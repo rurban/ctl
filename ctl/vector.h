@@ -1,3 +1,7 @@
+/* Arrays that can change in size. */
+
+// TODO emplace, emplace_back
+
 #ifndef T
 #error "Template type T undefined for <ctl/vector.h>"
 #endif
@@ -50,6 +54,24 @@ JOIN(A, init)(void)
     self.copy = JOIN(T, copy);
 #endif
     return self;
+}
+
+static inline size_t
+JOIN(A, capacity)(A* self)
+{
+    return self->capacity;
+}
+
+static inline size_t
+JOIN(A, size)(A* self)
+{
+    return self->size;
+}
+
+static inline size_t
+JOIN(A, max_size)()
+{
+    return 4294967296 / sizeof(T); // 32bit at most
 }
 
 static inline int

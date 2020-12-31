@@ -1,3 +1,5 @@
+/* LIFO deque */
+
 #ifndef T
 #error "Template type T undefined for <ctl/stack.h>"
 #endif
@@ -24,7 +26,7 @@
 #define remove_if   __REMOVE_IF
 
 // Replace the three instances of `deq` below
-// with either `vec` or `lst`, depending on your use case.
+// with either `vec` or `list`, depending on your use case.
 #define deq stack
 #include <ctl/deque.h>
 #undef deq

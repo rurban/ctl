@@ -1,26 +1,22 @@
-/* As red-black tree. */
+/* WIP Unordered, in opposition to C++ STL. Implemented as open-addressing hash table. */
 
 #ifndef T
-#error "Template type T undefined for <ctl/set.h>"
+#error "Template type T undefined for <ctl/map.h>"
 #endif
 
-// TODO emplace, lower_bound, upper_bound, equal_range
+/* TODO khash or such */
 
 #include <ctl/ctl.h>
 
-#define A JOIN(set, T)
+#define A JOIN(map, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
 
 typedef struct B
 {
-    struct B* l;
-    struct B* r;
-    struct B* p;
+    struct C* buckets;
     T key;
-    // Red = 0
-    // Black = 1
-    int color;
+    int size;
 } B;
 
 typedef struct A
@@ -103,24 +99,6 @@ JOIN(A, free_node)(A* self, B* node)
     free(node);
 }
 
-static inline int
-JOIN(B, color)(B* self)
-{
-    return self ? self->color : 1;
-}
-
-static inline int
-JOIN(B, is_blk)(B* self)
-{
-    return JOIN(B, color)(self) == 1;
-}
-
-static inline int
-JOIN(B, is_red)(B* self)
-{
-    return JOIN(B, color)(self) == 0;
-}
-
 static inline B*
 JOIN(B, min)(B* self)
 {
@@ -138,27 +116,6 @@ JOIN(B, max)(B* self)
 }
 
 static inline B*
-JOIN(B, grandfather)(B* self)
-{
-    return self->p->p;
-}
-
-static inline B*
-JOIN(B, sibling)(B* self)
-{
-    if(self == self->p->l)
-        return self->p->r;
-    else
-        return self->p->l;
-}
-
-static inline B*
-JOIN(B, uncle)(B* self)
-{
-    return JOIN(B, sibling)(self->p);
-}
-
-static inline B*
 JOIN(B, init)(T key, int color)
 {
     B* self = (B*) malloc(sizeof(B));
@@ -166,6 +123,12 @@ JOIN(B, init)(T key, int color)
     self->color = color;
     self->l = self->r = self->p = NULL;
     return self;
+}
+
+static inline B*
+JOIN(A, at)(A* self, T key)
+{
+    return JOIN(A, find)(self, key);
 }
 
 static inline B*
@@ -289,37 +252,6 @@ JOIN(A, verify)(A* self)
 
 #endif
 
-static inline void
-JOIN(A, rotate_l)(A* self, B* node)
-{
-    B* r = node->r;
-    JOIN(B, replace)(self, node, r);
-    node->r = r->l;
-    if(r->l)
-        r->l->p = node;
-    r->l = node;
-    node->p = r;
-}
-
-static inline void
-JOIN(A, rotate_r)(A* self, B* node)
-{
-    B* l = node->l;
-    JOIN(B, replace)(self, node, l);
-    node->l = l->r;
-    if(l->r)
-        l->r->p = node;
-    l->r = node;
-    node->p = l;
-}
-
-static inline void
-JOIN(A, insert_1)(A*, B*),
-JOIN(A, insert_2)(A*, B*),
-JOIN(A, insert_3)(A*, B*),
-JOIN(A, insert_4)(A*, B*),
-JOIN(A, insert_5)(A*, B*);
-
 static inline B*
 JOIN(A, insert)(A* self, T key)
 {
@@ -370,74 +302,6 @@ JOIN(A, insert)(A* self, T key)
 }
 
 static inline void
-JOIN(A, insert_1)(A* self, B* node)
-{
-    if(node->p)
-        JOIN(A, insert_2)(self, node);
-    else
-        node->color = 1;
-}
-
-static inline void
-JOIN(A, insert_2)(A* self, B* node)
-{
-    if(JOIN(B, is_blk)(node->p))
-        return;
-    else
-       JOIN(A, insert_3)(self, node);
-}
-
-static inline void
-JOIN(A, insert_3)(A* self, B* node)
-{
-    if(JOIN(B, is_red)(JOIN(B, uncle)(node)))
-    {
-        node->p->color = 1;
-        JOIN(B, uncle)(node)->color = 1;
-        JOIN(B, grandfather)(node)->color = 0;
-        JOIN(A, insert_1)(self, JOIN(B, grandfather)(node));
-    }
-    else
-        JOIN(A, insert_4)(self, node);
-}
-
-static inline void
-JOIN(A, insert_4)(A* self, B* node)
-{
-    if(node == node->p->r && node->p == JOIN(B, grandfather)(node)->l)
-    {
-        JOIN(A, rotate_l)(self, node->p);
-        node = node->l;
-    }
-    else
-    if(node == node->p->l && node->p == JOIN(B, grandfather)(node)->r)
-    {
-        JOIN(A, rotate_r)(self, node->p);
-        node = node->r;
-    }
-    JOIN(A, insert_5)(self, node);
-}
-
-static inline void
-JOIN(A, insert_5)(A* self, B* node)
-{
-    node->p->color = 1;
-    JOIN(B, grandfather)(node)->color = 0;
-    if(node == node->p->l && node->p == JOIN(B, grandfather)(node)->l)
-        JOIN(A, rotate_r)(self, JOIN(B, grandfather)(node));
-    else
-        JOIN(A, rotate_l)(self, JOIN(B, grandfather)(node));
-}
-
-static inline void
-JOIN(A, erase_1)(A*, B*),
-JOIN(A, erase_2)(A*, B*),
-JOIN(A, erase_3)(A*, B*),
-JOIN(A, erase_4)(A*, B*),
-JOIN(A, erase_5)(A*, B*),
-JOIN(A, erase_6)(A*, B*);
-
-static inline void
 JOIN(A, erase_node)(A* self, B* node)
 {
     if(node->l && node->r)
@@ -468,100 +332,6 @@ JOIN(A, erase)(A* self, T key)
     B* node = JOIN(A, find)(self, key);
     if(node)
         JOIN(A, erase_node)(self, node);
-}
-
-static inline void
-JOIN(A, erase_1)(A* self, B* node)
-{
-    if(node->p)
-        JOIN(A, erase_2)(self, node);
-}
-
-static inline void
-JOIN(A, erase_2)(A* self, B* node)
-{
-    if(JOIN(B, is_red)(JOIN(B, sibling)(node)))
-    {
-        node->p->color = 0;
-        JOIN(B, sibling)(node)->color = 1;
-        if(node == node->p->l)
-            JOIN(A, rotate_l)(self, node->p);
-        else
-            JOIN(A, rotate_r)(self, node->p);
-    }
-    JOIN(A, erase_3)(self, node);
-}
-
-static inline void
-JOIN(A, erase_3)(A* self, B* node)
-{
-    if(JOIN(B, is_blk)(node->p)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node))
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->l)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->r))
-    {
-        JOIN(B, sibling)(node)->color = 0;
-        JOIN(A, erase_1)(self, node->p);
-    }
-    else
-        JOIN(A, erase_4)(self, node);
-}
-
-static inline void
-JOIN(A, erase_4)(A* self, B* node)
-{
-    if(JOIN(B, is_red)(node->p)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node))
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->l)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->r))
-    {
-        JOIN(B, sibling)(node)->color = 0;
-        node->p->color = 1;
-    }
-    else
-        JOIN(A, erase_5)(self, node);
-}
-
-static inline void
-JOIN(A, erase_5)(A* self, B* node)
-{
-    if(node == node->p->l
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node))
-    && JOIN(B, is_red)(JOIN(B, sibling)(node)->l)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->r))
-    {
-        JOIN(B, sibling)(node)->color = 0;
-        JOIN(B, sibling)(node)->l->color = 1;
-        JOIN(A, rotate_r)(self, JOIN(B, sibling)(node));
-    }
-    else
-    if(node == node->p->r
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node))
-    && JOIN(B, is_red)(JOIN(B, sibling)(node)->r)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->l))
-    {
-        JOIN(B, sibling)(node)->color = 0;
-        JOIN(B, sibling)(node)->r->color = 1;
-        JOIN(A, rotate_l)(self, JOIN(B, sibling)(node));
-    }
-    JOIN(A, erase_6)(self, node);
-}
-
-static inline void
-JOIN(A, erase_6)(A* self, B* node)
-{
-    JOIN(B, sibling)(node)->color = JOIN(B, color)(node->p);
-    node->p->color = 1;
-    if(node == node->p->l)
-    {
-        JOIN(B, sibling)(node)->r->color = 1;
-        JOIN(A, rotate_l)(self, node->p);
-    }
-    else
-    {
-        JOIN(B, sibling)(node)->l->color = 1;
-        JOIN(A, rotate_r)(self, node->p);
-    }
 }
 
 static inline void
@@ -673,56 +443,6 @@ JOIN(A, copy)(A* self)
         it.step(&it);
     }
     return copy;
-}
-
-static inline size_t
-JOIN(A, remove_if)(A* self, int (*_match)(T*))
-{
-    size_t erases = 0;
-    foreach(A, self, it)
-        if(_match(&it.node->key))
-        {
-            JOIN(A, erase_node)(self, it.node);
-            erases += 1;
-        }
-    return erases;
-}
-
-static inline A
-JOIN(A, intersection)(A* a, A* b)
-{
-    A self = JOIN(A, init)(a->compare);
-    foreach(A, a, i)
-        if(JOIN(A, find)(b, *i.ref))
-            JOIN(A, insert)(&self, self.copy(i.ref));
-    return self;
-}
-
-static inline A
-JOIN(A, union)(A* a, A* b)
-{
-    A self = JOIN(A, init)(a->compare);
-    foreach(A, a, i) JOIN(A, insert)(&self, self.copy(i.ref));
-    foreach(A, b, i) JOIN(A, insert)(&self, self.copy(i.ref));
-    return self;
-}
-
-static inline A
-JOIN(A, difference)(A* a, A* b)
-{
-    A self = JOIN(A, copy)(a);
-    foreach(A, b, i) JOIN(A, erase)(&self, *i.ref);
-    return self;
-}
-
-static inline A
-JOIN(A, symmetric_difference)(A* a, A* b)
-{
-    A self = JOIN(A, union)(a, b);
-    A intersection = JOIN(A, intersection)(a, b);
-    foreach(A, &intersection, i) JOIN(A, erase)(&self, *i.ref);
-    JOIN(A, free)(&intersection);
-    return self;
 }
 
 #undef T

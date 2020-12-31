@@ -1,6 +1,10 @@
+/* List containers are implemented as doubly-linked lists */
+
 #ifndef T
 #error "Template type T undefined for <ctl/list.h>"
 #endif
+
+// TODO emplace, emplace_front, emplace_back, remove
 
 #include <ctl/ctl.h>
 
@@ -33,8 +37,7 @@ typedef struct I
     B* next;
     B* end;
     int done;
-}
-I;
+} I;
 
 static inline T
 JOIN(A, implicit_copy)(T* self)
@@ -70,6 +73,18 @@ static inline int
 JOIN(A, empty)(A* self)
 {
     return self->size == 0;
+}
+
+static inline size_t
+JOIN(A, size)(A* self)
+{
+    return self->size;
+}
+
+static inline size_t
+JOIN(A, max_size)()
+{
+    return 4294967296 / sizeof(T); // 32bit at most
 }
 
 static inline T*
@@ -114,27 +129,30 @@ JOIN(A, connect)(A* self, B* position, B* node, int before)
     if(JOIN(A, empty)(self))
         self->head = self->tail = node;
     else
-    if(before)
+    if (self->size + 1 < JOIN(A, max_size)())
     {
-        node->next = position;
-        node->prev = position->prev;
-        if(position->prev)
-            position->prev->next = node;
-        position->prev = node;
-        if(position == self->head)
-            self->head = node;
+        if(before)
+        {
+            node->next = position;
+            node->prev = position->prev;
+            if(position->prev)
+                position->prev->next = node;
+            position->prev = node;
+            if(position == self->head)
+                self->head = node;
+        }
+        else
+        {
+            node->prev = position;
+            node->next = position->next;
+            if(position->next)
+                position->next->prev = node;
+            position->next = node;
+            if(position == self->tail)
+                self->tail = node;
+        }
+        self->size += 1;
     }
-    else
-    {
-        node->prev = position;
-        node->next = position->next;
-        if(position->next)
-            position->next->prev = node;
-        position->next = node;
-        if(position == self->tail)
-            self->tail = node;
-    }
-    self->size += 1;
 }
 
 static inline void
@@ -203,6 +221,7 @@ JOIN(A, free)(A* self)
 static inline void
 JOIN(A, resize)(A* self, size_t size, T value)
 {
+    // TODO max_size?
     if(size != self->size)
         for(size_t i = 0; size != self->size; i++)
             (size < self->size)

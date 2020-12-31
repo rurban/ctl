@@ -9,8 +9,7 @@
 typedef struct
 {
     int* value;
-}
-digi;
+} digi;
 
 static inline digi
 digi_init(int value)

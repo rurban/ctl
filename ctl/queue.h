@@ -1,7 +1,10 @@
+/* FIFO deque */
+
 #ifndef T
 #error "Template type T undefined for <ctl/queue.h>"
 #endif
 
+// TODO emplace
 #define push_back   push
 #define pop_front   pop
 #define at          __AT

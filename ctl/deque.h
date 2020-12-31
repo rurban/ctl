@@ -1,3 +1,7 @@
+/* Double-ended queues are sequence containers with dynamic sizes
+   that can be expanded or contracted on both ends. */
+/* It should be possible to do it thread-safe. Not yet. */
+
 #ifndef T
 #error "Template type T undefined for <ctl/deque.h>"
 #endif
@@ -43,6 +47,18 @@ static inline int
 JOIN(A, empty)(A* self)
 {
     return self->size == 0;
+}
+
+static inline size_t
+JOIN(A, size)(A* self)
+{
+    return self->size;
+}
+
+static inline size_t
+JOIN(A, max_size)()
+{
+    return 4294967296 / sizeof(T); // 32bit at most
 }
 
 static inline T

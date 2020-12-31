@@ -1,14 +1,19 @@
-/* As red-black tree. */
+/* Maybe as hash table without values */
+// TODO
 
 #ifndef T
-#error "Template type T undefined for <ctl/set.h>"
+#error "Template type T undefined for <ctl/unordered_set.h>"
 #endif
 
 // TODO emplace, lower_bound, upper_bound, equal_range
+// bucket_count, max_bucket_count, bucket_size, bucket,
+// hash policy, load_factor, max_load_factor,
+// rehash, reserve
+// hash_function, key_eq
 
 #include <ctl/ctl.h>
 
-#define A JOIN(set, T)
+#define A JOIN(unset, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
 
