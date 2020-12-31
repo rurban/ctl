@@ -168,6 +168,8 @@ priority_queue.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
 set.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
+ust.i:
+	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
 
 examples/astar:                      ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 examples/postfix:                    ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
