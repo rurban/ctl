@@ -142,6 +142,8 @@ STL `std::map`, `std::unordered_map` and `std::unordered_set` are in work.
 STL variants of multi-sets and multi-maps will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 
+UTF-8 strings and identifiers will be added eventually, UTF-16 or UTF-32 not.
+
 ## Base Implementation Details
 
     vector.h: See `realloc`.
