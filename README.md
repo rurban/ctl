@@ -137,7 +137,10 @@ make vector
 
 ## Other
 
-STL `std::map`, `std::unordered_map` and `std::unordered_set` are in work.
+STL `std::map` is in work as unordered hashmap by default, no extra `std::unordered_map`
+and `std::unordered_set`. set should also be unordered by default.
+The map hopefully with something like greg7mdp/parallel-hashmap or at least
+khash.
 
 STL variants of multi-sets and multi-maps will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
