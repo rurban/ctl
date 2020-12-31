@@ -137,14 +137,10 @@ make vector
 
 ## Other
 
-STL `std::map` will not be implemented in CTL because maps only provide slight
-syntactic improvements over sets.
-
-STL `std::unordered_map` and `std::unordered_set` will not be implemented in CTL
-because ordered containers are preferred, even at the cost of performance.
+STL `std::map`, `std::unordered_map` and `std::unordered_set` are in work.
 
 STL variants of multi-sets and multi-maps will not be implemented because
-similar behaviour can be implemented as an amalgamation of a `set` and `lst`.
+similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 
 ## Base Implementation Details
 
@@ -155,6 +151,6 @@ similar behaviour can be implemented as an amalgamation of a `set` and `lst`.
 
 ## Acknowledgements
 
-Tahnks you `glouw` for three-letter variant https://github.com/glouw/ctl.
+Tahnks you `glouw` for the initial three-letter variant https://github.com/glouw/ctl.
 Thank you `kully` for the Plotly code, and thank you for the general review.
 Thank you `smlckz` for the `foreach` cleanup.
