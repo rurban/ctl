@@ -19,11 +19,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <str.h>
+#include <ctl/string.h>
 
 #define P
 #define T char
-#include <stk.h>
+#include <ctl/stack.h>
 
 struct val;
 
@@ -36,7 +36,7 @@ static valp
 valp_copy(valp*);
 
 #define T valp
-#include <vec.h>
+#include <ctl/vector.h>
 
 static vec_valp*
 vec_valp_heap_init(void)
@@ -171,7 +171,7 @@ pair_copy(pair* self)
 }
 
 #define T pair
-#include <set.h>
+#include <ctl/set.h>
 
 static int
 set_pair_key_compare(pair* a, pair* b)
@@ -202,14 +202,14 @@ set_pair_heap_copy(set_pair* self)
    return copy;
 }
 
-static stk_char
+static stack_char
 prime(str* text)
 {
-    stk_char feed = stk_char_init();
+    stack_char feed = stack_char_init();
     while(text->size)
     {
         char c = *str_back(text);
-        stk_char_push(&feed, c);
+        stack_char_push(&feed, c);
         str_pop_back(text);
     }
     return feed;
@@ -225,23 +225,23 @@ is_space(char c)
 }
 
 static int
-next(stk_char* feed)
+next(stack_char* feed)
 {
     char c;
-    while(is_space(c = *stk_char_top(feed)))
-        stk_char_pop(feed);
+    while(is_space(c = *stack_char_top(feed)))
+       stack_char_pop(feed);
     return c;
 }
 
 static void
-match(stk_char* feed, char c)
+match(stack_char* feed, char c)
 {
     if(next(feed) != c)
     {
         printf("expected '%c' but received '%c'\n", c, next(feed));
         exit(1);
     }
-    stk_char_pop(feed);
+    stack_char_pop(feed);
 }
 
 static int
@@ -265,21 +265,21 @@ is_string(char c)
 }
 
 static str
-read(stk_char* feed, int clause(char c))
+read(stack_char* feed, int clause(char c))
 {
     next(feed);
     str s = str_init("");
     char c;
-    while(clause(c = *stk_char_top(feed)))
+    while(clause(c = *stack_char_top(feed)))
     {
         str_push_back(&s, c);
-        stk_char_pop(feed);
+        stack_char_pop(feed);
     }
     return s;
 }
 
 static str
-read_string(stk_char* feed)
+read_string(stack_char* feed)
 {
     match(feed, '"');
     str string = read(feed, is_string);
@@ -288,7 +288,7 @@ read_string(stk_char* feed)
 }
 
 static double
-read_number(stk_char* feed)
+read_number(stack_char* feed)
 {
     str number = read(feed, is_number);
     double converted = atof(number.value);
@@ -297,10 +297,10 @@ read_number(stk_char* feed)
 }
 
 static set_pair*
-read_object(stk_char*);
+read_object(stack_char*);
 
 static valp
-read_value(stk_char* feed)
+read_value(stack_char* feed)
 {
     valp value = valp_init();
     if(is_number(next(feed)))
@@ -340,7 +340,7 @@ read_value(stk_char* feed)
 }
 
 static set_pair*
-read_object(stk_char* feed)
+read_object(stack_char* feed)
 {
     set_pair* child = set_pair_heap_init();
     match(feed, '{');
@@ -362,9 +362,9 @@ static valp
 jsonify(char* serial)
 {
     str text = str_init(serial);
-    stk_char feed = prime(&text);
+    stack_char feed = prime(&text);
     valp json = read_value(&feed);
-    stk_char_free(&feed);
+    stack_char_free(&feed);
     str_free(&text);
     return json;
 }

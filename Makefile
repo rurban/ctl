@@ -13,7 +13,7 @@ Og = 0
 Ofast = 0
 Os = 0
 
-CFLAGS  = -Ictl
+CFLAGS  = -I.
 CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
 CFLAGS += -march=native
 CFLAGS += -g
@@ -62,15 +62,15 @@ endif
 TESTS = \
 	tests/func/test_c11 \
 	tests/func/test_container_composing \
-	tests/func/test_deq \
-	tests/func/test_lst \
-	tests/func/test_str \
-	tests/func/test_pqu \
-	tests/func/test_que \
+	tests/func/test_deque \
+	tests/func/test_list \
+	tests/func/test_string \
+	tests/func/test_priority_queue \
+	tests/func/test_queue \
 	tests/func/test_set \
-	tests/func/test_stk \
+	tests/func/test_stack \
 	tests/func/test_vec_capacity \
-	tests/func/test_vec
+	tests/func/test_vector
 
 EXAMPLES = \
 	examples/astar \
@@ -91,19 +91,19 @@ clean:
 	@rm -f $(TESTS)
 	@rm -f $(EXAMPLES)
 
-str:
+string:
 	$(call expand,$@)
-lst:
+list:
 	$(call expand,$@,-DT=int -DP)
-vec:
+vector:
 	$(call expand,$@,-DT=int -DP)
-deq:
+deque:
 	$(call expand,$@,-DT=int -DP)
-stk:
+stack:
 	$(call expand,$@,-DT=int -DP)
-que:
+queue:
 	$(call expand,$@,-DT=int -DP)
-pqu:
+priority_queue:
 	$(call expand,$@,-DT=int -DP)
 set:
 	$(call expand,$@,-DT=int -DP)
@@ -115,15 +115,15 @@ examples/snow:                       ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 examples/6502:                       ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 tests/func/test_c11:                 ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 tests/func/test_container_composing: ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_deq:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_lst:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_pqu:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_que:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_deque:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_list:                ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_priority_queue:      ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_queue:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_set:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_stk:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_str:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_stack:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_string:              ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_vec_capacity:        ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_vec:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_vector:              ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 
 define expand
 	@$(CC) $(CFLAGS) ctl/$(1).h -E $(2) | clang-format -style=webkit

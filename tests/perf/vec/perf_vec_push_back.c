@@ -2,7 +2,7 @@
 
 #define P
 #define T int
-#include <vec.h>
+#include <ctl/vector.h>
 
 #include <time.h>
 

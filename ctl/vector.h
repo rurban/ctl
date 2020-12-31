@@ -1,8 +1,8 @@
 #ifndef T
-#error "Template type T undefined for <vec.h>"
+#error "Template type T undefined for <ctl/vector.h>"
 #endif
 
-#include <ctl.h>
+#include <ctl/ctl.h>
 
 #define A JOIN(vec, T)
 #define I JOIN(A, it)
@@ -19,8 +19,7 @@ typedef struct A
     T (*copy)(T*);
     size_t size;
     size_t capacity;
-}
-A;
+} A;
 
 typedef struct I
 {
@@ -30,8 +29,7 @@ typedef struct I
     T* end;
     T* next;
     int done;
-}
-I;
+} I;
 
 static inline T
 JOIN(A, implicit_copy)(T* self)
@@ -396,7 +394,7 @@ JOIN(A, find)(A* self, T key, int _equal(T*, T*))
 #undef MUST_ALIGN_16
 
 // Hold preserves `T` if other containers
-// (eg. `pqu.h`) wish to extend `vec.h`.
+// (eg. `priority_queue.h`) wish to extend `vector.h`.
 #ifdef HOLD
 #undef HOLD
 #else

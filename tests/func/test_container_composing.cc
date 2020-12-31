@@ -2,157 +2,157 @@
 
 #define P
 #define T int
-#include <deq.h>
+#include <ctl/deque.h>
 
 #define T deq_int
-#include <lst.h>
+#include <ctl/list.h>
 
 #define T deq_int
-#include <pqu.h>
+#include <ctl/priority_queue.h>
 
 #define T deq_int
-#include <que.h>
+#include <ctl/queue.h>
 
 #define T deq_int
-#include <set.h>
+#include <ctl/set.h>
 
 #define T deq_int
-#include <stk.h>
+#include <ctl/stack.h>
 
 #define T deq_int
-#include <vec.h>
+#include <ctl/vector.h>
 
 #define P
 #define T int
-#include <lst.h>
+#include <ctl/list.h>
 
-#define T lst_int
-#include <pqu.h>
+#define T list_int
+#include <ctl/priority_queue.h>
 
-#define T lst_int
-#include <que.h>
+#define T list_int
+#include <ctl/queue.h>
 
-#define T lst_int
-#include <set.h>
+#define T list_int
+#include <ctl/set.h>
 
-#define T lst_int
-#include <stk.h>
+#define T list_int
+#include <ctl/stack.h>
 
-#define T lst_int
-#include <vec.h>
+#define T list_int
+#include <ctl/vector.h>
 
-#define T lst_int
-#include <deq.h>
-
-#define P
-#define T int
-#include <pqu.h>
-
-#define T pqu_int
-#include <que.h>
-
-#define T pqu_int
-#include <set.h>
-
-#define T pqu_int
-#include <stk.h>
-
-#define T pqu_int
-#include <vec.h>
-
-#define T pqu_int
-#include <deq.h>
-
-#define T pqu_int
-#include <lst.h>
+#define T list_int
+#include <ctl/deque.h>
 
 #define P
 #define T int
-#include <que.h>
+#include <ctl/priority_queue.h>
 
-#define T que_int
-#include <set.h>
+#define T pqu_int
+#include <ctl/queue.h>
 
-#define T que_int
-#include <stk.h>
+#define T pqu_int
+#include <ctl/set.h>
 
-#define T que_int
-#include <vec.h>
+#define T pqu_int
+#include <ctl/stack.h>
 
-#define T que_int
-#include <deq.h>
+#define T pqu_int
+#include <ctl/vector.h>
 
-#define T que_int
-#include <lst.h>
+#define T pqu_int
+#include <ctl/deque.h>
 
-#define T que_int
-#include <pqu.h>
-
-#define P
-#define T int
-#include <set.h>
-
-#define T set_int
-#include <stk.h>
-
-#define T set_int
-#include <vec.h>
-
-#define T set_int
-#include <deq.h>
-
-#define T set_int
-#include <lst.h>
-
-#define T set_int
-#include <pqu.h>
-
-#define T set_int
-#include <que.h>
+#define T pqu_int
+#include <ctl/list.h>
 
 #define P
 #define T int
-#include <stk.h>
+#include <ctl/queue.h>
 
-#define T stk_int
-#include <vec.h>
+#define T queue_int
+#include <ctl/set.h>
 
-#define T stk_int
-#include <deq.h>
+#define T queue_int
+#include <ctl/stack.h>
 
-#define T stk_int
-#include <lst.h>
+#define T queue_int
+#include <ctl/vector.h>
 
-#define T stk_int
-#include <pqu.h>
+#define T queue_int
+#include <ctl/deque.h>
 
-#define T stk_int
-#include <que.h>
+#define T queue_int
+#include <ctl/list.h>
 
-#define T stk_int
-#include <set.h>
+#define T queue_int
+#include <ctl/priority_queue.h>
 
 #define P
 #define T int
-#include <vec.h>
+#include <ctl/set.h>
+
+#define T set_int
+#include <ctl/stack.h>
+
+#define T set_int
+#include <ctl/vector.h>
+
+#define T set_int
+#include <ctl/deque.h>
+
+#define T set_int
+#include <ctl/list.h>
+
+#define T set_int
+#include <ctl/priority_queue.h>
+
+#define T set_int
+#include <ctl/queue.h>
+
+#define P
+#define T int
+#include <ctl/stack.h>
+
+#define T stack_int
+#include <ctl/vector.h>
+
+#define T stack_int
+#include <ctl/deque.h>
+
+#define T stack_int
+#include <ctl/list.h>
+
+#define T stack_int
+#include <ctl/priority_queue.h>
+
+#define T stack_int
+#include <ctl/queue.h>
+
+#define T stack_int
+#include <ctl/set.h>
+
+#define P
+#define T int
+#include <ctl/vector.h>
 
 #define T vec_int
-#include <deq.h>
+#include <ctl/deque.h>
 
 #define T vec_int
-#include <lst.h>
+#include <ctl/list.h>
 
 #define T vec_int
-#include <pqu.h>
+#include <ctl/priority_queue.h>
 
 #define T vec_int
-#include <que.h>
+#include <ctl/queue.h>
 
 #define T vec_int
-#include <set.h>
+#include <ctl/set.h>
 
 #define T vec_int
-#include <stk.h>
+#include <ctl/stack.h>
 
 int
 main(void)

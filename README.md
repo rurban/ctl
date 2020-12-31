@@ -8,15 +8,18 @@ CTL aims to improve ISO C99/C11 developer productivity by implementing the follo
 STL containers in ISO C99/C11:
 
 ```
-deq.h = std::deque
-lst.h = std::list
-pqu.h = std::priority_queue
-que.h = std::queue
-set.h = std::set
-stk.h = std::stack
-str.h = std::string
-vec.h = std::vector
+ctl/deque.h          = std::deque           prefix: deq
+ctl/list.h           = std::list            prefix: list
+ctl/priority_queue.h = std::priority_queue  prefix: pqu
+ctl/queue.h          = std::queue           prefix: queue
+ctl/set.h            = std::set             prefix: set
+ctl/stack.h          = std::stack           prefix: stack
+ctl/string.h         = std::string          prefix: str
+ctl/vector.h         = std::vector          prefix: vec
 ```
+hashmap's are in work still.
+
+It is based on glouw's ctl, but with proper names, and using the incpath `ctl/` prefix.
 
 ## Use
 
@@ -27,7 +30,7 @@ Configure a CTL container with a built-in or typedef type `T`.
 
 #define P
 #define T int
-#include <vec.h>
+#include <ctl/vector.h>
 
 int compare(int* a, int* b) { return *b < *a; }
 
@@ -48,14 +51,9 @@ int main(void)
 
 Definition `P` states type `T` is Plain Old Data (POD).
 
-To compile, include the `ctl` directory:
-
-```shell
-gcc main.c -I ctl
-```
-
 For a much more thorough getting started guide,
-see the wiki: https://github.com/glouw/ctl/wiki
+see the wiki: https://github.com/rurban/ctl/wiki and
+https://github.com/glouw/ctl/wiki for the original sample with three-letter names.
 
 ## Memory Ownership
 
@@ -68,7 +66,7 @@ typedef struct { ... } type;
 void type_free(type*);
 type type_copy(type*);
 #define T type
-#include <vec.h>
+#include <ctl/vector.h>
 ```
 
 Forgetting a declaration will print a human-readable error message:
@@ -90,11 +88,11 @@ for template type `T` as type `int` for all measurements.
 ![](images/pqu.log.png)
 ![](images/compile.log.png)
 
-Omitted from these performance measurements are `que.h`, `stk.h`, and `str.h`,
-as their performance characteristics can be inferred from `deq.h`, and `vec.h`,
+Omitted from these performance measurements are `queue.h`, `stack.h`, and `string.h`,
+as their performance characteristics can be inferred from `deque.h`, and `vector.h`,
 respectively.
 
-Note, CTL strings do not support short strings.
+Note, CTL strings do not support short strings yet.
 
 ## Running Tests
 
@@ -127,14 +125,14 @@ For maintaining CTL, a container templated to type `int` can be
 outputted to `stdout` by running make on the container name, eg:
 
 ```shell
-make deq
-make lst
-make pqu
-make que
+make deque
+make list
+make priority_queue
+make queue
 make set
-make stk
-make str
-make vec
+make stack
+make string
+make vector
 ```
 
 ## Other
@@ -150,12 +148,13 @@ similar behaviour can be implemented as an amalgamation of a `set` and `lst`.
 
 ## Base Implementation Details
 
-    vec.h: See `realloc`.
-    deq.h: Paged `realloc`.
-    lst.h: Doubly linked list.
+    vector.h: See `realloc`.
+    deque.h: Paged `realloc`.
+    list.h: Doubly linked list.
     set.h: Red black tree.
 
 ## Acknowledgements
 
+Tahnks you `glouw` for three-letter variant https://github.com/glouw/ctl.
 Thank you `kully` for the Plotly code, and thank you for the general review.
 Thank you `smlckz` for the `foreach` cleanup.

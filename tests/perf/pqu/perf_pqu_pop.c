@@ -2,7 +2,7 @@
 
 #define P
 #define T int
-#include <pqu.h>
+#include <ctl/priority_queue.h>
 
 #include <time.h>
 

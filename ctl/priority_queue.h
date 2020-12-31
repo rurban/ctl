@@ -1,5 +1,5 @@
 #ifndef T
-#error "Template type T undefined for <pqu.h>"
+#error "Template type T undefined for <ctl/priority_queue.h>"
 #endif
 
 #define front         top
@@ -30,7 +30,7 @@
 #define HOLD
 #define COMPARE
 #define init __INIT
-#include <vec.h>
+#include <ctl/vector.h>
 #undef init
 #undef vec
 

@@ -1,10 +1,10 @@
 #ifndef T
-#error "Template type T undefined for <lst.h>"
+#error "Template type T undefined for <ctl/list.h>"
 #endif
 
-#include <ctl.h>
+#include <ctl/ctl.h>
 
-#define A JOIN(lst, T)
+#define A JOIN(list, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
 
@@ -13,8 +13,7 @@ typedef struct B
     struct B* prev;
     struct B* next;
     T value;
-}
-B;
+} B;
 
 typedef struct A
 {
@@ -23,8 +22,7 @@ typedef struct A
     B* head;
     B* tail;
     size_t size;
-}
-A;
+} A;
 
 typedef struct I
 {

@@ -9,7 +9,7 @@ digi_key_compare(digi* a, digi* b)
 
 #define USE_INTERNAL_VERIFY
 #define T digi
-#include <set.h>
+#include <ctl/set.h>
 
 #include <set>
 #include <algorithm>

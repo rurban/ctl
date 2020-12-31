@@ -2,7 +2,7 @@
 #include "digi.hh"
 
 #define T digi
-#include <pqu.h>
+#include <ctl/priority_queue.h>
 
 #include <queue>
 #include <algorithm>

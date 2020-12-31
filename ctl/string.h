@@ -2,7 +2,7 @@
 #define __STR__H__
 
 #ifdef T
-#error "Template type T defined for <str.h>"
+#error "Template type T defined for <ctl/string.h>"
 #endif
 
 #define vec_char str
@@ -11,7 +11,7 @@
 #define str_init str___INIT
 #define str_equal str___EQUAL
 #define str_find str___FIND
-#include <vec.h>
+#include <ctl/vector.h>
 #undef str_init
 #undef str_equal
 #undef str_find
@@ -160,7 +160,7 @@ static inline str
 str_substr(str* self, size_t index, size_t size)
 {
     str substr = str_init("");
-    str_resize(&substr, size, '\0');
+    str_resize (&substr, size, '\0');
     for(size_t i = 0; i < size; i++)
         substr.value[i] = self->value[index + i];
     return substr;
@@ -169,7 +169,7 @@ str_substr(str* self, size_t index, size_t size)
 static inline int
 str_compare(str* self, const char* s)
 {
-    return strcmp(self->value, s);
+    return strcmp (self->value, s);
 }
 
 static inline int

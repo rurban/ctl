@@ -1,53 +1,53 @@
 #include "../test.h"
 
-#include <str.h> // MULTIPLE INCLUDES OKAY.
-#include <str.h>
-#include <str.h>
-#include <str.h>
+#include <ctl/string.h> // MULTIPLE INCLUDES OKAY.
+#include <ctl/string.h>
+#include <ctl/string.h>
+#include <ctl/string.h>
 
 #define P
 #define T int
-#include <stk.h>
+#include <ctl/stack.h>
 
 #define P
 #define T int
-#include <pqu.h>
+#include <ctl/priority_queue.h>
 
 #define P
 #define T int
-#include <que.h>
+#include <ctl/queue.h>
 
 #define P
 #define T int
-#include <lst.h>
+#include <ctl/list.h>
 
 #define P
 #define T int
-#include <deq.h>
+#include <ctl/deque.h>
 
 #define P
 #define T int
-#include <set.h>
+#include <ctl/set.h>
 
 #define P
 #define T char
-#include <vec.h>
+#include <ctl/vector.h>
 
 #define P
 #define T int
-#include <vec.h>
+#include <ctl/vector.h>
 
 #define P
 #define T unsigned
-#include <vec.h>
+#include <ctl/vector.h>
 
 #define P
 #define T float
-#include <vec.h>
+#include <ctl/vector.h>
 
 #define P
 #define T double
-#include <vec.h>
+#include <ctl/vector.h>
 
 typedef struct
 {
@@ -58,10 +58,10 @@ point;
 
 #define P
 #define T point
-#include <vec.h>
+#include <ctl/vector.h>
 
 #define T str
-#include <vec.h>
+#include <ctl/vector.h>
 
 typedef struct
 {
@@ -100,7 +100,7 @@ person_copy(person* self)
 }
 
 #define T person
-#include <vec.h>
+#include <ctl/vector.h>
 
 static int
 int_match(int* a, int* b)
@@ -133,16 +133,16 @@ main(void)
         deq_int_sort(&a, int_compare);
         deq_int_free(&a);
     }{
-        lst_int a = lst_int_init();
-        lst_int_push_back(&a, 1);
-        lst_int_push_back(&a, 2);
-        lst_int_push_back(&a, 3);
-        lst_int_push_back(&a, 4);
-        lst_int_push_back(&a, 5);
-        lst_int_push_back(&a, 6);
-        lst_int_push_back(&a, 7);
-        lst_int_push_back(&a, 8);
-        lst_int_free(&a);
+        list_int a = list_int_init();
+        list_int_push_back(&a, 1);
+        list_int_push_back(&a, 2);
+        list_int_push_back(&a, 3);
+        list_int_push_back(&a, 4);
+        list_int_push_back(&a, 5);
+        list_int_push_back(&a, 6);
+        list_int_push_back(&a, 7);
+        list_int_push_back(&a, 8);
+        list_int_free(&a);
     }{
         vec_str b = vec_str_init();
         vec_str_push_back(&b, str_init("This"));
@@ -160,23 +160,23 @@ main(void)
         vec_person_free(&c);
         vec_person_free(&d);
     }{
-        lst_int a = lst_int_init();
-        lst_int_push_back(&a, 1);
-        lst_int_push_back(&a, 1);
-        lst_int_push_back(&a, 1);
-        lst_int_push_back(&a, 2);
-        lst_int_push_back(&a, 3);
-        lst_int_push_back(&a, 3);
-        lst_int_push_back(&a, 4);
-        lst_int_push_back(&a, 6);
-        lst_int_push_back(&a, 6);
-        lst_int_push_back(&a, 6);
-        lst_int_push_back(&a, 6);
-        lst_int_push_back(&a, 6);
-        lst_int_push_back(&a, 8);
-        lst_int_push_back(&a, 8);
-        lst_int_unique(&a, int_match);
-        lst_int_free(&a);
+        list_int a = list_int_init();
+        list_int_push_back(&a, 1);
+        list_int_push_back(&a, 1);
+        list_int_push_back(&a, 1);
+        list_int_push_back(&a, 2);
+        list_int_push_back(&a, 3);
+        list_int_push_back(&a, 3);
+        list_int_push_back(&a, 4);
+        list_int_push_back(&a, 6);
+        list_int_push_back(&a, 6);
+        list_int_push_back(&a, 6);
+        list_int_push_back(&a, 6);
+        list_int_push_back(&a, 6);
+        list_int_push_back(&a, 8);
+        list_int_push_back(&a, 8);
+        list_int_unique(&a, int_match);
+        list_int_free(&a);
     }
     TEST_PASS(__FILE__);
 }

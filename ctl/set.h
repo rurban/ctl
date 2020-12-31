@@ -1,8 +1,8 @@
 #ifndef T
-#error "Template type T undefined for <set.h>"
+#error "Template type T undefined for <ctl/set.h>"
 #endif
 
-#include <ctl.h>
+#include <ctl/ctl.h>
 
 #define A JOIN(set, T)
 #define B JOIN(A, node)
@@ -17,8 +17,7 @@ typedef struct B
     // Red = 0
     // Black = 1
     int color;
-}
-B;
+} B;
 
 typedef struct A
 {
@@ -27,8 +26,7 @@ typedef struct A
     void (*free)(T*);
     T (*copy)(T*);
     size_t size;
-}
-A;
+} A;
 
 typedef struct I
 {
@@ -38,8 +36,7 @@ typedef struct I
     T* ref;
     B* next;
     int done;
-}
-I;
+} I;
 
 static inline B*
 JOIN(A, begin)(A* self)

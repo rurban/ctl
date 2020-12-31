@@ -2,7 +2,7 @@
 
 #define P
 #define T int
-#include <deq.h>
+#include <ctl/deque.h>
 
 #include <time.h>
 

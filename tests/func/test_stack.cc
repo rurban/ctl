@@ -2,20 +2,19 @@
 #include "digi.hh"
 
 #define T digi
-#include <que.h>
+#include <ctl/stack.h>
 
-#include <queue>
+#include <stack>
 #include <algorithm>
 
-#define CHECK(_x, _y) {                                           \
-    while(_x.size > 0) {                                          \
-        assert(_x.size == _y.size());                             \
-        assert(que_digi_empty(&_x) == _y.empty());                \
-        assert(*_y.front().value == *que_digi_front(&_x)->value); \
-        assert(*_y.back().value == *que_digi_back(&_x)->value);   \
-        _y.pop();                                                 \
-        que_digi_pop(&_x);                                        \
-    }                                                             \
+#define CHECK(_x, _y) {                                        \
+    while(_x.size > 0) {                                       \
+        assert(_x.size == _y.size());                          \
+        assert(stack_digi_empty(&_x) == _y.empty());           \
+        assert(*_y.top().value == *stack_digi_top(&_x)->value);\
+        _y.pop();                                              \
+       stack_digi_pop(&_x);                                    \
+    }                                                          \
 }
 
 int
@@ -28,16 +27,19 @@ main(void)
     for(size_t loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
-        que_digi a = que_digi_init();
-        std::queue<DIGI> b;
+        stack_digi a = stack_digi_init();
+        std::stack<DIGI> b;
         for(size_t pushes = 0; pushes < size; pushes++)
         {
             const int value = TEST_RAND(INT_MAX);
-            que_digi_push(&a, digi_init(value));
+            stack_digi_push(&a, digi_init(value));
             b.push(DIGI{value});
         }
         enum
         {
+            TEST_EMPTY,
+            TEST_SIZE,
+            TEST_TOP,
             TEST_PUSH,
             TEST_POP,
             TEST_SWAP,
@@ -50,7 +52,7 @@ main(void)
             {
                 const int value = TEST_RAND(INT_MAX);
                 b.push(DIGI{value});
-                que_digi_push(&a, digi_init(value));
+                stack_digi_push(&a, digi_init(value));
                 CHECK(a, b);
                 break;
             }
@@ -59,27 +61,27 @@ main(void)
                 if(a.size > 0)
                 {
                     b.pop();
-                    que_digi_pop(&a);
+                    stack_digi_pop(&a);
                     CHECK(a, b);
                 }
                 break;
             }
             case TEST_SWAP:
             {
-                que_digi aa = que_digi_copy(&a);
-                que_digi aaa = que_digi_init();
-                std::queue<DIGI> bb = b;
-                std::queue<DIGI> bbb;
-                que_digi_swap(&aaa, &aa);
+                stack_digi aa = stack_digi_copy(&a);
+                stack_digi aaa = stack_digi_init();
+                std::stack<DIGI> bb = b;
+                std::stack<DIGI> bbb;
+                stack_digi_swap(&aaa, &aa);
                 std::swap(bb, bbb);
                 CHECK(aaa, bbb);
-                que_digi_free(&aaa);
+                stack_digi_free(&aaa);
                 CHECK(a, b);
                 break;
             }
         }
         CHECK(a, b);
-        que_digi_free(&a);
+        stack_digi_free(&a);
     }
     TEST_PASS(__FILE__);
 }

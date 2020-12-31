@@ -2,7 +2,7 @@
 // -- A 6502 compiler specalizing in 16-bit integer math and brute force loop unrolling --
 //
 
-#include <str.h>
+#include <ctl/string.h>
 #define str_equal(a, b) (str_compare(a, b) == 0)
 
 #include <stdio.h>
@@ -15,10 +15,10 @@
 
 #define P
 #define T char
-#include <stk.h>
+#include <ctl/stack.h>
 
 #define T str
-#include <lst.h>
+#include <ctl/list.h>
 
 #define LIST X(NONE) X(TYPE) X(FUN) X(ARRAY) X(VAR)
 
@@ -84,15 +84,15 @@ token_key_compare(token* a, token* b)
 }
 
 #define T token
-#include <set.h>
+#include <ctl/set.h>
 
 struct
 {
     str comment;
-    stk_char feed;
+    stack_char feed;
     set_token tokens;
-    lst_str assem;
-    lst_str variables;
+    list_str assem;
+    list_str variables;
     size_t local_addr;
     size_t global_addr;
     size_t label;
@@ -104,10 +104,10 @@ void
 global_init(void)
 {
     global.comment = str_init("");
-    global.feed = stk_char_init();
+    global.feed =  stack_char_init();
     global.tokens = set_token_init(token_key_compare);
-    global.assem = lst_str_init();
-    global.variables = lst_str_init();
+    global.assem = list_str_init();
+    global.variables = list_str_init();
     global.label = global.brace.l = global.brace.r = 0;
     global.local_addr = 0;
     global.global_addr = 0x300 + 3; // +3 for JMP MAIN.
@@ -117,10 +117,10 @@ void
 global_free(void)
 {
     str_free(&global.comment);
-    stk_char_free(&global.feed);
+    stack_char_free(&global.feed);
     set_token_free(&global.tokens);
-    lst_str_free(&global.assem);
-    lst_str_free(&global.variables);
+    list_str_free(&global.assem);
+    list_str_free(&global.variables);
 }
 
 void
@@ -155,7 +155,7 @@ void
 insert(token tok)
 {
     set_token_insert(&global.tokens, tok);
-    lst_str_push_back(&global.variables, str_copy(&tok.name));
+    list_str_push_back(&global.variables, str_copy(&tok.name));
 }
 
 str
@@ -188,14 +188,14 @@ write(char* fmt, ...)
     va_start(args, fmt);
     str s = stringify(fmt, args);
     va_end(args);
-    lst_str_push_back(&global.assem, s);
+    list_str_push_back(&global.assem, s);
 }
 
 void
 save(void)
 {
     FILE* out = fopen("out.asm", "w");
-    foreach(lst_str, &global.assem, it)
+    foreach(list_str, &global.assem, it)
     {
         char* s = it.ref->value;
         puts(s);
@@ -282,9 +282,9 @@ tidy(str* s)
 char
 top(void)
 {
-    if(stk_char_empty(&global.feed))
+    if(stack_char_empty(&global.feed))
         quit("<< INTERNAL COMPILER ERROR >> Accessed global feed of size '%lu'", global.feed.size);
-    return *stk_char_top(&global.feed);
+    return *stack_char_top(&global.feed);
 }
 
 void
@@ -300,7 +300,7 @@ pop(void)
     }
     else
         str_push_back(&global.comment, c);
-    stk_char_pop(&global.feed);
+    stack_char_pop(&global.feed);
 }
 
 int
@@ -310,7 +310,7 @@ next(void)
     while(is_space(c = top()))
     {
         pop();
-        if(stk_char_empty(&global.feed))
+        if(stack_char_empty(&global.feed))
             return EOF;
     }
     return c;
@@ -820,7 +820,7 @@ prime(str* text)
     while(text->size)
     {
         char c = *str_back(text);
-        stk_char_push(&global.feed, c);
+        stack_char_push(&global.feed, c);
         str_pop_back(text);
     }
 }
@@ -856,7 +856,7 @@ unroll(void)
     match(')');
     match('{');
     str meta = buffer(is_scoped);
-    lst_str expanded = lst_str_init();
+    list_str expanded = list_str_init();
     for(size_t i = 0; i < size; i++)
     {
         str temp = str_copy(&meta);
@@ -868,14 +868,14 @@ unroll(void)
         }
         str reffer = format("%s[%d]", array.value, i);
         replace(&temp, &reftok, &reffer);
-        lst_str_push_front(&expanded, str_copy(&temp));
+        list_str_push_front(&expanded, str_copy(&temp));
         str_free(&reffer);
         str_free(&temp);
     }
     match('}');
-    foreach(lst_str, &expanded, it)
+    foreach(list_str, &expanded, it)
         prime(it.ref);
-    lst_str_free(&expanded);
+    list_str_free(&expanded);
     str_free(&meta);
     str_free(&reftok);
     str_free(&enumtok);
@@ -957,16 +957,16 @@ statement(void)
 void
 pop_locals(size_t size)
 {
-    lst_str reversed = lst_str_init();
+    list_str reversed = list_str_init();
     while(size)
     {
-        str* local = lst_str_back(&global.variables);
-        lst_str_push_front(&reversed, str_copy(local));
-        lst_str_pop_back(&global.variables);
+        str* local = list_str_back(&global.variables);
+        list_str_push_front(&reversed, str_copy(local));
+        list_str_pop_back(&global.variables);
         size -= 1;
     }
     write("; %8s %8s %6s %6s %6s", "TYPE", "NAME", "SIZE", "ADDR", "FAM");
-    foreach(lst_str, &reversed, it)
+    foreach(list_str, &reversed, it)
     {
         token* tok = get(it.ref);
         write("; %8s %8s %6d %6d %6d",
@@ -974,7 +974,7 @@ pop_locals(size_t size)
         global.local_addr -= tok->size;
         erase(&tok->name);
     }
-    lst_str_free(&reversed);
+    list_str_free(&reversed);
 }
 
 void

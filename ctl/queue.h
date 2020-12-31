@@ -1,5 +1,5 @@
 #ifndef T
-#error "Template type T undefined for <que.h>"
+#error "Template type T undefined for <ctl/queue.h>"
 #endif
 
 #define push_back   push
@@ -21,8 +21,8 @@
 #define step        __STEP
 #define remove_if   __REMOVE_IF
 
-#define deq que
-#include <deq.h>
+#define deq queue
+#include <ctl/deque.h>
 #undef deq
 
 #undef push_back

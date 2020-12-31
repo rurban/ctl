@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 make -j16
 make examples

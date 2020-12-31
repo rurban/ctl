@@ -12,7 +12,7 @@ function perf_graph
     do
         if [[ $TEST == *.c ]]
         then
-            gcc -o $OUT $CFLAGS $TEST -I ctl
+            gcc -o $OUT $CFLAGS $TEST -I.
         else
             g++ -o $OUT $CFLAGS $TEST
         fi
@@ -35,7 +35,7 @@ function perf_compile_two_bar
     AA=bina
     BB=binb
     echo $LOG
-    X=`(time gcc -o $AA $CFLAGS $A -I ctl) 2>&1 | grep $KEY | cut -d ' ' -f 2`
+    X=`(time gcc -o $AA $CFLAGS $A -I.) 2>&1 | grep $KEY | cut -d ' ' -f 2`
     Y=`(time g++ -o $BB $CFLAGS $B)        2>&1 | grep $KEY | cut -d ' ' -f 2`
     I=`stat --printf="%s" $AA`
     J=`stat --printf="%s" $BB`

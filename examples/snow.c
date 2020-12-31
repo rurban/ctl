@@ -8,13 +8,13 @@
 
 #define P
 #define T char
-#include <vec.h>
+#include <ctl/vector.h>
 
 // P is omitted since the previous inclusion of vec
 // defines vec_char_init, vec_char_free, and vec_char_copy
 
 #define T vec_char // A 2D array, like std::vector<std::vector<char>>.
-#include <vec.h>
+#include <ctl/vector.h>
 
 enum
 {

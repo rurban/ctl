@@ -1,8 +1,8 @@
 #ifndef T
-#error "Template type T undefined for <deq.h>"
+#error "Template type T undefined for <ctl/deque.h>"
 #endif
 
-#include <ctl.h>
+#include <ctl/ctl.h>
 
 #define A JOIN(deq, T)
 #define B JOIN(A, bucket)
@@ -15,8 +15,7 @@ typedef struct B
     T value[DEQ_BUCKET_SIZE];
     int16_t a;
     int16_t b;
-}
-B;
+} B;
 
 typedef struct A
 {
@@ -27,8 +26,7 @@ typedef struct A
     size_t mark_b;
     size_t capacity;
     size_t size;
-}
-A;
+} A;
 
 typedef struct I
 {
@@ -39,8 +37,7 @@ typedef struct I
     size_t index_next;
     size_t index_last;
     int done;
-}
-I;
+} I;
 
 static inline int
 JOIN(A, empty)(A* self)

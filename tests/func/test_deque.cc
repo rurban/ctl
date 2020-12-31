@@ -2,7 +2,7 @@
 #include "digi.hh"
 
 #define T digi
-#include <deq.h>
+#include <ctl/deque.h>
 
 #include <deque>
 #include <algorithm>

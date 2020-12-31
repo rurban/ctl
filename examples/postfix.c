@@ -4,19 +4,19 @@
 
 #include <stdio.h>
 
-#include <str.h>
+#include <ctl/string.h>
 
 // Template signatures can be renamed, such that long form
-// lst_str_push_back(lst_str*, ...) can be replaced with
+// list_str_push_back(list_str*, ...) can be replaced with
 // the a convenient ls_push_back(ls*, ...).
 
-#define lst_str ls
+#define list_str ls
 #define T str
-#include <lst.h>
+#include <ctl/list.h>
 
-#define stk_str ss
+#define stack_str ss
 #define T str
-#include <stk.h>
+#include <ctl/stack.h>
 
 int
 get_prec(char c)

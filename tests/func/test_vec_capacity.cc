@@ -4,27 +4,27 @@
 
 #define P
 #define T uint8_t
-#include <vec.h>
+#include <ctl/vector.h>
 
 #define P
 #define T uint16_t
-#include <vec.h>
+#include <ctl/vector.h>
 
 #define P
 #define T uint32_t
-#include <vec.h>
+#include <ctl/vector.h>
 
 #define P
 #define T uint64_t
-#include <vec.h>
+#include <ctl/vector.h>
 
 #define P
 #define T float
-#include <vec.h>
+#include <ctl/vector.h>
 
 #define P
 #define T double
-#include <vec.h>
+#include <ctl/vector.h>
 
 #include <vector>
 

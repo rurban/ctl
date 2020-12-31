@@ -1,5 +1,5 @@
 #ifndef T
-#error "Template type T undefined for <stk.h>"
+#error "Template type T undefined for <ctl/stack.h>"
 #endif
 
 #define push_back   push
@@ -25,8 +25,8 @@
 
 // Replace the three instances of `deq` below
 // with either `vec` or `lst`, depending on your use case.
-#define deq stk
-#include <deq.h>
+#define deq stack
+#include <ctl/deque.h>
 #undef deq
 
 #undef push_back

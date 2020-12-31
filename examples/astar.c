@@ -4,7 +4,7 @@
 // See:
 //     https://www.redblobgames.com/pathfinding/a-star/introduction.html
 
-#include <str.h>
+#include <ctl/string.h>
 #include <stdio.h>
 
 typedef struct
@@ -83,19 +83,19 @@ pi_key_compare(pi* a, pi* b)
 
 #define P
 #define T point
-#include <pqu.h>
+#include <ctl/priority_queue.h>
 
 #define P
 #define T point
-#include <deq.h>
+#include <ctl/deque.h>
 
 #define P
 #define T pi
-#include <set.h>
+#include <ctl/set.h>
 
 #define P
 #define T pp
-#include <set.h>
+#include <ctl/set.h>
 
 deq_point
 astar(str* maze, int width)

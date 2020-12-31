@@ -2,7 +2,7 @@
 #include "digi.hh"
 
 #define T digi
-#include <vec.h>
+#include <ctl/vector.h>
 
 #include <vector>
 #include <algorithm>

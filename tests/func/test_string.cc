@@ -1,6 +1,6 @@
 #include "../test.h"
 
-#include <str.h>
+#include <ctl/string.h>
 #include "digi.hh"
 
 #include <string>
