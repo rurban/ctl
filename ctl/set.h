@@ -1,6 +1,10 @@
+/* As red-black tree. */
+
 #ifndef T
 #error "Template type T undefined for <ctl/set.h>"
 #endif
+
+// TODO emplace, lower_bound, upper_bound, equal_range
 
 #include <ctl/ctl.h>
 
@@ -55,6 +59,18 @@ static inline int
 JOIN(A, empty)(A* self)
 {
     return self->size == 0;
+}
+
+static inline size_t
+JOIN(A, size)(A* self)
+{
+    return self->size;
+}
+
+static inline size_t
+JOIN(A, max_size)()
+{
+    return 4294967296 / sizeof(T); // 32bit at most
 }
 
 static inline T
