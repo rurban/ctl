@@ -1,0 +1,33 @@
+name: Minor C/C++ CI
+
+on:
+  push:
+    branches-ignore:
+      - 'ignore*'
+      - 'temp*'
+      - master
+    paths-ignore:
+      - 'images/*'
+  pull_request:
+    paths-ignore:
+      - 'images/*'
+    branches-ignore:
+      - master
+
+jobs:
+  branch:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: SANITIZE
+      run:
+        make -j9 SANITIZE=1
+    - name: c99
+      run:
+        make -j9 CC=gcc\ -std=c99
+    - name: c11
+      run:
+        make -j9 CC=gcc\ -std=c11
+    - name: examples
+      run:
+        make examples
