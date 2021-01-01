@@ -9,13 +9,14 @@ use feature 'unicode_strings';
 binmode(STDOUT, ":utf8");
 
 open my $in, '<:utf8', 'README.md' or die "$! README.md";
-my @c = qw(vec str arr deq list set map uset umap pqu que stk);
+my @c = qw(vec str arr deq list slst set map uset umap pqu que stk);
 my %long = (
   vec => 'vector',
   str => 'string',
   arr => 'array',
   deq => 'deque',
   list => 'list',
+  slst => 'forward_list',
   set => 'set',
   map => 'map',
   uset => 'unordered_set',
@@ -119,13 +120,13 @@ $m->{compare}->{str} = '✓';
 $m->{key_compare}->{str} = '✓';
 $m->{erase_node}->{list} = '✓';
 $m->{erase_node}->{set} = '✓';
-for my $c (qw(vec str arr deq list set map uset umap)) {
+for my $c (qw(vec str arr deq list slst set map uset umap)) {
   for (qw(begin end next foreach ref)) {
     $m->{$_}->{$c} = '✓';
   }
   $m->{inserter}->{$c} = $m->{copy_if}->{$c};
 }
-for my $c (qw(vec str arr deq list set map)) {
+for my $c (qw(vec str arr deq list slst set map)) {
   for (qw(advance distance range foreach_range foreach_n foreach_n_range)) {
     $m->{$_}->{$c} = '✓';
   }

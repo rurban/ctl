@@ -140,6 +140,14 @@ typedef char *charp;
 
 #define POD
 #define T int
+#include <ctl/forward_list.h>
+
+#ifdef POD
+#error "POD leftover"
+#endif
+
+#define POD
+#define T int
 #include <ctl/deque.h>
 
 #ifdef POD
@@ -272,6 +280,19 @@ int main(void)
         list_int_push_back(&a, 7);
         list_int_push_back(&a, 8);
         list_int_free(&a);
+    }
+    {
+        slist_int a = slist_int_init();
+        slist_int_push_front(&a, 1);
+        slist_int_push_front(&a, 2);
+        slist_int_push_front(&a, 3);
+        slist_int_push_front(&a, 4);
+        slist_int_push_front(&a, 5);
+        slist_int_push_front(&a, 6);
+        slist_int_push_front(&a, 7);
+        slist_int_push_front(&a, 8);
+        slist_int_unique(&a);
+        slist_int_free(&a);
     }
     {
         vec_str b = vec_str_init();

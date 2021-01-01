@@ -4,7 +4,7 @@ CXX="g++ -std=c++17"
 CFLAGS="-O3 -march=native"
 VERSION=$($CXX --version | head -1)
 if test -z "$PNG"; then
-  PNG="uset uset_pow2 uset_cached _set pqu vec list deq arr compile"
+  PNG="uset uset_pow2 uset_cached _set pqu vec slist list deq arr compile"
 fi
 
 perf_graph()
@@ -146,6 +146,20 @@ str() {
      tests/perf/str/perf_str_sort.c \
      tests/perf/str/perf_string_iterate.cc \
      tests/perf/str/perf_str_iterate.c"
+}
+
+slist() {
+  perf_graph \
+    'slist.log' \
+    "std::forward_list<int> (dotted) vs. CTL slist_int (solid) ($CFLAGS) ($VERSION)" \
+    "tests/perf/slist/perf_fwlist_pop_front.cc \
+     tests/perf/slist/perf_slist_pop_front.c \
+     tests/perf/slist/perf_fwlist_push_front.cc \
+     tests/perf/slist/perf_slist_push_front.c \
+     tests/perf/slist/perf_fwlist_sort.cc \
+     tests/perf/slist/perf_slist_sort.c \
+     tests/perf/slist/perf_fwlist_iterate.cc \
+     tests/perf/slist/perf_slist_iterate.c"
 }
 
 list() {

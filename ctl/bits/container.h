@@ -2,7 +2,12 @@
    SPDX-License-Identifier: MIT */
 
 // DO NOT STANDALONE INCLUDE.
-#if !defined CTL_LIST && !defined CTL_SET && !defined CTL_USET && !defined CTL_VEC && !defined CTL_ARR &&              \
+#if !defined CTL_LIST && \
+    !defined CTL_SLIST && \
+    !defined CTL_SET && \
+    !defined CTL_USET && \
+    !defined CTL_VEC && \
+    !defined CTL_ARR && \
     !defined CTL_DEQ
 #error "No CTL container defined for <ctl/bits/container.h>"
 #endif
@@ -17,8 +22,8 @@
 
 #include <stdbool.h>
 
-#ifndef CTL_ARR
-static inline int JOIN(A, empty)(A *self)
+#if !defined(CTL_ARR) && !defined(CTL_SLIST)
+static inline int JOIN(A, empty)(A* self)
 {
     return self->size == 0;
 }
@@ -49,9 +54,9 @@ static inline T JOIN(A, implicit_copy)(T *self)
     return *self;
 }
 
-// not valid for uset, str.
-#if !defined(CTL_USET) && !defined(CTL_STR)
-static inline int JOIN(A, equal)(A *self, A *other)
+// not valid for uset, str
+#if !defined(CTL_USET) && !defined(CTL_STR) && !defined(CTL_SLIST)
+static inline int JOIN(A, equal)(A* self, A* other)
 {
     if (JOIN(A, size)(self) != JOIN(A, size)(other))
         return 0;

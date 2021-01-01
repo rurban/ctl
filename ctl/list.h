@@ -625,6 +625,7 @@ static inline void JOIN(A, swap)(A *self, A *other)
     *other = temp;
 }
 
+// FIXME return B*
 static inline void JOIN(A, splice)(I *pos, A *other)
 {
     A *self = pos->container;
@@ -696,7 +697,7 @@ static inline A *JOIN(A, move_range)(I *range, A *out)
 
 static inline void JOIN(A, merge)(A *self, A *other)
 {
-    ASSERT(self->compare || !"compare undefined");
+    CTL_ASSERT_COMPARE;
     if (JOIN(A, empty)(self))
         JOIN(A, swap)(self, other);
     else
@@ -759,8 +760,7 @@ static inline I JOIN(A, unique_range)(I *range)
     return prev;
 }
 
-static inline void /* I, B* ?? */
-    JOIN(A, unique)(A *self)
+static inline void JOIN(A, unique)(A *self)
 {
     list_foreach_ref(A, self, it)
     {

@@ -63,35 +63,35 @@ The function names are composed of the prefix **slist_**, the user-defined type
 
 ## Member functions
 
-[init](slist/init.md) `()`
+    A init ()
 
 constructs the list.
 
-[free](slist/free.md) `(A* self)`
+    free (A* self)
 
 destructs the list.
 
-[assign](slist/assign.md) `(A* self, size_t count, T value)`
+    assign (A* self, size_t count, T value)
 
 resizes and sets count elements to the value
 
-[copy](slist/copy.md) `(A* self)`
+    A copy (A* self)
 
 returns a copy of the container.
 
 ## Element access
 
-[front](slist/front.md) `(A* self)`
+    T* front (A* self)
 
 access the first element
 
 ## Iterators
 
-[begin](slist/begin.md) `(A* self)`
+    I begin (A* self)
 
 returns an iterator to the beginning
 
-[end](slist/end.md) `(A* self)`
+    I end (A* self)
 
 returns an iterator to the end
 
@@ -108,112 +108,109 @@ See [iterators](iterators.md) for more.
 
 ## Capacity
 
-[empty](slist/empty.md) `(A* self)`
+    empty (A* self)
 
 checks whether the container is empty
 
     size_t max_size ()
 
-returns the maximum possible number of elements
+returns the maximum possible number of elements. _(unused)_
 
 ## Modifiers
 
-[clear](slist/clear.md) `(A* self)`
+    clear (A* self)
 
 clears the contents
 
-[insert_after](slist/insert_after.md) `(A* self, I* pos, T value)`
+    insert_after (A* self, I* pos, T value)
 
 inserts value after pos.
 
-[insert_count](slist/insert_after.md) `(A* self, I* pos, size_t count, T value)`
+    insert_count (A* self, I* pos, size_t count, T value)
 
 inserts count values after pos.
 
-[insert_range](slist/insert_after.md) `(A* self, I* pos, I* first, I* last)`
+    insert_range (A* self, I* pos, GI* range)
 
 inserts values after pos from first to last.
 
-[emplace_after](slist/emplace_after.md) `(A* self, I* pos, T values...)`
+    emplace_after (A* self, I* pos, T *value)
 
-Inserts values into the container after pos.
+Inserts value into the container after pos.
 
-[erase_after](slist/erase_after.md) `(A* self, I* pos)`
+    B* erase_after (A* self, B* node)
 
-erases the element at pos
+erases the element after node. If `node == NULL`, erases the head; similar to
+the STL `before_begin()` iterator.
 
-[erase_range](slist/erase.md) `(A* self, I* first, I* last)`
+    erase_range (A* self, I* range)
 
-erases elements
+erases ell elements after `range->node` until before `range->end`.
 
-[push_front](slist/push_front.md) `(A* self, T value)`
+    push_front (A* self, T value)
 
 inserts an element to the beginning
 
-[emplace_front](slist/emplace_front.md) `(A* self, T values...)`
+    emplace_front (A* self, T *value)
 
-inserts elements to the beginning
+inserts element at the beginning
 
-[pop_front](slist/pop_front.md) `(A* self)`
+    pop_front (A* self)
 
 removes the first element
 
-[resize](slist/resize.md) `(A* self, size_t count)`
-
-Resizes the container to contain count elements.
-
-[swap](slist/swap.md) `(A* self, A* other)`
+    swap (A* self, A* other)
 
 swaps the contents
 
 ## Operations
 
-[merge](slist/merge.md) `(A* self, A* other, int T_compare(T*, T*))`
+    A merge (A* self, A* other)
 
 merges two sorted lists.
 
-[splice_after](slist/splice.md) `(A* self, I* pos, A* other)`
+    splice_after (A* self, I* pos, A* other)
 
 Moves all elements from the other list to this list after pos.
 
-[splice_it](slist/splice.md) `(A* self, I* pos, A* other, I* other_pos)`
+    splice_it (A* self, I* pos, I* other_pos)
 
-Moves elements from the other list at pos to this list before pos.
+Moves elements from the other list at pos to this list before pos. _(NYI)_
 
-[splice_range](slist/splice.md) `(A* self, I* pos, A* other, I* other_first, I* other_last)`
+    splice_range (A* self, I* pos, I* other)
 
-Moves elements from the other list to this list before pos.
+Moves a range of elements from the other list to this list before pos.
 
-[remove](slist/remove.md) `(A* self, T value)`
+    remove (A* self, T value)
 
 Removes all elements binary equal to the value.
 
-[remove_if](slist/remove.md) `(A* self, int T_match(T*))`
+    remove_if (A* self, int T_match(T*))
 
 Removes all elements satisfying specific criteria.
 
-[reverse](slist/reverse.md) `(A* self)`
+    reverse (A* self)
 
-reverse the list elements.
+reverse the list elements in place.
 
-[sort](slist/sort.md) `(A* self, int T_compare(T*, T*))`
+   sort (A* self)`
 
 sorts the list.
 
-[unique](slist/unique.md) `(A* self, int T_equal(T*, T*))`
+    unique (A* self)
 
 removes consecutive duplicates.
 
 ## Non-member functions
 
-[find](slist/find.md) `(A* self, T value, int T_equal(T*, T*))`
+    I find (A* self, T value)
 
 finds element with specific value
 
-[erase_if](slist/erase_if.md) `(A* self, int T_match(T*))`
+    erase_if (A* self, int T_match(T*))
 
-erases all elements satisfying specific criteria (C++20) NYI
+erases all elements satisfying specific criteria (C++20) _(NYI)_
 
-[equal](slist/equal.md) `(A* self, A* other, int T_equal(T*, T*))`
+    int equal (A* self, A* other)
 
 Returns 0 or 1 if all elements are equal.

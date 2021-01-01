@@ -116,7 +116,7 @@ static inline long TEST_TIME(void)
     }                                                                                                                  \
     loops:
 
-#define RECORD_WHICH covvec.vector[which]++
+#define RECORD_WHICH covvec.vector[(u16)which]++
 
 /* check if we covered all tests. If not redo the missing tests. */
 static inline int check_redo(vec_u16 *covvec, queue_int *tests, const int number_ok)

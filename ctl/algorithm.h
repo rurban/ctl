@@ -6,11 +6,23 @@
 //#ifndef __CTL_ALGORITHM_H__
 //#define __CTL_ALGORITHM_H__
 
-#if !defined CTL_LIST && !defined CTL_SET && !defined CTL_USET && !defined CTL_VEC && !defined CTL_ARR &&              \
-    !defined CTL_DEQ && /* plus all children also. we don't include it for parents */                                  \
-    !defined CTL_STACK && !defined CTL_QUEUE && !defined CTL_PQU && !defined CTL_MAP && !defined CTL_UMAP
-#error "No CTL container defined for <ctl/algorithm.h>"
+// clang-format off
+#if !defined CTL_LIST && \
+    !defined CTL_SLIST && \
+    !defined CTL_SET && \
+    !defined CTL_USET && \
+    !defined CTL_VEC && \
+    !defined CTL_ARR && \
+    !defined CTL_DEQ && \
+    /* plus all children also. we don't include it for parents */ \
+    !defined CTL_STACK && \
+    !defined CTL_QUEUE && \
+    !defined CTL_PQU && \
+    !defined CTL_MAP && \
+    !defined CTL_UMAP
+# error "No CTL container defined for <ctl/algorithm.h>"
 #endif
+// clang-format on
 #undef CTL_ALGORITHM
 #define CTL_ALGORITHM
 
@@ -60,10 +72,13 @@ static inline bool JOIN(A, none_of)(A *self, int _match(T *))
 static inline bool JOIN(A, find_range)(I *range, T value)
 {
     A *self = range->container;
-    foreach_range_(A, i, range) if (JOIN(A, _equal)(self, i.ref, &value))
+    foreach_range_(A, i, range)
     {
-        *range = i;
-        return true;
+        if (JOIN(A, _equal)(self, i.ref, &value))
+        {
+            *range = i;
+            return true;
+        }
     }
     JOIN(I, set_done)(range);
     return false;
@@ -74,14 +89,22 @@ static inline bool JOIN(A, find_range)(I *range, T value)
 
 static inline I JOIN(A, find_if_range)(I *range, int _match(T *))
 {
-    foreach_range_(A, i, range) if (_match(i.ref)) return i;
+    foreach_range_(A, i, range)
+    {
+        if (_match(i.ref))
+            return i;
+    }
     JOIN(I, set_done)(range);
     return *range;
 }
 
 static inline I JOIN(A, find_if_not_range)(I *range, int _match(T *))
 {
-    foreach_range_(A, i, range) if (!_match(i.ref)) return i;
+    foreach_range_(A, i, range)
+    {
+        if (!_match(i.ref))
+            return i;
+    }
     JOIN(I, set_done)(range);
     return *range;
 }
@@ -130,9 +153,13 @@ static inline void JOIN(A, inserter)(A *self, T value)
     JOIN(A, push_front)(self, value);
 #elif defined CTL_PQU || defined CTL_STACK || defined CTL_QUEUE
     JOIN(A, push)(self, value);
+#else
+    #error "undefined container"
 #endif
 }
 
+#if !defined CTL_SLIST
+// slist needs to do some reversing
 static inline A *JOIN(A, copy_range)(GI *range, A *out)
 {
     void (*next)(struct I*) = range->vtable.next;
@@ -145,6 +172,7 @@ static inline A *JOIN(A, copy_range)(GI *range, A *out)
     }
     return out;
 }
+#endif // SLIST
 #endif // ARR
 
 #if defined(CTL_LIST) || defined(CTL_VEC) || defined(CTL_STR) || defined(CTL_DEQ)
@@ -274,7 +302,7 @@ static inline A JOIN(A, intersection)(A *a, A *b)
 }
 #endif // LIST, VEC, STR, DEQ
 
-#if !defined(CTL_ARR) && !defined(CTL_USET)
+#if !defined(CTL_ARR) && !defined(CTL_USET) && !defined(CTL_SLIST)
 
 // Warning: fails with 3-way compare! And with generic r2 also.
 static inline A JOIN(A, difference_range)(I *r1, GI *r2)
@@ -336,7 +364,7 @@ static inline A JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
 #endif
     return self;
 }
-#endif // !ARR, USET
+#endif // !ARR, USET, SLIST
 
 #if defined(CTL_LIST) || defined(CTL_VEC) || defined(CTL_STR) || defined(CTL_DEQ)
 static inline A JOIN(A, difference)(A *a, A *b)
@@ -502,7 +530,7 @@ static inline A JOIN(A, transform)(A *self, T _unop(T *))
     return other;
 }
 
-#ifndef CTL_ARR
+#if !defined(CTL_ARR) && !defined(CTL_SLIST)
 static inline A JOIN(A, transform_it)(A *self, I *pos, T _binop(T *, T *))
 {
     A other = JOIN(A, init_from)(self);
@@ -523,7 +551,7 @@ static inline A JOIN(A, transform_it)(A *self, I *pos, T _binop(T *, T *))
 #endif
     return other;
 }
-#endif // ARR
+#endif // ARR,SLIST
 
 // std::deque has a different idea
 static inline void JOIN(A, generate_n)(A *self, size_t count, T _gen(void))
@@ -620,7 +648,7 @@ static inline A JOIN(A, merge_range)(I *r1, GI *r2)
     return self;
 }
 
-#ifndef CTL_LIST
+#if !defined(CTL_LIST) && !defined(CTL_SLIST)
 static inline A JOIN(A, merge)(A *a, A *b)
 {
     JOIN(A, it) r1 = JOIN(A, begin)(a);
@@ -767,7 +795,11 @@ JOIN(A, lexicographical_compare_three_way)(I *range1, GI *range2, int (*compare)
 static inline size_t JOIN(A, count_if_range)(I *range, int _match(T *))
 {
     size_t count = 0;
-    foreach_range_(A, i, range) if (_match(i.ref)) count++;
+    foreach_range_(A, i, range)
+    {
+        if (_match(i.ref))
+            count++;
+    }
     return count;
 }
 
@@ -775,8 +807,10 @@ static inline size_t JOIN(A, count_if)(A *self, int _match(T *))
 {
     size_t count = 0;
     foreach (A, self, i)
+    {
         if (_match(i.ref))
             count++;
+    }
     return count;
 }
 //#endif // STR
@@ -997,14 +1031,18 @@ static inline I JOIN(A, adjacent_find)(A *self)
 
 #if !defined CTL_USET
 
+// if all values in the range are the same as value
 static inline bool JOIN(A, equal_value)(I *range, T value)
 {
     bool result = !JOIN(I, done)(range);
     A *self = range->container;
-    foreach_range_(A, i, range) if (!JOIN(A, _equal)(self, i.ref, &value))
+    foreach_range_(A, i, range)
     {
-        result = false;
-        break;
+        if (!JOIN(A, _equal)(self, i.ref, &value))
+        {
+            result = false;
+            break;
+        }
     }
     if (self && self->free)
         self->free(&value);
@@ -1248,7 +1286,7 @@ static inline I JOIN(A, unique_range)(I *range);
 #endif // VEC, DEQ
 
 // not sure yet about array. maybe with POD array.
-#if !defined CTL_LIST && !defined CTL_ARR
+#if !defined CTL_LIST && !defined CTL_SLIST && !defined CTL_ARR
 static inline I JOIN(A, unique)(A *self)
 {
     if (JOIN(A, size)(self) < 2)
@@ -1256,8 +1294,9 @@ static inline I JOIN(A, unique)(A *self)
     I range = JOIN(A, begin)(self);
     return JOIN(A, unique_range)(&range);
 }
-#endif // LIST, ARR
+#endif // LIST, SLIST, ARR
 
+#if !defined(CTL_SLIST)
 static inline void JOIN(A, reverse_range)(I *first)
 {
     I last = *first;
@@ -1290,6 +1329,7 @@ static inline void JOIN(A, reverse)(A *a)
     }
 }
 #endif //!LIST
+#endif //!SLIST
 
 #endif // USET, SET
 

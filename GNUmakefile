@@ -127,6 +127,7 @@ TESTS = \
 	tests/func/test_priority_queue \
 	tests/func/test_queue \
 	tests/func/test_stack \
+	tests/func/test_forward_list \
 	tests/func/test_unordered_set_power2 \
 	tests/func/test_unordered_set_cached \
 	tests/func/test_unordered_set_sleep \
@@ -304,7 +305,11 @@ tests/func/test_deque:    .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ct
 tests/func/test_list:     .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/list.h \
                           tests/func/test_list.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_priority_queue: .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/priority_queue.h ctl/vector.h \
+tests/func/test_forward_list: .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/forward_list.h \
+                          tests/func/test_forward_list.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
+tests/func/test_priority_queue: .cflags $(COMMON_H) tests/test.h \
+                          tests/func/digi.hh ctl/priority_queue.h ctl/vector.h \
                           tests/func/test_priority_queue.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_queue:    .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/queue.h ctl/deque.h \

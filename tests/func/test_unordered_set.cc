@@ -83,10 +83,10 @@ static const char *test_names[] = {
         {                                                                                                              \
             size_t a_found = 0;                                                                                        \
             size_t b_found = 0;                                                                                        \
-            foreach (uset_digi, &_x, _it)                                                                               \
+            foreach (uset_digi, &_x, _it)                                                                              \
             {                                                                                                          \
-                auto _found = _y.find(DIGI(*_it.ref->value));                                                            \
-                assert(_found != _y.end());                                                                             \
+                auto _found = _y.find(DIGI(*_it.ref->value));                                                          \
+                assert(_found != _y.end());                                                                            \
                 a_found++;                                                                                             \
             }                                                                                                          \
             for (auto x : _y)                                                                                          \
@@ -98,8 +98,9 @@ static const char *test_names[] = {
             }                                                                                                          \
             assert(a_found == b_found);                                                                                \
             /* only if we use the very same policies                                                                   \
-            assert(_x.bucket_max + 1 == _y.bucket_count());                                                              \
-            for(size_t _i = 0; _i <= _x.bucket_max; _i++)                                                             \
+            assert(_x.bucket_max + 1 == _y.bucket_count());                                                            \
+            for(size_t _i = 0; _i <= _x.bucket_max; _i++)
+            \
                 assert(uset_digi_bucket_size(&_x, _i) == _y.bucket_size(_i));                                          \
             */                                                                                                         \
         }                                                                                                              \

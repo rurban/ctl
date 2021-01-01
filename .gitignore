@@ -1,3 +1,4 @@
+.dir-locals.el
 test
 a.out
 *.asm
@@ -21,6 +22,7 @@ a.out
 /tests/func/test_priority_queue
 /tests/func/test_queue
 /tests/func/test_set
+/tests/func/test_slist
 /tests/func/test_stack
 /tests/func/test_str_capacity
 /tests/func/test_string

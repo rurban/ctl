@@ -275,61 +275,64 @@ cppcheck:
 #tests/func/test_generic_iter: .cflags ${H} \
 #                          tests/func/test_generic_iter.cc
 #	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_deque:    .cflags ${COMMON_H} ctl/deque.h \
+tests/func/test_deque:    .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/deque.h \
                           tests/func/test_deque.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_list:     .cflags ${COMMON_H} ctl/list.h \
+tests/func/test_list:     .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/list.h \
                           tests/func/test_list.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_priority_queue: .cflags ${COMMON_H} ctl/priority_queue.h ctl/vector.h \
+tests/func/test_forward_list: .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/forward_list.h \
+                          tests/func/test_forward_list.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
+tests/func/test_priority_queue: .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/priority_queue.h ctl/vector.h \
                           tests/func/test_priority_queue.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_queue:    .cflags ${COMMON_H} ctl/queue.h ctl/deque.h \
+tests/func/test_queue:    .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/queue.h ctl/deque.h \
                           tests/func/test_queue.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_set:      .cflags ${COMMON_H} ctl/set.h \
+tests/func/test_set:      .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/set.h \
                           tests/func/test_set.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_map:      .cflags ${COMMON_H} ctl/map.h ctl/set.h \
+tests/func/test_map:      .cflags ${COMMON_H} tests/test.h tests/func/strint.hh ctl/map.h ctl/set.h \
                           tests/func/test_map.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_unordered_set: .cflags ${COMMON_H} ctl/unordered_set.h \
+tests/func/test_unordered_set: .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_unordered_set_power2: .cflags ${COMMON_H} ctl/unordered_set.h \
+tests/func/test_unordered_set_power2: .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
 	${CXX} ${CXXFLAGS} -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc -o $@
-tests/func/test_unordered_set_cached: .cflags ${COMMON_H} ctl/unordered_set.h \
+tests/func/test_unordered_set_cached: .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
 	${CXX} ${CXXFLAGS} -DCTL_USET_CACHED_HASH tests/func/test_unordered_set.cc -o $@
-tests/func/test_unordered_set_sleep: .cflags ${COMMON_H} ctl/unordered_set.h \
+tests/func/test_unordered_set_sleep: .cflags ${COMMON_H} tests/test.h ctl/unordered_set.h \
                           tests/func/test_unordered_set_sleep.c
 	${CC} ${CFLAGS} -O3 -finline tests/func/test_unordered_set_sleep.c -o $@
-tests/func/test_unordered_map: .cflags ${COMMON_H} ctl/unordered_map.h ctl/unordered_set.h \
+tests/func/test_unordered_map: .cflags ${COMMON_H} tests/test.h tests/func/strint.hh ctl/unordered_map.h ctl/unordered_set.h \
                           tests/func/test_unordered_map.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_stack:    .cflags ${COMMON_H} ctl/stack.h ctl/deque.h \
+tests/func/test_stack:    .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/stack.h ctl/deque.h \
                           tests/func/test_stack.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_string:   .cflags ${COMMON_H} ctl/string.h ctl/vector.h \
+tests/func/test_string:   .cflags ${COMMON_H} tests/test.h ctl/string.h ctl/vector.h \
                           tests/func/test_string.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_str_capacity: .cflags ${COMMON_H} ctl/string.h ctl/vector.h \
+tests/func/test_str_capacity: .cflags ${COMMON_H} tests/test.h ctl/string.h ctl/vector.h \
                           tests/func/test_str_capacity.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_vec_capacity: .cflags ${COMMON_H} ctl/vector.h \
+tests/func/test_vec_capacity: .cflags ${COMMON_H} tests/test.h ctl/vector.h \
                           tests/func/test_vec_capacity.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_vector:   .cflags ${COMMON_H} ctl/vector.h \
+tests/func/test_vector:   .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/vector.h \
                           tests/func/test_vector.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_array:   .cflags ${COMMON_H} ctl/array.h \
+tests/func/test_array:   .cflags ${COMMON_H} tests/test.h tests/func/digi.hh ctl/array.h \
                           tests/func/test_array.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_double_array:   .cflags ${COMMON_H} ctl/array.h \
+tests/func/test_double_array:   .cflags ${COMMON_H} tests/test.h ctl/array.h \
                           tests/func/test_double_array.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_int_vector: .cflags ${COMMON_H} ctl/vector.h \
+tests/func/test_int_vector: .cflags ${COMMON_H} tests/test.h ctl/vector.h \
                           tests/func/test_int_vector.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
 
