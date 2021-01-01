@@ -53,8 +53,7 @@ typedef struct
 {
     int x;
     int y;
-}
-point;
+} point;
 
 #define POD
 #define T point
@@ -67,8 +66,7 @@ typedef struct
 {
     vec_point path;
     str name;
-}
-person;
+} person;
 
 static person
 person_init(size_t path_capacity, const char* first, const char* last)
@@ -124,7 +122,8 @@ main(void)
         vec_int_push_back(&a, 3);
         vec_int_push_back(&a, 4);
         vec_int_free(&a);
-    }{
+    }
+    {
         const size_t size = 16;
         deq_int a = deq_int_init();
         for(size_t i = 0; i < size; i++) deq_int_push_back(&a, i);
@@ -132,7 +131,8 @@ main(void)
         deq_int_insert(&a, 1, 99);
         deq_int_sort(&a, int_compare);
         deq_int_free(&a);
-    }{
+    }
+    {
         list_int a = list_int_init();
         list_int_push_back(&a, 1);
         list_int_push_back(&a, 2);
@@ -143,7 +143,8 @@ main(void)
         list_int_push_back(&a, 7);
         list_int_push_back(&a, 8);
         list_int_free(&a);
-    }{
+    }
+    {
         vec_str b = vec_str_init();
         vec_str_push_back(&b, str_init("This"));
         vec_str_push_back(&b, str_init("is"));
@@ -151,7 +152,8 @@ main(void)
         vec_str_push_back(&b, str_init("test"));
         vec_str_resize(&b, 512, str_init(""));
         vec_str_free(&b);
-    }{
+    }
+    {
         vec_person c = vec_person_init();
         vec_person_push_back(&c, person_init(128, "FIRST", "JONES"));
         vec_person_push_back(&c, person_init(256, "LAST", "ALEXA"));
@@ -159,7 +161,8 @@ main(void)
         vec_person d = vec_person_copy(&c);
         vec_person_free(&c);
         vec_person_free(&d);
-    }{
+    }
+    {
         list_int a = list_int_init();
         list_int_push_back(&a, 1);
         list_int_push_back(&a, 1);

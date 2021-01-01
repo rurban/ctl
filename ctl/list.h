@@ -115,6 +115,9 @@ JOIN(A, end)(A* self)
 static inline void
 JOIN(A, disconnect)(A* self, B* node)
 {
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert (self->size);
+#endif
     if(node == self->tail) self->tail = self->tail->prev;
     if(node == self->head) self->head = self->head->next;
     if(node->prev) node->prev->next = node->next;
@@ -132,7 +135,7 @@ JOIN(A, connect)(A* self, B* position, B* node, int before)
         self->size += 1;
     }
     else
-    if (self->size + 1 < JOIN(A, max_size)())
+    if (self->size < JOIN(A, max_size)())
     {
         if(before)
         {
@@ -156,6 +159,11 @@ JOIN(A, connect)(A* self, B* position, B* node, int before)
         }
         self->size += 1;
     }
+    /* error handling? silent ignore or stderr or assert or customizable.
+    else
+        assert (0 || "list size exceeded");
+        fprintf (stderr, "list size exceeded");
+    */
 }
 
 static inline void
