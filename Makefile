@@ -96,6 +96,9 @@ TESTS = \
 	tests/func/test_vec_capacity \
 	tests/func/test_vector
 
+TESTS = \
+	tests/func/test_c11
+
 EXAMPLES = \
 	examples/astar \
 	examples/postfix \
