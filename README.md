@@ -163,10 +163,75 @@ type utilities to omit default compare, equal and hash methods.
 
 ## Base Implementation Details
 
-    vector.h: See `realloc`.
-    deque.h: Paged `realloc`.
-    list.h: Doubly linked list.
-    set.h: Red black tree.
+```
+vector.h: See `realloc`.
+deque.h: Paged `realloc`.
+list.h: Doubly linked list.
+set.h: Red black tree.
+
+                    vec  str  deq  lst  set  pqu  que  stk
++--------------------------------------------------------+
+init                x    x    x    x    x    x    x    x
+free                x    x    x    x    x    x    x    x
+empty               x    x    x    x    x    x    x    x
+top                                          x         x
+push                                         x    x    x
+pop                                          x    x    x
+at                  x    x    x
+front               x    x    x    x              x
+back                x    x    x    x              x
+begin               x    x    x    x    x
+end                 x    x    x    x    x
+set                 x    x    x
+pop_back            x    x    x    x
+pop_front                     x    x
+clear               x    x    x    x    x
+reserve             x    x
+push_back           x    x    x    x
+push_front                    x    x
+transfer                           x
+disconnect                         x
+connect                            x
+resize              x    x    x    x
+assign              x    x    x    x
+reverse                            x
+shrink_to_fit       x    x
+data                x    x
+insert              x    x    x    x    x
+erase               x    x    x    x    x
+erase_node                              x
+sort                x    x    x    x
+copy                x    x    x    x    x
+step                x    x    x    x    x
+range               x    x    x    x    x
+each                x    x    x    x    x
+remove_if           x    x    x    x    x
+swap                x    x    x    x    x
+equal               x    x    x    x    x
+splice                             x
+merge                              x
+unique                             x
+find                x    x    x    x    x
+append                   x
+insert_str               x
+replace                  x              x
+c_str                    x
+find                     x
+count                    x              x
+contains                                x
+rfind                    x
+find_first_of            x
+find_last_of             x
+find_first_not_of        x
+find_last_not_of         x
+substr                   x
+compare                  x
+key_compare              x
+insersection                            x
+union                                   x
+difference                              x
+symmetric_difference                    x
+```
 
 ## Acknowledgements
 

@@ -17,7 +17,7 @@ int
 int_equal(int* a, int* b)
 { return *a == *b; }
 
-#define P
+#define POD
 #define T int
 #include <ctl/stack.h>
 
