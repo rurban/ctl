@@ -90,7 +90,7 @@ JOIN(A, init)(int _compare(T*, T*))
     static A zero;
     A self = zero;
     self.compare = _compare;
-#ifdef P
+#ifdef POD
 #undef P
     self.copy = JOIN(A, implicit_copy);
 #else

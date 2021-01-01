@@ -50,7 +50,7 @@ JOIN(A, init)(void)
 {
     static A zero;
     A self = zero;
-#ifdef P
+#ifdef POD
 #undef P
     self.copy = JOIN(A, implicit_copy);
 #else

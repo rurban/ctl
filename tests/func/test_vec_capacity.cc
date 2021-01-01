@@ -2,27 +2,27 @@
 
 #include <stdint.h>
 
-#define P
+#define POD
 #define T uint8_t
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T uint16_t
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T uint32_t
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T uint64_t
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T float
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T double
 #include <ctl/vector.h>
 

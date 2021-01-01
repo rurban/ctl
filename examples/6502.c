@@ -13,7 +13,7 @@
 #define DEFAULT_BYTE_SIZE (1)
 #define DEFAULT_WORD_SIZE (2)
 
-#define P
+#define POD
 #define T char
 #include <ctl/stack.h>
 

@@ -1,11 +1,12 @@
-# C TEMPLATE LIBRARY (CTL)
+# C CONTAINER TEMPLATE LIBRARY (CTL)
 
-CTL is a fast compiling, type safe, header only, template-like library for ISO C99/C11.
+CTL is a fast compiling, type safe, header only, template-like
+container library for ISO C99/C11.
 
 ## Motivation
 
-CTL aims to improve ISO C99/C11 developer productivity by implementing the following
-STL containers in ISO C99/C11:
+CTL aims to improve ISO C99/C11 developer productivity by implementing
+the following STL containers in ISO C99/C11:
 
 ```
 ctl/deque.h          = std::deque           prefix: deq
@@ -28,7 +29,7 @@ Configure a CTL container with a built-in or typedef type `T`.
 ```C
 #include <stdio.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/vector.h>
 
@@ -49,7 +50,7 @@ int main(void)
 }
 ```
 
-Definition `P` states type `T` is Plain Old Data (POD).
+Definition `POD` states type `T` is Plain Old Data (POD).
 
 For a much more thorough getting started guide,
 see the wiki: https://github.com/rurban/ctl/wiki and

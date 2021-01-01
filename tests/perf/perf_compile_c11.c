@@ -1,118 +1,118 @@
-#define P
+#define POD
 #define T int
 #include <ctl/deque.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/list.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/queue.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/set.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/stack.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/priority_queue.h>
 
 #include <ctl/string.h>
 
-#define P
+#define POD
 #define T short
 #include <ctl/deque.h>
 
-#define P
+#define POD
 #define T short
 #include <ctl/list.h>
 
-#define P
+#define POD
 #define T short
 #include <ctl/queue.h>
 
-#define P
+#define POD
 #define T short
 #include <ctl/set.h>
 
-#define P
+#define POD
 #define T short
 #include <ctl/stack.h>
 
-#define P
+#define POD
 #define T short
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T short
 #include <ctl/priority_queue.h>
 
 #include <ctl/string.h>
 
-#define P
+#define POD
 #define T float
 #include <ctl/deque.h>
 
-#define P
+#define POD
 #define T float
 #include <ctl/list.h>
 
-#define P
+#define POD
 #define T float
 #include <ctl/queue.h>
 
-#define P
+#define POD
 #define T float
 #include <ctl/set.h>
 
-#define P
+#define POD
 #define T float
 #include <ctl/stack.h>
 
-#define P
+#define POD
 #define T float
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T float
 #include <ctl/priority_queue.h>
 
 #include <ctl/string.h>
 
-#define P
+#define POD
 #define T double
 #include <ctl/deque.h>
 
-#define P
+#define POD
 #define T double
 #include <ctl/list.h>
 
-#define P
+#define POD
 #define T double
 #include <ctl/queue.h>
 
-#define P
+#define POD
 #define T double
 #include <ctl/set.h>
 
-#define P
+#define POD
 #define T double
 #include <ctl/stack.h>
 
-#define P
+#define POD
 #define T double
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T double
 #include <ctl/priority_queue.h>
 

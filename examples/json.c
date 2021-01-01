@@ -21,7 +21,7 @@
 
 #include <ctl/string.h>
 
-#define P
+#define POD
 #define T char
 #include <ctl/stack.h>
 
