@@ -5,47 +5,47 @@
 #include <ctl/string.h>
 #include <ctl/string.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/stack.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/priority_queue.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/queue.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/list.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/deque.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/set.h>
 
-#define P
+#define POD
 #define T char
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T unsigned
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T float
 #include <ctl/vector.h>
 
-#define P
+#define POD
 #define T double
 #include <ctl/vector.h>
 
@@ -56,7 +56,7 @@ typedef struct
 }
 point;
 
-#define P
+#define POD
 #define T point
 #include <ctl/vector.h>
 

@@ -1,11 +1,12 @@
-# C TEMPLATE LIBRARY (CTL)
+# C CONTAINER TEMPLATE LIBRARY (CTL)
 
-CTL is a fast compiling, type safe, header only, template-like library for ISO C99/C11.
+CTL is a fast compiling, type safe, header only, template-like
+container library for ISO C99/C11.
 
 ## Motivation
 
-CTL aims to improve ISO C99/C11 developer productivity by implementing the following
-STL containers in ISO C99/C11:
+CTL aims to improve ISO C99/C11 developer productivity by implementing
+the following STL containers in ISO C99/C11:
 
 ```
 ctl/deque.h          = std::deque           prefix: deq
@@ -17,7 +18,7 @@ ctl/stack.h          = std::stack           prefix: stack
 ctl/string.h         = std::string          prefix: str
 ctl/vector.h         = std::vector          prefix: vec
 ```
-hashmap's are in work still.
+map and forward_list are in work still.
 
 It is based on glouw's ctl, but with proper names, and using the incpath `ctl/` prefix.
 
@@ -28,7 +29,7 @@ Configure a CTL container with a built-in or typedef type `T`.
 ```C
 #include <stdio.h>
 
-#define P
+#define POD
 #define T int
 #include <ctl/vector.h>
 
@@ -49,7 +50,7 @@ int main(void)
 }
 ```
 
-Definition `P` states type `T` is Plain Old Data (POD).
+Definition `POD` states type `T` is Plain Old Data (POD).
 
 For a much more thorough getting started guide,
 see the wiki: https://github.com/rurban/ctl/wiki and
@@ -57,7 +58,7 @@ https://github.com/glouw/ctl/wiki for the original sample with three-letter name
 
 ## Memory Ownership
 
-Types with memory ownership require definition `P` be omitted, and require
+Types with memory ownership require definition `POD` be omitted, and require
 function declarations for the C++ equivalent of the destructor and copy constructor,
 prior to the inclusion of the container:
 
@@ -156,6 +157,6 @@ UTF-8 strings and identifiers will be added eventually, UTF-16 or UTF-32 not.
 
 ## Acknowledgements
 
-Tahnks you `glouw` for the initial three-letter variant https://github.com/glouw/ctl.
+Thank you `glouw` for the initial three-letter variant https://github.com/glouw/ctl.
 Thank you `kully` for the Plotly code, and thank you for the general review.
 Thank you `smlckz` for the `foreach` cleanup.

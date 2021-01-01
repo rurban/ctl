@@ -6,7 +6,7 @@
 #endif
 
 #define vec_char str
-#define P
+#define POD
 #define T char
 #define str_init str___INIT
 #define str_equal str___EQUAL

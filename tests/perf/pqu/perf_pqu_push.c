@@ -1,6 +1,6 @@
 #include "../../test.h"
 
-#define P
+#define POD
 #define T int
 #include <ctl/priority_queue.h>
 

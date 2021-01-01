@@ -81,19 +81,19 @@ pi_key_compare(pi* a, pi* b)
     return point_key_compare(&a->p, &b->p);
 }
 
-#define P
+#define POD
 #define T point
 #include <ctl/priority_queue.h>
 
-#define P
+#define POD
 #define T point
 #include <ctl/deque.h>
 
-#define P
+#define POD
 #define T pi
 #include <ctl/set.h>
 
-#define P
+#define POD
 #define T pp
 #include <ctl/set.h>
 

@@ -47,8 +47,8 @@ JOIN(A, init)(void)
 {
     static A zero;
     A self = zero;
-#ifdef P
-#undef P
+#ifdef POD
+#undef POD
     self.copy = JOIN(A, implicit_copy);
 #else
     self.free = JOIN(T, free);

@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <sys/select.h>
 
-#define P
+#define POD
 #define T char
 #include <ctl/vector.h>
 
