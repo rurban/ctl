@@ -3,6 +3,7 @@ CC="gcc -std=c11"
 CXX="g++ -std=c++17"
 CFLAGS="-O3 -march=native"
 VERSION=$($CXX --version | head -1)
+VERSION=$(echo $VERSION | sed 's, 2020.*,,')
 
 function perf_graph
 {
@@ -21,7 +22,7 @@ function perf_graph
         fi
         ./$OUT >> "$LOG"
     done
-    python3 tests/perf/perf_plot.py "$LOG" "$TITLE" &&
+    perl tests/perf/perf_plot.pl "$LOG" "$TITLE" &&
       (mv "$LOG.png" docs/images/; rm -- "./$LOG" "./$OUT")
 }
 
