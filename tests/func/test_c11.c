@@ -18,6 +18,35 @@ int_equal(int* a, int* b)
 { return *a == *b; }
 
 #define POD
+//typedef char* str;
+#define T str
+#include <ctl/map.h>
+
+size_t
+FNV1a(const char *key)
+{
+  size_t h;
+  h = 2166136261u;
+  for (unsigned i = 0; i < strlen(key); i++) {
+    h ^= (unsigned char)key[i];
+    h *= 16777619;
+  }
+  return h;
+}
+
+size_t
+_str_hash(str* s)
+{ return FNV1a(*(const char **)s); }
+
+int
+_str_equal(str* a, str* b)
+{ return strcmp(*(char**)a, *(char**)b) == 0; }
+
+int
+_str_cmp(str* a, str* b)
+{ return strcmp(*(char**)a, *(char**)b); }
+
+#define POD
 #define T int
 #include <ctl/stack.h>
 
@@ -257,6 +286,20 @@ main(void)
         foreach(uset_int, &a, it) { uset_int_bucket_size(it.node); }
         printf("uset load_factor: %f\n", uset_int_load_factor(&a));
         uset_int_free(&a);
+    }
+    {
+        map_str a = map_str_init(8, _str_hash, _str_equal);
+        char c_char[36];
+        for (int i=0; i<1000; i++) {
+          snprintf(c_char, 36, "%c%d", 48 + (rand() % 74), rand());
+          str s = (str){.value = c_char};
+          map_str_insert(&a, s);
+        }
+        foreach(map_str, &a, it) { strcpy (c_char, *(char**)it.ref); }
+        printf("last key \"%s\", ", c_char);
+        foreach(map_str, &a, it) { map_str_bucket_size(it.node); }
+        printf("map_str load_factor: %f\n", map_str_load_factor(&a));
+        map_str_free(&a);
     }
     TEST_PASS(__FILE__);
 }

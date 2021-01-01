@@ -20,7 +20,7 @@ ctl/vector.h         = std::vector          prefix: vec
 ctl/map.h            = std::unordered_map   prefix: map
 ctl/unordered_set.h  = std::unordered_set   prefix: uset
 ```
-map and forward_list are in work still.
+forward_list is in work still.
 
 It is based on glouw's ctl, but with proper names, and using the incpath `ctl/` prefix.
 
@@ -94,6 +94,7 @@ for template type `T` as type `int` for all measurements.
 Omitted from these performance measurements are `queue.h`, `stack.h`, and `string.h`,
 as their performance characteristics can be inferred from `deque.h`, and `vector.h`,
 respectively.
+ust and map not yet.
 
 Note, CTL strings do not support short strings yet.
 
@@ -151,8 +152,7 @@ make unordered_set.i
 
 ## Other
 
-STL `std::map` and `std::unordered_set` are in work as unordered hashmap by
-default, no extra `std::unordered_map`.
+STL `std::map` is in work as unordered hashmap by default, no extra `std::unordered_map`.
 The hashes hopefully with something like greg7mdp/parallel-hashmap or at least
 khash, not chained lists as in the STL. Thus the internal bucket methods will
 be gone.

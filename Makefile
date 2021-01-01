@@ -168,7 +168,9 @@ priority_queue.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
 set.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-ust.i:
+unordered_set.i:
+	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
+map.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
 
 examples/astar:                      ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
