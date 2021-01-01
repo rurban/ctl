@@ -180,7 +180,7 @@ JOIN(A, disconnect)(A* self, B* node)
 }
 
 static inline void
-JOIN(A, connect)(A* self, B* position, B* node, int before)
+JOIN(A, connect_before)(A* self, B* position, B* node)
 {
     if(JOIN(A, empty)(self))
     {
@@ -190,26 +190,13 @@ JOIN(A, connect)(A* self, B* position, B* node, int before)
     else
     if (self->size < JOIN(A, max_size)())
     {
-        if(before)
-        {
-            node->next = position;
-            node->prev = position->prev;
-            if(position->prev)
-                position->prev->next = node;
-            position->prev = node;
-            if(position == self->head)
-                self->head = node;
-        }
-        else
-        {
-            node->prev = position;
-            node->next = position->next;
-            if(position->next)
-                position->next->prev = node;
-            position->next = node;
-            if(position == self->tail)
-                self->tail = node;
-        }
+        node->next = position;
+        node->prev = position->prev;
+        if(position->prev)
+            position->prev->next = node;
+        position->prev = node;
+        if(position == self->head)
+            self->head = node;
         self->size++;
     }
     /* error handling? silent ignore or stderr or assert or customizable.
@@ -220,24 +207,17 @@ JOIN(A, connect)(A* self, B* position, B* node, int before)
 }
 
 static inline void
-JOIN(A, push_back)(A* self, T value)
-{
-    B* node = JOIN(B, init)(value);
-    JOIN(A, connect)(self, self->tail, node, 0);
-}
-
-static inline void
 JOIN(A, push_front)(A* self, T value)
 {
     B* node = JOIN(B, init)(value);
-    JOIN(A, connect)(self, self->head, node, 1);
+    JOIN(A, connect_before)(self, self->head, node);
 }
 
 static inline void
-JOIN(A, transfer)(A* self, A* other, B* position, B* node, int before)
+JOIN(A, transfer_before)(A* self, A* other, B* position, B* node)
 {
     JOIN(A, disconnect)(other, node);
-    JOIN(A, connect)(self, position, node, before);
+    JOIN(A, connect_before)(self, position, node);
 }
 
 static inline void
@@ -265,7 +245,7 @@ static inline B*
 JOIN(A, insert)(A* self, B* pos, T value)
 {
     B* node = JOIN(B, init)(value);
-    JOIN(A, connect)(self, pos, node, 1);
+    JOIN(A, connect_before)(self, pos, node);
     return node;
 }
 
@@ -285,6 +265,40 @@ JOIN(A, free)(A* self)
     *self = JOIN(A, init)();
     self->compare = *compare;
     self->equal = *equal;
+}
+
+static inline void
+JOIN(A, connect_after)(A* self, B* position, B* node)
+{
+    if(JOIN(A, empty)(self))
+    {
+        self->head = self->tail = node;
+        self->size += 1;
+    }
+    else
+    if (self->size < JOIN(A, max_size)())
+    {
+        node->prev = position;
+        node->next = position->next;
+        if(position->next)
+            position->next->prev = node;
+        position->next = node;
+        if(position == self->tail)
+            self->tail = node;
+        self->size += 1;
+    }
+    /* error handling? silent ignore or stderr or assert or customizable.
+    else
+        assert (0 || "list size exceeded");
+        fprintf (stderr, "list size exceeded");
+    */
+}
+
+static inline void
+JOIN(A, push_back)(A* self, T value)
+{
+    B* node = JOIN(B, init)(value);
+    JOIN(A, connect_after)(self, self->tail, node);
 }
 
 static inline void
@@ -374,21 +388,21 @@ JOIN(A, remove)(A* self, T* value)
 static inline B*
 JOIN(A, emplace)(A* self, B* pos, T* value) {
     B* node = JOIN(B, init)(self->copy(value));
-    JOIN(A, connect)(self, pos, node, 1);
+    JOIN(A, connect_before)(self, pos, node);
     return pos->next;
 }
 
 static inline B*
 JOIN(A, emplace_front)(A* self, T* value) {
     B* node = JOIN(B, init)(self->copy(value));
-    JOIN(A, connect)(self, self->head, node, 1);
+    JOIN(A, connect_before)(self, self->head, node);
     return self->head;
 }
 
 static inline B*
 JOIN(A, emplace_back)(A* self, T* value) {
     B* node = JOIN(B, init)(self->copy(value));
-    JOIN(A, connect)(self, self->tail, node, 0);
+    JOIN(A, connect_after)(self, self->tail, node);
     return self->tail;
 }
 
@@ -399,7 +413,7 @@ JOIN(A, insert_count)(A* self, B* pos, size_t count, T value)
 {
     B* node = JOIN(B, init)(value);
     for (size_t i=0; i < count; i++)
-        JOIN(A, connect)(self, pos, node, 1);
+        JOIN(A, connect_before)(self, pos, node);
     return node;
 }
 
@@ -413,7 +427,7 @@ JOIN(A, insert_range)(A* self, B* pos, I* first, I* last)
     foreach(A, other, it)
     {
         node = JOIN(B, init)(*it.ref);
-        JOIN(A, connect)(self, pos, node, 1);
+        JOIN(A, connect_before)(self, pos, node);
     }
     return node;
 }
@@ -448,7 +462,15 @@ JOIN(A, splice)(A* self, B* pos, A* other)
         JOIN(A, swap)(self, other);
     else
         foreach(A, other, it)
-            JOIN(A, transfer)(self, other, pos, it.node, 1);
+            JOIN(A, transfer_before)(self, other, pos, it.node);
+}
+
+// only needed for merge
+static inline void
+JOIN(A, transfer_after)(A* self, A* other, B* position, B* node)
+{
+    JOIN(A, disconnect)(other, node);
+    JOIN(A, connect_after)(self, position, node);
 }
 
 #ifdef DEBUG
@@ -491,10 +513,10 @@ JOIN(A, merge)(A* self, A* other)
     {
         for(B* node = self->head; node; node = node->next)
             while(!JOIN(A, empty)(other) && self->compare(&node->value, &other->head->value))
-                JOIN(A, transfer)(self, other, node, other->head, 1);
+                JOIN(A, transfer_before)(self, other, node, other->head);
         // Remainder.
         while(!JOIN(A, empty)(other))
-            JOIN(A, transfer)(self, other, self->tail, other->head, 0);
+            JOIN(A, transfer_after)(self, other, self->tail, other->head);
     }
 }
 
@@ -511,7 +533,7 @@ JOIN(A, sort)(A* self)
         A* counter = NULL;
         do
         {
-            JOIN(A, transfer)(&carry, self, carry.head, self->head, 1);
+            JOIN(A, transfer_before)(&carry, self, carry.head, self->head);
             for(counter = temp; counter != fill && !JOIN(A, empty)(counter); counter++)
             {
                 JOIN(A, merge)(counter, &carry);

@@ -340,6 +340,8 @@ hashmaps will be changed from chained lists to open addressing, thus no internal
 bucket methods, and even more faster, but pointers into it are disallowed.
 The `CTL_USET_CACHED_HASH` policy is still in work, for faster finds but more memory.
 
+Optimized list, seperate connect before and after methods.
+
 Work is ongoing for all `algorithms.h` and `ranges`, with full iterator support
 and `foreach_range`.
 
