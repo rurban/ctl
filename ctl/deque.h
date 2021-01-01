@@ -23,9 +23,9 @@ typedef struct B
 
 typedef struct A
 {
+    B** pages;
     void (*free)(T*);
     T (*copy)(T*);
-    B** pages;
     size_t mark_a;
     size_t mark_b;
     size_t capacity;
