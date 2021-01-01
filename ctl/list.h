@@ -129,7 +129,7 @@ JOIN(A, connect)(A* self, B* position, B* node, int before)
     if(JOIN(A, empty)(self))
         self->head = self->tail = node;
     else
-    if (self->size + 1 < JOIN(A, max_size)())
+    if (self->size < JOIN(A, max_size)())
     {
         if(before)
         {
@@ -153,6 +153,8 @@ JOIN(A, connect)(A* self, B* position, B* node, int before)
         }
         self->size += 1;
     }
+    else
+        fprintf (stderr, "list size exceeded");
 }
 
 static inline void

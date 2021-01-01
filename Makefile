@@ -24,7 +24,7 @@ CFLAGS += -DLONG
 endif
 
 ifeq (1, $(SANITIZE))
-CFLAGS += -fsanitize=address -fsanitize=undefined
+CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
 endif
 
 ifeq (1, $(Og))

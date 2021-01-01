@@ -9,17 +9,17 @@
 
 #define CHECK(_x, _y) {                                           \
     assert(_x.size == _y.size());                                 \
-    assert(list_digi_empty(&_x) == _y.empty());                    \
+    assert(list_digi_empty(&_x) == _y.empty());                   \
     if(_x.size > 0) {                                             \
-        assert(*_y.front().value == *list_digi_front(&_x)->value); \
-        assert(*_y.back().value == *list_digi_back(&_x)->value);   \
+        assert(*_y.front().value == *list_digi_front(&_x)->value);\
+        assert(*_y.back().value == *list_digi_back(&_x)->value);  \
     }                                                             \
     std::list<DIGI>::iterator _iter = _y.begin();                 \
-    foreach(list_digi, &_x, _it) {                                 \
+    foreach(list_digi, &_x, _it) {                                \
         assert(*_it.ref->value == *_iter->value);                 \
         _iter++;                                                  \
     }                                                             \
-    list_digi_it _it = list_digi_it_each(&_x);                      \
+    list_digi_it _it = list_digi_it_each(&_x);                    \
     for(auto& _d : _y) {                                          \
         assert(*_it.ref->value == *_d.value);                     \
         _it.step(&_it);                                           \
