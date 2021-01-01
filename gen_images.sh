@@ -18,10 +18,8 @@ function perf_graph
         fi
         ./$OUT >> $LOG
     done
-    python3 tests/perf/perf_plot.py $LOG "$TITLE"
-    mv $LOG.png docs/images/
-    rm $LOG
-    rm $OUT
+    python3 tests/perf/perf_plot.py $LOG "$TITLE" &&
+      (mv $LOG.png docs/images/; rm $LOG; rm $OUT)
 }
 
 function perf_compile_two_bar
@@ -39,10 +37,8 @@ function perf_compile_two_bar
     Y=`(time g++ -o $BB $CFLAGS $B)     2>&1 | grep $KEY | cut -d ' ' -f 2`
     I=`stat --printf="%s" $AA`
     J=`stat --printf="%s" $BB`
-    python3 tests/perf/perf_plot_bar.py $LOG "$TITLE" $X $Y $I $J $A $B
-    mv $LOG.png docs/images/
-    rm $AA
-    rm $BB
+    python3 tests/perf/perf_plot_bar.py $LOG "$TITLE" $X $Y $I $J $A $B &&
+      (mv $LOG.png docs/images/; rm $AA; rm $BB)
 }
 
 perf_graph \
