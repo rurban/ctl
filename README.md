@@ -17,7 +17,8 @@ ctl/set.h            = std::set             prefix: set
 ctl/stack.h          = std::stack           prefix: stack
 ctl/string.h         = std::string          prefix: str
 ctl/vector.h         = std::vector          prefix: vec
-ctl/ust.h            = std::unordered_set   prefix: uset
+ctl/map.h            = std::unordered_map   prefix: map
+ctl/unordered_set.h  = std::unordered_set   prefix: uset
 ```
 map and forward_list are in work still.
 
@@ -145,15 +146,16 @@ make set.i
 make stack.i
 make string.i
 make vector.i
-make ust.i
+make unordered_set.i
 ```
 
 ## Other
 
 STL `std::map` and `std::unordered_set` are in work as unordered hashmap by
 default, no extra `std::unordered_map`.
-The map hopefully with something like greg7mdp/parallel-hashmap or at least
-khash, not chained lists as in the STL.
+The hashes hopefully with something like greg7mdp/parallel-hashmap or at least
+khash, not chained lists as in the STL. Thus the internal bucket methods will
+be gone.
 
 STL variants of multi-sets and multi-maps will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
@@ -166,16 +168,17 @@ type utilities to omit default compare, equal and hash methods.
 ## Base Implementation Details
 
 ```
-vector.h: realloc
-string.h: vector.h
-deque.h:  realloc (paged)
-queue.h:  deque.h
-stack.h:  deque.h
-pque.h:   vector.h
-forward_list.h: single linked list
-list.h:   doubly linked list
-set.h:    red black tree
-uset.h:   hashed forward linked lists
+vector.h:           realloc
+string.h:           vector.h
+deque.h:            realloc (paged)
+queue.h:            deque.h
+stack.h:            deque.h
+priority_queue.h:   vector.h
+list.h:             doubly linked list
+forward_list.h:     single linked list
+set.h:              red black tree
+unordered_set.h:    hashed forward linked lists (will change)
+map.h:              unordered_set.h
 
                     vec  str  deq  lst  set  pqu  que  stk  ust
 +-------------------------------------------------------------+
@@ -183,8 +186,6 @@ empty               x    x    x    x    x    x    x    x    x
 each                x    x    x    x    x                   x
 equal               x    x    x    x    x    x    x    x    x
 swap                x    x    x    x    x    x    x    x    x
-bucket                                                      x
-bucket_size                                                 x
 load_factor                                                 x
 rehash                                                      x
 insert              x    x    x    x    x                   x

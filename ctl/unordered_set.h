@@ -1,44 +1,42 @@
+/* Unordered set as hashtable */
 #ifndef T
-#error "Template type T undefined for <ust.h>"
+#error "Template type T undefined for <unordered_set.h>"
 #endif
 
-#include <ctl.h>
+#include <ctl/ctl.h>
 
-#define A JOIN(ust, T)
+#define A JOIN(uset, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
 
 typedef struct B
 {
-    T value;
     struct B* next;
-}
-B;
+    T value;
+} B;
 
 typedef struct A
 {
+    B** bucket;
+    size_t size;
+    size_t bucket_count;
     void (*free)(T*);
     T (*copy)(T*);
     size_t (*hash)(T*);
     int (*equal)(T*, T*);
-    B** bucket;
-    size_t size;
-    size_t bucket_count;
-}
-A;
+} A;
 
 typedef struct I
 {
-    void (*step)(struct I*);
-    B* end;
-    B* node;
     T* ref;
-    B* next;
     A* container;
     size_t hash;
+    void (*step)(struct I*);
+    B* next;
+    B* node;
+    B* end;
     int done;
-}
-I;
+} I;
 
 static inline B*
 JOIN(A, begin)(A* self)
