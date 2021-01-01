@@ -44,9 +44,7 @@ setup_sets(set_digi* a, std::set<DIGI>& b)
 int
 main(void)
 {
-#ifdef SRAND
-    srand(time(NULL));
-#endif
+    INIT_SRAND;
     const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
     for(size_t loop = 0; loop < loops; loop++)
     {

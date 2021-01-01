@@ -57,6 +57,13 @@ endif
 
 ifeq (1, $(SRAND))
 CFLAGS += -DSRAND
+ifneq ($(SEED),)
+CFLAGS += -DSEED=$(SEED)
+endif
+else
+ifneq ($(SEED),)
+CFLAGS += -DSRAND -DSEED=$(SEED)
+endif
 endif
 
 TESTS = \

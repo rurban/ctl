@@ -43,9 +43,7 @@ setup_lists(list_digi* a, std::list<DIGI>& b, size_t size, int* max_value)
 int
 main(void)
 {
-#ifdef SRAND
-    srand(time(NULL));
-#endif
+    INIT_SRAND;
     const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
     for(size_t loop = 0; loop < loops; loop++)
     {

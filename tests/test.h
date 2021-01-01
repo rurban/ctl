@@ -36,4 +36,14 @@ TEST_TIME(void)
     return 1000000 * now.tv_sec + now.tv_usec;
 }
 
+#ifdef SRAND
+#  ifdef SEED
+#    define INIT_SRAND srand(SEED)
+#  else
+#    define INIT_SRAND srand(time(NULL))
+#  endif
+#else
+#  define INIT_SRAND
+#endif
+
 #endif
