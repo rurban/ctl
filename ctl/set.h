@@ -14,10 +14,10 @@
 
 typedef struct B
 {
+    T key;
     struct B* l;
     struct B* r;
     struct B* p;
-    T key;
     // Red = 0
     // Black = 1
     int color;
@@ -34,10 +34,10 @@ typedef struct A
 
 typedef struct I
 {
+    T* ref;
     void (*step)(struct I*);
     B* end;
     B* node;
-    T* ref;
     B* next;
     int done;
 } I;

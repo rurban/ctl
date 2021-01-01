@@ -14,24 +14,24 @@
 
 typedef struct B
 {
-    struct B* prev;
     struct B* next;
+    struct B* prev;
     T value;
 } B;
 
 typedef struct A
 {
+    B* head;
     void (*free)(T*);
     T (*copy)(T*);
-    B* head;
     B* tail;
     size_t size;
 } A;
 
 typedef struct I
 {
-    void (*step)(struct I*);
     T* ref;
+    void (*step)(struct I*);
     B* begin;
     B* node;
     B* next;

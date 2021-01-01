@@ -27,8 +27,8 @@ typedef struct A
 
 typedef struct I
 {
-    void (*step)(struct I*);
     T* ref;
+    void (*step)(struct I*);
     T* begin;
     T* end;
     T* next;
