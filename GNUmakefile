@@ -292,6 +292,8 @@ ctl/string.i:
 	$(call expand,$(subst .i,,$@))
 ctl/u8string.i:
 	$(call expand,$(subst .i,,$@))
+ctl/u8ident.i:
+	$(call expand,$(subst .i,,$@))
 ctl/map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 ctl/unordered_map.i:
@@ -352,6 +354,12 @@ tests/func/test_stack:    .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ct
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_string:   .cflags $(COMMON_H) tests/test.h ctl/string.h ctl/vector.h \
                           tests/func/test_string.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
+tests/func/test_u8string:   .cflags $(COMMON_H) tests/test.h ctl/u8string.h ctl/vector.h \
+                          tests/func/test_u8string.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
+tests/func/test_u8ident:   .cflags $(COMMON_H) tests/test.h ctl/u8ident.h ctl/u8string.h \
+                          ctl/vector.h tests/func/test_u8string.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_str_capacity: .cflags $(COMMON_H) tests/test.h ctl/string.h ctl/vector.h \
                           tests/func/test_str_capacity.cc

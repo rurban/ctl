@@ -322,9 +322,12 @@ tests/func/test_string:   .cflags ${COMMON_H} tests/test.h ctl/string.h ctl/vect
 tests/func/test_str_capacity: .cflags ${COMMON_H} tests/test.h ctl/string.h ctl/vector.h \
                           tests/func/test_str_capacity.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
-tests/func/test_u8string:   .cflags ${COMMON_H} ctl/u8string.h ctl/string.h \
+tests/func/test_u8string:   .cflags ${COMMON_H} tests/test.h ctl/u8string.h ctl/vector.h \
                           tests/func/test_u8string.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
+tests/func/test_u8ident:   .cflags ${COMMON_H} tests/test.h ctl/u8ident.h ctl/u8ident.h \
+                          tests/func/test_u8ident.cc
+	${CXX} ${CFLAGS} -o $@ $@.cc
 tests/func/test_vec_capacity: .cflags ${COMMON_H} tests/test.h ctl/vector.h \
                           tests/func/test_vec_capacity.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc

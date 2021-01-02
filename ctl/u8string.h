@@ -336,6 +336,7 @@ JOIN(A, key_compare)(A* self, A* s)
 #ifdef HOLD /* for u8ident.h */
 # undef HOLD
 #else
+# undef POD
 # undef T
 # undef A
 # undef I

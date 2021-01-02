@@ -280,6 +280,7 @@ static inline int JOIN(A, compare)(A *self, A *other)
 #undef A
 #undef I
 #undef T
+#undef POD
 #else
 #undef HOLD
 #endif
