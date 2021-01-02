@@ -102,22 +102,22 @@ clean:
 	@rm -f $(TESTS)
 	@rm -f $(EXAMPLES)
 
-string:
-	$(call expand,$@)
-list:
-	$(call expand,$@,-DT=int -DP)
-vector:
-	$(call expand,$@,-DT=int -DP)
-deque:
-	$(call expand,$@,-DT=int -DP)
-stack:
-	$(call expand,$@,-DT=int -DP)
-queue:
-	$(call expand,$@,-DT=int -DP)
-priority_queue:
-	$(call expand,$@,-DT=int -DP)
-set:
-	$(call expand,$@,-DT=int -DP)
+string.i:
+	$(call expand,$(subst .i,,$@))
+list.i:
+	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
+vector.i:
+	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
+deque.i:
+	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
+stack.i:
+	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
+queue.i:
+	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
+priority_queue.i:
+	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
+set.i:
+	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
 
 examples/astar:                      ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 examples/postfix:                    ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@

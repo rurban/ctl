@@ -123,25 +123,25 @@ To do all of the above in one step, run:
 ```
 
 For maintaining CTL, a container templated to type `int` can be
-outputted to `stdout` by running make on the container name, eg:
+output to `stdout` by running make on the container name with .i, eg:
 
 ```shell
-make deque
-make list
-make priority_queue
-make queue
-make set
-make stack
-make string
-make vector
+make deque.i
+make list.i
+make priority_queue.i
+make queue.i
+make set.i
+make stack.i
+make string.i
+make vector.i
 ```
 
 ## Other
 
-STL `std::map` is in work as unordered hashmap by default, no extra `std::unordered_map`
-and `std::unordered_set`. set should also be unordered by default.
+STL `std::map` and `std::unordered_set` are in work as unordered hashmap by
+default, no extra `std::unordered_map`.
 The map hopefully with something like greg7mdp/parallel-hashmap or at least
-khash.
+khash, not chained lists as in the STL.
 
 STL variants of multi-sets and multi-maps will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
