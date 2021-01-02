@@ -27,13 +27,13 @@
 #ifndef u8str_char8_t
 typedef struct A
 {
-    T *vector;
-    void (*free)(T *);
-    T (*copy)(T *);
-    int (*compare)(T *, T *); // 2-way operator<
-    int (*equal)(T *, T *);   // optional
+    T* vector;
     size_t size;
     size_t capacity;
+    void (*free)(T*);
+    T (*copy)(T*);
+    int (*compare)(T*, T*); // 2-way operator<
+    int (*equal)(T*, T*); // optional
 } A;
 #endif
 
