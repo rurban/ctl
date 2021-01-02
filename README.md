@@ -56,7 +56,8 @@ all containers in ISO C99/C11:
 | [ctl/set.h](docs/set.md)                       | std::set             | set      |
 | [ctl/stack.h](docs/stack.md)                   | std::stack           | stack    |
 | [ctl/string.h](docs/string.md)                 | std::string          | str      |
-| [ctl/u8string.h](docs/u8string.md)             | std::string          | str      |
+| [ctl/u8string.h](docs/u8string.md)             | std::string ext      | u8str    |
+| [ctl/u8ident.h](docs/u8ident.md)               |  -                   | u8id     |
 | [ctl/vector.h](docs/vector.md)                 | std::vector          | vec      |
 | [ctl/array.h](docs/array.md)                   | std::array           | arrNNNN  |
 | [ctl/map.h](docs/map.md)                       | std::map             | map      |
@@ -286,6 +287,7 @@ make ctl/set.i
 make ctl/stack.i
 make ctl/string.i
 make ctl/u8string.i
+make ctl/u8ident.i
 make ctl/vector.i
 make ctl/array.i
 make ctl/map.i
@@ -365,6 +367,7 @@ And in its grandiosity (esp. not header-only):
     vector.h:           realloc
     string.h:           vector.h
     u8string.h:         vector.h ++
+    u8ident.h:          u8string.h
     deque.h:            realloc (paged)
     queue.h:            deque.h
     stack.h:            deque.h
