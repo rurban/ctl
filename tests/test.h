@@ -8,6 +8,8 @@
 #include <sys/time.h>
 #include <limits.h>
 #include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <assert.h>
 
 #ifdef LONG
@@ -38,9 +40,12 @@ TEST_TIME(void)
 
 #ifdef SRAND
 #  ifdef SEED
-#    define INIT_SRAND srand(SEED)
+#    define INIT_SRAND srand(SEED); printf("-DSEED=%u\n", SEED)
 #  else
-#    define INIT_SRAND srand(time(NULL))
+#    define INIT_SRAND                                               \
+       unsigned seed = rand()*clock()*getpid();                      \
+       srand(seed);                                                  \
+       printf("SEED=%u\n", seed)
 #  endif
 #else
 #  define INIT_SRAND
