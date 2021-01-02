@@ -196,6 +196,11 @@ typedef char *charp;
 #endif
 
 #include <ctl/u8string.h>
+
+#ifdef POD
+#error "POD leftover"
+#endif
+
 #define T u8str
 #include <ctl/vector.h>
 
