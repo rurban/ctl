@@ -56,6 +56,7 @@ all containers in ISO C99/C11:
 | [ctl/set.h](set.md)                       | std::set             | set      |
 | [ctl/stack.h](stack.md)                   | std::stack           | stack    |
 | [ctl/string.h](string.md)                 | std::string          | str      |
+| [ctl/u8string.h](u8string.md)             | std::string          | str      |
 | [ctl/vector.h](vector.md)                 | std::vector          | vec      |
 | [ctl/array.h](array.md)                   | std::array           | arrNNNN  |
 | [ctl/map.h](map.md)                       | std::map             | map      |
@@ -284,6 +285,7 @@ make ctl/queue.i
 make ctl/set.i
 make ctl/stack.i
 make ctl/string.i
+make ctl/u8string.i
 make ctl/vector.i
 make ctl/array.i
 make ctl/map.i
@@ -301,7 +303,7 @@ STL variants of multi-sets and multi-maps will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 See `tests/func/test_container_composing.cc`
 
-UTF-8 strings and identifiers will be added eventually, Wide, UTF-16 or UTF-32
+UTF-8 strings and identifiers are in work. Wide, UTF-16 or UTF-32
 not. Parallel variants of all containers and algos in `pctl` with openmp are in
 planning.
 
@@ -359,10 +361,10 @@ And in its grandiosity (esp. not header-only):
 
 ## Base Implementation Details
 
-
     array.h:            stack/heap allocated
     vector.h:           realloc
     string.h:           vector.h
+    u8string.h:   	vector.h ++
     deque.h:            realloc (paged)
     queue.h:            deque.h
     stack.h:            deque.h
@@ -740,6 +742,8 @@ Support not only GNU make, but also BSD make and MSVC nmake.
 
 Tested also on macOS (default apple clang++ with libc++), FreeBSD (default
 clang with libc++), and Windows MSVC (default CL 19).
+
+Added u8string with proper utf-8/unicode and identifier-security support. (u8ident)
 
 ### Differences to the STL
 

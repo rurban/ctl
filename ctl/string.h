@@ -3,6 +3,9 @@
 #ifndef __CTL_STRING__H__
 #define __CTL_STRING__H__
 
+/* Should *string derive from string.h?
+   Rather from some base_string.h
+ */
 #ifdef T
 #error "Template type T defined for <ctl/string.h>"
 #endif
@@ -38,7 +41,6 @@
 #undef str_find
 #undef str_begin
 #undef str_end
-#undef vec_char
 
 #include <stdint.h>
 #include <string.h>
@@ -64,9 +66,13 @@ static inline int str_char_equal(char *a, char *b)
     return *a == *b;
 }
 
-static inline str str_init(const char *c_str)
+/* STL clash */
+#define str_equal(a, b) (str_compare(a, b) == 0)
+#define str_key_equal(a, b) (str_key_compare(a, b) == 0)
+
+static inline A JOIN(A, init)(const T* c_str)
 {
-    str self = str___INIT();
+    A self = str___INIT();
     size_t len = strlen(c_str);
 #ifndef _LIBCPP_STD_VER
     size_t min = 15;
@@ -81,7 +87,7 @@ static inline str str_init(const char *c_str)
     return self;
 }
 
-static inline void str_append(str *self, const char *s)
+static inline void JOIN(A, append)(A *self, const T *s)
 {
     size_t start = self->size;
     size_t len = strlen(s);
@@ -90,7 +96,7 @@ static inline void str_append(str *self, const char *s)
         self->vector[start + i] = s[i];
 }
 
-static inline void str_insert_str(str *self, size_t index, const char *s)
+static inline void JOIN(A, insert_str)(A *self, size_t index, const T *s)
 {
     size_t start = self->size;
     size_t len = strlen(s);
@@ -103,7 +109,7 @@ static inline void str_insert_str(str *self, size_t index, const char *s)
     }
 }
 
-static inline void str_replace(str *self, size_t index, size_t size, const char *s)
+static inline void JOIN(A, replace)(A *self, size_t index, size_t size, const T *s)
 {
     size_t end = index + size;
     if (end >= self->size)
@@ -113,21 +119,21 @@ static inline void str_replace(str *self, size_t index, size_t size, const char 
     str_insert_str(self, index, s);
 }
 
-static inline char *str_c_str(str *self)
+static inline T *JOIN(A, c_str)(A *self)
 {
     return str_data(self);
 }
 
-static inline size_t str_find(str *self, const char *s)
+static inline size_t JOIN(A, find)(A *self, const T *s)
 {
-    char *c_str = self->vector;
-    char *found = strstr(c_str, s);
+    T *c_str = self->vector;
+    T *found = strstr(c_str, s);
     if (found)
         return found - c_str;
     return SIZE_MAX;
 }
 
-static inline int str_count(str *self, char c)
+static inline int JOIN(A, count)(A *self, T c)
 {
     size_t count = 0;
     for (size_t i = 0; i < self->size; i++)
@@ -136,12 +142,12 @@ static inline int str_count(str *self, char c)
     return count;
 }
 
-static inline size_t str_rfind(str *self, const char *s)
+static inline size_t JOIN(A, rfind)(A *self, const T *s)
 {
-    char *c_str = self->vector;
+    T *c_str = self->vector;
     for (size_t i = self->size; i != SIZE_MAX; i--)
     {
-        char *found = strstr(&c_str[i], s);
+        T *found = strstr(&c_str[i], s);
         if (found)
             return found - c_str;
     }
@@ -191,35 +197,36 @@ static inline bool str_find_first_of_range(str_it *range1, str_it *range2)
 }
 
 // see algorithm.h for the range variant
-static inline size_t str_find_first_of(str *self, const char *s)
+static inline size_t JOIN(A, find_first_of)(A *self, const T *s)
 {
 #if 1
     size_t i = strcspn(self->vector, s);
     return i >= self->size ? SIZE_MAX : i;
 #else
     for (size_t i = 0; i < self->size; i++)
-        for (const char *p = s; *p; p++)
+        for (const T *p = s; *p; p++)
             if (self->vector[i] == *p)
                 return i;
     return SIZE_MAX;
 #endif
 }
 
-static inline size_t str_find_last_of(str *self, const char *s)
+// TODO: proper string search
+static inline size_t JOIN(A, find_last_of)(A *self, const T *s)
 {
     for (size_t i = self->size; i != SIZE_MAX; i--)
-        for (const char *p = s; *p; p++)
+        for (const T *p = s; *p; p++)
             if (self->vector[i] == *p)
                 return i;
     return SIZE_MAX;
 }
 
-static inline size_t str_find_first_not_of(str *self, const char *s)
+static inline size_t JOIN(A, find_first_not_of)(A *self, const T *s)
 {
     for (size_t i = 0; i < self->size; i++)
     {
         size_t count = 0;
-        for (const char *p = s; *p; p++)
+        for (const T *p = s; *p; p++)
             if (self->vector[i] == *p)
                 count++;
         if (count == 0)
@@ -228,12 +235,12 @@ static inline size_t str_find_first_not_of(str *self, const char *s)
     return SIZE_MAX;
 }
 
-static inline size_t str_find_last_not_of(str *self, const char *s)
+static inline size_t JOIN(A, find_last_not_of)(A *self, const T *s)
 {
     for (size_t i = self->size - 1; i != SIZE_MAX; i--)
     {
         size_t count = 0;
-        for (const char *p = s; *p; p++)
+        for (const T *p = s; *p; p++)
             if (self->vector[i] == *p)
                 count++;
         if (count == 0)
@@ -242,49 +249,42 @@ static inline size_t str_find_last_not_of(str *self, const char *s)
     return SIZE_MAX;
 }
 
-static inline str str_substr(str *self, size_t index, size_t size)
+static inline str JOIN(A, substr)(A *self, size_t index, size_t size)
 {
-    str substr = str_init("");
-#ifndef _LIBCPP_STD_VER // gcc shrinks, llvm not
-#endif
-    str_resize(&substr, size, '\0');
+    str substr = JOIN(A, init)("");
+    JOIN(A, resize)(&substr, size, '\0');
     for (size_t i = 0; i < size; i++)
         substr.vector[i] = self->vector[index + i];
     return substr;
 }
 
-/* STL clash */
-static inline int str_compare(str *self, const char *s)
+static inline int JOIN(A, key_compare)(A *self, const T *s)
 {
     return strcmp(self->vector, s);
 }
 
-/* STL clash
-static inline int
-str_equal(str* self, const char* s)
-{
-    return str_compare(self, other) == 0;
-}
-*/
-
-static inline int str_key_compare(str *self, str *other)
+static inline int JOIN(A, compare)(A *self, A *other)
 {
     return strcmp(self->vector, other->vector);
 }
 
-static inline int str_equal(str *self, str *other)
-{
-    return strcmp(self->vector, other->vector) == 0;
-}
+//static inline int
+//JOIN(A, equal)(str* self, str* other)
+//{
+//    return strcmp (self->vector, other->vector) == 0;
+//}
 
-#undef POD
 #ifndef HOLD
 #undef vec_char
+#undef MUST_ALIGN_16
+#undef A
+#undef I
 #undef T
 #else
 #undef HOLD
 #endif
 #undef CTL_STR
+#undef POD
 
 #else
 

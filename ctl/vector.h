@@ -23,6 +23,8 @@
 #define INIT_SIZE 15
 #endif
 
+// u8str overrides vec
+#ifndef u8str_char8_t
 typedef struct A
 {
     T *vector;
@@ -33,6 +35,7 @@ typedef struct A
     size_t size;
     size_t capacity;
 } A;
+#endif
 
 typedef int (*JOIN(A, compare_fn))(T *, T *);
 
@@ -771,20 +774,22 @@ static inline A *JOIN(A, move_range)(I *range, A *out)
 //#pragma message "vector: no INCLUDE_ALGORITHM"
 //#endif
 
-#undef A
-#undef I
-#undef MUST_ALIGN_16
-#undef INIT_SIZE
-
-// Hold preserves `T` if other containers
-// (eg. `priority_queue.h`) wish to extend `vector.h`.
+// Hold preserves `T`... if other containers
+// (eg. `priority_queue.h`) wish to extend `vector.h`
 #ifdef HOLD
 //#pragma message "vector HOLD"
-#undef HOLD
+# undef HOLD
 #else
-#undef C
-#undef T
-#undef POD
-#undef NOT_INTEGRAL
+# undef T
+# undef POD
+# undef NOT_INTEGRAL
 #endif
-#undef CTL_VEC
+
+// strings needs to keep A, I
+#if !defined(vec_char) && !defined(u8str_char8_t)
+# undef A
+# undef I
+# undef MUST_ALIGN_16
+# undef CTL_VEC
+#endif
+#undef INIT_SIZE

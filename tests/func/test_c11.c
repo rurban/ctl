@@ -195,6 +195,12 @@ typedef char *charp;
 #error "POD leftover"
 #endif
 
+#include <ctl/u8string.h>
+
+#ifdef POD
+#error "POD leftover"
+#endif
+
 typedef struct
 {
     int x;
@@ -395,6 +401,15 @@ int main(void)
         map_charint_node *b = map_charint_node_max(it.node);
         printf("max {\"%s\", %d}\n", b->value.key, b->value.value);
         map_charint_free(&a);
+    }
+    {
+        u8str b = u8str_init();
+        u8str_push_back(&b, str_init("This"));
+        u8str_push_back(&b, str_init("is"));
+        u8str_push_back(&b, str_init("a"));
+        u8str_push_back(&b, str_init("test"));
+        u8str_resize(&b, 512, str_init(""));
+        u8str_free(&b);
     }
     TEST_PASS(__FILE__);
 }

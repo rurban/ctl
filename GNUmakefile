@@ -290,6 +290,8 @@ help:
 
 ctl/string.i:
 	$(call expand,$(subst .i,,$@))
+ctl/u8string.i:
+	$(call expand,$(subst .i,,$@))
 ctl/map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 ctl/unordered_map.i:
