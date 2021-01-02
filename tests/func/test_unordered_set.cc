@@ -17,7 +17,7 @@ digi_hash(digi* a)
 #define CHECK(_x, _y) {                           \
     assert(_x.size == _y.size());                 \
     std::unordered_set<DIGI>::iterator _iter = _y.begin(); \
-    foreach(uset_digi, &_x, _it) {                 \
+    foreach(uset_digi, &_x, _it) {                \
         assert(*_it.ref->value == *_iter->value); \
         _iter++;                                  \
     }                                             \

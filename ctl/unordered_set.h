@@ -224,6 +224,7 @@ JOIN(A, rehash)(A* self, size_t desired_count)
     {
         B** bucket = JOIN(A, bucket)(&rehashed, it.node->value);
         *bucket = JOIN(B, push)(*bucket, it.node);
+        rehashed.size++;
     }
     free(self->bucket);
     *self = rehashed;
