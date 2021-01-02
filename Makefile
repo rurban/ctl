@@ -29,30 +29,32 @@ endif
 
 ifeq (1, $(Og))
 CFLAGS += -Og
-endif
-
+else
 ifeq (1, $(O0))
 CFLAGS += -O0
-endif
-
+else
 ifeq (1, $(O1))
 CFLAGS += -O1
-endif
-
+else
 ifeq (1, $(O2))
 CFLAGS += -O2
-endif
-
+else
 ifeq (1, $(O3))
 CFLAGS += -O3
-endif
-
+else
 ifeq (1, $(Ofast))
 CFLAGS += -Ofast
-endif
-
+else
 ifeq (1, $(Os))
 CFLAGS += -Os
+else
+CFLAGS += -O3
+endif
+endif
+endif
+endif
+endif
+endif
 endif
 
 ifeq (1, $(SRAND))
@@ -88,7 +90,9 @@ EXAMPLES = \
 
 all: $(TESTS)
 	$(foreach bin,$(TESTS),./$(bin) &&) exit 0
+	@echo CFLAGS=$(CFLAGS)
 	@$(CC) --version
+	@echo CXXFLAGS=$(CXXFLAGS)
 	@$(CXX) --version
 	@rm -f $(TESTS)
 
