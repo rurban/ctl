@@ -422,7 +422,7 @@ pprint(valp value, int tabs)
                 pprint(v, tabs);
                 if(it.ref < vec_valp_end(array) - 1)
                     printf(", ");
-                index += 1;
+                index++;
             }
             printf("]");
         }

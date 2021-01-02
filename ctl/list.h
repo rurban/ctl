@@ -134,7 +134,7 @@ JOIN(A, disconnect)(A* self, B* node)
     if(node->prev) node->prev->next = node->next;
     if(node->next) node->next->prev = node->prev;
     node->prev = node->next = NULL;
-    self->size -= 1;
+    self->size--;
 }
 
 static inline void
@@ -143,7 +143,7 @@ JOIN(A, connect)(A* self, B* position, B* node, int before)
     if(JOIN(A, empty)(self))
     {
         self->head = self->tail = node;
-        self->size += 1;
+        self->size++;
     }
     else
     if (self->size < JOIN(A, max_size)())
@@ -168,7 +168,7 @@ JOIN(A, connect)(A* self, B* position, B* node, int before)
             if(position == self->tail)
                 self->tail = node;
         }
-        self->size += 1;
+        self->size++;
     }
     /* error handling? silent ignore or stderr or assert or customizable.
     else
@@ -274,7 +274,7 @@ JOIN(A, assign)(A* self, size_t size, T value)
         if(self->free)
             self->free(it.ref);
         *it.ref = self->copy(&value);
-        i += 1;
+        i++;
     }
     if(self->free)
         self->free(&value);
@@ -310,7 +310,7 @@ JOIN(A, remove_if)(A* self, int _equal(T*))
         if(_equal(it.ref))
         {
             JOIN(A, erase)(self, it.node);
-            erases += 1;
+            erases++;
         }
     return erases;
 }

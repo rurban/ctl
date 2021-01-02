@@ -127,7 +127,7 @@ main(void)
                         break;
                     }
                     iter++;
-                    current += 1;
+                    current++;
                 }
                 CHECK(a, b);
                 break;
@@ -147,7 +147,7 @@ main(void)
                         break;
                     }
                     iter++;
-                    current += 1;
+                    current++;
                 }
                 CHECK(a, b);
                 break;
@@ -226,7 +226,7 @@ main(void)
                     if(current == index)
                         break;
                     iter++;
-                    current += 1;
+                    current++;
                     it.step(&it);
                 }
                 list_digi aa;
@@ -295,7 +295,7 @@ main(void)
                             test_value = *it.ref->value;
                             break;
                         }
-                        current += 1;
+                        current++;
                     }
                     int value = TEST_RAND(2) ? TEST_RAND(INT_MAX) : test_value;
                     digi key = digi_init(value);

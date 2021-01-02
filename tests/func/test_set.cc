@@ -106,7 +106,7 @@ main(void)
                         if(*iter->value % 2)
                         {
                             iter = b.erase(iter);
-                            b_erases += 1;
+                            b_erases++;
                         }
                         else
                             iter++;

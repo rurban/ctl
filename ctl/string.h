@@ -51,7 +51,7 @@ str_insert_str(str* self, size_t index, const char* s)
     self->size = start;
     while(len != 0)
     {
-        len -= 1;
+        len--;
         str_insert(self, index, s[len]);
     }
 }
@@ -89,7 +89,7 @@ str_count(str* self, char c)
     size_t count = 0;
     for(size_t i = 0; i < self->size; i++)
         if(self->value[i] == c)
-            count += 1;
+            count++;
     return count;
 }
 
@@ -134,7 +134,7 @@ str_find_first_not_of(str* self, const char* s)
         size_t count = 0;
         for(const char* p = s; *p; p++)
             if(self->value[i] == *p)
-                count += 1;
+                count++;
         if(count == 0)
             return i;
     }
@@ -149,7 +149,7 @@ str_find_last_not_of(str* self, const char* s)
         size_t count = 0;
         for(const char* p = s; *p; p++)
             if(self->value[i] == *p)
-                count += 1;
+                count++;
         if(count == 0)
             return i;
     }

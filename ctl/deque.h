@@ -102,7 +102,7 @@ JOIN(I, step)(I* self)
     else
     {
         self->ref = JOIN(A, at)(self->container, self->index);
-        self->index_next += 1;
+        self->index_next++;
     }
 }
 
@@ -168,7 +168,7 @@ JOIN(A, alloc)(A* self, size_t capacity, size_t shift_from)
     size_t i = self->mark_b;
     while(i != 0)
     {
-        i -= 1;
+        i--;
         self->pages[i + shift] = self->pages[i];
     }
     self->mark_a += shift;
@@ -192,13 +192,13 @@ JOIN(A, push_front)(A* self, T value)
         {
             if(self->mark_a == 0)
                 JOIN(A, alloc)(self, 2 * self->capacity, self->mark_a);
-            self->mark_a -= 1;
+            self->mark_a--;
             *JOIN(A, first)(self) = JOIN(B, init)(DEQ_BUCKET_SIZE);
         }
     }
     B* page = *JOIN(A, first)(self);
-    page->a -= 1;
-    self->size += 1;
+    page->a--;
+    self->size++;
     page->value[page->a] = value;
 }
 
@@ -211,12 +211,12 @@ JOIN(A, pop_front)(A* self)
         T* ref = &page->value[page->a];
         self->free(ref);
     }
-    page->a += 1;
-    self->size -= 1;
+    page->a++;
+    self->size--;
     if(page->a == page->b)
     {
         free(page);
-        self->mark_a += 1;
+        self->mark_a++;
     }
 }
 
@@ -237,22 +237,22 @@ JOIN(A, push_back)(A* self, T value)
         {
             if(self->mark_b == self->capacity)
                 JOIN(A, alloc)(self, 2 * self->capacity, self->mark_b);
-            self->mark_b += 1;
+            self->mark_b++;
             *JOIN(A, last)(self) = JOIN(B, init)(0);
         }
     }
     B* page = *JOIN(A, last)(self);
     page->value[page->b] = value;
-    page->b += 1;
-    self->size += 1;
+    page->b++;
+    self->size++;
 }
 
 static inline void
 JOIN(A, pop_back)(A* self)
 {
     B* page = *JOIN(A, last)(self);
-    page->b -= 1;
-    self->size -= 1;
+    page->b--;
+    self->size--;
     if(self->free)
     {
         T* ref = &page->value[page->b];
@@ -261,7 +261,7 @@ JOIN(A, pop_back)(A* self)
     if(page->b == page->a)
     {
         free(page);
-        self->mark_b -= 1;
+        self->mark_b--;
     }
 }
 
@@ -403,7 +403,7 @@ JOIN(A, ranged_sort)(A* self, int64_t a, int64_t b, int _compare(T*, T*))
     for(int64_t i = a + 1; i <= b; i++)
         if(_compare(JOIN(A, at)(self, a), JOIN(A, at)(self, i)))
         {
-            z += 1;
+            z++;
             SWAP(T, JOIN(A, at)(self, z), JOIN(A, at)(self, i));
         }
     SWAP(T, JOIN(A, at)(self, a), JOIN(A, at)(self, z));
@@ -426,8 +426,8 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
         {
             JOIN(A, erase)(self, it.index);
             it.index_next = it.index;
-            it.index_last -= 1;
-            erases += 1;
+            it.index_last--;
+            erases++;
         }
     return erases;
 }

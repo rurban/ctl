@@ -285,7 +285,7 @@ static inline void
 JOIN(B, count_blk)(B* self, int nodes, int* in_path)
 {
     if(JOIN(B, is_blk)(self))
-        nodes += 1;
+        nodes++;
     if(self)
     {
         JOIN(B, count_blk)(self->l, nodes, in_path);
@@ -392,7 +392,7 @@ JOIN(A, insert)(A* self, T key)
     else
         self->root = insert;
     JOIN(A, insert_1)(self, insert);
-    self->size += 1;
+    self->size++;
 #ifdef USE_INTERNAL_VERIFY
     JOIN(A, verify)(self);
 #endif
@@ -486,7 +486,7 @@ JOIN(A, erase_node)(A* self, B* node)
     if(node->p == NULL && child)
         child->color = 1;
     JOIN(A, free_node)(self, node);
-    self->size -= 1;
+    self->size--;
 #ifdef USE_INTERNAL_VERIFY
     JOIN(A, verify)(self);
 #endif
@@ -629,7 +629,7 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
         if(_match(&it.node->key))
         {
             JOIN(A, erase_node)(self, it.node);
-            erases += 1;
+            erases++;
         }
     return erases;
 }

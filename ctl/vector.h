@@ -79,7 +79,7 @@ JOIN(I, step)(I* self)
     else
     {
         self->ref = self->next;
-        self->next += 1;
+        self->next++;
     }
 }
 
@@ -132,7 +132,7 @@ static inline void
 JOIN(A, pop_back)(A* self)
 {
     static T zero;
-    self->size -= 1;
+    self->size--;
     JOIN(A, set)(self, self->size, zero);
 }
 
@@ -142,7 +142,7 @@ JOIN(A, wipe)(A* self, size_t n)
     while(n != 0)
     {
         JOIN(A, pop_back)(self);
-        n -= 1;
+        n--;
     }
 }
 
@@ -167,7 +167,7 @@ JOIN(A, fit)(A* self, size_t capacity)
     static T zero;
     size_t overall = capacity;
     if(MUST_ALIGN_16(T))
-        overall += 1;
+        overall++;
     self->value = (T*) realloc(self->value, overall * sizeof(T));
     if(MUST_ALIGN_16(T))
         for(size_t i = self->capacity; i < overall; i++)
@@ -209,7 +209,7 @@ JOIN(A, push_back)(A* self, T value)
     if(self->size == self->capacity)
         JOIN(A, reserve)(self, self->capacity == 0 ? 1 : 2 * self->capacity);
     *JOIN(A, at)(self, self->size) = value;
-    self->size += 1;
+    self->size++;
 }
 
 static inline void
@@ -283,7 +283,7 @@ JOIN(A, erase)(A* self, size_t index)
         self->value[i] = self->value[i + 1];
         self->value[i + 1] = zero;
     }
-    self->size -= 1;
+    self->size--;
 }
 
 static inline void
@@ -297,7 +297,7 @@ JOIN(A, ranged_sort)(A* self, int64_t a, int64_t b, int _compare(T*, T*))
     for(int64_t i = a + 1; i <= b; i++)
         if(_compare(&self->value[a], &self->value[i]))
         {
-            z += 1;
+            z++;
             SWAP(T, &self->value[z], &self->value[i]);
         }
     SWAP(T, &self->value[a], &self->value[z]);
@@ -336,7 +336,7 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
             JOIN(A, erase)(self, index);
             it.end = JOIN(A, end)(self);
             it.next = it.ref;
-            erases += 1;
+            erases++;
         }
     }
     return erases;

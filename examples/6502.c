@@ -267,8 +267,8 @@ is_scoped(char c)
         global.brace.r = 0;
         return 0;
     }
-    if(c == '{') global.brace.l += 1;
-    if(c == '}') global.brace.r += 1;
+    if(c == '{') global.brace.l++;
+    if(c == '}') global.brace.r++;
     return 1;
 }
 
@@ -612,7 +612,7 @@ compare(char* method, int x, int y)
     size_t i = DEFAULT_WORD_SIZE;
     while(i)
     {
-        i -= 1;
+        i--;
         write("\tLDA %d", global.local_addr + i - DEFAULT_WORD_SIZE);
         write("\tCMP %d", global.local_addr + i);
         write("\t%s L%d\n", method, a);
@@ -963,7 +963,7 @@ pop_locals(size_t size)
         str* local = list_str_back(&global.variables);
         list_str_push_front(&reversed, str_copy(local));
         list_str_pop_back(&global.variables);
-        size -= 1;
+        size--;
     }
     write("; %8s %8s %6s %6s %6s", "TYPE", "NAME", "SIZE", "ADDR", "FAM");
     foreach(list_str, &reversed, it)

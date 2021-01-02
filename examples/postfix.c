@@ -80,7 +80,7 @@ get_digit(str* s, size_t i)
 {
     size_t j = i;
     while(is_digit(s->value[j]))
-        j += 1;
+        j++;
     return str_substr(s, i, j - i);
 }
 
@@ -89,7 +89,7 @@ get_operator(str* s, size_t i)
 {
     size_t j = i;
     while(is_of_operator(s->value[j]))
-        j += 1;
+        j++;
     return str_substr(s, i, j - i);
 }
 

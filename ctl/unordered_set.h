@@ -123,7 +123,7 @@ JOIN(A, __next_prime)(size_t n)
     {
         if(JOIN(A, __is_prime)(n))
             break;
-        n += 1;
+        n++;
     }
     return n;
 }
@@ -156,7 +156,7 @@ JOIN(A, bucket_size)(B* self)
 {
     size_t size = 0;
     for(B* n = self; n; n = n->next)
-        size += 1;
+        size++;
     return size;
 }
 
@@ -211,7 +211,7 @@ JOIN(A, insert)(A* self, T value)
             return;
         }
     *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(value));
-    self->size += 1;
+    self->size++;
 }
 
 static inline void
@@ -251,7 +251,7 @@ JOIN(A, count)(A* self, T value)
     size_t count = 0;
     foreach(A, self, it)
         if(self->equal(it.ref , &value))
-            count += 1;
+            count++;
     return count;
 }
 
@@ -268,7 +268,7 @@ JOIN(A, erase)(A* self, T value)
             JOIN(A, free_node)(self, n);
             if(prev)
                 prev->next = next;
-            self->size -= 1;
+            self->size--;
             break;
         }
         prev = n;
