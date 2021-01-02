@@ -246,6 +246,42 @@ compare                  x
 key_compare              x
 ```
 
+## Differences
+
+### Differences to the original https://github.com/glouw/ctl
+
+`#include` with the `ctl/` prefix.
+
+Use the original long names, not three-letter abbrevations.
+
+`#define POD` not `P`
+
+Added some minor missing methods, like max\_size, size, capacity, ...
+
+Reproducible tests with SEED=n
+
+hashmaps will be changed from chained lists to open addressing, thus no internal
+buckets methods, and much faster.
+
+On errors, like size > max\_size return silently. This avoids DDOS attacks.
+When assert is used, throw them. (assert.h included, no NDEBUG)
+
+glouw/ctl does not treat errors at all. There cannot be any.
+
+string will get proper utf-8/unicode and identifier-security support. All
+strings are assumed UTF-8. No wstring for unicode.
+
+### Differences to the STL
+
+map is the STL unordered_map. For the STL map use set.h
+
+STL multiset and multimap variants will not be implemented because
+similar behaviour can be implemented as an amalgamation of a `set` and `list`.
+
+STL array and span is missing. array is just a vector.
+
+No exceptions. No bloat and no indirect calls.
+
 ## Acknowledgements
 
 Thank you `glouw` for the initial three-letter variant https://github.com/glouw/ctl.
