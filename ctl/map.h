@@ -121,4 +121,5 @@ static inline I JOIN(A, insert_or_assign_found)(A *self, T key, int *foundp)
 #undef B
 #undef I
 #undef GI
+#undef CTL_SET
 #undef CTL_MAP

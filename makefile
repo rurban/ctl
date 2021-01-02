@@ -218,12 +218,14 @@ help:
 	@echo " clean:      the tests, perf, examples and manpages"
 	@echo " <file>.i:   expand the file with -DT=int for debugging"
 
+ctl/string.i ctl/u8string.i:
+	@${CXX} ${CFLAGS} $< -P -E | clang-format -style=webkit
 .h.i:
-	@${CC} ${CFLAGS} -DT=int $< -E | clang-format -style=webkit
+	@${CC} ${CFLAGS} -DPOD -DT=int $< -E | clang-format -style=webkit
 .c.i:
-	@${CC} ${CFLAGS} -DT=int $< -E | clang-format -style=webkit
+	@${CC} ${CFLAGS} -DPOD -DT=int $< -E | clang-format -style=webkit
 .cc.i:
-	@${CXX} ${CFLAGS} -DT=int $< -P -E | clang-format -style=webkit
+	@${CXX} ${CFLAGS} -DPOD -DT=int $< -P -E | clang-format -style=webkit
 ctl/unordered_map.i ctl/map.i:
 	@${CXX} ${CFLAGS} $< -DT=strint -P -E | clang-format -style=webkit
 
@@ -319,6 +321,9 @@ tests/func/test_string:   .cflags ${COMMON_H} tests/test.h ctl/string.h ctl/vect
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_str_capacity: .cflags ${COMMON_H} tests/test.h ctl/string.h ctl/vector.h \
                           tests/func/test_str_capacity.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
+tests/func/test_u8string:   .cflags ${COMMON_H} ctl/u8string.h ctl/string.h \
+                          tests/func/test_u8string.cc
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_vec_capacity: .cflags ${COMMON_H} tests/test.h ctl/vector.h \
                           tests/func/test_vec_capacity.cc

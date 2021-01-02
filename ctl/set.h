@@ -1221,6 +1221,7 @@ not_found:
 #endif
 
 #ifndef HOLD
+#undef CTL_SET
 #undef POD
 #undef NOT_INTEGRAL
 #undef T
@@ -1231,7 +1232,6 @@ not_found:
 #else
 #undef HOLD
 #endif
-#undef CTL_SET
 
 #ifdef USE_INTERNAL_VERIFY
 #undef USE_INTERNAL_VERIFY
