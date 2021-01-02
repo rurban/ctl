@@ -63,7 +63,7 @@ else
 ifeq (1, $(Os))
 CFLAGS += -Os
 else
-CFLAGS += -O3
+CFLAGS += -O2
 endif
 endif
 endif
@@ -92,6 +92,7 @@ TESTS = \
 	tests/func/test_priority_queue \
 	tests/func/test_queue \
 	tests/func/test_set \
+	tests/func/test_unordered_set \
 	tests/func/test_stack \
 	tests/func/test_vec_capacity \
 	tests/func/test_vector
@@ -185,6 +186,7 @@ tests/func/test_list:                ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_priority_queue:      ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_queue:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_set:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_unordered_set:       ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_stack:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_string:              ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_vec_capacity:        ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@

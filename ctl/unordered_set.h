@@ -3,6 +3,8 @@
 #error "Template type T undefined for <unordered_set.h>"
 #endif
 
+// TODO emplace, extract, merge, contains, erase_if, equal_range
+
 #include <ctl/ctl.h>
 
 #define A JOIN(uset, T)
@@ -131,7 +133,7 @@ JOIN(A, __next_prime)(size_t n)
 static inline B*
 JOIN(B, init)(T value)
 {
-    B* n = malloc(sizeof(B));
+    B* n = (B*) malloc(sizeof(B));
     n->value = value;
     n->next = NULL;
     return n;
@@ -178,7 +180,7 @@ static inline void
 JOIN(A, reserve)(A* self, size_t desired_count)
 {
     self->bucket_count = JOIN(A, __next_prime)(desired_count);
-    self->bucket = calloc(self->bucket_count, sizeof(B*));
+    self->bucket = (B**) calloc(self->bucket_count, sizeof(B*));
 }
 
 static inline A
@@ -273,6 +275,13 @@ JOIN(A, erase)(A* self, T value)
         }
         prev = n;
     }
+}
+
+static inline void
+JOIN(A, clear)(A* self)
+{
+    foreach(A, self, i) JOIN(A, erase)(self, *i.ref);
+    JOIN(A, free)(self);
 }
 
 static inline A

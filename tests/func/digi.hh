@@ -97,6 +97,18 @@ struct DIGI
     {
         return *value == *a.value;
     }
+    size_t hash(const DIGI& a) const
+    {
+      return *a.value % 0xffffffff;
+    }
+};
+
+class DIGI_hash {
+public:
+    std::size_t operator()(const DIGI& a) const
+    {
+        return (*a.value % 0xffffffff);
+    }
 };
 
 static inline bool
