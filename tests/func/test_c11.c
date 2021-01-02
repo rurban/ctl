@@ -196,6 +196,8 @@ typedef char *charp;
 #endif
 
 #include <ctl/u8string.h>
+#define T u8str
+#include <ctl/vector.h>
 
 #ifdef POD
 #error "POD leftover"
@@ -310,6 +312,16 @@ int main(void)
         vec_str_free(&b);
     }
     {
+        vec_double b = vec_double_init();
+        vec_double_push_back(&b, 1.0);
+        vec_double_free(&b);
+    }
+    {
+        vec_unsigned b = vec_unsigned_init();
+        vec_unsigned_push_back(&b, 1U);
+        vec_unsigned_free(&b);
+    }
+    {
         vec_person c = vec_person_init();
         vec_person_push_back(&c, person_init(128, "FIRST", "JONES"));
         vec_person_push_back(&c, person_init(256, "LAST", "ALEXA"));
@@ -403,12 +415,12 @@ int main(void)
         map_charint_free(&a);
     }
     {
-        u8str b = u8str_init();
-        u8str_push_back(&b, str_init("This"));
-        u8str_push_back(&b, str_init("is"));
-        u8str_push_back(&b, str_init("a"));
-        u8str_push_back(&b, str_init("test"));
-        u8str_resize(&b, 512, str_init(""));
+        u8str b = u8str_init("");
+        u8str_str_push_back(&b, u8str_init("This"));
+        u8str_str_push_back(&b, u8str_init("is"));
+        u8str_push_back(&u, 'a');
+        u8str_str_push_back(&u, u8str_init("test"));
+        u8str_resize(&b, 512, (char8_t)'\0');
         u8str_free(&b);
     }
     TEST_PASS(__FILE__);

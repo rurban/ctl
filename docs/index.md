@@ -364,7 +364,7 @@ And in its grandiosity (esp. not header-only):
     array.h:            stack/heap allocated
     vector.h:           realloc
     string.h:           vector.h
-    u8string.h:   	vector.h ++
+    u8string.h:         vector.h ++
     deque.h:            realloc (paged)
     queue.h:            deque.h
     stack.h:            deque.h
