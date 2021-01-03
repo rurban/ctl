@@ -187,6 +187,7 @@ JOIN(A, transfer)(A* self, A* other, B* position, B* node, int before)
     JOIN(A, connect)(self, position, node, before);
 }
 
+// FIXME I* position
 static inline void
 JOIN(A, erase)(A* self, B* node)
 {
@@ -208,6 +209,7 @@ JOIN(A, pop_front)(A* self)
     JOIN(A, erase)(self, self->head);
 }
 
+// FIXME I* position
 static inline void
 JOIN(A, insert)(A* self, B* position, T value)
 {
@@ -329,6 +331,12 @@ JOIN(A, reverse)(A* self)
     self->head = tail;
 }
 
+#if 0
+// equalness via memcmp sizeof(T)?
+static inline size_t
+JOIN(A, remove)(A* self, T value){}
+#endif
+
 static inline size_t
 JOIN(A, remove_if)(A* self, int _equal(T*))
 {
@@ -342,15 +350,27 @@ JOIN(A, remove_if)(A* self, int _equal(T*))
     return erases;
 }
 
+// FIXME I* position
 static inline void
-JOIN(A, splice)(A* self, B* position, A* other)
+JOIN(A, splice)(A* self, B* pos, A* other)
 {
-    if(self->size == 0 && position == NULL)
+    if(self->size == 0 && pos == NULL)
         JOIN(A, swap)(self, other);
     else
         foreach(A, other, it)
-            JOIN(A, transfer)(self, other, position, it.node, 1);
+            JOIN(A, transfer)(self, other, pos, it.node, 1);
 }
+
+#if 0
+static inline void
+JOIN(A, splice)(A* self, I* pos, A* other) {}
+
+static inline void
+JOIN(A, splice_it)(A* self, I* pos, A* other, I* other_pos) {}
+
+static inline void
+JOIN(A, splice_range)(A* self, I* pos, A* other, I* other_first, I* other_last) {}
+#endif
 
 static inline void
 JOIN(A, merge)(A* self, A* other, int _compare(T*, T*))

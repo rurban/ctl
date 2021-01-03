@@ -255,6 +255,7 @@ JOIN(A, pop_back)(A* self)
     }
 }
 
+// TODO erase_it, erase_range
 static inline void
 JOIN(A, erase)(A* self, size_t index)
 {
@@ -276,6 +277,28 @@ JOIN(A, erase)(A* self, size_t index)
     }
     self->free = saved;
 }
+
+#if 0
+// TODO emplace, emplace_front, emplace_back
+static inline void
+JOIN(A, emplace)(A* self, I* pos, ...){}
+
+static inline void
+JOIN(A, emplace_front)(A* self, ...){}
+
+static inline void
+JOIN(A, emplace_back)(A* self, ...){}
+
+// TODO insert_it, insert_range, insert_count
+static inline void
+JOIN(A, insert_it)(A* self, I* pos, T value){}
+
+static inline void
+JOIN(A, insert_range)(A* self, I* first, I* last){}
+
+static inline void
+JOIN(A, insert_count)(A* self, I* pos, size_t count, T value){}
+#endif
 
 static inline void
 JOIN(A, insert)(A* self, size_t index, T value)
@@ -303,11 +326,13 @@ JOIN(A, insert)(A* self, size_t index, T value)
         JOIN(A, push_back)(self, value);
 }
 
+// FIXME, no default value
 static inline void
 JOIN(A, resize)(A* self, size_t size, T value)
 {
     if(size != self->size)
     {
+        // Optimize POD with realloc and memset
         while(size != self->size)
             if(size < self->size)
                 JOIN(A, pop_back)(self);
@@ -363,6 +388,8 @@ JOIN(A, copy)(A* self)
     return other;
 }
 
+// TODO size_t from, to index
+// TODO sort_range with iters
 static inline void
 JOIN(A, ranged_sort)(A* self, int64_t a, int64_t b, int _compare(T*, T*))
 {

@@ -110,6 +110,11 @@ JOIN(A, pop)(A* self)
     JOIN(A, down)(self, 0);
 }
 
+#if 0
+static inline void
+JOIN(A, emplace)(A* self, ...) {}
+#endif
+
 #undef front
 #undef at
 #undef back
@@ -124,7 +129,7 @@ JOIN(A, pop)(A* self)
 #undef push_back
 #undef resize
 #undef assign
-#undef shrink_to_fit_fit
+#undef shrink_to_fit
 #undef data
 #undef insert
 #undef erase
