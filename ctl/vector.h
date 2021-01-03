@@ -234,13 +234,23 @@ JOIN(A, resize)(A* self, size_t size, T value)
 }
 
 static inline void
-JOIN(A, assign)(A* self, size_t size, T value)
+JOIN(A, assign)(A* self, size_t count, T value)
 {
-    JOIN(A, resize)(self, size, self->copy(&value));
-    for(size_t i = 0; i < size; i++)
+    JOIN(A, resize)(self, count, self->copy(&value));
+    for(size_t i = 0; i < count; i++)
         JOIN(A, set)(self, i, self->copy(&value));
     if(self->free)
         self->free(&value);
+}
+
+static inline void
+JOIN(A, assign_range)(A* self, T* from, T* last)
+{
+    size_t count = last - from;
+    JOIN(A, resize)(self, count, self->copy(self->value)); // TODO
+    JOIN(A, it) it = JOIN(I, range)(self, from, last);
+    for(size_t i=0; !it.done; it.step(&it), i++)
+        JOIN(A, set)(self, i, *it.ref);
 }
 
 static inline void
@@ -269,17 +279,46 @@ JOIN(A, insert)(A* self, size_t index, T value)
         JOIN(A, push_back)(self, value);
 }
 
-static inline void
+static inline T*
 JOIN(A, erase)(A* self, size_t index)
 {
     static T zero;
     JOIN(A, set)(self, index, zero);
+    // TODO memmove
     for(size_t i = index; i < self->size - 1; i++)
     {
         self->value[i] = self->value[i + 1];
         self->value[i + 1] = zero;
     }
     self->size--;
+    return &self->value[self->size - 1];
+}
+
+static inline T*
+JOIN(A, erase_range)(A* self, T* from, T* to)
+{
+    static T zero;
+    if (from >= to)
+        return to;
+    T* end = &self->value[self->size];
+    // TODO memmove
+    *from = zero;
+    for(T* pos = from; pos < to - 1; pos++)
+    {
+        *pos = *(pos + 1);
+        *(pos + 1) = zero;
+        self->size--;
+    }
+    if (to < end)
+        return to + 1;
+    else
+        return to;
+}
+
+static inline T*
+JOIN(A, erase_it)(A* self, T* pos)
+{
+    return JOIN(A, erase_range)(self, pos, JOIN(A, end)(self));
 }
 
 static inline void
