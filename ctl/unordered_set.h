@@ -44,7 +44,7 @@ typedef struct I
 static inline B*
 JOIN(A, begin)(A* self)
 {
-    for(size_t i = 0; i < self->size; i++)
+    for(size_t i = 0; i < self->bucket_count; i++)
     {
         B* node = self->buckets[i];
         if(node)
