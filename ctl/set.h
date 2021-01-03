@@ -487,6 +487,36 @@ JOIN(A, erase_node)(A* self, B* node)
 #endif
 }
 
+static inline I
+JOIN(I, iter)(A* self, B *node)
+{
+    I it = JOIN(I, each)(self);
+    it.node = node;
+    it.ref = &node->key;
+    it.next = JOIN(B, next)(it.node);
+    return it;
+}
+
+static inline void
+JOIN(A, erase_it)(A* self, I* pos)
+{
+    B* node = pos->node;
+    if(node)
+        JOIN(A, erase_node)(self, node);
+}
+
+static inline void
+JOIN(A, erase_range)(A* self, I* from, I* to)
+{
+    B* node = from->node;
+    if(node)
+    {
+        JOIN(A, it) it = JOIN(I, range)(self, from->node, to->node);
+        for(; !it.done; it.step(&it))
+            JOIN(A, erase_node)(self, it.node);
+    }
+}
+
 static inline void
 JOIN(A, erase)(A* self, T key)
 {
@@ -666,10 +696,14 @@ JOIN(A, symmetric_difference)(A* a, A* b)
     return self;
 }
 
+#ifndef HOLD
 #undef T
 #undef A
 #undef B
 #undef I
+#else
+#undef HOLD
+#endif
 
 #ifdef USE_INTERNAL_VERIFY
 #undef USE_INTERNAL_VERIFY

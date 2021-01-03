@@ -33,7 +33,6 @@
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
-#define PAIR JOIN(A, pair)
 
 typedef struct B
 {
@@ -149,6 +148,16 @@ JOIN(I, range)(A* container, B* begin, B* end)
 #define equal __EQUAL
 #include <ctl/_share.h>
 #undef equal
+
+static inline I
+JOIN(I, iter)(A* self, B *node)
+{
+    I it = JOIN(I, each)(self);
+    it.node = node;
+    it.ref = &it.node->value;
+    it.next = it.node->next;
+    return it;
+}
 
 // TODO:
 // primes[] obtained experimentally - is there a quicker way to get more primes
@@ -401,15 +410,49 @@ JOIN(A, insert)(A* self, T value)
     }
 }
 
-#if 0
-static inline I*
+#ifdef DEBUG
+
+static inline void
+JOIN(A, insert_found)(A* self, T value, int* foundp)
+{
+    if(JOIN(A, find)(self, value))
+    {
+        *foundp = 1;
+        if(self->free)
+            self->free(&value);
+        return;
+    }
+    if(JOIN(A, empty)(self))
+        JOIN(A, rehash)(self, 12);
+    B** bucket = JOIN(A, _bucket)(self, value);
+    *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(value));
+    LOG ("insert_found: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
+    self->size++;
+    if (JOIN(A, load_factor)(self) > self->max_load_factor)
+        JOIN(A, rehash)(self, 2 * self->bucket_count);
+    *foundp = 0;
+}
+
+static inline I
 JOIN(A, emplace)(A* self, T* value)
 {
-    if((B* node = JOIN(A, find)(self, *value)))
-    {
-        return JOIN(JOIN(A, it), each)(node);
-    }
-    else
+    B* node;
+    if ((node = JOIN(A, find)(self, *value)))
+        return JOIN(I, iter)(self, node);
+
+    B** buckets = JOIN(A, _bucket)(self, *value);
+    *buckets = JOIN(B, push)(*buckets, JOIN(B, init)(*value));
+    self->size++;
+    if (JOIN(A, load_factor)(self) > self->max_load_factor)
+        JOIN(A, rehash)(self, 2 * self->bucket_count);
+    return JOIN(I, iter)(self, *buckets);
+}
+
+static inline I
+JOIN(A, emplace_found)(A* self, T* value, int* foundp)
+{
+    B* node;
+    if ((node = JOIN(A, find)(self, *value)))
     {
         if(!self->bucket_count)
             JOIN(A, rehash)(self, 12);
@@ -422,8 +465,17 @@ JOIN(A, emplace)(A* self, T* value)
             size_t new_size = JOIN(A, __next_prime)(max_bucket_count);
             JOIN(A, rehash)(self, new_size);
         }
-        return JOIN(JOIN(A, it), each)(*bucket);
+        *foundp = 1;
+        return JOIN(I, iter)(self, node);
     }
+
+    B** buckets = JOIN(A, _bucket)(self, *value);
+    *buckets = JOIN(B, push)(*buckets, JOIN(B, init)(*value));
+    self->size++;
+    if (JOIN(A, load_factor)(self) > self->max_load_factor)
+        JOIN(A, rehash)(self, 2 * self->bucket_count);
+    *foundp = 0;
+    return JOIN(I, iter)(self, *buckets);
 }
 #endif
 
@@ -592,4 +644,8 @@ JOIN(A, equal)(A* self, A* other)
 #undef T
 #else
 #undef HOLD
+#endif
+
+#ifdef USE_INTERNAL_VERIFY
+#undef USE_INTERNAL_VERIFY
 #endif

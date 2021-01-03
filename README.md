@@ -264,9 +264,19 @@ Use the original long names, not three-letter abbrevations.
 
 Added lots of missing methods, like `max_size`, `size`, `capacity`, ...
 Probe for -std=c++20 c++ support and this for testing against the STL..
+
 Added **map** and **unordered_map**.
 
 Added docs and manpages.
+
+Added many `_it` and `_range` method variants to accept iterators, `_found` to
+return found or not.
+
+    set: erase_it, erase_range
+    umap: insert_or_assign_found
+    uset: clear
+
+Added many return values as iterators, as in the STL:
 
 Reproducible tests with `SEED=n`
 
@@ -292,6 +302,11 @@ similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 STL array and span is missing. array is just a vector.
 
 emplace missing, most C++20 methods also still missing.
+STL methods returning a pair of iterator and bool have a `_found` suffix,
+return the iterator and set a `int *foundp` value. Eg.
+
+    int found;
+    map_T_insert_assign_found (self, key, &found);
 
 No short string optimization yet.
 

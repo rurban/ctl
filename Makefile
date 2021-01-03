@@ -188,6 +188,8 @@ unordered_set.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
 unordered_map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
+tests/func/test_c11.i:
+	@$(CC) $(CFLAGS) $(subst .i,.c,$@) -E | clang-format -style=webkit
 
 examples/astar:                      ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 examples/postfix:                    ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@

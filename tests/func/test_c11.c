@@ -29,12 +29,12 @@ FNV1a(const char *key)
   return h;
 }
 
-#undef POD
 typedef struct {
   char *key;
   int value;
 } charint;
 
+#undef POD
 #define T charint
 
 static inline size_t
@@ -44,6 +44,10 @@ charint_hash(charint *a) {
 static inline int
 charint_equal(charint *a, charint *b) {
   return strcmp(a->key, b->key) == 0;
+}
+static inline int
+charint_cmp(charint *a, charint *b) {
+  return strcmp(a->key, b->key);
 }
 static inline void
 charint_free(charint *a) {
@@ -61,6 +65,10 @@ charint_copy(charint *self) {
 }
 
 #include <ctl/unordered_map.h>
+
+#undef POD
+#define T charint
+#include <ctl/map.h>
 
 size_t
 _str_hash(str* s)
@@ -250,6 +258,7 @@ main(void)
         list_int_unique(&a, int_match);
         list_int_free(&a);
     }
+#ifdef DEBUG
     {
         int j = 0;
         uset_int a = uset_int_init(int_hash, int_equal);
@@ -278,6 +287,23 @@ main(void)
         foreach(umap_charint, &a, it) { umap_charint_node_bucket_size(it.node); }
         printf("umap_charint load_factor: %f\n", umap_charint_load_factor(&a));
         umap_charint_free(&a);
+    }
+#endif
+    {
+        map_charint a = map_charint_init(charint_cmp);
+        char c_char[36];
+        for (int i=0; i<1000; i++) {
+          snprintf(c_char, 36, "%c%d", 48 + (rand() % 74), rand());
+          //str s = (str){.value = c_char};
+          map_charint_insert(&a, charint_copy(&(charint){ c_char, i }));
+        }
+        foreach(map_charint, &a, it) { strcpy (c_char, it.ref->key); }
+        printf("last key \"%s\", ", c_char);
+        map_charint_node *b = map_charint_begin(&a);
+        printf("min {\"%s\", %d} ", b->key.key, b->key.value);
+        b = map_charint_node_max(b);
+        printf("max {\"%s\", %d}\n", b->key.key, b->key.value);
+        map_charint_free(&a);
     }
     TEST_PASS(__FILE__);
 }
