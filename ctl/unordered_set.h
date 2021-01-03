@@ -19,7 +19,7 @@ typedef struct B
 
 typedef struct A
 {
-    B** bucket;
+    B** buckets;
     size_t size;
     size_t bucket_count;
     void (*free)(T*);
@@ -45,7 +45,7 @@ JOIN(A, begin)(A* self)
 {
     for(size_t i = 0; i < self->size; i++)
     {
-        B* node = self->bucket[i];
+        B* node = self->buckets[i];
         if(node)
             return node;
     }
@@ -74,7 +74,7 @@ JOIN(I, step)(I* self)
     if(self->next == JOIN(A, end)(self->container))
     {
         for(size_t i = self->hash + 1; i < self->container->bucket_count; i++)
-            if((self->next = self->container->bucket[i]))
+            if((self->next = self->container->buckets[i]))
             {
                 JOIN(I, update)(self);
                 return;
@@ -150,7 +150,7 @@ static inline B**
 JOIN(A, bucket)(A* self, T value)
 {
     size_t hash = self->hash(&value) % self->bucket_count;
-    return &self->bucket[hash];
+    return &self->buckets[hash];
 }
 
 static inline size_t
@@ -171,6 +171,18 @@ JOIN(A, free_node)(A* self, B* n)
 }
 
 static inline float
+JOIN(A, max_load_factor)()
+{
+    return (float) 0.85;
+}
+
+static inline float
+JOIN(A, max_bucket_count)(A* self)
+{
+    return (float) (self->size / JOIN(A, max_load_factor)());
+}
+
+static inline float
 JOIN(A, load_factor)(A* self)
 {
     return (float) self->size / (float) self->bucket_count;
@@ -180,7 +192,7 @@ static inline void
 JOIN(A, reserve)(A* self, size_t desired_count)
 {
     self->bucket_count = JOIN(A, __next_prime)(desired_count);
-    self->bucket = (B**) calloc(self->bucket_count, sizeof(B*));
+    self->buckets = (B**) calloc(self->bucket_count, sizeof(B*));
 }
 
 static inline A
@@ -202,32 +214,38 @@ JOIN(A, init)(size_t desired_count, size_t (*_hash)(T*), int (*_equal)(T*, T*))
 }
 
 static inline void
+JOIN(A, rehash)(A* self, size_t desired_count)
+{
+    A rehashed = JOIN(A, init)(desired_count, self->hash, self->equal);
+    foreach(A, self, it)
+    {
+        B** buckets = JOIN(A, bucket)(&rehashed, it.node->value);
+        *buckets = JOIN(B, push)(*buckets, it.node);
+        rehashed.size++;
+    }
+    free(self->buckets);
+    *self = rehashed;
+}
+
+static inline void
 JOIN(A, insert)(A* self, T value)
 {
-    B** bucket = JOIN(A, bucket)(self, value);
-    for(B* n = *bucket; n; n = n->next)
+    B** buckets = JOIN(A, bucket)(self, value);
+    for(B* n = *buckets; n; n = n->next)
         if(self->equal(&value, &n->value))
         {
             if(self->free)
                 self->free(&value);
             return;
         }
-    *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(value));
+    *buckets = JOIN(B, push)(*buckets, JOIN(B, init)(value));
     self->size++;
-}
-
-static inline void
-JOIN(A, rehash)(A* self, size_t desired_count)
-{
-    A rehashed = JOIN(A, init)(desired_count, self->hash, self->equal);
-    foreach(A, self, it)
+    if (JOIN(A, load_factor)(self) > JOIN(A, max_load_factor)())
     {
-        B** bucket = JOIN(A, bucket)(&rehashed, it.node->value);
-        *bucket = JOIN(B, push)(*bucket, it.node);
-        rehashed.size++;
+        size_t max_bucket_count = JOIN(A, max_bucket_count)(self);
+        size_t new_size = JOIN(A, __next_prime)(max_bucket_count);
+        JOIN(A, rehash)(self, new_size);
     }
-    free(self->bucket);
-    *self = rehashed;
 }
 
 static inline void
@@ -235,14 +253,14 @@ JOIN(A, free)(A* self)
 {
     foreach(A, self, it)
         JOIN(A, free_node)(self, it.node);
-    free(self->bucket);
+    free(self->buckets);
 }
 
 static inline B*
 JOIN(A, find)(A* self, T value)
 {
-    B** bucket = JOIN(A, bucket)(self, value);
-    for(B* n = *bucket; n; n = n->next)
+    B** buckets = JOIN(A, bucket)(self, value);
+    for(B* n = *buckets; n; n = n->next)
         if(self->equal(&value, &n->value))
             return n;
     return NULL;
@@ -261,9 +279,9 @@ JOIN(A, count)(A* self, T value)
 static inline void
 JOIN(A, erase)(A* self, T value)
 {
-    B** bucket = JOIN(A, bucket)(self, value);
+    B** buckets = JOIN(A, bucket)(self, value);
     B* prev = NULL;
-    for(B* n = *bucket; n; n = n->next)
+    for(B* n = *buckets; n; n = n->next)
     {
         if(self->equal(&value, &n->value))
         {
@@ -331,7 +349,11 @@ JOIN(A, symmetric_difference)(A* a, A* b)
     return self;
 }
 
-#undef T
+#ifndef HOLD
 #undef A
 #undef B
 #undef I
+#undef T
+#else
+#undef HOLD
+#endif
