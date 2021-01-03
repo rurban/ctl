@@ -172,7 +172,7 @@ set.i:
 unordered_set.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
 map.i:
-	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
+	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 
 examples/astar:                      ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 examples/postfix:                    ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@

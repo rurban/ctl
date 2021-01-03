@@ -17,11 +17,6 @@ int
 int_equal(int* a, int* b)
 { return *a == *b; }
 
-#define POD
-//typedef char* str;
-#define T str
-#include <ctl/map.h>
-
 size_t
 FNV1a(const char *key)
 {
@@ -33,6 +28,39 @@ FNV1a(const char *key)
   }
   return h;
 }
+
+#undef POD
+typedef struct {
+  char *key;
+  int value;
+} charint;
+
+#define T charint
+
+static inline size_t
+charint_hash(charint *a) {
+  return FNV1a(a->key);
+}
+static inline int
+charint_equal(charint *a, charint *b) {
+  return strcmp(a->key, b->key) == 0;
+}
+static inline void
+charint_free(charint *a) {
+  free(a->key);
+}
+static inline charint
+charint_copy(charint *self) {
+  char *copy_key = (char*) malloc(strlen(self->key) + 1);
+  strcpy (copy_key, self->key);
+  charint copy = {
+    copy_key,
+    self->value,
+  };
+  return copy;
+}
+
+#include <ctl/map.h>
 
 size_t
 _str_hash(str* s)
@@ -223,83 +251,31 @@ main(void)
         list_int_free(&a);
     }
     {
+        int j;
         uset_int a = uset_int_init(8, int_hash, int_equal);
-        volatile int i;
-        uset_int_insert(&a, -0);
-        uset_int_insert(&a, -1);
-        uset_int_insert(&a, -2);
-        uset_int_insert(&a, -3);
-        uset_int_insert(&a, -4);
-        uset_int_insert(&a, -5);
-        uset_int_insert(&a, -6);
-        uset_int_insert(&a, -7);
-        uset_int_insert(&a, -8);
-        uset_int_insert(&a, -9);
-        uset_int_insert(&a, -10);
-        uset_int_insert(&a, -11);
-        uset_int_insert(&a, -12);
-        uset_int_insert(&a, -13);
-        uset_int_insert(&a, -14);
-        uset_int_insert(&a, -15);
-        uset_int_insert(&a, -16);
-        uset_int_insert(&a, -17);
-        uset_int_insert(&a, -18);
-        uset_int_insert(&a, -19);
-        uset_int_insert(&a, -20);
-        uset_int_insert(&a, -21);
-        uset_int_insert(&a, -22);
-        uset_int_insert(&a, -23);
-        uset_int_insert(&a, -24);
-        uset_int_insert(&a, -25);
-        uset_int_insert(&a, -26);
-        uset_int_insert(&a, -27);
-        uset_int_insert(&a, 0);
-        uset_int_insert(&a, 1);
-        uset_int_insert(&a, 2);
-        uset_int_insert(&a, 3);
-        uset_int_insert(&a, 4);
-        uset_int_insert(&a, 5);
-        uset_int_insert(&a, 6);
-        uset_int_insert(&a, 7);
-        uset_int_insert(&a, 8);
-        uset_int_insert(&a, 9);
-        uset_int_insert(&a, 10);
-        uset_int_insert(&a, 11);
-        uset_int_insert(&a, 12);
-        uset_int_insert(&a, 13);
-        uset_int_insert(&a, 14);
-        uset_int_insert(&a, 15);
-        uset_int_insert(&a, 16);
-        uset_int_insert(&a, 17);
-        uset_int_insert(&a, 18);
-        uset_int_insert(&a, 19);
-        uset_int_insert(&a, 20);
-        uset_int_insert(&a, 21);
-        uset_int_insert(&a, 22);
-        uset_int_insert(&a, 23);
-        uset_int_insert(&a, 24);
-        uset_int_insert(&a, 25);
-        uset_int_insert(&a, 26);
-        uset_int_insert(&a, 27);
-        foreach(uset_int, &a, it) { i = *it.ref; }
-        printf("last int %d, ", i);
+        for (int i=0; i > -27; i--)
+          uset_int_insert(&a, i);
+        for (int i=0; i < 27; i++)
+          uset_int_insert(&a, i);
+        foreach(uset_int, &a, it) { j = *it.ref; }
+        printf("last int %d, ", j);
         foreach(uset_int, &a, it) { uset_int_bucket_size(it.node); }
         printf("uset load_factor: %f\n", uset_int_load_factor(&a));
         uset_int_free(&a);
     }
     {
-        map_str a = map_str_init(8, _str_hash, _str_equal);
+        map_charint a = map_charint_init(8, charint_hash, charint_equal);
         char c_char[36];
         for (int i=0; i<1000; i++) {
           snprintf(c_char, 36, "%c%d", 48 + (rand() % 74), rand());
-          str s = (str){.value = c_char};
-          map_str_insert(&a, s);
+          //str s = (str){.value = c_char};
+          map_charint_insert(&a, charint_copy(&(charint){ c_char, i }));
         }
-        foreach(map_str, &a, it) { strcpy (c_char, *(char**)it.ref); }
+        foreach(map_charint, &a, it) { strcpy (c_char, it.ref->key); }
         printf("last key \"%s\", ", c_char);
-        foreach(map_str, &a, it) { map_str_bucket_size(it.node); }
-        printf("map_str load_factor: %f\n", map_str_load_factor(&a));
-        map_str_free(&a);
+        foreach(map_charint, &a, it) { map_charint_bucket_size(it.node); }
+        printf("map_charint load_factor: %f\n", map_charint_load_factor(&a));
+        map_charint_free(&a);
     }
     TEST_PASS(__FILE__);
 }
