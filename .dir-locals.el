@@ -2,7 +2,8 @@
          (fill-column . 80)
          (mode . auto-fill)))
  (c-mode . ((c-file-style . "linux")
-            (c-basic-offset . 4)))
- ;;("src/imported" . ((nil . ((change-log-default-name
- ;;                   . "ChangeLog.local")))))
- )
+            (c-basic-offset . 4)
+            (mode . flymake)))
+ (c++-mode . ((c-file-style . "linux")
+            (c-basic-offset . 4)
+            (mode . flymake))))
