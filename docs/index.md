@@ -160,6 +160,10 @@ make unordered_map.i
 STL variants of multi-sets and multi-maps will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 
+UTF-8 strings and identifiers will be added eventually, Wide, UTF-16 or UTF-32
+not. All methods from algorithm, iterator and range are in work, as well as some
+type utilities to omit default compare, equal and hash methods.
+
 See [Differences](#differences) below.
 
 ## Base Implementation Details

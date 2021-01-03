@@ -10,6 +10,7 @@
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#define PAIR JOIN(A, pair)
 
 typedef struct B
 {
@@ -248,6 +249,30 @@ JOIN(A, insert)(A* self, T value)
     }
 }
 
+#if 0
+static inline I*
+JOIN(A, emplace)(A* self, ...)
+{
+    B** buckets = JOIN(A, bucket)(self, value);
+    for(B* n = *buckets; n; n = n->next)
+        if(self->equal(&value, &n->value))
+        {
+            if(self->free)
+                self->free(&value);
+            return (PAIR){JOIN(JOIN(A, it), each)(self), false};
+        }
+    *buckets = JOIN(B, push)(*buckets, JOIN(B, init)(value));
+    self->size++;
+    if (JOIN(A, load_factor)(self) > JOIN(A, max_load_factor)())
+    {
+        size_t max_bucket_count = JOIN(A, max_bucket_count)(self);
+        size_t new_size = JOIN(A, __next_prime)(max_bucket_count);
+        JOIN(A, rehash)(self, new_size);
+    }
+    return JOIN(JOIN(A, it), each)(*buckets);
+}
+#endif
+
 static inline void
 JOIN(A, free)(A* self)
 {
@@ -306,9 +331,12 @@ JOIN(A, clear)(A* self)
 static inline A
 JOIN(A, copy)(A* self)
 {
+    fprintf (stderr, "copy\norig size: %lu\n", self->size);
     A other = JOIN(A, init)(self->bucket_count, self->hash, self->equal);
-    foreach(A, self, it)
-        JOIN(A, insert)(self, self->copy(it.ref));
+    foreach(A, self, it) {
+        fprintf (stderr, "size: %lu\n", other.size);
+        JOIN(A, insert)(&other, self->copy(it.ref));
+    }
     return other;
 }
 

@@ -1,7 +1,7 @@
-/* Unordered map, in opposition to C++ STL */
+/* same hash table as unordered_set */
 
 #ifndef T
-#error "Template struct type T undefined for <ctl/map.h>"
+#error "Template struct type T undefined for <ctl/unordered_map.h>"
 #endif
 
 #include <ctl/ctl.h>
@@ -9,7 +9,7 @@
 // TODO emplace
 
 #define HOLD
-#define uset map
+#define uset umap
 #include <ctl/unordered_set.h>
 
 static inline void

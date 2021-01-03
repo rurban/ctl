@@ -169,9 +169,11 @@ priority_queue.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
 set.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
+map.i:
+	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 unordered_set.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-map.i:
+unordered_map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 
 examples/astar:                      ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
@@ -186,7 +188,9 @@ tests/func/test_list:                ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_priority_queue:      ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_queue:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_set:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_map:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_unordered_set:       ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_unordered_map:       ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_stack:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_string:              ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_vec_capacity:        ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
