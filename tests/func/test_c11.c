@@ -198,31 +198,25 @@ main(void)
 {
     {
         vec_int a = vec_int_init();
-        vec_int_push_back(&a, 1);
-        vec_int_push_back(&a, 2);
-        vec_int_push_back(&a, 3);
-        vec_int_push_back(&a, 4);
+        for(size_t i = 0; i < 4; i++)
+            vec_int_push_back(&a, i);
         vec_int_free(&a);
     }
     {
         const size_t size = 16;
         deq_int a = deq_int_init();
-        for(size_t i = 0; i < size; i++) deq_int_push_back(&a, i);
-        for(size_t i = 0; i < size; i++) deq_int_push_front(&a, i);
+        for(size_t i = 0; i < size; i++)
+            deq_int_push_back(&a, i);
+        for(size_t i = 0; i < size; i++)
+            deq_int_push_front(&a, i);
         deq_int_insert(&a, 1, 99);
         deq_int_sort(&a);
         deq_int_free(&a);
     }
     {
         list_int a = list_int_init();
-        list_int_push_back(&a, 1);
-        list_int_push_back(&a, 2);
-        list_int_push_back(&a, 3);
-        list_int_push_back(&a, 4);
-        list_int_push_back(&a, 5);
-        list_int_push_back(&a, 6);
-        list_int_push_back(&a, 7);
-        list_int_push_back(&a, 8);
+        for(size_t i = i; i < 8; i++)
+            list_int_push_back(&a, i);
         list_int_free(&a);
     }
     {
@@ -245,19 +239,15 @@ main(void)
     }
     {
         list_int a = list_int_init();
+        for(size_t i = i; i < 8; i++)
+            list_int_push_back(&a, i);
         list_int_push_back(&a, 1);
         list_int_push_back(&a, 1);
-        list_int_push_back(&a, 1);
-        list_int_push_back(&a, 2);
-        list_int_push_back(&a, 3);
         list_int_push_back(&a, 3);
         list_int_push_back(&a, 4);
         list_int_push_back(&a, 6);
         list_int_push_back(&a, 6);
         list_int_push_back(&a, 6);
-        list_int_push_back(&a, 6);
-        list_int_push_back(&a, 6);
-        list_int_push_back(&a, 8);
         list_int_push_back(&a, 8);
         list_int_unique(&a);
         list_int_free(&a);

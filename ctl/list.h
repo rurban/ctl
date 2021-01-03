@@ -136,6 +136,7 @@ JOIN(A, init_from)(A* copy)
     return self;
 }
 
+// internal
 static inline B*
 JOIN(B, init)(T value)
 {
@@ -145,6 +146,7 @@ JOIN(B, init)(T value)
     return self;
 }
 
+// internal
 static inline void
 JOIN(A, disconnect)(A* self, B* node)
 {
@@ -159,6 +161,7 @@ JOIN(A, disconnect)(A* self, B* node)
     self->size--;
 }
 
+// internal
 static inline void
 JOIN(A, connect_before)(A* self, B* position, B* node)
 {
@@ -193,6 +196,7 @@ JOIN(A, push_front)(A* self, T value)
     JOIN(A, connect_before)(self, self->head, node);
 }
 
+// internal
 static inline void
 JOIN(A, transfer_before)(A* self, A* other, B* position, B* node)
 {
@@ -200,28 +204,39 @@ JOIN(A, transfer_before)(A* self, A* other, B* position, B* node)
     JOIN(A, connect_before)(self, position, node);
 }
 
+// internal
 static inline void
-JOIN(A, erase)(A* self, B* node)
+JOIN(A, erase_node)(A* self, B* node)
 {
     JOIN(A, disconnect)(self, node);
     FREE_VALUE(self, node->value);
     free(node);
 }
 
+// FIXME return I*
+static inline void
+JOIN(A, erase)(A* self, I* position)
+{
+    JOIN(A, disconnect)(self, position->node);
+    if(self->free)
+        self->free(position->ref);
+    free(position->node);
+}
+
 static inline void
 JOIN(A, pop_back)(A* self)
 {
-    JOIN(A, erase)(self, self->tail);
+    JOIN(A, erase_node)(self, self->tail);
 }
 
 static inline void
 JOIN(A, pop_front)(A* self)
 {
-    JOIN(A, erase)(self, self->head);
+    JOIN(A, erase_node)(self, self->head);
 }
 
 static inline B*
-JOIN(A, insert)(A* self, B* pos, T value)
+JOIN(A, insert)(A* self, I* position, T value)
 {
     B* node = JOIN(B, init)(value);
     JOIN(A, connect_before)(self, pos, node);
@@ -425,7 +440,7 @@ JOIN(A, remove_if)(A* self, int _match(T*))
     foreach(A, self, it)
         if(_match(it.ref))
         {
-            JOIN(A, erase)(self, it.node);
+            JOIN(A, erase_node)(self, it.node);
             erases++;
         }
     return erases;
@@ -446,13 +461,13 @@ JOIN(A, swap)(A* self, A* other)
 }
 
 static inline void
-JOIN(A, splice)(A* self, B* pos, A* other)
+JOIN(A, splice)(A* self, I* position, A* other)
 {
-    if(self->size == 0 && pos == NULL)
+    if(self->size == 0 && (position == NULL || position->node == NULL))
         JOIN(A, swap)(self, other);
     else
         foreach(A, other, it)
-            JOIN(A, transfer_before)(self, other, pos, it.node);
+            JOIN(A, transfer_before)(self, other, position->node, it.node);
 }
 
 // only needed for merge
@@ -461,6 +476,7 @@ JOIN(A, transfer_after)(A* self, A* other, B* position, B* node)
 {
     JOIN(A, disconnect)(other, node);
     JOIN(A, connect_after)(self, position, node);
+            JOIN(A, transfer)(self, other, position->node, it.node, 1);
 }
 
 #ifdef DEBUG

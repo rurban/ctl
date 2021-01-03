@@ -281,7 +281,7 @@ main(void)
                 {
                     if(current == index)
                     {
-                        list_digi_erase(&a, it.node);
+                        list_digi_erase(&a, &it);
                         b.erase(iter);
                         break;
                     }
@@ -301,11 +301,8 @@ main(void)
                 {
                     if(current == index)
                     {
-                        list_digi_node *node =
-                            list_digi_insert(&a, it.node, digi_init(value));
-                        std::list<DIGI>::iterator ii =
-                            b.insert(iter, DIGI{value});
-                        CHECK_ITER(node, b, ii);
+                        list_digi_insert(&a, &it, digi_init(value));
+                        b.insert(iter, DIGI{value});
                         break;
                     }
                     iter++;
@@ -494,7 +491,7 @@ main(void)
                 std::list<DIGI> bb;
                 setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
                 b.splice(iter, bb);
-                list_digi_splice(&a, it.node, &aa);
+                list_digi_splice(&a, &it, &aa);
                 CHECK(a, b);
                 break;
             }
