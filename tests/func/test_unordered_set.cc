@@ -72,6 +72,9 @@ main(void)
             TEST_TOTAL,
         };
         int which = TEST_RAND(TEST_TOTAL);
+#ifndef DEBUG
+        /* unstable */
+#endif
         switch(which)
         {
             case TEST_INSERT:

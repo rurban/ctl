@@ -38,6 +38,11 @@ CFLAGS += -Werror
 CFLAGS += -DLONG
 endif
 
+ifeq (1, $(DEBUG))
+O0 = 1
+CFLAGS += -DDEBUG
+endif
+
 ifeq (1, $(SANITIZE))
 CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
 endif
@@ -96,6 +101,11 @@ TESTS = \
 	tests/func/test_stack \
 	tests/func/test_vec_capacity \
 	tests/func/test_vector
+ifneq ($(DEBUG),)
+TESTS += \
+	tests/func/test_map     \
+	tests/func/test_unordered_map
+endif
 
 EXAMPLES = \
 	examples/astar \
