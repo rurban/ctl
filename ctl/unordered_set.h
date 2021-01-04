@@ -385,6 +385,12 @@ JOIN(A, bucket_size)(A* self, size_t index)
     return size;
 }
 
+static inline size_t
+JOIN(A, bucket)(A* self, T value)
+{
+    return self->hash(&value) % self->bucket_count;
+}
+
 static inline void
 JOIN(A, _free_node)(A* self, B* n)
 {
@@ -407,6 +413,12 @@ static inline void
 JOIN(A, max_load_factor)(A* self, float f)
 {
     self->max_load_factor = f;
+}
+
+static inline size_t
+JOIN(A, bucket_count)(A* self)
+{
+    return self->bucket_count;
 }
 
 static inline size_t
@@ -581,6 +593,7 @@ JOIN(A, insert)(A* self, T value)
     if(JOIN(A, find)(self, value))
     {
         FREE_VALUE(self, value);
+        return;
     }
     else
     {

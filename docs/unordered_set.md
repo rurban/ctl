@@ -190,10 +190,12 @@ if range of elements match a specific key. _(range NYI)_
 ## Bucket interface
 
     I* begin (B* bucket)
+    I* begin (A* self, size_t bucket_index)
 
 returns an iterator to the beginning of the specified bucket _(NYI)_
 
     I* end (B* bucket)
+    I* end (A* self, size_t bucket_index)
 
 returns an iterator to the end of the specified bucket _(NYI)_
 
