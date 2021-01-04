@@ -73,7 +73,11 @@ main(void)
         };
         int which = TEST_RAND(TEST_TOTAL);
 #ifndef DEBUG
-        /* unstable */
+        /* UNSTABLE (all methods with iterators) */
+        if (which == TEST_RESERVE ||
+            which == TEST_INSERT ||
+            which == TEST_FIND ||
+            which == TEST_ERASE)
 #endif
         switch(which)
         {
