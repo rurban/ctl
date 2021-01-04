@@ -4,9 +4,8 @@
 #error "Template type T undefined for <ctl/list.h>"
 #endif
 
-// TODO emplace, emplace_front, emplace_back, remove
-
 #include <ctl/ctl.h>
+#include <stdarg.h>
 
 #define A JOIN(list, T)
 #define B JOIN(A, node)
@@ -14,8 +13,8 @@
 
 typedef struct B
 {
-    struct B* prev;
     struct B* next;
+    struct B* prev;
     T value;
 } B;
 
@@ -31,6 +30,7 @@ typedef struct A
 typedef struct I
 {
     CTL_COMMONFIELDS_ITER;
+    A* container;
     B* begin;
 } I;
 
@@ -86,6 +86,7 @@ JOIN(I, range)(A* container, B* begin, B* end)
         self.next = begin->next;
         self.node = begin;
         self.ref = &begin->value;
+        self.container = container;
     }
     else
         self.done = 1;
@@ -291,10 +292,70 @@ JOIN(A, reverse)(A* self)
     self->head = tail;
 }
 
-#if 0
-// equalness via memcmp sizeof(T)?
+#ifdef DEBUG
+
+static inline I
+JOIN(I, iter)(A* self, B *node)
+{
+    I it = JOIN(I, each)(self);
+    it.begin = node;
+    it.node = node;
+    it.ref = &node->value;
+    it.next = node->next;
+    return it;
+}
+
 static inline size_t
-JOIN(A, remove)(A* self, T value){}
+JOIN(A, remove)(A* self, T value){
+    size_t erases = 0;
+    foreach(A, self, it)
+        if(memcmp(it.ref, &value, sizeof(T)) == 0)
+        {
+            JOIN(A, erase)(self, it.node);
+            erases += 1;
+        }
+    return erases;
+}
+
+static inline I
+JOIN(A, emplace)(A* self, I* pos, size_t nargs, ...) {
+    va_list sp;
+    va_start(sp, nargs);
+    for (size_t i=0; i < nargs; i++)
+    {
+        T value = *(T*)sp;
+        B* node = JOIN(B, init)(value);
+        JOIN(A, connect)(self, pos->node, node, 1);
+    }
+    va_end(sp);
+    return JOIN(I, iter)(self, pos->next);
+}
+
+static inline I*
+JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
+{
+    B* node = JOIN(B, init)(value);
+    for (size_t i=0; i < count; i++)
+        JOIN(A, connect)(self, pos->node, node, 1);
+    if (count)
+        pos->step(pos);
+    return pos;
+}
+
+static inline I*
+JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
+{
+    A* other = first->container;
+    foreach(A, other, it)
+    {
+        B* node = JOIN(B, init)(*it.ref);
+        JOIN(A, connect)(self, it.node, node, 1);
+    }
+    if (first != last)
+        pos->step(pos);
+    return pos;
+}
+
 #endif
 
 static inline size_t
