@@ -183,9 +183,21 @@ main(void)
                 TEST_POP_FRONT,
                 TEST_CLEAR,
                 TEST_ERASE,
+#ifdef DEBUG
+                TEST_ERASE_IT,
+                TEST_ERASE_RANGE,
+                TEST_EMPLACE,
+                TEST_EMPLACE_FRONT,
+                TEST_EMPLACE_BACK,
+                TEST_INSERT_IT,
+                TEST_INSERT_COUNT,
+                TEST_INSERT_RANGE,
+#endif
                 TEST_RESIZE,
                 TEST_SHRINK_TO_FIT,
                 TEST_SORT,
+                TEST_RANGED_SORT,
+                TEST_SORT_RANGE,
                 TEST_COPY,
                 TEST_SWAP,
                 TEST_INSERT,
@@ -267,6 +279,28 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
+                case TEST_RANGED_SORT:
+                {
+                    deq_digi_ranged_sort(&a, 1, a.size - 3, digi_compare);
+                    auto from = b.begin();
+                    auto to = b.end();
+                    advance(from, 1);
+                    advance(to, -3);
+                    std::sort(from, to);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_SORT_RANGE:
+                {
+                    deq_digi_ranged_sort(&a, 1, a.size - 3, digi_compare);
+                    auto from = b.begin();
+                    auto to = b.end();
+                    advance(from, 1);
+                    advance(to, -3);
+                    std::sort(from, to);
+                    CHECK(a, b);
+                    break;
+                }
                 case TEST_COPY:
                 {
                     deq_digi aa = deq_digi_copy(&a);
@@ -296,12 +330,56 @@ main(void)
                     {
                         const int value = TEST_RAND(INT_MAX);
                         const size_t index = TEST_RAND(a.size);
-                        b.insert(b.begin() + index, DIGI{value});
                         deq_digi_insert(&a, index, digi_init(value));
+                        b.insert(b.begin() + index, DIGI{value});
                     }
                     CHECK(a, b);
                     break;
                 }
+#ifdef DEBUG
+                case TEST_INSERT_IT:
+                {
+                    size_t amount = TEST_RAND(512);
+                    for(size_t count = 0; count < amount; count++)
+                    {
+                        const int value = TEST_RAND(INT_MAX);
+                        const size_t index = TEST_RAND(a.size);
+                        deq_digi_it it = deq_digi_it_each(&a);
+                        it.index += count;
+                        deq_digi_insert_it(&a, &it, digi_init(value));
+                        b.insert(b.begin() + index, DIGI{value});
+                    }
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_INSERT_COUNT:
+                {
+                    size_t amount = TEST_RAND(512);
+                    const int value = TEST_RAND(INT_MAX);
+                    const size_t index = TEST_RAND(a.size);
+                    deq_digi_it pos = deq_digi_it_each(&a);
+                    pos.index += index;
+                    deq_digi_insert_count(&a, &pos, amount, digi_init(value));
+                    b.insert(b.begin() + index, amount, DIGI{value});
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_INSERT_RANGE:
+                {
+                    size_t amount = TEST_RAND(512);
+                    const int value = TEST_RAND(INT_MAX);
+                    const size_t index = TEST_RAND(a.size - 4);
+                    deq_digi_it pos = deq_digi_it_each(&a);
+                    deq_digi_it from = deq_digi_it_each(&a);
+                    deq_digi_it* end = deq_digi_end(&a);
+                    pos.index += 1;
+                    from.index += index;
+                    deq_digi_insert_range(&a, &pos, &from, end);
+                    b.insert(b.begin() + 1, b.begin() + index, b.end());
+                    CHECK(a, b);
+                    break;
+                }
+#endif
                 case TEST_ASSIGN:
                 {
                     const int value = TEST_RAND(INT_MAX);

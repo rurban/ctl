@@ -19,7 +19,8 @@ derived from [deque](deque.md).
 
 # DESCRIPTION
 
-The queue is a container adapter that gives the programmer the functionality of a queue - specifically, a FIFO (first-in, first-out) data structure.
+The queue is a container adapter that gives the programmer the functionality of
+a queue - specifically, a FIFO (first-in, first-out) data structure.
 
 The header acts as a wrapper to the underlying container - only a
 specific set of functions is provided. The queue pushes the elements on the back

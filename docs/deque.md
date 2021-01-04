@@ -16,7 +16,7 @@ parent for [queue](queue.md) and [stack](stack.md).
 
     int i = 0;
     deq_int a = deq_int_init ();
-    deq_int_resize (&a, 100);
+    deq_int_resize (&a, 100, 0);
 
     for (i=0; i<100; i++) {
       deq_int_push_front (&a, i);
@@ -127,9 +127,9 @@ reduces memory usage by freeing unused memory.
 
 ## Modifiers
 
-[assign](deq/assign.md) `(A* self, size_t count, T value)`
+[assign](deq/assign.md) `(A* self, size_t count, T default_value)`
 
-resizes and sets count elements to the value
+resizes and sets count elements to the default value.
 
 [clear](deq/clear.md) `(A* self)`
 
@@ -161,17 +161,17 @@ erases the element at index
 
 [erase_it](deq/erase.md) `(A* self, I* pos)`
 
-erases the element at pos (NYI)
+erases the element at pos
 
 [erase_range](deq/erase.md) `(A* self, I* first, I* last)`
 
-erases elements (NYI)
+erases elements
 
 [push_front](deq/push_front.md) `(A* self, T value)`
 
 inserts an element to the beginning
 
-[emplace_front](deq/emplace_front.md) `(A* self, T values...)`
+[emplace_front](deq/emplace_front.md) `(A* self, int numvalues, T values...)`
 
 inserts elements to the beginning (NYI)
 
@@ -191,9 +191,9 @@ removes the first element
 
 removes the last element
 
-[resize](deq/resize.md) `(A* self, size_t count)`
+[resize](deq/resize.md) `(A* self, size_t count, T default_value)`
 
-Resizes the container to contain count elements. (FIXME, no default value)
+Resizes the container to contain count elements.
 
 [swap](deq/swap.md) `(A* self, A* other)`
 

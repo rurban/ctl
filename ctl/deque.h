@@ -7,6 +7,7 @@
 #endif
 
 #include <ctl/ctl.h>
+#include <stdarg.h>
 
 #define A JOIN(deq, T)
 #define B JOIN(A, bucket)
@@ -263,7 +264,6 @@ JOIN(A, pop_back)(A* self)
     }
 }
 
-// TODO erase_it, erase_range
 static inline void
 JOIN(A, erase)(A* self, size_t index)
 {
@@ -285,28 +285,6 @@ JOIN(A, erase)(A* self, size_t index)
     }
     self->free = saved;
 }
-
-#if 0
-// TODO emplace, emplace_front, emplace_back
-static inline void
-JOIN(A, emplace)(A* self, I* pos, ...){}
-
-static inline void
-JOIN(A, emplace_front)(A* self, ...){}
-
-static inline void
-JOIN(A, emplace_back)(A* self, ...){}
-
-// TODO insert_it, insert_range, insert_count
-static inline void
-JOIN(A, insert_it)(A* self, I* pos, T value){}
-
-static inline void
-JOIN(A, insert_range)(A* self, I* first, I* last){}
-
-static inline void
-JOIN(A, insert_count)(A* self, I* pos, size_t count, T value){}
-#endif
 
 static inline void
 JOIN(A, insert)(A* self, size_t index, T value)
@@ -334,13 +312,91 @@ JOIN(A, insert)(A* self, size_t index, T value)
         JOIN(A, push_back)(self, value);
 }
 
-// FIXME, no default value
+#ifdef DEBUG
+
+static inline void
+JOIN(A, erase_it)(A* self, I* pos)
+{
+    return JOIN(A, erase)(self, pos->index);
+}
+
+static inline void
+JOIN(A, erase_range)(A* self, I* first, I* last)
+{
+    for(size_t i=0; first->index < last->index; i++)
+        JOIN(A, erase)(self, i);
+}
+
+static inline void
+JOIN(A, emplace)(A* self, I* pos, int numvalues, ...)
+{
+    va_list sp;
+    va_start(sp, numvalues);
+    va_end(sp);
+    for(int i=0; i < numvalues; i++)
+    {
+        T value = va_arg(sp, T);
+        JOIN(A, insert)(self, pos->index, value);
+    }
+}
+
+static inline void
+JOIN(A, emplace_front)(A* self, int numvalues, ...)
+{
+    va_list sp;
+    va_start(sp, numvalues);
+    va_end(sp);
+    for(int i=0; i < numvalues; i++)
+    {
+        T value = va_arg(sp, T);
+        JOIN(A, push_front)(self, value);
+    }
+}
+
+static inline void
+JOIN(A, emplace_back)(A* self, int numvalues, ...)
+{
+    va_list sp;
+    va_start(sp, numvalues);
+    va_end(sp);
+    for(int i=0; i < numvalues; i++)
+    {
+        T value = va_arg(sp, T);
+        JOIN(A, push_back)(self, value);
+    }
+}
+
+static inline void
+JOIN(A, insert_it)(A* self, I* pos, T value)
+{
+    JOIN(A, insert)(self, pos->index, value);
+}
+
+static inline void
+JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
+{
+    if (first->index < last->index)
+        for(I it = *first; !it.done; it.step(&it))
+            JOIN(A, insert)(self, pos->index, *it.ref);
+}
+
+static inline void
+JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
+{
+    // avoid overflows, esp. silent signed conversions, like -1
+    if (self->size + count < JOIN(A, max_size)())
+        for(size_t i = pos->index; i < count + pos->index; i++)
+            JOIN(A, insert)(self, pos->index, value);
+}
+
+#endif
+
 static inline void
 JOIN(A, resize)(A* self, size_t size, T value)
 {
     if(size != self->size)
     {
-        // Optimize POD with realloc and memset
+        // TODO optimize POD with realloc and memset
         while(size != self->size)
             if(size < self->size)
                 JOIN(A, pop_back)(self);
@@ -349,6 +405,7 @@ JOIN(A, resize)(A* self, size_t size, T value)
     }
     if(self->free)
         self->free(&value);
+
 }
 
 static inline void
@@ -388,31 +445,35 @@ JOIN(A, copy)(A* self)
     return other;
 }
 
-// TODO size_t from, to index
-// TODO sort_range with iters
 static inline void
-JOIN(A, ranged_sort)(A* self, int64_t a, int64_t b, int _compare(T*, T*))
+JOIN(A, _ranged_sort)(A* self, long from, long to, int _compare(T*, T*))
 {
-    if(a >= b)
+    if(from >= to)
         return;
-    int64_t mid = (a + b) / 2;
-    SWAP(T, JOIN(A, at)(self, a), JOIN(A, at)(self, mid));
-    int64_t z = a;
-    for(int64_t i = a + 1; i <= b; i++)
-        if(_compare(JOIN(A, at)(self, a), JOIN(A, at)(self, i)))
+    long mid = (from + to) / 2;
+    SWAP(T, JOIN(A, at)(self, from), JOIN(A, at)(self, mid));
+    long z = from;
+    for(long i = from + 1; i <= to; i++)
+        if(_compare(JOIN(A, at)(self, from), JOIN(A, at)(self, i)))
         {
             z++;
             SWAP(T, JOIN(A, at)(self, z), JOIN(A, at)(self, i));
         }
-    SWAP(T, JOIN(A, at)(self, a), JOIN(A, at)(self, z));
-    JOIN(A, ranged_sort)(self, a, z - 1, _compare);
-    JOIN(A, ranged_sort)(self, z + 1, b, _compare);
+    SWAP(T, JOIN(A, at)(self, from), JOIN(A, at)(self, z));
+    JOIN(A, ranged_sort)(self, from, z - 1, _compare);
+    JOIN(A, ranged_sort)(self, z + 1, to, _compare);
 }
 
 static inline void
 JOIN(A, sort)(A* self, int _compare(T*, T*))
 {
     JOIN(A, ranged_sort)(self, 0, self->size - 1, _compare);
+}
+
+static inline void
+JOIN(A, sort_range)(A* self, I* from, I* to, int _compare(T*, T*))
+{
+    JOIN(A, ranged_sort)(self, from->index, to->index, _compare);
 }
 
 static inline size_t

@@ -318,12 +318,12 @@ JOIN(A, remove)(A* self, T value){
 }
 
 static inline I
-JOIN(A, emplace)(A* self, I* pos, size_t nargs, ...) {
+JOIN(A, emplace)(A* self, I* pos, int numvalues, ...) {
     va_list sp;
-    va_start(sp, nargs);
-    for (size_t i=0; i < nargs; i++)
+    va_start(sp, numvalues);
+    for (int i=0; i < numvalues; i++)
     {
-        T value = *(T*)sp;
+        T value = va_arg(sp, T);
         B* node = JOIN(B, init)(value);
         JOIN(A, connect)(self, pos->node, node, 1);
     }
