@@ -53,6 +53,12 @@ digi_match(digi* a, digi* b)
     return *a->value == *b->value;
 }
 
+static inline size_t
+digi_hash(digi* a)
+{
+    return (size_t)*a->value;
+}
+
 struct DIGI
 {
     int* value;
@@ -99,7 +105,7 @@ struct DIGI
     }
     size_t hash(const DIGI& a) const
     {
-      return *a.value % 0xffffffff;
+        return (size_t)*a.value;
     }
 };
 
@@ -107,7 +113,7 @@ class DIGI_hash {
 public:
     std::size_t operator()(const DIGI& a) const
     {
-        return (*a.value % 0xffffffff);
+        return (size_t)*a.value;
     }
 };
 

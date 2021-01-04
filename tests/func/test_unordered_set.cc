@@ -1,12 +1,6 @@
 #include "../test.h"
 #include "digi.hh"
 
-static inline size_t
-digi_hash(digi* a)
-{
-  return (size_t)(*a->value % 0xffffffff);
-}
-
 #define USE_INTERNAL_VERIFY
 #define T digi
 #include <ctl/unordered_set.h>
@@ -32,7 +26,9 @@ static void
 setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
 {
     size_t iters = TEST_RAND(TEST_MAX_SIZE);
-    *a = uset_digi_init(5, digi_hash, digi_match);
+    iters = 5; // TMP
+    LOG ("\nSETUP_SETS %lu\n", iters);
+    *a = uset_digi_init(iters, digi_hash, digi_match);
     for(size_t inserts = 0; inserts < iters; inserts++)
     {
         const int vb = TEST_RAND(TEST_MAX_SIZE);
@@ -81,6 +77,7 @@ main(void)
             case TEST_INSERT:
             {
                 const int vb = TEST_RAND(TEST_MAX_SIZE);
+                LOG ("\nTEST INSERT %d\n", vb);
                 uset_digi_insert(&a, digi_init(vb));
                 b.insert(DIGI{vb});
                 CHECK(a, b);
@@ -89,6 +86,7 @@ main(void)
             case TEST_ERASE:
             {
                 const size_t erases = TEST_RAND(TEST_MAX_SIZE) / 4;
+                LOG ("\nTEST ERASE %lu\n", erases);
                 for(size_t i = 0; i < erases; i++)
                     if(a.size > 0)
                     {
@@ -105,6 +103,7 @@ main(void)
             case TEST_REHASH:
             {
                 size_t size = uset_digi_size(&a);
+                LOG ("\nTEST REHASH -> %lu\n", size);
                 b.rehash(size * 2);
                 uset_digi_rehash(&a, size * 2);
                 CHECK(a, b);
@@ -113,14 +112,13 @@ main(void)
             case TEST_RESERVE:
             {
                 size_t size = uset_digi_size(&a);
-                size_t load = uset_digi_load_factor(&a);
+                float load = uset_digi_load_factor(&a);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 bb.reserve(size * 2 / load);
-#if 0
+                LOG ("\nTEST RESERVE %lu, %f\n", size, load);
                 uset_digi aa = uset_digi_copy(&a);
                 uset_digi_reserve(&aa, size * 2 / load);
                 CHECK(aa, bb);
-#endif
                 break;
             }
             case TEST_SWAP:
@@ -129,6 +127,7 @@ main(void)
                 uset_digi aaa = uset_digi_init(1, digi_hash, digi_match);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 std::unordered_set<DIGI,DIGI_hash> bbb;
+                LOG ("\nTEST SWAP\n");
                 uset_digi_swap(&aaa, &aa);
                 std::swap(bb, bbb);
                 CHECK(aaa, bbb);
@@ -140,6 +139,7 @@ main(void)
             {
                 int key = TEST_RAND(TEST_MAX_SIZE);
                 digi kd = digi_init(key);
+                LOG ("\nTEST COUNT\n");
                 int aa = uset_digi_count(&a, kd);
                 int bb = b.count(DIGI{key});
                 assert(aa == bb);
@@ -151,6 +151,7 @@ main(void)
             {
                 int key = TEST_RAND(TEST_MAX_SIZE);
                 digi kd = digi_init(key);
+                LOG ("\nTEST FIND %d\n", key);
                 uset_digi_node* aa = uset_digi_find(&a, kd);
                 auto bb = b.find(DIGI{key});
                 if(bb == b.end())
@@ -164,6 +165,7 @@ main(void)
             case TEST_CLEAR:
             {
                 b.clear();
+                LOG ("\nTEST CLEAR\n");
                 uset_digi_clear(&a);
                 CHECK(a, b);
                 break;
@@ -172,10 +174,13 @@ main(void)
             case TEST_CONTAINS: // C++20.
             {
                 int key = TEST_RAND(TEST_MAX_SIZE);
-                int aa = uset_digi_contains(&a, key);
+                LOG ("\nTEST CONTAINS %d\n", key);
+                digi kd = digi_init(key);
+                int aa = uset_digi_contains(&a, kd);
                 int bb = b.contains(key);
                 assert(aa == bb);
                 CHECK(a, b);
+                digi_free(&kd);
                 break;
             }
             case TEST_EMPLACE:
@@ -184,6 +189,7 @@ main(void)
             case TEST_CONTAINS:
             case TEST_ERASE_IF:
             {
+                LOG ("\nTEST ERASE_IF %lu\n", a.size);
                 size_t a_erases = uset_digi_erase_if(&a, digi_is_odd);
                 size_t b_erases = b.erase_if(DIGI_is_odd);
                 assert(a_erases == b_erases);
@@ -195,6 +201,7 @@ main(void)
 #endif
             case TEST_COPY:
               { // C++20
+                LOG ("\nTEST COPY %lu\n", a.size);
                 uset_digi aa = uset_digi_copy(&a);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 CHECK(aa, bb);
@@ -206,6 +213,7 @@ main(void)
             {
                 uset_digi aa = uset_digi_copy(&a);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
+                LOG ("\nTEST EQUAL %lu\n", aa.size);
                 assert(uset_digi_equal(&a, &aa, digi_match));
                 assert(b == bb);
                 uset_digi_free(&aa);
@@ -217,6 +225,7 @@ main(void)
                 uset_digi aa;
                 std::unordered_set<DIGI,DIGI_hash> bb;
                 setup_sets(&aa, bb);
+                LOG ("\nTEST UNION %lu, %lu\n", a.size, aa.size);
                 uset_digi aaa = uset_digi_union(&a, &aa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
@@ -233,6 +242,7 @@ main(void)
                 uset_digi aa;
                 std::unordered_set<DIGI,DIGI_hash> bb;
                 setup_sets(&aa, bb);
+                LOG ("\nTEST INTERSECTION %lu, %lu\n", a.size, aa.size);
                 uset_digi aaa = uset_digi_intersection(&a, &aa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
@@ -249,6 +259,7 @@ main(void)
                 uset_digi aa;
                 std::unordered_set<DIGI,DIGI_hash> bb;
                 setup_sets(&aa, bb);
+                LOG ("\nTEST SYMMETRIC_DIFFERENCE %lu, %lu\n", a.size, aa.size);
                 uset_digi aaa = uset_digi_symmetric_difference(&a, &aa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
@@ -265,6 +276,7 @@ main(void)
                 uset_digi aa;
                 std::unordered_set<DIGI,DIGI_hash> bb;
                 setup_sets(&aa, bb);
+                LOG ("\nTEST DIFFERENCE %lu, %lu\n", a.size, aa.size);
                 uset_digi aaa = uset_digi_difference(&a, &aa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),

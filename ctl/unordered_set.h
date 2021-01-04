@@ -1,4 +1,9 @@
-/* Unordered set as hashtable */
+/* Unordered set as hashtable.
+   This closed, linked list hashing has the advantage of keeping pointers
+   into the set valid.
+   The faster open addressing moves pointers. Maybe add another class for open
+   hashes (omap).
+ */
 #ifndef T
 #error "Template type T undefined for <unordered_set.h>"
 #endif
@@ -31,13 +36,13 @@ typedef struct A
 
 typedef struct I
 {
-    T* ref;
-    A* container;
-    size_t hash;
-    void (*step)(struct I*);
     B* next;
+    A* container;
+    T* ref;
+    void (*step)(struct I*);
     B* node;
     B* end;
+    size_t bucket_index;
     int done;
 } I;
 
@@ -47,8 +52,10 @@ JOIN(A, begin)(A* self)
     for(size_t i = 0; i < self->bucket_count; i++)
     {
         B* node = self->buckets[i];
-        if(node)
+        if(node) {
+            LOG ("begin %lu %p\n", i, (void*)node);
             return node;
+        }
     }
     return NULL;
 }
@@ -61,29 +68,53 @@ JOIN(A, end)(A* self)
 }
 
 static inline void
-JOIN(I, update)(I* self)
+JOIN(I, update)(I* self, size_t bucket_index)
 {
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert (self->node != self->next);
+#endif
     self->node = self->next;
     self->ref = &self->node->value;
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert (self->next != self->node->next);
+#endif
     self->next = self->node->next;
-    self->hash = self->container->hash(self->ref);
+    LOG ("update: bucket_index %lu -> %lu of %lu\n", self->bucket_index,
+         bucket_index, self->container->bucket_count);
+    self->bucket_index = bucket_index;
 }
 
+/*
+  need two states: if next is not empty, we are still in the bucket chain.
+  if empty, we need to advance to the next bucket.
+*/
 static inline void
 JOIN(I, step)(I* self)
 {
+    // or just !self->next
     if(self->next == JOIN(A, end)(self->container))
     {
-        for(size_t i = self->hash + 1; i < self->container->bucket_count; i++)
-            if((self->next = self->container->buckets[i]))
+        for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
+        {
+            LOG("step buckets[%lu] of %lu\n", i, self->container->bucket_count);
+            B* next = self->container->buckets[i];
+            if(next != NULL) // && self->next != next) DEBUG only
             {
-                JOIN(I, update)(self);
+                self->next = next;
+                LOG ("step found in buckets[%lu]\n", i);
+                JOIN(I, update)(self, i);
                 return;
             }
+        }
+        LOG ("step done\n");
+        self->bucket_index = 0;
         self->done = 1;
     }
     else
-        JOIN(I, update)(self);
+    {   // still in chain. advance to next in chain
+        LOG ("step next\n");
+        JOIN(I, update)(self, self->bucket_index);
+    }
 }
 
 static inline I
@@ -99,10 +130,14 @@ JOIN(I, range)(A* container, B* begin, B* end)
         self.next = self.node->next;
         self.end = end;
         self.container = container;
-        self.hash = self.container->hash(self.ref);
+        //self.hash = self.container->hash(self.ref);
     }
     else
+    {
+        LOG ("range done\n");
+        //self.bucket_index = 0;
         self.done = 1;
+    }
     return self;
 }
 
@@ -151,6 +186,7 @@ static inline B**
 JOIN(A, bucket)(A* self, T value)
 {
     size_t hash = self->hash(&value) % self->bucket_count;
+    LOG ("hash -> buckets[%lu]\n", hash);
     return &self->buckets[hash];
 }
 
@@ -232,19 +268,31 @@ static inline void
 JOIN(A, insert)(A* self, T value)
 {
     B** buckets = JOIN(A, bucket)(self, value);
-    for(B* n = *buckets; n; n = n->next)
+    int i = 0;
+    //LOG ("inserts: hash -> buckets[%ld]\n", (buckets - self->buckets)/sizeof(buckets));
+    for(B* n = *buckets; n; n = n->next, i++)
+    {
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+        assert (n != n->next);
+#endif
+        LOG ("bucket[%d] %p\n", i, (void*)n);
         if(self->equal(&value, &n->value))
         {
+            LOG ("insert: already in bucket[%d] %p\n", i, (void*)n);
             if(self->free)
                 self->free(&value);
             return;
         }
+    }
     *buckets = JOIN(B, push)(*buckets, JOIN(B, init)(value));
+    LOG ("insert: add bucket[%d] %p\n", i, (void*)*buckets);
     self->size++;
     if (JOIN(A, load_factor)(self) > JOIN(A, max_load_factor)())
     {
         size_t max_bucket_count = JOIN(A, max_bucket_count)(self);
         size_t new_size = JOIN(A, __next_prime)(max_bucket_count + 1);
+        LOG ("resize from %lu to %lu, load %f\n", self->size, new_size,
+                 JOIN(A, load_factor)(self));
         JOIN(A, rehash)(self, new_size);
     }
 }
@@ -331,12 +379,13 @@ JOIN(A, clear)(A* self)
 static inline A
 JOIN(A, copy)(A* self)
 {
-    fprintf (stderr, "copy\norig size: %lu\n", self->size);
+    LOG ("copy\norig size: %lu\n", self->size);
     A other = JOIN(A, init)(self->bucket_count, self->hash, self->equal);
     foreach(A, self, it) {
-        fprintf (stderr, "size: %lu\n", other.size);
+        LOG ("size: %lu\n", other.size);
         JOIN(A, insert)(&other, self->copy(it.ref));
     }
+    LOG ("final size: %lu\n", other.size);
     return other;
 }
 

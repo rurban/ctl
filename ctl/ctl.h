@@ -16,4 +16,6 @@
 
 #define len(a) (sizeof(a) / sizeof(*(a)))
 
+#define LOG(...) fprintf(stderr, __VA_ARGS__)
+
 #endif
