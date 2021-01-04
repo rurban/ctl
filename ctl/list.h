@@ -30,13 +30,8 @@ typedef struct A
 
 typedef struct I
 {
-    void (*step)(struct I*);
-    T* ref;
+    CTL_COMMONFIELDS_ITER;
     B* begin;
-    B* node;
-    B* next;
-    B* end;
-    int done;
 } I;
 
 static inline T*

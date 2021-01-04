@@ -36,14 +36,9 @@ typedef struct A
 
 typedef struct I
 {
-    B* next;
+    CTL_COMMONFIELDS_ITER;
     A* container;
-    T* ref;
-    void (*step)(struct I*);
-    B* node;
-    B* end;
     size_t bucket_index;
-    int done;
 } I;
 
 static inline B*

@@ -27,12 +27,8 @@ typedef struct A
 
 typedef struct I
 {
-    void (*step)(struct I*);
-    T* ref;
+    CTL_VECTORFIELDS_ITER;
     T* begin;
-    T* end;
-    T* next;
-    int done;
 } I;
 
 static inline size_t

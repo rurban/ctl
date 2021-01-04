@@ -34,13 +34,11 @@ typedef struct A
 
 typedef struct I
 {
-    void (*step)(struct I*);
+    CTL_COMMONFIELDS_ITER;
     A* container;
-    T* ref;
     size_t index;
     size_t index_next;
     size_t index_last;
-    int done;
 } I;
 
 static inline B**
