@@ -244,7 +244,7 @@ JOIN(A, insert)(A* self, T value)
     if (JOIN(A, load_factor)(self) > JOIN(A, max_load_factor)())
     {
         size_t max_bucket_count = JOIN(A, max_bucket_count)(self);
-        size_t new_size = JOIN(A, __next_prime)(max_bucket_count);
+        size_t new_size = JOIN(A, __next_prime)(max_bucket_count + 1);
         JOIN(A, rehash)(self, new_size);
     }
 }
