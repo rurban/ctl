@@ -105,6 +105,19 @@ JOIN(I, step)(I* self)
     }
 }
 
+static inline void
+JOIN(I, advance)(I* self, int i)
+{
+    if(self->index + i >= self->index_last || (long)self->index + i < 0)
+        self->done = 1;
+    else
+    {
+        self->index += i;
+        self->ref = JOIN(A, at)(self->container, self->index);
+        self->index_next += i;
+    }
+}
+
 static inline I
 JOIN(I, range)(A* container, T* begin, T* end)
 {
@@ -366,30 +379,33 @@ JOIN(A, emplace_back)(A* self, int numvalues, ...)
     }
 }
 
-static inline void
+static inline I*
 JOIN(A, insert_it)(A* self, I* pos, T value)
 {
     JOIN(A, insert)(self, pos->index, value);
+    return pos;
 }
 
-static inline void
+static inline I*
 JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
 {
     if (first->index < last->index)
         for(I it = *first; !it.done; it.step(&it))
-            JOIN(A, insert)(self, pos->index, *it.ref);
+            JOIN(A, insert)(self, pos->index++, *it.ref);
+    return pos;
 }
 
-static inline void
+static inline I*
 JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
 {
     // avoid overflows, esp. silent signed conversions, like -1
     if (self->size + count < JOIN(A, max_size)())
         for(size_t i = pos->index; i < count + pos->index; i++)
-            JOIN(A, insert)(self, pos->index, value);
+            JOIN(A, insert)(self, i, value);
+    return pos;
 }
 
-#endif
+#endif // DEBUG
 
 static inline void
 JOIN(A, resize)(A* self, size_t size, T value)

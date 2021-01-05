@@ -141,17 +141,17 @@ inserts the element at index.
 
 [insert_it](deq/insert.md) `(A* self, I* pos, T value)`
 
-inserts value before pos. (NYI)
+inserts value before pos.
 
 [insert_count](deq/insert.md) `(A* self, I* pos, size_t count, T value)`
 
-inserts count values before pos. (NYI)
+inserts count values before pos.
 
 [insert_range](deq/insert.md) `(A* self, I* pos, I* first, I* last)`
 
-inserts values at from first to last. (NYI)
+inserts values from range [first, last) before pos.
 
-[emplace](deq/emplace.md) `(A* self, I* pos, T values...)`
+[emplace](deq/emplace.md) `(A* self, I* pos, int numvalues, T values...)`
 
 Inserts values into the container directly before pos.
 
@@ -179,7 +179,7 @@ inserts elements to the beginning (NYI)
 
 inserts an element to the end
 
-[emplace_back](map/emplace_back.md) `(A* self, T values...)`
+[emplace_back](map/emplace_back.md) `(A* self, int numvalues, T values...)`
 
 adds elements to the end
 
