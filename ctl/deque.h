@@ -54,6 +54,7 @@ JOIN(A, last)(A* self)
     return &self->pages[self->mark_b - 1];
 }
 
+// TODO bounds check
 static inline T*
 JOIN(A, at)(A* self, size_t index)
 {
@@ -325,19 +326,65 @@ JOIN(A, insert)(A* self, size_t index, T value)
         JOIN(A, push_back)(self, value);
 }
 
-#ifdef DEBUG
-
 static inline void
-JOIN(A, erase_it)(A* self, I* pos)
+JOIN(A, clear)(A* self)
 {
-    return JOIN(A, erase)(self, pos->index);
+    while(!JOIN(A, empty)(self))
+        JOIN(A, pop_back)(self);
 }
 
 static inline void
+JOIN(A, free)(A* self)
+{
+    JOIN(A, clear)(self);
+    free(self->pages);
+    *self = JOIN(A, init)();
+}
+
+static inline A
+JOIN(A, copy)(A* self)
+{
+    A other = JOIN(A, init)();
+    while(other.size < self->size)
+    {
+        T* value = JOIN(A, at)(self, other.size);
+        JOIN(A, push_back)(&other, other.copy(value));
+    }
+    return other;
+}
+
+static inline void
+JOIN(A, resize)(A* self, size_t size, T value)
+{
+    if(size != self->size)
+    {
+        // TODO optimize POD with realloc and memset
+        while(size != self->size)
+            if(size < self->size)
+                JOIN(A, pop_back)(self);
+            else
+                JOIN(A, push_back)(self, self->copy(&value));
+    }
+    if(self->free)
+        self->free(&value);
+
+}
+
+static inline I*
+JOIN(A, erase_it)(A* self, I* pos)
+{
+    JOIN(A, erase)(self, pos->index);
+    return pos;
+}
+
+#ifdef DEBUG
+
+static inline I*
 JOIN(A, erase_range)(A* self, I* first, I* last)
 {
     for(size_t i=0; first->index < last->index; i++)
         JOIN(A, erase)(self, i);
+    return first;
 }
 
 static inline void
@@ -379,6 +426,8 @@ JOIN(A, emplace_back)(A* self, int numvalues, ...)
     }
 }
 
+#endif // DEBUG
+
 static inline I*
 JOIN(A, insert_it)(A* self, I* pos, T value)
 {
@@ -390,39 +439,51 @@ static inline I*
 JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
 {
     if (first->index < last->index)
-        for(I it = *first; !it.done; it.step(&it))
-            JOIN(A, insert)(self, pos->index++, *it.ref);
+    {
+        size_t index = pos->index;
+        if (!last->done)
+            first->index_last = last->index;
+        // broken if overlapping. STL does mostly fine, but undefined behavior.
+        // and sometimes it even fails. so skip or assert.
+        if (first->container == pos->container)
+        {
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+            assert (first->container != pos->container);
+#endif
+#if 0
+            A copy = JOIN(A, copy)(self);
+            for(I it = *first; !it.done; it.step(&it))
+                JOIN(A, insert)(&copy, index++, self->copy(it.ref));
+            for (size_t i = pos->index; i < index; i++)
+            {
+                T value = *JOIN(A, at)(&copy, i);
+                JOIN(A, insert)(self, i, self->copy(&value));
+            }
+            JOIN(A, free)(&copy);
+#endif
+        }
+        else
+            for(I it = *first; !it.done; it.step(&it))
+                JOIN(A, insert)(self, index++, self->copy(it.ref));
+    }
     return pos;
 }
 
+#ifdef DEBUG
 static inline I*
 JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
 {
     // avoid overflows, esp. silent signed conversions, like -1
     if (self->size + count < JOIN(A, max_size)())
-        for(size_t i = pos->index; i < count + pos->index; i++)
-            JOIN(A, insert)(self, i, value);
+    {
+        size_t index = pos->index;
+        JOIN(A, insert)(self, index, value);
+        for(size_t i = index + 1; i < count + index; i++)
+            JOIN(A, insert)(self, i, self->copy(&value));
+    }
     return pos;
 }
-
-#endif // DEBUG
-
-static inline void
-JOIN(A, resize)(A* self, size_t size, T value)
-{
-    if(size != self->size)
-    {
-        // TODO optimize POD with realloc and memset
-        while(size != self->size)
-            if(size < self->size)
-                JOIN(A, pop_back)(self);
-            else
-                JOIN(A, push_back)(self, self->copy(&value));
-    }
-    if(self->free)
-        self->free(&value);
-
-}
+#endif
 
 static inline void
 JOIN(A, assign)(A* self, size_t size, T value)
@@ -432,33 +493,6 @@ JOIN(A, assign)(A* self, size_t size, T value)
         JOIN(A, set)(self, i, self->copy(&value));
     if(self->free)
         self->free(&value);
-}
-
-static inline void
-JOIN(A, clear)(A* self)
-{
-    while(!JOIN(A, empty)(self))
-        JOIN(A, pop_back)(self);
-}
-
-static inline void
-JOIN(A, free)(A* self)
-{
-    JOIN(A, clear)(self);
-    free(self->pages);
-    *self = JOIN(A, init)();
-}
-
-static inline A
-JOIN(A, copy)(A* self)
-{
-    A other = JOIN(A, init)();
-    while(other.size < self->size)
-    {
-        T* value = JOIN(A, at)(self, other.size);
-        JOIN(A, push_back)(&other, other.copy(value));
-    }
-    return other;
 }
 
 // including to

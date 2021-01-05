@@ -17,7 +17,7 @@ void print_deq(deq_digi *a)
 void print_deque(std::deque<DIGI> &b)
 {
     for(size_t i = 0; i < b.size(); i++)
-        printf ("%zu: %d\n", i, *b.at(i).value);
+        printf ("%zu: %d\n", i, b.at(i).value ? *b.at(i).value : -1);
     printf ("\n");
 }
 
@@ -208,11 +208,17 @@ main(void)
     test_capacity_edge_case();
     test_random_work_load();
     INIT_SRAND;
-    const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    int test = -1;
+    char *env = getenv ("TEST");
+    if (env)
+        sscanf(env, "%d", &test);
+    size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    if (test >= 0)
+        loops = 10;
     for(size_t loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(LONG)
         size = 10;
 #endif
         enum
@@ -247,15 +253,15 @@ main(void)
                 TEST_POP_FRONT,
                 TEST_CLEAR,
                 TEST_ERASE,
+                TEST_ERASE_IT, // 6
+                TEST_INSERT_IT,
+                TEST_INSERT_RANGE, // 8
 #ifdef DEBUG
-                TEST_ERASE_IT,
+                TEST_INSERT_COUNT, // 9
                 TEST_ERASE_RANGE,
                 TEST_EMPLACE,
                 TEST_EMPLACE_FRONT,
                 TEST_EMPLACE_BACK,
-                TEST_INSERT_IT,
-                TEST_INSERT_COUNT,
-                TEST_INSERT_RANGE,
 #endif
                 TEST_RESIZE,
                 TEST_SHRINK_TO_FIT,
@@ -272,6 +278,9 @@ main(void)
                 TEST_TOTAL,
             };
             int which = TEST_RAND(TEST_TOTAL);
+            if (test >= 0 && test < (int)TEST_TOTAL)
+                which = test;
+            LOG ("TEST %d\n", which);
             switch(which)
             {
                 case TEST_PUSH_BACK:
@@ -424,10 +433,9 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_INSERT_IT:
                 {
-                    size_t amount = TEST_RAND(15);
+                    size_t amount = TEST_RAND(512);
                     for(size_t count = 0; count < amount; count++)
                     {
                         const int value = TEST_RAND(TEST_MAX_VALUE);
@@ -437,51 +445,124 @@ main(void)
                         deq_digi_it_advance(&it, index);
                         pos = deq_digi_insert_it(&a, &it, digi_init(value));
                         LOG ("CTL insert_it %d at %lu:\n", value, pos->index);
-                        print_deq (&a);
+                        //print_deq (&a);
 
                         std::deque<DIGI>::iterator iter =
                             b.insert(b.begin() + index, DIGI{value});
                         LOG ("STL insert %d at %ld:\n", value, std::distance(b.begin(),iter));
-                        print_deque (b);
+                        //print_deque (b);
                         CHECK_ITER (pos, b, iter);
                     }
                     CHECK(a, b);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_INSERT_COUNT:
                 {
+#ifdef LONG
                     size_t amount = TEST_RAND(512);
+#else
+                    size_t amount = TEST_RAND(10);
+#endif
                     const int value = TEST_RAND(TEST_MAX_VALUE);
-                    const size_t index = TEST_RAND(a.size);
+                    const size_t index = TEST_RAND(a.size - 1);
                     deq_digi_it *pos;
                     deq_digi_it it = deq_digi_it_each(&a);
                     deq_digi_it_advance(&it, index);
                     pos = deq_digi_insert_count(&a, &it, amount, digi_init(value));
+                    LOG ("CTL insert_count at %lu, %zux %d:\n", pos->index, amount, value);
+                    print_deq (&a);
+
                     std::deque<DIGI>::iterator iter =
                         b.insert(b.begin() + index, amount, DIGI{value});
+                    LOG ("STL insert %zux %d at %ld:\n", amount, value,
+                         std::distance(b.begin(),iter));
                     CHECK_ITER (pos, b, iter);
+                    print_deque (b); // maybe corrupt
                     CHECK(a, b);
                     break;
                 }
+#endif
+                case TEST_ERASE_IT:
+                    if(a.size > 0)
+                    {
+                        const size_t index = TEST_RAND(a.size);
+                        LOG ("erase_it %zu from %zu\n", index, a.size);
+                        deq_digi_it* pos;
+                        deq_digi_it it = deq_digi_it_each(&a);
+                        deq_digi_it_advance(&it, index);
+                        pos = deq_digi_erase_it(&a, &it);
+                        std::deque<DIGI>::iterator iter =
+                            b.erase(b.begin() + index);
+                        CHECK_ITER (pos, b, iter);
+                    }
+                    CHECK(a, b);
+                    break;
                 case TEST_INSERT_RANGE:
                 {
                     const size_t index = std::min(TEST_RAND(a.size - 4), 2UL);
+                    deq_digi aa = deq_digi_copy(&a);
+                    std::deque<DIGI> bb = b;
                     deq_digi_it *pos;
-                    deq_digi_it it = deq_digi_it_each(&a);
-                    deq_digi_it from = deq_digi_it_each(&a);
-                    deq_digi_it end = deq_digi_it_each(&a);
-                    deq_digi_it_advance(&it, 1);
-                    deq_digi_it_advance(&from, index);
-                    end.index = a.size;
-                    end.done = 1;
-                    pos = deq_digi_insert_range(&a, &it, &from, &end);
+                    if (a.size > 2)
+                    {   // safe variant, from a copy
+                        deq_digi_it it = deq_digi_it_each(&a);
+                        deq_digi_it from = deq_digi_it_each(&aa);
+                        deq_digi_it end = deq_digi_it_each(&aa);
+                        deq_digi_it_advance(&it, 1);
+                        deq_digi_it_advance(&from, index);
+                        end.index = a.size;
+                        end.done = 1;
+                        pos = deq_digi_insert_range(&a, &it, &from, &end);
+                        LOG ("CTL insert_range safe at %lu, [%lu - %lu):\n", pos->index,
+                             from.index, end.index);
+                        print_deq (&a);
 
-                    std::deque<DIGI>::iterator iter =
-                        b.insert(b.begin() + 1, b.begin() + index, b.end());
-                    CHECK_ITER (pos, b, iter);
-                    CHECK(a, b);
+                        std::deque<DIGI>::iterator iter =
+                            b.insert(b.begin() + 1, bb.begin() + index, bb.end());
+                        LOG ("STL insert at %ld:\n", std::distance(b.begin(),iter));
+                        CHECK_ITER (pos, b, iter);
+                        print_deque (b);
+                        CHECK(a, b);
+                    }
+#if 0
+                    // unsafe variant, from same object. fails at lower half
+                    // but since even g++ STL fails sometimes, skip that test
+                    if (a.size > 2)
+                    {
+                        deq_digi_resize(&a, aa.size, digi_init(0));
+                        deq_digi_it it = deq_digi_it_each(&a);
+                        deq_digi_it from = deq_digi_it_each(&a);
+                        deq_digi_it end = deq_digi_it_each(&a);
+                        deq_digi_it_advance(&it, 1);
+                        deq_digi_it_advance(&from, index);
+                        deq_digi_it_advance(&end, a.size - 1);
+                        pos = deq_digi_insert_range(&a, &it, &from, &end);
+                        LOG ("CTL insert_range unsafe at %lu, [%lu - %lu):\n", pos->index,
+                             from.index, end.index);
+                        print_deq (&a);
+
+                        b.resize(bb.size());
+                        std::deque<DIGI>::iterator iter =
+                            b.insert(b.begin() + 1, b.begin() + index, b.end() - 1);
+                        LOG ("STL insert at %ld:\n", std::distance(b.begin(),iter));
+                        CHECK_ITER (pos, b, iter);
+                        print_deque (b);
+                        CHECK(a, b);
+                    }
+#endif
+                    deq_digi_free(&aa);
                     break;
                 }
+#ifdef DEBUG
+                case TEST_ERASE_RANGE:
+                    LOG ("erase_range\n");
+                    // fallthrough
+                case TEST_EMPLACE:
+                case TEST_EMPLACE_FRONT:
+                case TEST_EMPLACE_BACK:
+                    LOG ("TEST %d not yet implemented\n", which);
+                    break;
 #endif
                 case TEST_ASSIGN:
                 {
