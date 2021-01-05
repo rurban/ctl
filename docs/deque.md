@@ -151,9 +151,9 @@ inserts count values before pos.
 
 inserts values from range [first, last) before pos.
 
-[emplace](deq/emplace.md) `(A* self, I* pos, int numvalues, T values...)`
+[emplace](deq/emplace.md) `(A* self, I* pos, T* value)`
 
-Inserts values into the container directly before pos.
+Inserts the value reference into the container directly before pos.
 
 [erase](deq/erase.md) `(A* self, size_t index)`
 
@@ -171,17 +171,17 @@ erases elements
 
 inserts an element to the beginning
 
-[emplace_front](deq/emplace_front.md) `(A* self, int numvalues, T values...)`
+[emplace_front](deq/emplace_front.md) `(A* self, T* value)`
 
-inserts elements to the beginning (NYI)
+inserts the value reference to the beginning.
 
 [push_back](deq/push_back.md) `(A* self, T value)`
 
-inserts an element to the end
+inserts an element to the end.
 
-[emplace_back](map/emplace_back.md) `(A* self, int numvalues, T values...)`
+[emplace_back](map/emplace_back.md) `(A* self, T* value)`
 
-adds elements to the end
+adds the value reference to the end.
 
 [pop_front](deq/pop_front.md) `(A* self)`
 

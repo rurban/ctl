@@ -391,46 +391,25 @@ JOIN(A, erase_range)(A* self, I* first, I* last)
     return first;
 }
 
+#endif
+
 static inline void
-JOIN(A, emplace)(A* self, I* pos, int numvalues, ...)
+JOIN(A, emplace)(A* self, I* pos, T* value)
 {
-    va_list sp;
-    va_start(sp, numvalues);
-    va_end(sp);
-    for(int i=0; i < numvalues; i++)
-    {
-        T value = va_arg(sp, T);
-        JOIN(A, insert)(self, pos->index, value);
-    }
+    JOIN(A, insert)(self, pos->index, *value);
 }
 
 static inline void
-JOIN(A, emplace_front)(A* self, int numvalues, ...)
+JOIN(A, emplace_front)(A* self, T* value)
 {
-    va_list sp;
-    va_start(sp, numvalues);
-    va_end(sp);
-    for(int i=0; i < numvalues; i++)
-    {
-        T value = va_arg(sp, T);
-        JOIN(A, push_front)(self, value);
-    }
+    JOIN(A, push_front)(self, *value);
 }
 
 static inline void
-JOIN(A, emplace_back)(A* self, int numvalues, ...)
+JOIN(A, emplace_back)(A* self, T* value)
 {
-    va_list sp;
-    va_start(sp, numvalues);
-    va_end(sp);
-    for(int i=0; i < numvalues; i++)
-    {
-        T value = va_arg(sp, T);
-        JOIN(A, push_back)(self, value);
-    }
+    JOIN(A, push_back)(self, *value);
 }
-
-#endif // DEBUG
 
 static inline I*
 JOIN(A, insert_it)(A* self, I* pos, T value)

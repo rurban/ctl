@@ -259,10 +259,10 @@ main(void)
 #ifdef DEBUG
                 TEST_INSERT_COUNT, // 9
                 TEST_ERASE_RANGE,
+#endif
                 TEST_EMPLACE,
                 TEST_EMPLACE_FRONT,
                 TEST_EMPLACE_BACK,
-#endif
                 TEST_RESIZE,
                 TEST_SHRINK_TO_FIT,
                 TEST_SORT,
@@ -557,13 +557,54 @@ main(void)
 #ifdef DEBUG
                 case TEST_ERASE_RANGE:
                     LOG ("erase_range\n");
-                    // fallthrough
-                case TEST_EMPLACE:
-                case TEST_EMPLACE_FRONT:
-                case TEST_EMPLACE_BACK:
-                    LOG ("TEST %d not yet implemented\n", which);
                     break;
 #endif
+                case TEST_EMPLACE:
+                {
+                    int value = TEST_RAND(TEST_MAX_VALUE);
+                    digi aa = digi_init(value);
+                    if (a.size < 1)
+                    {
+                        deq_digi_push_front(&a, digi_init(value));
+                        b.push_front(DIGI{value});
+                    }
+#ifdef DEBUG
+                    deq_digi_resize(&a, 10, digi_init(0));
+                    b.resize(10);
+                    LOG("before emplace\n");
+                    print_deq(&a);
+#endif
+                    deq_digi_it it = deq_digi_it_each(&a);
+                    deq_digi_it_advance(&it, 1);
+                    LOG("CTL emplace 1 %d\n", *aa.value);
+                    deq_digi_emplace(&a, &it, &aa);
+                    print_deq(&a);
+                    LOG("STL emplace begin++ %d\n", *DIGI{value});
+                    b.emplace(b.begin() + 1, DIGI{value});
+                    print_deque(b);
+                    CHECK(a, b);
+                    // may not delete, as emplace does not copy
+                    //digi_free(&aa);
+                    break;
+                }
+                case TEST_EMPLACE_FRONT:
+                {
+                    int value = TEST_RAND(TEST_MAX_VALUE);
+                    digi aa = digi_init(value);
+                    deq_digi_emplace_front(&a, &aa);
+                    b.emplace_front(DIGI{value});
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_EMPLACE_BACK:
+                {
+                    int value = TEST_RAND(TEST_MAX_VALUE);
+                    digi aa = digi_init(value);
+                    deq_digi_emplace_back(&a, &aa);
+                    b.emplace_back(DIGI{value});
+                    CHECK(a, b);
+                    break;
+                }
                 case TEST_ASSIGN:
                 {
                     const int value = TEST_RAND(TEST_MAX_VALUE);
