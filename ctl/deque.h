@@ -54,12 +54,16 @@ JOIN(A, last)(A* self)
     return &self->pages[self->mark_b - 1];
 }
 
-// TODO bounds check
 static inline T*
 JOIN(A, at)(A* self, size_t index)
 {
-    if(self->size == 0)
+    if(self->size == 0 || index >= self->size)
+    {
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+        assert (index < self->size);
+#endif
         return NULL;
+    }
     else
     {
         B* first = *JOIN(A, first)(self);
