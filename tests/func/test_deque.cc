@@ -258,8 +258,8 @@ main(void)
                 TEST_INSERT_RANGE, // 8
 #ifdef DEBUG
                 TEST_INSERT_COUNT, // 9
-                TEST_ERASE_RANGE,
 #endif
+                TEST_ERASE_RANGE,
                 TEST_EMPLACE,
                 TEST_EMPLACE_FRONT,
                 TEST_EMPLACE_BACK,
@@ -554,11 +554,35 @@ main(void)
                     deq_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_ERASE_RANGE:
-                    LOG ("erase_range\n");
+                {
+                    int value = TEST_RAND(TEST_MAX_VALUE);
+                    if (a.size < 4)
+                    {
+                        deq_digi_resize(&a, 10, digi_init(value));
+                        b.resize(10, DIGI{value});
+                    }
+                    const size_t index = std::max(TEST_RAND(a.size/2), 2UL);
+                    LOG ("erase_range %zu of %zu\n", index, a.size);
+                    deq_digi_it* pos;
+                    deq_digi_it from = deq_digi_it_each(&a);
+                    deq_digi_it end = deq_digi_it_each(&a);
+                    deq_digi_it_advance(&from, index);
+                    end.index = a.size;
+                    end.done = 1;
+                    pos = deq_digi_erase_range(&a, &from, &end);
+                    LOG ("CTL erase_range at %lu, [%lu - %lu):\n", pos->index,
+                         from.index, end.index);
+                    print_deq (&a);
+
+                    std::deque<DIGI>::iterator iter =
+                        b.erase(b.begin() + index, b.end());
+                    LOG ("STL erase [%ld, %ld):\n", std::distance(b.begin(),iter), a.size);
+                    CHECK_ITER (pos, b, iter);
+                    print_deque (b);
+                    CHECK(a, b);
                     break;
-#endif
+                }
                 case TEST_EMPLACE:
                 {
                     int value = TEST_RAND(TEST_MAX_VALUE);

@@ -381,17 +381,13 @@ JOIN(A, erase_it)(A* self, I* pos)
     return pos;
 }
 
-#ifdef DEBUG
-
 static inline I*
 JOIN(A, erase_range)(A* self, I* first, I* last)
 {
-    for(size_t i=0; first->index < last->index; i++)
-        JOIN(A, erase)(self, i);
+    for(size_t i = first->index; i < last->index; i++)
+        JOIN(A, erase)(self, first->index);
     return first;
 }
-
-#endif
 
 static inline void
 JOIN(A, emplace)(A* self, I* pos, T* value)
