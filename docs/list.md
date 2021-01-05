@@ -34,8 +34,11 @@ The function names are composed of the prefix **list_**, the user-defined type
 **T** and the method name. E.g `list_int` with `#define T int`.
 
 Adding, removing and moving the elements within the list or across several lists
-does not invalidate the iterators or references. An iterator is invalidated only
-when the corresponding element is deleted.
+does not invalidate the iterators or references.
+
+Note:
+Most function accepting or returning iterators, use return `node*` (`B*`)
+pointers instead.
 
 # Member types
 
@@ -51,7 +54,7 @@ when the corresponding element is deleted.
 
 [init](list/init.md) `()`
 
-constructs the list.
+constructs an empty list.
 
 [free](list/free.md) `(A* self)`
 
@@ -63,10 +66,6 @@ returns a copy of the container.
 
 ## Element access
 
-[at](list/at.md) `(A* self, size_t index)`
-
-access specified element with bounds checking
-
 [front](list/front.md) `(A* self)`
 
 access the first element
@@ -77,13 +76,15 @@ access the last element
 
 ## Iterators
 
+Note: `begin` and `end` return `node*` (`B*`) pointers, not iterators.
+
 [begin](list/begin.md) `(A* self)`
 
-returns an iterator to the beginning
+returns a node pointer to the beginning, different to the STL.
 
 [end](list/end.md) `(A* self)`
 
-returns an iterator to the end
+returns an node pointer to the end, different to the STL.
 
 ## Capacity
 
@@ -109,25 +110,25 @@ resizes and sets count elements to the value
 
 clears the contents
 
-[insert](list/insert.md) `(A* self, I* pos, T value)`
+[insert](list/insert.md) `(A* self, B* node, T value)`
 
-inserts value before pos. (FIXME: currently B* pos)
+inserts value before the element.
 
 [insert_count](list/insert.md) `(A* self, I* pos, size_t count, T value)`
 
-inserts count values before pos. (NYI)
+inserts count values before the element. (NYI)
 
 [insert_range](list/insert.md) `(A* self, I* pos, I* first, I* last)`
 
 inserts values before pos from first to last. (NYI)
 
-[emplace](list/emplace.md) `(A* self, I* pos, T values...)`
+[emplace](list/emplace.md) `(A* self, B* pos, T* value)`
 
-Inserts values into the container before pos.
+Insert a copy of the value into the container before pos.
 
-[erase](list/erase.md) `(A* self, I* pos)`
+[erase](list/erase.md) `(A* self, B* pos)`
 
-erases the element at pos (FIXME: currently B* node)
+erases the element at pos.
 
 [erase_range](list/erase.md) `(A* self, I* first, I* last)`
 
@@ -135,19 +136,19 @@ erases elements (NYI)
 
 [push_front](list/push_front.md) `(A* self, T value)`
 
-inserts an element to the beginning
+inserts an element to the beginning.
 
-[emplace_front](list/emplace_front.md) `(A* self, T values...)`
+[emplace_front](list/emplace_front.md) `(A* self, T *value)`
 
-inserts elements to the beginning (NYI)
+inserts a copy of the value at the beginning.
 
 [push_back](list/push_back.md) `(A* self, T value)`
 
-inserts an element to the end
+inserts an element to the end.
 
-[emplace_back](map/emplace_back.md) `(A* self, T values...)`
+[emplace_back](map/emplace_back.md) `(A* self, T* value)`
 
-adds elements to the end
+adds a copy of the value at the end.
 
 [pop_front](list/pop_front.md) `(A* self)`
 
@@ -157,9 +158,9 @@ removes the first element
 
 removes the last element
 
-[resize](list/resize.md) `(A* self, size_t count)`
+[resize](list/resize.md) `(A* self, size_t count, T default_value)`
 
-Resizes the container to contain count elements. (FIXME, no default value)
+Resizes the container to contain count elements.
 
 [swap](list/swap.md) `(A* self, A* other)`
 
@@ -171,15 +172,15 @@ swaps the contents
 
 merges two sorted lists.
 
-[splice](list/splice.md) `(A* self, I* pos, A* other)`
+[splice](list/splice.md) `(A* self, B* pos, A* other)`
 
 Moves all elements from the other list to this list before pos.
 
-[splice_it](list/splice.md) `(A* self, I* pos, A* other, I* other_pos)`
+[splice_it](list/splice.md) `(A* self, B* pos, A* other, B* other_pos)`
 
 Moves elements from the other list at pos to this list before pos. (NYI)
 
-[splice_range](list/splice.md) `(A* self, I* pos, A* other, I* other_first, I* other_last)`
+[splice_range](list/splice.md) `(A* self, B* pos, A* other, B* other_first, B* other_last)`
 
 Moves elements from the other list to this list before pos. (NYI)
 

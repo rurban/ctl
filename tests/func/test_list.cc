@@ -26,6 +26,14 @@
     }                                                             \
 }
 
+#define CHECK_ITER(_it, b, _iter)                                 \
+    if (_it != NULL)                                              \
+    {                                                             \
+        assert (_iter != b.end());                                \
+        assert(*_it->value.value == *(*_iter).value);             \
+    } else                                                        \
+        assert (_iter == b.end())
+
 static void
 setup_lists(list_digi* a, std::list<DIGI>& b, size_t size, int* max_value)
 {
@@ -65,6 +73,14 @@ main(void)
             TEST_SWAP,
             TEST_COPY,
             TEST_REVERSE,
+#ifdef DEBUG
+            TEST_REMOVE,
+            TEST_EMPLACE,
+            TEST_EMPLACE_FRONT,
+            TEST_EMPLACE_BACK,
+            TEST_INSERT_COUNT,
+            TEST_INSERT_RANGE,
+#endif
             TEST_REMOVE_IF,
             TEST_SPLICE,
             TEST_MERGE,
@@ -142,8 +158,11 @@ main(void)
                 {
                     if(current == index)
                     {
-                        list_digi_insert(&a, it.node, digi_init(value));
-                        b.insert(iter, DIGI{value});
+                        list_digi_node *node =
+                            list_digi_insert(&a, it.node, digi_init(value));
+                        std::list<DIGI>::iterator ii =
+                            b.insert(iter, DIGI{value});
+                        CHECK_ITER(node, b, ii);
                         break;
                     }
                     iter++;
@@ -208,6 +227,49 @@ main(void)
                 CHECK(a, b);
                 break;
             }
+#ifdef DEBUG
+            case TEST_REMOVE:
+            {
+                int value = TEST_RAND(INT_MAX);
+                list_digi_remove(&a, digi_init(value));
+                b.remove(DIGI{value});
+                CHECK(a, b);
+                break;
+            }
+            case TEST_EMPLACE:
+            {
+                int value = TEST_RAND(INT_MAX);
+                digi aa = digi_init(value);
+                list_digi_emplace(&a, a.head->next, &aa);
+                b.emplace(b.begin()++, DIGI{value});
+                CHECK(a, b);
+                digi_free(&aa);
+                break;
+            }
+            case TEST_EMPLACE_FRONT:
+            {
+                int value = TEST_RAND(INT_MAX);
+                digi aa = digi_init(value);
+                list_digi_emplace_front(&a, &aa);
+                b.emplace_front(DIGI{value});
+                CHECK(a, b);
+                digi_free(&aa);
+                break;
+            }
+            case TEST_EMPLACE_BACK:
+            {
+                int value = TEST_RAND(INT_MAX);
+                digi aa = digi_init(value);
+                list_digi_emplace_back(&a, &aa);
+                b.emplace_back(DIGI{value});
+                CHECK(a, b);
+                digi_free(&aa);
+                break;
+            }
+            case TEST_INSERT_COUNT:
+            case TEST_INSERT_RANGE:
+            break;
+#endif
             case TEST_REMOVE_IF:
             {
                 list_digi_remove_if(&a, digi_is_odd);
@@ -301,11 +363,7 @@ main(void)
                     digi key = digi_init(value);
                     list_digi_node* aa = list_digi_find(&a, key, digi_equal);
                     auto bb = std::find(b.begin(), b.end(), DIGI{value});
-                    bool found_a = aa != NULL;
-                    bool found_b = bb != b.end();
-                    assert(found_a == found_b);
-                    if(found_a && found_b)
-                        assert(*aa->value.value == *bb->value);
+                    CHECK_ITER(aa, b, bb);
                     digi_free(&key);
                     CHECK(a, b);
                 }
