@@ -216,3 +216,12 @@ erases all elements satisfying specific criteria (C++20)
 [equal](deq/equal.md) `(A* self, A* other, int T_equal(T*, T*))`
 
 Returns 0 or 1 if all elements are equal.
+
+[sort](deq/sort.md) `(A* self, int T_equal(T*, T*))`
+
+Sorts the elements in non-descending order.
+Currently it's a stable_sort, i.e. the order of equal elements is preserved.
+
+[sort_range](deq/sort.md) `(A* self, I* first, I* last, int T_equal(T*, T*))`
+
+Sorts the elements in the range `[first, last)` in non-descending order.

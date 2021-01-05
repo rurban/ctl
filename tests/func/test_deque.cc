@@ -7,6 +7,25 @@
 #include <deque>
 #include <algorithm>
 
+void print_deq(deq_digi *a)
+{
+    for(size_t i = 0; i < a->size; i++)
+        printf ("%zu: %d\n", i, *deq_digi_at(a, i)->value);
+    printf ("\n");
+}
+
+void print_deque(std::deque<DIGI> &b)
+{
+    for(size_t i = 0; i < b.size(); i++)
+        printf ("%zu: %d\n", i, *b.at(i).value);
+    printf ("\n");
+}
+
+#ifndef DEBUG
+#define print_deq(x)
+#define print_deque(x)
+#endif
+
 #define CHECK(_x, _y) {                                           \
     assert(_x.size == _y.size());                                 \
     assert(deq_digi_empty(&_x) == _y.empty());                    \
@@ -16,6 +35,10 @@
     }                                                             \
     std::deque<DIGI>::iterator _iter = _y.begin();                \
     foreach(deq_digi, &_x, _it) {                                 \
+        /*if (*_it.ref->value != *_iter->value)                   \
+            fprintf(stderr, "CTL %d at %lu vs STL %d\n",          \
+                    *_it.ref->value, _it.index,                   \
+                    *_iter->value);*/                             \
         assert(*_it.ref->value == *_iter->value);                 \
         _iter++;                                                  \
     }                                                             \
@@ -144,13 +167,14 @@ main(void)
 {
     test_capacity_edge_case();
     test_random_work_load();
-#ifdef SRAND
-    srand(time(NULL));
-#endif
+    INIT_SRAND;
     const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
     for(size_t loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
+        //#ifdef DEBUG
+        size = 10;
+        //#endif
         enum
         {
             MODE_DIRECT,
@@ -170,7 +194,7 @@ main(void)
             {
                 for(size_t pushes = 0; pushes < size; pushes++)
                 {
-                    const int value = TEST_RAND(INT_MAX);
+                    const int value = TEST_RAND(1000/*INT_MAX*/);
                     deq_digi_push_back(&a, digi_init(value));
                     b.push_back(DIGI{value});
                 }
@@ -279,25 +303,49 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
+                // internal method only
                 case TEST_RANGED_SORT:
                 {
-                    deq_digi_ranged_sort(&a, 1, a.size - 3, digi_compare);
+                    if (a.size < 4)
+                        break; // even the STL crashes on wrong iters
+                    LOG ("unsorted:\n");
+                    print_deq (&a);
+                    // including to
+                    size_t cto = a.size - 4;
+                    deq_digi__ranged_sort(&a, 1, cto, digi_compare);
+                    LOG ("sorted 1 - %lu (size-4):\n", cto);
+                    print_deq (&a);
+
                     auto from = b.begin();
                     auto to = b.end();
                     advance(from, 1);
                     advance(to, -3);
+                    LOG ("STL sort %ld - %ld:\n", std::distance(b.begin(), from),
+                            std::distance(b.begin(), to));
                     std::sort(from, to);
+                    print_deque (b);
                     CHECK(a, b);
                     break;
                 }
                 case TEST_SORT_RANGE:
                 {
-                    deq_digi_ranged_sort(&a, 1, a.size - 3, digi_compare);
-                    auto from = b.begin();
-                    auto to = b.end();
-                    advance(from, 1);
-                    advance(to, -3);
-                    std::sort(from, to);
+                    if (a.size < 4)
+                        break;
+                    {
+                        deq_digi_it cfrom = deq_digi_it_each(&a);
+                        deq_digi_it cto = deq_digi_it_each(&a);
+                        cfrom.index += 1;
+                        // excluding to
+                        cto.index = a.size - 3;
+                        deq_digi_sort_range(&a, &cfrom, &cto, digi_compare);
+                    }
+                    {
+                        auto from = b.begin();
+                        auto to = b.end();
+                        advance(from, 1);
+                        advance(to, -3);
+                        std::sort(from, to);
+                    }
                     CHECK(a, b);
                     break;
                 }
@@ -366,15 +414,16 @@ main(void)
                 }
                 case TEST_INSERT_RANGE:
                 {
-                    size_t amount = TEST_RAND(512);
-                    const int value = TEST_RAND(INT_MAX);
-                    const size_t index = TEST_RAND(a.size - 4);
-                    deq_digi_it pos = deq_digi_it_each(&a);
-                    deq_digi_it from = deq_digi_it_each(&a);
-                    deq_digi_it* end = deq_digi_end(&a);
-                    pos.index += 1;
-                    from.index += index;
-                    deq_digi_insert_range(&a, &pos, &from, end);
+                    const size_t index = std::min(TEST_RAND(a.size - 4), 2UL);
+                    {
+                        deq_digi_it pos = deq_digi_it_each(&a);
+                        deq_digi_it from = deq_digi_it_each(&a);
+                        deq_digi_it end = deq_digi_it_each(&a);
+                        pos.index += 1;
+                        from.index += index;
+                        end.index = a.size;
+                        deq_digi_insert_range(&a, &pos, &from, &end);
+                    }
                     b.insert(b.begin() + 1, b.begin() + index, b.end());
                     CHECK(a, b);
                     break;
@@ -411,7 +460,8 @@ main(void)
                     if(a.size > 0)
                     {
                         const size_t index = TEST_RAND(a.size);
-                        int value = TEST_RAND(2) ? TEST_RAND(INT_MAX) : *deq_digi_at(&a, index)->value;
+                        int value = TEST_RAND(2) ? TEST_RAND(INT_MAX)
+                                                 : *deq_digi_at(&a, index)->value;
                         digi key = digi_init(value);
                         digi* aa = deq_digi_find(&a, key, digi_equal);
                         auto bb = std::find(b.begin(), b.end(), DIGI{value});

@@ -445,6 +445,7 @@ JOIN(A, copy)(A* self)
     return other;
 }
 
+// including to
 static inline void
 JOIN(A, _ranged_sort)(A* self, long from, long to, int _compare(T*, T*))
 {
@@ -460,20 +461,22 @@ JOIN(A, _ranged_sort)(A* self, long from, long to, int _compare(T*, T*))
             SWAP(T, JOIN(A, at)(self, z), JOIN(A, at)(self, i));
         }
     SWAP(T, JOIN(A, at)(self, from), JOIN(A, at)(self, z));
-    JOIN(A, ranged_sort)(self, from, z - 1, _compare);
-    JOIN(A, ranged_sort)(self, z + 1, to, _compare);
+    if (z)
+        JOIN(A, _ranged_sort)(self, from, z - 1, _compare);
+    JOIN(A, _ranged_sort)(self, z + 1, to, _compare);
 }
 
 static inline void
 JOIN(A, sort)(A* self, int _compare(T*, T*))
 {
-    JOIN(A, ranged_sort)(self, 0, self->size - 1, _compare);
+    JOIN(A, _ranged_sort)(self, 0, self->size - 1, _compare);
 }
 
+// excluding to
 static inline void
 JOIN(A, sort_range)(A* self, I* from, I* to, int _compare(T*, T*))
 {
-    JOIN(A, ranged_sort)(self, from->index, to->index, _compare);
+    JOIN(A, _ranged_sort)(self, from->index, to->index - 1, _compare);
 }
 
 static inline size_t
