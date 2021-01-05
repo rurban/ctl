@@ -24,6 +24,8 @@ void print_list(std::list<DIGI> &b)
 #ifdef DEBUG
 #define TEST_MAX_VALUE 1000
 #else
+#define print_lst(x)
+#define print_list(x)
 #define TEST_MAX_VALUE INT_MAX
 #endif
 
@@ -72,7 +74,13 @@ int
 main(void)
 {
     INIT_SRAND;
-    const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    int test = -1;
+    char *env = getenv ("TEST");
+    if (env)
+        sscanf(env, "%d", &test);
+    size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    if (test >= 0)
+        loops = 10;
     for(size_t loop = 0; loop < loops; loop++)
     {
         list_digi a;
@@ -93,8 +101,8 @@ main(void)
             TEST_SWAP,
             TEST_COPY,
             TEST_REVERSE,
+            TEST_REMOVE, // 12
 #ifdef DEBUG
-            TEST_REMOVE,
             TEST_INSERT_COUNT,
             TEST_INSERT_RANGE,
 #endif
@@ -111,6 +119,9 @@ main(void)
             TEST_TOTAL
         };
         int which = TEST_RAND(TEST_TOTAL);
+        if (test >= 0 && test < (int)TEST_TOTAL)
+            which = test;
+        LOG ("TEST %d\n", which);
         switch(which)
         {
             case TEST_PUSH_FRONT:
@@ -247,20 +258,37 @@ main(void)
                 CHECK(a, b);
                 break;
             }
-#ifdef DEBUG
             case TEST_REMOVE:
             {
-                int value = TEST_RAND(TEST_MAX_VALUE);
-                list_digi_remove(&a, digi_init(value));
-                b.remove(DIGI{value});
+                digi *value = list_digi_front(&a);
+#ifdef DEBUG
+                list_digi_resize(&a, 10, digi_init(0));
+                b.resize(10);
+#endif
+                LOG("before remove %d\n", *value->value);
+                print_lst(&a);
+#ifdef DEBUG
+                size_t erased_a =
+#endif
+                    list_digi_remove(&a, value);
+                LOG("removed %zu\n", erased_a);
+                print_lst(&a);
+                // if C++20: size_t only since C++20
+                b.remove(b.front());
+                LOG("removed STL\n");
+                print_list(b);
                 CHECK(a, b);
                 break;
             }
-#endif
             case TEST_EMPLACE:
             {
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 digi aa = digi_init(value);
+                if (a.size < 2)
+                {
+                    list_digi_resize(&a, 10, digi_init(0));
+                    b.resize(10);
+                }
 #ifdef DEBUG
                 list_digi_resize(&a, 10, digi_init(0));
                 b.resize(10);

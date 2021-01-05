@@ -184,9 +184,9 @@ Moves elements from the other list at pos to this list before pos. (NYI)
 
 Moves elements from the other list to this list before pos. (NYI)
 
-[remove](list/remove.md) `(A* self, T value)`
+[remove](list/remove.md) `(A* self, T* value)`
 
-Removes all elements binary equal to the value. (NYI)
+Removes all elements binary equal to the value reference. (not value)
 
 [remove_if](list/remove.md) `(A* self, int T_match(T*))`
 

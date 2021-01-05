@@ -331,15 +331,15 @@ JOIN(I, advance)(I* self, int n)
 }
 
 static inline size_t
-JOIN(A, remove)(A* self, T value){
-    size_t erases = 0;
+JOIN(A, remove)(A* self, T* value){
+    size_t erased = 0;
     foreach(A, self, it)
-        if(memcmp(it.ref, &value, sizeof(T)) == 0)
+        if(memcmp(it.ref, value, sizeof(T)) == 0)
         {
             JOIN(A, erase)(self, it.node);
-            erases += 1;
+            erased += 1;
         }
-    return erases;
+    return erased;
 }
 
 static inline B*
@@ -364,6 +364,7 @@ JOIN(A, emplace_back)(A* self, T* value) {
 }
 
 #ifdef DEBUG
+
 static inline B*
 JOIN(A, insert_count)(A* self, B* pos, size_t count, T value)
 {
