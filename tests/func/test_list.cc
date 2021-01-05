@@ -7,6 +7,26 @@
 #include <list>
 #include <algorithm>
 
+void print_lst(list_digi *a)
+{
+    foreach(list_digi, a, it)
+        printf ("%d ", *it.ref->value);
+    printf ("\n");
+}
+
+void print_list(std::list<DIGI> &b)
+{
+    for(auto& d: b)
+        printf ("%d ", *d.value);
+    printf ("\n");
+}
+
+#ifdef DEBUG
+#define TEST_MAX_VALUE 1000
+#else
+#define TEST_MAX_VALUE INT_MAX
+#endif
+
 #define CHECK(_x, _y) {                                           \
     assert(_x.size == _y.size());                                 \
     assert(list_digi_empty(&_x) == _y.empty());                   \
@@ -40,7 +60,7 @@ setup_lists(list_digi* a, std::list<DIGI>& b, size_t size, int* max_value)
     *a = list_digi_init();
     for(size_t pushes = 0; pushes < size; pushes++)
     {
-        int value = TEST_RAND(INT_MAX - 1); // SEE COMMENT IN CASE MERGE.
+        int value = TEST_RAND(TEST_MAX_VALUE - 1); // SEE COMMENT IN CASE MERGE.
         if(max_value && value > *max_value)
             *max_value = value;
         list_digi_push_back(a, digi_init(value));
@@ -75,12 +95,12 @@ main(void)
             TEST_REVERSE,
 #ifdef DEBUG
             TEST_REMOVE,
-            TEST_EMPLACE,
-            TEST_EMPLACE_FRONT,
-            TEST_EMPLACE_BACK,
             TEST_INSERT_COUNT,
             TEST_INSERT_RANGE,
 #endif
+            TEST_EMPLACE,
+            TEST_EMPLACE_FRONT,
+            TEST_EMPLACE_BACK,
             TEST_REMOVE_IF,
             TEST_SPLICE,
             TEST_MERGE,
@@ -95,7 +115,7 @@ main(void)
         {
             case TEST_PUSH_FRONT:
             {
-                int value = TEST_RAND(INT_MAX);
+                int value = TEST_RAND(TEST_MAX_VALUE);
                 list_digi_push_front(&a, digi_init(value));
                 b.push_front(DIGI{value});
                 CHECK(a, b);
@@ -103,7 +123,7 @@ main(void)
             }
             case TEST_PUSH_BACK:
             {
-                int value = TEST_RAND(INT_MAX);
+                int value = TEST_RAND(TEST_MAX_VALUE);
                 list_digi_push_back(&a, digi_init(value));
                 b.push_back(DIGI{value});
                 CHECK(a, b);
@@ -151,7 +171,7 @@ main(void)
             case TEST_INSERT:
             {
                 size_t index = TEST_RAND(a.size);
-                int value = TEST_RAND(INT_MAX);
+                int value = TEST_RAND(TEST_MAX_VALUE);
                 size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
                 foreach(list_digi, &a, it)
@@ -191,7 +211,7 @@ main(void)
                 size_t width = TEST_RAND(a.size);
                 if(width > 2)
                 {
-                    int value = TEST_RAND(INT_MAX);
+                    int value = TEST_RAND(TEST_MAX_VALUE);
                     list_digi_assign(&a, width, digi_init(value));
                     b.assign(width, DIGI{value});
                 }
@@ -230,25 +250,37 @@ main(void)
 #ifdef DEBUG
             case TEST_REMOVE:
             {
-                int value = TEST_RAND(INT_MAX);
+                int value = TEST_RAND(TEST_MAX_VALUE);
                 list_digi_remove(&a, digi_init(value));
                 b.remove(DIGI{value});
                 CHECK(a, b);
                 break;
             }
+#endif
             case TEST_EMPLACE:
             {
-                int value = TEST_RAND(INT_MAX);
+                int value = TEST_RAND(TEST_MAX_VALUE);
                 digi aa = digi_init(value);
+#ifdef DEBUG
+                list_digi_resize(&a, 10, digi_init(0));
+                b.resize(10);
+                LOG("before emplace\n");
+                print_lst(&a);
+#endif
                 list_digi_emplace(&a, a.head->next, &aa);
-                b.emplace(b.begin()++, DIGI{value});
+                LOG("CTL emplace head->next %d\n", *aa.value);
+                //print_lst(&a);
+                auto iter = b.begin();
+                b.emplace(++iter, DIGI{value});
+                LOG("STL emplace begin++ %d\n", *DIGI{value});
+                //print_list(b);
                 CHECK(a, b);
                 digi_free(&aa);
                 break;
             }
             case TEST_EMPLACE_FRONT:
             {
-                int value = TEST_RAND(INT_MAX);
+                int value = TEST_RAND(TEST_MAX_VALUE);
                 digi aa = digi_init(value);
                 list_digi_emplace_front(&a, &aa);
                 b.emplace_front(DIGI{value});
@@ -258,7 +290,7 @@ main(void)
             }
             case TEST_EMPLACE_BACK:
             {
-                int value = TEST_RAND(INT_MAX);
+                int value = TEST_RAND(TEST_MAX_VALUE);
                 digi aa = digi_init(value);
                 list_digi_emplace_back(&a, &aa);
                 b.emplace_back(DIGI{value});
@@ -266,6 +298,7 @@ main(void)
                 digi_free(&aa);
                 break;
             }
+#ifdef DEBUG
             case TEST_INSERT_COUNT:
             case TEST_INSERT_RANGE:
             break;
@@ -359,7 +392,7 @@ main(void)
                         }
                         current++;
                     }
-                    int value = TEST_RAND(2) ? TEST_RAND(INT_MAX) : test_value;
+                    int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : test_value;
                     digi key = digi_init(value);
                     list_digi_node* aa = list_digi_find(&a, key, digi_equal);
                     auto bb = std::find(b.begin(), b.end(), DIGI{value});

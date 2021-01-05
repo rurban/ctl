@@ -311,8 +311,7 @@ JOIN(A, reverse)(A* self)
     self->head = tail;
 }
 
-#ifdef DEBUG
-
+// Unused iterator methods. we decided to just use B* pointers, not I*.
 static inline I
 JOIN(I, iter)(A* self, B *node)
 {
@@ -364,6 +363,7 @@ JOIN(A, emplace_back)(A* self, T* value) {
     return self->tail;
 }
 
+#ifdef DEBUG
 static inline B*
 JOIN(A, insert_count)(A* self, B* pos, size_t count, T value)
 {
@@ -434,6 +434,7 @@ JOIN(A, splice_range)(A* self, B* pos, A* other, B* other_first, B* other_last)
     else
     {
         // FIXME util other_last
+        (void) other_last;
         JOIN(A, transfer)(self, other, pos, other_first, 1);
     }
 }

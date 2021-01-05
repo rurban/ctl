@@ -112,6 +112,10 @@ struct DIGI
     {
         return *value == *a.value;
     }
+    int operator*() const
+    {
+        return *value;
+    }
     size_t hash(const DIGI& a) const
     {
         return (size_t)*a.value;
