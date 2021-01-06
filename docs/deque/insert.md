@@ -29,16 +29,25 @@ Defined in header [**<ctl/deque.h>**](../deque.md)
 # DESCRIPTION
 
 `it insert (A* self, size_t index, T value)`
-inserts value before index. Returns void.
+
+Inserts value before index. Returns void. If `index == self->size`, insert at the end.
 
 `it insert_it (A* self, T* pos, T value)`
-inserts value before pos. Returns pos, which points now to the element inserted.
+
+Inserts value before pos. Returns pos, which points now to the element inserted.
 
 `it insert_count (A* self, T* pos, size_t count, T value)`
+
 Inserts count values before pos.  Returns pos, which points now to the first element inserted.
 The first value is inserted asis, the others as copy.
 
+On size overflows, e.g. `size+count > UINT_MAX` or `> max_size` return NULL.
+
+Note that the C++ STL version cannot deal properly with `count=0`, leaving
+unitialized elements around.
+
 `it insert_range (A* self, T* pos, T* first, T* last)`
+
 Inserts values from range `[first, last)` before pos. Returns pos, which points
 now to the first element inserted.
 

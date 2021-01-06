@@ -83,7 +83,7 @@ struct DIGI
     }
     DIGI(const DIGI& a): DIGI()
     {
-        *value = *a.value;
+        *value = a.value ? *a.value : 0;
     }
     DIGI& operator=(const DIGI& a)
     {

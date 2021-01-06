@@ -427,7 +427,7 @@ JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
         if (first->container == pos->container)
         {
 #if defined(_ASSERT_H) && !defined(NDEBUG)
-            assert (first->container != pos->container);
+            assert (first->container != pos->container || !"container overlap");
 #endif
 #if 0
             A copy = JOIN(A, copy)(self);
@@ -451,8 +451,18 @@ JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
 static inline I*
 JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
 {
-    // avoid overflows, esp. silent signed conversions, like -1
-    if (count > 0 && self->size + count < JOIN(A, max_size)())
+    // detect overflows, esp. silent signed conversions, like -1
+    if (self->size + count < self->size ||
+        count + pos->index < count ||
+        self->size + count > JOIN(A, max_size)())
+    {
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+        assert (self->size + count >= self->size || !"count overflow");
+        assert (pos->index + count >= count || !"pos overflow");
+        assert (self->size + count < JOIN(A, max_size)() || !"max_size overflow");
+#endif
+        return NULL;
+    if (count > 0)
     {
         size_t index = pos->index;
         JOIN(A, insert)(self, index, value);

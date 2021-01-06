@@ -17,7 +17,14 @@ void print_deq(deq_digi *a)
 void print_deque(std::deque<DIGI> &b)
 {
     for(size_t i = 0; i < b.size(); i++)
-        printf ("%zu: %d\n", i, b.at(i).value ? *b.at(i).value : -1);
+    {
+        DIGI val = b.at(i);
+        // DIGI.hh is not as stable as the CTL
+        if (val.value)
+            printf ("%zu: %d\n", i, *val.value);
+        else
+            printf ("%zu: NULL\n", i);
+    }
     printf ("\n");
 }
 
@@ -35,17 +42,22 @@ void print_deque(std::deque<DIGI> &b)
     assert(_x.size == _y.size());                                 \
     assert(deq_digi_empty(&_x) == _y.empty());                    \
     if(_x.size > 0) {                                             \
-        assert(*_y.front().value == *deq_digi_front(&_x)->value); \
-        assert(*_y.back().value == *deq_digi_back(&_x)->value);   \
+        if (_y.front().value)                                     \
+            assert(*_y.front().value == *deq_digi_front(&_x)->value); \
+        if (_y.back().value)                                      \
+            assert(*_y.back().value == *deq_digi_back(&_x)->value); \
     }                                                             \
     std::deque<DIGI>::iterator _iter = _y.begin();                \
     foreach(deq_digi, &_x, _it) {                                 \
-        assert(*_it.ref->value == *_iter->value);                 \
+        /* The STL may be corrupt */                              \
+        if (_iter->value)                                         \
+            assert(*_it.ref->value == *_iter->value);             \
         _iter++;                                                  \
     }                                                             \
     deq_digi_it _it = deq_digi_it_each(&_x);                      \
     for(auto& _d : _y) {                                          \
-        assert(*_it.ref->value == *_d.value);                     \
+        if (_d.value)                                             \
+            assert(*_it.ref->value == *_d.value);                 \
         _it.step(&_it);                                           \
     }                                                             \
     for(size_t i = 0; i < _y.size(); i++)                         \
@@ -60,8 +72,14 @@ void print_deque(std::deque<DIGI> &b)
     assert(_x.size == _y.size());                                 \
     assert(deq_digi_empty(&_x) == _y.empty());                    \
     if(_x.size > 0) {                                             \
-        assert(*_y.front().value == *deq_digi_front(&_x)->value); \
-        assert(*_y.back().value == *deq_digi_back(&_x)->value);   \
+        if (_y.front().value)                                     \
+            assert(*_y.front().value == *deq_digi_front(&_x)->value); \
+        else                                                          \
+            fprintf(stderr, "STL empty front value\n");               \
+        if (_y.back().value)                                          \
+            assert(*_y.back().value == *deq_digi_back(&_x)->value);   \
+        else                                                          \
+            fprintf(stderr, "STL empty back value\n");                \
     }                                                             \
     std::deque<DIGI>::iterator _iter = _y.begin();                \
     foreach(deq_digi, &_x, _it) {                                 \
@@ -462,21 +480,28 @@ main(void)
                     size_t amount = TEST_RAND(10);
 #endif
                     const int value = TEST_RAND(TEST_MAX_VALUE);
-                    const size_t index = TEST_RAND(a.size - 1);
+                    const size_t index = TEST_RAND(a.size); // allow end()
                     deq_digi_it *pos;
                     deq_digi_it it = deq_digi_it_each(&a);
                     deq_digi_it_advance(&it, index);
                     pos = deq_digi_insert_count(&a, &it, amount, digi_init(value));
+                    if (!pos) {
+                        fprintf(stderr, "overflow size %zu + amount %zu\n", a.size, amount);
+                        break;
+                    }
                     LOG ("CTL insert_count at %lu, %zux %d:\n", pos->index, amount, value);
                     print_deq (&a);
 
-                    std::deque<DIGI>::iterator iter =
-                        b.insert(b.begin() + index, amount, DIGI{value});
-                    LOG ("STL insert %zux %d at %ld:\n", amount, value,
-                         std::distance(b.begin(),iter));
-                    CHECK_ITER (pos, b, iter);
-                    print_deque (b); // maybe corrupt
-                    CHECK(a, b);
+                    if (amount)
+                    {
+                        std::deque<DIGI>::iterator iter =
+                            b.insert(b.begin() + index, amount, DIGI{value});
+                        LOG ("STL insert %zux %d at %ld:\n", amount, value,
+                             std::distance(b.begin(),iter));
+                        CHECK_ITER (pos, b, iter);
+                        print_deque (b); // may be corrupt
+                        CHECK(a, b);     // may be NULL
+                    }
                     break;
                 }
                 case TEST_ERASE_IT:
