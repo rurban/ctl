@@ -20,12 +20,28 @@
 #include <stdint.h>
 #include <string.h>
 
+// if we compare char by char, for algorithms like sort
+// is_lower
+static inline int
+str_char_compare(char* a, char* b)
+{
+    return *a < *b ? 1 : *a == *b ? 0 : -1;
+}
+
+static inline int
+str_char_equal(char* a, char* b)
+{
+    return *a == *b;
+}
+
 static inline str
 str_init(const char* c_str)
 {
     str self = str___INIT();
     size_t len = strlen(c_str);
     size_t min = 15;
+    self.compare = str_char_compare;
+    self.equal = str_char_equal;
     str_reserve(&self, len < min ? min : len);
     for(const char* s = c_str; *s; s++)
         str_push_back(&self, *s);

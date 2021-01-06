@@ -251,6 +251,8 @@ main(void)
         for(size_t mode = MODE_DIRECT; mode < MODE_TOTAL; mode++)
         {
             deq_digi a = deq_digi_init();
+            a.compare = digi_compare;
+            a.equal = digi_equal;
             std::deque<DIGI> b;
             if(mode == MODE_DIRECT)
             {
@@ -370,7 +372,7 @@ main(void)
                 }
                 case TEST_SORT:
                 {
-                    deq_digi_sort(&a, digi_compare);
+                    deq_digi_sort(&a);
                     std::sort(b.begin(), b.end());
                     CHECK(a, b);
                     break;
@@ -409,7 +411,7 @@ main(void)
                         cfrom.index += 1;
                         // excluding to
                         cto.index = a.size - 3;
-                        deq_digi_sort_range(&a, &cfrom, &cto, digi_compare);
+                        deq_digi_sort_range(&a, &cfrom, &cto);
                     }
                     {
                         auto from = b.begin();
@@ -697,7 +699,7 @@ main(void)
                 {
                     deq_digi aa = deq_digi_copy(&a);
                     std::deque<DIGI> bb = b;
-                    assert(deq_digi_equal(&a, &aa, digi_equal));
+                    assert(deq_digi_equal(&a, &aa));
                     assert(b == bb);
                     deq_digi_free(&aa);
                     CHECK(a, b);
@@ -711,13 +713,21 @@ main(void)
                         int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                                                  : *deq_digi_at(&a, index)->value;
                         digi key = digi_init(value);
-                        digi* aa = deq_digi_find(&a, key, digi_equal);
+                        digi* aa = deq_digi_find(&a, key);
                         auto bb = std::find(b.begin(), b.end(), DIGI{value});
                         bool found_a = aa != NULL;
                         bool found_b = bb != b.end();
                         assert(found_a == found_b);
                         if(found_a && found_b)
                             assert(*aa->value == *bb->value);
+
+                        a.equal = NULL;
+                        aa = deq_digi_find(&a, key);
+                        found_a = aa != NULL;
+                        assert(found_a == found_b);
+                        if(found_a && found_b)
+                            assert(*aa->value == *bb->value);
+
                         digi_free(&key);
                         CHECK(a, b);
                     }

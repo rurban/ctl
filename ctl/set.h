@@ -24,10 +24,11 @@ typedef struct B
 typedef struct A
 {
     B* root;
-    int (*compare)(T*, T*);
+    size_t size;
     void (*free)(T*);
     T (*copy)(T*);
-    size_t size;
+    int (*compare)(T*, T*);
+    int (*equal)(T*, T*);
 } A;
 
 typedef struct I
@@ -127,8 +128,15 @@ JOIN(A, init)(int _compare(T*, T*))
     A self = zero;
     self.compare = _compare;
 #ifdef POD
-#undef POD
     self.copy = JOIN(A, implicit_copy);
+# ifndef NOT_INTEGRAL
+    if (_JOIN(A, _type_is_integral)())
+    {
+        if (!_compare)
+            self.compare = _JOIN(A, _default_integral_compare);
+        self.equal = _JOIN(A, _default_integral_equal);
+    }
+# endif
 #else
     self.free = JOIN(T, free);
     self.copy = JOIN(T, copy);
@@ -697,6 +705,8 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 }
 
 #ifndef HOLD
+#undef POD
+#undef NOT_INTEGRAL
 #undef T
 #undef A
 #undef B

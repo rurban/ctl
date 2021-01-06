@@ -7,7 +7,6 @@
 #endif
 
 #include <ctl/ctl.h>
-#include <stdarg.h>
 
 #define A JOIN(deq, T)
 #define B JOIN(A, bucket)
@@ -24,13 +23,15 @@ typedef struct B
 
 typedef struct A
 {
-    void (*free)(T*);
-    T (*copy)(T*);
     B** pages;
     size_t mark_a;
     size_t mark_b;
     size_t capacity;
     size_t size;
+    void (*free)(T*);
+    T (*copy)(T*);
+    int (*compare)(T*, T*);
+    int (*equal)(T*, T*);
 } A;
 
 typedef struct I
@@ -150,8 +151,14 @@ JOIN(A, init)(void)
     static A zero;
     A self = zero;
 #ifdef POD
-#undef POD
     self.copy = JOIN(A, implicit_copy);
+# ifndef NOT_INTEGRAL
+    if (_JOIN(A, _type_is_integral)())
+    {
+        self.compare = _JOIN(A, _default_integral_compare);
+        self.equal = _JOIN(A, _default_integral_equal);
+    }
+# endif
 #else
     self.free = JOIN(T, free);
     self.copy = JOIN(T, copy);
@@ -504,16 +511,24 @@ JOIN(A, _ranged_sort)(A* self, long from, long to, int _compare(T*, T*))
 }
 
 static inline void
-JOIN(A, sort)(A* self, int _compare(T*, T*))
+JOIN(A, sort)(A* self)
 {
-    JOIN(A, _ranged_sort)(self, 0, self->size - 1, _compare);
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert(self->compare || !"compare undefined");
+#endif
+    if (self->size)
+        JOIN(A, _ranged_sort)(self, 0, self->size - 1, self->compare);
 }
 
 // excluding to
 static inline void
-JOIN(A, sort_range)(A* self, I* from, I* to, int _compare(T*, T*))
+JOIN(A, sort_range)(A* self, I* from, I* to)
 {
-    JOIN(A, _ranged_sort)(self, from->index, to->index - 1, _compare);
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert(self->compare);
+#endif
+    if (to->index)
+        JOIN(A, _ranged_sort)(self, from->index, to->index - 1, self->compare);
 }
 
 static inline size_t
@@ -531,18 +546,44 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
     return erases;
 }
 
+static inline int
+JOIN(A, _equal)(A* self, T* a, T* b)
+{
+    if(self->equal)
+        return self->equal(a, b);
+    else
+        return !self->compare(a, b) &&
+               !self->compare(b, a);
+}
+
 static inline T*
-JOIN(A, find)(A* self, T key, int _equal(T*, T*))
+JOIN(A, find)(A* self, T key)
 {
     foreach(A, self, it)
-        if(_equal(it.ref, &key))
+        if(JOIN(A, _equal)(self, it.ref, &key))
             return it.ref;
     return NULL;
 }
+
+#ifdef DEBUG
+
+static inline I*
+JOIN(A, find_range)(A* self, I* first, I* last, T value)
+{
+    foreach(A, self, it)
+        if(JOIN(A, _equal)(self, it.ref, &value))
+            return first;
+    return last;
+}
+
+#endif
+
 
 #undef T
 #undef A
 #undef B
 #undef I
+#undef POD
+#undef NOT_INTEGRAL
 
 #undef DEQ_BUCKET_SIZE

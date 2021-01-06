@@ -133,6 +133,7 @@ typedef struct
 } point;
 
 #define POD
+#define NOT_INTEGRAL
 #define T point
 #include <ctl/vector.h>
 
@@ -177,18 +178,6 @@ person_copy(person* self)
 #define T person
 #include <ctl/vector.h>
 
-static int
-int_match(int* a, int* b)
-{
-    return *a == *b;
-}
-
-static int
-int_compare(int* a, int* b)
-{
-    return *a < *b;
-}
-
 int
 main(void)
 {
@@ -206,7 +195,7 @@ main(void)
         for(size_t i = 0; i < size; i++) deq_int_push_back(&a, i);
         for(size_t i = 0; i < size; i++) deq_int_push_front(&a, i);
         deq_int_insert(&a, 1, 99);
-        deq_int_sort(&a, int_compare);
+        deq_int_sort(&a);
         deq_int_free(&a);
     }
     {
@@ -255,7 +244,7 @@ main(void)
         list_int_push_back(&a, 6);
         list_int_push_back(&a, 8);
         list_int_push_back(&a, 8);
-        list_int_unique(&a, int_match);
+        list_int_unique(&a);
         list_int_free(&a);
     }
 #ifdef DEBUG

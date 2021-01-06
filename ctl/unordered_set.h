@@ -53,6 +53,7 @@ typedef struct A
     void (*free)(T*);
     T (*copy)(T*);
     size_t (*hash)(T*);
+    int (*compare)(T*, T*);
     int (*equal)(T*, T*);
 } A;
 
@@ -310,8 +311,8 @@ JOIN(A, init)(size_t (*_hash)(T*), int (*_equal)(T*, T*))
     self.hash = _hash;
     self.equal = _equal;
 #ifdef POD
-#undef POD
     self.copy = JOIN(A, implicit_copy);
+#undef POD
 #else
     self.free = JOIN(T, free);
     self.copy = JOIN(T, copy);

@@ -20,11 +20,13 @@ typedef struct B
 
 typedef struct A
 {
-    void (*free)(T*);
-    T (*copy)(T*);
     B* head;
     B* tail;
     size_t size;
+    void (*free)(T*);
+    T (*copy)(T*);
+    int (*compare)(T*, T*);
+    int (*equal)(T*, T*);
 } A;
 
 typedef struct I
@@ -122,8 +124,14 @@ JOIN(A, init)(void)
     static A zero;
     A self = zero;
 #ifdef POD
-#undef POD
     self.copy = JOIN(A, implicit_copy);
+# ifndef NOT_INTEGRAL
+    if (_JOIN(A, _type_is_integral)())
+    {
+        self.compare = _JOIN(A, _default_integral_compare);
+        self.equal = _JOIN(A, _default_integral_equal);
+    }
+# endif
 #else
     self.free = JOIN(T, free);
     self.copy = JOIN(T, copy);
@@ -443,14 +451,17 @@ JOIN(A, splice_range)(A* self, B* pos, A* other, B* other_first, B* other_last)
 #endif
 
 static inline void
-JOIN(A, merge)(A* self, A* other, int _compare(T*, T*))
+JOIN(A, merge)(A* self, A* other)
 {
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert(self->compare || !"compare undefined");
+#endif
     if(JOIN(A, empty)(self))
         JOIN(A, swap)(self, other);
     else
     {
         for(B* node = self->head; node; node = node->next)
-            while(!JOIN(A, empty)(other) && _compare(&node->value, &other->head->value))
+            while(!JOIN(A, empty)(other) && self->compare(&node->value, &other->head->value))
                 JOIN(A, transfer)(self, other, node, other->head, 1);
         // Remainder.
         while(!JOIN(A, empty)(other))
@@ -459,7 +470,7 @@ JOIN(A, merge)(A* self, A* other, int _compare(T*, T*))
 }
 
 static inline void
-JOIN(A, sort)(A* self, int _compare(T*, T*))
+JOIN(A, sort)(A* self)
 {
     if(self->size > 1)
     {
@@ -474,7 +485,7 @@ JOIN(A, sort)(A* self, int _compare(T*, T*))
             JOIN(A, transfer)(&carry, self, carry.head, self->head, 1);
             for(counter = temp; counter != fill && !JOIN(A, empty)(counter); counter++)
             {
-                JOIN(A, merge)(counter, &carry, _compare);
+                JOIN(A, merge)(counter, &carry);
                 JOIN(A, swap)(&carry, counter);
             }
             JOIN(A, swap)(&carry, counter);
@@ -483,28 +494,36 @@ JOIN(A, sort)(A* self, int _compare(T*, T*))
         }
         while(!JOIN(A, empty)(self));
         for(counter = temp + 1; counter != fill; counter++)
-            JOIN(A, merge)(counter, counter - 1, _compare);
+            JOIN(A, merge)(counter, counter - 1);
         JOIN(A, swap)(self, fill - 1);
     }
 }
 
 static inline void
-JOIN(A, unique)(A* self, int _equal(T*, T*))
+JOIN(A, unique)(A* self)
 {
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert(self->equal || !"equal undefined");
+#endif
     foreach(A, self, it)
-        if(it.next && _equal(it.ref, &it.next->value))
+        if(it.next && self->equal(it.ref, &it.next->value))
             JOIN(A, erase)(self, it.node);
 }
 
 static inline B*
-JOIN(A, find)(A* self, T key, int _equal(T*, T*))
+JOIN(A, find)(A* self, T key)
 {
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert(self->equal || !"equal undefined");
+#endif
     foreach(A, self, it)
-        if(_equal(it.ref, &key))
+        if(self->equal(it.ref, &key))
             return it.node;
     return NULL;
 }
 
+#undef POD
+#undef NOT_INTEGRAL
 #undef T
 #undef A
 #undef B

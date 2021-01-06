@@ -46,6 +46,8 @@ main(void)
         for(size_t mode = MODE_DIRECT; mode < MODE_TOTAL; mode++)
         {
             vec_digi a = vec_digi_init();
+            a.compare = digi_compare;
+            a.equal = digi_equal;
             std::vector<DIGI> b;
             if(mode == MODE_DIRECT)
             {
@@ -157,7 +159,7 @@ main(void)
                 }
                 case TEST_SORT:
                 {
-                    vec_digi_sort(&a, digi_compare);
+                    vec_digi_sort(&a);
                     std::sort(b.begin(), b.end());
                     CHECK(a, b);
                     break;
@@ -204,7 +206,7 @@ main(void)
                 {
                     vec_digi aa = vec_digi_copy(&a);
                     std::vector<DIGI> bb = b;
-                    assert(vec_digi_equal(&a, &aa, digi_equal));
+                    assert(vec_digi_equal(&a, &aa));
                     assert(b == bb);
                     vec_digi_free(&aa);
                     CHECK(a, b);
@@ -217,7 +219,7 @@ main(void)
                         const size_t index = TEST_RAND(a.size);
                         int value = TEST_RAND(2) ? TEST_RAND(INT_MAX) : *vec_digi_at(&a, index)->value;
                         digi key = digi_init(value);
-                        digi* aa = vec_digi_find(&a, key, digi_equal);
+                        digi* aa = vec_digi_find(&a, key);
                         auto bb = std::find(b.begin(), b.end(), DIGI{value});
                         bool found_a = aa != NULL;
                         bool found_b = bb != b.end();

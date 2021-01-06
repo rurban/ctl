@@ -186,7 +186,7 @@ main(void)
             {
                 set_digi aa = set_digi_copy(&a);
                 std::set<DIGI> bb = b;
-                assert(set_digi_equal(&a, &aa, digi_equal));
+                assert(set_digi_equal(&a, &aa));
                 assert(b == bb);
                 set_digi_free(&aa);
                 CHECK(a, b);

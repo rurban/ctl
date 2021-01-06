@@ -72,6 +72,7 @@ main(void)
         {
             char* base = create_test_string(str_size);
             str a = str_init("");
+            a.compare = char_compare;
             std::string b;
             if(mode == MODE_DIRECT)
             {
@@ -303,7 +304,7 @@ main(void)
                 }
                 case TEST_SORT:
                 {
-                    str_sort(&a, char_compare);
+                    str_sort(&a);
                     std::sort(b.begin(), b.end());
                     CHECK(a, b);
                     break;

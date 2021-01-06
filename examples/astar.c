@@ -82,18 +82,22 @@ pi_key_compare(pi* a, pi* b)
 }
 
 #define POD
+#define NOT_INTEGRAL
 #define T point
 #include <ctl/priority_queue.h>
 
 #define POD
+#define NOT_INTEGRAL
 #define T point
 #include <ctl/deque.h>
 
 #define POD
+#define NOT_INTEGRAL
 #define T pi
 #include <ctl/set.h>
 
 #define POD
+#define NOT_INTEGRAL
 #define T pp
 #include <ctl/set.h>
 

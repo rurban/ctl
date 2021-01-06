@@ -376,7 +376,7 @@ main(void)
                     bb.push_back(DIGI{total});
                 }
                 b.merge(bb);
-                list_digi_merge(&a, &aa, digi_compare);
+                list_digi_merge(&a, &aa);
                 CHECK(a, b);
                 break;
             }
@@ -384,7 +384,7 @@ main(void)
             {
                 list_digi aa = list_digi_copy(&a);
                 std::list<DIGI> bb = b;
-                assert(list_digi_equal(&a, &aa, digi_equal));
+                assert(list_digi_equal(&a, &aa));
                 assert(b == bb);
                 list_digi_free(&aa);
                 CHECK(a, b);
@@ -392,14 +392,14 @@ main(void)
             }
             case TEST_SORT:
             {
-                list_digi_sort(&a, digi_compare);
+                list_digi_sort(&a);
                 b.sort();
                 CHECK(a, b);
                 break;
             }
             case TEST_UNIQUE:
             {
-                list_digi_unique(&a, digi_equal);
+                list_digi_unique(&a);
                 b.unique();
                 CHECK(a, b);
                 break;
@@ -422,7 +422,8 @@ main(void)
                     }
                     int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : test_value;
                     digi key = digi_init(value);
-                    list_digi_node* aa = list_digi_find(&a, key, digi_equal);
+                    list_digi_node* aa = list_digi_find(&a, key);
+
                     auto bb = std::find(b.begin(), b.end(), DIGI{value});
                     CHECK_ITER(aa, b, bb);
                     digi_free(&key);

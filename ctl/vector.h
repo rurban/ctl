@@ -17,13 +17,14 @@ typedef struct A
 {
     T* value;
     void (*free)(T*);
-#ifdef COMPARE
-    int (*compare)(T*, T*);
-#endif
     T (*copy)(T*);
+    int (*compare)(T*, T*);
+    int (*equal)(T*, T*); // optional
     size_t size;
     size_t capacity;
 } A;
+
+typedef int (*JOIN(A, compare_fn))(T*, T*);
 
 typedef struct I
 {
@@ -106,12 +107,30 @@ JOIN(A, init)(void)
     static A zero;
     A self = zero;
 #ifdef POD
-#undef POD
     self.copy = JOIN(A, implicit_copy);
+# ifndef NOT_INTEGRAL
+    if (_JOIN(A, _type_is_integral)())
+    {
+        self.compare = _JOIN(A, _default_integral_compare);
+        self.equal = _JOIN(A, _default_integral_equal);
+    }
+# endif
 #else
     self.free = JOIN(T, free);
     self.copy = JOIN(T, copy);
 #endif
+    return self;
+}
+
+static inline A
+JOIN(A, _init)(A* copy)
+{
+    static A zero;
+    A self = zero;
+    self.free = copy->free;
+    self.copy = copy->copy;
+    self.compare = copy->compare;
+    self.equal = copy->equal;
     return self;
 }
 
@@ -153,8 +172,12 @@ static inline void
 JOIN(A, free)(A* self)
 {
     JOIN(A, clear)(self);
+    JOIN(A, compare_fn) *compare = &self->compare;
+    JOIN(A, compare_fn) *equal = &self->equal;
     free(self->value);
     *self = JOIN(A, init)();
+    self->compare = *compare;
+    self->equal = *equal;
 }
 
 static inline void
@@ -322,37 +345,39 @@ JOIN(A, erase_it)(A* self, T* pos)
 }
 
 static inline void
-JOIN(A, ranged_sort)(A* self, int64_t a, int64_t b, int _compare(T*, T*))
+JOIN(A, _ranged_sort)(A* self, long a, long b, int _compare(T*, T*))
 {
     if(a >= b)
         return;
-    int64_t mid = (a + b) / 2;
+    long mid = (a + b) / 2;
     SWAP(T, &self->value[a], &self->value[mid]);
-    int64_t z = a;
-    for(int64_t i = a + 1; i <= b; i++)
+    long z = a;
+    for(long i = a + 1; i <= b; i++)
         if(_compare(&self->value[a], &self->value[i]))
         {
             z++;
             SWAP(T, &self->value[z], &self->value[i]);
         }
     SWAP(T, &self->value[a], &self->value[z]);
-    JOIN(A, ranged_sort)(self, a, z - 1, _compare);
-    JOIN(A, ranged_sort)(self, z + 1, b, _compare);
+    if (z)
+        JOIN(A, _ranged_sort)(self, a, z - 1, _compare);
+    JOIN(A, _ranged_sort)(self, z + 1, b, _compare);
 }
 
 static inline void
-JOIN(A, sort)(A* self, int _compare(T*, T*))
+JOIN(A, sort)(A* self)
 {
-    JOIN(A, ranged_sort)(self, 0, self->size - 1, _compare);
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert(self->compare || !"compare undefined");
+#endif
+    if (self->size)
+        JOIN(A, _ranged_sort)(self, 0, self->size - 1, self->compare);
 }
 
 static inline A
 JOIN(A, copy)(A* self)
 {
-    A other = JOIN(A, init)();
-#ifdef COMPARE
-    other.compare = self->compare;
-#endif
+    A other = JOIN(A, _init)(self);
     JOIN(A, reserve)(&other, self->size);
     while(other.size < self->size)
         JOIN(A, push_back)(&other, other.copy(&self->value[other.size]));
@@ -378,17 +403,24 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
 }
 
 static inline T*
-JOIN(A, find)(A* self, T key, int _equal(T*, T*))
+JOIN(A, find)(A* self, T key)
 {
     foreach(A, self, it)
-        if(_equal(it.ref, &key))
-            return it.ref;
+    {
+        if(self->equal)
+        {
+            if(self->equal(it.ref, &key))
+                return it.ref;
+        }
+        else
+        {
+            if(!self->compare(it.ref, &key) &&
+               !self->compare(&key, it.ref))
+                return it.ref;
+        }
+    }
     return NULL;
 }
-
-#ifdef COMPARE
-#undef COMPARE
-#endif
 
 #undef A
 #undef I
@@ -400,4 +432,6 @@ JOIN(A, find)(A* self, T key, int _equal(T*, T*))
 #undef HOLD
 #else
 #undef T
+#undef POD
+#undef NOT_INTEGRAL
 #endif
