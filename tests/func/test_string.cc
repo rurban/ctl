@@ -56,12 +56,21 @@ int
 main(void)
 {
     INIT_SRAND;
-    const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    int test = -1;
+    char *env = getenv ("TEST");
+    if (env)
+        sscanf(env, "%d", &test);
+    if (test >= 0)
+        loops = 10;
     for(size_t loop = 0; loop < loops; loop++)
     {
         size_t str_size = TEST_RAND(TEST_MAX_SIZE);
         if(str_size < MIN_STR_SIZE)
             str_size = MIN_STR_SIZE;
+#if defined(DEBUG) && !defined(LONG)
+        str_size = 15;
+#endif
         enum
         {
             MODE_DIRECT,
@@ -117,6 +126,9 @@ main(void)
                 TEST_TOTAL
             };
             int which = TEST_RAND(TEST_TOTAL);
+            if (test >= 0 && test < (int)TEST_TOTAL)
+                which = test;
+            LOG ("TEST %d\n", which);
             switch(which)
             {
                 case TEST_PUSH_BACK:
@@ -292,6 +304,8 @@ main(void)
                     const size_t capacity = 3 * TEST_RAND(a.capacity);
                     b.reserve(capacity);
                     str_reserve(&a, capacity);
+                    LOG("CTL reserve %zu %zu\n", a.size, a.capacity);
+                    LOG("STL reserve %zu %zu\n", b.size(), b.capacity());
                     CHECK(a, b);
                     break;
                 }
@@ -299,13 +313,18 @@ main(void)
                 {
                     b.shrink_to_fit();
                     str_shrink_to_fit(&a);
+                    LOG("CTL shrink_to_fit %zu %zu\n", a.size, a.capacity);
+                    LOG("STL shrink_to_fit %zu %zu\n", b.size(), b.capacity());
                     CHECK(a, b);
                     break;
                 }
                 case TEST_SORT:
                 {
+                    LOG("before sort \"%s\"\n", a.value);
                     str_sort(&a);
+                    LOG("after  sort \"%s\"\n", a.value);
                     std::sort(b.begin(), b.end());
+                    LOG("STL    sort \"%s\"\n", b.c_str());
                     CHECK(a, b);
                     break;
                 }
@@ -313,6 +332,8 @@ main(void)
                 {
                     str ca = str_copy(&a);
                     std::string cb = b;
+                    LOG("copy  a: \"%s\": %zu\n", a.value, a.capacity);
+                    LOG("copy ca: \"%s\": %zu\n", ca.value, ca.capacity);
                     CHECK(ca, cb);
                     str_free(&ca);
                     CHECK(a, b);
