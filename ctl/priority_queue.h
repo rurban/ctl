@@ -31,7 +31,6 @@
 
 #define vec pqu
 #define HOLD
-#define COMPARE
 #define init __INIT
 #include <ctl/vector.h>
 #undef init

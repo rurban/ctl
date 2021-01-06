@@ -345,11 +345,21 @@ JOIN(A, erase_it)(A* self, T* pos)
 }
 
 static inline void
+JOIN(A, swap)(A* self, A* other)
+{
+    A temp = *self;
+    *self = *other;
+    *other = temp;
+    JOIN(A, shrink_to_fit)(self);
+}
+
+static inline void
 JOIN(A, _ranged_sort)(A* self, long a, long b, int _compare(T*, T*))
 {
     if(a >= b)
         return;
     long mid = (a + b) / 2;
+    //printf("sort \"%s\" %ld, %ld\n", self->value, a, b);
     SWAP(T, &self->value[a], &self->value[mid]);
     long z = a;
     for(long i = a + 1; i <= b; i++)
@@ -378,7 +388,7 @@ static inline A
 JOIN(A, copy)(A* self)
 {
     A other = JOIN(A, _init)(self);
-    JOIN(A, reserve)(&other, self->size);
+    JOIN(A, reserve)(&other, self->size); // i.e shrink to fit
     while(other.size < self->size)
         JOIN(A, push_back)(&other, other.copy(&self->value[other.size]));
     return other;

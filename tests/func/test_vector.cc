@@ -184,12 +184,18 @@ main(void)
                 }
                 case TEST_SWAP:
                 {
+                    LOG("CTL capacity %zu\n", a.capacity);
+                    LOG("STL capacity %zu\n", b.capacity());
                     vec_digi aa = vec_digi_copy(&a);
                     vec_digi aaa = vec_digi_init();
+                    LOG("CTL capacity %zu copy %zu\n", aa.capacity, aa.size);
+                    LOG("CTL capacity %zu init\n", aaa.capacity);
                     std::vector<DIGI> bb = b;
                     std::vector<DIGI> bbb;
                     vec_digi_swap(&aaa, &aa);
+                    LOG("CTL capacity %zu after swap %zu\n", aaa.capacity, aaa.size);
                     std::swap(bb, bbb);
+                    LOG("STL capacity %zu after swap %zu\n", bbb.capacity(), bbb.size());
                     CHECK(aaa, bbb);
                     vec_digi_free(&aaa);
                     CHECK(a, b);

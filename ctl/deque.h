@@ -555,6 +555,14 @@ JOIN(A, find)(A* self, T key)
     return NULL;
 }
 
+static inline void
+JOIN(A, swap)(A* self, A* other)
+{
+    A temp = *self;
+    *self = *other;
+    *other = temp;
+}
+
 #ifdef DEBUG
 
 static inline I*

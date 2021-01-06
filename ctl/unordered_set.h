@@ -638,6 +638,15 @@ JOIN(A, equal)(A* self, A* other)
     return result;
 }
 
+static inline void
+JOIN(A, swap)(A* self, A* other)
+{
+    A temp = *self;
+    *self = *other;
+    *other = temp;
+}
+
+#undef POD
 #ifndef HOLD
 #undef A
 #undef B

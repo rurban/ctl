@@ -22,11 +22,10 @@
 #include <string.h>
 
 // if we compare char by char, for algorithms like sort
-// is_lower
 static inline int
 str_char_compare(char* a, char* b)
 {
-    return *a < *b ? 1 : *a == *b ? 0 : -1;
+    return *a > *b;
 }
 
 static inline int

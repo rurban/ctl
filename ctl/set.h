@@ -654,6 +654,14 @@ JOIN(A, copy)(A* self)
     return copy;
 }
 
+static inline void
+JOIN(A, swap)(A* self, A* other)
+{
+    A temp = *self;
+    *self = *other;
+    *other = temp;
+}
+
 static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {

@@ -66,14 +66,6 @@ JOIN(A, equal)(A* self, A* other)
 }
 #endif
 
-static inline void
-JOIN(A, swap)(A* self, A* other)
-{
-    A temp = *self;
-    *self = *other;
-    *other = temp;
-}
-
 // is_integral type utilities, to make equal and compare optional for simple POD types
 /*
 #define _define_integral_compare(T)                                  \

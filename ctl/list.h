@@ -435,6 +435,14 @@ JOIN(A, remove_if)(A* self, int _match(T*))
 }
 
 static inline void
+JOIN(A, swap)(A* self, A* other)
+{
+    A temp = *self;
+    *self = *other;
+    *other = temp;
+}
+
+static inline void
 JOIN(A, splice)(A* self, B* pos, A* other)
 {
     if(self->size == 0 && pos == NULL)

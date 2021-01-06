@@ -62,14 +62,14 @@ main(void)
     if (env)
         sscanf(env, "%d", &test);
     if (test >= 0)
-        loops = 10;
+        loops = 30;
     for(size_t loop = 0; loop < loops; loop++)
     {
         size_t str_size = TEST_RAND(TEST_MAX_SIZE);
         if(str_size < MIN_STR_SIZE)
             str_size = MIN_STR_SIZE;
 #if defined(DEBUG) && !defined(LONG)
-        str_size = 15;
+        str_size = MIN_STR_SIZE;
 #endif
         enum
         {
