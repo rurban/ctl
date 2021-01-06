@@ -461,14 +461,14 @@ JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
         assert (pos->index + count >= count || !"pos overflow");
         assert (self->size + count < JOIN(A, max_size)() || !"max_size overflow");
 #endif
+        if(self->free)
+            self->free(&value);
         return NULL;
-    if (count > 0)
-    {
-        size_t index = pos->index;
-        JOIN(A, insert)(self, index, value);
-        for(size_t i = index + 1; i < count + index; i++)
-            JOIN(A, insert)(self, i, self->copy(&value));
     }
+    for(size_t i = pos->index; i < count + pos->index; i++)
+        JOIN(A, insert)(self, i, self->copy(&value));
+    if(self->free)
+        self->free(&value);
     return pos;
 }
 
