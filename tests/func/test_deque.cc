@@ -256,9 +256,7 @@ main(void)
                 TEST_ERASE_IT, // 6
                 TEST_INSERT_IT,
                 TEST_INSERT_RANGE, // 8
-#ifdef DEBUG
                 TEST_INSERT_COUNT, // 9
-#endif
                 TEST_ERASE_RANGE,
                 TEST_EMPLACE,
                 TEST_EMPLACE_FRONT,
@@ -456,11 +454,10 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_INSERT_COUNT:
                 {
 #ifdef LONG
-                    size_t amount = TEST_RAND(512);
+                    size_t amount = TEST_RAND(1024);
 #else
                     size_t amount = TEST_RAND(10);
 #endif
@@ -482,7 +479,6 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-#endif
                 case TEST_ERASE_IT:
                     if(a.size > 0)
                     {

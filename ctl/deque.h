@@ -448,12 +448,11 @@ JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
     return pos;
 }
 
-#ifdef DEBUG
 static inline I*
 JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
 {
     // avoid overflows, esp. silent signed conversions, like -1
-    if (self->size + count < JOIN(A, max_size)())
+    if (count > 0 && self->size + count < JOIN(A, max_size)())
     {
         size_t index = pos->index;
         JOIN(A, insert)(self, index, value);
@@ -462,7 +461,6 @@ JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
     }
     return pos;
 }
-#endif
 
 static inline void
 JOIN(A, assign)(A* self, size_t size, T value)
