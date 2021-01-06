@@ -30,6 +30,7 @@
 #include <math.h>
 #endif
 
+#define CTL_USET
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
@@ -146,9 +147,7 @@ JOIN(I, range)(A* container, B* begin, B* end)
     return self;
 }
 
-#define equal __EQUAL
 #include <ctl/_share.h>
-#undef equal
 
 static inline I
 JOIN(I, iter)(A* self, B *node)
@@ -627,6 +626,7 @@ JOIN(A, symmetric_difference)(A* a, A* b)
     return self;
 }
 
+// different to the shared equal
 static inline int
 JOIN(A, equal)(A* self, A* other)
 {

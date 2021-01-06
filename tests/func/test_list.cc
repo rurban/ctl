@@ -60,6 +60,8 @@ static void
 setup_lists(list_digi* a, std::list<DIGI>& b, size_t size, int* max_value)
 {
     *a = list_digi_init();
+    a->compare = digi_compare;
+    a->equal = digi_equal;
     for(size_t pushes = 0; pushes < size; pushes++)
     {
         int value = TEST_RAND(TEST_MAX_VALUE - 1); // SEE COMMENT IN CASE MERGE.

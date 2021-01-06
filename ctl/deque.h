@@ -546,16 +546,6 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
     return erases;
 }
 
-static inline int
-JOIN(A, _equal)(A* self, T* a, T* b)
-{
-    if(self->equal)
-        return self->equal(a, b);
-    else
-        return !self->compare(a, b) &&
-               !self->compare(b, a);
-}
-
 static inline T*
 JOIN(A, find)(A* self, T key)
 {

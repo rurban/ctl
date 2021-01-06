@@ -37,6 +37,8 @@ JOIN(A, implicit_copy)(T* self)
     return *self;
 }
 
+// not valid for uset, str
+#if !defined(CTL_USET) && !defined(CTL_STR)
 static inline int
 JOIN(A, equal)(A* self, A* other)
 {
@@ -62,6 +64,7 @@ JOIN(A, equal)(A* self, A* other)
     }
     return 1;
 }
+#endif
 
 static inline void
 JOIN(A, swap)(A* self, A* other)
@@ -127,6 +130,16 @@ _JOIN(A, _type_is_integral)()
            _strEQcc(CTL_STRINGIFY(T), "unsigned_char");
 }
 #endif
+
+static inline int
+JOIN(A, _equal)(A* self, T* a, T* b)
+{
+    if(self->equal)
+        return self->equal(a, b);
+    else
+        return !self->compare(a, b) &&
+               !self->compare(b, a);
+}
 
 #ifdef DEBUG
 

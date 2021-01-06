@@ -29,6 +29,8 @@ typedef struct A
     int (*equal)(T*, T*);
 } A;
 
+typedef int (*JOIN(A, compare_fn))(T*, T*);
+
 typedef struct I
 {
     CTL_COMMONFIELDS_ITER;
@@ -136,6 +138,22 @@ JOIN(A, init)(void)
     self.free = JOIN(T, free);
     self.copy = JOIN(T, copy);
 #endif
+    return self;
+}
+
+static inline A
+JOIN(A, _init)(A* copy)
+{
+    static A zero;
+    A self = zero;
+#ifdef POD
+    self.copy = JOIN(A, implicit_copy);
+#else
+    self.free = JOIN(T, free);
+    self.copy = JOIN(T, copy);
+#endif
+    self.compare = copy->compare;
+    self.equal = copy->equal;
     return self;
 }
 
@@ -262,8 +280,12 @@ JOIN(A, clear)(A* self)
 static inline void
 JOIN(A, free)(A* self)
 {
+    JOIN(A, compare_fn) *compare = &self->compare;
+    JOIN(A, compare_fn) *equal = &self->equal;
     JOIN(A, clear)(self);
     *self = JOIN(A, init)();
+    self->compare = *compare;
+    self->equal = *equal;
 }
 
 static inline void
@@ -281,7 +303,7 @@ JOIN(A, resize)(A* self, size_t size, T value)
 static inline A
 JOIN(A, copy)(A* self)
 {
-    A other = JOIN(A, init)();
+    A other = JOIN(A, _init)(self);
     for(B* node = self->head; node; node = node->next)
         JOIN(A, push_back)(&other, self->copy(&node->value));
     return other;
@@ -400,11 +422,11 @@ JOIN(A, insert_range)(A* self, B* pos, I* first, I* last)
 #endif
 
 static inline size_t
-JOIN(A, remove_if)(A* self, int _equal(T*))
+JOIN(A, remove_if)(A* self, int _match(T*))
 {
     size_t erases = 0;
     foreach(A, self, it)
-        if(_equal(it.ref))
+        if(_match(it.ref))
         {
             JOIN(A, erase)(self, it.node);
             erases++;
@@ -474,10 +496,10 @@ JOIN(A, sort)(A* self)
 {
     if(self->size > 1)
     {
-        A carry = JOIN(A, init)();
+        A carry = JOIN(A, _init)(self);
         A temp[64];
         for(size_t i = 0; i < len(temp); i++)
-            temp[i] = JOIN(A, init)();
+            temp[i] = JOIN(A, _init)(self);
         A* fill = temp;
         A* counter = NULL;
         do
@@ -499,14 +521,14 @@ JOIN(A, sort)(A* self)
     }
 }
 
-static inline void
+static inline void /* not I* it */
 JOIN(A, unique)(A* self)
 {
 #if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->equal || !"equal undefined");
+    assert(self->compare || !"compare undefined");
 #endif
     foreach(A, self, it)
-        if(it.next && self->equal(it.ref, &it.next->value))
+        if(it.next && JOIN(A, _equal)(self, it.ref, &it.next->value))
             JOIN(A, erase)(self, it.node);
 }
 
@@ -514,10 +536,10 @@ static inline B*
 JOIN(A, find)(A* self, T key)
 {
 #if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->equal || !"equal undefined");
+    assert(self->compare || !"compare undefined");
 #endif
     foreach(A, self, it)
-        if(self->equal(it.ref, &key))
+        if(JOIN(A, _equal)(self, it.ref, &key))
             return it.node;
     return NULL;
 }

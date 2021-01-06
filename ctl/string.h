@@ -5,6 +5,7 @@
 #error "Template type T defined for <ctl/string.h>"
 #endif
 
+#define CTL_STR
 #define vec_char str
 #define POD
 #define T char
@@ -191,7 +192,7 @@ str_compare(str* self, const char* s)
 static inline int
 str_key_compare(str* self, str* s)
 {
-    return strcmp(self->value, s->value);
+    return strcmp (self->value, s->value);
 }
 
 #endif
