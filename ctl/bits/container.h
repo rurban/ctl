@@ -3,6 +3,11 @@
 // DO NOT STANDALONE INCLUDE.
 //
 
+#if !defined CTL_LIST && !defined CTL_SET && !defined CTL_USET && \
+    !defined CTL_VEC && !defined CTL_DEQ
+#error "No CTL container defined for <ctl/bits/container.h>"
+#endif
+
 #include <stdbool.h>
 
 static inline int
@@ -65,6 +70,8 @@ JOIN(A, equal)(A* self, A* other)
     return 1;
 }
 #endif
+
+// Type utilities
 
 // is_integral type utilities, to make equal and compare optional for simple POD types
 /*
@@ -225,42 +232,4 @@ JOIN(A, _equal)(A* self, T* a, T* b)
                !self->compare(b, a);
 }
 
-#ifdef DEBUG
-
-static inline I*
-JOIN(A, find_if)(A* self, int _match(T*))
-{
-    foreach(A, self, it)
-        if(_match(it.ref))
-            return first;
-    return last;
-}
-
-static inline I*
-JOIN(A, find_if_not)(A* self, int _match(T*))
-{
-    foreach(A, self, it)
-        if(!_match(it.ref))
-            return first;
-    return last;
-}
-
-static inline bool
-JOIN(A, all_of)(A* self, int _match(T*))
-{
-    return JOIN(A, find_if_not)(self, _match) == JOIN(A, end)(self);
-}
-
-static inline bool
-JOIN(A, any_of)(A* self, int _match(T*))
-{
-    return JOIN(A, find_if)(self, first, last, _match) != JOIN(A, end)(self);
-}
-
-static inline bool
-JOIN(A, none_of)(A* self, int _match(T*))
-{
-    return JOIN(A, find_if)(self, _match) == JOIN(A, end)(self);
-}
-
-#endif
+#include <ctl/algorithm.h>

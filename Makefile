@@ -90,8 +90,8 @@ endif
 
 CXXFLAGS=$(CFLAGS)
 
-H        = $(wildcard ctl/*.h)
-COMMON_H = ctl/ctl.h ctl/_share.h
+H        = $(wildcard ctl/*.h) ctl/bits/*.h
+COMMON_H = ctl/ctl.h ctl/bits/container.h ctl/algorithm.h
 TESTS = \
 	tests/func/test_c11 \
 	tests/func/test_container_composing \

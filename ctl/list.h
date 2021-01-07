@@ -119,7 +119,7 @@ JOIN(A, end)(A* self)
 }
 #endif
 
-#include <ctl/_share.h>
+#include <ctl/bits/container.h>
 
 static inline A
 JOIN(A, init)(void)

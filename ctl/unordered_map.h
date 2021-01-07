@@ -1,8 +1,6 @@
 /* same hash table as unordered_set
 
-  TODO: extra free for key and value pairs.
-  on str or char* key use defaults. on integral types also.
-  so only free on the pair value part is needed.
+  TODO: add pairs, to handle the extra free for key and value pairs.
 
   search only the key. for most ops, just not insert/emplace.
  */

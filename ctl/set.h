@@ -120,7 +120,7 @@ JOIN(I, range)(A* container, B* begin, B* end)
     return self;
 }
 
-#include <ctl/_share.h>
+#include <ctl/bits/container.h>
 
 static inline A
 JOIN(A, init)(int _compare(T*, T*))

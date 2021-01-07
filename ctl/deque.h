@@ -144,7 +144,7 @@ JOIN(I, range)(A* container, T* begin, T* end)
     return self;
 }
 
-#include <ctl/_share.h>
+#include <ctl/bits/container.h>
 
 static inline A
 JOIN(A, init)(void)
