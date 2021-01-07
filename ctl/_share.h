@@ -115,11 +115,11 @@ _JOIN(A, _type_is_integral)()
            _strEQcc(CTL_STRINGIFY(T), "wchar_t") ||
            _strEQcc(CTL_STRINGIFY(T), "char16_t") ||
            _strEQcc(CTL_STRINGIFY(T), "char32_t") ||
-           _strEQcc(CTL_STRINGIFY(T), "long_double") ||
-           _strEQcc(CTL_STRINGIFY(T), "long_long") ||
-           _strEQcc(CTL_STRINGIFY(T), "unsigned_int") ||
-           _strEQcc(CTL_STRINGIFY(T), "unsigned_long") ||
-           _strEQcc(CTL_STRINGIFY(T), "unsigned_char");
+           _strEQcc(CTL_STRINGIFY(T), "long double") ||
+           _strEQcc(CTL_STRINGIFY(T), "long long") ||
+           _strEQcc(CTL_STRINGIFY(T), "unsigned int") ||
+           _strEQcc(CTL_STRINGIFY(T), "unsigned long") ||
+           _strEQcc(CTL_STRINGIFY(T), "unsigned char");
 }
 #endif
 

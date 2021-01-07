@@ -80,6 +80,42 @@ tests/test_c11.c:11:11: error: ‘type_free’ undeclared (first use in this fun
    11 | #define T type
 ```
 
+## Compare
+
+In contrast to the original CTL, this applies default `compare` and `equal` methods
+to all integral types T as
+int, long, bool, char, short, float, double, char8_t, wchar_t, char16_t,
+char32_t, long double, long long, unsigned int, unsigned long, unsigned char.
+
+Only with structs a `compare` and optionally an `equal` method must be set.
+Removed the compare and equal args from `equal`, `sort`, `sort_range`, `find`,
+`merge`, `unique`.
+
+Without an `equal` method two `compare` calls are used, so having a special equal
+method is preferred if one of those methods from above are used.
+
+If you have a POD type, i.e. a struct with only integral types, i.e. no pointers, you
+have to define `NOT_INTEGRAL`.
+
+e.g.
+```C
+#define POD
+#define NOT_INTEGRAL
+#define T point
+#include <ctl/priority_queue.h>
+
+// or
+
+#define T digi
+#include <ctl/deque.h>
+...
+    deq_digi a = deq_digi_init();
+    a.compare = digi_compare;
+    a.equal = digi_equal;
+```
+
+Forgetting a compare method will assert with "compare undefined", if enabled.
+
 ## Performance
 
 CTL performance is presented in solid colors, and STL in dotted colors,
@@ -261,22 +297,38 @@ key_compare              x
 Use the original long names, not three-letter abbrevations.
 
 `#define POD` not `P`
+`#define NOT_INTEGRAL` not `COMPARE`
 
 Added lots of missing methods, like `max_size`, `size`, `capacity`, ...
-Probe for -std=c++20 c++ support and this for testing against the STL..
+Probe for -std=c++20 c++ support and use this for testing against the STL.
 
 Added **map** and **unordered_map**.
 
 Added docs and manpages.
 
+Added builtin default `compare` and `equal` methods for the simple integral types T:
+`int`, `long`, `bool`, `char`, `short`, `float`, `double`, `char8_t`, 
+`long double`, `long long`, `unsigned int`, `unsigned long`, `unsigned char`.
+Only with structs a compare and optionally and equal method must be set.
+Removed the compare and equal args from `equal`, `sort`, `sort_range`, `find`,
+`merge`, `unique`
+Added compare and equal fields to all.
+
 Added many `_it` and `_range` method variants to accept iterators, `_found` to
 return found or not.
 
+    deque: insert_it, insert_range, insert_count, erase_it, erase_range,
+           emplace, emplace_back, emplace_front, sort_range
+    vector: assign_range, erase_it, erase_range
+    list: remove, emplace, emplace_front, insert_range, insert_count
     set: erase_it, erase_range
-    umap: insert_or_assign_found
-    uset: clear
+    map: insert_or_assign
+    umap: insert_or_assign, insert_or_assign_found
+    uset: clear, insert_found
 
-Added many return values as iterators, as in the STL:
+vector `swap` does `shrink_to_fit` as in the STL.
+
+Added many return values as iterators, as in the STL.
 
 Reproducible tests with `SEED=n`
 
@@ -284,14 +336,15 @@ Optimized hashmaps with two growth policies, about 100x faster with the policy
 `CTL_USET_GROWTH_POWER2`, instead of the default `CTL_USET_GROWTH_PRIMED`.
 
 hashmaps will be changed from chained lists to open addressing, thus no internal
-bucket methods, and even more faster. The `CTL_USET_CACHED_HASH` policy is still in
-work, for faster finds but more memory.
+bucket methods, and even more faster, but pointers into it are disallowed.
+The `CTL_USET_CACHED_HASH` policy is still in work, for faster finds but more memory.
 
 Work is ongoing for all `algorithms.h` and `ranges`, with full iterator support
 and `foreach_range`.
 
 On errors, like `size > max_size` return silently. This avoids DDOS attacks.
 When assert is used, throw them. (when assert.h included, no NDEBUG)
+
 glouw/ctl does not treat errors at all. There cannot be any.
 
 ### Differences to the STL
@@ -301,12 +354,14 @@ similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 
 STL array and span is missing. array is just a vector.
 
-emplace missing, most C++20 methods also still missing.
 STL methods returning a pair of iterator and bool have a `_found` suffix,
 return the iterator and set a `int *foundp` value. Eg.
 
     int found;
     map_T_insert_assign_found (self, key, &found);
+
+`emplace`, `erase_if` and many algorithms still missing, most C++20 methods
+also still missing.
 
 No short string optimization yet.
 
@@ -314,11 +369,11 @@ hashmaps will not rely on chained lists with buckets, and will be either changed
 to open addressing or a better modern layout, such greg7mdp/parallel-hashmap.
 Thus the bucket interface methods will go, except maybe `max_bucket_count`.
 
-u8string will get proper utf-8/unicode support, exceeding C++ STL.
+**u8string** will get proper utf-8/unicode support, exceeding C++ STL.
 compare will check u8strings normalized to NFD.
 No wstring, u16string and u32string (most likely).
 
-u8ident: POSIX std extension for people using utf-8 identifiers, but
+**u8ident**: POSIX std extension for people using utf-8 identifiers, but
 need security. See http://unicode.org/reports/tr39/
 Like a kernel filesystem or user database or programming language
 in a UTF-8 terminal, UI widget or editor wishes to present identifiers, like
@@ -339,8 +394,9 @@ Implement the **Moderately Restrictive** restriction level for identifiers as de
   characters.
 Reject violations, optionally warn about confusables.
 
-No exceptions or errors. Just ignore or return NULL.
-No bloat and no indirect calls.
+No exceptions or errors. Just ignore or return NULL. If assert is included, use
+it, with a proper error message.
+No bloat and not many indirect calls (only compare and equal).
 
 ## Acknowledgements
 
