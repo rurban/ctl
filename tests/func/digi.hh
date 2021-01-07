@@ -48,7 +48,7 @@ digi_is_odd(digi* d)
 }
 
 static inline int
-digi_match(digi* a, digi* b)
+digi_equal(digi* a, digi* b)
 {
     return *a->value == *b->value;
 }

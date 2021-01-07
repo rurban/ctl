@@ -8,18 +8,31 @@
 #include <unordered_set>
 #include <algorithm>
 
-#define CHECK(_x, _y) {                           \
-    assert(_x.size == _y.size());                 \
-    std::unordered_set<DIGI>::iterator _iter = _y.begin(); \
-    foreach(uset_digi, &_x, _it) {                \
-        assert(*_it.ref->value == *_iter->value); \
-        _iter++;                                  \
-    }                                             \
-    uset_digi_it _it = uset_digi_it_each(&_x);    \
-    for(auto& _d : _y) {                          \
-        assert(*_it.ref->value == *_d.value);     \
-        _it.step(&_it);                           \
-    }                                             \
+#define CHECK(_x, _y) {                                                \
+    assert(_x.size == _y.size());                                      \
+    if(_x.size > 0)                                                    \
+    {                                                                  \
+        size_t a_found = 0;                                            \
+        size_t b_found = 0;                                            \
+        foreach(uset_digi, &_x, it)                                    \
+        {                                                              \
+            auto found = _y.find(DIGI(*it.ref->value));                \
+            assert(found != _y.end());                                 \
+            a_found += 1;                                              \
+        }                                                              \
+        for(auto x : _y)                                               \
+        {                                                              \
+            digi d = digi_init(*x.value);                              \
+            uset_digi_node* found = uset_digi_find(&_x, d);            \
+            assert(found != NULL);                                     \
+            digi_free(&d);                                             \
+            b_found += 1;                                              \
+        }                                                              \
+        assert(a_found == b_found);                                    \
+        assert(_x.bucket_count == _y.bucket_count());                  \
+        for(size_t _i = 0; _i < _x.bucket_count; _i++)                 \
+            assert(uset_digi_bucket_size(&_x, _i) == _y.bucket_size(_i));\
+    }                                                                  \
 }
 
 static void
@@ -28,7 +41,7 @@ setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
     size_t iters = TEST_RAND(TEST_MAX_SIZE);
     iters = 5; // TMP
     LOG ("\nSETUP_SETS %lu\n", iters);
-    *a = uset_digi_init(iters, digi_hash, digi_match);
+    *a = uset_digi_init(digi_hash, digi_equal);
     for(size_t inserts = 0; inserts < iters; inserts++)
     {
         const int vb = TEST_RAND(TEST_MAX_SIZE);
@@ -37,10 +50,20 @@ setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
     }
 }
 
+static void
+test_small_size(void)
+{
+    uset_digi a = uset_digi_init(digi_hash, digi_equal);
+    uset_digi_insert(&a, digi_init(1));
+    uset_digi_insert(&a, digi_init(2));
+    uset_digi_free(&a);
+}
+
 int
 main(void)
 {
     INIT_SRAND;
+    test_small_size();
     const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
     for(size_t loop = 0; loop < loops; loop++)
     {
@@ -72,13 +95,6 @@ main(void)
             TEST_TOTAL,
         };
         int which = TEST_RAND(TEST_TOTAL);
-#ifndef DEBUG
-        /* UNSTABLE (all methods with iterators) */
-        if (which == TEST_RESERVE ||
-            which == TEST_INSERT ||
-            which == TEST_FIND ||
-            which == TEST_ERASE)
-#endif
         switch(which)
         {
             case TEST_INSERT:
@@ -131,7 +147,7 @@ main(void)
             case TEST_SWAP:
             {
                 uset_digi aa = uset_digi_copy(&a);
-                uset_digi aaa = uset_digi_init(1, digi_hash, digi_match);
+                uset_digi aaa = uset_digi_init(digi_hash, digi_equal);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 LOG ("\nTEST SWAP\n");
@@ -221,7 +237,7 @@ main(void)
                 uset_digi aa = uset_digi_copy(&a);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 LOG ("\nTEST EQUAL %lu\n", aa.size);
-                assert(uset_digi_equal(&a, &aa, digi_match));
+                assert(uset_digi_equal(&a, &aa, digi_equal));
                 assert(b == bb);
                 uset_digi_free(&aa);
                 CHECK(a, b);

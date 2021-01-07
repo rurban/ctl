@@ -252,19 +252,19 @@ main(void)
     }
     {
         int j = 0;
-        uset_int a = uset_int_init(8, int_hash, int_equal);
+        uset_int a = uset_int_init(int_hash, int_equal);
         for (int i=0; i > -27; i--)
           uset_int_insert(&a, i);
         for (int i=0; i < 27; i++)
           uset_int_insert(&a, i);
         foreach(uset_int, &a, it) { j = *it.ref; }
         printf("last int %d, ", j);
-        foreach(uset_int, &a, it) { uset_int_bucket_size(it.node); }
+        foreach(uset_int, &a, it) { uset_int_node_bucket_size(it.node); }
         printf("uset load_factor: %f\n", uset_int_load_factor(&a));
         uset_int_free(&a);
     }
     {
-        umap_charint a = umap_charint_init(8, charint_hash, charint_equal);
+        umap_charint a = umap_charint_init(charint_hash, charint_equal);
         char c_char[36];
         for (int i=0; i<1000; i++) {
           snprintf(c_char, 36, "%c%d", 48 + (rand() % 74), rand());
@@ -273,7 +273,7 @@ main(void)
         }
         foreach(umap_charint, &a, it) { strcpy (c_char, it.ref->key); }
         printf("last key \"%s\", ", c_char);
-        foreach(umap_charint, &a, it) { umap_charint_bucket_size(it.node); }
+        foreach(umap_charint, &a, it) { umap_charint_node_bucket_size(it.node); }
         printf("umap_charint load_factor: %f\n", umap_charint_load_factor(&a));
         umap_charint_free(&a);
     }

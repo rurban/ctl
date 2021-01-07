@@ -322,7 +322,7 @@ main(void)
                 {
                     deq_digi aa = deq_digi_copy(&a);
                     std::deque<DIGI> bb = b;
-                    assert(deq_digi_equal(&a, &aa, digi_match));
+                    assert(deq_digi_equal(&a, &aa, digi_equal));
                     assert(b == bb);
                     deq_digi_free(&aa);
                     CHECK(a, b);
@@ -335,7 +335,7 @@ main(void)
                         const size_t index = TEST_RAND(a.size);
                         int value = TEST_RAND(2) ? TEST_RAND(INT_MAX) : *deq_digi_at(&a, index)->value;
                         digi key = digi_init(value);
-                        digi* aa = deq_digi_find(&a, key, digi_match);
+                        digi* aa = deq_digi_find(&a, key, digi_equal);
                         auto bb = std::find(b.begin(), b.end(), DIGI{value});
                         bool found_a = aa != NULL;
                         bool found_b = bb != b.end();

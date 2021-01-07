@@ -261,7 +261,7 @@ main(void)
             {
                 list_digi aa = list_digi_copy(&a);
                 std::list<DIGI> bb = b;
-                assert(list_digi_equal(&a, &aa, digi_match));
+                assert(list_digi_equal(&a, &aa, digi_equal));
                 assert(b == bb);
                 list_digi_free(&aa);
                 CHECK(a, b);
@@ -276,7 +276,7 @@ main(void)
             }
             case TEST_UNIQUE:
             {
-                list_digi_unique(&a, digi_match);
+                list_digi_unique(&a, digi_equal);
                 b.unique();
                 CHECK(a, b);
                 break;
@@ -299,7 +299,7 @@ main(void)
                     }
                     int value = TEST_RAND(2) ? TEST_RAND(INT_MAX) : test_value;
                     digi key = digi_init(value);
-                    list_digi_node* aa = list_digi_find(&a, key, digi_match);
+                    list_digi_node* aa = list_digi_find(&a, key, digi_equal);
                     auto bb = std::find(b.begin(), b.end(), DIGI{value});
                     bool found_a = aa != NULL;
                     bool found_b = bb != b.end();

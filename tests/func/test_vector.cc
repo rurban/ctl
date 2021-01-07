@@ -204,7 +204,7 @@ main(void)
                 {
                     vec_digi aa = vec_digi_copy(&a);
                     std::vector<DIGI> bb = b;
-                    assert(vec_digi_equal(&a, &aa, digi_match));
+                    assert(vec_digi_equal(&a, &aa, digi_equal));
                     assert(b == bb);
                     vec_digi_free(&aa);
                     CHECK(a, b);
@@ -217,7 +217,7 @@ main(void)
                         const size_t index = TEST_RAND(a.size);
                         int value = TEST_RAND(2) ? TEST_RAND(INT_MAX) : *vec_digi_at(&a, index)->value;
                         digi key = digi_init(value);
-                        digi* aa = vec_digi_find(&a, key, digi_match);
+                        digi* aa = vec_digi_find(&a, key, digi_equal);
                         auto bb = std::find(b.begin(), b.end(), DIGI{value});
                         bool found_a = aa != NULL;
                         bool found_b = bb != b.end();
