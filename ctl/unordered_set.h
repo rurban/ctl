@@ -70,14 +70,12 @@ JOIN(I, index)(A* self, T value)
 }
 
 static inline void
-JOIN(I, update)(I* self, size_t bucket_index)
+JOIN(I, update)(I* self)
 {
     self->node = self->next;
     self->ref = &self->node->value;
     self->next = self->node->next;
-    LOG ("update: bucket_index %lu -> %lu of %lu\n", self->bucket_index,
-         bucket_index, self->container->bucket_count);
-    self->bucket_index = bucket_index;
+    self->bucket_index = JOIN(I, index)(self->container, *self->ref);
 }
 
 /*
@@ -91,26 +89,15 @@ JOIN(I, step)(I* self)
     if(self->next == JOIN(A, end)(self->container))
     {
         for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
-        {
-            LOG("step buckets[%lu] of %lu\n", i, self->container->bucket_count);
             if((self->next = self->container->buckets[i]))
             {
-                JOIN(I, update)(self, i);
+                JOIN(I, update)(self);
                 return;
             }
-        }
-        LOG ("step done\n");
-        self->bucket_index = 0;
         self->done = 1;
     }
     else
-    {   // still in chain. advance to next in chain
-        LOG ("step next\n");
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-        assert (self->node != self->next && "bucket chain cycle");
-#endif
-        JOIN(I, update)(self, self->bucket_index);
-    }
+        JOIN(I, update)(self);
 }
 
 static inline I
@@ -127,12 +114,11 @@ JOIN(I, range)(A* container, B* begin, B* end)
         self.next = self.node->next;
         self.end = end;
         self.container = container;
-        //self.hash = self.container->hash(self.ref);
+        self.bucket_index = JOIN(I, index)(container, *self.ref);
     }
     else
     {
         LOG ("range done\n");
-        //self.bucket_index = 0;
         self.done = 1;
     }
     return self;
@@ -186,7 +172,7 @@ JOIN(B, bucket_size)(B* self)
 }
 
 static inline B**
-JOIN(A, bucket)(A* self, T value)
+JOIN(A, _bucket)(A* self, T value)
 {
     size_t hash = self->hash(&value) % self->bucket_count;
     LOG ("hash -> buckets[%lu]\n", hash);
@@ -203,7 +189,7 @@ JOIN(A, bucket_size)(A* self, size_t index)
 }
 
 static inline void
-JOIN(A, free_node)(A* self, B* n)
+JOIN(A, _free_node)(A* self, B* n)
 {
     if(self->free)
         self->free(&n->value);
@@ -274,7 +260,7 @@ JOIN(A, rehash)(A* self, size_t desired_count)
     JOIN(A, reserve)(&rehashed, desired_count);
     foreach(A, self, it)
     {
-        B** buckets = JOIN(A, bucket)(&rehashed, it.node->value);
+        B** buckets = JOIN(A, _bucket)(&rehashed, it.node->value);
         if (it.node != *buckets)
             *buckets = JOIN(B, push)(*buckets, it.node);
     }
@@ -288,7 +274,7 @@ JOIN(A, find)(A* self, T value)
 {
     if(!JOIN(A, empty)(self))
     {
-        B** buckets = JOIN(A, bucket)(self, value);
+        B** buckets = JOIN(A, _bucket)(self, value);
         for(B* n = *buckets; n; n = n->next)
             if(self->equal(&value, &n->value))
                 return n;
@@ -308,7 +294,7 @@ JOIN(A, insert)(A* self, T value)
     {
         if(JOIN(A, empty)(self))
             JOIN(A, rehash)(self, 12);
-        B** bucket = JOIN(A, bucket)(self, value);
+        B** bucket = JOIN(A, _bucket)(self, value);
         *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(value));
         LOG ("insert: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
         self->size++;
@@ -334,7 +320,7 @@ JOIN(A, emplace)(A* self, T* value)
     {
         if(JOIN(A, empty)(self))
             JOIN(A, rehash)(self, 12);
-        B** bucket = JOIN(A, bucket)(self, value);
+        B** bucket = JOIN(A, _bucket)(self, value);
         *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(*value));
         self->size++;
         if (JOIN(A, load_factor)(self) > self->max_load_factor)
@@ -349,11 +335,22 @@ JOIN(A, emplace)(A* self, T* value)
 #endif
 
 static inline void
-JOIN(A, free)(A* self)
+JOIN(A, clear)(A* self)
 {
     foreach(A, self, it)
-        JOIN(A, free_node)(self, it.node);
+        JOIN(A, _free_node)(self, it.node);
+    for(size_t i = 0; i < self->bucket_count; i++)
+        self->buckets[i] = NULL;
+    self->size = 0;
+}
+
+static inline void
+JOIN(A, free)(A* self)
+{
+    JOIN(A, clear)(self);
     free(self->buckets);
+    self->buckets = NULL;
+    self->bucket_count = 0;
 }
 
 static inline size_t
@@ -361,7 +358,7 @@ JOIN(A, count)(A* self, T value)
 {
     size_t count = 0;
     foreach(A, self, it)
-        if(self->equal(it.ref , &value))
+        if(self->equal(it.ref, &value))
             count++;
     return count;
 }
@@ -369,14 +366,15 @@ JOIN(A, count)(A* self, T value)
 static inline void
 JOIN(A, erase)(A* self, T value)
 {
-    B** buckets = JOIN(A, bucket)(self, value);
+    B** buckets = JOIN(A, _bucket)(self, value);
     B* prev = NULL;
     for(B* n = *buckets; n; n = n->next)
     {
         if(self->equal(&value, &n->value))
         {
             B* next = n->next;
-            JOIN(A, free_node)(self, n);
+            JOIN(A, _free_node)(self, n);
+            n = NULL;
             if(prev)
                 prev->next = next;
             self->size--;
@@ -384,13 +382,6 @@ JOIN(A, erase)(A* self, T value)
         }
         prev = n;
     }
-}
-
-static inline void
-JOIN(A, clear)(A* self)
-{
-    foreach(A, self, i) JOIN(A, erase)(self, *i.ref);
-    JOIN(A, free)(self);
 }
 
 static inline A
@@ -419,9 +410,10 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
             if(_match(&n->value))
             {
                 B* next = n->next;
-                JOIN(A, free_node)(self, n);
+                JOIN(A, _free_node)(self, n);
                 if(prev)
                     prev->next = next;
+                self->size--;
             }
             prev = n;
         }

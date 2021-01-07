@@ -253,6 +253,7 @@ main(void)
     {
         int j = 0;
         uset_int a = uset_int_init(int_hash, int_equal);
+        // TODO skip default a.equal
         for (int i=0; i > -27; i--)
           uset_int_insert(&a, i);
         for (int i=0; i < 27; i++)
@@ -265,6 +266,7 @@ main(void)
     }
     {
         umap_charint a = umap_charint_init(charint_hash, charint_equal);
+        // TODO a.equal = charint_equal
         char c_char[36];
         for (int i=0; i<1000; i++) {
           snprintf(c_char, 36, "%c%d", 48 + (rand() % 74), rand());

@@ -42,6 +42,7 @@ setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
     iters = 5; // TMP
     LOG ("\nSETUP_SETS %lu\n", iters);
     *a = uset_digi_init(digi_hash, digi_equal);
+    // TODO a->equal = digi_equal
     for(size_t inserts = 0; inserts < iters; inserts++)
     {
         const int vb = TEST_RAND(TEST_MAX_SIZE);
@@ -54,6 +55,7 @@ static void
 test_small_size(void)
 {
     uset_digi a = uset_digi_init(digi_hash, digi_equal);
+    // TODO a.equal = digi_equal
     uset_digi_insert(&a, digi_init(1));
     uset_digi_insert(&a, digi_init(2));
     uset_digi_free(&a);
@@ -148,6 +150,7 @@ main(void)
             {
                 uset_digi aa = uset_digi_copy(&a);
                 uset_digi aaa = uset_digi_init(digi_hash, digi_equal);
+                // TODO a.equal = digi_equal
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 LOG ("\nTEST SWAP\n");
