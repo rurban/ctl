@@ -8,6 +8,7 @@
 
 #include <ctl/ctl.h>
 
+#define CTL_SET
 #define A JOIN(set, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
@@ -129,14 +130,7 @@ JOIN(A, init)(int _compare(T*, T*))
     self.compare = _compare;
 #ifdef POD
     self.copy = JOIN(A, implicit_copy);
-# ifndef NOT_INTEGRAL
-    if (_JOIN(A, _type_is_integral)())
-    {
-        if (!_compare)
-            self.compare = _JOIN(A, _default_integral_compare);
-        self.equal = _JOIN(A, _default_integral_equal);
-    }
-# endif
+    _JOIN(A, _set_default_methods)(&self);
 #else
     self.free = JOIN(T, free);
     self.copy = JOIN(T, copy);
@@ -722,6 +716,7 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 #else
 #undef HOLD
 #endif
+#undef CTL_SET
 
 #ifdef USE_INTERNAL_VERIFY
 #undef USE_INTERNAL_VERIFY

@@ -29,6 +29,7 @@
 #define each          __EACH
 #define remove_if     __REMOVE_IF
 
+#define CTL_PQU
 #define vec pqu
 #define HOLD
 #define init __INIT
@@ -148,3 +149,4 @@ JOIN(A, emplace)(A* self, ...) {}
 #undef POD
 #undef NOT_INTEGRAL
 #undef A
+#define CTL_PQU

@@ -29,6 +29,7 @@ FNV1a(const char *key)
   return h;
 }
 
+/* TODO: make that simpler as with STL pairs, treating them seperately */
 typedef struct {
   char *key;
   int value;
@@ -81,6 +82,16 @@ _str_equal(str* a, str* b)
 int
 _str_cmp(str* a, str* b)
 { return strcmp(*(char**)a, *(char**)b); }
+
+#define T str
+#include <ctl/set.h>
+
+// we known about this special case
+#define POD
+#define NOT_INTEGRAL
+typedef char* charp;
+#define T charp
+#include <ctl/set.h>
 
 #define POD
 #define T int

@@ -7,6 +7,7 @@
 #include <ctl/ctl.h>
 #include <stdarg.h>
 
+#define CTL_LIST
 #define A JOIN(list, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
@@ -558,3 +559,4 @@ JOIN(A, find)(A* self, T key)
 #undef A
 #undef B
 #undef I
+#undef CTL_LIST

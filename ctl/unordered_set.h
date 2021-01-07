@@ -54,8 +54,8 @@ typedef struct A
     void (*free)(T*);
     T (*copy)(T*);
     size_t (*hash)(T*);
-    int (*compare)(T*, T*);
     int (*equal)(T*, T*);
+    int (*compare)(T*, T*);
 } A;
 
 typedef struct I
@@ -311,7 +311,7 @@ JOIN(A, init)(size_t (*_hash)(T*), int (*_equal)(T*, T*))
     self.equal = _equal;
 #ifdef POD
     self.copy = JOIN(A, implicit_copy);
-#undef POD
+    _JOIN(A, _set_default_methods)(&self);
 #else
     self.free = JOIN(T, free);
     self.copy = JOIN(T, copy);
@@ -655,6 +655,7 @@ JOIN(A, swap)(A* self, A* other)
 #else
 #undef HOLD
 #endif
+#undef CTL_USET
 
 #ifdef USE_INTERNAL_VERIFY
 #undef USE_INTERNAL_VERIFY

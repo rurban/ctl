@@ -24,6 +24,7 @@
 #define step        __STEP
 #define remove_if   __REMOVE_IF
 
+#define CTL_QUEUE
 #define deq queue
 #include <ctl/deque.h>
 #undef deq
@@ -46,3 +47,4 @@
 #undef each
 #undef step
 #undef remove_if
+#undef CTL_QUEUE

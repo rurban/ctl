@@ -8,6 +8,7 @@
 
 #include <ctl/ctl.h>
 
+#define CTL_DEQ
 #define A JOIN(deq, T)
 #define B JOIN(A, bucket)
 #define I JOIN(A, it)
@@ -583,5 +584,6 @@ JOIN(A, find_range)(A* self, I* first, I* last, T value)
 #undef I
 #undef POD
 #undef NOT_INTEGRAL
+#undef CTL_DEQ
 
 #undef DEQ_BUCKET_SIZE

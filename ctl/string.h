@@ -194,4 +194,5 @@ str_key_compare(str* self, str* s)
     return strcmp (self->value, s->value);
 }
 
+#undef CTL_STR
 #endif

@@ -13,6 +13,7 @@
 
 #include <ctl/ctl.h>
 
+#define CTL_UMAP
 #define HOLD
 #define uset umap
 #include <ctl/unordered_set.h>
@@ -61,6 +62,7 @@ JOIN(A, insert_or_assign_found)(A* self, T value, int *foundp)
     return JOIN(I, iter)(self, *buckets);
 }
 
+#undef CTL_UMAP
 #undef uset
 #undef T
 #undef A

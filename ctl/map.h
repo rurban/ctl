@@ -8,6 +8,7 @@
 
 // TODO C++17: emplace, try_emplace, extract, merge
 
+#define CTL_MAP
 #define HOLD
 #define set map
 #include <ctl/set.h>
@@ -119,3 +120,4 @@ JOIN(A, insert_or_assign_found)(A* self, T key, int* foundp)
 #undef A
 #undef B
 #undef I
+#undef CTL_MAP

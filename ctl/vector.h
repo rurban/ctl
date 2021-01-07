@@ -8,6 +8,7 @@
 
 #include <ctl/ctl.h>
 
+#define CTL_VEC
 #define A JOIN(vec, T)
 #define I JOIN(A, it)
 
@@ -445,3 +446,4 @@ JOIN(A, find)(A* self, T key)
 #undef POD
 #undef NOT_INTEGRAL
 #endif
+#undef CTL_VEC

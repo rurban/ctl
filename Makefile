@@ -93,6 +93,8 @@ CXXFLAGS=$(CFLAGS)
 TESTS = \
 	tests/func/test_c11 \
 	tests/func/test_container_composing \
+	tests/func/test_integral \
+	tests/func/test_integral_c11 \
 	tests/func/test_deque \
 	tests/func/test_list \
 	tests/func/test_string \
@@ -190,6 +192,10 @@ unordered_map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 tests/func/test_c11.i:
 	@$(CC) $(CFLAGS) $(subst .i,.c,$@) -E | clang-format -style=webkit
+tests/func/test_integral_c11.i:
+	@$(CC) $(CFLAGS) $(subst .i,.c,$@) -E | clang-format -style=webkit
+tests/func/test_integral.i:
+	@$(CXX) $(CFLAGS) $(subst .i,.cc,$@) -E | clang-format -style=webkit
 
 examples/astar:                      ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 examples/postfix:                    ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
@@ -197,7 +203,9 @@ examples/json:                       ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 examples/snow:                       ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 examples/6502:                       ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 tests/func/test_c11:                 ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
+tests/func/test_integral_c11:        ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
 tests/func/test_container_composing: ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_integral:            ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_deque:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_list:                ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_priority_queue:      ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
