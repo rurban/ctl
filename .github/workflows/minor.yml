@@ -25,6 +25,7 @@ jobs:
           - make -j9 CC=gcc\ -std=c99
           - make -j9 CC=gcc\ -std=c11
           - make examples SANITIZE=1
+          - make perf
     steps:
     - uses: actions/checkout@v2
     - run:  ${{ matrix.MAKE }}

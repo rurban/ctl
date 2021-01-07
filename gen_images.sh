@@ -1,4 +1,4 @@
-CFLAGS='-O3'
+CFLAGS="-O3 -march=native"
 VERSION=$(g++ --version | head -1)
 
 function perf_graph
@@ -19,7 +19,7 @@ function perf_graph
         ./$OUT >> $LOG
     done
     python3 tests/perf/perf_plot.py $LOG "$TITLE"
-    mv $LOG.png images/
+    mv $LOG.png docs/images/
     rm $LOG
     rm $OUT
 }
@@ -36,18 +36,18 @@ function perf_compile_two_bar
     BB=binb
     echo $LOG
     X=`(time gcc -o $AA $CFLAGS $A -I.) 2>&1 | grep $KEY | cut -d ' ' -f 2`
-    Y=`(time g++ -o $BB $CFLAGS $B)        2>&1 | grep $KEY | cut -d ' ' -f 2`
+    Y=`(time g++ -o $BB $CFLAGS $B)     2>&1 | grep $KEY | cut -d ' ' -f 2`
     I=`stat --printf="%s" $AA`
     J=`stat --printf="%s" $BB`
     python3 tests/perf/perf_plot_bar.py $LOG "$TITLE" $X $Y $I $J $A $B
-    mv $LOG.png images/
+    mv $LOG.png docs/images/
     rm $AA
     rm $BB
 }
 
 perf_graph \
     'set.log' \
-    "std::set<int> vs. CTL set_int ($CFLAGS) ($VERSION)" \
+    "std::set<int> (dotted) vs. CTL set_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/set/perf_set_insert.cc \
      tests/perf/set/perf_set_insert.c \
      tests/perf/set/perf_set_erase.cc \
@@ -57,7 +57,7 @@ perf_graph \
 
 perf_graph \
     'pqu.log' \
-    "std::priority_queue<int> vs. CTL pqu_int ($CFLAGS) ($VERSION)" \
+    "std::priority_queue<int> (dotted) vs. CTL pqu_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/pqu/perf_priority_queue_push.cc \
      tests/perf/pqu/perf_pqu_push.c \
      tests/perf/pqu/perf_priority_queue_pop.cc \
@@ -65,7 +65,7 @@ perf_graph \
 
 perf_graph \
     'vec.log' \
-    "std::vector<int> vs. CTL vec_int ($CFLAGS) ($VERSION)" \
+    "std::vector<int> (dotted) vs. CTL vec_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/vec/perf_vector_push_back.cc \
      tests/perf/vec/perf_vec_push_back.c \
      tests/perf/vec/perf_vector_pop_back.cc \
@@ -76,8 +76,8 @@ perf_graph \
      tests/perf/vec/perf_vec_iterate.c"
 
 perf_graph \
-    'lst.log' \
-    "std::list<int> vs. CTL lst_int ($CFLAGS) ($VERSION)" \
+    'list.log' \
+    "std::list<int> (dotted) vs. CTL list_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/lst/perf_list_push_back.cc
      tests/perf/lst/perf_lst_push_back.c \
      tests/perf/lst/perf_list_pop_back.cc \
@@ -93,7 +93,7 @@ perf_graph \
 
 perf_graph \
     'deq.log' \
-    "std::deque<int> vs. CTL deq_int ($CFLAGS) ($VERSION)" \
+    "std::deque<int> (dotted) vs. CTL deq_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/deq/perf_deque_push_back.cc
      tests/perf/deq/perf_deq_push_back.c \
      tests/perf/deq/perf_deque_pop_back.cc \

@@ -96,6 +96,11 @@ all: $(TESTS)
 	@$(CXX) --version
 	@rm -f $(TESTS)
 
+PERFS_C  = $(patsubst %.c,%, $(wildcard tests/perf/*/perf*.c) tests/perf/perf_compile_c11.c)
+PERFS_CC = $(patsubst %.cc,%, $(wildcard tests/perf/*/perf*.cc) tests/perf/perf_compile_cc.cc)
+
+perf: $(PERFS_C) $(PERFS_CC)
+
 examples: $(EXAMPLES)
 
 clean:

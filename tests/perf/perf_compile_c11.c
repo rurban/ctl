@@ -172,7 +172,7 @@ A(void)
     deq_int a = deq_int_init();
     vec_int b = vec_int_init();
     list_int c = list_int_init();
-    queue_int d = que_int_init();
+    queue_int d = queue_int_init();
     set_int e = set_int_init(compare_key_int);
     stack_int f = stack_int_init();
     str g = str_init("test");
@@ -214,7 +214,7 @@ B(void)
     deq_short a = deq_short_init();
     vec_short b = vec_short_init();
     list_short c = list_short_init();
-    queue_short d = que_short_init();
+    queue_short d = queue_short_init();
     set_short e = set_short_init(compare_key_short);
     stack_short f = stack_short_init();
     str g = str_init("test");
@@ -256,7 +256,7 @@ C(void)
     deq_float a = deq_float_init();
     vec_float b = vec_float_init();
     list_float c = list_float_init();
-   queue_float d = que_float_init();
+   queue_float d = queue_float_init();
     set_float e = set_float_init(compare_key_float);
    stack_float f = stack_float_init();
     str g = str_init("test");
@@ -298,7 +298,7 @@ D(void)
     deq_double a = deq_double_init();
     vec_double b = vec_double_init();
     list_double c = list_double_init();
-    queue_double d = que_double_init();
+    queue_double d = queue_double_init();
     set_double e = set_double_init(compare_key_double);
     stack_double f = stack_double_init();
     str g = str_init("test");

@@ -90,17 +90,16 @@ tests/test_c11.c:11:11: error: ‘type_free’ undeclared (first use in this fun
 CTL performance is presented in solid colors, and STL in dotted colors,
 for template type `T` as type `int` for all measurements.
 
-![](../images/vec.log.png)
-![](../images/lst.log.png)
-![](../images/deq.log.png)
-![](../images/set.log.png)
-![](../images/pqu.log.png)
-![](../images/compile.log.png)
+![](images/vec.log.png)
+![](images/list.log.png)
+![](images/deq.log.png)
+![](images/set.log.png)
+![](images/pqu.log.png)
+![](images/compile.log.png)
 
 Omitted from these performance measurements are `queue.h`, `stack.h`, and `string.h`,
 as their performance characteristics can be inferred from `deque.h`, and `vector.h`,
-respectively.
-`unordered_set.h` not yet.
+respectively. `uset` not yet.
 
 Note, CTL strings do not support short strings yet.
 
@@ -123,12 +122,20 @@ To generate performance graphs, run:
 ```shell
 sh gen_images.sh
 # Graphing requires python3 and the Plotly family of libraries via pip3.
+pip install plotly
+pip install psutil
+pip install kaleido
 ```
 
 To do all of the above in one step, run:
 
 ```shell
 ./all.sh
+```
+
+The full CI suite is run via: (1-2 hrs)
+```shell
+./ci-all.sh
 ```
 
 For maintaining CTL, a container templated to type `int` can be
