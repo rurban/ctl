@@ -259,7 +259,10 @@ static inline void
 JOIN(A, rehash)(A* self, size_t desired_count)
 {
     A rehashed = JOIN(A, init)(self->hash, self->equal);
+    size_t bucket_count = self->bucket_count;
     JOIN(A, reserve)(&rehashed, desired_count);
+    if (bucket_count == self->bucket_count)
+        return;
     foreach(A, self, it)
     {
         B** buckets = JOIN(A, _bucket)(&rehashed, it.node->value);
