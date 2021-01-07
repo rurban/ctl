@@ -131,7 +131,8 @@ for template type `T` as type `int` for all measurements.
 
 Omitted from these performance measurements are `queue.h`, `stack.h`, and `string.h`,
 as their performance characteristics can be inferred from `deque.h`, and `vector.h`,
-respectively.
+respectively. Likewise `map.h` from `set.h` and `unordered_map.h` from
+`unordered_set.h`.
 `unordered_set.h` is defined with the faster `CTL_USET_GROWTH_POWER2`, as my
 STL. `CTL_USET_GROWTH_PRIMED` is safer but atrocious.
 

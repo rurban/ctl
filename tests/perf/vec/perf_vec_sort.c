@@ -6,8 +6,6 @@
 
 #include <time.h>
 
-static int compare(int* a, int* b) { return *a < *b; }
-
 int main(void)
 {
     puts(__FILE__);
@@ -19,7 +17,7 @@ int main(void)
         for(int elem = 0; elem < elems; elem++)
             vec_int_push_back(&c, rand());
         int t0 = TEST_TIME();
-        vec_int_sort(&c, compare);
+        vec_int_sort(&c);
         int t1 = TEST_TIME();
         printf("%10d %10d\n", elems, t1 - t0);
         vec_int_free(&c);
