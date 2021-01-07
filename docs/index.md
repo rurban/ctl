@@ -88,10 +88,13 @@ tests/test_c11.c:11:11: error: ‘type_free’ undeclared (first use in this fun
 
 ## Compare
 
-In contrast to the original CTL, this applies default `compare` and `equal` methods
-to all integral types T as
-int, long, bool, char, short, float, double, char8_t, wchar_t, char16_t,
-char32_t, long double, long long, unsigned int, unsigned long, unsigned char.
+In contrast to the original CTL, this applies default `compare` and `equal`
+methods to all integral types `T` as
+`int`, `long`, `bool`, `char`, `short`, `float`, `double`, `char8_t`,
+`uint8_t` - `uin64_t`, `int8_t` - `in64_t`.
+Since T may not contain a space, we also accept `long double` as `ldbl`,
+`long long` as `llong`, `unsigned int` as `uint` and `uint8_t` - `uin64_t`,
+`unsigned long` as `ulong`, `unsigned char` as `uchar`.
 
 Only with structs a `compare` and optionally an `equal` method must be set.
 Removed the compare and equal args from `equal`, `sort`, `sort_range`, `find`,
@@ -121,6 +124,18 @@ have to define `NOT_INTEGRAL`.
 ```
 
 Forgetting a compare method will assert with "compare undefined", if enabled.
+
+## Iterators and Ranges
+
+We accept and return two types of iterators: `T*` for simple types in arrays, as
+vector and deque derived containers,
+and `B*` for the rest: list, set and uset derived containers wirth extra nodes.
+
+Contrary to the STL we mostly return `T*` or `B*`, not full `I` iterators.
+But you can convert those return values via the `iter` method to full iterators,
+to be acceptable as `I*` argument, e.g. for range methods.
+
+range methods are suffixed with `_range`, special iterator methods with `_it`.
 
 ## Performance
 

@@ -694,16 +694,6 @@ JOIN(A, count)(A* self, T value)
     return count;
 }
 
-static inline size_t
-JOIN(A, count_if)(A* self, int _match(T*))
-{
-    size_t count = 0;
-    foreach(A, self, it)
-        if(_match(it.ref))
-            count++;
-    return count;
-}
-
 // C++20
 static inline bool
 JOIN(A, contains)(A* self, T value)

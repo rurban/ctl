@@ -564,23 +564,7 @@ JOIN(A, swap)(A* self, A* other)
     *other = temp;
 }
 
-#if 0
-// see algorithm.h instead
-static inline I*
-JOIN(A, find_range)(A* self, I* first, I* last, T value)
-{
-    foreach_range(A, first, last, it)
-        if(JOIN(A, _equal)(self, it.ref, &value))
-            return first;
-    return last;
-}
-
-#endif
-
-#if defined(CTL_QUEUE) || \
-    defined(CTL_STACK)
-# include <ctl/algorithm.h>
-#endif
+#include <ctl/algorithm.h>
 
 #undef T
 #undef A

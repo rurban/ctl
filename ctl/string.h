@@ -1,7 +1,7 @@
 /* A vector class
    SPDX-License-Identifier: MIT */
-#ifndef __STR__H__
-#define __STR__H__
+#ifndef __CTL_STRING__H__
+#define __CTL_STRING__H__
 
 #ifdef T
 #error "Template type T defined for <ctl/string.h>"
@@ -10,6 +10,7 @@
 #define CTL_STR
 #define vec_char str
 #define POD
+#define NOT_INTEGRAL
 #define T char
 #define MUST_ALIGN_16(T) (sizeof(T) == sizeof(char))
 #define str_init str___INIT
@@ -210,5 +211,14 @@ str_key_compare(str* self, str* other)
     return strcmp (self->value, other->value);
 }
 
+#ifndef HOLD
 #undef CTL_STR
+#undef POD
+#undef NOT_INTEGRAL
+#undef vec_char
+#undef T
+#else
+#undef HOLD
 #endif
+
+#endif // once
