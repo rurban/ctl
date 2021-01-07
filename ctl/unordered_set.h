@@ -373,19 +373,22 @@ JOIN(A, erase)(A* self, T value)
 {
     B** buckets = JOIN(A, _bucket)(self, value);
     B* prev = NULL;
-    for(B* n = *buckets; n; n = n->next)
+    B* n = *buckets;
+    while (n)
     {
+        B* next = n->next;
         if(self->equal(&value, &n->value))
         {
-            B* next = n->next;
             JOIN(A, _free_node)(self, n);
             n = NULL;
             if(prev)
                 prev->next = next;
+            else
+                *buckets = next;
             self->size--;
-            break;
         }
         prev = n;
+        n = next;
     }
 }
 
@@ -406,23 +409,9 @@ JOIN(A, copy)(A* self)
 static inline void
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
-    for(size_t i = 0; i < self->bucket_count; i++)
-    {
-        B** bucket = &self->buckets[i];
-        B* prev = NULL;
-        for(B* n = *bucket; n; n = n->next)
-        {
-            if(_match(&n->value))
-            {
-                B* next = n->next;
-                JOIN(A, _free_node)(self, n);
-                if(prev)
-                    prev->next = next;
-                self->size--;
-            }
-            prev = n;
-        }
-    }
+    foreach(A, self, it)
+        if(_match(it.ref))
+            JOIN(A, _free_node)(self, it.node);
 }
 
 static inline A
