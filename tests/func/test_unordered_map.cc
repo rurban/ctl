@@ -10,18 +10,33 @@
 #include <unordered_map>
 #include <algorithm>
 
-#define CHECK(_x, _y) {                                      \
-    assert(_x.size == _y.size());                            \
-    std::unordered_map<std::string,int>::iterator _iter = _y.begin(); \
-    foreach(umap_strint, &_x, _it) {                         \
-        assert(_it.ref->value == _iter->second);             \
-        _iter++;                                             \
-    }                                                        \
-    umap_strint_it _it = umap_strint_it_each(&_x);           \
-    for(auto& _d : _y) {                                     \
-        assert(_it.ref->value == _d.second);                 \
-        _it.step(&_it);                                      \
-    }                                                        \
+#define CHECK(_x, _y) {                                                \
+    assert(_x.size == _y.size());                                      \
+    if(_x.size > 0)                                                    \
+    {                                                                  \
+        size_t a_found = 0;                                            \
+        size_t b_found = 0;                                            \
+        foreach(umap_digi, &_x, it)                                    \
+        {                                                              \
+            auto found = _y.find(DIGI(*it.ref->value));                \
+            assert(found != _y.end());                                 \
+            a_found++;                                                 \
+        }                                                              \
+        for(auto x : _y)                                               \
+        {                                                              \
+            digi d = digi_init(*x.value);                              \
+            umap_digi_node* found = umap_digi_find(&_x, d);            \
+            assert(found != NULL);                                     \
+            digi_free(&d);                                             \
+            b_found++;                                                 \
+        }                                                              \
+        assert(a_found == b_found);                                    \
+        /*                                                             \
+        assert(_x.bucket_count == _y.bucket_count());                  \
+        for(size_t _i = 0; _i < _x.bucket_count; _i++)                 \
+            assert(umap_digi_bucket_size(&_x, _i) == _y.bucket_size(_i));\
+        */                                                              \
+    }                                                                  \
 }
 
 static char *

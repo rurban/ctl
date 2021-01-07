@@ -124,7 +124,9 @@ JOIN(I, range)(A* container, B* begin, B* end)
     return self;
 }
 
+#define equal __EQUAL
 #include <ctl/_share.h>
+#undef equal
 
 // TODO:
 // primes[] obtained experimentally - is there a quicker way to get more primes
@@ -455,6 +457,17 @@ JOIN(A, symmetric_difference)(A* a, A* b)
     foreach(A, &intersection, i) JOIN(A, erase)(&self, *i.ref);
     JOIN(A, free)(&intersection);
     return self;
+}
+
+static inline int
+JOIN(A, equal)(A* self, A* other)
+{
+    if(self->size != other->size)
+        return 0;
+    A diff = JOIN(A, intersection)(self, other);
+    int result = JOIN(A, empty)(&diff);
+    JOIN(A, free)(&diff);
+    return result;
 }
 
 #ifndef HOLD
