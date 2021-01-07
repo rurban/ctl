@@ -53,10 +53,19 @@ digi_equal(digi* a, digi* b)
     return *a->value == *b->value;
 }
 
+static inline uint32_t
+int_hash_func (uint32_t key)
+{
+  key = ((key >> 16) ^ key) * 0x45d9f3b;
+  key = ((key >> 16) ^ key) * 0x45d9f3b;
+  key = (key >> 16) ^ key;
+  return key;
+}
+
 static inline size_t
 digi_hash(digi* a)
 {
-    return (size_t)*a->value;
+    return (size_t)int_hash_func(*a->value);
 }
 
 struct DIGI
