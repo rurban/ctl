@@ -2,7 +2,7 @@
    This closed, linked list hashing has the advantage of keeping pointers
    into the set valid.
    The faster open addressing moves pointers. Maybe add another class for open
-   hashes (omap).
+   hashes (hmap, hashtable).
  */
 #ifndef T
 #error "Template type T undefined for <unordered_set.h>"
@@ -230,11 +230,20 @@ JOIN(A, load_factor)(A* self)
 static inline void
 JOIN(A, reserve)(A* self, size_t desired_count)
 {
-    self->bucket_count = JOIN(A, __next_prime)(desired_count);
+    size_t new_size = JOIN(A, __next_prime)(desired_count);
+    if (self->bucket_count == new_size)
+        return;
     if (self->buckets)
-        self->buckets = (B**) realloc(self->buckets, self->bucket_count * sizeof(B*));
+    {
+        LOG("reserve %zu realloc => %zu\n", self->bucket_count, new_size);
+        self->buckets = (B**) realloc(self->buckets, new_size * sizeof(B*));
+    }
     else
-        self->buckets = (B**) calloc(self->bucket_count, sizeof(B*));
+        self->buckets = (B**) calloc(new_size, sizeof(B*));
+    self->bucket_count = new_size;
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert (self->buckets || !"out of memory");
+#endif
 }
 
 static inline A
@@ -298,7 +307,7 @@ JOIN(A, insert)(A* self, T value)
     {
         B** bucket = JOIN(A, bucket)(self, value);
         *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(value));
-        LOG ("insert: add bucket %p\n", (void*)*bucket);
+        LOG ("insert: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
         self->size++;
         if (JOIN(A, load_factor)(self) > self->max_load_factor)
         {
