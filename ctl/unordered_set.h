@@ -49,7 +49,7 @@ JOIN(A, begin)(A* self)
     {
         B* node = self->buckets[i];
         if(node) {
-            LOG ("begin %lu %p\n", i, (void*)node);
+            //LOG ("begin %lu %p\n", i, (void*)node);
             return node;
         }
     }
@@ -107,7 +107,7 @@ JOIN(I, range)(A* container, B* begin, B* end)
     I self = zero;
     if(begin)
     {
-        LOG ("range init\n");
+        //LOG ("range init\n");
         self.step = JOIN(I, step);
         self.node = begin;
         self.ref = &self.node->value;
@@ -118,7 +118,7 @@ JOIN(I, range)(A* container, B* begin, B* end)
     }
     else
     {
-        LOG ("range done\n");
+        //LOG ("range done\n");
         self.done = 1;
     }
     return self;
@@ -177,7 +177,7 @@ static inline B**
 JOIN(A, _bucket)(A* self, T value)
 {
     size_t hash = self->hash(&value) % self->bucket_count;
-    LOG ("hash -> buckets[%lu]\n", hash);
+    //LOG ("hash -> buckets[%lu]\n", hash);
     return &self->buckets[hash];
 }
 
@@ -464,7 +464,7 @@ JOIN(A, equal)(A* self, A* other)
 {
     if(self->size != other->size)
         return 0;
-    A diff = JOIN(A, intersection)(self, other);
+    A diff = JOIN(A, difference)(self, other);
     int result = JOIN(A, empty)(&diff);
     JOIN(A, free)(&diff);
     return result;

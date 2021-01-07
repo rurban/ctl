@@ -37,6 +37,24 @@
     }                                                                  \
 }
 
+#ifdef DEBUG
+void print_uset(uset_digi* a)
+{
+    foreach(uset_digi, a, it)
+        printf("%d\n", *it.ref->value);
+    printf("--\n");
+}
+void print_unordered_set(std::unordered_set<DIGI,DIGI_hash> b)
+{
+    for(auto& x : b)
+        printf("%d\n", *x.value);
+    printf("--\n");
+}
+#else
+#define print_uset(aa)
+#define print_unordered_set(bb)
+#endif
+
 static void
 setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
 {
@@ -95,7 +113,9 @@ main(void)
             TEST_UNION,
             TEST_INTERSECTION,
             TEST_SYMMETRIC_DIFFERENCE,
+#ifdef DEBUG
             TEST_DIFFERENCE,
+#endif
             TEST_TOTAL,
         };
         int which = TEST_RAND(TEST_TOTAL);
@@ -242,6 +262,8 @@ main(void)
                 uset_digi aa = uset_digi_copy(&a);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 LOG ("\nTEST EQUAL %lu\n", aa.size);
+                print_uset(&aa);
+                print_unordered_set(bb);
                 assert(uset_digi_equal(&a, &aa));
                 assert(b == bb);
                 uset_digi_free(&aa);
@@ -299,6 +321,7 @@ main(void)
                 uset_digi_free(&aaa);
                 break;
             }
+#ifdef DEBUG
             case TEST_DIFFERENCE:
             {
                 uset_digi aa;
@@ -306,16 +329,19 @@ main(void)
                 setup_sets(&aa, bb);
                 LOG ("\nTEST DIFFERENCE %lu, %lu\n", a.size, aa.size);
                 uset_digi aaa = uset_digi_difference(&a, &aa);
+                print_uset(&aaa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                     std::inserter(bbb, bbb.begin()));
                 CHECK(a, b);
                 CHECK(aa, bb);
+                print_unordered_set(bbb);
                 CHECK(aaa, bbb);
                 uset_digi_free(&aa);
                 uset_digi_free(&aaa);
                 break;
             }
+#endif
         }
         CHECK(a, b);
         uset_digi_free(&a);
