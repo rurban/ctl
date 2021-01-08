@@ -58,14 +58,14 @@ void print_unordered_set(std::unordered_set<DIGI,DIGI_hash> b)
 static void
 setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
 {
-    size_t iters = TEST_RAND(TEST_MAX_SIZE);
+    size_t size = TEST_RAND(TEST_MAX_SIZE);
 #ifdef DEBUG
-    iters = 5; //TMP
+    size = 5; //TMP
 #endif
-    LOG ("\nSETUP_SETS %lu\n", iters);
+    LOG ("\nSETUP_SETS %lu\n", size);
     *a = uset_digi_init(digi_hash, digi_equal);
     // TODO a->equal = digi_equal
-    for(size_t inserts = 0; inserts < iters; inserts++)
+    for(size_t inserts = 0; inserts < size; inserts++)
     {
         const int vb = TEST_RAND(TEST_MAX_SIZE);
         uset_digi_insert(a, digi_init(vb));
@@ -88,7 +88,15 @@ main(void)
 {
     INIT_SRAND;
     test_small_size();
-    const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    int test = -1;
+    char *env = getenv ("TEST");
+    if (env)
+        sscanf(env, "%d", &test);
+    if (test >= 0)
+        loops = 10;
+    if ((env = getenv ("LOOPS")))
+        sscanf(env, "%lu", &loops);
     for(size_t loop = 0; loop < loops; loop++)
     {
         uset_digi a;
@@ -122,6 +130,9 @@ main(void)
             TEST_TOTAL,
         };
         int which = TEST_RAND(TEST_TOTAL);
+        if (test >= 0 && test < (int)TEST_TOTAL)
+            which = test;
+        LOG ("TEST %d\n", which);
         switch(which)
         {
             case TEST_INSERT:
