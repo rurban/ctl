@@ -1,5 +1,6 @@
 CC = gcc -std=c11
 CXX = g++ -std=c++17
+PREFIX = /usr/local
 
 LONG = 0
 SANITIZE = 0
@@ -101,11 +102,38 @@ PERFS_CC = $(patsubst %.cc,%, $(wildcard tests/perf/*/perf*.cc) tests/perf/perf_
 
 perf: $(PERFS_C) $(PERFS_CC)
 
+$(wildcard tests/perf/lst/perf*.c) : ctl/list.h
+$(wildcard tests/perf/set/perf*.c) : ctl/set.h
+$(wildcard tests/perf/uset/perf*.c): ctl/unordered_set.h
+
 examples: $(EXAMPLES)
+
+MANPAGES = $(patsubst docs/%.md,docs/man/%.h.3, $(wildcard docs/*.md))
+
+man: docs/man/ctl.h.3 $(MANPAGES)
+
+docs/man/ctl.h.3: docs/index.md
+	@mkdir -p docs/man
+	ronn < $< > $@
+docs/man/%.h.3 : docs/%.md
+	ronn < $< > $@
+
+install: man
+	mkdir -p $(DESTDIR)$(PREFIX)/include/ctl
+	cp ctl/*.h $(DESTDIR)$(PREFIX)/include/ctl/
+	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man3
+	cp docs/man/* $(DESTDIR)$(PREFIX)/share/man/man3/
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/ctl/images
+	cp docs/*.md $(DESTDIR)$(PREFIX)/share/doc/ctl/
+	cp -r docs/*/*.md $(DESTDIR)$(PREFIX)/share/doc/ctl/
+	cp docs/images/*.log.png $(DESTDIR)$(PREFIX)/share/doc/ctl/images/
 
 clean:
 	@rm -f $(TESTS)
 	@rm -f $(EXAMPLES)
+	@rm -f $(PERFS_C) $(PERFS_CC)
+	@rm -f docs/man/ctl.h.3 $(MANPAGES)
+	@if test -d docs/man; then rmdir docs/man; fi
 
 string.i:
 	$(call expand,$(subst .i,,$@))

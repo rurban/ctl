@@ -130,6 +130,8 @@ The full CI suite is run via: (1-2 hrs)
 ./ci-all.sh
 ```
 
+To generate the manpages or run `make install` install the `ronn` gem.
+
 For maintaining CTL, a container templated to type `int` can be
 output to `stdout` by running make on the container name with .i, eg:
 
