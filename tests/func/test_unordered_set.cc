@@ -152,8 +152,8 @@ main(void)
             {
                 LOG ("\nTEST ERASE_IF %lu\n", a.size);
                 size_t a_erases = uset_digi_erase_if(&a, digi_is_odd);
-#ifdef __cpp_lib_erase_if
-                size_t b_erases = b.erase_if(DIGI_is_odd); //C++20
+#if defined(__cpp_lib_erase_if) && __cpp_lib_erase_if > 202002L
+                size_t b_erases = std::erase_if(b, DIGI_is_odd); //C++20
 #else
                 size_t b_erases = 0;
                 {
@@ -181,7 +181,7 @@ main(void)
                 const int vb = TEST_RAND(TEST_MAX_SIZE);
                 bool a_has = uset_digi_contains(&a, digi_init(vb));
 #ifdef __cpp_lib_erase_if
-                bool a_has = b.contains(DIGI{vb}); //C++20
+                bool b_has = b.contains(DIGI{vb}); //C++20
 #else
                 bool b_has = b.count(DIGI{vb}) == 1;
 #endif
