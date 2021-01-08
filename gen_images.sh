@@ -55,6 +55,16 @@ perf_graph \
      tests/perf/set/perf_set_iterate.c"
 
 perf_graph \
+    'uset.log' \
+    "std::unordered_set<int> (dotted) vs. CTL uset_int (solid) ($CFLAGS) ($VERSION)" \
+    "tests/perf/uset/perf_uset_insert.cc \
+     tests/perf/uset/perf_uset_insert.c \
+     tests/perf/uset/perf_uset_erase.cc \
+     tests/perf/uset/perf_uset_erase.c
+     tests/perf/uset/perf_uset_iterate.cc \
+     tests/perf/uset/perf_uset_iterate.c"
+
+perf_graph \
     'pqu.log' \
     "std::priority_queue<int> (dotted) vs. CTL pqu_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/pqu/perf_priority_queue_push.cc \
