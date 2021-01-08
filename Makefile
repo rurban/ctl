@@ -1,6 +1,20 @@
-CC = gcc -std=c11
-CXX = g++ -std=c++17
 PREFIX = /usr/local
+CC = gcc
+CXX = g++
+
+.SUFFIXES: .cc .c .i .o .md .3
+.PHONY: all man install clean doc images perf examples
+
+TRY_CXX20 := $(shell $(CXX) -std=c++20 -I. tests/func/test_deque.cc -o /dev/null)
+ifneq ($(.SHELLSTATUS),0)
+TRY_CXX17 := $(shell $(CXX) -std=c++17 -I. tests/func/test_deque.cc -o /dev/null)
+ifeq ($(.SHELLSTATUS),0)
+CXX += -std=c++17
+endif
+else
+CXX += -std=c++20
+endif
+CC += -std=c11
 
 LONG = 0
 SANITIZE = 0
@@ -96,6 +110,9 @@ all: $(TESTS)
 	@echo CXXFLAGS=$(CXXFLAGS)
 	@$(CXX) --version
 	@rm -f $(TESTS)
+
+images:
+	./gen_images.sh
 
 PERFS_C  = $(patsubst %.c,%, $(wildcard tests/perf/*/perf*.c) tests/perf/perf_compile_c11.c)
 PERFS_CC = $(patsubst %.cc,%, $(wildcard tests/perf/*/perf*.cc) tests/perf/perf_compile_cc.cc)
