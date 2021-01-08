@@ -261,20 +261,26 @@ Use the original long names, not three-letter abbrevations.
 
 `#define POD` not `P`
 
-Added some minor missing methods, like `max_size`, `size`, `capacity`, ...
+Added lots of missing methods, like `max_size`, `size`, `capacity`, ...
+Probe for -std=c++20 c++ support and this for testing against the STL..
 Added **map** and **unordered_map**.
+
+Added docs and manpages.
 
 Reproducible tests with `SEED=n`
 
-hashmaps are auto-rehashed when exceeding `max_load_factor()` (0.85).
-added `max_bucket_count()`.
+Optimized hashmaps with two growth policies, about 100x faster with the policy
+`CTL_USET_GROWTH_POWER2`, instead of the default `CTL_USET_GROWTH_PRIMED`.
 
 hashmaps will be changed from chained lists to open addressing, thus no internal
-bucket methods, and much faster.
+bucket methods, and even more faster. The `CTL_USET_CACHED_HASH` policy is still in
+work, for faster finds but more memory.
+
+Work is ongoing for all `algorithms.h` and `ranges`, with full iterator support
+and `foreach_range`.
 
 On errors, like `size > max_size` return silently. This avoids DDOS attacks.
 When assert is used, throw them. (when assert.h included, no NDEBUG)
-
 glouw/ctl does not treat errors at all. There cannot be any.
 
 ### Differences to the STL
@@ -322,7 +328,10 @@ No bloat and no indirect calls.
 
 ## Acknowledgements
 
-Thank you `glouw` for the initial three-letter variant https://github.com/glouw/ctl.
+Thank you `glouw` for the initial three-letter variant
+https://github.com/glouw/ctl.
+
 Thank you `kully` for the Plotly code, and thank you for the general review.
+
 Thank you `smlckz` for the `foreach` cleanup.
 
