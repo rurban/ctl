@@ -20,43 +20,93 @@
 static inline I
 JOIN(A, insert_or_assign)(A* self, T value)
 {
-    B* node;
-    if((node = JOIN(A, find)(self, value)))
-    {
-        if(self->free)
-            self->free(&value);
-        node->value = value;
-        return JOIN(I, iter)(self, node);
-    }
     if(JOIN(A, empty)(self))
-        JOIN(A, rehash)(self, 12);
+        JOIN(A, rehash)(self, 8);
+#ifdef CTL_USET_CACHED_HASH
+    size_t hash = self->hash(&value);
+    B** buckets = JOIN(A, _bucket_hash)(self, hash);
+#else
     B** buckets = JOIN(A, _bucket)(self, value);
+#endif
+    for(B* n = *buckets; n; n = n->next)
+    {
+#ifdef CTL_USET_CACHED_HASH
+        if(n->cached_hash != hash)
+            break;
+#endif
+        if(self->equal(&value, &n->value))
+        {
+            if(self->free)
+                self->free(&n->value);
+#ifdef CTL_USET_CACHED_HASH
+            n->cached_hash = self->hash(&value);
+            n->value = value;
+#endif
+            return JOIN(I, iter)(self, n);
+        }
+    }
+
+#ifdef CTL_USET_CACHED_HASH
+    JOIN(B, push)(buckets, JOIN(B, init_cached)(value, hash));
+#else
     JOIN(B, push)(buckets, JOIN(B, init)(value));
+#endif
     self->size++;
-    if (JOIN(A, load_factor)(self) > self->max_load_factor)
+
+    if (self->size > self->max_bucket_count)
+#ifdef CTL_USET_GROWTH_POWER2
+        JOIN(A, _rehash)(self, 2 * self->bucket_count);
+#else
         JOIN(A, rehash)(self, 2 * self->bucket_count);
+#endif
+
     return JOIN(I, iter)(self, *buckets);
 }
 
 static inline I
 JOIN(A, insert_or_assign_found)(A* self, T value, int *foundp)
 {
-    B* node;
-    if((node = JOIN(A, find)(self, value)))
-    {
-        if(self->free)
-            self->free(&value);
-        *foundp = 1;
-        node->value = value;
-        return JOIN(I, iter)(self, node);
-    }
     if(JOIN(A, empty)(self))
-        JOIN(A, rehash)(self, 12);
+        JOIN(A, rehash)(self, 8);
+#ifdef CTL_USET_CACHED_HASH
+    size_t hash = self->hash(&value);
+    B** buckets = JOIN(A, _bucket_hash)(self, hash);
+#else
     B** buckets = JOIN(A, _bucket)(self, value);
+#endif
+    for(B* n = *buckets; n; n = n->next)
+    {
+#ifdef CTL_USET_CACHED_HASH
+        if(n->cached_hash != hash)
+            break;
+#endif
+        if(self->equal(&value, &n->value))
+        {
+            if(self->free)
+                self->free(&n->value);
+#ifdef CTL_USET_CACHED_HASH
+            n->cached_hash = self->hash(&value);
+            n->value = value;
+#endif
+            *foundp = 1;
+            return JOIN(I, iter)(self, n);
+        }
+    }
+
+#ifdef CTL_USET_CACHED_HASH
+    JOIN(B, push)(buckets, JOIN(B, init_cached)(value, hash));
+#else
     JOIN(B, push)(buckets, JOIN(B, init)(value));
+#endif
     self->size++;
-    if (JOIN(A, load_factor)(self) > self->max_load_factor)
+
+    if (self->size > self->max_bucket_count)
+#ifdef CTL_USET_GROWTH_POWER2
+        JOIN(A, _rehash)(self, 2 * self->bucket_count);
+#else
         JOIN(A, rehash)(self, 2 * self->bucket_count);
+#endif
+
     *foundp = 0;
     return JOIN(I, iter)(self, *buckets);
 }

@@ -216,7 +216,7 @@ returns the bucket index for the key.
 
 ## Hash policy
 
-Growth policies:
+Growth policy defines:
 ```C
 #define CTL_USET_GROWTH_PRIMED
 /* slower but more secure. uses all hash bits. (default) */
@@ -228,14 +228,26 @@ Growth policies:
 `CTL_USET_GROWTH_POWER2` rehashes with bucket_count * 2,
 `CTL_USET_GROWTH_PRIMED` rehashes with the next prime at bucket_count * 1.618.
 
+`CTL_USET_CACHED_HASH` stores the hash of each value in the bucket and is used
+to short-circuit slower equal value comparisons. It trades memory for faster
+unsuccesful searches, such as with insert with high load factor and many collisions.
+
+Planned:
+- `CTL_USET_MOVE_TO_FRONT` moves a bucket in a chain not at the top
+position to the top in each access, such as find and contains, not only insert.
+
+- `CTL_USET_GROWTH_FACTOR` defaults to `2.0` for `CTL_USET_GROWTH_POWER2` and
+`1.618` for `CTL_USET_GROWTH_PRIMED`.
+
+Methods:
+
 [load_factor](uset/load_factor.md) `(A* self)`
 
 returns average number of elements per bucket
 
-[max_load_factor](uset/max_load_factor.md) `(A* self)`
-[set_max_load_factor](uset/max_load_factor.md) `(A* self, float factor)`
+[max_load_factor](uset/max_load_factor.md) `(A* self, float factor)`
 
-manages maximum average number of elements per bucket. defaults to 0.85
+Sets maximum average number of elements per bucket. Defaults to 1.0
 
 [rehash](uset/rehash.md) `(A* self, size_t bucket_count)`
 

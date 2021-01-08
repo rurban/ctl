@@ -46,8 +46,13 @@
 #endif
 
 #if defined(_ASSERT_H) && !defined(NDEBUG)
-#define CTL_ASSERT_EQUAL \
+#ifdef CTL_USET
+# define CTL_ASSERT_EQUAL \
+    assert(self->equal || !"equal undefined");
+#else
+# define CTL_ASSERT_EQUAL \
     assert(self->equal || self->compare || !"equal or compare undefined");
+#endif
 #define CTL_ASSERT_COMPARE \
     assert(self->compare || !"compare undefined");
 #else

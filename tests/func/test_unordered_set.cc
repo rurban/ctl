@@ -68,6 +68,9 @@ static void
 setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
 {
     size_t size = TEST_RAND(TEST_MAX_SIZE);
+#ifdef DEBUG
+    //size = 12;
+#endif
     LOG ("\nSETUP_SETS %lu\n", size);
     *a = uset_digi_init(digi_hash, digi_equal);
     uset_digi_rehash(a, size);
@@ -159,10 +162,18 @@ main(void)
             case TEST_SELF:
             {
                 uset_digi aa = uset_digi_copy(&a);
+                LOG ("before\n");
+                print_uset(&a);
                 foreach(uset_digi, &aa, it)
+                {
+                    LOG("find %d [%zu]\n", *it.ref->value, it.bucket_index);
                     assert(uset_digi_find(&a, *it.ref));
+                }
+                LOG ("all found\n");
                 foreach(uset_digi, &a, it)
                     uset_digi_erase(&aa, *it.ref);
+                LOG ("all erased\n");
+                print_uset(&a);
                 assert(uset_digi_empty(&aa));
                 uset_digi_free(&aa);
                 break;

@@ -206,8 +206,6 @@ _JOIN(A, _set_default_methods)(A* self)
 #endif
 #ifdef CTL_USET
     self->hash = _JOIN(A, _default_integral_hash);
-    if (!self->compare) // default arg
-        self->compare = _JOIN(A, _default_integral_compare);
 #else
     self->compare = _JOIN(A, _default_integral_compare);
 #endif
@@ -221,7 +219,7 @@ _JOIN(A, _set_default_methods)(A* self) { (void) self; }
 
 #endif
 
-#ifndef CTL_STR
+#if !defined(CTL_STR) && !defined(CTL_USET)
 static inline int
 JOIN(A, _equal)(A* self, T* a, T* b)
 {

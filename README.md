@@ -141,10 +141,17 @@ respectively. Likewise `map.h` from `set.h` and `unordered_map.h` from
 `unordered_set.h`.
 
 `unordered_set.h` is defined with the default `CTL_USET_GROWTH_PRIMED`.
-`CTL_USET_GROWTH_POWER2` is here. libstdc++ uses POWER2 by default, libc++
-supports both, depending on the initial size.
+libstdc++ uses POWER2 by default, libc++ supports both, depending on the initial size.
+`CTL_USET_GROWTH_POWER2` is here:
 
 ![](docs/images/uset_pow2.log.png)
+
+`CTL_USET_CACHED_HASH` is here:
+
+![](docs/images/uset_cached.log.png)
+
+This trades memory for faster unsuccesful searches, such as with insert with
+high load factor.
 
 ## Running Tests
 

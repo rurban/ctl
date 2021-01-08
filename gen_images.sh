@@ -15,13 +15,7 @@ function perf_graph
     do
         if [[ $TEST == *.c ]]
         then
-            ORIG_CFLAGS="$CFLAGS"
-            if test "$LOG" = "uset_pow2.log"
-            then
-                CFLAGS="$CFLAGS -DCTL_USET_GROWTH_POWER2"
-            fi
             $CC -o "$OUT" $CFLAGS $TEST -I.
-            CFLAGS="$ORIG_CFLAGS"
         else
             $CXX -o "$OUT" $CFLAGS $TEST
         fi
@@ -60,6 +54,9 @@ perf_graph \
      tests/perf/uset/perf_uset_iterate.cc \
      tests/perf/uset/perf_uset_iterate.c"
 
+ORIG_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -DCTL_USET_GROWTH_POWER2"
+
 perf_graph \
     'uset_pow2.log' \
     "std::unordered_set<int> (dotted) vs. CTL uset_int POWER2 (solid) ($CFLAGS) ($VERSION)" \
@@ -69,6 +66,22 @@ perf_graph \
      tests/perf/uset/perf_uset_erase.c
      tests/perf/uset/perf_uset_iterate.cc \
      tests/perf/uset/perf_uset_iterate.c"
+
+CFLAGS="$ORIG_CFLAGS"
+CFLAGS="$CFLAGS -DCTL_USET_CACHED_HASH"
+
+perf_graph \
+    'uset_cached.log' \
+    "std::unordered_set<int> (dotted) vs. CTL uset_int CACHED_HASH (solid) ($CFLAGS) ($VERSION)" \
+    "tests/perf/uset/perf_uset_insert.cc \
+     tests/perf/uset/perf_uset_insert.c \
+     tests/perf/uset/perf_uset_erase.cc \
+     tests/perf/uset/perf_uset_erase.c
+     tests/perf/uset/perf_uset_iterate.cc \
+     tests/perf/uset/perf_uset_iterate.c"
+
+CFLAGS="$ORIG_CFLAGS"
+
 
 perf_graph \
     'set.log' \

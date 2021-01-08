@@ -5,17 +5,21 @@
    hashes (hmap, hashtable).
 
    See MIT LICENSE.
- */
+
+   Tunable policies:
+
+Growth policies:
+ - CTL_USET_GROWTH_PRIMED:  slower but more secure. uses all hash
+                            bits. (default)
+ - CTL_USET_GROWTH_POWER2:  faster, but less secure. uses only some left-most
+                             bits. not recommended with inet access.
+
+CTL_USET_CACHED_HASH:       store the hash in the bucket. faster find, but
+                            needs a bit more space. (not yet stable)
+*/
 #ifndef T
 #error "Template type T undefined for <unordered_set.h>"
 #endif
-
-/* Growth policies
- * CTL_USET_GROWTH_PRIMED:  slower but more secure. uses all hash
- *                          bits. (default)
- * CTL_USET_GROWTH_POWER2:  faster, but less secure. uses only some lower
- *                          bits. not recommended with public inet access (json, ...)
- */
 
 #ifdef CTL_USET_GROWTH_PRIMED // the default
 # undef CTL_USET_GROWTH_POWER2
@@ -26,7 +30,6 @@
 
 // TODO emplace, extract, merge, equal_range
 
-#include <ctl/ctl.h>
 #include <stdbool.h>
 #if !defined(__GNUC__) && defined(CTL_USET_GROWTH_POWER2)
 #include <math.h>
@@ -36,6 +39,8 @@
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+
+#include <ctl/ctl.h>
 
 typedef struct B
 {
@@ -58,7 +63,7 @@ typedef struct A
     T (*copy)(T*);
     size_t (*hash)(T*);
     int (*equal)(T*, T*);
-    int (*compare)(T*, T*);
+    //int (*compare)(T*, T*);
 } A;
 
 typedef struct I
@@ -94,13 +99,25 @@ JOIN(I, index)(A* self, T value)
     return self->hash(&value) % self->bucket_count;
 }
 
+#ifdef CTL_USET_CACHED_HASH
+static inline size_t
+JOIN(I, cached_index)(A* self, B* node)
+{
+    return node->cached_hash % self->bucket_count;
+}
+#endif
+
 static inline void
 JOIN(I, update)(I* self)
 {
     self->node = self->next;
     self->ref = &self->node->value;
     self->next = self->node->next;
+#ifdef CTL_USET_CACHED_HASH
+    self->bucket_index = JOIN(I, cached_index)(self->container, self->node);
+#else
     self->bucket_index = JOIN(I, index)(self->container, *self->ref);
+#endif
 }
 
 // for later, with redesigned iters
@@ -220,6 +237,18 @@ JOIN(B, init)(T value)
     return n;
 }
 
+#ifdef CTL_USET_CACHED_HASH
+static inline B*
+JOIN(B, init_cached)(T value, size_t hash)
+{
+    B* n = (B*) malloc(sizeof(B));
+    n->value = value;
+    n->cached_hash = hash;
+    n->next = NULL;
+    return n;
+}
+#endif
+
 static inline size_t
 JOIN(B, bucket_size)(B* self)
 {
@@ -241,9 +270,27 @@ JOIN(B, push)(B** bucketp, B* n)
 }
 
 static inline B**
+JOIN(A, _cached_bucket)(A* self, B* node)
+{
+#ifdef CTL_USET_CACHED_HASH
+    size_t hash = node->cached_hash % self->bucket_count;
+#else
+    size_t hash = self->hash(&node->value) % self->bucket_count;
+#endif
+    //LOG ("hash -> buckets[%lu]\n", hash);
+    return &self->buckets[hash];
+}
+
+static inline B**
+JOIN(A, _bucket_hash)(A* self, size_t hash)
+{
+    return &self->buckets[ hash % self->bucket_count ];
+}
+
+static inline B**
 JOIN(A, _bucket)(A* self, T value)
 {
-    size_t hash = self->hash(&value) % self->bucket_count;
+    const size_t hash = self->hash(&value) % self->bucket_count;
     //LOG ("hash -> buckets[%lu]\n", hash);
     return &self->buckets[hash];
 }
@@ -364,7 +411,7 @@ JOIN(A, rehash)(A* self, size_t desired_count)
     JOIN(A, reserve)(&rehashed, desired_count);
     foreach(A, self, it)
     {
-        B** buckets = JOIN(A, _bucket)(&rehashed, it.node->value);
+        B** buckets = JOIN(A, _cached_bucket)(&rehashed, it.node);
         if (it.node != *buckets)
             JOIN(B, push)(buckets, it.node);
     }
@@ -388,7 +435,7 @@ JOIN(A, _rehash)(A* self, size_t count)
     JOIN(A, _reserve)(&rehashed, count);
     foreach(A, self, it)
     {
-        B** buckets = JOIN(A, _bucket)(&rehashed, it.node->value);
+        B** buckets = JOIN(A, _cached_bucket)(&rehashed, it.node);
         if (it.node != *buckets)
             JOIN(B, push)(buckets, it.node);
     }
@@ -403,15 +450,27 @@ JOIN(A, _rehash)(A* self, size_t count)
 // Note: As this is used internally a lot, don't consume (free) the key.
 // The user must free it by himself.
 static inline B*
-JOIN(A, find)(A* self, T key)
+JOIN(A, find)(A* self, T value)
 {
     if(self->size)
     {
-        B** buckets = JOIN(A, _bucket)(self, key);
+#ifdef CTL_USET_CACHED_HASH
+        size_t hash = self->hash(&value);
+        B** buckets = JOIN(A, _bucket_hash)(self, hash);
+#else
+        B** buckets = JOIN(A, _bucket)(self, value);
+#endif
         for(B* n = *buckets; n; n = n->next)
-            if(self->equal(&key, &n->value))
-                // TODO: the popular move-to-from strategy
+        {
+#ifdef CTL_USET_CACHED_HASH
+            // faster unsucessful searches
+            if(n->cached_hash != hash)
+                continue;
+#endif
+            if(self->equal(&value, &n->value))
+                // TODO move-to-front
                 return n;
+        }
     }
     return NULL;
 }
@@ -428,7 +487,7 @@ JOIN(A, insert)(A* self, T value)
     {
         if(!self->bucket_count)
             JOIN(A, rehash)(self, 8);
-        else if (self->size >= self->max_bucket_count)
+        if (self->size + 1 > self->max_bucket_count)
         {
 #ifdef CTL_USET_GROWTH_POWER2
             const size_t bucket_count = 2 * self->bucket_count;
@@ -444,8 +503,12 @@ JOIN(A, insert)(A* self, T value)
 #endif
         }
         B** bucket = JOIN(A, _bucket)(self, value);
+#ifdef CTL_USET_CACHED_HASH
+        JOIN(B, push)(bucket, JOIN(B, init_cached)(value, self->hash(&value)));
+#else
         JOIN(B, push)(bucket, JOIN(B, init)(value));
-        //LOG ("insert: add bucket, collisions: %zu\n", JOIN(B, bucket_size)(*bucket));
+#endif
+        LOG ("insert: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
         self->size++;
     }
 }
@@ -497,7 +560,11 @@ JOIN(A, emplace_found)(A* self, T* value, int* foundp)
         if(!self->bucket_count)
             JOIN(A, rehash)(self, 12);
         B** bucket = JOIN(A, _bucket)(self, *value);
+#ifdef CTL_USET_CACHED_HASH
+        JOIN(B, push)(bucket, JOIN(B, init_cached)(*value, self->hash(value)));
+#else
         JOIN(B, push)(bucket, JOIN(B, init)(*value));
+#endif
         self->size++;
         if (self->size > self->max_bucket_count)
         {
@@ -545,9 +612,18 @@ static inline size_t
 JOIN(A, count)(A* self, T value)
 {
     size_t count = 0;
+#ifdef CTL_USET_CACHED_HASH
+    size_t hash = self->hash(&value);
+#endif
     foreach(A, self, it)
+    {
+#ifdef CTL_USET_CACHED_HASH
+        if(it.node->cached_hash != hash)
+            continue;
+#endif
         if(self->equal(it.ref, &value))
             count++;
+    }
     if(self->free)
         self->free(&value);
     return count;
@@ -557,14 +633,23 @@ JOIN(A, count)(A* self, T value)
 static inline bool
 JOIN(A, contains)(A* self, T value)
 {
+#ifdef CTL_USET_CACHED_HASH
+    size_t hash = self->hash(&value);
+#endif
     foreach(A, self, it)
+    {
+#ifdef CTL_USET_CACHED_HASH
+        if(it.node->cached_hash != hash)
+            continue;
+#endif
         if(self->equal(it.ref, &value))
         {
             if(self->free)
                 self->free(&value);
-            // TODO: the popular move-to-from strategy
+            // TODO: the popular move-to-front strategy
             return true;
         }
+    }
     if(self->free)
         self->free(&value);
     return false;
@@ -583,12 +668,25 @@ JOIN(A, _linked_erase)(A* self, B** bucket, B* n, B* prev, B* next)
 static inline void
 JOIN(A, erase)(A* self, T value)
 {
+#ifdef CTL_USET_CACHED_HASH
+    size_t hash = self->hash(&value);
+    B** buckets = JOIN(A, _bucket_hash)(self, hash);
+#else
     B** buckets = JOIN(A, _bucket)(self, value);
+#endif
     B* prev = NULL;
     B* n = *buckets;
     while (n)
     {
         B* next = n->next;
+#ifdef CTL_USET_CACHED_HASH
+        if(n->cached_hash != hash)
+        {
+            prev = n;
+            n = next;
+            continue;
+        }
+#endif
         if(self->equal(&value, &n->value))
         {
             JOIN(A, _linked_erase)(self, buckets, n, prev, next);
