@@ -8,9 +8,10 @@
 #error "Template type T undefined for <unordered_set.h>"
 #endif
 
-// TODO emplace, extract, merge, contains, erase_if, equal_range
+// TODO emplace, extract, merge, equal_range
 
 #include <ctl/ctl.h>
+#include <stdbool.h>
 
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
@@ -367,6 +368,16 @@ JOIN(A, count)(A* self, T value)
         if(self->equal(it.ref, &value))
             count++;
     return count;
+}
+
+// C++20
+static inline bool
+JOIN(A, contains)(A* self, T value)
+{
+    foreach(A, self, it)
+        if(self->equal(it.ref, &value))
+            return true;
+    return false;
 }
 
 static inline void

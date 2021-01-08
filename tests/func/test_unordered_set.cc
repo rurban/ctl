@@ -98,10 +98,10 @@ main(void)
             //TEST_EMPLACE,
             //TEST_EXTRACT,
             //TEST_MERGE,
-            //TEST_CONTAINS,
-            TEST_ERASE_IF,
             //TEST_EQUAL_RANGE,
             //TEST_REMOVE_IF,
+            TEST_ERASE_IF,
+            TEST_CONTAINS,
             TEST_ERASE,
             TEST_CLEAR,
             TEST_SWAP,
@@ -155,6 +155,20 @@ main(void)
                 }
 #endif
                 assert(a_erases == b_erases);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_CONTAINS:
+            {
+                LOG ("\nTEST CONTAINS %lu\n", a.size);
+                const int vb = TEST_RAND(TEST_MAX_SIZE);
+                bool a_has = uset_digi_contains(&a, digi_init(vb));
+#ifdef __cpp_lib_erase_if
+                bool a_has = b.contains(DIGI{vb}); //C++20
+#else
+                bool b_has = b.count(DIGI{vb}) == 1;
+#endif
+                assert(a_has == b_has);
                 CHECK(a, b);
                 break;
             }
@@ -214,28 +228,24 @@ main(void)
             case TEST_COUNT:
             {
                 int key = TEST_RAND(TEST_MAX_SIZE);
-                digi kd = digi_init(key);
                 LOG ("\nTEST COUNT\n");
-                int aa = uset_digi_count(&a, kd);
+                int aa = uset_digi_count(&a, digi_init(key));
                 int bb = b.count(DIGI{key});
                 assert(aa == bb);
                 CHECK(a, b);
-                digi_free(&kd);
                 break;
             }
             case TEST_FIND:
             {
                 int key = TEST_RAND(TEST_MAX_SIZE);
-                digi kd = digi_init(key);
                 LOG ("\nTEST FIND %d\n", key);
-                uset_digi_node* aa = uset_digi_find(&a, kd);
+                uset_digi_node* aa = uset_digi_find(&a, digi_init(key));
                 auto bb = b.find(DIGI{key});
                 if(bb == b.end())
                     assert(uset_digi_end(&a) == aa);
                 else
                     assert(*bb->value == *aa->value.value);
                 CHECK(a, b);
-                digi_free(&kd);
                 break;
             }
             case TEST_CLEAR:
@@ -247,31 +257,10 @@ main(void)
                 break;
             }
 #if 0
-            case TEST_CONTAINS: // C++20.
-            {
-                int key = TEST_RAND(TEST_MAX_SIZE);
-                LOG ("\nTEST CONTAINS %d\n", key);
-                digi kd = digi_init(key);
-                int aa = uset_digi_contains(&a, kd);
-                int bb = b.contains(key);
-                assert(aa == bb);
-                CHECK(a, b);
-                digi_free(&kd);
-                break;
-            }
             case TEST_EMPLACE:
             case TEST_EXTRACT:
             case TEST_MERGE:
             case TEST_CONTAINS:
-            case TEST_ERASE_IF:
-            {
-                LOG ("\nTEST ERASE_IF %lu\n", a.size);
-                size_t a_erases = uset_digi_erase_if(&a, digi_is_odd);
-                size_t b_erases = b.erase_if(DIGI_is_odd);
-                assert(a_erases == b_erases);
-                CHECK(a, b);
-                break;
-            }
             case TEST_EQUAL_RANGE:
                 break;
 #endif
