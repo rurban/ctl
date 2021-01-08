@@ -234,7 +234,7 @@ JOIN(A, reserve)(A* self, size_t desired_count)
         self->buckets = (B**) calloc(new_size, sizeof(B*));
     self->bucket_count = new_size;
 #if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert (self->buckets || !"out of memory");
+    assert (self->buckets && "out of memory");
 #endif
 }
 

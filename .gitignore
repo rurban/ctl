@@ -9,6 +9,7 @@ a.out
 /tests/func/test_set
 /tests/func/test_stack
 /tests/func/test_string
+/tests/func/test_unordered_set
 /tests/func/test_vec_capacity
 /tests/func/test_vector
 /examples/6502
