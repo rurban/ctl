@@ -99,8 +99,9 @@ main(void)
             //TEST_EXTRACT,
             //TEST_MERGE,
             //TEST_CONTAINS,
-            //TEST_ERASE_IF,
+            TEST_ERASE_IF,
             //TEST_EQUAL_RANGE,
+            //TEST_REMOVE_IF,
             TEST_ERASE,
             TEST_CLEAR,
             TEST_SWAP,
@@ -127,6 +128,33 @@ main(void)
                 LOG ("\nTEST INSERT %d\n", vb);
                 uset_digi_insert(&a, digi_init(vb));
                 b.insert(DIGI{vb});
+                CHECK(a, b);
+                break;
+            }
+            case TEST_ERASE_IF:
+            {
+                LOG ("\nTEST ERASE_IF %lu\n", a.size);
+                size_t a_erases = uset_digi_erase_if(&a, digi_is_odd);
+#ifdef __cpp_lib_erase_if
+                size_t b_erases = b.erase_if(DIGI_is_odd); //C++20
+#else
+                size_t b_erases = 0;
+                {
+                    auto iter = b.begin();
+                    auto end = b.end();
+                    while(iter != end)
+                    {
+                        if((int) *iter->value % 2)
+                        {
+                            iter = b.erase(iter);
+                            b_erases += 1;
+                        }
+                        else
+                            iter++;
+                    }
+                }
+#endif
+                assert(a_erases == b_erases);
                 CHECK(a, b);
                 break;
             }

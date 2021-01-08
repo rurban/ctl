@@ -186,7 +186,7 @@ JOIN(A, bucket_size)(A* self, size_t index)
 {
     size_t size = 0;
     for(B* n = self->buckets[index]; n; n = n->next)
-        size += 1;
+        size++;
     return size;
 }
 
@@ -196,6 +196,7 @@ JOIN(A, _free_node)(A* self, B* n)
     if(self->free)
         self->free(&n->value);
     free(n);
+    self->size--;
 }
 
 static inline void
@@ -369,6 +370,16 @@ JOIN(A, count)(A* self, T value)
 }
 
 static inline void
+JOIN(A, _linked_erase)(A* self, B** bucket, B* n, B* prev, B* next)
+{
+    JOIN(A, _free_node)(self, n);
+    if(prev)
+        prev->next = next;
+    else
+        *bucket = next;
+}
+
+static inline void
 JOIN(A, erase)(A* self, T value)
 {
     B** buckets = JOIN(A, _bucket)(self, value);
@@ -379,17 +390,37 @@ JOIN(A, erase)(A* self, T value)
         B* next = n->next;
         if(self->equal(&value, &n->value))
         {
-            JOIN(A, _free_node)(self, n);
-            n = NULL;
-            if(prev)
-                prev->next = next;
-            else
-                *buckets = next;
-            self->size--;
+            JOIN(A, _linked_erase)(self, buckets, n, prev, next);
+            break;
         }
         prev = n;
         n = next;
     }
+}
+
+static inline size_t
+JOIN(A, erase_if)(A* self, int (*_match)(T*))
+{
+    size_t erases = 0;
+    for(size_t i = 0; i < self->bucket_count; i++)
+    {
+        B** buckets = &self->buckets[i];
+        B* prev = NULL;
+        B* n = *buckets;
+        while(n)
+        {
+            B* next = n->next;
+            if(_match(&n->value))
+            {
+                JOIN(A, _linked_erase)(self, buckets, n, prev, next);
+                erases += 1;
+            }
+            else
+                prev = n;
+            n = next;
+        }
+    }
+    return erases;
 }
 
 static inline A
@@ -404,14 +435,6 @@ JOIN(A, copy)(A* self)
     }
     LOG ("final size: %lu\n", other.size);
     return other;
-}
-
-static inline void
-JOIN(A, remove_if)(A* self, int (*_match)(T*))
-{
-    foreach(A, self, it)
-        if(_match(it.ref))
-            JOIN(A, _free_node)(self, it.node);
 }
 
 static inline A
