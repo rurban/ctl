@@ -8,10 +8,27 @@
 #error "Template type T undefined for <unordered_set.h>"
 #endif
 
+/* Growth policies
+ * CTL_USET_GROWTH_PRIMED:  slower but more secure. uses all hash
+ *                          bits. (default)
+ * CTL_USET_GROWTH_POWER2:  faster, but less secure. uses only some lower
+ *                          bits. not recommended with public inet access (json, ...)
+ */
+
+#ifdef CTL_USET_GROWTH_PRIMED // the default
+# undef CTL_USET_GROWTH_POWER2
+#endif
+#ifdef CTL_USET_GROWTH_POWER2
+# undef CTL_USET_GROWTH_PRIMED
+#endif
+
 // TODO emplace, extract, merge, equal_range
 
 #include <ctl/ctl.h>
 #include <stdbool.h>
+#if !defined(__GNUC__) && defined(CTL_USET_GROWTH_POWER2)
+#include <math.h>
+#endif
 
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
@@ -22,6 +39,9 @@ typedef struct B
 {
     struct B* next;
     T value;
+#ifdef CTL_USET_CACHED_HASH
+    size_t cached_hash;
+#endif
 } B;
 
 typedef struct A
@@ -150,19 +170,23 @@ JOIN(A, __next_prime)(size_t n)
     return primes[n - 1];
 }
 
+// Support huge hash tables with wordsize 64? currently we have a 32bit max_size
+static inline uint32_t
+JOIN(A, __next_power2)(uint32_t n)
+{
+#ifdef __GNUC__
+    return 1 << (32 - __builtin_clz(n-1));
+#else
+    return 1 << ceil(log2((double)n));
+#endif
+}
+
 static inline B*
 JOIN(B, init)(T value)
 {
     B* n = (B*) malloc(sizeof(B));
     n->value = value;
     n->next = NULL;
-    return n;
-}
-
-static inline B*
-JOIN(B, push)(B* bucket, B* n)
-{
-    n->next = bucket;
     return n;
 }
 
@@ -173,6 +197,17 @@ JOIN(B, bucket_size)(B* self)
     for(B* n = self; n; n = n->next)
         size += 1;
     return size;
+}
+
+static inline B*
+JOIN(B, push)(B* bucket, B* n)
+{
+#ifdef DEBUG
+    if (n->next)
+        LOG ("push collision %zu\n", JOIN(B, bucket_size)(n));
+#endif
+    n->next = bucket;
+    return n;
 }
 
 static inline B**
@@ -219,27 +254,43 @@ JOIN(A, load_factor)(A* self)
     return (float) self->size / (float) self->bucket_count;
 }
 
+// new_size must fit the growth policy: power2 or prime
 static inline void
-JOIN(A, reserve)(A* self, size_t desired_count)
+JOIN(A, _reserve)(A* self, const size_t new_size)
 {
-    size_t new_size = JOIN(A, __next_prime)(desired_count);
     if (self->bucket_count == new_size)
         return;
     if (self->buckets)
     {
-        LOG("reserve %zu realloc => %zu\n", self->bucket_count, new_size);
+        LOG("_reserve %zu realloc => %zu\n", self->bucket_count, new_size);
         self->buckets = (B**) realloc(self->buckets, new_size * sizeof(B*));
         memset(&self->buckets[self->bucket_count], 0, (new_size - self->bucket_count) * sizeof(B*));
     }
     else
     {
-        LOG("reserve %zu calloc => %zu\n", self->bucket_count, new_size);
+        LOG("_reserve %zu calloc => %zu\n", self->bucket_count, new_size);
         self->buckets = (B**) calloc(new_size, sizeof(B*));
     }
-    self->max_bucket_count = self->bucket_count = new_size;
+    self->bucket_count = new_size;
+    if (self->size > 127)
+        self->max_bucket_count = JOIN(A, max_bucket_count(self));
+    else
+        self->max_bucket_count = new_size; // ignore custom load factors here
 #if defined(_ASSERT_H) && !defined(NDEBUG)
     assert (self->buckets && "out of memory");
 #endif
+}
+
+static inline void
+JOIN(A, reserve)(A* self, size_t desired_count)
+{
+#ifdef CTL_USET_GROWTH_POWER2
+    const size_t new_size = JOIN(A, __next_power2)(desired_count);
+#else
+    const size_t new_size = JOIN(A, __next_prime)(desired_count);
+#endif
+    //LOG("growth policy %zu => %zu ", desired_count, new_size);
+    JOIN(A, _reserve)(self, new_size);
 }
 
 static inline A
@@ -257,7 +308,7 @@ JOIN(A, init)(size_t (*_hash)(T*), int (*_equal)(T*, T*))
     self.copy = JOIN(T, copy);
 #endif
     JOIN(A, max_load_factor)(&self, 1.0f); // better would be 0.95
-    JOIN(A, reserve)(&self, 12);
+    JOIN(A, _reserve)(&self, 8);
     return self;
 }
 
@@ -267,7 +318,7 @@ JOIN(A, rehash)(A* self, size_t desired_count)
     A rehashed = JOIN(A, init)(self->hash, self->equal);
     size_t bucket_count = self->bucket_count;
     JOIN(A, reserve)(&rehashed, desired_count);
-    if (bucket_count == self->bucket_count)
+    if (bucket_count == rehashed.bucket_count)
         return;
     foreach(A, self, it)
     {
@@ -276,13 +327,38 @@ JOIN(A, rehash)(A* self, size_t desired_count)
             *buckets = JOIN(B, push)(*buckets, it.node);
     }
     rehashed.size = self->size;
+    LOG ("rehash from %lu to %lu, load %f\n", rehashed.size, rehashed.bucket_count,
+         JOIN(A, load_factor)(self));
+    free(self->buckets);
+    *self = rehashed;
+}
+
+// count: guaranteed growth policy (power2 or prime)
+static inline void
+JOIN(A, _rehash)(A* self, size_t count)
+{
+    if (count == self->bucket_count)
+        return;
+    A rehashed = JOIN(A, init)(self->hash, self->equal);
+    LOG("_rehash %zu => %zu\n", self->size, count);
+    JOIN(A, _reserve)(&rehashed, count);
+    foreach(A, self, it)
+    {
+        B** buckets = JOIN(A, _bucket)(&rehashed, it.node->value);
+        if (it.node != *buckets)
+            *buckets = JOIN(B, push)(*buckets, it.node);
+    }
+    rehashed.size = self->size;
+    LOG ("_rehash from %lu to %lu, load %f\n", rehashed.size, count,
+         JOIN(A, load_factor)(self));
+    free(self->buckets);
     *self = rehashed;
 }
 
 static inline B*
 JOIN(A, find)(A* self, T value)
 {
-    if(!JOIN(A, empty)(self))
+    if(self->size)
     {
         B** buckets = JOIN(A, _bucket)(self, value);
         for(B* n = *buckets; n; n = n->next)
@@ -303,18 +379,25 @@ JOIN(A, insert)(A* self, T value)
     else
     {
         if(!self->bucket_count)
-            JOIN(A, rehash)(self, 12);
+            JOIN(A, rehash)(self, 8);
+        else if (self->size >= self->max_bucket_count)
+        {
+#ifdef CTL_USET_GROWTH_POWER2
+            const size_t bucket_count = 2 * self->bucket_count;
+            LOG ("rehash from %lu to %lu, load %f\n", self->size, self->bucket_count,
+                 JOIN(A, load_factor)(self));
+            JOIN(A, _rehash)(self, bucket_count);
+#else
+            // The natural growth factor is the golden ratio.
+            //size_t const bucket_count = (size_t)((double)self->bucket_count * 1.618033);
+            size_t const bucket_count = 1.618 * (double)self->bucket_count;
+            JOIN(A, rehash)(self, bucket_count);
+#endif
+        }
         B** bucket = JOIN(A, _bucket)(self, value);
         *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(value));
-        LOG ("insert: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
+        //LOG ("insert: add bucket, collisions: %zu\n", JOIN(B, bucket_size)(*bucket));
         self->size++;
-        if (self->bucket_count > self->max_bucket_count)
-        {
-            size_t bucket_count = 2 * self->bucket_count;
-            LOG ("rehash from %lu to %lu, load %f\n", self->size, bucket_count,
-                 JOIN(A, load_factor)(self));
-            JOIN(A, rehash)(self, bucket_count);
-        }
     }
 }
 
@@ -333,7 +416,7 @@ JOIN(A, emplace)(A* self, T* value)
         B** bucket = JOIN(A, _bucket)(self, value);
         *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(*value));
         self->size++;
-        if (self->bucket_count > self->max_bucket_count)
+        if (self->size > self->max_bucket_count)
         {
             size_t max_bucket_count = JOIN(A, max_bucket_count)(self);
             size_t new_size = JOIN(A, __next_prime)(max_bucket_count);
@@ -359,6 +442,7 @@ JOIN(A, clear)(A* self)
 static inline void
 JOIN(A, free)(A* self)
 {
+    LOG("free calloc %zu, %zu\n", self->bucket_count, self->size);
     JOIN(A, clear)(self);
     free(self->buckets);
     self->buckets = NULL;
@@ -444,7 +528,7 @@ JOIN(A, copy)(A* self)
 {
     LOG ("copy\norig size: %lu\n", self->size);
     A other = JOIN(A, init)(self->hash, self->equal);
-    JOIN(A, reserve)(&other, self->bucket_count);
+    JOIN(A, _reserve)(&other, self->bucket_count);
     foreach(A, self, it) {
         LOG ("size: %lu\n", other.size);
         JOIN(A, insert)(&other, self->copy(it.ref));

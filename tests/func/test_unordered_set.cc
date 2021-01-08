@@ -60,11 +60,14 @@ setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
 {
     size_t size = TEST_RAND(TEST_MAX_SIZE);
 #ifdef DEBUG
-    size = 5; //TMP
+    size = 10;
 #endif
     LOG ("\nSETUP_SETS %lu\n", size);
     *a = uset_digi_init(digi_hash, digi_equal);
     // TODO a->equal = digi_equal
+#ifdef DEBUG
+    //uset_digi_rehash(a, size * 2);
+#endif
     for(size_t inserts = 0; inserts < size; inserts++)
     {
         const int vb = TEST_RAND(TEST_MAX_SIZE);

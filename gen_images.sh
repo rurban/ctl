@@ -45,16 +45,6 @@ function perf_compile_two_bar
 }
 
 perf_graph \
-    'set.log' \
-    "std::set<int> (dotted) vs. CTL set_int (solid) ($CFLAGS) ($VERSION)" \
-    "tests/perf/set/perf_set_insert.cc \
-     tests/perf/set/perf_set_insert.c \
-     tests/perf/set/perf_set_erase.cc \
-     tests/perf/set/perf_set_erase.c
-     tests/perf/set/perf_set_iterate.cc \
-     tests/perf/set/perf_set_iterate.c"
-
-perf_graph \
     'uset.log' \
     "std::unordered_set<int> (dotted) vs. CTL uset_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/uset/perf_uset_insert.cc \
@@ -63,6 +53,16 @@ perf_graph \
      tests/perf/uset/perf_uset_erase.c
      tests/perf/uset/perf_uset_iterate.cc \
      tests/perf/uset/perf_uset_iterate.c"
+
+perf_graph \
+    'set.log' \
+    "std::set<int> (dotted) vs. CTL set_int (solid) ($CFLAGS) ($VERSION)" \
+    "tests/perf/set/perf_set_insert.cc \
+     tests/perf/set/perf_set_insert.c \
+     tests/perf/set/perf_set_erase.cc \
+     tests/perf/set/perf_set_erase.c
+     tests/perf/set/perf_set_iterate.cc \
+     tests/perf/set/perf_set_iterate.c"
 
 perf_graph \
     'pqu.log' \

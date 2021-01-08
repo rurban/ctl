@@ -100,6 +100,7 @@ TESTS = \
 	tests/func/test_queue \
 	tests/func/test_set \
 	tests/func/test_unordered_set \
+	tests/func/test_unordered_set_power2 \
 	tests/func/test_stack \
 	tests/func/test_vec_capacity \
 	tests/func/test_vector
@@ -202,6 +203,8 @@ tests/func/test_queue:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_set:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_map:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_unordered_set:       ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+tests/func/test_unordered_set_power2:ALWAYS; \
+        $(CXX) $(CFLAGS) -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc -o $@
 tests/func/test_unordered_map:       ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_stack:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
 tests/func/test_string:              ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
