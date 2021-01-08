@@ -93,13 +93,15 @@ for template type `T` as type `int` for all measurements.
 ![](images/vec.log.png)
 ![](images/list.log.png)
 ![](images/deq.log.png)
-![](images/set.log.png)
+![](images/uset.log.png)
 ![](images/pqu.log.png)
 ![](images/compile.log.png)
 
 Omitted from these performance measurements are `queue.h`, `stack.h`, and `string.h`,
 as their performance characteristics can be inferred from `deque.h`, and `vector.h`,
-respectively. `uset` not yet.
+respectively.
+`unordered_set.h` is defined with the faster `CTL_USET_GROWTH_POWER2`, as my
+STL. `CTL_USET_GROWTH_PRIMED` is safer but atrocious.
 
 Note, CTL strings do not support short strings yet.
 
