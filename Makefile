@@ -88,6 +88,8 @@ CFLAGS += -DSRAND -DSEED=$(SEED)
 endif
 endif
 
+CXXFLAGS=$(CFLAGS)
+
 TESTS = \
 	tests/func/test_c11 \
 	tests/func/test_container_composing \

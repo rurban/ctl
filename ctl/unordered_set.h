@@ -29,6 +29,7 @@ typedef struct A
     B** buckets;
     size_t size;
     size_t bucket_count;
+    size_t max_bucket_count;
     float max_load_factor;
     void (*free)(T*);
     T (*copy)(T*);
@@ -206,10 +207,10 @@ JOIN(A, max_load_factor)(A* self, float f)
     self->max_load_factor = f;
 }
 
-static inline float
+static inline size_t
 JOIN(A, max_bucket_count)(A* self)
 {
-    return (float) (self->size / self->max_load_factor);
+    return (size_t) (self->size / self->max_load_factor);
 }
 
 static inline float
@@ -272,7 +273,7 @@ JOIN(A, rehash)(A* self, size_t desired_count)
             *buckets = JOIN(B, push)(*buckets, it.node);
     }
     rehashed.size = self->size;
-    free(self->buckets);
+    self->max_bucket_count = JOIN(A, max_bucket_count)(self);
     *self = rehashed;
 }
 
@@ -305,10 +306,11 @@ JOIN(A, insert)(A* self, T value)
         *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(value));
         LOG ("insert: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
         self->size++;
-        if (JOIN(A, load_factor)(self) > self->max_load_factor)
+        self->max_bucket_count = JOIN(A, max_bucket_count)(self);
+        if (self->bucket_count > self->max_bucket_count)
         {
             size_t bucket_count = 2 * self->bucket_count;
-            LOG ("resize from %lu to %lu, load %f\n", self->size, bucket_count,
+            LOG ("rehash from %lu to %lu, load %f\n", self->size, bucket_count,
                  JOIN(A, load_factor)(self));
             JOIN(A, rehash)(self, bucket_count);
         }
@@ -330,7 +332,8 @@ JOIN(A, emplace)(A* self, T* value)
         B** bucket = JOIN(A, _bucket)(self, value);
         *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(*value));
         self->size++;
-        if (JOIN(A, load_factor)(self) > self->max_load_factor)
+        self->max_bucket_count = JOIN(A, max_bucket_count)(self);
+        if (self->bucket_count > self->max_bucket_count)
         {
             size_t max_bucket_count = JOIN(A, max_bucket_count)(self);
             size_t new_size = JOIN(A, __next_prime)(max_bucket_count);
@@ -346,9 +349,11 @@ JOIN(A, clear)(A* self)
 {
     foreach(A, self, it)
         JOIN(A, _free_node)(self, it.node);
-    for(size_t i = 0; i < self->bucket_count; i++)
-        self->buckets[i] = NULL;
+    memset(self->buckets, 0, self->bucket_count * sizeof(B*));
+    /* for(size_t i = 0; i < self->bucket_count; i++)
+        self->buckets[i] = NULL; */
     self->size = 0;
+    self->max_bucket_count = 0;
 }
 
 static inline void
