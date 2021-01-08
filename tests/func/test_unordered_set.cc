@@ -80,6 +80,7 @@ test_small_size(void)
     // TODO a.equal = digi_equal
     uset_digi_insert(&a, digi_init(1));
     uset_digi_insert(&a, digi_init(2));
+    print_uset(&a);
     uset_digi_free(&a);
 }
 
@@ -130,7 +131,7 @@ main(void)
             TEST_TOTAL,
         };
         int which = TEST_RAND(TEST_TOTAL);
-        if (test >= 0 && test < (int)TEST_TOTAL)
+        //if (test >= 0 && test < (int)TEST_TOTAL)
             which = test;
         LOG ("TEST %d\n", which);
         switch(which)

@@ -232,8 +232,11 @@ JOIN(A, reserve)(A* self, size_t desired_count)
         memset(&self->buckets[self->bucket_count], 0, (new_size - self->bucket_count) * sizeof(B*));
     }
     else
+    {
+        LOG("reserve %zu calloc => %zu\n", self->bucket_count, new_size);
         self->buckets = (B**) calloc(new_size, sizeof(B*));
-    self->bucket_count = new_size;
+    }
+    self->max_bucket_count = self->bucket_count = new_size;
 #if defined(_ASSERT_H) && !defined(NDEBUG)
     assert (self->buckets && "out of memory");
 #endif
@@ -273,7 +276,6 @@ JOIN(A, rehash)(A* self, size_t desired_count)
             *buckets = JOIN(B, push)(*buckets, it.node);
     }
     rehashed.size = self->size;
-    self->max_bucket_count = JOIN(A, max_bucket_count)(self);
     *self = rehashed;
 }
 
@@ -300,13 +302,12 @@ JOIN(A, insert)(A* self, T value)
     }
     else
     {
-        if(JOIN(A, empty)(self))
+        if(!self->bucket_count)
             JOIN(A, rehash)(self, 12);
         B** bucket = JOIN(A, _bucket)(self, value);
         *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(value));
         LOG ("insert: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
         self->size++;
-        self->max_bucket_count = JOIN(A, max_bucket_count)(self);
         if (self->bucket_count > self->max_bucket_count)
         {
             size_t bucket_count = 2 * self->bucket_count;
@@ -327,12 +328,11 @@ JOIN(A, emplace)(A* self, T* value)
     }
     else
     {
-        if(JOIN(A, empty)(self))
+        if(!self->bucket_count)
             JOIN(A, rehash)(self, 12);
         B** bucket = JOIN(A, _bucket)(self, value);
         *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(*value));
         self->size++;
-        self->max_bucket_count = JOIN(A, max_bucket_count)(self);
         if (self->bucket_count > self->max_bucket_count)
         {
             size_t max_bucket_count = JOIN(A, max_bucket_count)(self);
