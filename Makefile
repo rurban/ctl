@@ -169,11 +169,26 @@ install: man
 	cp docs/images/*.log.png $(DESTDIR)$(PREFIX)/share/doc/ctl/images/
 
 clean:
+	@rm -f .cflags .cflags.tmp
 	@rm -f $(TESTS)
 	@rm -f $(EXAMPLES)
 	@rm -f $(PERFS_C) $(PERFS_CC)
 	@rm -f docs/man/ctl.h.3 $(MANPAGES)
 	@if test -d docs/man; then rmdir docs/man; fi
+
+help:
+	@echo " make targets for the ctl, a header-only library for C"
+	@echo " "
+	@echo " all, check: run all tests"
+	@echo " images:     generate the performance graphs"
+	@echo " perf:       compile the performance binaries seperately"
+	@echo " examples:   compile the examples"
+	@echo " man:        create the manpages in docs/man"
+	@echo " install:    copy to $(DESTDIR)$(PREFIX)/include/ctl"
+	@echo "                     $(DESTDIR)$(PREFIX)/share/man/man3"
+	@echo "                     $(DESTDIR)$(PREFIX)/share/doc/ctl"
+	@echo " clean:      the tests, perf, examples and manpages"
+	@echo " header.i:   exapand the header with -DT=int for debugging"
 
 string.i:
 	$(call expand,$(subst .i,,$@))
