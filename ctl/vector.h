@@ -30,8 +30,7 @@ typedef int (*JOIN(A, compare_fn))(T*, T*);
 
 typedef struct I
 {
-    CTL_VECTORFIELDS_ITER;
-    T* begin;
+    CTL_T_ITER_FIELDS;
 } I;
 
 static inline size_t
@@ -73,7 +72,7 @@ JOIN(A, end)(A* self)
 static inline void
 JOIN(I, step)(I* self)
 {
-    if(self->next < self->begin || self->next >= self->end)
+    if(self->next >= self->end)
         self->done = 1;
     else
     {
@@ -91,7 +90,6 @@ JOIN(I, range)(A* container, T* begin, T* end)
     if(begin && end)
     {
         self.step = JOIN(I, step);
-        self.begin = begin;
         self.end = end;
         self.next = begin + 1;
         self.ref = begin;

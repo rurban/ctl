@@ -62,8 +62,7 @@ typedef struct A
 
 typedef struct I
 {
-    CTL_COMMONFIELDS_ITER;
-    A* container;
+    CTL_B_ITER_FIELDS;
     size_t bucket_index;
 } I;
 

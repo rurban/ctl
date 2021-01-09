@@ -35,7 +35,7 @@ typedef struct A
 
 typedef struct I
 {
-    CTL_COMMONFIELDS_ITER;
+    CTL_B_ITER_FIELDS;
 } I;
 
 static inline B*

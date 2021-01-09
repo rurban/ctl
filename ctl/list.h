@@ -35,8 +35,7 @@ typedef int (*JOIN(A, compare_fn))(T*, T*);
 
 typedef struct I
 {
-    CTL_COMMONFIELDS_ITER;
-    A* container;
+    CTL_B_ITER_FIELDS;
 } I;
 
 static inline T*

@@ -39,8 +39,8 @@ typedef struct A
 
 typedef struct I
 {
-    CTL_COMMONFIELDS_ITER;
-    A* container;
+    CTL_B_ITER_FIELDS;
+    // TODO: maybe switch to pointers
     size_t index;
     size_t index_next;
     size_t index_last;
