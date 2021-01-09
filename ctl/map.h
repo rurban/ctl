@@ -1,13 +1,13 @@
-/* red-black tree from set.h with a key-value struct as T
+/* red-black tree from set.h with a pair as <T, T_VALUE>
    SPDX-License-Identifier: MIT */
 
 #ifndef T
 #error "Template struct type T undefined for <ctl/map.h>"
 #endif
 
-#include <ctl/ctl.h>
-
 // TODO C++17: emplace, try_emplace, extract, merge
+
+#include <ctl/ctl.h>
 
 #define CTL_MAP
 #define HOLD
@@ -15,6 +15,8 @@
 #define set map
 #define _set _map
 #include <ctl/set.h>
+
+#include <ctl/pair.h>
 
 static inline I JOIN(A, insert_or_assign)(A *self, T key)
 {

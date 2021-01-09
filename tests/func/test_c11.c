@@ -26,7 +26,7 @@ int int_equal(int *a, int *b)
     return *a == *b;
 }
 
-size_t FNV1a(const char *key)
+static inline size_t FNV1a(const char *key)
 {
     size_t h;
     h = 2166136261u;
@@ -38,11 +38,22 @@ size_t FNV1a(const char *key)
     return h;
 }
 
+/*
+size_t
+int_hash(int* x)
+{ return abs(*x); }
+
+int
+int_equal(int* a, int* b)
+{ return *a == *b; }
+
+*/
+
 /* TODO: make that simpler as with STL pairs, treating them seperately */
-typedef struct
-{
-    char *key;
-    int value;
+/*
+typedef struct {
+  char *key;
+  int value;
 } charint;
 
 static inline size_t charint_hash(charint *a)
@@ -71,13 +82,24 @@ static inline charint charint_copy(charint *self)
     };
     return copy;
 }
+*/
 
-#undef POD
-#define T charint
+static inline void charp_free(char **s) { free (*s); }
+static inline char* charp_copy(char **s)
+{
+    size_t len = strlen(*s);
+    char* copy = (char*)malloc(len+1);
+    strcpy (copy, *s);
+    return copy;
+}
+
+//#undef POD
+#define T charp
+typedef char* charp;
 #include <ctl/unordered_map.h>
 
-#undef POD
-#define T charint
+//#undef POD
+#define T charp
 #include <ctl/map.h>
 
 size_t _str_hash(str *s)
@@ -98,7 +120,7 @@ int _str_cmp(str *a, str *b)
 #define T str
 #include <ctl/set.h>
 
-// we known about this special case
+// we know about this special case
 #define POD
 #define NOT_INTEGRAL
 typedef char *charp;
@@ -334,7 +356,7 @@ int main(void)
 #ifdef DEBUG
     {
         int j = 0;
-        uset_int a = uset_int_init(int_hash, int_equal);
+        uset_int a = uset_int_init(NULL, NULL);
         // TODO skip default a.equal
         for (int i = 0; i > -27; i--)
             uset_int_insert(&a, i);
