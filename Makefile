@@ -68,7 +68,7 @@ else
 ifeq (1, $(Os))
 CFLAGS += -Os
 else
-CFLAGS += -O2
+CFLAGS += -O3
 endif
 endif
 endif
