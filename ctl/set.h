@@ -1,4 +1,5 @@
-/* As red-black tree. */
+/* Red-black tree.
+   See MIT LICENSE. */
 
 #ifndef T
 #error "Template type T undefined for <ctl/set.h>"

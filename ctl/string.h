@@ -1,3 +1,5 @@
+/* A vector class
+   See MIT LICENSE. */
 #ifndef __STR__H__
 #define __STR__H__
 

@@ -1,6 +1,9 @@
 // Optional algorithms
+// See MIT LICENSE
 // DO NOT STANDALONE INCLUDE, need container included before.
-// Might be included more than once for child contaimers.
+//
+// Might be included more than once for child containers, but
+// really should be included for the child, not the parent to avoid bloat.
 #define CTL_ALGORITHM
 
 #if !defined CTL_LIST && !defined CTL_SET && !defined CTL_USET && \

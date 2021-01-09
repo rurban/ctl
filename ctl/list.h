@@ -1,4 +1,5 @@
-/* List containers are implemented as doubly-linked lists */
+/* List containers are implemented as doubly-linked lists
+   See MIT LICENSE. */
 
 #ifndef T
 #error "Template type T undefined for <ctl/list.h>"

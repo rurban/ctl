@@ -1,4 +1,5 @@
-/* same hash table as unordered_set
+/* Same hash table as unordered_set
+   See MIT LICENSE.
 
   TODO: add pairs, to handle the extra free for key and value pairs.
 

@@ -1,4 +1,5 @@
-/* red-black tree from set.h with a key-value struct as T */
+/* red-black tree from set.h with a key-value struct as T
+   See MIT LICENSE. */
 
 #ifndef T
 #error "Template struct type T undefined for <ctl/map.h>"

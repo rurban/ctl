@@ -1,4 +1,5 @@
-/* FIFO deque */
+/* FIFO deque
+   See MIT LICENSE. */
 
 #ifndef T
 #error "Template type T undefined for <ctl/queue.h>"

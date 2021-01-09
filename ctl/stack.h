@@ -1,4 +1,5 @@
-/* LIFO deque */
+/* LIFO deque
+   See MIT LICENSE. */
 
 #ifndef T
 #error "Template type T undefined for <ctl/stack.h>"

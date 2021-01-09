@@ -1,8 +1,7 @@
-// Commonalities; expandable by all containers.
-//
-// DO NOT STANDALONE INCLUDE.
-//
+/* Common bits for all containers.
+   See MIT LICENSE. */
 
+// DO NOT STANDALONE INCLUDE.
 #if !defined CTL_LIST && !defined CTL_SET && !defined CTL_USET && \
     !defined CTL_VEC && !defined CTL_DEQ
 #error "No CTL container defined for <ctl/bits/container.h>"

@@ -3,6 +3,8 @@
    into the set valid.
    The faster open addressing moves pointers. Maybe add another class for open
    hashes (hmap, hashtable).
+
+   See MIT LICENSE.
  */
 #ifndef T
 #error "Template type T undefined for <unordered_set.h>"

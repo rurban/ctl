@@ -1,4 +1,5 @@
-/* Arrays that can change in size. */
+/* Arrays that can change in size.
+   See MIT LICENSE. */
 
 // TODO emplace, emplace_back
 
