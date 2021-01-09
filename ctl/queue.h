@@ -28,7 +28,9 @@
 #define CTL_QUEUE
 #define deq queue
 #include <ctl/deque.h>
+#include <ctl/algorithm.h>
 #undef deq
+#undef CTL_QUEUE
 
 #undef push_back
 #undef pop_front
@@ -48,4 +50,3 @@
 #undef each
 #undef step
 #undef remove_if
-#undef CTL_QUEUE

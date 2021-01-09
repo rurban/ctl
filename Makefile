@@ -241,9 +241,9 @@ tests/func/test_deque:               .cflags $(COMMON_H) ctl/deque.h
 	$(CXX) $(CFLAGS) -o $@ $@.cc
 tests/func/test_list:                .cflags $(COMMON_H) ctl/list.h
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_priority_queue:      .cflags $(COMMON_H) ctl/priority_queue.h
+tests/func/test_priority_queue:      .cflags $(COMMON_H) ctl/priority_queue.h ctl/vector.h
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_queue:               .cflags $(COMMON_H) ctl/queue.h
+tests/func/test_queue:               .cflags $(COMMON_H) ctl/queue.h ctl/deque.h
 	$(CXX) $(CFLAGS) -o $@ $@.cc
 tests/func/test_set:                 .cflags $(COMMON_H) ctl/set.h
 	$(CXX) $(CFLAGS) -o $@ $@.cc
@@ -255,7 +255,7 @@ tests/func/test_unordered_set_power2: .cflags $(COMMON_H) ctl/unordered_set.h
 	$(CXX) $(CFLAGS) -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc -o $@
 tests/func/test_unordered_map:       .cflags $(COMMON_H) ctl/unordered_map.h ctl/unordered_set.h
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_stack:               .cflags $(COMMON_H) ctl/deque.h ctl/stack.h
+tests/func/test_stack:               .cflags $(COMMON_H) ctl/stack.h ctl/deque.h
 	$(CXX) $(CFLAGS) -o $@ $@.cc
 tests/func/test_string:              .cflags $(COMMON_H) ctl/string.h ctl/vector.h
 	$(CXX) $(CFLAGS) -o $@ $@.cc

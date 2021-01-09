@@ -2,19 +2,28 @@
 // See MIT LICENSE
 // DO NOT STANDALONE INCLUDE, need container included before.
 //
-// Might be included more than once for child containers, but
-// really should be included for the child, not the parent to avoid bloat.
+// Might only be included once. By the child. not the parent.
+#ifndef __CTL_ALGORITHM_H__
+#define __CTL_ALGORITHM_H__
 #define CTL_ALGORITHM
 
 #if !defined CTL_LIST && !defined CTL_SET && !defined CTL_USET && \
-    !defined CTL_VEC && !defined CTL_DEQ
+    !defined CTL_VEC && !defined CTL_DEQ && \
+    /* plus all children also. we dont include it for parents */ \
+    !defined CTL_STACK && !defined CTL_QUEUE  && !defined CTL_PQU && \
+    !defined CTL_MAP && !defined CTL_UMAP
 #error "No CTL container defined for <ctl/algorithm.h>"
 #endif
 
 // Generic algorithms with ranges
 
-#ifdef DEBUG
+#if 0
 #include <stdbool.h>
+
+/* We have two major kinds of iterators:
+   - returning B* nodes (list, set, uset), and
+   - returning T* valuerefs directly (arrays).
+*/
 
 #if !defined IT /* && !defined foreach_range */
 # if defined CTL_LIST || defined CTL_SET || defined CTL_USET
@@ -38,7 +47,7 @@
       foreach(A, other, it)
 #  else // DEQ
 #   define foreach_range(A, it, first, last)
-/* FIXME: T -> I, deque needs a container field
+/* FIXME: T -> I, deque needs a container field really
 #   define foreach_range(A, it, first, last)       \
       A* itercont = first->container;              \
       if (last != JOIN(A, end)(&itercont)          \
@@ -255,5 +264,4 @@ JOIN(A, count)(A* self, T value)
 #endif
 
 #undef IT
-
-//#endif
+#endif

@@ -31,6 +31,7 @@
 #define CTL_STACK
 #define deq stack
 #include <ctl/deque.h>
+#include <ctl/algorithm.h>
 #undef deq
 #undef CTL_STACK
 
