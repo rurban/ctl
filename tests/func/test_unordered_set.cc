@@ -382,5 +382,9 @@ main(void)
         CHECK(a, b);
         uset_digi_free(&a);
     }
+#ifdef CTL_USET_GROWTH_POWER2
+    TEST_PASS("tests/func/test_unordered_set_power2");
+#else
     TEST_PASS(__FILE__);
+#endif
 }
