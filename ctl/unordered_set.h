@@ -464,7 +464,7 @@ JOIN(A, emplace_found)(A* self, T* value, int* foundp)
     {
         if(!self->bucket_count)
             JOIN(A, rehash)(self, 12);
-        B** bucket = JOIN(A, _bucket)(self, value);
+        B** bucket = JOIN(A, _bucket)(self, *value);
         *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(*value));
         self->size++;
         if (self->size > self->max_bucket_count)

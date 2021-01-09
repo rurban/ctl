@@ -34,6 +34,7 @@ setup_sets(map_strint* a, std::map<std::string,int>& b)
 {
     size_t iters = TEST_RAND(TEST_MAX_SIZE);
     *a = map_strint_init(strint_compare);
+    a->equal = strint_equal;
     for(size_t inserts = 0; inserts < iters; inserts++)
     {
         char *key = new_rand_str();
@@ -91,10 +92,9 @@ main(void)
             case TEST_INSERT_OR_ASSIGN:
             {
                 char *key = new_rand_str();
-                const int vb = TEST_RAND(TEST_MAX_SIZE);
-                auto p = STRINT{key,vb};
+                int vb = TEST_RAND(TEST_MAX_SIZE);
                 map_strint_insert_or_assign(&a, strint_init(str_init(key),vb));
-                b.insert_or_assign(key, std::move(p));
+                b.insert_or_assign(key, vb);
                 CHECK(a, b);
                 break;
             }
@@ -202,7 +202,7 @@ main(void)
             {
                 map_strint aa = map_strint_copy(&a);
                 std::map<std::string,int> bb = b;
-                assert(map_strint_equal(&a, &aa, strint_match));
+                assert(map_strint_equal(&a, &aa));
                 assert(b == bb);
                 map_strint_free(&aa);
                 CHECK(a, b);

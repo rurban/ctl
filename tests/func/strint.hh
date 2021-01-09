@@ -50,7 +50,8 @@ strint_compare(strint* a, strint* b)
 static inline size_t
 strint_hash(strint* a)
 {
-    return (size_t)FNV1a(str_c_str(&a->key));
+    const char* key = a->key.value;
+    return key && *key ? (size_t)FNV1a(key) : 0UL;
 }
 
 static inline strint
@@ -69,7 +70,7 @@ strint_is_odd(strint* d)
 }
 
 static inline int
-strint_match(strint* a, strint* b)
+strint_equal(strint* a, strint* b)
 {
     return str_key_compare (&a->key, &b->key) == 0;
 }

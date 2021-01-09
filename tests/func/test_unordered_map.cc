@@ -1,5 +1,4 @@
 #include "../test.h"
-// FIXME
 #include "strint.hh"
 
 #define USE_INTERNAL_VERIFY
@@ -18,13 +17,15 @@
         size_t b_found = 0;                                            \
         foreach(umap_strint, &_x, it)                                  \
         {                                                              \
-            auto found = _y.find(*it.ref->value);                      \
+            str *_key = &it.ref->key;                                  \
+            auto found = _y.find(_key->value);                         \
             assert(found != _y.end());                                 \
             a_found++;                                                 \
         }                                                              \
         for(auto x : _y)                                               \
         {                                                              \
-            strint d = strint_init(*x.value);                          \
+            const char *_key = x.first.c_str();                        \
+            strint d = strint_init(str_init(_key), x.second);          \
             umap_strint_node* found = umap_strint_find(&_x, d);        \
             assert(found != NULL);                                     \
             strint_free(&d);                                           \
@@ -50,7 +51,7 @@ static void
 setup_sets(umap_strint* a, std::unordered_map<std::string,int>& b)
 {
     size_t iters = TEST_RAND(TEST_MAX_SIZE);
-    *a = umap_strint_init(strint_hash, strint_match);
+    *a = umap_strint_init(strint_hash, strint_equal);
     for(size_t inserts = 0; inserts < iters; inserts++)
     {
         char *key = new_rand_str();
@@ -65,7 +66,15 @@ int
 main(void)
 {
     INIT_SRAND;
-    const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    int test = -1;
+    char *env = getenv ("TEST");
+    if (env)
+        sscanf(env, "%d", &test);
+    if (test >= 0)
+        loops = 10;
+    if ((env = getenv ("LOOPS")))
+        sscanf(env, "%lu", &loops);
     for(size_t loop = 0; loop < loops; loop++)
     {
         umap_strint a;
@@ -83,10 +92,12 @@ main(void)
             //TEST_EQUAL_RANGE,
             TEST_ERASE,
             TEST_CLEAR,
-            TEST_SWAP,
             TEST_COUNT,
             TEST_FIND,
+#ifdef DEBUG
+            TEST_SWAP,
             TEST_COPY,
+#endif
             TEST_EQUAL,
             TEST_REHASH,
             TEST_RESERVE,
@@ -97,6 +108,9 @@ main(void)
             TEST_TOTAL,
         };
         int which = TEST_RAND(TEST_TOTAL);
+        if (test >= 0)
+            which = test;
+        LOG ("TEST %d\n", which);
         switch(which)
         {
             case TEST_INSERT:
@@ -112,9 +126,8 @@ main(void)
             {
                 char *key = new_rand_str();
                 const int vb = TEST_RAND(TEST_MAX_SIZE);
-                auto p = STRINT{key,vb};
                 umap_strint_insert_or_assign(&a, strint_init(str_init(key),vb));
-                b.insert_or_assign(key, std::move(p));
+                b.insert_or_assign(key, vb);
                 CHECK(a, b);
                 break;
             }
@@ -154,11 +167,12 @@ main(void)
                 CHECK(aa, bb);
                 break;
             }
+#ifdef DEBUG
             case TEST_SWAP:
             {
                 umap_strint aa = umap_strint_copy(&a);
-                umap_strint aaa = umap_strint_init(strint_hash, strint_match);
-                JOIN(A, reserve)(&aaa, a.size);
+                umap_strint aaa = umap_strint_init(strint_hash, strint_equal);
+                umap_strint_reserve(&aaa, a.size);
                 std::unordered_map<std::string,int> bb = b;
                 std::unordered_map<std::string,int> bbb;
                 umap_strint_swap(&aaa, &aa);
@@ -168,6 +182,16 @@ main(void)
                 CHECK(a, b);
                 break;
             }
+            case TEST_COPY:
+              { // C++20
+                umap_strint aa = umap_strint_copy(&a);
+                std::unordered_map<std::string,int> bb = b;
+                CHECK(aa, bb);
+                umap_strint_free(&aa);
+                CHECK(a, b);
+                break;
+            }
+#endif
             case TEST_COUNT:
             {
                 char *key = new_rand_str();
@@ -229,20 +253,11 @@ main(void)
             case TEST_EQUAL_RANGE:
                 break;
 #endif
-            case TEST_COPY:
-              { // C++20
-                umap_strint aa = umap_strint_copy(&a);
-                std::unordered_map<std::string,int> bb = b;
-                CHECK(aa, bb);
-                umap_strint_free(&aa);
-                CHECK(a, b);
-                break;
-            }
             case TEST_EQUAL:
             {
                 umap_strint aa = umap_strint_copy(&a);
                 std::unordered_map<std::string,int> bb = b;
-                assert(umap_strint_equal(&a, &aa, strint_match));
+                assert(umap_strint_equal(&a, &aa));
                 assert(b == bb);
                 umap_strint_free(&aa);
                 CHECK(a, b);
