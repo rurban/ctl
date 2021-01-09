@@ -5,20 +5,13 @@ parent for [queue](queue.md) and [stack](stack.md).
 
 # SYNOPSIS
 
-    static inline int
-    int_cmp(int *a, int *b) {
-      return *a < *b;
-    }
-
-    #undef POD
     #define T int
     #include <ctl/deque.h>
 
-    int i = 0;
     deq_int a = deq_int_init ();
     deq_int_resize (&a, 100, 0);
 
-    for (i=0; i<100; i++) {
+    for (int i=0; i<100; i++) {
       deq_int_push_front (&a, i);
       deq_int_push_back (&a, i);
       deq_int_pop_front (&a, i);
@@ -68,6 +61,19 @@ The complexity (efficiency) of common operations on a `deque` is as follows:
 `B` being `deq_T_node`  node type
 
 `I` being `deq_T_it`    iterator type
+
+## Member fields
+
+with non-POD or NON_INTEGRAL types these fields must be set, if used with sort,
+merge, unique, ...
+
+[`.compare`](uset/.compare.md)
+
+Compare method `int (*compare)(T*, T*)`
+
+[`.equal`](uset/.equal.md)
+
+Optional equal `int (*equal)(T*, T*)`. If not set, maximal 2x compare will be called.
 
 ## Member functions
 
@@ -205,6 +211,14 @@ swaps the contents
 
 finds element with specific value
 
+[find_if](algorithm/find_if.md) `(A* self, int _match(T*))`
+
+finds element by predicate
+
+[find_if_not](algorithm/find_if.md) `(A* self, int _match(T*))`
+
+finds element by predicate
+
 [remove_if](deq/remove_if.md) `(A* self, int T_match(T*))`
 
 Removes all elements satisfying specific criteria.
@@ -213,15 +227,28 @@ Removes all elements satisfying specific criteria.
 
 erases all elements satisfying specific criteria (C++20)
 
-[equal](deq/equal.md) `(A* self, A* other, int T_equal(T*, T*))`
+[equal](deq/equal.md) `(A* self, A* other)`
 
 Returns 0 or 1 if all elements are equal.
 
-[sort](deq/sort.md) `(A* self, int T_equal(T*, T*))`
+[sort](deq/sort.md) `(A* self)`
 
 Sorts the elements in non-descending order.
 Currently it's a stable_sort, i.e. the order of equal elements is preserved.
+(merge-sort)
 
-[sort_range](deq/sort.md) `(A* self, I* first, I* last, int T_equal(T*, T*))`
+[sort_range](deq/sort.md) `(A* self, I* first, I* last)`
 
 Sorts the elements in the range `[first, last)` in non-descending order.
+
+[all_of](algorithm/all_of.md) `(A* self, int _match(T*))`
+
+[any_of](algorithm/any_of.md) `(A* self, int _match(T*))`
+
+[none_of](algorithm/none_of.md) `(A* self, int _match(T*))`
+
+[all_of_range](algorithm/all_of.md) `(A* self, I* first, I* last, int _match(T*))`
+
+[any_of_range](algorithm/any_of.md) `(A* self, I* first, I* last, int _match(T*))`
+
+[none_of_range](algorithm/none_of.md) `(A* self, I* first, I* last, int _match(T*))`

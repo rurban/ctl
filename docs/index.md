@@ -113,7 +113,7 @@ e.g.
 
 #define T digi
 #include <ctl/deque.h>
-...
+
     deq_digi a = deq_digi_init();
     a.compare = digi_compare;
     a.equal = digi_equal;
@@ -159,7 +159,7 @@ make examples
 To generate performance graphs, run:
 
 ```shell
-sh gen_images.sh
+make images
 # Graphing requires python3 and the Plotly family of libraries via pip3.
 pip install plotly
 pip install psutil

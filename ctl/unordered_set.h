@@ -228,6 +228,12 @@ JOIN(A, _bucket)(A* self, T value)
 }
 
 static inline size_t
+JOIN(A, bucket)(A* self, T value)
+{
+    return self->hash(&value) % self->bucket_count;
+}
+
+static inline size_t
 JOIN(A, bucket_size)(A* self, size_t index)
 {
     size_t size = 0;

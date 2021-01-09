@@ -228,7 +228,7 @@ JOIN(A, _equal)(A* self, T* a, T* b)
 #ifdef DEBUG
 
 static inline I*
-JOIN(A, find_if)(A* self, I* first, I* last, int _match(T*))
+JOIN(A, find_if)(A* self, int _match(T*))
 {
     foreach(A, self, it)
         if(_match(it.ref))
@@ -237,7 +237,7 @@ JOIN(A, find_if)(A* self, I* first, I* last, int _match(T*))
 }
 
 static inline I*
-JOIN(A, find_if_not)(A* self, I* first, I* last, int _match(T*))
+JOIN(A, find_if_not)(A* self, int _match(T*))
 {
     foreach(A, self, it)
         if(!_match(it.ref))
@@ -246,21 +246,21 @@ JOIN(A, find_if_not)(A* self, I* first, I* last, int _match(T*))
 }
 
 static inline bool
-JOIN(A, all_of)(A* self, I* first, I* last, int _match(T*))
+JOIN(A, all_of)(A* self, int _match(T*))
 {
-    return JOIN(A, find_if_not)(self, first, last, _match) == last;
+    return JOIN(A, find_if_not)(self, _match) == JOIN(A, end)(self);
 }
 
 static inline bool
-JOIN(A, any_of)(A* self, I* first, I* last, int _match(T*))
+JOIN(A, any_of)(A* self, int _match(T*))
 {
-    return JOIN(A, find_if)(self, first, last, _match) != last;
+    return JOIN(A, find_if)(self, first, last, _match) != JOIN(A, end)(self);
 }
 
 static inline bool
-JOIN(A, none_of)(A* self, I* first, I* last, int _match(T*))
+JOIN(A, none_of)(A* self, int _match(T*))
 {
-    return JOIN(A, find_if)(self, first, last, _match) == last;
+    return JOIN(A, find_if)(self, _match) == JOIN(A, end)(self);
 }
 
 #endif

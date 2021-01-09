@@ -14,12 +14,16 @@ Implementation in work still.
     #define T int
     #include <ctl/unordered_set.h>
 
-    uset_int a = uset_int_init(200, int_hash, int_eq);
+    uset_int a = uset_int_init(int_hash, int_eq);
     for (int i=0; i < 120; i++)
       uset_int_insert(&a, rand());
 
+    printf ("5 is %s included\n", uset_int_contains(&a, 5) ? "" : "not");
+    uset_digi_node* n = uset_int_find(&a, 5));
+    uset_int_erase(&a, 5);
+
     foreach(uset_int, &a, it) { printf("GOT %d\n", *it.ref); }
-    foreach(uset_int, &a, it) { printf("SIZE %lu\n", uset_int_bucket_size(it.node)); }
+    foreach(uset_int, &a, it) { printf("SIZE %lu\n", uset_int_node_bucket_size(it.node)); }
     printf("load_factor: %f\n", uset_int_load_factor(&a));
 
     uset_int_free(&a);
@@ -56,9 +60,11 @@ element's hash and corrupt the container.
 
 ## Member functions
 
-[init](uset/init.md) `(bucket_count, T_hash(T*), T_equal(T*, T*))`
+[init](uset/init.md) `(T_hash(T*), T_equal(T*, T*))`
 
 constructs the hash table.
+with INTEGRAL types the member may be NULL, and are then set to default
+methods.
 
 [free](uset/free.md) `(A* self)`
 
@@ -92,9 +98,9 @@ checks whether the container is empty
 
 returns the number of non-empty and non-deleted elements
 
-[capacity](uset/size.md) `(A* self)`
+[bucket_count](uset/size.md) `(A* self)`
 
-returns the size of the array
+returns the size of the array. Same as capacity
 
 [max_size](uset/max_size.md) `()`
 
@@ -110,21 +116,29 @@ clears the contents
 
 inserts the element `(C++17)`
 
-[emplace](uset/emplace.md) `(A* self, T values...)`
+[insert_found](uset/insert.md) `(A* self, T value, int* foundp)`
+
+inserts the element and sets foundp if it already existed.
+
+[emplace](uset/emplace.md) `(A* self, T *value)`
 
 constructs elements in-place. (NYI)
 
-[emplace_hint](map/emplace_hint.md) `(A* self, I* pos, T values...)`
+[emplace_hint](uset/emplace.md) `(A* self, I* pos, T *value)`
 
 constructs elements in-place at position. (NYI)
+
+[emplace_found](uset/emplace.md) `(A* self, T *value, int* foundp)`
+
+constructs elements in-place and sets foundp if it already existed. (NYI)
 
 [erase](uset/erase.md) `(A* self, T key)`
 
 erases the element by key
 
-[erase_it](uset/erase.md) `(A* self, I* pos)`
+[erase_if](uset/erase_if.md) `(A* self, int (*_match)(T*))`
 
-erases the element at pos
+erases the element by match.
 
 [erase_range](uset/erase.md) `(A* self, I* first, I* last)`
 
@@ -135,19 +149,29 @@ erases elements
 swaps the contents
 
 [extract](uset/extract.md) `(A* self, T key)`
-[extract_it](uset/extract.md) `(A* self, I* pos)`
 
 extracts a node from the container. NYI
 
-[merge](uset/merge.md) `(A* self)`
+[merge](uset/merge.md) `(A* self, A* other)`
 
 splices nodes from another container
+
+## Member fields
+
+[`.hash`](uset/.hash.md)
+
+Hash method `int (*hash)(T*)`
+
+[`.equal`](uset/.equal.md)
+
+equal method `int (*equal)(T*, T*)`
 
 ## Lookup
 
 [count](uset/count.md) `(A* self)`
 
-returns the number of elements matching specific key
+returns the number of elements matching specific key. It will always be 1,
+unless your equal method s broken.
 
 [find](uset/find.md) `(A* self, T key)`
 
@@ -157,19 +181,21 @@ finds element with specific key
 
 checks if the container contains element with specific key. (C++20)
 
-[equal_range](uset/equal_range.md) `(A* self)`
+[equal](uset/equal.md) `(A* self, A* other)`
 
-returns range of elements matching a specific key. (NYI)
+[equal_range](uset/equal_range.md) `(A* self, I* first, I* last)`
+
+if range of elements match a specific key. (NYI)
 
 ## Bucket interface
 
 begin `(A* self, size_t bucket_index)`
 
-returns an iterator to the beginning of the specified bucket
+returns an iterator to the beginning of the specified bucket (NYI)
 
 end `(A* self, size_t bucket_index)`
 
-returns an iterator to the end of the specified bucket
+returns an iterator to the end of the specified bucket (NYI)
 
 bucket_count `(A* self)`
 
@@ -177,17 +203,30 @@ returns the number of buckets
 
 max_bucket_count `(A* self)`
 
-returns the maximum number of buckets of the map.
+returns the maximum number of buckets of the set.
 
 bucket_size `(A* self, size_t bucket_index)`
+bucket_size `(B* bucket)`
 
-returns the number of elements in specific bucket.
+returns the number of elements in the specific bucket, the collisions.
 
 bucket `(A* self, T value)`
 
 returns the bucket index for the key.
 
 ## Hash policy
+
+Growth policies:
+```C
+#define CTL_USET_GROWTH_PRIMED
+/* slower but more secure. uses all hash bits. (default) */
+#define CTL_USET_GROWTH_POWER2
+/* faster, but less secure. uses only some lower bits.
+   not recommended with public inet access (json, ...) */
+```
+
+`CTL_USET_GROWTH_POWER2` rehashes with bucket_count * 2,
+`CTL_USET_GROWTH_PRIMED` rehashes with the next prime at bucket_count * 1.618.
 
 [load_factor](uset/load_factor.md) `(A* self)`
 
@@ -201,12 +240,12 @@ manages maximum average number of elements per bucket. defaults to 0.85
 [rehash](uset/rehash.md) `(A* self, size_t bucket_count)`
 
 reserves at least the specified number of buckets.
-This regenerates the hash table.
+This might regenerate the hash table, but not the buckets.
 
 [reserve](uset/reserve.md) `(A* self, size_t desired_size)`
 
 reserves space for at least the specified number of elements.
-This regenerates the hash table. 
+This might regenerate the hash table, but not the buckets.
 
 ## Non-member functions
 
@@ -218,15 +257,30 @@ specializes the swap algorithm
 
 Removes all elements satisfying specific criteria.
 
-[erase_if](uset/erase_if.md) `(A* self, int T_match(T*))`
+[find_if](algorithm/find_if.md) `(A* self, int _match(T*))`
 
-erases all elements satisfying specific criteria (C++20)
+finds element by predicate
 
-[intersection](uset/intersection.md) `(A* self, A* other)`
+[find_if_not](algorithm/find_if.md) `(A* self, int _match(T*))`
 
-[union](uset/union.md) `(A* self, A* other)`
+finds element by predicate
 
-[difference](uset/difference.md) `(A* self, A* other)`
+[intersection](algorithm/intersection.md) `(A* self, A* other)`
 
-[symmetric_difference](uset/symmetric_difference.md) `(A* self, A* other)`
+[union](algorithm/union.md) `(A* self, A* other)`
 
+[difference](algorithm/difference.md) `(A* self, A* other)`
+
+[symmetric_difference](algorithm/symmetric_difference.md) `(A* self, A* other)`
+
+[all_of](algorithm/all_of.md) `(A* self, int _match(T*))`
+
+[any_of](algorithm/any_of.md) `(A* self, int _match(T*))`
+
+[none_of](algorithm/none_of.md) `(A* self, int _match(T*))`
+
+[all_of_range](algorithm/all_of.md) `(A* self, I* first, I* last, int _match(T*))`
+
+[any_of_range](algorithm/any_of.md) `(A* self, I* first, I* last, int _match(T*))`
+
+[none_of_range](algorithm/none_of.md) `(A* self, I* first, I* last, int _match(T*))`
