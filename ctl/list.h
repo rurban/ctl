@@ -37,7 +37,6 @@ typedef struct I
 {
     CTL_COMMONFIELDS_ITER;
     A* container;
-    B* begin;
 } I;
 
 static inline T*
@@ -86,7 +85,6 @@ JOIN(I, range)(A* container, B* begin, B* end)
     if(begin)
     {
         self.step = JOIN(I, step);
-        self.begin = begin;
         self.end = end;
         self.next = begin->next;
         self.node = begin;
@@ -348,7 +346,6 @@ static inline I
 JOIN(I, iter)(A* self, B *node)
 {
     I it = JOIN(I, each)(self);
-    it.begin = node;
     it.node = node;
     it.ref = &node->value;
     it.next = node->next;
@@ -532,7 +529,7 @@ JOIN(A, sort)(A* self)
     }
 }
 
-static inline void /* not I* it */
+static inline void /* B* ?? */
 JOIN(A, unique)(A* self)
 {
     foreach(A, self, it)
