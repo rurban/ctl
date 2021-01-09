@@ -124,7 +124,7 @@ struct DIGI
 
 class DIGI_hash {
 public:
-    std::size_t operator()(const DIGI& a) const
+    size_t operator()(const DIGI& a) const
     {
         return (size_t)*a.value;
     }
