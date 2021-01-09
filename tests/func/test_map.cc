@@ -9,7 +9,7 @@ OLD_MAIN
 #define USE_INTERNAL_VERIFY
 #define INCLUDE_ALGORITHM
 #define INCLUDE_NUMERIC
-#define T strint
+#define T charp
 #include <ctl/map.h>
 
 #include <algorithm>
@@ -141,7 +141,7 @@ int main(void)
         case TEST_INSERT: {
             char *key = new_rand_str();
             const int vb = TEST_RAND(TEST_MAX_SIZE);
-            map_strint_insert(&a, strint_init(str_init(key), vb));
+            map_charp_insert(&a, strint_init(str_init(key), vb));
             b.insert(STRINT{key, vb});
             CHECK(a, b);
             break;
@@ -149,7 +149,7 @@ int main(void)
         case TEST_INSERT_OR_ASSIGN: {
             char *key = new_rand_str();
             int vb = TEST_RAND(TEST_MAX_SIZE);
-            map_strint_insert_or_assign(&a, strint_init(str_init(key), vb));
+            map_charp_insert_or_assign(&a, strint_init(str_init(key), vb));
             b.insert_or_assign(key, vb);
             CHECK(a, b);
             break;
@@ -162,11 +162,53 @@ int main(void)
                     char *key = new_rand_str();
                     const int value = TEST_RAND(TEST_MAX_SIZE);
                     strint kd = strint_init(str_init(key), value);
-                    map_strint_erase(&a, kd);
+                    map_charp_erase(&a, kd);
                     b.erase(key);
                     CHECK(a, b);
                     strint_free(&kd);
                 }
+            CHECK(a, b);
+            break;
+        }
+        case TEST_SWAP: {
+            map_charp aa = map_charp_copy(&a);
+            map_charp aaa = map_charp_init(strint_compare);
+            std::map<std::string, int> bb = b;
+            std::map<std::string, int> bbb;
+            map_charp_swap(&aaa, &aa);
+            std::swap(bb, bbb);
+            CHECK(aaa, bbb);
+            map_charp_free(&aaa);
+            CHECK(a, b);
+            break;
+        }
+        case TEST_COUNT: {
+            char *key = new_rand_str();
+            int value = TEST_RAND(TEST_MAX_SIZE);
+            strint kd = strint_init(str_init(key), value);
+            int aa = map_charp_count(&a, kd);
+            int bb = b.count(key);
+            assert(aa == bb);
+            CHECK(a, b);
+            strint_free(&kd);
+            break;
+        }
+        case TEST_FIND_NODE: {
+            char *key = new_rand_str();
+            const int value = TEST_RAND(TEST_MAX_SIZE);
+            strint kd = strint_init(str_init(key), value);
+            map_strint_node *aa = map_strint_find_node(&a, kd);
+            auto bb = b.find(key);
+            if (bb == b.end())
+            {
+                char *key = new_rand_str();
+                const int value = TEST_RAND(TEST_MAX_SIZE);
+                strint kd = strint_init(str_init(key), value);
+                map_strint_erase(&a, kd);
+                b.erase(key);
+                CHECK(a, b);
+                strint_free(&kd);
+            }
             CHECK(a, b);
             break;
         }
@@ -201,8 +243,10 @@ int main(void)
             auto bb = b.find(key);
             if (bb == b.end())
             {
-                map_strint_it e = map_strint_end(&a);
-                assert(e.node == aa);
+                b.clear();
+                map_charp_clear(&a);
+                CHECK(a, b);
+                break;
             }
             else
                 assert(bb->second == aa->value.value);
@@ -264,81 +308,81 @@ int main(void)
             case TEST_CONTAINS:
 #endif
         case TEST_COPY: { // C++20
-            map_strint aa = map_strint_copy(&a);
+            map_charp aa = map_charp_copy(&a);
             std::map<std::string, int> bb = b;
             CHECK(aa, bb);
-            map_strint_free(&aa);
+            map_charp_free(&aa);
             CHECK(a, b);
             break;
         }
         case TEST_EQUAL: {
-            map_strint aa = map_strint_copy(&a);
+            map_charp aa = map_charp_copy(&a);
             std::map<std::string, int> bb = b;
-            assert(map_strint_equal(&a, &aa));
+            assert(map_charp_equal(&a, &aa));
             assert(b == bb);
-            map_strint_free(&aa);
+            map_charp_free(&aa);
             CHECK(a, b);
             break;
         }
         case TEST_UNION: {
-            map_strint aa;
+            map_charp aa;
             std::map<std::string, int> bb;
             setup_sets(&aa, bb);
-            map_strint aaa = map_strint_union(&a, &aa);
+            map_charp aaa = map_charp_union(&a, &aa);
             std::map<std::string, int> bbb;
             std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
             CHECK(a, b);
             CHECK(aa, bb);
             CHECK(aaa, bbb);
-            map_strint_free(&aa);
-            map_strint_free(&aaa);
+            map_charp_free(&aa);
+            map_charp_free(&aaa);
             break;
         }
         case TEST_INTERSECTION: {
-            map_strint aa;
+            map_charp aa;
             std::map<std::string, int> bb;
             setup_sets(&aa, bb);
-            map_strint aaa = map_strint_intersection(&a, &aa);
+            map_charp aaa = map_charp_intersection(&a, &aa);
             std::map<std::string, int> bbb;
             std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
             CHECK(a, b);
             CHECK(aa, bb);
             CHECK(aaa, bbb);
-            map_strint_free(&aa);
-            map_strint_free(&aaa);
+            map_charp_free(&aa);
+            map_charp_free(&aaa);
             break;
         }
         case TEST_SYMMETRIC_DIFFERENCE: {
-            map_strint aa;
+            map_charp aa;
             std::map<std::string, int> bb;
             setup_sets(&aa, bb);
-            map_strint aaa = map_strint_symmetric_difference(&a, &aa);
+            map_charp aaa = map_charp_symmetric_difference(&a, &aa);
             std::map<std::string, int> bbb;
             std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
             CHECK(a, b);
             CHECK(aa, bb);
             CHECK(aaa, bbb);
-            map_strint_free(&aa);
-            map_strint_free(&aaa);
+            map_charp_free(&aa);
+            map_charp_free(&aaa);
             break;
         }
         case TEST_DIFFERENCE: {
-            map_strint aa;
+            map_charp aa;
             std::map<std::string, int> bb;
             setup_sets(&aa, bb);
-            map_strint aaa = map_strint_difference(&a, &aa);
+            map_charp aaa = map_charp_difference(&a, &aa);
             std::map<std::string, int> bbb;
             std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
             CHECK(a, b);
             CHECK(aa, bb);
             CHECK(aaa, bbb);
-            map_strint_free(&aa);
-            map_strint_free(&aaa);
+            map_charp_free(&aa);
+            map_charp_free(&aaa);
             break;
         }
         }
         CHECK(a, b);
-        map_strint_free(&a);
+        map_charp_free(&a);
     }
     FINISH_TEST(__FILE__);
 }

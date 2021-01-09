@@ -31,7 +31,8 @@ typedef unsigned char unsigned_char;
 #include <ctl/stack.h>
 
 #define POD
-#define T float
+#define T int
+#define T_VALUE float
 #include <ctl/map.h>
 
 #define POD
