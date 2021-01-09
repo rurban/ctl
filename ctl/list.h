@@ -363,10 +363,11 @@ JOIN(I, advance)(I* self, int n)
 }
 
 static inline size_t
-JOIN(A, remove)(A* self, T* value){
+JOIN(A, remove)(A* self, T* value)
+{
     size_t erased = 0;
     foreach(A, self, it)
-        if(memcmp(it.ref, value, sizeof(T)) == 0)
+        if(JOIN(A, _equal)(self, it.ref, value))
         {
             JOIN(A, erase)(self, it.node);
             erased += 1;
@@ -534,9 +535,6 @@ JOIN(A, sort)(A* self)
 static inline void /* not I* it */
 JOIN(A, unique)(A* self)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare || !"compare undefined");
-#endif
     foreach(A, self, it)
         if(it.next && JOIN(A, _equal)(self, it.ref, &it.next->value))
             JOIN(A, erase)(self, it.node);
@@ -545,9 +543,6 @@ JOIN(A, unique)(A* self)
 static inline B*
 JOIN(A, find)(A* self, T key)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare || !"compare undefined");
-#endif
     foreach(A, self, it)
         if(JOIN(A, _equal)(self, it.ref, &key))
             return it.node;

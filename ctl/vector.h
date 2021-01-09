@@ -379,9 +379,7 @@ JOIN(A, _ranged_sort)(A* self, long a, long b, int _compare(T*, T*))
 static inline void
 JOIN(A, sort)(A* self)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare || !"compare undefined");
-#endif
+    CTL_ASSERT_COMPARE
     if (self->size)
         JOIN(A, _ranged_sort)(self, 0, self->size - 1, self->compare);
 }
@@ -414,25 +412,16 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
     return erases;
 }
 
+#ifndef CTL_STR
 static inline T*
 JOIN(A, find)(A* self, T key)
 {
     foreach(A, self, it)
-    {
-        if(self->equal)
-        {
-            if(self->equal(it.ref, &key))
-                return it.ref;
-        }
-        else
-        {
-            if(!self->compare(it.ref, &key) &&
-               !self->compare(&key, it.ref))
-                return it.ref;
-        }
-    }
+        if (JOIN(A, _equal)(self, it.ref, &key))
+            return it.ref;
     return NULL;
 }
+#endif
 
 #undef A
 #undef I

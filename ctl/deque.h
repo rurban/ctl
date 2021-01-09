@@ -516,9 +516,7 @@ JOIN(A, _ranged_sort)(A* self, long from, long to, int _compare(T*, T*))
 static inline void
 JOIN(A, sort)(A* self)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare || !"compare undefined");
-#endif
+    CTL_ASSERT_COMPARE
     if (self->size)
         JOIN(A, _ranged_sort)(self, 0, self->size - 1, self->compare);
 }
@@ -527,9 +525,7 @@ JOIN(A, sort)(A* self)
 static inline void
 JOIN(A, sort_range)(A* self, I* from, I* to)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare);
-#endif
+    CTL_ASSERT_COMPARE
     if (to->index)
         JOIN(A, _ranged_sort)(self, from->index, to->index - 1, self->compare);
 }
@@ -566,12 +562,12 @@ JOIN(A, swap)(A* self, A* other)
     *other = temp;
 }
 
-#ifdef DEBUG
-
+#if 0
+// see algorithm.h instead
 static inline I*
 JOIN(A, find_range)(A* self, I* first, I* last, T value)
 {
-    foreach(A, self, it)
+    foreach_range(A, first, last, it)
         if(JOIN(A, _equal)(self, it.ref, &value))
             return first;
     return last;

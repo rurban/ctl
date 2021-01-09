@@ -221,15 +221,18 @@ _JOIN(A, _set_default_methods)(A* self) { (void) self; }
 
 #endif
 
+#ifndef CTL_STR
 static inline int
 JOIN(A, _equal)(A* self, T* a, T* b)
 {
+    CTL_ASSERT_EQUAL
     if(self->equal)
         return self->equal(a, b);
     else
         return !self->compare(a, b) &&
                !self->compare(b, a);
 }
+#endif
 
 // if parent, include only for the child later.
 // parents are vec: str, pqu. deq: queue, stack. set: map, uset: umap
