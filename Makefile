@@ -188,29 +188,29 @@ help:
 	@echo "                     $(DESTDIR)$(PREFIX)/share/man/man3"
 	@echo "                     $(DESTDIR)$(PREFIX)/share/doc/ctl"
 	@echo " clean:      the tests, perf, examples and manpages"
-	@echo " header.i:   exapand the header with -DT=int for debugging"
+	@echo " <file>.i:   expand the file with -DT=int for debugging"
 
-string.i:
+ctl/string.i:
 	$(call expand,$(subst .i,,$@))
-list.i:
+ctl/list.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-vector.i:
+ctl/vector.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-deque.i:
+ctl/deque.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-stack.i:
+ctl/stack.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-queue.i:
+ctl/queue.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-priority_queue.i:
+ctl/priority_queue.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-set.i:
+ctl/set.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-map.i:
+ctl/map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
-unordered_set.i:
+ctl/unordered_set.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-unordered_map.i:
+ctl/unordered_map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 tests/func/test_c11.i:
 	@$(CC) $(CFLAGS) $(subst .i,.c,$@) -E | clang-format -style=webkit
