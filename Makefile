@@ -212,12 +212,11 @@ ctl/unordered_set.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
 ctl/unordered_map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
-tests/func/test_c11.i:
-	@$(CC) $(CFLAGS) $(subst .i,.c,$@) -E | clang-format -style=webkit
-tests/func/test_integral_c11.i:
-	@$(CC) $(CFLAGS) $(subst .i,.c,$@) -E | clang-format -style=webkit
-tests/func/test_integral.i:
-	@$(CXX) $(CFLAGS) $(subst .i,.cc,$@) -E | clang-format -style=webkit
+
+%.i : %.c
+	@$(CC) $(CFLAGS) $< -E | clang-format -style=webkit
+%.i : %.cc
+	@$(CXX) $(CFLAGS) $< -P -E | clang-format -style=webkit
 
 examples/astar:                      .cflags $(H)
 	$(CC) $(CFLAGS) -o $@ $@.c
@@ -265,7 +264,7 @@ tests/func/test_vector:              .cflags $(COMMON_H) ctl/vector.h
 	$(CXX) $(CFLAGS) -o $@ $@.cc
 
 define expand
-	@$(CC) $(CFLAGS) ctl/$(1).h -E $(2) | clang-format -style=webkit
+	@$(CC) $(CFLAGS) $(1).h -E $(2) | clang-format -style=webkit
 endef
 
 ALWAYS:
