@@ -3,7 +3,7 @@ CC = gcc
 CXX = g++
 
 .SUFFIXES: .cc .c .i .o .md .3
-.PHONY: all man install clean doc images perf examples
+.PHONY: all man install clean doc images perf examples ALWAYS
 
 TRY_CXX20 := $(shell $(CXX) -std=c++20 -I. tests/func/test_deque.cc -o /dev/null)
 ifneq ($(.SHELLSTATUS),0)
@@ -90,6 +90,8 @@ endif
 
 CXXFLAGS=$(CFLAGS)
 
+H        = $(wildcard ctl/*.h)
+COMMON_H = ctl/ctl.h ctl/_share.h
 TESTS = \
 	tests/func/test_c11 \
 	tests/func/test_container_composing \
@@ -121,12 +123,14 @@ EXAMPLES = \
 
 all: $(TESTS)
 	$(foreach bin,$(TESTS),./$(bin) &&) exit 0
-	@echo CFLAGS=$(CFLAGS)
-	@$(CC) --version
-	@echo CXXFLAGS=$(CXXFLAGS)
-	@$(CXX) --version
-	@rm -f $(TESTS)
+	@$(CC) --version | head -n2
+	@echo $(CC) $(CFLAGS)
+	@$(CXX) --version | head -n2
+	@echo $(CXX) $(CXXFLAGS)
 
+check: all
+.cflags: ALWAYS
+	@echo "$(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
 images:
 	./gen_images.sh
 
@@ -135,9 +139,12 @@ PERFS_CC = $(patsubst %.cc,%, $(wildcard tests/perf/*/perf*.cc) tests/perf/perf_
 
 perf: $(PERFS_C) $(PERFS_CC)
 
-$(wildcard tests/perf/lst/perf*.c) : ctl/list.h
-$(wildcard tests/perf/set/perf*.c) : ctl/set.h
-$(wildcard tests/perf/uset/perf*.c): ctl/unordered_set.h
+$(wildcard tests/perf/lst/perf*.c) : $(COMMON_H) ctl/list.h
+$(wildcard tests/perf/set/perf*.c) : $(COMMON_H) ctl/set.h
+$(wildcard tests/perf/deq/perf*.c) : $(COMMON_H) ctl/deque.h
+$(wildcard tests/perf/pqu/perf*.c) : $(COMMON_H) ctl/priority_queue.h
+$(wildcard tests/perf/vec/perf*.c) : $(COMMON_H) ctl/vector.h
+$(wildcard tests/perf/uset/perf*.c): $(COMMON_H) ctl/unordered_set.h
 
 examples: $(EXAMPLES)
 
@@ -197,29 +204,50 @@ tests/func/test_integral_c11.i:
 tests/func/test_integral.i:
 	@$(CXX) $(CFLAGS) $(subst .i,.cc,$@) -E | clang-format -style=webkit
 
-examples/astar:                      ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
-examples/postfix:                    ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
-examples/json:                       ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
-examples/snow:                       ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
-examples/6502:                       ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
-tests/func/test_c11:                 ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
-tests/func/test_integral_c11:        ALWAYS; $(CC)  $(CFLAGS) $@.c  -o $@
-tests/func/test_container_composing: ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_integral:            ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_deque:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_list:                ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_priority_queue:      ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_queue:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_set:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_map:                 ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_unordered_set:       ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_unordered_set_power2:ALWAYS; \
-        $(CXX) $(CFLAGS) -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc -o $@
-tests/func/test_unordered_map:       ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_stack:               ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_string:              ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_vec_capacity:        ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
-tests/func/test_vector:              ALWAYS; $(CXX) $(CFLAGS) $@.cc -o $@
+examples/astar:                      .cflags $(H)
+	$(CC) $(CFLAGS) -o $@ $@.c
+examples/postfix:                    .cflags $(H)
+	$(CC) $(CFLAGS) -o $@ $@.c
+examples/json:                       .cflags $(H)
+	$(CC) $(CFLAGS) -o $@ $@.c
+examples/snow:                       .cflags $(COMMON_H) ctl/vector.h
+	$(CC) $(CFLAGS) -o $@ $@.c
+examples/6502:                       .cflags $(H)
+	$(CC) $(CFLAGS) -o $@ $@.c
+tests/func/test_c11:                 .cflags $(H)
+	$(CC) $(CFLAGS) -o $@ $@.c
+tests/func/test_integral_c11:        .cflags $(H)
+	$(CC) $(CFLAGS) -o $@ $@.c
+tests/func/test_integral:            .cflags $(H)
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_container_composing: .cflags $(H)
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_deque:               .cflags $(COMMON_H) ctl/deque.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_list:                .cflags $(COMMON_H) ctl/list.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_priority_queue:      .cflags $(COMMON_H) ctl/priority_queue.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_queue:               .cflags $(COMMON_H) ctl/queue.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_set:                 .cflags $(COMMON_H) ctl/set.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_map:                 .cflags $(COMMON_H) ctl/map.h ctl/set.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_unordered_set:       .cflags $(COMMON_H) ctl/unordered_set.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_unordered_set_power2: .cflags $(COMMON_H) ctl/unordered_set.h
+	$(CXX) $(CFLAGS) -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc -o $@
+tests/func/test_unordered_map:       .cflags $(COMMON_H) ctl/unordered_map.h ctl/unordered_set.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_stack:               .cflags $(COMMON_H) ctl/deque.h ctl/stack.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_string:              .cflags $(COMMON_H) ctl/string.h ctl/vector.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_vec_capacity:        .cflags $(COMMON_H) ctl/vector.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/test_vector:              .cflags $(COMMON_H) ctl/vector.h
+	$(CXX) $(CFLAGS) -o $@ $@.cc
 
 define expand
 	@$(CC) $(CFLAGS) ctl/$(1).h -E $(2) | clang-format -style=webkit
