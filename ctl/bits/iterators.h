@@ -12,12 +12,12 @@
 #  define IT B
 /* return it.node. end is NULL */
 #  define iter_ITp(iter) (iter)->node
-#  define iter_IT_endp(iter) ((iter)->done ? NULL : (iter)->node)
+#  define iter_IT_endp(iter) (iter->done ? NULL : iter->node)
 #  define iter_IT(iter) (iter).node
-#  define iter_IT_end(iter) ((iter).done ? NULL : (iter).node)
+#  define iter_IT_end(iter) (iter.done ? NULL : iter.node)
 #  define foreach_range(A, it, first, last)      \
-    if (!last->done)                             \
-        first->end = last->node;                 \
+      if (!last->done)                           \
+          first->end = last->next;               \
       for(JOIN(A, it) it = *first; !it.done; it.step(&it))
 
 # else
@@ -26,9 +26,9 @@
 #  define IT T
 /* return it.ref */
 #  define iter_ITp(iter) (iter)->ref
-#  define iter_IT_endp(iter) ((iter)->done ? NULL : (iter)->ref)
+#  define iter_IT_endp(iter) (iter->done ? NULL : iter->ref)
 #  define iter_IT(iter) (iter).ref
-#  define iter_IT_end(iter) ((iter).done ? NULL : (iter).ref)
+#  define iter_IT_end(iter) (iter.done ? NULL : iter.ref)
 #  ifdef CTL_VEC
 #   define foreach_range(A, it, first, last)       \
     if (!last->done)                               \
