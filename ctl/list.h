@@ -66,10 +66,17 @@ JOIN(A, end)(A* self)
 static inline void
 JOIN(I, step)(I* self)
 {
-    if(self->next == self->end)
+    if(self->next == self->end || !self->next) // FIXME
         self->done = 1;
     else
     {
+        /* Can theoretically be optimized to remove the node,
+           but we still need the node for returning iters, and
+           using it in foreach. i.e. erase,transfer... also in set and uset
+
+        self->ref = &self->next->value;
+        self->next = self->next->next;
+         */
         self->node = self->next;
         self->ref = &self->node->value;
         self->next = self->node->next;
@@ -83,11 +90,12 @@ JOIN(I, range)(A* container, B* begin, B* end)
     I self = zero;
     if(begin)
     {
+        self.next = begin->next;
+        self.ref = &begin->value;
         self.step = JOIN(I, step);
         self.end = end;
-        self.next = begin->next;
+        self.done = 0;
         self.node = begin;
-        self.ref = &begin->value;
         self.container = container;
     }
     else
@@ -360,8 +368,13 @@ JOIN(I, iter)(A* self, B *node)
 {
     I it = JOIN(I, each)(self);
     it.node = node;
-    it.ref = &node->value;
-    it.next = node->next;
+    if (!node)
+        it.done = 1;
+    else
+    {
+        it.ref = &node->value;
+        it.next = node->next;
+    }
     return it;
 }
 

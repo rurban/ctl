@@ -82,12 +82,12 @@ setup_lists(list_digi* a, std::list<DIGI>& b, size_t size, int* max_value)
 // list_digi_it* first_a, *last_a;
 // _List_iterator<DIGI>* first_b, *last_b;
 static void
-get_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
+get_random_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
            std::list<DIGI>& b, std::_List_iterator<DIGI>& first_b,
            std::_List_iterator<DIGI>&last_b)
 {
     size_t r1 = TEST_RAND(a->size / 2);
-    size_t r2 = std::max(r1 + TEST_RAND(a->size / 2), a->size);
+    size_t r2 = std::min(r1 + TEST_RAND(a->size / 2), a->size);
     LOG("iters %zu, %zu of %zu\n", r1, r2, a->size);
     if (a->size)
     {
@@ -98,7 +98,13 @@ get_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
             it1.step(&it1);
             first_b++;
         }
-        if (r2 == a->size)
+        *first_a = it1;
+        if (r1 == r2)
+        {
+            *last_a = it1;
+            last_b = first_b;
+        }
+        else if (r2 == a->size)
         {
             list_digi_it it2 = list_digi_it_iter (a, a->tail);
             it2.done = 1;
@@ -108,21 +114,22 @@ get_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
         else
         {
             list_digi_it it2 = list_digi_it_iter (a, a->head);
+            last_b = b.begin();
             for(size_t i = 0; i < r2; i++)
             {
                 it2.step(&it2);
                 last_b++;
             }
+            *last_a = it2;
         }
+        first_a->end = last_a->node;
     }
     else
     {
-        list_digi_it it1 = list_digi_it_iter (a, a->head);
-        list_digi_it it2 = list_digi_it_iter (a, a->tail);
-        *first_a = it1;
+        list_digi_it end = list_digi_it_range (a, NULL, NULL);
+        *first_a = end;
+        *last_a = end;
         first_b = b.begin();
-        it2.done = 1;
-        *last_a = it2;
         last_b = b.end();
     }
 }
@@ -162,6 +169,7 @@ main(void)
         TEST(SORT) \
         TEST(UNIQUE) \
         TEST(FIND) \
+        TEST(FIND_RANGE) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
         TEST(FIND_IF_RANGE) \
@@ -171,12 +179,11 @@ main(void)
         TEST(NONE_OF) \
         TEST(ALL_OF_RANGE) \
         TEST(ANY_OF_RANGE) \
-        TEST(NONE_OF_RANGE)
-#define FOREACH_DEBUG(TEST) \
+        TEST(NONE_OF_RANGE) \
         TEST(INSERT_COUNT) \
-        TEST(INSERT_RANGE) \
+        TEST(INSERT_RANGE)
+#define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) \
-        TEST(FIND_RANGE) \
         TEST(COUNT) \
         TEST(COUNT_IF) \
         TEST(COUNT_IF_RANGE) \
@@ -452,7 +459,8 @@ main(void)
                     int value = TEST_RAND(128);
                     total += value;
                     if(pushes == (size - 1))
-                        total = max_value + 1; // MAX + 1 ENSURES MERGE CAN APPEND TO TAIL.
+                        // MAX + 1 ENSURES MERGE CAN APPEND TO TAIL.
+                        total = max_value + 1;
                     list_digi_push_back(&aa, digi_init(total));
                     bb.push_back(DIGI{total});
                 }
@@ -517,6 +525,12 @@ main(void)
             {
                 bool aa = list_digi_all_of(&a, digi_is_odd);
                 bool bb = all_of(b.begin(), b.end(), DIGI_is_odd);
+                if (aa != bb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                }
                 assert(aa == bb);
                 break;
             }
@@ -524,6 +538,12 @@ main(void)
             {
                 bool aa = list_digi_all_of(&a, digi_is_odd);
                 bool bb = all_of(b.begin(), b.end(), DIGI_is_odd);
+                if (aa != bb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                }
                 assert(aa == bb);
                 break;
             }
@@ -531,6 +551,12 @@ main(void)
             {
                 bool aa = list_digi_all_of(&a, digi_is_odd);
                 bool bb = all_of(b.begin(), b.end(), DIGI_is_odd);
+                if (aa != bb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                }
                 assert(aa == bb);
                 break;
             }
@@ -538,10 +564,16 @@ main(void)
             {
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
-                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 bool aa = list_digi_all_of_range(&first_a, &last_a,
                                                  digi_is_odd);
                 bool bb = all_of(first_b, last_b, DIGI_is_odd);
+                if (aa != bb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                }
                 assert(aa == bb);
                 break;
             }
@@ -549,10 +581,16 @@ main(void)
             {
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
-                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 bool aa = list_digi_any_of_range(&first_a, &last_a,
                                                  digi_is_odd);
                 bool bb = any_of(first_b, last_b, DIGI_is_odd);
+                if (aa != bb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                }
                 assert(aa == bb);
                 break;
             }
@@ -560,10 +598,16 @@ main(void)
             {
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
-                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 bool aa = list_digi_none_of_range(&first_a, &last_a,
                                                  digi_is_odd);
                 bool bb = none_of(first_b, last_b, DIGI_is_odd);
+                if (aa != bb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                }
                 assert(aa == bb);
                 break;
             }
@@ -585,7 +629,7 @@ main(void)
             {
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
-                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_node *n =
                     list_digi_find_if_range(&first_a, &last_a, digi_is_odd);
                 auto it = find_if(first_b, last_b, DIGI_is_odd);
@@ -598,7 +642,7 @@ main(void)
             {
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
-                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_node *n =
                     list_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
                 auto it = find_if_not(first_b, last_b, DIGI_is_odd);
@@ -613,7 +657,7 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
                 LOG("EQUAL_RANGE\n");
-                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 bool aa = list_digi_equal_range(&first_a, &last_a,
                                                 digi_init(vb));
                 bool bb = equal_range(first_b, last_b, vb);
@@ -626,7 +670,6 @@ main(void)
                 int test_value = 0;
                 int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                                      : test_value;
-                LOG("COUNT\n");
                 size_t numa = list_digi_count(&a, digi_init(v));
                 size_t numb = count(b.begin(), b.end(), DIGI{v});
                 assert(numa == numb);
@@ -634,7 +677,6 @@ main(void)
             }
             case TEST_COUNT_IF:
             {
-                LOG("COUNT_IF\n");
                 size_t numa = list_digi_count_if(&a, digi_is_odd);
                 size_t numb = count_if(b.begin(), b.end(), DIGI_is_odd);
                 assert(numa == numb);
@@ -647,8 +689,7 @@ main(void)
                                      : test_value;
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
-                LOG("COUNT_IF_RANGE\n");
-                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 size_t numa = list_digi_count_range(&first_a, &last_a,
                                                     digi_init(v));
                 size_t numb = count(first_b, last_b, DIGI{v});
@@ -659,8 +700,7 @@ main(void)
             {
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
-                LOG("COUNT_IF_RANGE\n");
-                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 size_t numa = list_digi_count_if_range(&first_a, &last_a,
                                                         digi_is_odd);
                 size_t numb = count_if(first_b, last_b, DIGI_is_odd);

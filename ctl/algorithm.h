@@ -93,25 +93,21 @@ JOIN(A, find_if_not_range)(I* first, I* last, int _match(T*))
 static inline bool
 JOIN(A, all_of_range)(I* first, I* last, int _match(T*))
 {
-    A* self = first->container;
-    IT* it = JOIN(A, find_if_not_range)(first, last, _match);
-    return it == JOIN(A, end)(self);
-}
-// C++20
-static inline bool
-JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
-{
-    A* self = first->container;
-    IT* it = JOIN(A, find_if_range)(first, last, _match);
-    return it != JOIN(A, end)(self);
+    IT* n = JOIN(A, find_if_not_range)(first, last, _match);
+    return n == iter_IT_endp(last);
 }
 // C++20
 static inline bool
 JOIN(A, none_of_range)(I* first, I* last, int _match(T*))
 {
-    A* self = first->container;
-    IT* it = JOIN(A, find_if_range)(first, last, _match);
-    return it == JOIN(A, end)(self);
+    IT* n = JOIN(A, find_if_range)(first, last, _match);
+    return n == iter_IT_endp(last);
+}
+// C++20
+static inline bool
+JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
+{
+    return !JOIN(A, none_of_range)(first, last, _match);
 }
 
 #if !defined(CTL_SET) && !defined(CTL_USET) && !defined(CTL_STR)
