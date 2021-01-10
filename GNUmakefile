@@ -96,7 +96,8 @@ endif
 CXXFLAGS=$(CFLAGS)
 
 H        = $(wildcard ctl/*.h) ctl/bits/*.h
-COMMON_H = ctl/ctl.h ctl/bits/container.h ctl/algorithm.h
+COMMON_H = ctl/ctl.h ctl/algorithm.h ctl/bits/container.h \
+           ctl/bits/integral.h ctl/bits/iterators.h
 TESTS = \
 	tests/func/test_c11 \
 	tests/func/test_container_composing \
@@ -218,10 +219,6 @@ ctl/unordered_map.i:
 examples/% : examples/%.c .cflags $(H)
 	$(CC) $(CFLAGS) -o $@ $@.c
 
-tests/func/%: tests/func/%.c .cflags $(H)
-	$(CC) $(CFLAGS) -o $@ $@.c
-tests/func/%: tests/func/%.cc .cflags $(H)
-	$(CXX) $(CFLAGS) -o $@ $@.cc
 tests/func/test_deque:    .cflags $(COMMON_H) ctl/deque.h \
                           tests/func/test_deque.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
@@ -266,6 +263,10 @@ tests/func/test_vec_capacity: .cflags $(COMMON_H) ctl/vector.h \
 	$(CXX) $(CFLAGS) -o $@ $@.cc
 tests/func/test_vector:   .cflags $(COMMON_H) ctl/vector.h \
                           tests/func/test_vector.cc
+	$(CXX) $(CFLAGS) -o $@ $@.cc
+tests/func/%: tests/func/%.c .cflags $(H)
+	$(CC) $(CFLAGS) -o $@ $@.c
+tests/func/%: tests/func/%.cc .cflags $(H)
 	$(CXX) $(CFLAGS) -o $@ $@.cc
 
 stress:

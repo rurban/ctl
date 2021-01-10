@@ -16,10 +16,9 @@
 #  define iter_IT(iter) (iter).node
 #  define iter_IT_end(iter) ((iter).done ? NULL : (iter).node)
 #  define foreach_range(A, it, first, last)      \
-    A* _itercont = first->container;             \
-    if (last)                                    \
+    if (!last->done)                             \
         first->end = last->node;                 \
-    foreach(A, _itercont, it)
+      for(JOIN(A, it) it = *first; !it.done; it.step(&it))
 
 # else
 
@@ -32,18 +31,18 @@
 #  define iter_IT_end(iter) ((iter).done ? NULL : (iter).ref)
 #  ifdef CTL_VEC
 #   define foreach_range(A, it, first, last)       \
-      A* _itercont = first->container;             \
-      if (last != JOIN(A, end)(_itercont))         \
+    if (!last->done)                               \
           first->end = last->end;                  \
-      foreach(A, _itercont, it)
+      for(JOIN(A, it) it = *first; !it.done; it.step(&it))
+
 #  else // DEQ
     /*  T -> I, deque needs the container
         TODO: maybe switch to pointers */
 #   define foreach_range(A, it, first, last)       \
-      A* _itercont = first->container;             \
-      if (last != JOIN(A, end)(_itercont))         \
+    if (!last->done)                               \
           first->index_last = last->index;         \
-      foreach(A, _itercont, it)
+      for(JOIN(A, it) it = *first; !it.done; it.step(&it))
+
 #  endif
 
 # endif // T_ITER

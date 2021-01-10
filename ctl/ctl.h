@@ -14,7 +14,7 @@
 #define _JOIN(prefix, name) PASTE(_, PASTE(prefix, PASTE(_, name)))
 
 /* iterator with extra B nodes */
-#define CTL_B_ITER_FIELDS \
+#define CTL_B_ITER_FIELDS     \
     B* next;                  \
     T* ref;                   \
     void (*step)(struct I*);  \

@@ -29,6 +29,23 @@ void print_list(std::list<DIGI> &b)
 #define TEST_MAX_VALUE INT_MAX
 #endif
 
+int random_element(list_digi* a)
+{
+    const size_t index = TEST_RAND(a->size);
+    int test_value = 0;
+    size_t current = 0;
+    foreach(list_digi, a, it)
+    {
+        if(current == index)
+        {
+            test_value = *it.ref->value;
+            break;
+        }
+        current++;
+    }
+    return test_value;
+}
+
 #define CHECK(_x, _y) {                                           \
     assert(_x.size == _y.size());                                 \
     assert(list_digi_empty(&_x) == _y.empty());                   \
@@ -79,7 +96,6 @@ setup_lists(list_digi* a, std::list<DIGI>& b, size_t size, int* max_value)
     }
 }
 
-#ifdef DEBUG
 // list_digi_it* first_a, *last_a;
 // _List_iterator<DIGI>* first_b, *last_b;
 static void
@@ -102,7 +118,6 @@ get_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
     *last_a = it;
     last_b = b.end();
 }
-#endif
 
 int
 main(void)
@@ -145,20 +160,21 @@ main(void)
         TEST(NONE_OF) \
         TEST(COUNT) \
         TEST(COUNT_IF) \
+        TEST(ALL_OF_RANGE) \
+        TEST(ANY_OF_RANGE) \
+        TEST(NONE_OF_RANGE) \
+        TEST(FIND_RANGE) \
+        TEST(FIND_IF_RANGE) \
+        TEST(FIND_IF_NOT_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(INSERT_COUNT) \
         TEST(INSERT_RANGE) \
         TEST(EQUAL_RANGE) \
-        TEST(FIND_RANGE) \
-        TEST(FIND_IF_RANGE) \
-        TEST(FIND_IF_NOT_RANGE) \
         TEST(ANY_OF) \
-        TEST(ALL_OF_RANGE) \
-        TEST(ANY_OF_RANGE) \
-        TEST(NONE_OF_RANGE) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE)
+
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
@@ -465,38 +481,45 @@ main(void)
             }
             case TEST_FIND:
             {
-                if(a.size > 0)
-                {
-                    const size_t index = TEST_RAND(a.size);
-                    int test_value = 0;
-                    size_t current = 0;
-                    foreach(list_digi, &a, it)
-                    {
-                        if(current == index)
-                        {
-                            test_value = *it.ref->value;
-                            break;
-                        }
-                        current++;
-                    }
-                    int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
-                                             : test_value;
-                    digi key = digi_init(value);
-                    list_digi_node* aa = list_digi_find(&a, key);
-
-                    auto bb = std::find(b.begin(), b.end(), DIGI{value});
-                    CHECK_ITER(aa, b, bb);
-                    digi_free(&key);
-                    CHECK(a, b);
-                }
+                int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
+                                         : random_element(&a);
+                digi key = digi_init(value);
+                list_digi_node* aa = list_digi_find(&a, key);
+                auto bb = find(b.begin(), b.end(), DIGI{value});
+                CHECK_ITER(aa, b, bb);
+                digi_free (&key); // special
+                CHECK(a, b);
+                break;
+            }
+            case TEST_FIND_RANGE:
+            {
+                int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
+                                         : random_element(&a);
+                digi key = digi_init(value);
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                list_digi_node *n =
+                    list_digi_find_range(&first_a, &last_a, key);
+                auto it = find(first_b, last_b, DIGI{value});
+                CHECK_ITER(n, b, it);
+                digi_free (&key); // special
+                CHECK(a, b);
                 break;
             }
 #ifdef DEBUG
             case TEST_INSERT_COUNT:
             case TEST_INSERT_RANGE:
-            break;
+                break;
+            // algorithms + ranges
+            case TEST_ANY_OF:
+            {
+                bool aa = list_digi_all_of(&a, digi_is_odd);
+                bool bb = all_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(aa == bb);
+                break;
+            }
 #endif
-#ifdef DEBUG // algorithm
             case TEST_ALL_OF_RANGE:
             {
                 list_digi_it first_a, last_a;
@@ -544,21 +567,6 @@ main(void)
                 CHECK_ITER(n, b, it);
                 break;
             }
-            case TEST_FIND_RANGE:
-            {
-                int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
-                                         : test_value;
-                digi key = digi_init(value);
-                list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
-                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                list_digi_node *n =
-                    list_digi_find_range(&first_a, &last_a, key);
-                auto it = b.find(first_b, last_b, DIGI{value});
-                CHECK_ITER(n, b, it);
-                digi_free (key);
-                break;
-            }
             case TEST_FIND_IF_RANGE:
             {
                 list_digi_it first_a, last_a;
@@ -567,6 +575,8 @@ main(void)
                 list_digi_node *n =
                     list_digi_find_if_range(&first_a, &last_a, digi_is_odd);
                 auto it = find_if(first_b, last_b, DIGI_is_odd);
+                print_lst(&a);
+                print_list(b);
                 CHECK_ITER(n, b, it);
                 break;
             }
@@ -581,6 +591,36 @@ main(void)
                 CHECK_ITER(n, b, it);
                 break;
             }
+            case TEST_ALL_OF:
+            {
+                bool is_a = list_digi_all_of(&a, digi_is_odd);
+                bool is_b = all_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
+            case TEST_NONE_OF:
+            {
+                bool is_a = list_digi_none_of(&a, digi_is_odd);
+                bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
+            case TEST_COUNT:
+            {
+                int key = TEST_RAND(TEST_MAX_SIZE);
+                int aa = list_digi_count(&a, digi_init(key));
+                int bb = count(b.begin(), b.end(), DIGI{key});
+                assert(aa == bb);
+                break;
+            }
+            case TEST_COUNT_IF:
+            {
+                size_t count_a = list_digi_count_if(&a, digi_is_odd);
+                size_t count_b = count_if(b.begin(), b.end(), DIGI_is_odd);
+                assert(count_a == count_b);
+                break;
+            }
+#ifdef DEBUG
             case TEST_EQUAL_RANGE:
             {
                 /*
@@ -597,70 +637,28 @@ main(void)
                 break;
             }
             case TEST_COUNT_IF_RANGE:
+            {
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                list_digi_node *n =
+                    list_digi_count_if_range(&first_a, &last_a, digi_is_odd);
+                auto it = count_if(first_b, last_b, DIGI_is_odd);
+                CHECK_ITER(n, b, it);
+                break;
+            }
             case TEST_COUNT_RANGE:
-            case TEST_COUNT_IF:
-            case TEST_COUNT:
-                break;
-            case TEST_ANY_OF:
             {
-                bool is_a = list_digi_all_of(&a, digi_is_odd);
-                bool is_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
-                assert(is_a == is_b);
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                list_digi_node *n =
+                    list_digi_count_range(&first_a, &last_a, digi_is_odd);
+                auto it = count(first_b, last_b, DIGI_is_odd);
+                CHECK_ITER(n, b, it);
                 break;
             }
 #endif
-            case TEST_FIND_IF:
-            {
-                list_digi_node* aa = list_digi_find_if(&a, digi_is_odd);
-                auto bb = std::find_if(b.begin(), b.end(), DIGI_is_odd);
-                if(bb == b.end())
-                    assert(list_digi_end(&a) == aa);
-                else
-                    assert(*bb->value == *aa->value.value);
-                break;
-            }
-            case TEST_FIND_IF_NOT:
-            {
-                list_digi_node* aa = list_digi_find_if_not(&a, digi_is_odd);
-                auto bb = std::find_if_not(b.begin(), b.end(), DIGI_is_odd);
-                if(bb == b.end())
-                    assert(list_digi_end(&a) == aa);
-                else
-                    assert(*bb->value == *aa->value.value);
-                break;
-            }
-            case TEST_ALL_OF:
-            {
-                bool is_a = list_digi_all_of(&a, digi_is_odd);
-                bool is_b = std::all_of(b.begin(), b.end(), DIGI_is_odd);
-                assert(is_a == is_b);
-                break;
-            }
-            case TEST_NONE_OF:
-            {
-                bool is_a = list_digi_none_of(&a, digi_is_odd);
-                bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
-                assert(is_a == is_b);
-                break;
-            }
-            case TEST_COUNT:
-            {
-                int key = TEST_RAND(TEST_MAX_SIZE);
-                int aa = list_digi_count(&a, digi_init(key));
-                int bb = std::count(b.begin(), b.end(), DIGI{key});
-                assert(aa == bb);
-                break;
-            }
-            case TEST_COUNT_IF:
-            {
-                const size_t count_a = list_digi_count_if(&a, digi_is_odd);
-#ifdef __cpp_lib_erase_if // C++20
-                const
-#endif
-                    size_t count_b = std::count_if(b.begin(), b.end(), DIGI_is_odd);
-                assert(count_a == count_b);
-                break;
-            }
         }
         CHECK(a, b);
         list_digi_free(&a);
