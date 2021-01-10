@@ -115,6 +115,7 @@ get_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
     else
         first_b = b.begin();
     it = list_digi_it_iter (a, a->tail);
+    it.done = 1;
     *last_a = it;
     last_b = b.end();
 }
@@ -636,26 +637,31 @@ main(void)
                 */
                 break;
             }
+            case TEST_COUNT_RANGE:
+            {
+                int test_value = 0;
+                int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
+                                     : test_value;
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                LOG("COUNT_IF_RANGE\n");
+                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                size_t numa = list_digi_count_range(&first_a, &last_a,
+                                                    digi_init(v));
+                size_t numb = count(first_b, last_b, DIGI{v});
+                assert(numa == numb);
+                break;
+            }
             case TEST_COUNT_IF_RANGE:
             {
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
+                LOG("COUNT_IF_RANGE\n");
                 get_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                list_digi_node *n =
-                    list_digi_count_if_range(&first_a, &last_a, digi_is_odd);
-                auto it = count_if(first_b, last_b, DIGI_is_odd);
-                CHECK_ITER(n, b, it);
-                break;
-            }
-            case TEST_COUNT_RANGE:
-            {
-                list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
-                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                list_digi_node *n =
-                    list_digi_count_range(&first_a, &last_a, digi_is_odd);
-                auto it = count(first_b, last_b, DIGI_is_odd);
-                CHECK_ITER(n, b, it);
+                size_t numa = list_digi_count_if_range(&first_a, &last_a,
+                                                        digi_is_odd);
+                size_t numb = count_if(first_b, last_b, DIGI_is_odd);
+                assert(numa == numb);
                 break;
             }
 #endif
