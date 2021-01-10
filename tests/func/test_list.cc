@@ -262,22 +262,28 @@ main(void)
             }
             case TEST_REMOVE:
             {
-                digi *value = list_digi_front(&a);
+                if (a.size)
+                {
+                    digi *value = list_digi_front(&a);
 #ifdef DEBUG
-                list_digi_resize(&a, 10, digi_init(0));
-                b.resize(10);
+                    list_digi_resize(&a, 10, digi_init(0));
+                    b.resize(10);
 #endif
-                int vb = *value->value;
-                LOG("before remove %d\n", vb);
-                print_lst(&a);
-                digi copy = digi_init(vb);
-                size_t erased_a = list_digi_remove(&a, &copy);
-                LOG("removed %zu\n", erased_a);
-                print_lst(&a);
-                digi_free (&copy);
-                // if C++20: size_t only since C++20
-                b.remove(b.front());
-                LOG("removed STL\n");
+                    int vb = *value->value;
+                    LOG("before remove %d\n", vb);
+                    print_lst(&a);
+                    digi copy = digi_init(vb);
+#ifdef DEBUG // only used in logging
+                    size_t erased_a =
+#endif
+                        list_digi_remove(&a, &copy);
+                    LOG("removed %zu\n", erased_a);
+                    print_lst(&a);
+                    digi_free (&copy);
+                    // if C++20: size_t only since C++20
+                    b.remove(b.front());
+                    LOG("removed STL\n");
+                }
                 print_list(b);
                 CHECK(a, b);
                 break;
