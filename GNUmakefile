@@ -218,26 +218,20 @@ ctl/unordered_map.i:
 %.i : %.cc
 	@$(CXX) $(CFLAGS) $< -P -E | clang-format -style=webkit
 
-examples/astar: .cflags $(H) examples/astar.c
-	$(CC) $(CFLAGS) -o $@ $@.c
-examples/postfix: .cflags $(H) examples/postfix.c
-	$(CC) $(CFLAGS) -o $@ $@.c
-examples/json: .cflags $(H) examples/json.c
-	$(CC) $(CFLAGS) -o $@ $@.c
-examples/snow: .cflags $(COMMON_H) ctl/vector.h examples/snow.c
-	$(CC) $(CFLAGS) -o $@ $@.c
-examples/6502:  .cflags $(H) examples/6502.c
+examples/% : examples/%.c .cflags $(H)
 	$(CC) $(CFLAGS) -o $@ $@.c
 
-tests/func/test_c11: .cflags $(H) tests/func/test_c11.c
+tests/func/%: tests/func/%.c .cflags $(H)
 	$(CC) $(CFLAGS) -o $@ $@.c
-tests/func/test_integral_c11: .cflags $(H) tests/func/test_integral_c11.c
-	$(CC) $(CFLAGS) -o $@ $@.c
-tests/func/test_integral: .cflags $(H) tests/func/test_integral.cc
+tests/func/%: tests/func/%.cc .cflags $(H)
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_container_composing: .cflags $(H) \
-                          tests/func/test_container_composing.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+#tests/func/test_integral_c11: .cflags $(H) tests/func/test_integral_c11.c
+#	$(CC) $(CFLAGS) -o $@ $@.c
+#tests/func/test_integral: .cflags $(H) tests/func/test_integral.cc
+#	$(CXX) $(CFLAGS) -o $@ $@.cc
+#tests/func/test_container_composing: .cflags $(H) \
+#                          tests/func/test_container_composing.cc
+#	$(CXX) $(CFLAGS) -o $@ $@.cc
 tests/func/test_deque:    .cflags $(COMMON_H) ctl/deque.h \
                           tests/func/test_deque.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
