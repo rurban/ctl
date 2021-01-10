@@ -262,9 +262,9 @@ main(void)
             }
             case TEST_REMOVE:
             {
-                if (a.size)
+                digi *value = list_digi_front(&a);
+                if (value) // not empty
                 {
-                    digi *value = list_digi_front(&a);
 #ifdef DEBUG
                     list_digi_resize(&a, 10, digi_init(0));
                     b.resize(10);
@@ -283,9 +283,9 @@ main(void)
                     // if C++20: size_t only since C++20
                     b.remove(b.front());
                     LOG("removed STL\n");
+                    print_list(b);
+                    CHECK(a, b);
                 }
-                print_list(b);
-                CHECK(a, b);
                 break;
             }
             case TEST_EMPLACE:

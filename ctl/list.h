@@ -41,13 +41,13 @@ typedef struct I
 static inline T*
 JOIN(A, front)(A* self)
 {
-    return &self->head->value;
+    return self->head ? &self->head->value : NULL;
 }
 
 static inline T*
 JOIN(A, back)(A* self)
 {
-    return &self->tail->value;
+    return self->tail ? &self->tail->value : NULL;
 }
 
 static inline B*
