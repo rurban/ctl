@@ -192,27 +192,13 @@ help:
 
 ctl/string.i:
 	$(call expand,$(subst .i,,$@))
-ctl/list.i:
-	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-ctl/vector.i:
-	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-ctl/deque.i:
-	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-ctl/stack.i:
-	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-ctl/queue.i:
-	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-ctl/priority_queue.i:
-	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
-ctl/set.i:
-	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
 ctl/map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
-ctl/unordered_set.i:
-	$(call expand,$(subst .i,,$@),-DT=int -DPOD)
 ctl/unordered_map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 
+%.i : %.h
+	@$(CC) $(CFLAGS) -DT=int -DPOD $< -E | clang-format -style=webkit
 %.i : %.c
 	@$(CC) $(CFLAGS) $< -E | clang-format -style=webkit
 %.i : %.cc
@@ -225,13 +211,6 @@ tests/func/%: tests/func/%.c .cflags $(H)
 	$(CC) $(CFLAGS) -o $@ $@.c
 tests/func/%: tests/func/%.cc .cflags $(H)
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-#tests/func/test_integral_c11: .cflags $(H) tests/func/test_integral_c11.c
-#	$(CC) $(CFLAGS) -o $@ $@.c
-#tests/func/test_integral: .cflags $(H) tests/func/test_integral.cc
-#	$(CXX) $(CFLAGS) -o $@ $@.cc
-#tests/func/test_container_composing: .cflags $(H) \
-#                          tests/func/test_container_composing.cc
-#	$(CXX) $(CFLAGS) -o $@ $@.cc
 tests/func/test_deque:    .cflags $(COMMON_H) ctl/deque.h \
                           tests/func/test_deque.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
