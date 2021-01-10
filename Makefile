@@ -218,49 +218,64 @@ ctl/unordered_map.i:
 %.i : %.cc
 	@$(CXX) $(CFLAGS) $< -P -E | clang-format -style=webkit
 
-examples/astar:                      .cflags $(H)
+examples/astar: .cflags $(H) examples/astar.c
 	$(CC) $(CFLAGS) -o $@ $@.c
-examples/postfix:                    .cflags $(H)
+examples/postfix: .cflags $(H) examples/postfix.c
 	$(CC) $(CFLAGS) -o $@ $@.c
-examples/json:                       .cflags $(H)
+examples/json: .cflags $(H) examples/json.c
 	$(CC) $(CFLAGS) -o $@ $@.c
-examples/snow:                       .cflags $(COMMON_H) ctl/vector.h
+examples/snow: .cflags $(COMMON_H) ctl/vector.h examples/snow.c
 	$(CC) $(CFLAGS) -o $@ $@.c
-examples/6502:                       .cflags $(H)
+examples/6502:  .cflags $(H) examples/6502.c
 	$(CC) $(CFLAGS) -o $@ $@.c
-tests/func/test_c11:                 .cflags $(H)
+
+tests/func/test_c11: .cflags $(H) tests/func/test_c11.c
 	$(CC) $(CFLAGS) -o $@ $@.c
-tests/func/test_integral_c11:        .cflags $(H)
+tests/func/test_integral_c11: .cflags $(H) tests/func/test_integral_c11.c
 	$(CC) $(CFLAGS) -o $@ $@.c
-tests/func/test_integral:            .cflags $(H)
+tests/func/test_integral: .cflags $(H) tests/func/test_integral.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_container_composing: .cflags $(H)
+tests/func/test_container_composing: .cflags $(H) \
+                          tests/func/test_container_composing.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_deque:               .cflags $(COMMON_H) ctl/deque.h
+tests/func/test_deque:    .cflags $(COMMON_H) ctl/deque.h \
+                          tests/func/test_deque.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_list:                .cflags $(COMMON_H) ctl/list.h
+tests/func/test_list:     .cflags $(COMMON_H) ctl/list.h \
+                          tests/func/test_list.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_priority_queue:      .cflags $(COMMON_H) ctl/priority_queue.h ctl/vector.h
+tests/func/test_priority_queue: .cflags $(COMMON_H) ctl/priority_queue.h ctl/vector.h \
+                          tests/func/test_priority_queue.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_queue:               .cflags $(COMMON_H) ctl/queue.h ctl/deque.h
+tests/func/test_queue:    .cflags $(COMMON_H) ctl/queue.h ctl/deque.h \
+                          tests/func/test_queue.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_set:                 .cflags $(COMMON_H) ctl/set.h
+tests/func/test_set:      .cflags $(COMMON_H) ctl/set.h \
+                          tests/func/test_set.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_map:                 .cflags $(COMMON_H) ctl/map.h ctl/set.h
+tests/func/test_map:      .cflags $(COMMON_H) ctl/map.h ctl/set.h \
+                          tests/func/test_map.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_unordered_set:       .cflags $(COMMON_H) ctl/unordered_set.h
+tests/func/test_unordered_set: .cflags $(COMMON_H) ctl/unordered_set.h \
+                          tests/func/test_unordered_set.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_unordered_set_power2: .cflags $(COMMON_H) ctl/unordered_set.h
+tests/func/test_unordered_set_power2: .cflags $(COMMON_H) ctl/unordered_set.h \
+                          tests/func/test_unordered_set.cc
 	$(CXX) $(CFLAGS) -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc -o $@
-tests/func/test_unordered_map:       .cflags $(COMMON_H) ctl/unordered_map.h ctl/unordered_set.h
+tests/func/test_unordered_map: .cflags $(COMMON_H) ctl/unordered_map.h ctl/unordered_set.h \
+                          tests/func/test_unordered_map.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_stack:               .cflags $(COMMON_H) ctl/stack.h ctl/deque.h
+tests/func/test_stack:    .cflags $(COMMON_H) ctl/stack.h ctl/deque.h \
+                          tests/func/test_stack.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_string:              .cflags $(COMMON_H) ctl/string.h ctl/vector.h
+tests/func/test_string:   .cflags $(COMMON_H) ctl/string.h ctl/vector.h \
+                          tests/func/test_string.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_vec_capacity:        .cflags $(COMMON_H) ctl/vector.h
+tests/func/test_vec_capacity: .cflags $(COMMON_H) ctl/vector.h \
+                          tests/func/test_vec_capacity.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
-tests/func/test_vector:              .cflags $(COMMON_H) ctl/vector.h
+tests/func/test_vector:   .cflags $(COMMON_H) ctl/vector.h \
+                          tests/func/test_vector.cc
 	$(CXX) $(CFLAGS) -o $@ $@.cc
 
 define expand
