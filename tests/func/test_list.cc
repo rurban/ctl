@@ -55,6 +55,13 @@ void print_list(std::list<DIGI> &b)
         assert(*_it->value.value == *(*_iter).value);             \
     } else                                                        \
         assert (_iter == b.end())
+#define CHECK_ITER_I(_it, b, _iter)                               \
+    if (!_it->done)                                               \
+    {                                                             \
+        assert (_iter != b.end());                                \
+        assert(*_it->ref->value == *(*_iter).value);              \
+    } else                                                        \
+        assert (_iter == b.end())
 
 static void
 setup_lists(list_digi* a, std::list<DIGI>& b, size_t size, int* max_value)
@@ -71,6 +78,31 @@ setup_lists(list_digi* a, std::list<DIGI>& b, size_t size, int* max_value)
         b.push_back(DIGI{value});
     }
 }
+
+#ifdef DEBUG
+// list_digi_it* first_a, *last_a;
+// _List_iterator<DIGI>* first_b, *last_b;
+static void
+get_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
+           std::list<DIGI>& b, std::_List_iterator<DIGI>& first_b,
+           std::_List_iterator<DIGI>&last_b)
+{
+    // TODO random index
+    list_digi_it it = list_digi_it_iter (a, a->head);
+    if (a->size)
+    {
+        it.step(&it);
+        *first_a = it;
+        first_b = b.begin();
+        first_b++;
+    }
+    else
+        first_b = b.begin();
+    it = list_digi_it_iter (a, a->tail);
+    *last_a = it;
+    last_b = b.end();
+}
+#endif
 
 int
 main(void)
@@ -447,7 +479,8 @@ main(void)
                         }
                         current++;
                     }
-                    int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : test_value;
+                    int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
+                                             : test_value;
                     digi key = digi_init(value);
                     list_digi_node* aa = list_digi_find(&a, key);
 
@@ -464,15 +497,109 @@ main(void)
             break;
 #endif
 #ifdef DEBUG // algorithm
-            case TEST_EQUAL_RANGE:
-            case TEST_FIND_RANGE:
-            case TEST_FIND_IF_RANGE:
-            case TEST_FIND_IF_NOT_RANGE:
             case TEST_ALL_OF_RANGE:
+            {
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                bool aa = list_digi_all_of_range(&first_a, &last_a,
+                                                 digi_is_odd);
+                bool bb = all_of(first_b, last_b, DIGI_is_odd);
+                assert(aa == bb);
+                break;
+            }
             case TEST_ANY_OF_RANGE:
+            {
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                bool aa = list_digi_any_of_range(&first_a, &last_a,
+                                                 digi_is_odd);
+                bool bb = any_of(first_b, last_b, DIGI_is_odd);
+                assert(aa == bb);
+                break;
+            }
             case TEST_NONE_OF_RANGE:
+            {
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                bool aa = list_digi_none_of_range(&first_a, &last_a,
+                                                 digi_is_odd);
+                bool bb = none_of(first_b, last_b, DIGI_is_odd);
+                assert(aa == bb);
+                break;
+            }
+            case TEST_FIND_IF:
+            {
+                list_digi_node *n = list_digi_find_if(&a, digi_is_odd);
+                auto it = find_if(b.begin(), b.end(), DIGI_is_odd);
+                CHECK_ITER(n, b, it);
+                break;
+            }
+            case TEST_FIND_IF_NOT:
+            {
+                list_digi_node *n = list_digi_find_if_not(&a, digi_is_odd);
+                auto it = find_if_not(b.begin(), b.end(), DIGI_is_odd);
+                CHECK_ITER(n, b, it);
+                break;
+            }
+            case TEST_FIND_RANGE:
+            {
+                int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
+                                         : test_value;
+                digi key = digi_init(value);
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                list_digi_node *n =
+                    list_digi_find_range(&first_a, &last_a, key);
+                auto it = b.find(first_b, last_b, DIGI{value});
+                CHECK_ITER(n, b, it);
+                digi_free (key);
+                break;
+            }
+            case TEST_FIND_IF_RANGE:
+            {
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                list_digi_node *n =
+                    list_digi_find_if_range(&first_a, &last_a, digi_is_odd);
+                auto it = find_if(first_b, last_b, DIGI_is_odd);
+                CHECK_ITER(n, b, it);
+                break;
+            }
+            case TEST_FIND_IF_NOT_RANGE:
+            {
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                list_digi_node *n =
+                    list_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
+                auto it = find_if_not(first_b, last_b, DIGI_is_odd);
+                CHECK_ITER(n, b, it);
+                break;
+            }
+            case TEST_EQUAL_RANGE:
+            {
+                /*
+                int vb = TEST_RAND(TEST_MAX_VALUE);
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                LOG("EQUAL_RANGE\n");
+                get_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                bool aa = list_digi_equal_range(&first_a, &last_a,
+                                                digi_init(vb));
+                bool bb = equal_range(first_b, last_b, vb);
+                assert(aa == bb);
+                */
+                break;
+            }
             case TEST_COUNT_IF_RANGE:
             case TEST_COUNT_RANGE:
+            case TEST_COUNT_IF:
+            case TEST_COUNT:
                 break;
             case TEST_ANY_OF:
             {

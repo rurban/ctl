@@ -133,8 +133,6 @@ _JOIN(A, _set_default_methods)(A* self)
 #endif
 #ifdef CTL_USET
     self->hash = _JOIN(A, _default_integral_hash);
-    if (!self->compare) // default arg
-        self->compare = _JOIN(A, _default_integral_compare);
 #else
     self->compare = _JOIN(A, _default_integral_compare);
 #endif
