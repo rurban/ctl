@@ -5,7 +5,7 @@ deriving from [vector](vector.md).
 
 # SYNOPSIS
 
-    #undef POD
+    #define POD
     #define T int
     #include <ctl/string.h>
 

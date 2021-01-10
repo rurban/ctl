@@ -2,9 +2,9 @@
 
 Defined in header **<ctl/list.h>**, CTL prefix **list**.
 
-# SYNOPSIS
+## SYNOPSIS
 
-    #undef POD
+    #define POD
     #define T int
     #include <ctl/list.h>
 
@@ -22,7 +22,7 @@ Defined in header **<ctl/list.h>**, CTL prefix **list**.
 
     list_int_free(&a);
 
-# DESCRIPTION
+## DESCRIPTION
 
 list, a double-linked list, is a container that supports constant time insertion
 and removal of elements from anywhere in the container. Fast random access is
@@ -40,7 +40,7 @@ Note:
 Most function accepting or returning iterators, use return `node*` (`B*`)
 pointers instead.
 
-# Member types
+## Member types
 
 `T`                     value type
 

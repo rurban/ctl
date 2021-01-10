@@ -4,7 +4,7 @@ Defined in header **<ctl/forward_list.h>**, CTL prefix **slist**.
 
 This is still in development.
 
-# SYNOPSIS
+## SYNOPSIS
 
     bool int_eq(int* a, int* b) {
        return *a == *b;
@@ -13,7 +13,7 @@ This is still in development.
        return *a % 2;
     }
 
-    #undef POD
+    #define POD
     #define T int
     #include <ctl/forward_list.h>
 
@@ -35,7 +35,7 @@ This is still in development.
 
     slist_int_free(&a);
 
-# DESCRIPTION
+## DESCRIPTION
 
 forward_list, a singly-linked list, is a container that supports fast insertion
 and removal of elements from anywhere in the container. Fast random access is
@@ -51,7 +51,7 @@ list.
 The function names are composed of the prefix **slist_**, the user-defined type
 **T** and the method name. E.g `slist_int` with `#define T int`.
 
-# Member types
+## Member types
 
 `T`                       value type
 

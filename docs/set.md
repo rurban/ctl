@@ -3,14 +3,14 @@
 Defined in header **<ctl/set.h>**, CTL prefix **set**,
 parent for [map](map.md).
 
-# SYNOPSIS
+## SYNOPSIS
 
     static inline int
     int_cmp(int *a, int *b) {
       return *a < *b;
     }
 
-    #undef POD
+    #define POD
     #define T int
     #include <ctl/set.h>
 
@@ -28,7 +28,7 @@ parent for [map](map.md).
     printf("max {\"%s\", %d}\n", set_int_max (a));
     set_int_free(&a);
 
-# DESCRIPTION
+## DESCRIPTION
 
 set is a sorted associative container that contains key-value pairs with unique
 keys. Keys are sorted by using the custom comparison function T_cmp. Search, removal,
@@ -42,7 +42,7 @@ determined by using the equivalence relation. In imprecise terms, two objects a
 and b are considered equivalent (not unique) if neither compares less than the
 other: !comp(a, b) && !comp(b, a).
 
-# Member types
+## Member types
 
 `T`                     value type
 

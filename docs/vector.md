@@ -6,7 +6,7 @@ parent for [string](string.md), [priority_queue](priority_queue.md),
 
 # SYNOPSIS
 
-    #undef POD
+    #define POD
     #define T int
     #include <ctl/vector.h>
 

@@ -5,7 +5,7 @@ parent of [unordered_map](unordered_map.md)
 
 No implementation yet.
 
-# SYNOPSIS
+## SYNOPSIS
 
     typedef struct {
       char *key;
@@ -32,7 +32,6 @@ No implementation yet.
       return copy;
     }
 
-    #undef POD
     #define T charint
     #include <ctl/hashtable.h>
 
@@ -50,7 +49,7 @@ No implementation yet.
     printf("htbl_charint load_factor: %f\n", htbl_charint_load_factor(&a));
     htbl_charint_free(&a);
 
-# DESCRIPTION
+## DESCRIPTION
 
 `hashtable` is an optimized associative container (open-addressing hash table)
 that contains a set of unique objects of type Key. Search, insertion, and
@@ -72,7 +71,7 @@ element's hash and corrupt the container.
 
 It has the same API as unordered_map, just no Bucket interface.
 
-# Member types
+## Member types
 
 `T`                      value type
 

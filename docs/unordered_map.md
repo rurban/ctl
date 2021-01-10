@@ -5,7 +5,7 @@ derived from [unordered_set](unordered_set.md)
 
 Implementation in work still. Esp. lookup should be key only.
 
-# SYNOPSIS
+## SYNOPSIS
 
     typedef struct {
       char *key;
@@ -32,7 +32,6 @@ Implementation in work still. Esp. lookup should be key only.
       return copy;
     }
 
-    #undef POD
     #define T charint
     #include <ctl/unordered_map.h>
 
@@ -50,7 +49,7 @@ Implementation in work still. Esp. lookup should be key only.
     printf("umap_charint load_factor: %f\n", umap_charint_load_factor(&a));
     umap_charint_free(&a);
 
-# DESCRIPTION
+## DESCRIPTION
 		
 `unordered_map` is an associative container that contains a map of unique
 objects of type Key. Search, insertion, and removal have average constant-time
@@ -71,7 +70,7 @@ values stay the same. For faster open-adressing hash tables an experimental
 Container elements may not be modified (even by non const iterators) since
 modification could change an element's hash and corrupt the container. 
 
-# Member types
+## Member types
 
 `T`                     value type
 

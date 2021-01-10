@@ -3,14 +3,14 @@
 Defined in header **<ctl/priority_queue.h>**, CTL prefix **pqu**,
 derived from [vector](vector.md).
 
-# SYNOPSIS
+## SYNOPSIS
 
     static inline int
     int_cmp(int *a, int *b) {
       return *a < *b;
     }
 
-    #undef POD
+    #define POD
     #define T int
     #include <ctl/priority_queue.h>
 
@@ -23,7 +23,7 @@ derived from [vector](vector.md).
 
     pqu_int_free(&a);
 
-# DESCRIPTION
+## DESCRIPTION
 
 A priority queue is a container adaptor that provides constant time lookup of
 the largest (by default) element, at the expense of logarithmic insertion and
@@ -39,7 +39,7 @@ Working with a priority_queue is similar to managing a heap in some random
 access container, with the benefit of not being able to accidentally invalidate
 the heap. 
 
-# Member types
+## Member types
 
 `T`                     value type
 

@@ -3,9 +3,9 @@
 Defined in header **<ctl/queue.h>**, CTL prefix **queue**,
 derived from [deque](deque.md).
 
-# SYNOPSIS
+## SYNOPSIS
 
-    #undef POD
+    #define POD
     #define T int
     #include <ctl/queue.h>
 
@@ -17,7 +17,7 @@ derived from [deque](deque.md).
 
     queue_int_free(&a);
 
-# DESCRIPTION
+## DESCRIPTION
 
 The queue is a container adapter that gives the programmer the functionality of
 a queue - specifically, a FIFO (first-in, first-out) data structure.
@@ -43,7 +43,7 @@ queue holding just one element has to allocate its full internal array (e.g. 8
 times the object size on 64-bit libstdc++; 16 times the object size or 4096
 bytes, whichever is larger, on 64-bit libc++).
 
-# Member types
+## Member types
 
 `T`                       value type
 

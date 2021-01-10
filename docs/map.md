@@ -3,7 +3,7 @@
 Defined in header **<ctl/map.h>**, CTL prefix **map**,
 deriving from [set](set.md).
 
-# SYNOPSIS
+## SYNOPSIS
 
     typedef struct {
       char *key;
@@ -29,7 +29,6 @@ deriving from [set](set.md).
       return copy;
     }
 
-    #undef POD
     #define T charint
     #include <ctl/map.h>
 
@@ -51,7 +50,7 @@ deriving from [set](set.md).
 
     map_charint_free(&a);
 
-# DESCRIPTION
+## DESCRIPTION
 
 map is a sorted associative container that contains key-value pairs with unique
 keys. Keys are sorted by using the comparison function Compare. Search, removal,
@@ -66,7 +65,7 @@ determined by using the equivalence relation. In imprecise terms, two objects a
 and b are considered equivalent (not unique) if neither compares less than the
 other: !comp(a, b) && !comp(b, a).
 
-# Member types
+## Member types
 
 `T`                     value type
 

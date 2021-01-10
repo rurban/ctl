@@ -10,7 +10,7 @@ Implementation in work still.
     size_t int_hash(int* x) { return abs(*x); }
     int int_eq(int* a, int* b) { return *a == *b; }
 
-    #undef POD
+    #define POD
     #define T int
     #include <ctl/unordered_set.h>
 

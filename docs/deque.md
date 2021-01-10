@@ -3,8 +3,9 @@
 Defined in header **<ctl/deque.h>**, CTL prefix **deq**,
 parent for [queue](queue.md) and [stack](stack.md).
 
-# SYNOPSIS
+## SYNOPSIS
 
+    #define POD
     #define T int
     #include <ctl/deque.h>
 
@@ -22,7 +23,7 @@ parent for [queue](queue.md) and [stack](stack.md).
 
     deq_int_free(&a);
 
-# DESCRIPTION
+## DESCRIPTION
 
 deque ("double-ended queue") is an indexed sequence container that allows fast
 insertion and deletion at both its beginning and its end. In addition, insertion
@@ -52,7 +53,7 @@ The complexity (efficiency) of common operations on a `deque` is as follows:
 * Insertion or removal of elements at the end or beginning - constant 𝓞(1)
 * Insertion or removal of elements - linear 𝓞(n)
 
-# Member types
+## Member types
 
 `T`                     value type
 
