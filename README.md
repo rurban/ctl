@@ -66,11 +66,11 @@ function declarations for the C++ equivalent of the destructor and copy construc
 prior to the inclusion of the container:
 
 ```C
-typedef struct { ... } type;
-void type_free(type*);
-type type_copy(type*);
-#define T type
-#include <ctl/vector.h>
+    typedef struct { ... } type;
+    void type_free(type*);
+    type type_copy(type*);
+    #define T type
+    #include <ctl/vector.h>
 ```
 
 Forgetting a declaration will print a human-readable error message:
@@ -155,6 +155,7 @@ To generate performance graphs, run:
 
 ```shell
 sh gen_images.sh
+
 # Graphing requires python3 and the Plotly family of libraries via pip3.
 pip install plotly
 pip install psutil
@@ -178,17 +179,19 @@ For maintaining CTL, a container templated to type `int` can be
 output to `stdout` by running make on the container name with .i, eg:
 
 ```shell
-make deque.i
-make list.i
-make priority_queue.i
-make queue.i
-make set.i
-make stack.i
-make string.i
-make vector.i
-make map.i
-make unordered_set.i
-make unordered_map.i
+make ctl/deque.i
+make ctl/list.i
+make ctl/priority_queue.i
+make ctl/queue.i
+make ctl/set.i
+make ctl/stack.i
+make ctl/string.i
+make ctl/vector.i
+make ctl/map.i
+make ctl/unordered_set.i
+make ctl/unordered_map.i
+make tests/func/test_c11.i
+make tests/func/test_list.i
 ```
 
 ## Other
@@ -198,8 +201,11 @@ similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 See `tests/func/test_container_composing.cc`
 
 UTF-8 strings and identifiers will be added eventually, Wide, UTF-16 or UTF-32
-not. All methods from algorithm, iterator and range are in work, as well as some
-type utilities to omit default compare, equal and hash methods.
+not.
+
+All methods from algorithm, iterator and range are in work.
+Implemented are type utilities to omit default compare, equal and hash methods
+for POD integral types.
 
 See [Differences](#differences) below.
 
@@ -402,6 +408,43 @@ Reject violations, optionally warn about confusables.
 No exceptions or errors. Just ignore or return NULL. If assert is included, use
 it, with a proper error message.
 No bloat and not many indirect calls (only compare and equal).
+
+Not yet implemented:
+
+    foreach_range
+    foreach_n C++17
+    foreach_n_range C++20
+    mismatch
+    mismatch_range C++20
+    find_end
+    find_end_range C++20
+    find_first_of
+    find_first_of_range C++20
+    adjacent_find
+    adjacent_find_range C++20
+    search
+    search_range C++20
+    search_n
+    search_n_range C++20
+    copy_range C++20
+    copy_if C++11
+    copy_if_range C++20
+    copy_n C++11
+    copy_n_range C++20
+    copy_backward
+    copy_backward_range C++20
+    move C++11
+    move_range
+    move_backward C++11
+    move_backward_range C++20
+    fill
+    fill_range C++20
+    fill_n
+    fill_n_range C++20
+    transform
+    transform_range C++20
+    generate
+    generate_range C++20
 
 ## Acknowledgements
 
