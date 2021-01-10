@@ -97,18 +97,17 @@ method is preferred if one of those methods from above are used.
 If you have a POD type, i.e. a struct with only integral types, i.e. no pointers, you
 have to define `NOT_INTEGRAL`.
 
-e.g.
 ```C
-#define POD
-#define NOT_INTEGRAL
-#define T point
-#include <ctl/priority_queue.h>
+    #define POD
+    #define NOT_INTEGRAL
+    #define T point
+    #include <ctl/priority_queue.h>
+    
+    // or
+    
+    #define T digi
+    #include <ctl/deque.h>
 
-// or
-
-#define T digi
-#include <ctl/deque.h>
-...
     deq_digi a = deq_digi_init();
     a.compare = digi_compare;
     a.equal = digi_equal;
@@ -331,7 +330,8 @@ vector `swap` does `shrink_to_fit` as in the STL.
 
 Added many return values as iterators, as in the STL.
 
-Reproducible tests with `SEED=n`
+Reproducible tests with `SEED=n`,
+Optimized test dependencies, time went from 25s to 3s even with ccache.
 
 Optimized hashmaps with two growth policies, about 100x faster with the policy
 `CTL_USET_GROWTH_POWER2`, instead of the default `CTL_USET_GROWTH_PRIMED`.
@@ -349,6 +349,8 @@ On errors, like `size > max_size` return silently. This avoids DDOS attacks.
 When assert is used, throw them. (when assert.h included, no NDEBUG)
 
 glouw/ctl does not treat errors at all. There cannot be any.
+
+Support not only GNU make, but also BSD make.
 
 ### Differences to the STL
 
