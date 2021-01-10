@@ -17,8 +17,6 @@
 
 // Generic algorithms with ranges
 
-#ifdef DEBUG
-
 #include <ctl/bits/iterators.h>
 
 static inline IT*
@@ -64,8 +62,6 @@ JOIN(A, none_of)(A* self, int _match(T*))
 
 #include <stdbool.h>
 
-//#ifdef DEBUG
-
 // i.e. for LIST, SET, USET with B*
 //      and VEC, DEQ with T*
 static inline I*
@@ -94,6 +90,8 @@ JOIN(A, find_if_not_range)(I* first, I* last, int _match(T*))
             return iter_IT(it);
     return iter_IT_endp(last);
 }
+
+#ifdef DEBUG
 
 #if !defined(CTL_USET) && !defined(CTL_STR)
 static inline bool

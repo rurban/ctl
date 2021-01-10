@@ -79,7 +79,6 @@ setup_lists(list_digi* a, std::list<DIGI>& b, size_t size, int* max_value)
     }
 }
 
-#ifdef DEBUG
 // list_digi_it* first_a, *last_a;
 // _List_iterator<DIGI>* first_b, *last_b;
 static void
@@ -102,7 +101,6 @@ get_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
     *last_a = it;
     last_b = b.end();
 }
-#endif
 
 int
 main(void)
@@ -138,12 +136,7 @@ main(void)
         TEST(EQUAL) \
         TEST(SORT) \
         TEST(UNIQUE) \
-        TEST(FIND)
-#define FOREACH_DEBUG(TEST) \
-        TEST(INSERT_COUNT) \
-        TEST(INSERT_RANGE) \
-        TEST(EQUAL_RANGE) \
-        TEST(FIND_RANGE) \
+        TEST(FIND) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
         TEST(FIND_IF_RANGE) \
@@ -153,7 +146,12 @@ main(void)
         TEST(NONE_OF) \
         TEST(ALL_OF_RANGE) \
         TEST(ANY_OF_RANGE) \
-        TEST(NONE_OF_RANGE) \
+        TEST(NONE_OF_RANGE)
+#define FOREACH_DEBUG(TEST) \
+        TEST(INSERT_COUNT) \
+        TEST(INSERT_RANGE) \
+        TEST(EQUAL_RANGE) \
+        TEST(FIND_RANGE) \
         TEST(COUNT) \
         TEST(COUNT_IF) \
         TEST(COUNT_IF_RANGE) \
@@ -490,7 +488,6 @@ main(void)
                 }
                 break;
             }
-#ifdef DEBUG
            case TEST_ALL_OF:
             {
                 bool aa = list_digi_all_of(&a, digi_is_odd);
@@ -567,6 +564,8 @@ main(void)
                 list_digi_node *n =
                     list_digi_find_if_range(&first_a, &last_a, digi_is_odd);
                 auto it = find_if(first_b, last_b, DIGI_is_odd);
+                print_lst(&a);
+                print_list(b);
                 CHECK_ITER(n, b, it);
                 break;
             }
@@ -581,6 +580,7 @@ main(void)
                 CHECK_ITER(n, b, it);
                 break;
             }
+#ifdef DEBUG
             case TEST_EQUAL_RANGE:
             {
                 /*
