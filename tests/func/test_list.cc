@@ -103,21 +103,45 @@ get_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
            std::list<DIGI>& b, std::_List_iterator<DIGI>& first_b,
            std::_List_iterator<DIGI>&last_b)
 {
-    // TODO random index
-    list_digi_it it = list_digi_it_iter (a, a->head);
+    size_t r1 = TEST_RAND(a->size / 2);
+    size_t r2 = std::max(r1 + TEST_RAND(a->size / 2), a->size);
+    LOG("iters %zu, %zu of %zu\n", r1, r2, a->size);
     if (a->size)
     {
-        it.step(&it);
-        *first_a = it;
+        list_digi_it it1 = list_digi_it_iter (a, a->head);
         first_b = b.begin();
-        first_b++;
+        for(size_t i = 0; i < r1; i++)
+        {
+            it1.step(&it1);
+            first_b++;
+        }
+        if (r2 == a->size)
+        {
+            list_digi_it it2 = list_digi_it_iter (a, a->tail);
+            it2.done = 1;
+            *last_a = it2;
+            last_b = b.end();
+        }
+        else
+        {
+            list_digi_it it2 = list_digi_it_iter (a, a->head);
+            for(size_t i = 0; i < r2; i++)
+            {
+                it2.step(&it2);
+                last_b++;
+            }
+        }
     }
     else
+    {
+        list_digi_it it1 = list_digi_it_iter (a, a->head);
+        list_digi_it it2 = list_digi_it_iter (a, a->tail);
+        *first_a = it1;
         first_b = b.begin();
-    it = list_digi_it_iter (a, a->tail);
-    it.done = 1;
-    *last_a = it;
-    last_b = b.end();
+        it2.done = 1;
+        *last_a = it2;
+        last_b = b.end();
+    }
 }
 
 int
