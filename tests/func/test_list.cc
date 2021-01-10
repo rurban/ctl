@@ -267,14 +267,14 @@ main(void)
                 list_digi_resize(&a, 10, digi_init(0));
                 b.resize(10);
 #endif
-                LOG("before remove %d\n", *value->value);
+                int vb = *value->value;
+                LOG("before remove %d\n", vb);
                 print_lst(&a);
-#ifdef DEBUG
-                size_t erased_a =
-#endif
-                    list_digi_remove(&a, value);
+                digi copy = digi_init(vb);
+                size_t erased_a = list_digi_remove(&a, &copy);
                 LOG("removed %zu\n", erased_a);
                 print_lst(&a);
+                digi_free (&copy);
                 // if C++20: size_t only since C++20
                 b.remove(b.front());
                 LOG("removed STL\n");
