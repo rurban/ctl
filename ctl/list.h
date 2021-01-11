@@ -6,7 +6,6 @@
 #endif
 
 #include <ctl/ctl.h>
-#include <stdarg.h>
 
 #define CTL_LIST
 #define A JOIN(list, T)
