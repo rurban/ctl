@@ -48,36 +48,70 @@ int
 main(void)
 {
     INIT_SRAND;
-    const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
     {
         map_strint a;
         std::map<std::string,int> b;
         setup_sets(&a, b);
-        enum
-        {
-            TEST_INSERT,
-            TEST_INSERT_OR_ASSIGN,
-            //TEST_EMPLACE,
-            //TEST_EXTRACT,
-            //TEST_MERGE,
-            //TEST_CONTAINS,
-            //TEST_ERASE_IF,
-            //TEST_EQUAL_RANGE,
-            TEST_ERASE,
-            TEST_CLEAR,
-            TEST_SWAP,
-            TEST_COUNT,
-            TEST_FIND,
-            TEST_COPY,
-            TEST_EQUAL,
-            TEST_UNION,
-            TEST_INTERSECTION,
-            TEST_SYMMETRIC_DIFFERENCE,
-            TEST_DIFFERENCE,
-            TEST_TOTAL,
+#define FOREACH_METH(TEST) \
+        TEST(INSERT) \
+        TEST(INSERT_OR_ASSIGN) \
+        TEST(ERASE) \
+        TEST(CLEAR) \
+        TEST(SWAP) \
+        TEST(COUNT) \
+        TEST(FIND) \
+        TEST(COPY) \
+        TEST(EQUAL) \
+        TEST(UNION) \
+        TEST(INTERSECTION) \
+        TEST(SYMMETRIC_DIFFERENCE) \
+        TEST(DIFFERENCE)
+
+#define FOREACH_DEBUG(TEST) \
+        /* TEST(EMPLACE) */ \
+        /* TEST(EXTRACT) */ \
+        /* TEST(MERGE) */ \
+        /* TEST(CONTAINS) */ \
+        /* TEST(ERASE_IF) */ \
+        TEST(EQUAL_RANGE) \
+        TEST(FIND_RANGE) \
+        TEST(FIND_IF) \
+        TEST(FIND_IF_NOT) \
+        TEST(FIND_IF_RANGE) \
+        TEST(FIND_IF_NOT_RANGE) \
+        TEST(ALL_OF) \
+        TEST(ANY_OF) \
+        TEST(NONE_OF) \
+        TEST(ALL_OF_RANGE) \
+        TEST(ANY_OF_RANGE) \
+        TEST(NONE_OF_RANGE) \
+        TEST(COUNT_IF) \
+        TEST(COUNT_IF_RANGE) \
+        TEST(COUNT_RANGE)
+
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+        enum {
+            FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+            FOREACH_DEBUG(GENERATE_ENUM)
+#endif
+            TEST_TOTAL
         };
+#ifdef DEBUG
+        static const char *test_names[] = {
+            FOREACH_METH(GENERATE_NAME)
+            FOREACH_DEBUG(GENERATE_NAME)
+            ""
+        };
+#endif
         int which = TEST_RAND(TEST_TOTAL);
+        if (test >= 0 && test < (int)TEST_TOTAL)
+            which = test;
+        LOG ("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
         switch(which)
         {
             case TEST_INSERT:
@@ -272,6 +306,24 @@ main(void)
                 map_strint_free(&aaa);
                 break;
             }
+#ifdef DEBUG // algorithm
+            case TEST_EQUAL_RANGE:
+            case TEST_FIND_RANGE:
+            case TEST_FIND_IF:
+            case TEST_FIND_IF_NOT:
+            case TEST_FIND_IF_RANGE:
+            case TEST_FIND_IF_NOT_RANGE:
+            case TEST_ALL_OF:
+            case TEST_ANY_OF:
+            case TEST_NONE_OF:
+            case TEST_ALL_OF_RANGE:
+            case TEST_ANY_OF_RANGE:
+            case TEST_NONE_OF_RANGE:
+            case TEST_COUNT_IF:
+            case TEST_COUNT_IF_RANGE:
+            case TEST_COUNT_RANGE:
+                break;
+#endif
         }
         CHECK(a, b);
         map_strint_free(&a);

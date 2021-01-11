@@ -66,51 +66,58 @@ int
 main(void)
 {
     INIT_SRAND;
-    size_t loops = TEST_RAND(TEST_MAX_LOOPS);
-    int test = -1;
-    char *env = getenv ("TEST");
-    if (env)
-        sscanf(env, "%d", &test);
-    if (test >= 0)
-        loops = 10;
-    if ((env = getenv ("LOOPS")))
-        sscanf(env, "%lu", &loops);
+    INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
     {
         umap_strint a;
         std::unordered_map<std::string,int> b;
         setup_sets(&a, b);
-        enum
-        {
-            TEST_INSERT,
-            TEST_INSERT_OR_ASSIGN,
-            //TEST_EMPLACE,
-            //TEST_EXTRACT,
-            //TEST_MERGE,
-            //TEST_CONTAINS,
-            //TEST_ERASE_IF,
-            //TEST_EQUAL_RANGE,
-            TEST_ERASE,
-            TEST_CLEAR,
-            TEST_COUNT,
-            TEST_FIND,
+#define FOREACH_METH(TEST) \
+        TEST(INSERT) \
+        TEST(INSERT_OR_ASSIGN) \
+        TEST(ERASE) \
+        TEST(CLEAR) \
+        TEST(COUNT) \
+        TEST(FIND) \
+        TEST(EQUAL) \
+        TEST(REHASH) \
+        TEST(RESERVE) \
+        TEST(UNION) \
+        TEST(INTERSECTION) \
+        TEST(SYMMETRIC_DIFFERENCE) \
+        TEST(DIFFERENCE)
+
+#define FOREACH_DEBUG(TEST) \
+        /* TEST(EMPLACE) */ \
+        /* TEST(EXTRACT) */ \
+        /* TEST(MERGE) */ \
+        /* TEST(CONTAINS) */ \
+        /* TEST(EQUAL_RANGE) */ \
+        /* TEST(ERASE_IF) */ \
+        TEST(SWAP) \
+        TEST(COPY)
+
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+            enum {
+                FOREACH_METH(GENERATE_ENUM)
 #ifdef DEBUG
-            TEST_SWAP,
-            TEST_COPY,
+                FOREACH_DEBUG(GENERATE_ENUM)
 #endif
-            TEST_EQUAL,
-            TEST_REHASH,
-            TEST_RESERVE,
-            TEST_UNION,
-            TEST_INTERSECTION,
-            TEST_SYMMETRIC_DIFFERENCE,
-            TEST_DIFFERENCE,
-            TEST_TOTAL,
-        };
+                TEST_TOTAL
+            };
+#ifdef DEBUG
+            static const char *test_names[] = {
+                FOREACH_METH(GENERATE_NAME)
+                FOREACH_DEBUG(GENERATE_NAME)
+                ""
+            };
+#endif
         int which = TEST_RAND(TEST_TOTAL);
-        if (test >= 0)
+        if (test >= 0 && test < (int)TEST_TOTAL)
             which = test;
-        LOG ("TEST %d\n", which);
+        LOG ("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
         switch(which)
         {
             case TEST_INSERT:

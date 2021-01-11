@@ -34,12 +34,14 @@ main(void)
             std::string b;
             if(mode == MODE_DIRECT)
             {
+                LOG("mode DIRECT\n");
                 b.resize (size);
                 str_resize  (&a, size, '\0');
                 LOG("ctl resize   %zu vs %zu\n", a.size, b.size());
             }
             if(mode == MODE_GROWTH)
             {
+                LOG("mode GROWTH\n");
                 for(size_t pushes = 0; pushes < size; pushes++)
                 {
                     b.push_back (value); // double cap

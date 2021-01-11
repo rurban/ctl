@@ -226,15 +226,7 @@ main(void)
     test_capacity_edge_case();
     test_random_work_load();
     INIT_SRAND;
-    size_t loops = TEST_RAND(TEST_MAX_LOOPS);
-    int test = -1;
-    char *env = getenv ("TEST");
-    if (env)
-        sscanf(env, "%d", &test);
-    if (test >= 0)
-        loops = 10;
-    if ((env = getenv ("LOOPS")))
-        sscanf(env, "%lu", &loops);
+    INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
@@ -270,42 +262,59 @@ main(void)
                     b.push_back(DIGI{value});
                 }
             }
-            enum
-            {
-                TEST_PUSH_BACK,
-                TEST_POP_BACK,
-                TEST_PUSH_FRONT,
-                TEST_POP_FRONT,
-                TEST_CLEAR,
-                TEST_ERASE,
-                TEST_ERASE_IT, // 6
-                TEST_INSERT_IT,
-                TEST_INSERT_RANGE, // 8
-                TEST_INSERT_COUNT, // 9
-                TEST_ERASE_RANGE,
-#ifdef DEBUG // STD problems, not with CTL
-                TEST_EMPLACE, // 11
+#define FOREACH_METH(TEST) \
+            TEST(PUSH_BACK) \
+            TEST(POP_BACK) \
+            TEST(PUSH_FRONT) \
+            TEST(POP_FRONT) \
+            TEST(CLEAR) \
+            TEST(ERASE) \
+            TEST(ERASE_IT) \
+            TEST(INSERT_IT) \
+            TEST(INSERT_RANGE) \
+            TEST(INSERT_COUNT) \
+            TEST(ERASE_RANGE) \
+            TEST(EMPLACE_FRONT) \
+            TEST(EMPLACE_BACK) \
+            TEST(RESIZE) \
+            TEST(SHRINK_TO_FIT) \
+            TEST(SORT) \
+            TEST(RANGED_SORT) \
+            TEST(SORT_RANGE) \
+            TEST(COPY) \
+            TEST(SWAP) \
+            TEST(INSERT) \
+            TEST(ASSIGN) \
+            TEST(REMOVE_IF) \
+            TEST(EQUAL) \
+            TEST(FIND)
+
+#define FOREACH_DEBUG(TEST)                     \
+            TEST(EMPLACE) /* STD problems, not CTL*/    \
+            /* TEST(COUNT) */                       \
+            /* TEST(EQUAL_RANGE) */
+
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+            enum {
+                FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+                FOREACH_DEBUG(GENERATE_ENUM)
 #endif
-                TEST_EMPLACE_FRONT,
-                TEST_EMPLACE_BACK,
-                TEST_RESIZE,
-                TEST_SHRINK_TO_FIT,
-                TEST_SORT,
-                TEST_RANGED_SORT,
-                TEST_SORT_RANGE,
-                TEST_COPY,
-                TEST_SWAP,
-                TEST_INSERT,
-                TEST_ASSIGN,
-                TEST_REMOVE_IF,
-                TEST_EQUAL,
-                TEST_FIND,
-                TEST_TOTAL,
+                TEST_TOTAL
             };
+#ifdef DEBUG
+            static const char *test_names[] = {
+                FOREACH_METH(GENERATE_NAME)
+                FOREACH_DEBUG(GENERATE_NAME)
+                ""
+            };
+#endif
             int which = TEST_RAND(TEST_TOTAL);
             if (test >= 0 && test < (int)TEST_TOTAL)
                 which = test;
-            LOG ("TEST %d\n", which);
+            LOG ("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
             switch(which)
             {
                 case TEST_PUSH_BACK:

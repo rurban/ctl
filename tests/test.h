@@ -51,4 +51,16 @@ TEST_TIME(void)
 #  define INIT_SRAND
 #endif
 
+#define INIT_TEST_LOOPS(n)                    \
+    size_t loops = TEST_RAND(TEST_MAX_LOOPS); \
+    int test = -1;                            \
+    char *env = getenv ("TEST");              \
+    if (env)                                  \
+        sscanf(env, "%d", &test);             \
+    if (test >= 0)                            \
+        loops = n;                            \
+    if ((env = getenv ("LOOPS")))             \
+        sscanf(env, "%lu", &loops)
+
+
 #endif

@@ -22,7 +22,7 @@ int
 main(void)
 {
     INIT_SRAND;
-    const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
@@ -34,14 +34,49 @@ main(void)
             queue_digi_push(&a, digi_init(value));
             b.push(DIGI{value});
         }
-        enum
-        {
-            TEST_PUSH,
-            TEST_POP,
-            TEST_SWAP,
-            TEST_TOTAL,
+#define FOREACH_METH(TEST) \
+        TEST(PUSH) \
+        TEST(POP) \
+        TEST(SWAP)
+#define FOREACH_DEBUG(TEST) \
+        TEST(EQUAL_RANGE) \
+        TEST(FIND_RANGE) \
+        TEST(FIND_IF) \
+        TEST(FIND_IF_NOT) \
+        TEST(FIND_IF_RANGE) \
+        TEST(FIND_IF_NOT_RANGE) \
+        TEST(ALL_OF) \
+        TEST(ANY_OF) \
+        TEST(NONE_OF) \
+        TEST(ALL_OF_RANGE) \
+        TEST(ANY_OF_RANGE) \
+        TEST(NONE_OF_RANGE) \
+        TEST(COUNT) \
+        TEST(COUNT_IF) \
+        TEST(COUNT_IF_RANGE) \
+        TEST(COUNT_RANGE)
+        
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+        enum {
+            FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+            FOREACH_DEBUG(GENERATE_ENUM)
+#endif
+            TEST_TOTAL
         };
+#ifdef DEBUG
+        static const char *test_names[] = {
+            FOREACH_METH(GENERATE_NAME)
+            FOREACH_DEBUG(GENERATE_NAME)
+            ""
+        };
+#endif
         int which = TEST_RAND(TEST_TOTAL);
+        if (test >= 0 && test < (int)TEST_TOTAL)
+            which = test;
+        LOG ("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
         switch(which)
         {
             case TEST_PUSH:
@@ -49,7 +84,6 @@ main(void)
                 const int value = TEST_RAND(INT_MAX);
                 b.push(DIGI{value});
                 queue_digi_push(&a, digi_init(value));
-                CHECK(a, b);
                 break;
             }
             case TEST_POP:
@@ -58,7 +92,6 @@ main(void)
                 {
                     b.pop();
                     queue_digi_pop(&a);
-                    CHECK(a, b);
                 }
                 break;
             }
@@ -72,9 +105,27 @@ main(void)
                 std::swap(bb, bbb);
                 CHECK(aaa, bbb);
                 queue_digi_free(&aaa);
-                CHECK(a, b);
                 break;
             }
+#ifdef DEBUG // algorithm
+            case TEST_EQUAL_RANGE:
+            case TEST_FIND_RANGE:
+            case TEST_FIND_IF:
+            case TEST_FIND_IF_NOT:
+            case TEST_FIND_IF_RANGE:
+            case TEST_FIND_IF_NOT_RANGE:
+            case TEST_ALL_OF:
+            case TEST_ANY_OF:
+            case TEST_NONE_OF:
+            case TEST_ALL_OF_RANGE:
+            case TEST_ANY_OF_RANGE:
+            case TEST_NONE_OF_RANGE:
+            case TEST_COUNT:
+            case TEST_COUNT_IF:
+            case TEST_COUNT_IF_RANGE:
+            case TEST_COUNT_RANGE:
+                break;
+#endif
         }
         CHECK(a, b);
         queue_digi_free(&a);

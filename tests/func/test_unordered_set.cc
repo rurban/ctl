@@ -92,57 +92,69 @@ main(void)
 {
     INIT_SRAND;
     test_small_size();
-    size_t loops = TEST_RAND(TEST_MAX_LOOPS);
-    int test = -1;
-    char *env = getenv ("TEST");
-    if (env)
-        sscanf(env, "%d", &test);
-    if (test >= 0)
-        loops = 10;
-    if ((env = getenv ("LOOPS")))
-        sscanf(env, "%lu", &loops);
+    INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
     {
         uset_digi a;
         std::unordered_set<DIGI,DIGI_hash> b;
         setup_sets(&a, b);
-        enum
-        {
-            TEST_INSERT,
-            //TEST_EMPLACE,
-            //TEST_EXTRACT,
-            //TEST_MERGE,
-            //TEST_EQUAL_RANGE,
-            //TEST_REMOVE_IF,
-            TEST_ERASE_IF,
-            TEST_CONTAINS,
-            TEST_ERASE,
-            TEST_CLEAR,
-            TEST_SWAP,
-            TEST_COUNT,
-            TEST_FIND,
-            TEST_COPY,
-            TEST_EQUAL,
-            TEST_REHASH,
-            TEST_RESERVE,
-            TEST_UNION,
+
+#define FOREACH_METH(TEST) \
+        TEST(INSERT) \
+        TEST(ERASE_IF) \
+        TEST(CONTAINS) \
+        TEST(ERASE) \
+        TEST(CLEAR) \
+        TEST(SWAP) \
+        TEST(COUNT) \
+        TEST(FIND) \
+        TEST(COPY) \
+        TEST(EQUAL) \
+        TEST(REHASH) \
+        TEST(RESERVE) \
+        TEST(UNION)
+
+#define FOREACH_DEBUG(TEST) \
+        /* TEST(EMPLACE) */ \
+        /* TEST(EXTRACT) */ \
+        /* TEST(MERGE) */ \
+        /* TEST(REMOVE_IF) */ \
+        TEST(SYMMETRIC_DIFFERENCE) \
+        TEST(INTERSECTION) \
+        TEST(DIFFERENCE) \
+        TEST(FIND_IF) \
+        TEST(FIND_IF_NOT) \
+        TEST(ALL_OF) \
+        TEST(ANY_OF) \
+        TEST(NONE_OF) \
+        TEST(COUNT_IF)
+
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+            enum {
+                FOREACH_METH(GENERATE_ENUM)
 #ifdef DEBUG
-            TEST_SYMMETRIC_DIFFERENCE,
-            TEST_INTERSECTION,
-            TEST_DIFFERENCE,
+                FOREACH_DEBUG(GENERATE_ENUM)
 #endif
-            TEST_TOTAL,
-        };
+                TEST_TOTAL
+            };
+#ifdef DEBUG
+            static const char *test_names[] = {
+                FOREACH_METH(GENERATE_NAME)
+                FOREACH_DEBUG(GENERATE_NAME)
+                ""
+            };
+#endif
         int which = TEST_RAND(TEST_TOTAL);
-        //if (test >= 0 && test < (int)TEST_TOTAL)
+        if (test >= 0 && test < (int)TEST_TOTAL)
             which = test;
-        LOG ("TEST %d\n", which);
+        LOG ("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
         switch(which)
         {
             case TEST_INSERT:
             {
                 const int vb = TEST_RAND(TEST_MAX_SIZE);
-                LOG ("\nTEST INSERT %d\n", vb);
                 uset_digi_insert(&a, digi_init(vb));
                 b.insert(DIGI{vb});
                 CHECK(a, b);
@@ -150,7 +162,6 @@ main(void)
             }
             case TEST_ERASE_IF:
             {
-                LOG ("\nTEST ERASE_IF %lu\n", a.size);
                 size_t a_erases = uset_digi_erase_if(&a, digi_is_odd);
 #if defined(__cpp_lib_erase_if) && __cpp_lib_erase_if > 202002L
                 size_t b_erases = std::erase_if(b, DIGI_is_odd); //C++20
@@ -177,7 +188,6 @@ main(void)
             }
             case TEST_CONTAINS:
             {
-                LOG ("\nTEST CONTAINS %lu\n", a.size);
                 const int vb = TEST_RAND(TEST_MAX_SIZE);
                 bool a_has = uset_digi_contains(&a, digi_init(vb));
 #ifdef __cpp_lib_erase_if
@@ -192,7 +202,6 @@ main(void)
             case TEST_ERASE:
             {
                 const size_t erases = TEST_RAND(TEST_MAX_SIZE) / 4;
-                LOG ("\nTEST ERASE %lu\n", erases);
                 for(size_t i = 0; i < erases; i++)
                     if(a.size > 0)
                     {
@@ -209,7 +218,7 @@ main(void)
             case TEST_REHASH:
             {
                 size_t size = uset_digi_size(&a);
-                LOG ("\nTEST REHASH -> %lu\n", size);
+                LOG (" -> %lu\n", size);
                 b.rehash(size * 2);
                 uset_digi_rehash(&a, size * 2);
                 CHECK(a, b);
@@ -221,7 +230,7 @@ main(void)
                 float load = uset_digi_load_factor(&a);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 bb.reserve(size * 2 / load);
-                LOG ("\nTEST RESERVE %lu, %f\n", size, load);
+                LOG ("load %f\n", load);
                 uset_digi aa = uset_digi_copy(&a);
                 uset_digi_reserve(&aa, size * 2 / load);
                 CHECK(aa, bb);
@@ -235,7 +244,6 @@ main(void)
                 // TODO a.equal = digi_equal
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 std::unordered_set<DIGI,DIGI_hash> bbb;
-                LOG ("\nTEST SWAP\n");
                 uset_digi_swap(&aaa, &aa);
                 std::swap(bb, bbb);
                 CHECK(aaa, bbb);
@@ -247,7 +255,6 @@ main(void)
             case TEST_COUNT:
             {
                 int key = TEST_RAND(TEST_MAX_SIZE);
-                LOG ("\nTEST COUNT\n");
                 int aa = uset_digi_count(&a, digi_init(key));
                 int bb = b.count(DIGI{key});
                 assert(aa == bb);
@@ -257,7 +264,6 @@ main(void)
             case TEST_FIND:
             {
                 int key = TEST_RAND(TEST_MAX_SIZE);
-                LOG ("\nTEST FIND %d\n", key);
                 uset_digi_node* aa = uset_digi_find(&a, digi_init(key));
                 auto bb = b.find(DIGI{key});
                 if(bb == b.end())
@@ -270,22 +276,12 @@ main(void)
             case TEST_CLEAR:
             {
                 b.clear();
-                LOG ("\nTEST CLEAR\n");
                 uset_digi_clear(&a);
                 CHECK(a, b);
                 break;
             }
-#if 0
-            case TEST_EMPLACE:
-            case TEST_EXTRACT:
-            case TEST_MERGE:
-            case TEST_CONTAINS:
-            case TEST_EQUAL_RANGE:
-                break;
-#endif
             case TEST_COPY:
               { // C++20
-                LOG ("\nTEST COPY %lu\n", a.size);
                 uset_digi aa = uset_digi_copy(&a);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 CHECK(aa, bb);
@@ -297,7 +293,6 @@ main(void)
             {
                 uset_digi aa = uset_digi_copy(&a);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
-                LOG ("\nTEST EQUAL %lu\n", aa.size);
                 print_uset(&aa);
                 print_unordered_set(bb);
                 assert(uset_digi_equal(&a, &aa));
@@ -311,7 +306,6 @@ main(void)
                 uset_digi aa;
                 std::unordered_set<DIGI,DIGI_hash> bb;
                 setup_sets(&aa, bb);
-                LOG ("\nTEST UNION %lu, %lu\n", a.size, aa.size);
                 uset_digi aaa = uset_digi_union(&a, &aa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
@@ -329,7 +323,6 @@ main(void)
                 uset_digi aa;
                 std::unordered_set<DIGI,DIGI_hash> bb;
                 setup_sets(&aa, bb);
-                LOG ("\nTEST SYMMETRIC_DIFFERENCE %lu, %lu\n", a.size, aa.size);
                 uset_digi aaa = uset_digi_symmetric_difference(&a, &aa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
@@ -346,7 +339,6 @@ main(void)
                 uset_digi aa;
                 std::unordered_set<DIGI,DIGI_hash> bb;
                 setup_sets(&aa, bb);
-                LOG ("\nTEST INTERSECTION %lu, %lu\n", a.size, aa.size);
                 uset_digi aaa = uset_digi_intersection(&a, &aa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
@@ -363,7 +355,6 @@ main(void)
                 uset_digi aa;
                 std::unordered_set<DIGI,DIGI_hash> bb;
                 setup_sets(&aa, bb);
-                LOG ("\nTEST DIFFERENCE %lu, %lu\n", a.size, aa.size);
                 uset_digi aaa = uset_digi_difference(&a, &aa);
                 print_uset(&aaa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
@@ -377,6 +368,23 @@ main(void)
                 uset_digi_free(&aaa);
                 break;
             }
+#endif
+#if 0
+            case TEST_EMPLACE:
+            case TEST_EXTRACT:
+            case TEST_MERGE:
+            case TEST_CONTAINS:
+            case TEST_EQUAL_RANGE:
+                break;
+#endif
+#ifdef DEBUG // algorithm
+            case TEST_FIND_IF:
+            case TEST_FIND_IF_NOT:
+            case TEST_ALL_OF:
+            case TEST_ANY_OF:
+            case TEST_NONE_OF:
+            case TEST_COUNT_IF:
+                break;
 #endif
         }
         CHECK(a, b);

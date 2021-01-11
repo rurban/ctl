@@ -166,6 +166,7 @@ JOIN(A, none_of_range)(A* self, IT* first, IT* last, int _match(T*))
     return JOIN(A, find_if_range)(self, first, last, _match) == JOIN(A, end)(self);
 }
 
+#if !defined(CTL_SET) && !defined(CTL_USET) && !defined(CTL_STR)
 // C++20
 static inline size_t
 JOIN(A, count_if_range)(A* self, IT* first, IT* last, int _match(T*))
@@ -187,6 +188,7 @@ JOIN(A, count_range)(A* self, IT* first, IT* last, T value)
             count++;
     return count;
 }
+#endif // SET/USET/STR
 
 #endif // foreach_range IT
 

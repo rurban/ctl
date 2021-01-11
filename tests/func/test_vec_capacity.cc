@@ -65,6 +65,7 @@ main(void)
             vec_double   ff = vec_double_init();
             if(mode == MODE_DIRECT)
             {
+                LOG("mode DIRECT\n");
                 a.resize (size);
                 b.resize (size);
                 c.resize (size);
@@ -81,6 +82,7 @@ main(void)
             }
             if(mode == MODE_GROWTH)
             {
+                LOG("mode GROWTH\n");
                 for(size_t pushes = 0; pushes < size; pushes++)
                 {
                     a.push_back (value);

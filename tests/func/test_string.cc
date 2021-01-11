@@ -61,13 +61,7 @@ int
 main(void)
 {
     INIT_SRAND;
-    size_t loops = TEST_RAND(TEST_MAX_LOOPS);
-    int test = -1;
-    char *env = getenv ("TEST");
-    if (env)
-        sscanf(env, "%d", &test);
-    if (test >= 0)
-        loops = 30;
+    INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
     {
         size_t str_size = TEST_RAND(TEST_MAX_SIZE);
@@ -89,11 +83,13 @@ main(void)
             std::string b;
             if(mode == MODE_DIRECT)
             {
+                LOG("mode DIRECT\n");
                 a = str_init(base);
                 b = base;
             }
             if(mode == MODE_GROWTH)
             {
+                LOG("mode GROWTH\n");
                 a = str_init("");
                 for(size_t i = 0; i < str_size; i++)
                 {
@@ -102,38 +98,50 @@ main(void)
                 }
             }
             a.compare = char_compare;
-            enum
-            {
-                TEST_PUSH_BACK,
-                TEST_POP_BACK,
-                TEST_APPEND,
-                TEST_C_STR,
-                TEST_CLEAR,
-                TEST_ERASE,
-                TEST_RESIZE,
-                TEST_RESERVE,
-                TEST_SHRINK_TO_FIT,
-                TEST_SORT,
-                TEST_COPY,
-                TEST_SWAP,
-                TEST_INSERT,
-                TEST_ASSIGN,
-                TEST_REPLACE,
-                TEST_FIND,
-                TEST_RFIND,
-                TEST_FIND_FIRST_OF,
-                TEST_FIND_LAST_OF,
-                TEST_FIND_FIRST_NOT_OF,
-                TEST_FIND_LAST_NOT_OF,
-                TEST_SUBSTR,
-                TEST_COMPARE,
-                TEST_COUNT,
+
+#define FOREACH_METH(TEST) \
+            TEST(PUSH_BACK) \
+            TEST(POP_BACK) \
+            TEST(APPEND) \
+            TEST(C_STR) \
+            TEST(CLEAR) \
+            TEST(ERASE) \
+            TEST(RESIZE) \
+            TEST(RESERVE) \
+            TEST(SHRINK_TO_FIT) \
+            TEST(SORT) \
+            TEST(COPY) \
+            TEST(SWAP) \
+            TEST(INSERT) \
+            TEST(ASSIGN) \
+            TEST(REPLACE) \
+            TEST(FIND) \
+            TEST(RFIND) \
+            TEST(FIND_FIRST_OF) \
+            TEST(FIND_LAST_OF) \
+            TEST(FIND_FIRST_NOT_OF) \
+            TEST(FIND_LAST_NOT_OF) \
+            TEST(SUBSTR) \
+            TEST(COMPARE) \
+            TEST(COUNT)
+
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+            enum {
+                FOREACH_METH(GENERATE_ENUM)
                 TEST_TOTAL
             };
+#ifdef DEBUG
+            static const char *test_names[] = {
+                FOREACH_METH(GENERATE_NAME)
+                ""
+            };
+#endif
             int which = TEST_RAND(TEST_TOTAL);
             if (test >= 0 && test < (int)TEST_TOTAL)
                 which = test;
-            LOG ("TEST %d\n", which);
+            LOG ("TEST %s (size %zu)\n", test_names[which], a.size);
             switch(which)
             {
                 case TEST_PUSH_BACK:

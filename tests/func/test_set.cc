@@ -45,30 +45,69 @@ int
 main(void)
 {
     INIT_SRAND;
-    const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
+    INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
     {
         set_digi a;
         std::set<DIGI> b;
         setup_sets(&a, b);
-        enum
-        {
-            TEST_INSERT,
-            TEST_ERASE,
-            TEST_REMOVE_IF,
-            TEST_CLEAR,
-            TEST_SWAP,
-            TEST_COUNT,
-            TEST_FIND,
-            TEST_COPY,
-            TEST_EQUAL,
-            TEST_UNION,
-            TEST_INTERSECTION,
-            TEST_SYMMETRIC_DIFFERENCE,
-            TEST_DIFFERENCE,
-            TEST_TOTAL,
+#define FOREACH_METH(TEST) \
+        TEST(INSERT) \
+        TEST(ERASE) \
+        TEST(REMOVE_IF) \
+        TEST(CLEAR) \
+        TEST(SWAP) \
+        TEST(COUNT) \
+        TEST(FIND) \
+        TEST(COPY) \
+        TEST(EQUAL) \
+        TEST(UNION) \
+        TEST(INTERSECTION) \
+        TEST(SYMMETRIC_DIFFERENCE) \
+        TEST(DIFFERENCE)
+#define FOREACH_DEBUG(TEST) \
+        TEST(CONTAINS) \
+        /* TEST(EMPLACE) */ \
+        /* TEST(EXTRACT) */ \
+        /* TEST(MERGE) */ \
+        /* TEST(ERASE_IF) */ \
+        TEST(EQUAL_RANGE) \
+        TEST(FIND_RANGE) \
+        TEST(FIND_IF) \
+        TEST(FIND_IF_NOT) \
+        TEST(FIND_IF_RANGE) \
+        TEST(FIND_IF_NOT_RANGE) \
+        TEST(ALL_OF) \
+        TEST(ANY_OF) \
+        TEST(NONE_OF) \
+        TEST(ALL_OF_RANGE) \
+        TEST(ANY_OF_RANGE) \
+        TEST(NONE_OF_RANGE) \
+        TEST(COUNT_IF) \
+        TEST(COUNT_IF_RANGE) \
+        TEST(COUNT_RANGE)
+
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+        enum {
+            FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+            FOREACH_DEBUG(GENERATE_ENUM)
+#endif
+            TEST_TOTAL
         };
+#ifdef DEBUG
+        static const char *test_names[] = {
+            FOREACH_METH(GENERATE_NAME)
+            FOREACH_DEBUG(GENERATE_NAME)
+            ""
+        };
+#endif
         int which = TEST_RAND(TEST_TOTAL);
+        if (test >= 0 && test < (int)TEST_TOTAL)
+            which = test;
+        LOG ("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
         switch(which)
         {
             case TEST_INSERT:
@@ -92,7 +131,6 @@ main(void)
                         CHECK(a, b);
                         digi_free(&kd);
                     }
-                CHECK(a, b);
                 break;
             }
             case TEST_REMOVE_IF:
@@ -114,14 +152,12 @@ main(void)
                 }
                 size_t a_erases = set_digi_remove_if(&a, digi_is_odd);
                 assert(a_erases == b_erases);
-                CHECK(a, b);
                 break;
             }
             case TEST_CLEAR:
             {
                 b.clear();
                 set_digi_clear(&a);
-                CHECK(a, b);
                 break;
             }
             case TEST_SWAP:
@@ -134,7 +170,6 @@ main(void)
                 std::swap(bb, bbb);
                 CHECK(aaa, bbb);
                 set_digi_free(&aaa);
-                CHECK(a, b);
                 break;
             }
             case TEST_COUNT:
@@ -162,24 +197,12 @@ main(void)
                 digi_free(&kd);
                 break;
             }
-#if 0
-            case TEST_CONTAINS: // C++20.
-            {
-                int key = TEST_RAND(TEST_MAX_SIZE);
-                int aa = set_digi_contains(&a, key);
-                int bb = b.contains(key);
-                assert(aa == bb);
-                CHECK(a, b);
-                break;
-            }
-#endif
             case TEST_COPY:
             {
                 set_digi aa = set_digi_copy(&a);
                 std::set<DIGI> bb = b;
                 CHECK(aa, bb);
                 set_digi_free(&aa);
-                CHECK(a, b);
                 break;
             }
             case TEST_EQUAL:
@@ -189,7 +212,6 @@ main(void)
                 assert(set_digi_equal(&a, &aa));
                 assert(b == bb);
                 set_digi_free(&aa);
-                CHECK(a, b);
                 break;
             }
             case TEST_UNION:
@@ -200,7 +222,6 @@ main(void)
                 set_digi aaa = set_digi_union(&a, &aa);
                 std::set<DIGI> bbb;
                 std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
-                CHECK(a, b);
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
                 set_digi_free(&aa);
@@ -215,7 +236,6 @@ main(void)
                 set_digi aaa = set_digi_intersection(&a, &aa);
                 std::set<DIGI> bbb;
                 std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
-                CHECK(a, b);
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
                 set_digi_free(&aa);
@@ -229,8 +249,8 @@ main(void)
                 setup_sets(&aa, bb);
                 set_digi aaa = set_digi_symmetric_difference(&a, &aa);
                 std::set<DIGI> bbb;
-                std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
-                CHECK(a, b);
+                std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                              std::inserter(bbb, bbb.begin()));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
                 set_digi_free(&aa);
@@ -245,13 +265,44 @@ main(void)
                 set_digi aaa = set_digi_difference(&a, &aa);
                 std::set<DIGI> bbb;
                 std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
-                CHECK(a, b);
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
                 set_digi_free(&aa);
                 set_digi_free(&aaa);
                 break;
             }
+#ifdef DEBUG
+            case TEST_CONTAINS: // C++20
+            {
+                int key = TEST_RAND(TEST_MAX_SIZE);
+                int aa = set_digi_contains(&a, digi_init(key));
+#if defined(__cpp_lib_erase_if) && __cpp_lib_erase_if > 202002L
+                int bb = b.contains(DIGI{key});
+#else
+                int bb = b.count(DIGI{key}) == 1;
+#endif
+                assert(aa == bb);
+                break;
+            }
+#endif
+#ifdef DEBUG // algorithm
+            case TEST_EQUAL_RANGE:
+            case TEST_FIND_RANGE:
+            case TEST_FIND_IF:
+            case TEST_FIND_IF_NOT:
+            case TEST_FIND_IF_RANGE:
+            case TEST_FIND_IF_NOT_RANGE:
+            case TEST_ALL_OF:
+            case TEST_ANY_OF:
+            case TEST_NONE_OF:
+            case TEST_ALL_OF_RANGE:
+            case TEST_ANY_OF_RANGE:
+            case TEST_NONE_OF_RANGE:
+            case TEST_COUNT_IF:
+            case TEST_COUNT_IF_RANGE:
+            case TEST_COUNT_RANGE:
+                break;
+#endif
         }
         CHECK(a, b);
         set_digi_free(&a);

@@ -76,54 +76,77 @@ int
 main(void)
 {
     INIT_SRAND;
-    int test = -1;
-    char *env = getenv ("TEST");
-    if (env)
-        sscanf(env, "%d", &test);
-    size_t loops = TEST_RAND(TEST_MAX_LOOPS);
-    if (test >= 0)
-        loops = 10;
+    INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
     {
         list_digi a;
         std::list<DIGI> b;
         int max_value = 0;
         setup_lists(&a, b, TEST_RAND(TEST_MAX_SIZE), &max_value);
-        enum
-        {
-            TEST_PUSH_BACK,
-            TEST_PUSH_FRONT,
-            TEST_POP_BACK,
-            TEST_POP_FRONT,
-            TEST_ERASE,
-            TEST_INSERT,
-            TEST_CLEAR,
-            TEST_RESIZE,
-            TEST_ASSIGN,
-            TEST_SWAP,
-            TEST_COPY,
-            TEST_REVERSE,
-            TEST_REMOVE, // 12
+#define FOREACH_METH(TEST) \
+        TEST(PUSH_BACK) \
+        TEST(PUSH_FRONT) \
+        TEST(POP_BACK) \
+        TEST(POP_FRONT) \
+        TEST(ERASE) \
+        TEST(INSERT) \
+        TEST(CLEAR) \
+        TEST(RESIZE) \
+        TEST(ASSIGN) \
+        TEST(SWAP) \
+        TEST(COPY) \
+        TEST(REVERSE) \
+        TEST(REMOVE) \
+        TEST(EMPLACE) \
+        TEST(EMPLACE_FRONT) \
+        TEST(EMPLACE_BACK) \
+        TEST(REMOVE_IF) \
+        TEST(SPLICE) \
+        TEST(MERGE) \
+        TEST(EQUAL) \
+        TEST(SORT) \
+        TEST(UNIQUE) \
+        TEST(FIND)
+#define FOREACH_DEBUG(TEST) \
+        TEST(INSERT_COUNT) \
+        TEST(INSERT_RANGE) \
+        TEST(EQUAL_RANGE) \
+        TEST(FIND_RANGE) \
+        TEST(FIND_IF) \
+        TEST(FIND_IF_NOT) \
+        TEST(FIND_IF_RANGE) \
+        TEST(FIND_IF_NOT_RANGE) \
+        TEST(ALL_OF) \
+        TEST(ANY_OF) \
+        TEST(NONE_OF) \
+        TEST(ALL_OF_RANGE) \
+        TEST(ANY_OF_RANGE) \
+        TEST(NONE_OF_RANGE) \
+        TEST(COUNT) \
+        TEST(COUNT_IF) \
+        TEST(COUNT_IF_RANGE) \
+        TEST(COUNT_RANGE)
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+        enum {
+            FOREACH_METH(GENERATE_ENUM)
 #ifdef DEBUG
-            TEST_INSERT_COUNT,
-            TEST_INSERT_RANGE,
+            FOREACH_DEBUG(GENERATE_ENUM)
 #endif
-            TEST_EMPLACE,
-            TEST_EMPLACE_FRONT,
-            TEST_EMPLACE_BACK,
-            TEST_REMOVE_IF,
-            TEST_SPLICE,
-            TEST_MERGE,
-            TEST_EQUAL,
-            TEST_SORT,
-            TEST_UNIQUE,
-            TEST_FIND,
             TEST_TOTAL
         };
+#ifdef DEBUG
+        static const char *test_names[] = {
+            FOREACH_METH(GENERATE_NAME)
+            FOREACH_DEBUG(GENERATE_NAME)
+            ""
+        };
+#endif
         int which = TEST_RAND(TEST_TOTAL);
         if (test >= 0 && test < (int)TEST_TOTAL)
             which = test;
-        LOG ("TEST %d\n", which);
+        LOG ("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
         switch(which)
         {
             case TEST_PUSH_FRONT:
@@ -334,11 +357,6 @@ main(void)
                 digi_free(&aa);
                 break;
             }
-#ifdef DEBUG
-            case TEST_INSERT_COUNT:
-            case TEST_INSERT_RANGE:
-            break;
-#endif
             case TEST_REMOVE_IF:
             {
                 list_digi_remove_if(&a, digi_is_odd);
@@ -439,6 +457,30 @@ main(void)
                 }
                 break;
             }
+#ifdef DEBUG
+            case TEST_INSERT_COUNT:
+            case TEST_INSERT_RANGE:
+            break;
+#endif
+#ifdef DEBUG // algorithm
+            case TEST_EQUAL_RANGE:
+            case TEST_FIND_RANGE:
+            case TEST_FIND_IF:
+            case TEST_FIND_IF_NOT:
+            case TEST_FIND_IF_RANGE:
+            case TEST_FIND_IF_NOT_RANGE:
+            case TEST_ALL_OF:
+            case TEST_ANY_OF:
+            case TEST_NONE_OF:
+            case TEST_ALL_OF_RANGE:
+            case TEST_ANY_OF_RANGE:
+            case TEST_NONE_OF_RANGE:
+            case TEST_COUNT:
+            case TEST_COUNT_IF:
+            case TEST_COUNT_IF_RANGE:
+            case TEST_COUNT_RANGE:
+                break;
+#endif
         }
         CHECK(a, b);
         list_digi_free(&a);
