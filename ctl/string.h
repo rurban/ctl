@@ -184,16 +184,25 @@ str_substr(str* self, size_t index, size_t size)
     return substr;
 }
 
+/* STL clash */
 static inline int
 str_compare(str* self, const char* s)
 {
     return strcmp (self->value, s);
 }
 
+/* STL clash
 static inline int
-str_key_compare(str* self, str* s)
+str_equal(str* self, const char* s)
 {
-    return strcmp (self->value, s->value);
+    return str_compare(self, other) == 0;
+}
+*/
+
+static inline int
+str_key_compare(str* self, str* other)
+{
+    return strcmp (self->value, other->value);
 }
 
 #undef CTL_STR

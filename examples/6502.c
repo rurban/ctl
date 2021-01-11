@@ -1,5 +1,5 @@
 //
-// -- A 6502 compiler specalizing in 16-bit integer math and brute force loop unrolling --
+// -- A 6502 compiler specializing in 16-bit integer math and brute force loop unrolling --
 //
 
 #include <ctl/string.h>
@@ -27,8 +27,7 @@ typedef enum
 #define X(name) name,
     LIST
 #undef X
-}
-family;
+} family;
 
 const char* lookup[] = {
 #define X(name) #name,
@@ -43,8 +42,7 @@ typedef struct
     size_t size;
     size_t addr;
     family fam;
-}
-token;
+} token;
 
 token
 token_init(char* type, char* name, size_t size, size_t addr, family fam)
@@ -1052,12 +1050,14 @@ program(void)
         if(next() == '[')
         {
             if(found_function)
-                quit("array declarations (see '%s %s') must come before the main function", type.value, name.value);
+                quit("array declarations (see '%s %s') must come before the main function",
+                     type.value, name.value);
             global_array(&type, &name);
             match(';');
         }
         else
-            quit("unknown character '%c' in top level definition (see defintion for '%s %s')", next(), type.value, name.value);
+            quit("unknown character '%c' in top level definition (see definition for '%s %s')",
+                 next(), type.value, name.value);
         str_free(&type);
         str_free(&name);
     }
@@ -1091,7 +1091,7 @@ compile(char* code)
 void
 boids(void)
 {
-    // This program simluates 9 boids starting in random positions and
+    // This program simulates 9 boids starting in random positions and
     // move in random velocities while avoid one another. Boids bounce
     // off the edge of the screen.
     compile(
