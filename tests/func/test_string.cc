@@ -141,7 +141,7 @@ main(void)
             int which = TEST_RAND(TEST_TOTAL);
             if (test >= 0 && test < (int)TEST_TOTAL)
                 which = test;
-            LOG ("TEST %s (size %zu)\n", test_names[which], a.size);
+            LOG ("TEST=%d %s (size %zu, cap %zu)\n", which, test_names[which], a.size, a.capacity);
             switch(which)
             {
                 case TEST_PUSH_BACK:

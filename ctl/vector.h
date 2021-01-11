@@ -213,21 +213,35 @@ JOIN(A, fit)(A* self, size_t capacity)
 static inline void
 JOIN(A, reserve)(A* self, const size_t n)
 {
-    if(n > JOIN(A, max_size)())
+    const size_t max_size = JOIN(A, max_size)();
+    if(n > max_size)
     {
 #if defined(_ASSERT_H) && !defined(NDEBUG)
-        assert (n < JOIN(A, max_size)() || !"max_size overflow");
+        assert (n < max_size || !"max_size overflow");
 #endif
         return;
     }
     if(self->capacity != n)
     {
         // don't shrink, but shrink_to_fit
-        size_t actual = n <= self->size ? self->size : n;
+        size_t actual = n < self->size ? self->size : n;
         //if(MUST_ALIGN_16(T))
         //    actual = ((actual + 15) & ~15) - 1;
         if(actual > 0)
-            JOIN(A, fit)(self, actual);
+        {
+#ifdef CTL_STR
+            if (actual > self->capacity) // double it
+            {
+                if (actual < 2 * self->capacity)
+                    actual = 2 * self->capacity;
+                if (actual > max_size)
+                    actual = max_size;
+                JOIN(A, fit)(self, actual);
+            }
+            else
+#endif
+                JOIN(A, fit)(self, actual);
+        }
     }
 }
 
