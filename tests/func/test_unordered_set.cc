@@ -29,7 +29,7 @@
             b_found++;                                                 \
         }                                                              \
         assert(a_found == b_found);                                    \
-        /*                                                             \
+        /* only if we use the very same policies                      \
         assert(_x.bucket_count == _y.bucket_count());                  \
         for(size_t _i = 0; _i < _x.bucket_count; _i++)                 \
             assert(uset_digi_bucket_size(&_x, _i) == _y.bucket_size(_i));\
@@ -40,14 +40,16 @@
 #ifdef DEBUG
 void print_uset(uset_digi* a)
 {
+    int i = 0;
     foreach(uset_digi, a, it)
-        printf("%d\n", *it.ref->value);
+        printf("%d: %d [%zu]\n", i++, *it.ref->value, it.bucket_index);
     printf("--\n");
 }
 void print_unordered_set(std::unordered_set<DIGI,DIGI_hash> b)
 {
+    int i = 0;
     for(auto& x : b)
-        printf("%d\n", *x.value);
+        printf("%d: %d\n", i++, *x.value);
     printf("--\n");
 }
 #else
@@ -119,9 +121,9 @@ main(void)
         /* TEST(EXTRACT) */ \
         /* TEST(MERGE) */ \
         /* TEST(REMOVE_IF) */ \
-        TEST(SYMMETRIC_DIFFERENCE) \
-        TEST(INTERSECTION) \
-        TEST(DIFFERENCE) \
+        /* TEST(SYMMETRIC_DIFFERENCE) */    \
+        /* TEST(INTERSECTION)  */ \
+        /* TEST(DIFFERENCE)  */ \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
         TEST(ALL_OF) \
@@ -149,7 +151,7 @@ main(void)
         int which = TEST_RAND(TEST_TOTAL);
         if (test >= 0 && test < (int)TEST_TOTAL)
             which = test;
-        LOG ("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
+        LOG ("TEST=%d %s (%zu, %zu)\n", which, test_names[which], a.size, a.bucket_count);
         switch(which)
         {
             case TEST_INSERT:
@@ -229,10 +231,18 @@ main(void)
                 size_t size = uset_digi_size(&a);
                 float load = uset_digi_load_factor(&a);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
-                bb.reserve(size * 2 / load);
+                const size_t reserve = size * 2 / load;
                 LOG ("load %f\n", load);
+                bb.reserve(reserve);
+                LOG ("STL reserve by %zu %zu\n", reserve, bb.bucket_count());
+                LOG ("before\n");
+                print_uset(&a);
                 uset_digi aa = uset_digi_copy(&a);
-                uset_digi_reserve(&aa, size * 2 / load);
+                LOG ("copy\n");
+                print_uset(&aa);
+                uset_digi_reserve(&aa, reserve);
+                LOG ("CTL reserve by %zu %zu\n", reserve, aa.bucket_count);
+                print_uset(&aa);
                 CHECK(aa, bb);
                 uset_digi_free(&aa);
                 break;
@@ -317,7 +327,7 @@ main(void)
                 uset_digi_free(&aaa);
                 break;
             }
-#ifdef DEBUG
+#if 0
             case TEST_SYMMETRIC_DIFFERENCE:
             {
                 uset_digi aa;

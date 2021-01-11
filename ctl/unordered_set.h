@@ -50,6 +50,7 @@ typedef struct A
 {
     B** buckets;
     size_t size;
+    // in STL as rehash_policy: growth_factor, max_load_factor, next_resize
     size_t bucket_count;
     size_t max_bucket_count;
     float max_load_factor;
@@ -379,6 +380,7 @@ JOIN(A, find)(A* self, T value)
         B** buckets = JOIN(A, _bucket)(self, value);
         for(B* n = *buckets; n; n = n->next)
             if(self->equal(&value, &n->value))
+                // TODO: the popular move-to-from strategy
                 return n;
     }
     return NULL;
@@ -524,6 +526,7 @@ JOIN(A, contains)(A* self, T value)
 {
     foreach(A, self, it)
         if(self->equal(it.ref, &value))
+            // TODO: the popular move-to-from strategy
             return true;
     return false;
 }
