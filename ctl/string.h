@@ -11,6 +11,7 @@
 #define vec_char str
 #define POD
 #define T char
+#define MUST_ALIGN_16(T) (sizeof(T) == sizeof(char))
 #define str_init str___INIT
 #define str_equal str___EQUAL
 #define str_find str___FIND

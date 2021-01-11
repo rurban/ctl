@@ -13,7 +13,13 @@
 #define A JOIN(vec, T)
 #define I JOIN(A, it)
 
-#define MUST_ALIGN_16(T) (sizeof(T) == sizeof(char))
+// only for short strings, not vec_uint8_t
+#ifndef MUST_ALIGN_16
+# define MUST_ALIGN_16(T) 0
+# define INIT_SIZE 1
+#else
+# define INIT_SIZE 15
+#endif
 
 typedef struct A
 {
@@ -183,14 +189,21 @@ JOIN(A, free)(A* self)
 static inline void
 JOIN(A, fit)(A* self, size_t capacity)
 {
-    static T zero;
     size_t overall = capacity;
-    if(MUST_ALIGN_16(T))
-        overall++;
+    //if(MUST_ALIGN_16(T)) // reserve terminating \0 for strings
+    //    overall++;
     self->value = (T*) realloc(self->value, overall * sizeof(T));
     if(MUST_ALIGN_16(T))
+    {
+#if 0
+        static T zero;
         for(size_t i = self->capacity; i < overall; i++)
             self->value[i] = zero;
+#else
+        if (overall > self->capacity)
+            memset (&self->value[self->capacity], 0, overall - self->capacity);
+#endif
+    }
     self->capacity = capacity;
 }
 
@@ -199,24 +212,9 @@ JOIN(A, reserve)(A* self, const size_t capacity)
 {
     if(capacity != self->capacity)
     {
-        size_t actual = 0;
-        if(MUST_ALIGN_16(T))
-        {
-            if(capacity <= self->size)
-                actual = self->size;
-            else
-            if(capacity > self->size && capacity < self->capacity)
-                actual = capacity;
-            else
-            {
-                actual = 2 * self->capacity;
-                if(capacity > actual)
-                    actual = capacity;
-            }
-        }
-        else
-        if(capacity > self->capacity)
-            actual = capacity;
+        size_t actual = capacity <= self->size ? self->size : capacity;
+        //if(MUST_ALIGN_16(T))
+        //    actual = ((actual + 15) & ~15) - 1;
         if(actual > 0)
             JOIN(A, fit)(self, actual);
     }
@@ -226,7 +224,8 @@ static inline void
 JOIN(A, push_back)(A* self, T value)
 {
     if(self->size == self->capacity)
-        JOIN(A, reserve)(self, self->capacity == 0 ? 1 : 2 * self->capacity);
+        JOIN(A, reserve)(self,
+            self->capacity == 0 ? INIT_SIZE : 2 * self->capacity);
     *JOIN(A, at)(self, self->size) = value;
     self->size++;
 }
@@ -244,7 +243,7 @@ JOIN(A, resize)(A* self, size_t size, T value)
     {
         if(size > self->capacity)
         {
-            size_t capacity = 2 * self->size;
+            size_t capacity = 2 * self->capacity;
             if(size > capacity)
                 capacity = size;
             JOIN(A, reserve)(self, capacity);
@@ -279,7 +278,13 @@ JOIN(A, assign_range)(A* self, T* from, T* last)
 static inline void
 JOIN(A, shrink_to_fit)(A* self)
 {
-    JOIN(A, fit)(self, self->size);
+    if(MUST_ALIGN_16(T) && self->size <= 15)
+    {
+        size_t size = ((self->size + 15) & ~15) - 1;
+        JOIN(A, fit)(self, size);
+    }
+    else
+        JOIN(A, fit)(self, self->size);
 }
 
 static inline T*
@@ -424,6 +429,7 @@ JOIN(A, find)(A* self, T key)
 #undef A
 #undef I
 #undef MUST_ALIGN_16
+#undef INIT_SIZE
 
 // Hold preserves `T` if other containers
 // (eg. `priority_queue.h`) wish to extend `vector.h`.

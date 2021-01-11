@@ -1,13 +1,18 @@
 #include "../test.h"
 
 #include <ctl/string.h>
-#include "digi.hh"
+//#include "digi.hh"
 
 #include <string>
 #include <algorithm>
 
-#define MIN_STR_SIZE  (30) // NO SUPPORT FOR SMALL STRINGS.
+#define MIN_STR_SIZE  (30) // NO SUPPORT FOR SMALL STRINGS yet
 #define ALPHA_LETTERS (23)
+
+// mark functions which need 16 align
+#define LOG_CAP(a,b) \
+    LOG("ctl capacity %zu (0x%lx) vs %zu (0x%lx)\n", a.capacity, a.capacity, \
+        b.capacity(), b.capacity())
 
 #define CHECK(_x, _y) {                              \
     assert(strcmp(str_c_str(&_x), _y.c_str()) == 0); \
@@ -38,9 +43,8 @@ create_test_string(size_t size)
     char* temp = (char*) malloc(size + 1);
     for(size_t i = 0; i < size; i++)
     {
-        temp[i] = 'a' + TEST_RAND(ALPHA_LETTERS);
-        if(TEST_RAND(2))
-            temp[i] = toupper(temp[i]);
+        const int r = TEST_RAND(ALPHA_LETTERS);
+        temp[i] = (TEST_RAND(2) ? 'a' : 'A') + r;
     }
     temp[size] = '\0';
     return temp;
@@ -69,7 +73,7 @@ main(void)
         if(str_size < MIN_STR_SIZE)
             str_size = MIN_STR_SIZE;
 #if defined(DEBUG) && !defined(LONG)
-        str_size = MIN_STR_SIZE;
+        //str_size = 2; short strings for certain methods
 #endif
         enum
         {
@@ -136,6 +140,7 @@ main(void)
                     const char value = TEST_RAND(ALPHA_LETTERS);
                     b.push_back(value);
                     str_push_back(&a, value);
+                    LOG_CAP(a,b);
                     CHECK(a, b);
                     break;
                 }
@@ -146,6 +151,7 @@ main(void)
                         b.pop_back();
                         str_pop_back(&a);
                     }
+                    LOG_CAP(a,b);
                     CHECK(a, b);
                     break;
                 }
@@ -267,6 +273,7 @@ main(void)
                 {
                     str_clear(&a);
                     b.clear();
+                    LOG_CAP(a,b);
                     CHECK(a, b);
                     break;
                 }
@@ -315,6 +322,7 @@ main(void)
                     str_shrink_to_fit(&a);
                     LOG("CTL shrink_to_fit %zu %zu\n", a.size, a.capacity);
                     LOG("STL shrink_to_fit %zu %zu\n", b.size(), b.capacity());
+                    LOG_CAP(a,b);
                     CHECK(a, b);
                     break;
                 }
@@ -325,6 +333,7 @@ main(void)
                     LOG("after  sort \"%s\"\n", a.value);
                     std::sort(b.begin(), b.end());
                     LOG("STL    sort \"%s\"\n", b.c_str());
+                    LOG_CAP(a,b);
                     CHECK(a, b);
                     break;
                 }
@@ -356,6 +365,7 @@ main(void)
                     std::string bbb;
                     str_swap(&aaa, &aa);
                     std::swap(cb, bbb);
+                    LOG_CAP(aaa, bbb);
                     CHECK(aaa, bbb);
                     str_free(&aaa);
                     str_free(&aa);

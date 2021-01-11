@@ -1,3 +1,5 @@
+/* uint8_t uses MUST_ALIGN_16(T),
+   the others not */
 #include "../test.h"
 
 #include <stdint.h>
@@ -40,7 +42,7 @@ main(void)
     for(size_t loop = 0; loop < loops; loop++)
     {
         uint8_t value = TEST_RAND(UINT8_MAX); // SMALLEST SIZE.
-        size_t size = TEST_RAND(TEST_MAX_SIZE);
+        size_t size = loop ? TEST_RAND(TEST_MAX_SIZE) : TEST_RAND(30);
         enum
         {
             MODE_DIRECT,
@@ -70,6 +72,7 @@ main(void)
                 e.resize (size);
                 f.resize (size);
                 vec_uint8_t_resize  (&aa, size, 0);
+                LOG("uint8 resize    %zu vs %zu\n", aa.size, a.size());
                 vec_uint16_t_resize (&bb, size, 0);
                 vec_uint32_t_resize (&cc, size, 0);
                 vec_uint64_t_resize (&dd, size, 0);
@@ -87,6 +90,9 @@ main(void)
                     e.push_back (value);
                     f.push_back (value);
                     vec_uint8_t_push_back  (&aa, value);
+                    LOG("capacity  %zu (0x%lx) vs %zu (0x%lx) (%zu) %s\n", aa.capacity, aa.capacity,
+                        a.capacity(), a.capacity(), aa.size,
+                        aa.capacity != a.capacity() ? "FAIL" : "");
                     vec_uint16_t_push_back (&bb, value);
                     vec_uint32_t_push_back (&cc, value);
                     vec_uint64_t_push_back (&dd, value);
@@ -94,13 +100,18 @@ main(void)
                     vec_double_push_back   (&ff, value);
                 }
             }
+            LOG("uint8 size      %zu vs %zu\n", aa.size, a.size());
             ASSERT_EQUAL_SIZE (a, aa);
+            LOG("uint16 size     %zu vs %zu\n", bb.size, b.size());
             ASSERT_EQUAL_SIZE (b, bb);
             ASSERT_EQUAL_SIZE (c, cc);
             ASSERT_EQUAL_SIZE (d, dd);
             ASSERT_EQUAL_SIZE (e, ee);
             ASSERT_EQUAL_SIZE (f, ff);
+            LOG("uint8 capacity  %zu (0x%lx) vs %zu (0x%lx)\n", aa.capacity, aa.capacity,
+                a.capacity(), a.capacity());
             ASSERT_EQUAL_CAP  (a, aa);
+            LOG("uint16 capacity %zu vs %zu\n", bb.capacity, b.capacity());
             ASSERT_EQUAL_CAP  (b, bb);
             ASSERT_EQUAL_CAP  (c, cc);
             ASSERT_EQUAL_CAP  (d, dd);

@@ -481,7 +481,7 @@ JOIN(A, splice_it)(A* self, B* pos, A* other, B* other_pos)
     else
     {
         //??
-        JOIN(A, transfer)(self, other, pos, other_pos, 1);
+        JOIN(A, transfer_before)(self, other, pos, other_pos);
     }
 }
 
@@ -494,7 +494,7 @@ JOIN(A, splice_range)(A* self, B* pos, A* other, B* other_first, B* other_last)
     {
         // FIXME util other_last
         (void) other_last;
-        JOIN(A, transfer)(self, other, pos, other_first, 1);
+        JOIN(A, transfer_before)(self, other, pos, other_first);
     }
 }
 

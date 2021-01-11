@@ -79,8 +79,9 @@ TESTS = \
 	tests/func/test_unordered_set \
 	tests/func/test_unordered_set_power2 \
 	tests/func/test_stack \
+	tests/func/test_vector \
 	tests/func/test_vec_capacity \
-	tests/func/test_vector
+	tests/func/test_str_capacity
 .ifdef DEBUG
 TESTS += \
 	tests/func/test_map     \
@@ -225,6 +226,9 @@ tests/func/test_stack:    .cflags ${COMMON_H} ctl/stack.h ctl/deque.h \
 	${CXX} ${CFLAGS} -o $@ $@.cc
 tests/func/test_string:   .cflags ${COMMON_H} ctl/string.h ctl/vector.h \
                           tests/func/test_string.cc
+	${CXX} ${CFLAGS} -o $@ $@.cc
+tests/func/test_str_capacity: .cflags ${COMMON_H} ctl/string.h ctl/vector.h \
+                          tests/func/test_str_capacity.cc
 	${CXX} ${CFLAGS} -o $@ $@.cc
 tests/func/test_vec_capacity: .cflags ${COMMON_H} ctl/vector.h \
                           tests/func/test_vec_capacity.cc
