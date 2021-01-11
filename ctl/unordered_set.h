@@ -298,16 +298,19 @@ JOIN(A, _reserve)(A* self, const size_t new_size)
 #endif
 }
 
+static inline void JOIN(A, _rehash)(A* self, size_t count);
+
 static inline void
 JOIN(A, reserve)(A* self, size_t desired_count)
 {
 #ifdef CTL_USET_GROWTH_POWER2
     const size_t new_size = JOIN(A, __next_power2)(desired_count);
+    LOG("power2 growth policy %zu => %zu ", desired_count, new_size);
 #else
     const size_t new_size = JOIN(A, __next_prime)(desired_count);
+    LOG("primed growth policy %zu => %zu ", desired_count, new_size);
 #endif
-    //LOG("growth policy %zu => %zu ", desired_count, new_size);
-    JOIN(A, _reserve)(self, new_size);
+    JOIN(A, _rehash)(self, new_size);
 }
 
 static inline A
