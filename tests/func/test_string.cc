@@ -15,6 +15,7 @@
         b.capacity(), b.capacity())
 
 #define CHECK(_x, _y) {                              \
+    assert(strlen(str_c_str(&_x)) == strlen(_y.c_str())); \
     assert(strcmp(str_c_str(&_x), _y.c_str()) == 0); \
     assert(_x.capacity == _y.capacity());            \
     assert(_x.size == _y.size());                    \
@@ -84,23 +85,23 @@ main(void)
         for(size_t mode = MODE_DIRECT; mode < MODE_TOTAL; mode++)
         {
             char* base = create_test_string(str_size);
-            str a = str_init("");
-            a.compare = char_compare;
+            str a;
             std::string b;
             if(mode == MODE_DIRECT)
             {
-                str_free(&a);
                 a = str_init(base);
                 b = base;
             }
             if(mode == MODE_GROWTH)
             {
+                a = str_init("");
                 for(size_t i = 0; i < str_size; i++)
                 {
                     str_push_back(&a, base[i]);
                     b.push_back(base[i]);
                 }
             }
+            a.compare = char_compare;
             enum
             {
                 TEST_PUSH_BACK,
@@ -141,7 +142,6 @@ main(void)
                     b.push_back(value);
                     str_push_back(&a, value);
                     LOG_CAP(a,b);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_POP_BACK:
@@ -152,7 +152,6 @@ main(void)
                         str_pop_back(&a);
                     }
                     LOG_CAP(a,b);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_APPEND:
@@ -161,14 +160,13 @@ main(void)
                     str_append(&a, temp);
                     b.append(temp);
                     free(temp);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_C_STR:
                 {
-                    assert(strlen(str_c_str(&a)));
+                    assert(strlen(str_c_str(&a))); // strlen(NULL) is valid
                     assert(str_c_str(&a) == str_data(&a));
-                    CHECK(a, b);
+                    LOG("CTL C_STR %zu %zu\n", a.size, a.capacity);
                     break;
                 }
                 case TEST_REPLACE:
@@ -179,7 +177,6 @@ main(void)
                     str_replace(&a, index, size, temp);
                     b.replace(index, size, temp);
                     free(temp);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_FIND:
@@ -188,7 +185,6 @@ main(void)
                     char* temp = create_test_string(size);
                     assert(str_find(&a, temp) == b.find(temp));
                     free(temp);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_RFIND:
@@ -196,7 +192,6 @@ main(void)
                     char* temp = create_test_string(TEST_RAND(3));
                     assert(str_rfind(&a, temp) == b.rfind(temp));
                     free(temp);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_FIND_FIRST_OF:
@@ -205,7 +200,6 @@ main(void)
                     char* temp = create_test_string(size);
                     assert(str_find_first_of(&a, temp) == b.find_first_of(temp));
                     free(temp);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_FIND_LAST_OF:
@@ -214,7 +208,6 @@ main(void)
                     char* temp = create_test_string(size);
                     assert(str_find_last_of(&a, temp) == b.find_last_of(temp));
                     free(temp);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_FIND_FIRST_NOT_OF:
@@ -223,7 +216,6 @@ main(void)
                     char* temp = create_test_string(size);
                     assert(str_find_first_not_of(&a, temp) == b.find_first_not_of(temp));
                     free(temp);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_FIND_LAST_NOT_OF:
@@ -232,7 +224,6 @@ main(void)
                     char* temp = create_test_string(size);
                     assert(str_find_last_not_of(&a, temp) == b.find_last_not_of(temp));
                     free(temp);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_SUBSTR:
@@ -246,7 +237,6 @@ main(void)
                         CHECK(substr1, substr2);
                         str_free(&substr1);
                     }
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_COMPARE:
@@ -266,7 +256,6 @@ main(void)
                     str_free(&_b);
                     free(_ta);
                     free(_tb);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_CLEAR:
@@ -274,7 +263,6 @@ main(void)
                     str_clear(&a);
                     b.clear();
                     LOG_CAP(a,b);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_ERASE:
@@ -282,7 +270,6 @@ main(void)
                     const size_t index = TEST_RAND(a.size);
                     b.erase(b.begin() + index);
                     str_erase(&a, index);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_INSERT:
@@ -295,7 +282,6 @@ main(void)
                         b.insert(b.begin() + index, value);
                         str_insert(&a, index, value);
                     }
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_RESIZE:
@@ -303,7 +289,6 @@ main(void)
                     const size_t resize = 3 * TEST_RAND(a.size);
                     b.resize(resize);
                     str_resize(&a, resize, '\0');
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_RESERVE:
@@ -313,7 +298,6 @@ main(void)
                     str_reserve(&a, capacity);
                     LOG("CTL reserve %zu %zu\n", a.size, a.capacity);
                     LOG("STL reserve %zu %zu\n", b.size(), b.capacity());
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_SHRINK_TO_FIT:
@@ -323,7 +307,6 @@ main(void)
                     LOG("CTL shrink_to_fit %zu %zu\n", a.size, a.capacity);
                     LOG("STL shrink_to_fit %zu %zu\n", b.size(), b.capacity());
                     LOG_CAP(a,b);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_SORT:
@@ -334,7 +317,6 @@ main(void)
                     std::sort(b.begin(), b.end());
                     LOG("STL    sort \"%s\"\n", b.c_str());
                     LOG_CAP(a,b);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_COPY:
@@ -345,7 +327,6 @@ main(void)
                     LOG("copy ca: \"%s\": %zu\n", ca.value, ca.capacity);
                     CHECK(ca, cb);
                     str_free(&ca);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_ASSIGN:
@@ -354,7 +335,6 @@ main(void)
                     size_t assign_size = TEST_RAND(a.size);
                     str_assign(&a, assign_size, value);
                     b.assign(assign_size, value);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_SWAP:
@@ -369,14 +349,12 @@ main(void)
                     CHECK(aaa, bbb);
                     str_free(&aaa);
                     str_free(&aa);
-                    CHECK(a, b);
                     break;
                 }
                 case TEST_COUNT:
                 {
                     const char value = TEST_RAND(ALPHA_LETTERS);
                     assert(count(b.begin(), b.end(), value) == str_count(&a, value));
-                    CHECK(a, b);
                     break;
                 }
             }

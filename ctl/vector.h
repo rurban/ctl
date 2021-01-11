@@ -190,8 +190,11 @@ static inline void
 JOIN(A, fit)(A* self, size_t capacity)
 {
     size_t overall = capacity;
-    //if(MUST_ALIGN_16(T)) // reserve terminating \0 for strings
-    //    overall++;
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert (capacity < JOIN(A, max_size)() || !"max_size overflow");
+#endif
+    if(MUST_ALIGN_16(T)) // reserve terminating \0 for strings
+        overall++;
     self->value = (T*) realloc(self->value, overall * sizeof(T));
     if(MUST_ALIGN_16(T))
     {
@@ -208,11 +211,19 @@ JOIN(A, fit)(A* self, size_t capacity)
 }
 
 static inline void
-JOIN(A, reserve)(A* self, const size_t capacity)
+JOIN(A, reserve)(A* self, const size_t n)
 {
-    if(capacity != self->capacity)
+    if(n > JOIN(A, max_size)())
     {
-        size_t actual = capacity <= self->size ? self->size : capacity;
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+        assert (n < JOIN(A, max_size)() || !"max_size overflow");
+#endif
+        return;
+    }
+    if(self->capacity != n)
+    {
+        // don't shrink, but shrink_to_fit
+        size_t actual = n <= self->size ? self->size : n;
         //if(MUST_ALIGN_16(T))
         //    actual = ((actual + 15) & ~15) - 1;
         if(actual > 0)
@@ -228,6 +239,9 @@ JOIN(A, push_back)(A* self, T value)
             self->capacity == 0 ? INIT_SIZE : 2 * self->capacity);
     *JOIN(A, at)(self, self->size) = value;
     self->size++;
+//#ifdef CTL_STR
+//    self->value[self->size] = '\0';
+//#endif
 }
 
 static inline void
@@ -385,6 +399,9 @@ JOIN(A, sort)(A* self)
     CTL_ASSERT_COMPARE
     if (self->size)
         JOIN(A, _ranged_sort)(self, 0, self->size - 1, self->compare);
+//#ifdef CTL_STR
+//    self->value[self->size] = '\0';
+//#endif
 }
 
 static inline A

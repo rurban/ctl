@@ -135,8 +135,6 @@ respectively. Likewise `map.h` from `set.h` and `unordered_map.h` from
 `unordered_set.h` is defined with the faster `CTL_USET_GROWTH_POWER2`, as my
 STL. `CTL_USET_GROWTH_PRIMED` is safer but atrocious.
 
-Note, CTL strings do not support short strings yet.
-
 ## Running Tests
 
 To run all functional tests, run:
@@ -348,6 +346,8 @@ The `CTL_USET_CACHED_HASH` policy is still in work, for faster finds but more me
 
 Optimized list, seperate connect before and after methods.
 
+Implemented correct short string capacity policies.
+
 Work is ongoing for all `algorithms.h` and `ranges`, with full iterator support
 and `foreach_range`.
 
@@ -373,8 +373,6 @@ return the iterator and set a `int *foundp` value. Eg.
 
 `emplace`, `erase_if` and many algorithms still missing, most C++20 methods
 also still missing.
-
-No short string optimization yet.
 
 hashmaps will not rely on chained lists with buckets, and will be either changed
 to open addressing or a better modern layout, such greg7mdp/parallel-hashmap.
