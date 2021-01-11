@@ -276,10 +276,18 @@ JOIN(A, resize)(A* self, size_t size, T value)
     {
         if(size > self->capacity)
         {
+#ifdef CTL_STR
             size_t capacity = 2 * self->capacity;
             if(size > capacity)
                 capacity = size;
             JOIN(A, reserve)(self, capacity);
+#else       // different vector growth policy. double or just grow as needed.
+            size_t capacity;
+            size_t n = size > self->size ? size - self->size : 0;
+            LOG("  grow vector by %zu with size %zu\n", n, self->size);
+            capacity = self->size + (self->size > n ? self->size : n);
+            JOIN(A, fit)(self, capacity);
+#endif
         }
         for(size_t i = 0; self->size < size; i++)
             JOIN(A, push_back)(self, self->copy(&value));

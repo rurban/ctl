@@ -152,9 +152,9 @@ main(void)
                 {
                     const size_t resize = 3 * TEST_RAND(a.size) + 1;
                     b.resize(resize);
+                    LOG("STL resize by %zu %zu -> %zu\n", resize, b.size(), b.capacity());
                     vec_digi_resize(&a, resize, digi_init(0));
-                    LOG("CTL resize by %zu %zu %zu\n", resize, a.size, a.capacity);
-                    LOG("STL resize by %zu %zu %zu\n", resize, b.size(), b.capacity());
+                    LOG("CTL resize by %zu %zu -> %zu\n", resize, a.size, a.capacity);
                     break;
                 }
                 case TEST_RESERVE:
