@@ -48,6 +48,7 @@ position to the top in each access, such as find and contains, not only insert.
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#define IT B*
 
 #include <ctl/ctl.h>
 

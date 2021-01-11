@@ -13,6 +13,7 @@
 #define CTL_VEC
 #define A JOIN(vec, T)
 #define I JOIN(A, it)
+#define IT T*
 
 // only for short strings, not vec_uint8_t
 #ifndef MUST_ALIGN_16

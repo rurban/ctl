@@ -12,6 +12,7 @@
 #define A JOIN(list, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#define IT B*
 
 typedef struct B
 {
@@ -341,6 +342,7 @@ JOIN(I, iter)(A* self, B *node)
     it.node = node;
     if (!node)
         it.done = 1;
+        it.next = NULL; // JOIN(A, end)(self)
     else
     {
         it.ref = &node->value;

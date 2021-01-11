@@ -11,6 +11,7 @@
 #define A JOIN(set, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#define IT B*
 
 #include <ctl/ctl.h>
 
