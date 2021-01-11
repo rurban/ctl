@@ -297,6 +297,8 @@ main(void)
                     const size_t resize = 3 * TEST_RAND(a.size);
                     b.resize(resize);
                     str_resize(&a, resize, '\0');
+                    LOG("CTL resize by %zu %zu %zu\n", resize, a.size, a.capacity);
+                    LOG("STL resize by %zu %zu %zu\n", resize, b.size(), b.capacity());
                     break;
                 }
                 case TEST_RESERVE:
@@ -304,8 +306,8 @@ main(void)
                     const size_t capacity = 3 * TEST_RAND(a.capacity);
                     b.reserve(capacity);
                     str_reserve(&a, capacity);
-                    LOG("CTL reserve %zu %zu\n", a.size, a.capacity);
-                    LOG("STL reserve %zu %zu\n", b.size(), b.capacity());
+                    LOG("CTL reserve by %zu %zu\n", a.capacity, a.capacity);
+                    LOG("STL reserve by %zu %zu\n", capacity, b.capacity());
                     break;
                 }
                 case TEST_SHRINK_TO_FIT:

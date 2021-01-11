@@ -221,7 +221,12 @@ JOIN(A, reserve)(A* self, const size_t n)
 #endif
         return;
     }
+#ifdef CTL_STR
     if(self->capacity != n)
+#else
+    // never shrink vectors with reserve
+    if(self->capacity < n)
+#endif
     {
         // don't shrink, but shrink_to_fit
         size_t actual = n < self->size ? self->size : n;
