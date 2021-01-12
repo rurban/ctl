@@ -310,6 +310,8 @@ JOIN(A, reserve)(A* self, size_t desired_count)
     const size_t new_size = JOIN(A, __next_prime)(desired_count);
     LOG("primed growth policy %zu => %zu ", desired_count, new_size);
 #endif
+    if (new_size == self->bucket_count)
+        return;
     JOIN(A, _rehash)(self, new_size);
 }
 
@@ -335,11 +337,10 @@ JOIN(A, init)(size_t (*_hash)(T*), int (*_equal)(T*, T*))
 static inline void
 JOIN(A, rehash)(A* self, size_t desired_count)
 {
-    A rehashed = JOIN(A, init)(self->hash, self->equal);
-    size_t bucket_count = self->bucket_count;
-    JOIN(A, reserve)(&rehashed, desired_count);
-    if (bucket_count == rehashed.bucket_count)
+    if (desired_count == self->bucket_count)
         return;
+    A rehashed = JOIN(A, init)(self->hash, self->equal);
+    JOIN(A, reserve)(&rehashed, desired_count);
     foreach(A, self, it)
     {
         B** buckets = JOIN(A, _bucket)(&rehashed, it.node->value);
@@ -347,9 +348,10 @@ JOIN(A, rehash)(A* self, size_t desired_count)
             *buckets = JOIN(B, push)(*buckets, it.node);
     }
     rehashed.size = self->size;
-    LOG ("rehash from %lu to %lu, load %f\n", rehashed.size, rehashed.bucket_count,
+    LOG ("rehash temp. from %lu to %lu, load %f\n", rehashed.size, rehashed.bucket_count,
          JOIN(A, load_factor)(self));
     free(self->buckets);
+    LOG ("free old\n");
     *self = rehashed;
 }
 
@@ -357,6 +359,7 @@ JOIN(A, rehash)(A* self, size_t desired_count)
 static inline void
 JOIN(A, _rehash)(A* self, size_t count)
 {
+    // we do allow shrink here
     if (count == self->bucket_count)
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
@@ -373,6 +376,7 @@ JOIN(A, _rehash)(A* self, size_t count)
          JOIN(A, load_factor)(self));
     free(self->buckets);
     *self = rehashed;
+    return;
 }
 
 // Note: As this is used internally a lot, don't consume (free) the key.

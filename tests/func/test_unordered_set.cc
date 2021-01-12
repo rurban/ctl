@@ -58,22 +58,22 @@ void print_unordered_set(std::unordered_set<DIGI,DIGI_hash> b)
 #define print_unordered_set(bb)
 #endif
 
+#ifdef DEBUG
+#define TEST_MAX_VALUE TEST_MAX_SIZE
+#else
+#define TEST_MAX_VALUE INT_MAX
+#endif
+
 static void
 setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
 {
     size_t size = TEST_RAND(TEST_MAX_SIZE);
-#ifdef DEBUG
-    //size = 10;
-#endif
     LOG ("\nSETUP_SETS %lu\n", size);
     *a = uset_digi_init(digi_hash, digi_equal);
-    // TODO a->equal = digi_equal
-#ifdef DEBUG
-    //uset_digi_rehash(a, size * 2);
-#endif
+    uset_digi_rehash(a, size);
     for(size_t inserts = 0; inserts < size; inserts++)
     {
-        const int vb = TEST_RAND(TEST_MAX_SIZE);
+        const int vb = TEST_RAND(TEST_MAX_VALUE);
         uset_digi_insert(a, digi_init(vb));
         b.insert(DIGI{vb});
     }
@@ -157,7 +157,7 @@ main(void)
         {
             case TEST_INSERT:
             {
-                const int vb = TEST_RAND(TEST_MAX_SIZE);
+                const int vb = TEST_RAND(TEST_MAX_VALUE);
                 uset_digi_insert(&a, digi_init(vb));
                 b.insert(DIGI{vb});
                 break;
@@ -189,7 +189,7 @@ main(void)
             }
             case TEST_CONTAINS:
             {
-                const int vb = TEST_RAND(TEST_MAX_SIZE);
+                const int vb = TEST_RAND(TEST_MAX_VALUE);
                 bool a_has = uset_digi_contains(&a, digi_init(vb));
 #ifdef __cpp_lib_erase_if
                 bool b_has = b.contains(DIGI{vb}); //C++20
@@ -216,8 +216,9 @@ main(void)
             case TEST_REHASH:
             {
                 size_t size = uset_digi_size(&a);
-                LOG (" -> %lu\n", size);
+                LOG ("size %lu -> %lu, cap: %lu\n", size, size * 2, a.bucket_count);
                 b.rehash(size * 2);
+                LOG ("STL size: %lu, cap: %lu\n", b.size(), b.bucket_count());
                 uset_digi_rehash(&a, size * 2);
                 break;
             }
@@ -269,7 +270,7 @@ main(void)
             }
             case TEST_FIND:
             {
-                int vb = TEST_RAND(TEST_MAX_SIZE);
+                int vb = TEST_RAND(TEST_MAX_VALUE);
                 digi key = digi_init(vb);
                 // find is special, it doesnt free the key
                 uset_digi_node* aa = uset_digi_find(&a, key);
