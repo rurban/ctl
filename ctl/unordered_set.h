@@ -186,7 +186,7 @@ static inline uint32_t
 JOIN(A, __next_power2)(uint32_t n)
 {
 #ifdef __GNUC__
-    return 1 << (32 - __builtin_clz(n-1));
+    return n >= 8 ? 1 << (32 - __builtin_clz(n-1)) : 8;
 #else
     return 1 << ceil(log2((double)n));
 #endif
@@ -303,6 +303,8 @@ static inline void JOIN(A, _rehash)(A* self, size_t count);
 static inline void
 JOIN(A, reserve)(A* self, size_t desired_count)
 {
+    if ((int32_t)desired_count <= 0)
+        return;
 #ifdef CTL_USET_GROWTH_POWER2
     const size_t new_size = JOIN(A, __next_power2)(desired_count);
     LOG("power2 growth policy %zu => %zu ", desired_count, new_size);
