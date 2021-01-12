@@ -213,7 +213,7 @@ JOIN(B, bucket_size)(B* self)
 static inline B*
 JOIN(B, push)(B* bucket, B* n)
 {
-#ifdef DEBUG
+#ifdef DEBUG_COLL
     if (n->next)
         LOG ("push collision %zu\n", JOIN(B, bucket_size)(n));
 #endif
