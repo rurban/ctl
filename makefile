@@ -129,6 +129,9 @@ MANPAGES = ${patsubst docs/%.md,docs/man/%.h.3, ${wildcard docs/*.md}}
 
 man: docs/man/ctl.h.3 ${MANPAGES}
 
+docs/index.md : README.md
+	./update-index.pl
+
 docs/man/ctl.h.3: docs/index.md
 	@mkdir -p docs/man
 	ronn < $< > $@
@@ -136,6 +139,7 @@ docs/man/%.h.3 : docs/%.md
 	ronn < $< > $@
 
 install: man
+	-rm docs/man/index.h.3
 	mkdir -p ${DESTDIR)${PREFIX)/include/ctl
 	cp ctl/*.h ${DESTDIR)${PREFIX)/include/ctl/
 	mkdir -p ${DESTDIR)${PREFIX)/share/man/man3

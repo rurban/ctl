@@ -42,20 +42,26 @@ https://github.com/glouw/ctl/wiki for the original sample with three-letter name
 CTL aims to improve ISO C99/C11 developer productivity by implementing
 the following STL containers in ISO C99/C11:
 
-```
-ctl/deque.h          = std::deque           prefix: deq
-ctl/list.h           = std::list            prefix: list
-ctl/priority_queue.h = std::priority_queue  prefix: pqu
-ctl/queue.h          = std::queue           prefix: queue
-ctl/set.h            = std::set             prefix: set
-ctl/stack.h          = std::stack           prefix: stack
-ctl/string.h         = std::string          prefix: str
-ctl/vector.h         = std::vector          prefix: vec
-ctl/map.h            = std::map             prefix: map
-ctl/unordered_map.h  = std::unordered_map   prefix: umap
-ctl/unordered_set.h  = std::unordered_set   prefix: uset
-```
-`forward_list` (slist) is in work still.
+| CTL                                            | = C++ STL            | C prefix |
+|:-----------------------------------------------|:---------------------|----------|
+| [ctl/deque.h](docs/deque.md)                   | std::deque           | deq      |
+| [ctl/list.h](docs/list.md)                     | std::list            | list     |
+| [ctl/priority_queue.h](docs/priority_queue.md) | std::priority_queue  | pqu      |
+| [ctl/queue.h](docs/queue.md)                   | std::queue           | queue    |
+| [ctl/set.h](docs/set.md)                       | std::set             | set      |
+| [ctl/stack.h](docs/stack.md)                   | std::stack           | stack    |
+| [ctl/string.h](docs/string.md)                 | std::string          | str      |
+| [ctl/vector.h](docs/vector.md)                 | std::vector          | vec      |
+| [ctl/map.h](docs/map.md)                       | std::map             | map      |
+| [ctl/unordered_map.h](docs/unordered_map.md)   | std::unordered_map   | umap     |
+| [ctl/unordered_set.h](docs/unordered_set.md)   | std::unordered_set   | uset     |
+
+In work:
+
+[ctl/algorithm.h](docs/algorithm.md),
+[ctl/forward_list.h](docs/slist.md),
+[ctl/u8string.h](docs/u8string.md),
+[ctl/u8ident.h](docs/u8ident.md).
 
 It is based on glouw's ctl, but with proper names, and using the incpath `ctl/` prefix.
 
@@ -98,6 +104,7 @@ If you have a POD type, i.e. a struct with only integral types, i.e. no pointers
 have to define `NOT_INTEGRAL`.
 
 ```C
+
     #define POD
     #define NOT_INTEGRAL
     #define T point
@@ -152,7 +159,7 @@ make examples
 To generate performance graphs, run:
 
 ```shell
-sh gen_images.sh
+make images
 
 # Graphing requires python3 and the Plotly family of libraries via pip3.
 pip install plotly
@@ -346,7 +353,8 @@ The `CTL_USET_CACHED_HASH` policy is still in work, for faster finds but more me
 
 Optimized list, seperate connect before and after methods.
 
-Implemented correct short string capacity policies.
+Implemented correct short string and vector capacity policies, as in gcc
+libstdc++ and llvm libc++.
 
 Work is ongoing for all `algorithms.h` and `ranges`, with full iterator support
 and `foreach_range`.
