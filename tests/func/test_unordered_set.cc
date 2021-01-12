@@ -159,7 +159,6 @@ main(void)
                 const int vb = TEST_RAND(TEST_MAX_SIZE);
                 uset_digi_insert(&a, digi_init(vb));
                 b.insert(DIGI{vb});
-                CHECK(a, b);
                 break;
             }
             case TEST_ERASE_IF:
@@ -185,7 +184,6 @@ main(void)
                 }
 #endif
                 assert(a_erases == b_erases);
-                CHECK(a, b);
                 break;
             }
             case TEST_CONTAINS:
@@ -198,7 +196,6 @@ main(void)
                 bool b_has = b.count(DIGI{vb}) == 1;
 #endif
                 assert(a_has == b_has);
-                CHECK(a, b);
                 break;
             }
             case TEST_ERASE:
@@ -211,10 +208,8 @@ main(void)
                         digi kd = digi_init(key);
                         uset_digi_erase(&a, kd);
                         b.erase(DIGI{key});
-                        CHECK(a, b);
                         digi_free(&kd);
                     }
-                CHECK(a, b);
                 break;
             }
             case TEST_REHASH:
@@ -223,7 +218,6 @@ main(void)
                 LOG (" -> %lu\n", size);
                 b.rehash(size * 2);
                 uset_digi_rehash(&a, size * 2);
-                CHECK(a, b);
                 break;
             }
             case TEST_RESERVE:
@@ -259,7 +253,6 @@ main(void)
                 CHECK(aaa, bbb);
                 uset_digi_free(&aa);
                 uset_digi_free(&aaa);
-                CHECK(a, b);
                 break;
             }
             case TEST_COUNT:
@@ -268,26 +261,26 @@ main(void)
                 int aa = uset_digi_count(&a, digi_init(key));
                 int bb = b.count(DIGI{key});
                 assert(aa == bb);
-                CHECK(a, b);
                 break;
             }
             case TEST_FIND:
             {
-                int key = TEST_RAND(TEST_MAX_SIZE);
-                uset_digi_node* aa = uset_digi_find(&a, digi_init(key));
-                auto bb = b.find(DIGI{key});
+                int vb = TEST_RAND(TEST_MAX_SIZE);
+                digi key = digi_init(vb);
+                // find is special, it doesnt free the key
+                uset_digi_node* aa = uset_digi_find(&a, key);
+                auto bb = b.find(DIGI{vb});
                 if(bb == b.end())
                     assert(uset_digi_end(&a) == aa);
                 else
                     assert(*bb->value == *aa->value.value);
-                CHECK(a, b);
+                digi_free (&key);
                 break;
             }
             case TEST_CLEAR:
             {
                 b.clear();
                 uset_digi_clear(&a);
-                CHECK(a, b);
                 break;
             }
             case TEST_COPY:
@@ -296,7 +289,6 @@ main(void)
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 CHECK(aa, bb);
                 uset_digi_free(&aa);
-                CHECK(a, b);
                 break;
             }
             case TEST_EQUAL:
@@ -308,7 +300,6 @@ main(void)
                 assert(uset_digi_equal(&a, &aa));
                 assert(b == bb);
                 uset_digi_free(&aa);
-                CHECK(a, b);
                 break;
             }
             case TEST_UNION:
@@ -320,7 +311,6 @@ main(void)
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
                                std::inserter(bbb, bbb.begin()));
-                CHECK(a, b);
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
                 uset_digi_free(&aa);
@@ -337,7 +327,6 @@ main(void)
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                               std::inserter(bbb, bbb.begin()));
-                CHECK(a, b);
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
                 uset_digi_free(&aa);
@@ -353,7 +342,6 @@ main(void)
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
                                       std::inserter(bbb, bbb.begin()));
-                CHECK(a, b);
                 CHECK(aa, bb);
                 CHECK(aaa, bbb); // TODO size error
                 uset_digi_free(&aa);
@@ -370,7 +358,6 @@ main(void)
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                     std::inserter(bbb, bbb.begin()));
-                CHECK(a, b);
                 CHECK(aa, bb);
                 print_unordered_set(bbb);
                 CHECK(aaa, bbb);

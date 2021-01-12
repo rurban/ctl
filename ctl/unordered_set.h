@@ -375,14 +375,16 @@ JOIN(A, _rehash)(A* self, size_t count)
     *self = rehashed;
 }
 
+// Note: As this is used internally a lot, don't consume (free) the key.
+// The user must free it by himself.
 static inline B*
-JOIN(A, find)(A* self, T value)
+JOIN(A, find)(A* self, T key)
 {
     if(self->size)
     {
-        B** buckets = JOIN(A, _bucket)(self, value);
+        B** buckets = JOIN(A, _bucket)(self, key);
         for(B* n = *buckets; n; n = n->next)
-            if(self->equal(&value, &n->value))
+            if(self->equal(&key, &n->value))
                 // TODO: the popular move-to-from strategy
                 return n;
     }
