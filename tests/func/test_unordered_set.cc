@@ -5,6 +5,7 @@
 #define T digi
 #include <ctl/unordered_set.h>
 
+#include <inttypes.h>
 #include <unordered_set>
 #include <algorithm>
 
@@ -225,20 +226,23 @@ main(void)
                 size_t size = uset_digi_size(&a);
                 float load = uset_digi_load_factor(&a);
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
-                const size_t reserve = size * 2 / load;
+                const int32_t reserve = size * 2 / load;
                 LOG ("load %f\n", load);
-                bb.reserve(reserve);
-                LOG ("STL reserve by %zu %zu\n", reserve, bb.bucket_count());
-                LOG ("before\n");
-                print_uset(&a);
-                uset_digi aa = uset_digi_copy(&a);
-                LOG ("copy\n");
-                print_uset(&aa);
-                uset_digi_reserve(&aa, reserve);
-                LOG ("CTL reserve by %zu %zu\n", reserve, aa.bucket_count);
-                print_uset(&aa);
-                CHECK(aa, bb);
-                uset_digi_free(&aa);
+                if (reserve > 0) // avoid std::bad_alloc
+                {
+                    bb.reserve(reserve);
+                    LOG ("STL reserve by %" PRId32 " %zu\n", reserve, bb.bucket_count());
+                    LOG ("before\n");
+                    print_uset(&a);
+                    uset_digi aa = uset_digi_copy(&a);
+                    LOG ("copy\n");
+                    print_uset(&aa);
+                    uset_digi_reserve(&aa, reserve);
+                    LOG ("CTL reserve by %" PRId32 " %zu\n", reserve, aa.bucket_count);
+                    print_uset(&aa);
+                    CHECK(aa, bb);
+                    uset_digi_free(&aa);
+                }
                 break;
             }
             case TEST_SWAP:

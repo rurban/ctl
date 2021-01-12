@@ -5,6 +5,7 @@
 #define T strint
 #include <ctl/unordered_map.h>
 
+#include <inttypes.h>
 #include <string>
 #include <unordered_map>
 #include <algorithm>
@@ -166,12 +167,18 @@ main(void)
             case TEST_RESERVE:
             {
                 size_t size = umap_strint_size(&a);
-                size_t load = umap_strint_load_factor(&a);
+                float load = umap_strint_load_factor(&a);
                 std::unordered_map<std::string,int> bb = b;
-                bb.reserve(size * 2 / load);
-                umap_strint aa = umap_strint_copy(&a);
-                umap_strint_reserve(&aa, size * 2 / load);
-                CHECK(aa, bb);
+                const int32_t reserve = size * 2 / load;
+                LOG ("load %f\n", load);
+                if (reserve > 0) // avoid std::bad_alloc
+                {
+                    bb.reserve(reserve);
+                    umap_strint aa = umap_strint_copy(&a);
+                    umap_strint_reserve(&aa, reserve);
+                    CHECK(aa, bb);
+                    umap_strint_free(&aa);
+                }
                 break;
             }
 #ifdef DEBUG
