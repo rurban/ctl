@@ -62,7 +62,7 @@ setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
 {
     size_t size = TEST_RAND(TEST_MAX_SIZE);
 #ifdef DEBUG
-    size = 10;
+    //size = 10;
 #endif
     LOG ("\nSETUP_SETS %lu\n", size);
     *a = uset_digi_init(digi_hash, digi_equal);

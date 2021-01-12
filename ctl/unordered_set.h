@@ -522,6 +522,8 @@ JOIN(A, count)(A* self, T value)
     foreach(A, self, it)
         if(self->equal(it.ref, &value))
             count++;
+    if(self->free)
+        self->free(&value);
     return count;
 }
 
@@ -531,8 +533,14 @@ JOIN(A, contains)(A* self, T value)
 {
     foreach(A, self, it)
         if(self->equal(it.ref, &value))
+        {
+            if(self->free)
+                self->free(&value);
             // TODO: the popular move-to-from strategy
             return true;
+        }
+    if(self->free)
+        self->free(&value);
     return false;
 }
 
