@@ -241,6 +241,13 @@ JOIN(A, reserve)(A* self, const size_t n)
                     actual = 2 * self->capacity;
                 if (actual > max_size)
                     actual = max_size;
+# ifdef _LIBCPP_STD_VER // which versions? this is 18 (being 2018 for clang 10)
+                // with libc++ round up to 16
+                if (actual > 30)
+                    actual = ((actual & ~15) == actual)
+                        ? (actual + 15)
+                        : ((actual + 15) & ~15)- 1;
+# endif
                 JOIN(A, fit)(self, actual);
             }
             else

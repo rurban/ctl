@@ -6,11 +6,11 @@
 #include <string>
 
 #define ASSERT_EQUAL_SIZE(c, s) (assert(s.size() == c.size))
-//#ifdef DEBUG
-//#define ASSERT_EQUAL_CAP(c, s)
-//#else
+#if defined(DEBUG)
+#define ASSERT_EQUAL_CAP(c, s)
+#else
 #define ASSERT_EQUAL_CAP(c, s) (assert(s.capacity() == c.capacity))
-//#endif
+#endif
 
 int
 main(void)
@@ -35,9 +35,10 @@ main(void)
             if(mode == MODE_DIRECT)
             {
                 LOG("mode DIRECT\n");
+                size_t old_size = a.size;
                 b.resize (size);
-                str_resize  (&a, size, '\0');
-                LOG("ctl resize   %zu vs %zu\n", a.size, b.size());
+                str_resize (&a, size, '\0');
+                LOG("ctl resize %zu -> %zu vs %zu\n", old_size, a.size, b.size());
             }
             if(mode == MODE_GROWTH)
             {

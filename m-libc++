@@ -1,0 +1,4 @@
+#!/bin/sh
+# not needed on macOS nor FreeBSD
+# need to install libcxx-devel
+make CXX='clang++ -stdlib=libc++' $@

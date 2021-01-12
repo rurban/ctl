@@ -42,7 +42,11 @@ str_init(const char* c_str)
 {
     str self = str___INIT();
     size_t len = strlen(c_str);
+#ifndef _LIBCPP_STD_VER
     size_t min = 15;
+#else
+    size_t min = 22;
+#endif
     self.compare = str_char_compare;
     self.equal = str_char_equal;
     str_reserve(&self, len < min ? min : len);
