@@ -23,6 +23,7 @@
 #define TEST_SIGN(a) ((a < 0) ? (-1) : (a > 0) ? (1) : (0))
 
 #define TEST_PASS(f) printf("%s: PASS\n", f)
+#define TEST_FAIL(f) printf("%s: FAIL\n", f)
 
 #define TEST_RAND(max) (((max) == 0) ? 0 : (rand() % (max)))
 

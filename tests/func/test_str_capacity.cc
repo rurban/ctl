@@ -7,7 +7,7 @@
 
 #define ASSERT_EQUAL_SIZE(c, s) (assert(s.size() == c.size))
 #if defined(DEBUG)
-#define ASSERT_EQUAL_CAP(c, s)
+#define ASSERT_EQUAL_CAP(c, s) if (s.capacity() != c.capacity) fail++
 #else
 #define ASSERT_EQUAL_CAP(c, s) (assert(s.capacity() == c.capacity))
 #endif
@@ -16,6 +16,7 @@ int
 main(void)
 {
     INIT_SRAND;
+    size_t fail = 0;
     const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
     for(size_t loop = 0; loop < loops; loop++)
     {
@@ -35,10 +36,9 @@ main(void)
             if(mode == MODE_DIRECT)
             {
                 LOG("mode DIRECT\n");
-                size_t old_size = a.size;
                 b.resize (size);
                 str_resize (&a, size, '\0');
-                LOG("ctl resize %zu -> %zu vs %zu\n", old_size, a.size, b.size());
+                LOG("ctl resize 0 -> %zu vs %zu\n", a.size, b.size());
             }
             if(mode == MODE_GROWTH)
             {
@@ -60,5 +60,8 @@ main(void)
             str_free  (&a);
         }
     }
-    TEST_PASS(__FILE__);
+    if (fail)
+        TEST_FAIL(__FILE__);
+    else
+        TEST_PASS(__FILE__);
 }
