@@ -230,19 +230,22 @@ JOIN(A, reserve)(A* self, const size_t n)
     {
         // don't shrink, but shrink_to_fit
         size_t actual = n < self->size ? self->size : n;
-        //if(MUST_ALIGN_16(T))
-        //    actual = ((actual + 15) & ~15) - 1;
         if(actual > 0)
         {
 #ifdef CTL_STR
+            // reflecting gcc libstdc++ with __cplusplus >= 201103L < 2021 (gcc-10)
             if (actual > self->capacity) // double it
             {
                 if (actual < 2 * self->capacity)
                     actual = 2 * self->capacity;
                 if (actual > max_size)
                     actual = max_size;
-# ifdef _LIBCPP_STD_VER // which versions? this is 18 (being 2018 for clang 10)
+# ifdef _LIBCPP_STD_VER
                 // with libc++ round up to 16
+                // which versions? this is 18 (being 2018 for clang 10)
+                // but I researched it back to the latest change in __grow_by in
+                // PR17148, 2013
+                // TODO: Is there a _LIBCPP_STD_VER 13?
                 if (actual > 30)
                     actual = ((actual & ~15) == actual)
                         ? (actual + 15)

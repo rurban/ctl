@@ -8,7 +8,12 @@
 #define ASSERT_EQUAL_SIZE(c, s) (assert(s.size() == c.size))
 #if defined(DEBUG)
 #define ASSERT_EQUAL_CAP(c, s) if (s.capacity() != c.capacity) fail++
-#else
+// capacity is implemention-defined and we tested against gcc libstdc++ v3
+// and llvm libc++ v1 ver 18
+// gcc libstdc++ had the latest change with __cplusplus >= 201103L
+// libc++ had the latest change in __grow_by in PR17148, 2013
+#elif (defined _LIBCPP_STD_VER || \
+       (defined _GLIBCXX_RELEASE && __cplusplus >= 201103L))
 #define ASSERT_EQUAL_CAP(c, s) (assert(s.capacity() == c.capacity))
 #endif
 
