@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         MAKE:
-          - make -j9 SANITIZE=1 LONG=1
+          - make -j9 SANITIZE=1
           - make -j9 CC=gcc\ -std=c99
           - make -j9 CC=gcc\ -std=c11
           - make examples SANITIZE=1
