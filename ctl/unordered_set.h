@@ -48,9 +48,11 @@ position to the top in each access, such as find and contains, not only insert.
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#undef IT
 #define IT B*
 
 #include <ctl/ctl.h>
+#include <ctl/bits/iterators.h>
 
 typedef struct B
 {
@@ -494,11 +496,11 @@ JOIN(A, rehash)(A* self, size_t desired_count)
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
     JOIN(A, reserve)(&rehashed, desired_count);
-    foreach(A, self, it)
+    foreach_ref(A, T, self, it, ref)
     {
-        B** buckets = JOIN(A, _cached_bucket)(&rehashed, it.node);
-        if (it.node != *buckets)
-            JOIN(B, push)(buckets, it.node);
+        B** buckets = JOIN(A, _cached_bucket)(&rehashed, it);
+        if (it != *buckets)
+            JOIN(B, push)(buckets, it);
     }
     rehashed.size = self->size;
     LOG ("rehash temp. from %lu to %lu, load %f\n", rehashed.size, rehashed.bucket_count,
@@ -518,11 +520,11 @@ JOIN(A, _rehash)(A* self, size_t count)
     A rehashed = JOIN(A, init)(self->hash, self->equal);
     LOG("_rehash %zu => %zu\n", self->size, count);
     JOIN(A, _reserve)(&rehashed, count);
-    foreach(A, self, it)
+    foreach_ref(A, T, self, it, ref)
     {
-        B** buckets = JOIN(A, _cached_bucket)(&rehashed, it.node);
-        if (it.node != *buckets)
-            JOIN(B, push)(buckets, it.node);
+        B** buckets = JOIN(A, _cached_bucket)(&rehashed, *ref);
+        if (it != *buckets)
+            JOIN(B, push)(buckets, it);
     }
     rehashed.size = self->size;
     LOG ("_rehash from %lu to %lu, load %f\n", rehashed.size, count,
@@ -673,8 +675,8 @@ JOIN(A, emplace_found)(A* self, T* value, int* foundp)
 static inline void
 JOIN(A, clear)(A* self)
 {
-    foreach(A, self, it)
-        JOIN(A, _free_node)(self, it.node);
+    foreach(A, T, self, it)
+        JOIN(A, _free_node)(self, it);
     memset(self->buckets, 0, self->bucket_count * sizeof(B*));
     /* for(size_t i = 0; i < self->bucket_count; i++)
         self->buckets[i] = NULL; */
@@ -798,9 +800,9 @@ JOIN(A, copy)(A* self)
     LOG ("copy\norig size: %lu\n", self->size);
     A other = JOIN(A, init)(self->hash, self->equal);
     JOIN(A, _reserve)(&other, self->bucket_count);
-    foreach(A, self, it) {
+    foreach_ref(A, T, self, it, ref) {
         //LOG ("size: %lu\n", other.size);
-        JOIN(A, insert)(&other, self->copy(it.ref));
+        JOIN(A, insert)(&other, self->copy(ref));
     }
     LOG ("final size: %lu\n", other.size);
     return other;
@@ -810,9 +812,9 @@ static inline A
 JOIN(A, intersection)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
-    foreach(A, a, i)
-        if(JOIN(A, find)(b, *i.ref))
-            JOIN(A, insert)(&self, self.copy(i.ref));
+    foreach_ref(A, T, a, it, ref)
+        if(JOIN(A, find)(b, *ref))
+            JOIN(A, insert)(&self, self.copy(ref));
     return self;
 }
 
@@ -820,8 +822,14 @@ static inline A
 JOIN(A, union)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
-    foreach(A, a, i) JOIN(A, insert)(&self, self.copy(i.ref));
-    foreach(A, b, i) JOIN(A, insert)(&self, self.copy(i.ref));
+    {
+        foreach_ref(A, T, a, it, ref)
+            JOIN(A, insert)(&self, self.copy(ref));
+    }
+    {
+        foreach_ref(A, T, b, it, ref)
+            JOIN(A, insert)(&self, self.copy(ref));
+    }
     return self;
 }
 
@@ -831,7 +839,8 @@ static inline A
 JOIN(A, difference)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
-    foreach(A, b, i) JOIN(A, erase)(&self, *i.ref);
+    foreach_ref(A, T, b, it, ref)
+        JOIN(A, erase)(&self, *ref);
     return self;
 }
 #endif
@@ -841,7 +850,8 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 {
     A self = JOIN(A, union)(a, b);
     A intersection = JOIN(A, intersection)(a, b);
-    foreach(A, &intersection, i) JOIN(A, erase)(&self, *i.ref);
+    foreach_ref(A, T, &intersection, it, ref)
+        JOIN(A, erase)(&self, *ref);
     JOIN(A, free)(&intersection);
     return self;
 }
@@ -852,11 +862,11 @@ JOIN(A, equal)(A* self, A* other)
 {
     size_t count_a = 0;
     size_t count_b = 0;
-    foreach(A, self, it)
-        if(JOIN(A, find)(self, *it.ref))
+    foreach_ref(A, T, self, it, ref)
+        if(JOIN(A, find)(self, *ref))
             count_a += 1;
-    foreach(A, other, it)
-        if(JOIN(A, find)(other, *it.ref))
+    foreach_ref(A, T, other, it, ref)
+        if(JOIN(A, find)(other, *ref))
             count_b += 1;
     return count_a == count_b;
 }

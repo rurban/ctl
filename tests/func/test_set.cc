@@ -40,13 +40,13 @@ void print_setpp(std::set<DIGI>& b) {
 #define CHECK(_x, _y) {                           \
     assert(_x.size == _y.size());                 \
     std::set<DIGI>::iterator _iter = _y.begin();  \
-    foreach(set_digi, &_x, _it) {                 \
-        assert(*_it.ref->value == *_iter->value); \
+    foreach_ref(set_digi, digi, &_x, _it, _ref) { \
+        assert(*_ref->value == *_iter->value);    \
         _iter++;                                  \
     }                                             \
     set_digi_it _it = set_digi_it_each(&_x);      \
     for(auto& _d : _y) {                          \
-        assert(*_it.ref->value == *_d.value);     \
+        assert(*_ref->value == *_d.value);        \
         _it.step(&_it);                           \
     }                                             \
 }

@@ -17,9 +17,9 @@
     {                                                                  \
         size_t a_found = 0;                                            \
         size_t b_found = 0;                                            \
-        foreach(umap_strint, &_x, it)                                  \
+        foreach(umap_strint, strint, &_x, it, _ref)                    \
         {                                                              \
-            str *_key = &it.ref->key;                                  \
+            str *_key = _ref->key;                                     \
             auto found = _y.find(str_c_str(_key));                     \
             assert(found != _y.end());                                 \
             a_found++;                                                 \

@@ -27,8 +27,8 @@ int main(int argc, char** argv)
         {
             t0 = TEST_TIME();
             volatile int sum = 0;
-            foreach(list_int, &c, it)
-                sum += *it.ref;
+            foreach_ref(list_int, int, &c, it, ref)
+                sum += *ref;
         }
         if (!silent)
             printf("%10d %10ld\n", elems, TEST_TIME() - t0);

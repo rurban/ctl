@@ -17,9 +17,9 @@
     {                                                                  \
         size_t a_found = 0;                                            \
         size_t b_found = 0;                                            \
-        foreach(uset_digi, &_x, it)                                    \
+        foreach_ref(uset_digi, digi, &_x, it, ref)                     \
         {                                                              \
-            auto found = _y.find(DIGI(*it.ref->value));                \
+            auto found = _y.find(DIGI(*ref->value));                   \
             assert(found != _y.end());                                 \
             a_found++;                                                 \
         }                                                              \
@@ -44,8 +44,8 @@
 void print_uset(uset_digi* a)
 {
     int i = 0;
-    foreach(uset_digi, a, it)
-        printf("%d: %d [%zu]\n", i++, *it.ref->value, it.bucket_index);
+    foreach_ref(uset_digi, digi, a, it, ref)
+        printf("%d: %d [%zu]\n", i++, *ref->value, it->bucket_index);
     printf("--\n");
 }
 void print_unordered_set(std::unordered_set<DIGI,DIGI_hash> b)

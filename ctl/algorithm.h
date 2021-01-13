@@ -4,7 +4,7 @@
 //
 // Might only be included once. By the child. not the parent.
 #ifndef __CTL_ALGORITHM_H__
-#define __CTL_ALGORITHM_H__
+# define __CTL_ALGORITHM_H__
 #define CTL_ALGORITHM
 
 #if !defined CTL_LIST && \
@@ -13,32 +13,37 @@
     !defined CTL_VEC && \
     !defined CTL_ARR && \
     !defined CTL_DEQ && \
-    /* plus all children also. we dont include it for parents */ \
+    /* plus all children also. we don't include it for parents */ \
+    !defined CTL_STACK && \
+    !defined CTL_QUEUE && \
+    !defined CTL_PQU && \
     !defined CTL_MAP && \
     !defined CTL_UMAP
 # error "No CTL container defined for <ctl/algorithm.h>"
 #endif
 
+#ifndef IT
+# error "Iterator type IT undefined for <ctl/algorithm.h>"
+#endif
+
 // Generic algorithms with ranges
 
-#include <ctl/bits/iterators.h>
-
-static inline IT*
+static inline IT
 JOIN(A, find_if)(A* self, int _match(T*))
 {
-    foreach(A, self, it)
-        if(_match(it.ref))
-            return iter_IT(it);
+    foreach_ref(A, T, self, it, ref)
+        if(_match(ref))
+            return it;
     return JOIN(A, end)(self);
 }
 
 // C++11
-static inline IT*
+static inline IT
 JOIN(A, find_if_not)(A* self, int _match(T*))
 {
-    foreach(A, self, it)
-        if(!_match(it.ref))
-            return iter_IT(it);
+    foreach_ref(A, T, self, it, ref)
+        if(!_match(ref))
+            return it;
     return JOIN(A, end)(self);
 }
 
@@ -68,54 +73,70 @@ JOIN(A, none_of)(A* self, int _match(T*))
 //      for VEC with T*
 //      for DEQ with size_t
 // see bits/iterators.h
-static inline I*
+static inline IT
 JOIN(A, find_range)(A* self, IT first, IT last, T value)
 {
-    if (!first->container)
-        return iter_IT_endp(last);
-    foreach_range(A, it, first, last)
-        if(JOIN(A, _equal)(first->container, it.ref, &value))
-            return iter_IT(it);
-    return iter_IT_endp(last);
+#ifndef CTL_DEQ
+    (void) self;
+#endif
+    foreach_ref_range(A, T, self, it, ref, first, last)
+        if(JOIN(A, _equal)(self, ref, &value))
+            return first;
+    return last;
 }
 
-static inline IT*
+static inline IT
 JOIN(A, find_if_range)(A* self, IT first, IT last, int _match(T*))
 {
-    foreach_range(A, it, first, last)
-        if(_match(it.ref))
-            return iter_IT(it);
-    return iter_IT_endp(last);
+#ifndef CTL_DEQ
+    (void) self;
+#endif
+    foreach_ref_range(A, T, self, it, ref, first, last)
+        if(_match(ref))
+            return it;
+    return last;
 }
 
-static inline IT*
+static inline IT
 JOIN(A, find_if_not_range)(A* self, IT first, IT last, int _match(T*))
 {
-    foreach_range(A, it, first, last)
-        if(!_match(it.ref))
-            return iter_IT(it);
-    return iter_IT_endp(last);
+#ifndef CTL_DEQ
+    (void) self;
+#endif
+    foreach_ref_range(A, T, self, it, ref, first, last)
+        if(!_match(ref))
+            return it;
+    return last;
 }
 
 // C++20
 static inline bool
 JOIN(A, all_of_range)(A* self, IT first, IT last, int _match(T*))
 {
-    IT* n = JOIN(A, find_if_not_range)(first, last, _match);
-    return n == iter_IT_endp(last);
+#ifndef CTL_DEQ
+    (void) self;
+#endif
+    IT n = JOIN(A, find_if_not_range)(self, first, last, _match);
+    return n == last;
 }
 // C++20
 static inline bool
 JOIN(A, none_of_range)(A* self, IT first, IT last, int _match(T*))
 {
-    IT* n = JOIN(A, find_if_range)(first, last, _match);
-    return n == iter_IT_endp(last);
+#ifndef CTL_DEQ
+    (void) self;
+#endif
+    IT n = JOIN(A, find_if_range)(self, first, last, _match);
+    return n == last;
 }
 // C++20
 static inline bool
 JOIN(A, any_of_range)(A* self, IT first, IT last, int _match(T*))
 {
-    return !JOIN(A, none_of_range)(first, last, _match);
+#ifdef CTL_B_ITER
+    (void) self;
+#endif
+    return !JOIN(A, none_of_range)(self, first, last, _match);
 }
 
 #if !defined(CTL_USET) && !defined(CTL_STR)
@@ -124,12 +145,9 @@ JOIN(A, any_of_range)(A* self, IT first, IT last, int _match(T*))
 static inline size_t
 JOIN(A, count_range)(A* self, IT first, IT last, T value)
 {
-    A* self = first->container;
-    if (!self)
-        return 0; // leak!
     size_t count = 0;
-    foreach_range(A, it, first, last)
-        if(JOIN(A, _equal)(self, it.ref, &value))
+    foreach_ref_range(A, T, self, it, ref, first, last)
+        if(JOIN(A, _equal)(self, ref, &value))
             count++;
     if (self->free)
         self->free(&value);
@@ -143,8 +161,8 @@ static inline size_t
 JOIN(A, count_if_range)(A* self, IT first, IT last, int _match(T*))
 {
     size_t count = 0;
-    foreach_range(A, it, first, last)
-        if(_match(it.ref))
+    foreach_ref_range(A, T, self, it, ref, first, last)
+        if(_match(ref))
             count++;
     return count;
 }
@@ -153,8 +171,8 @@ static inline size_t
 JOIN(A, count_if)(A* self, int _match(T*))
 {
     size_t count = 0;
-    foreach(A, self, it)
-        if(_match(it.ref))
+    foreach_ref(A, T, self, it, ref)
+        if(_match(ref))
             count++;
     return count;
 }
@@ -164,8 +182,8 @@ static inline size_t
 JOIN(A, count)(A* self, T value)
 {
     size_t count = 0;
-    foreach(A, self, it)
-        if(JOIN(A, _equal)(self, it.ref, &value))
+    foreach_ref(A, T, self, it, ref)
+        if(JOIN(A, _equal)(self, ref, &value))
             count++;
     if(self->free)
         self->free(&value);
@@ -180,10 +198,9 @@ JOIN(A, count)(A* self, T value)
 static inline bool
 JOIN(A, equal_range)(A* self, IT first, IT last, T value)
 {
-    A* self = first->container;
     bool result = true;
-    foreach_range(A, it, first, last)
-        if(!JOIN(A, _equal)(self, it.ref, &value))
+    foreach_ref_range(A, T, self, it, ref, first, last)
+        if(!JOIN(A, _equal)(self, ref, &value))
         {
             result = false;
             break;
@@ -230,5 +247,4 @@ JOIN(A, equal_range)(A* self, IT first, IT last, T value)
 // generate
 // generate_range C++20
 
-#undef IT
-#endif
+#endif // only once

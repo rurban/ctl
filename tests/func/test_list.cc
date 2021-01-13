@@ -9,8 +9,8 @@
 
 void print_lst(list_digi *a)
 {
-    foreach(list_digi, a, it)
-        printf ("%d ", *it.ref->value);
+    foreach_ref(list_digi, digi, a, it, ref)
+        printf ("%d ", *ref->value);
     printf ("\n");
 }
 
@@ -54,8 +54,8 @@ int random_element(list_digi* a)
         assert(*_y.back().value == *list_digi_back(&_x)->value);  \
     }                                                             \
     std::list<DIGI>::iterator _iter = _y.begin();                 \
-    foreach(list_digi, &_x, _it) {                                \
-        assert(*_it.ref->value == *_iter->value);                 \
+    foreach_ref(list_digi, digi, &_x, _it, _ref) {                \
+        assert(*_ref->value == *_iter->value);                    \
         _iter++;                                                  \
     }                                                             \
     list_digi_it _it = list_digi_it_each(&_x);                    \
@@ -277,11 +277,11 @@ main(void)
                 size_t index = TEST_RAND(a.size);
                 size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                foreach(list_digi, &a, it)
+                foreach(list_digi, digi, &a, it)
                 {
                     if(current == index)
                     {
-                        list_digi_erase(&a, it.node);
+                        list_digi_erase(&a, it);
                         b.erase(iter);
                         break;
                     }
@@ -297,12 +297,12 @@ main(void)
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                foreach(list_digi, &a, it)
+                foreach(list_digi, digi, &a, it)
                 {
                     if(current == index)
                     {
                         list_digi_node *node =
-                            list_digi_insert(&a, it.node, digi_init(value));
+                            list_digi_insert(&a, it, digi_init(value));
                         std::list<DIGI>::iterator ii =
                             b.insert(iter, DIGI{value});
                         CHECK_ITER(node, b, ii);
@@ -555,6 +555,19 @@ main(void)
                 CHECK(a, b);
                 break;
             }
+            case TEST_ALL_OF:
+            {
+                bool aa = list_digi_all_of(&a, digi_is_odd);
+                bool bb = all_of(b.begin(), b.end(), DIGI_is_odd);
+                if (aa != bb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                }
+                assert(aa == bb);
+                break;
+            }
             case TEST_FIND_RANGE:
             {
                 int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
@@ -660,11 +673,28 @@ main(void)
                 CHECK_ITER(n, b, it);
                 break;
             }
-            case TEST_ALL_OF:
+            case TEST_INSERT_COUNT:
             {
-                bool is_a = list_digi_all_of(&a, digi_is_odd);
-                bool is_b = all_of(b.begin(), b.end(), DIGI_is_odd);
-                assert(is_a == is_b);
+                size_t index = TEST_RAND(a.size);
+                size_t count = TEST_RAND(a.size - 4) + 1;
+                int value = TEST_RAND(TEST_MAX_VALUE);
+                size_t current = 0;
+                std::list<DIGI>::iterator iter = b.begin();
+                foreach(list_digi, digi, &a, it)
+                {
+                    if(current == index)
+                    {
+                        list_digi_node *node =
+                            list_digi_insert_count(&a, it, count, digi_init(value));
+                        std::list<DIGI>::iterator ii =
+                            b.insert(iter, DIGI{value});
+                        CHECK_ITER(node, b, ii);
+                        break;
+                    }
+                    iter++;
+                    current++;
+                }
+                CHECK(a, b);
                 break;
             }
             case TEST_NONE_OF:

@@ -12,7 +12,10 @@
 #define A JOIN(list, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#undef IT
 #define IT B*
+
+#include <ctl/bits/iterators.h>
 
 typedef struct B
 {
@@ -306,13 +309,13 @@ JOIN(A, assign)(A* self, size_t size, T value)
 {
     JOIN(A, resize)(self, size, self->copy(&value));
     size_t i = 0;
-    foreach(A, self, it)
+    foreach_ref(A, T, self, it, ref)
     {
 #ifndef POD
         if(self->free)
-            self->free(it.ref);
+            self->free(ref);
 #endif
-        *it.ref = self->copy(&value);
+        *ref = self->copy(&value);
         i++;
     }
     FREE_VALUE(self, value);
@@ -321,12 +324,12 @@ JOIN(A, assign)(A* self, size_t size, T value)
 static inline void
 JOIN(A, reverse)(A* self)
 {
-    foreach(A, self, it)
+    foreach(A, T, self, it)
     {
-        B* next = it.node->next;
-        B* prev = it.node->prev;
-        it.node->prev = next;
-        it.node->next = prev;
+        B* next = it->next;
+        B* prev = it->prev;
+        it->prev = next;
+        it->next = prev;
     }
     B* tail = self->tail;
     B* head = self->head;
@@ -341,12 +344,14 @@ JOIN(I, iter)(A* self, B *node)
     I it = JOIN(I, each)(self);
     it.node = node;
     if (!node)
+    {
         it.done = 1;
         it.next = NULL; // JOIN(A, end)(self)
+    }
     else
     {
         it.ref = &node->value;
-        it.next = node->next;
+        it.next = = node->next;
     }
     return it;
 }
@@ -362,10 +367,10 @@ static inline size_t
 JOIN(A, remove)(A* self, T* value)
 {
     size_t erased = 0;
-    foreach(A, self, it)
-        if(JOIN(A, _equal)(self, it.ref, value))
+    foreach_ref(A, T, self, it, ref)
+        if(JOIN(A, _equal)(self, ref, value))
         {
-            JOIN(A, erase)(self, it.node);
+            JOIN(A, erase)(self, it);
             erased += 1;
         }
     return erased;
@@ -404,15 +409,12 @@ JOIN(A, insert_count)(A* self, B* pos, size_t count, T value)
 }
 
 static inline B*
-JOIN(A, insert_range)(A* self, B* pos, I* first, I* last)
+JOIN(A, insert_range)(A* self, B* pos, B* first, B* last)
 {
-    A* other = first->container;
-    B* node;
-    if (last)
-        first->end = last->node;
-    foreach(A, other, it)
+    B* node = NULL;
+    for(B* it = first; it < last; it++)
     {
-        node = JOIN(B, init)(*it.ref);
+        node = JOIN(B, init)(it->value);
         JOIN(A, connect_before)(self, pos, node);
     }
     return node;
@@ -424,10 +426,10 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int _match(T*))
 {
     size_t erases = 0;
-    foreach(A, self, it)
-        if(_match(it.ref))
+    foreach(A, T, self, it)
+        if(_match(ref))
         {
-            JOIN(A, erase)(self, it.node);
+            JOIN(A, erase)(self, it);
             erases++;
         }
     return erases;
@@ -453,8 +455,8 @@ JOIN(A, splice)(A* self, B* pos, A* other)
     if(self->size == 0 && pos == NULL)
         JOIN(A, swap)(self, other);
     else
-        foreach(A, other, it)
-            JOIN(A, transfer_before)(self, other, pos, it.node);
+        foreach(A, T, other, it)
+            JOIN(A, transfer_before)(self, other, pos, it);
 }
 
 // only needed for merge
@@ -545,17 +547,17 @@ JOIN(A, sort)(A* self)
 static inline void /* B* ?? */
 JOIN(A, unique)(A* self)
 {
-    foreach(A, self, it)
-        if(it.next && JOIN(A, _equal)(self, it.ref, &it.next->value))
-            JOIN(A, erase)(self, it.node);
+    foreach_ref(A, T, self, it, ref)
+        if(it->next && JOIN(A, _equal)(self, ref, &it.next->value))
+            JOIN(A, erase)(self, it);
 }
 
 static inline B*
 JOIN(A, find)(A* self, T key)
 {
-    foreach(A, self, it)
-        if(JOIN(A, _equal)(self, it.ref, &key))
-            return it.node;
+    foreach_ref(A, T, self, it, ref)
+        if(JOIN(A, _equal)(self, ref, &key))
+            return it;
     return NULL;
 }
 

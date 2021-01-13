@@ -57,13 +57,13 @@ int random_element(vec_digi* a)
         assert(*_y.back().value == *vec_digi_back(&_x)->value);   \
     }                                                             \
     std::vector<DIGI>::iterator _iter = _y.begin();               \
-    foreach(vec_digi, &_x, _it) {                                 \
-        assert(*_it.ref->value == *_iter->value);                 \
+    foreach(vec_digi, digi, &_x, _ref) {                          \
+        assert(*_ref->value == *_iter->value);                    \
         _iter++;                                                  \
     }                                                             \
     vec_digi_it _it = vec_digi_it_each(&_x);                      \
     for(auto& _d : _y) {                                          \
-        assert(*_it.ref->value == *_d.value);                     \
+        assert(*_ref->value == *_d.value);                        \
         _it.step(&_it);                                           \
     }                                                             \
     for(size_t i = 0; i < _y.size(); i++)                         \

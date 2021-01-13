@@ -13,7 +13,10 @@
 #define CTL_VEC
 #define A JOIN(vec, T)
 #define I JOIN(A, it)
+#undef IT
 #define IT T*
+
+#include <ctl/bits/iterators.h>
 
 // only for short strings, not vec_uint8_t
 #ifndef MUST_ALIGN_16
@@ -504,14 +507,12 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    foreach(A, self, it)
+    foreach(A, T, self, ref)
     {
-        if(_match(it.ref))
+        if(_match(ref))
         {
-            size_t index = it.ref - JOIN(A, begin)(self);
+            size_t index = ref - JOIN(A, begin)(self);
             JOIN(A, erase)(self, index);
-            it.end = JOIN(A, end)(self);
-            it.next = it.ref;
             erases++;
         }
     }
@@ -528,9 +529,9 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
 static inline T*
 JOIN(A, find)(A* self, T key)
 {
-    foreach(A, self, it)
-        if (JOIN(A, _equal)(self, it.ref, &key))
-            return it.ref;
+    foreach(A, T, self, ref)
+        if (JOIN(A, _equal)(self, ref, &key))
+            return ref;
     return NULL;
 }
 #endif

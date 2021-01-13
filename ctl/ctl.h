@@ -13,28 +13,10 @@
 #define JOIN(prefix, name) PASTE(prefix, PASTE(_, name))
 #define _JOIN(prefix, name) PASTE(_, PASTE(prefix, PASTE(_, name)))
 
-/* iterator with extra B nodes */
-#define CTL_B_ITER_FIELDS     \
-    B* next;                  \
-    T* ref;                   \
-    void (*step)(struct I*);  \
-    B* end;                   \
-    int done;                 \
-    B* node;                  \
-    A* container
-
-/* iterator with simple arrays of T, no intermediate nodes of B */
-#define CTL_T_ITER_FIELDS     \
-    T* next;                  \
-    T* ref;                   \
-    void (*step)(struct I*);  \
-    T* end;                   \
-    int done;                 \
-    A* container
-
 #define SWAP(TYPE, a, b) { TYPE temp = *(a); *(a) = *(b); *(b) = temp; }
 
-#define foreach(a, b, c) for(JOIN(a, it) c = JOIN(JOIN(a, it), each) (b); !c.done; c.step(&c))
+// old iterator
+#define foreach_it(a, b, c) for(JOIN(a, it) c = JOIN(JOIN(a, it), each) (b); !c.done; c.step(&c))
 
 #define len(a) (sizeof(a) / sizeof(*(a)))
 

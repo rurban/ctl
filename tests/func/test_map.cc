@@ -12,13 +12,13 @@
 #define CHECK(_x, _y) {                                      \
     assert(_x.size == _y.size());                            \
     std::map<std::string,int>::iterator _iter = _y.begin();  \
-    foreach(map_strint, &_x, _it) {                          \
-        assert(_it.ref->value == _iter->second);             \
+    foreach_ref(map_strint, strint, &_x, _it, _ref) {        \
+        assert(ref->value == _iter->second);                 \
         _iter++;                                             \
     }                                                        \
     map_strint_it _it = map_strint_it_each(&_x);             \
     for(auto& _d : _y) {                                     \
-        assert(_it.ref->value == _d.second);                 \
+        assert(_ref->value == _d.second);                    \
         _it.step(&_it);                                      \
     }                                                        \
 }

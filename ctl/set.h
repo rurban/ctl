@@ -11,16 +11,18 @@
 #define A JOIN(set, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#undef IT
 #define IT B*
 
 #include <ctl/ctl.h>
+#include <ctl/bits/iterators.h>
 
 typedef struct B
 {
     struct B* l;
     struct B* r;
     struct B* p;
-    T key;
+    T value;
     int color; // Red = 0, Black = 1
 } B;
 
@@ -122,7 +124,7 @@ JOIN(I, range)(A* container, B* begin, B* end)
     {
         self.step = JOIN(I, step);
         self.node = JOIN(B, min)(begin);
-        self.ref = &self.node->key;
+        self.ref = &self.node->value;
         self.next = JOIN(B, next)(self.node);
         self.end = end;
     }
@@ -154,7 +156,7 @@ JOIN(A, free_node)(A* self, B* node)
 {
 #ifndef POD
     if(self->free)
-        self->free(&node->key);
+        self->free(&node->value);
 #else
     (void) self;
 #endif
@@ -204,7 +206,7 @@ static inline B*
 JOIN(B, init)(T key, int color)
 {
     B* self = (B*) malloc(sizeof(B));
-    self->key = key;
+    self->value = key;
     self->color = color;
     self->l = self->r = self->p = NULL;
     return self;
@@ -216,13 +218,13 @@ JOIN(A, find)(A* self, T key)
     B* node = self->root;
     while(node)
     {
-        int diff = self->compare(&key, &node->key);
+        int diff = self->compare(&key, &node->value);
         // Don't rely on a valid 3-way compare. can be just a simple >
         if(diff == 0)
         {
             if (self->equal)
             {
-                if (self->equal(&key, &node->key))
+                if (self->equal(&key, &node->value))
                     return node;
                 else
                     node = node->r;
@@ -386,7 +388,7 @@ JOIN(A, insert)(A* self, T key)
         B* node = self->root;
         while(1)
         {
-            int diff = self->compare(&key, &node->key);
+            int diff = self->compare(&key, &node->value);
             if(diff == 0)
             {
                 JOIN(A, free_node)(self, insert);
@@ -500,7 +502,7 @@ JOIN(A, erase_node)(A* self, B* node)
     if(node->l && node->r)
     {
         B* pred = JOIN(B, max)(node->l);
-        SWAP(T, &node->key, &pred->key);
+        SWAP(T, &node->value, &pred->value);
         node = pred;
     }
     B* child = node->r ? node->r : node->l;
@@ -524,7 +526,7 @@ JOIN(I, iter)(A* self, B *node)
 {
     I it = JOIN(I, each)(self);
     it.node = node;
-    it.ref = &node->key;
+    it.ref = &node->value;
     it.next = JOIN(B, next)(it.node);
     return it;
 }
@@ -539,16 +541,11 @@ JOIN(A, erase_it)(A* self, I* pos)
 
 #ifdef DEBUG
 static inline void
-JOIN(A, erase_range)(A* self, I* from, I* to)
+JOIN(A, erase_range)(A* self, B* from, B* to)
 {
-    B* node = from->node;
-    if(node)
-    {
-        // TODO: check if clear would be faster (from==begin && to==end)
-        JOIN(A, it) it = JOIN(I, range)(self, from->node, to->node);
-        for(; !it.done; it.step(&it))
-            JOIN(A, erase_node)(self, it.node);
-    }
+    // TODO: check if clear would be faster (from==begin && to==end)
+    for(B* it = from; it; it = JOIN(B, next)(it))
+        JOIN(A, erase_node)(self, it);
 }
 #endif
 
@@ -685,13 +682,9 @@ JOIN(A, free)(A* self)
 static inline A
 JOIN(A, copy)(A* self)
 {
-    I it = JOIN(I, each)(self);
     A copy =  JOIN(A, init)(self->compare);
-    while(!it.done)
-    {
-        JOIN(A, insert)(&copy, self->copy(&it.node->key));
-        it.step(&it);
-    }
+    foreach_ref(A, T, self, it, ref)
+        JOIN(A, insert)(&copy, self->copy(ref));
     return copy;
 }
 
@@ -707,10 +700,10 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    foreach(A, self, it)
-        if(_match(&it.node->key))
+    foreach_ref(A, T, self, it, ref)
+        if(_match(ref))
         {
-            JOIN(A, erase_node)(self, it.node);
+            JOIN(A, erase_node)(self, it);
             erases++;
         }
     return erases;
@@ -726,9 +719,9 @@ static inline A
 JOIN(A, intersection)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->compare);
-    foreach(A, a, i)
-        if(JOIN(A, find)(b, *i.ref))
-            JOIN(A, insert)(&self, self.copy(i.ref));
+    foreach_ref(A, T, a, it, ref)
+        if(JOIN(A, find)(b, *ref))
+            JOIN(A, insert)(&self, self.copy(ref));
     return self;
 }
 
@@ -736,8 +729,8 @@ static inline A
 JOIN(A, union)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->compare);
-    foreach(A, a, i) JOIN(A, insert)(&self, self.copy(i.ref));
-    foreach(A, b, i) JOIN(A, insert)(&self, self.copy(i.ref));
+    foreach_ref(A, T, a, it, ref) JOIN(A, insert)(&self, self.copy(ref));
+    foreach_ref(A, T, b, it2, ref2) JOIN(A, insert)(&self, self.copy(ref2));
     return self;
 }
 
@@ -745,7 +738,7 @@ static inline A
 JOIN(A, difference)(A* a, A* b)
 {
     A self = JOIN(A, copy)(a);
-    foreach(A, b, i) JOIN(A, erase)(&self, *i.ref);
+    foreach_ref(A, T, b, it, ref) JOIN(A, erase)(&self, *ref);
     return self;
 }
 
@@ -754,7 +747,7 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 {
     A self = JOIN(A, union)(a, b);
     A intersection = JOIN(A, intersection)(a, b);
-    foreach(A, &intersection, i) JOIN(A, erase)(&self, *i.ref);
+    foreach_ref(A, T, &intersection, it, ref) JOIN(A, erase)(&self, *ref);
     JOIN(A, free)(&intersection);
     return self;
 }

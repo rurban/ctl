@@ -37,7 +37,7 @@ static inline I
 JOIN(I, each)(A* a)
 {
     return JOIN(A, empty)(a)
-         ? JOIN(I, range)(a, NULL, NULL)
+         ? JOIN(I, range)(a, 0, 0)
          : JOIN(I, range)(a, JOIN(A, begin)(a), JOIN(A, end)(a));
 }
 
@@ -110,6 +110,6 @@ JOIN(A, _equal)(A* self, T* a, T* b)
 #endif
 
 #ifndef _IS_PARENT_CHILD_FOLLOWS
-#include <ctl/algorithm.h>
+# include <ctl/algorithm.h>
 #endif
 #undef _IS_PARENT_CHILD_FOLLOWS
