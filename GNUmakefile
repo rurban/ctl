@@ -122,7 +122,7 @@ EXAMPLES = \
 	examples/snow \
 	examples/6502
 
-all: $(TESTS)
+all: $(TESTS) docs/index.md
 	$(foreach bin,$(TESTS),./$(bin) &&) exit 0
 	@$(CC) --version | head -n2
 	@echo $(CC) $(CFLAGS)

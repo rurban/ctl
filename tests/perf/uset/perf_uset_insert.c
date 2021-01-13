@@ -1,6 +1,5 @@
 #include "../../test.h"
 
-#define CTL_USET_GROWTH_POWER2
 #define POD
 #define T int
 #include <ctl/unordered_set.h>

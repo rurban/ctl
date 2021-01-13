@@ -15,7 +15,13 @@ function perf_graph
     do
         if [[ $TEST == *.c ]]
         then
+            ORIG_CFLAGS="$CFLAGS"
+            if test "$LOG" = "uset_pow2.log"
+            then
+                CFLAGS="$CFLAGS -DCTL_USET_GROWTH_POWER2"
+            fi
             $CC -o "$OUT" $CFLAGS $TEST -I.
+            CFLAGS="$ORIG_CFLAGS"
         else
             $CXX -o "$OUT" $CFLAGS $TEST
         fi
@@ -47,6 +53,16 @@ function perf_compile_two_bar
 perf_graph \
     'uset.log' \
     "std::unordered_set<int> (dotted) vs. CTL uset_int (solid) ($CFLAGS) ($VERSION)" \
+    "tests/perf/uset/perf_uset_insert.cc \
+     tests/perf/uset/perf_uset_insert.c \
+     tests/perf/uset/perf_uset_erase.cc \
+     tests/perf/uset/perf_uset_erase.c
+     tests/perf/uset/perf_uset_iterate.cc \
+     tests/perf/uset/perf_uset_iterate.c"
+
+perf_graph \
+    'uset_pow2.log' \
+    "std::unordered_set<int> (dotted) vs. CTL uset_int POWER2 (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/uset/perf_uset_insert.cc \
      tests/perf/uset/perf_uset_insert.c \
      tests/perf/uset/perf_uset_erase.cc \

@@ -96,7 +96,7 @@ EXAMPLES = \
 	examples/6502
 
 # was GNU ${foreach bin,${TESTS},./${bin} &&}
-all: ${TESTS}
+all: ${TESTS} docs/index.md
 .for t in ${TESTS}
 	./${t}
 .endfor

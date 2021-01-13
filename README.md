@@ -139,8 +139,12 @@ Omitted from these performance measurements are `queue.h`, `stack.h`, and `strin
 as their performance characteristics can be inferred from `deque.h`, and `vector.h`,
 respectively. Likewise `map.h` from `set.h` and `unordered_map.h` from
 `unordered_set.h`.
-`unordered_set.h` is defined with the faster `CTL_USET_GROWTH_POWER2`, as my
-STL. `CTL_USET_GROWTH_PRIMED` is safer but atrocious.
+
+`unordered_set.h` is defined with the default `CTL_USET_GROWTH_PRIMED`.
+`CTL_USET_GROWTH_POWER2` is here. libstdc++ uses POWER2 by default, libc++
+supports both, depending on the initial size.
+
+![](docs/images/uset_pow2.log.png)
 
 ## Running Tests
 
