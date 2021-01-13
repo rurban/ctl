@@ -6,8 +6,6 @@
 #error "Template type T undefined for <ctl/list.h>"
 #endif
 
-#include <ctl/ctl.h>
-
 #define CTL_LIST
 #define A JOIN(list, T)
 #define B JOIN(A, node)
@@ -15,7 +13,7 @@
 #undef IT
 #define IT B*
 
-#include <ctl/bits/iterators.h>
+#include <ctl/ctl.h>
 
 typedef struct B
 {
@@ -36,6 +34,8 @@ typedef struct A
 } A;
 
 typedef int (*JOIN(A, compare_fn))(T*, T*);
+
+#include <ctl/bits/iterators.h>
 
 typedef struct I
 {
@@ -147,6 +147,12 @@ JOIN(B, init)(T value)
     self->prev = self->next = NULL;
     self->value = value;
     return self;
+}
+
+static inline B*
+JOIN(B, next)(B* node)
+{
+    return node->next;
 }
 
 static inline void

@@ -36,29 +36,62 @@
     int done;                 \
     A* container
 
-#if defined CTL_LIST || defined CTL_SET || defined CTL_USET
+#if defined CTL_LIST || defined CTL_SET
 #  define CTL_B_ITER
 #  undef IT
 #  define IT B*
 /* return B* it node. end is NULL */
 
+B* JOIN(B, next)(B*);
+
 #ifndef foreach
 # define foreach(A, T, self, it) \
     JOIN(A, node) *it; \
-    for(it = JOIN(A, begin)(self); it; it = it->next)
+    for(it = JOIN(A, begin)(self); it; it = JOIN(JOIN(A, node), next)(it))
 # define foreach_ref(A, T, self, it, ref) \
     JOIN(A, node) *it; \
     T* ref; \
-    for(it = JOIN(A, begin)(self), ref = &it->value; it; it = JOIN(B, next)(it), ref = &it->value)
+    for(it = JOIN(A, begin)(self), ref = &it->value; it; \
+        it = JOIN(JOIN(A, node), next)(it), ref = &it->value)
 # define foreach_range(A, T, self, it, first, last) \
     JOIN(A, node) *it; \
-    for(it = first; it; it = JOIN(B, next)(it))
+    for(it = first; it; it = JOIN(JOIN(A, node), next)(it))
 # define foreach_ref_range(A, T, self, it, ref, first, last) \
     JOIN(A, node) *it; \
     T* ref; \
     for(it = first, ref = &first->value; \
         last == NULL ? it != NULL : it != last; \
-        it = JOIN(B, next)(it), ref = &it->value)
+        it = JOIN(JOIN(A, node), next)(it), ref = &it->value)
+# endif
+
+#elif defined CTL_USET
+// different bucket next method
+#  define CTL_B_ITER
+#  undef IT
+#  define IT B*
+/* return B* it node. end is NULL */
+
+B* JOIN(B, next)(B*);
+
+#ifndef foreach
+# define foreach(A, T, self, it) \
+    JOIN(A, node) *it; \
+    for(it = JOIN(A, begin)(self); it; it = JOIN(JOIN(A, node), next)(self, it))
+# define foreach_ref(A, T, self, it, ref) \
+    JOIN(A, node) *it; \
+    T* ref; \
+    for(it = JOIN(A, begin)(self), ref = &it->value; \
+        it;                                          \
+        it = JOIN(JOIN(A, node), next)(self, it), ref = &it->value)
+# define foreach_range(A, T, self, it, first, last)  \
+    JOIN(A, node) *it; \
+    for(it = first; it; it = JOIN(JOIN(A, node), next)(self, it))
+# define foreach_ref_range(A, T, self, it, ref, first, last) \
+    JOIN(A, node) *it; \
+    T* ref; \
+    for(it = first, ref = &first->value; \
+        last == NULL ? it != NULL : it != last; \
+        it = JOIN(JOIN(A, node), next)(self, it), ref = &it->value)
 # endif
 
 #else
