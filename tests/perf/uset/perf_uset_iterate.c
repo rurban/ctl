@@ -13,7 +13,7 @@ static int int_equal(int* a, int* b)   { return *a == *b; }
 int main(void)
 {
     puts(__FILE__);
-    srand(time(NULL));
+    srand(0xbeef);
     for(int run = 0; run < TEST_PERF_RUNS; run++)
     {
         uset_int c = uset_int_init(int_hash, int_equal);

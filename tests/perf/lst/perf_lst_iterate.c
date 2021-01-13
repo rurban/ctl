@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     int silent = 0;
     int t0 = TEST_TIME();
     puts(__FILE__);
-    srand(time(NULL));
+    srand(0xbeef);
     if (argc >= 2 && argv[1][0] == '-' && argv[1][1] == 's')
         silent = 1;
 #ifdef PERF // calc. startup delay for perf stat -D

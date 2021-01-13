@@ -11,7 +11,7 @@ static int compare(int* a, int* b) { return *a == *b ? 0 : *a < *b ? -1 : 1; }
 int main(void)
 {
     puts(__FILE__);
-    srand(time(NULL));
+    srand(0xbeef);
     for(int run = 0; run < TEST_PERF_RUNS; run++)
     {
         set_int c = set_int_init(compare);

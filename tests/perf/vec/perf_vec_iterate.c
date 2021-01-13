@@ -9,7 +9,7 @@
 int main(void)
 {
     puts(__FILE__);
-    srand(time(NULL));
+    srand(0xbeef);
     for(int run = 0; run < TEST_PERF_RUNS; run++)
     {
         vec_int c = vec_int_init();

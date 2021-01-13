@@ -10,7 +10,7 @@ class int_hash { public:
 int main()
 {
     puts(__FILE__);
-    srand(time(NULL));
+    srand(0xbeef);
     for(int run = 0; run < TEST_PERF_RUNS; run++)
     {
         std::unordered_set<int,int_hash> c;

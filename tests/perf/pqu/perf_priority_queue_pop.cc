@@ -9,7 +9,7 @@ struct compare { bool operator()(const int& a, const int& b) { return a < b; } }
 int main()
 {
     puts(__FILE__);
-    srand(time(NULL));
+    srand(0xbeef);
     for(int run = 0; run < TEST_PERF_RUNS; run++)
     {
         std::priority_queue<int, std::vector<int>, compare> c;

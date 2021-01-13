@@ -436,7 +436,8 @@ JOIN(A, insert)(A* self, T value)
                  JOIN(A, load_factor)(self));
             JOIN(A, _rehash)(self, bucket_count);
 #else
-            // The natural growth factor is the golden ratio.
+            // The natural growth factor is the golden ratio. libstc++ v3 and
+            // libc++ use 2.0 here.
             //size_t const bucket_count = (size_t)((double)self->bucket_count * 1.618033);
             size_t const bucket_count = 1.618 * (double)self->bucket_count;
             JOIN(A, rehash)(self, bucket_count);
