@@ -70,10 +70,12 @@ JOIN(A, at)(A* self, size_t index)
     }
     else
     {
-        B* first = *JOIN(A, first)(self);
-        size_t actual = index + first->a;
-        B* page = self->pages[self->mark_a + actual / DEQ_BUCKET_SIZE];
-        return &page->value[actual % DEQ_BUCKET_SIZE];
+        const B* first = *JOIN(A, first)(self);
+        const size_t actual = index + first->a;
+        const size_t q = actual / DEQ_BUCKET_SIZE;
+        const size_t r = actual % DEQ_BUCKET_SIZE;
+        B* page = self->pages[self->mark_a + q];
+        return &page->value[r];
     }
 }
 
