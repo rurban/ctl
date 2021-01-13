@@ -660,7 +660,7 @@ JOIN(A, clear)(A* self)
     /* for(size_t i = 0; i < self->bucket_count; i++)
         self->buckets[i] = NULL; */
     self->size = 0;
-    self->max_bucket_count = 0;
+    //self->max_bucket_count = 0;
 }
 
 static inline void
