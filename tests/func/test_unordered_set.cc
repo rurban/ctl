@@ -103,6 +103,7 @@ main(void)
         setup_sets(&a, b);
 
 #define FOREACH_METH(TEST) \
+        TEST(SELF) \
         TEST(INSERT) \
         TEST(ERASE_IF) \
         TEST(CONTAINS) \
@@ -155,6 +156,17 @@ main(void)
         LOG ("TEST=%d %s (%zu, %zu)\n", which, test_names[which], a.size, a.bucket_count);
         switch(which)
         {
+            case TEST_SELF:
+            {
+                uset_digi aa = uset_digi_copy(&a);
+                foreach(uset_digi, &aa, it)
+                    assert(uset_digi_find(&a, *it.ref));
+                foreach(uset_digi, &a, it)
+                    uset_digi_erase(&aa, *it.ref);
+                assert(uset_digi_empty(&aa));
+                uset_digi_free(&aa);
+                break;
+            }
             case TEST_INSERT:
             {
                 const int vb = TEST_RAND(TEST_MAX_VALUE);

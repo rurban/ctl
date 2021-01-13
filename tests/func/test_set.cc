@@ -52,6 +52,7 @@ main(void)
         std::set<DIGI> b;
         setup_sets(&a, b);
 #define FOREACH_METH(TEST) \
+        TEST(SELF) \
         TEST(INSERT) \
         TEST(ERASE) \
         TEST(REMOVE_IF) \
@@ -110,12 +111,22 @@ main(void)
         LOG ("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
         switch(which)
         {
+            case TEST_SELF:
+            {
+                set_digi aa = set_digi_copy(&a);
+                foreach(set_digi, &aa, it)
+                    assert(set_digi_find(&a, *it.ref));
+                foreach(set_digi, &a, it)
+                    set_digi_erase(&aa, *it.ref);
+                assert(set_digi_empty(&aa));
+                set_digi_free(&aa);
+                break;
+            }
             case TEST_INSERT:
             {
                 const int vb = TEST_RAND(TEST_MAX_SIZE);
                 set_digi_insert(&a, digi_init(vb));
                 b.insert(DIGI{vb});
-                CHECK(a, b);
                 break;
             }
             case TEST_ERASE:

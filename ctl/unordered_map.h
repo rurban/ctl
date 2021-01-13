@@ -31,7 +31,7 @@ JOIN(A, insert_or_assign)(A* self, T value)
     if(JOIN(A, empty)(self))
         JOIN(A, rehash)(self, 12);
     B** buckets = JOIN(A, _bucket)(self, value);
-    *buckets = JOIN(B, push)(*buckets, JOIN(B, init)(value));
+    JOIN(B, push)(buckets, JOIN(B, init)(value));
     self->size++;
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
         JOIN(A, rehash)(self, 2 * self->bucket_count);
@@ -53,7 +53,7 @@ JOIN(A, insert_or_assign_found)(A* self, T value, int *foundp)
     if(JOIN(A, empty)(self))
         JOIN(A, rehash)(self, 12);
     B** buckets = JOIN(A, _bucket)(self, value);
-    *buckets = JOIN(B, push)(*buckets, JOIN(B, init)(value));
+    JOIN(B, push)(buckets, JOIN(B, init)(value));
     self->size++;
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
         JOIN(A, rehash)(self, 2 * self->bucket_count);

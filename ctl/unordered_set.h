@@ -229,15 +229,15 @@ JOIN(B, bucket_size)(B* self)
     return size;
 }
 
-static inline B*
-JOIN(B, push)(B* bucket, B* n)
+static inline void
+JOIN(B, push)(B** bucketp, B* n)
 {
 #ifdef DEBUG_COLL
     if (n->next)
         LOG ("push collision %zu\n", JOIN(B, bucket_size)(n));
 #endif
-    n->next = bucket;
-    return n;
+    n->next = *bucketp;
+    *bucketp = n;
 }
 
 static inline B**
@@ -366,7 +366,7 @@ JOIN(A, rehash)(A* self, size_t desired_count)
     {
         B** buckets = JOIN(A, _bucket)(&rehashed, it.node->value);
         if (it.node != *buckets)
-            *buckets = JOIN(B, push)(*buckets, it.node);
+            JOIN(B, push)(buckets, it.node);
     }
     rehashed.size = self->size;
     LOG ("rehash temp. from %lu to %lu, load %f\n", rehashed.size, rehashed.bucket_count,
@@ -390,7 +390,7 @@ JOIN(A, _rehash)(A* self, size_t count)
     {
         B** buckets = JOIN(A, _bucket)(&rehashed, it.node->value);
         if (it.node != *buckets)
-            *buckets = JOIN(B, push)(*buckets, it.node);
+            JOIN(B, push)(buckets, it.node);
     }
     rehashed.size = self->size;
     LOG ("_rehash from %lu to %lu, load %f\n", rehashed.size, count,
@@ -443,7 +443,7 @@ JOIN(A, insert)(A* self, T value)
 #endif
         }
         B** bucket = JOIN(A, _bucket)(self, value);
-        *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(value));
+        JOIN(B, push)(bucket, JOIN(B, init)(value));
         //LOG ("insert: add bucket, collisions: %zu\n", JOIN(B, bucket_size)(*bucket));
         self->size++;
     }
@@ -464,7 +464,7 @@ JOIN(A, insert_found)(A* self, T value, int* foundp)
     if(JOIN(A, empty)(self))
         JOIN(A, rehash)(self, 12);
     B** bucket = JOIN(A, _bucket)(self, value);
-    *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(value));
+    JOIN(B, push)(bucket, JOIN(B, init)(value));
     LOG ("insert_found: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
     self->size++;
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
@@ -480,7 +480,7 @@ JOIN(A, emplace)(A* self, T* value)
         return JOIN(I, iter)(self, node);
 
     B** buckets = JOIN(A, _bucket)(self, *value);
-    *buckets = JOIN(B, push)(*buckets, JOIN(B, init)(*value));
+    JOIN(B, push)(buckets, JOIN(B, init)(*value));
     self->size++;
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
         JOIN(A, rehash)(self, 2 * self->bucket_count);
@@ -496,7 +496,7 @@ JOIN(A, emplace_found)(A* self, T* value, int* foundp)
         if(!self->bucket_count)
             JOIN(A, rehash)(self, 12);
         B** bucket = JOIN(A, _bucket)(self, *value);
-        *bucket = JOIN(B, push)(*bucket, JOIN(B, init)(*value));
+        JOIN(B, push)(bucket, JOIN(B, init)(*value));
         self->size++;
         if (self->size > self->max_bucket_count)
         {
@@ -509,7 +509,7 @@ JOIN(A, emplace_found)(A* self, T* value, int* foundp)
     }
 
     B** buckets = JOIN(A, _bucket)(self, *value);
-    *buckets = JOIN(B, push)(*buckets, JOIN(B, init)(*value));
+    JOIN(B, push)(buckets, JOIN(B, init)(*value));
     self->size++;
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
         JOIN(A, rehash)(self, 2 * self->bucket_count);
