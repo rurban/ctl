@@ -103,6 +103,25 @@ JOIN(I, update)(I* self)
     self->bucket_index = JOIN(I, index)(self->container, *self->ref);
 }
 
+// for later, with redesigned iters
+static inline B*
+JOIN(B, next)(A* container, B* node)
+{
+    if (node->next)
+        return node->next;
+    else
+    {
+        size_t i = JOIN(I, index)(container, node->value) + 1;
+        for(; i < container->bucket_count; i++)
+        {
+            B* n = container->buckets[i];
+            if(n)
+                return n;
+        }
+        return NULL;
+    }
+}
+
 /*
   need two states: if next is not empty, we are still in the bucket chain, keep bucket_index.
   if empty, we need to advance to the next bucket. bucket_index++
@@ -111,7 +130,7 @@ static inline void
 JOIN(I, step)(I* self)
 {
     // or just !self->next: advance to next bucket
-    if(self->next == JOIN(A, end)(self->container))
+    if(self->next == NULL)
     {
         for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
             if((self->next = self->container->buckets[i]))
