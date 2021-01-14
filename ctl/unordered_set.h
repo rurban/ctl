@@ -72,7 +72,6 @@ typedef struct A
     T (*copy)(T*);
     size_t (*hash)(T*);
     int (*equal)(T*, T*);
-    //int (*compare)(T*, T*);
 } A;
 
 typedef struct I
@@ -114,6 +113,11 @@ JOIN(I, cached_index)(A* self, B* node)
 {
     return node->cached_hash % self->bucket_count;
 }
+#define BUCKET_INDEX(self) \
+    JOIN(I, cached_index)(self->container, self->node);
+#else
+# define BUCKET_INDEX(self) \
+    JOIN(I, index)(self->container, *self->ref);
 #endif
 
 static inline void
@@ -122,11 +126,23 @@ JOIN(I, update)(I* self)
     self->node = self->next;
     self->ref = &self->node->value;
     self->next = self->node->next;
-#ifdef CTL_USET_CACHED_HASH
-    self->bucket_index = JOIN(I, cached_index)(self->container, self->node);
-#else
-    self->bucket_index = JOIN(I, index)(self->container, *self->ref);
-#endif
+    self->bucket_index = BUCKET_INDEX(self);
+}
+
+static inline int
+JOIN(I, scan)(I* self)
+{
+    for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
+    {
+        self->next = self->container->buckets[i];
+        if(self->next)
+        {
+            self->bucket_index = i;
+            JOIN(I, update)(self);
+            return 1;
+        }
+    }
+    return 0;
 }
 
 // for later, with redesigned iters
@@ -155,7 +171,6 @@ JOIN(B, next)(A* container, B* node)
 static inline void
 JOIN(I, step)(I* self)
 {
-    // or just !self->next: advance to next bucket
     if(self->next == NULL)
     {
         for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
@@ -484,6 +499,22 @@ JOIN(A, find)(A* self, T value)
     return NULL;
 }
 
+static inline B**
+JOIN(A, push_cached)(A* self, T* value)
+{
+#ifdef CTL_USET_CACHED_HASH
+    size_t hash = self->hash(value);
+    B** buckets = JOIN(A, _bucket_hash)(self, hash);
+    JOIN(B, push)(buckets, JOIN(B, init_cached)(*value, hash));
+#else
+    B** buckets = JOIN(A, _bucket)(self, *value);
+    JOIN(B, push)(buckets, JOIN(B, init)(*value));
+#endif
+    LOG ("push_bucket[%zu]\n", JOIN(B, bucket_size)(*buckets));
+    self->size++;
+    return buckets;
+}
+
 static inline void
 JOIN(A, insert)(A* self, T value)
 {
@@ -511,14 +542,7 @@ JOIN(A, insert)(A* self, T value)
             JOIN(A, rehash)(self, bucket_count);
 #endif
         }
-        B** bucket = JOIN(A, _bucket)(self, value);
-#ifdef CTL_USET_CACHED_HASH
-        JOIN(B, push)(bucket, JOIN(B, init_cached)(value, self->hash(&value)));
-#else
-        JOIN(B, push)(bucket, JOIN(B, init)(value));
-#endif
-        LOG ("insert: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
-        self->size++;
+        JOIN(A, push_cached)(self, &value);
     }
 }
 
@@ -536,10 +560,8 @@ JOIN(A, insert_found)(A* self, T value, int* foundp)
     }
     if(JOIN(A, empty)(self))
         JOIN(A, rehash)(self, 12);
-    B** bucket = JOIN(A, _bucket)(self, value);
-    JOIN(B, push)(bucket, JOIN(B, init)(value));
+    JOIN(A, push_cached)(self, &value);
     LOG ("insert_found: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
-    self->size++;
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
         JOIN(A, rehash)(self, 2 * self->bucket_count);
     *foundp = 0;
@@ -552,9 +574,7 @@ JOIN(A, emplace)(A* self, T* value)
     if ((node = JOIN(A, find)(self, *value)))
         return JOIN(I, iter)(self, node);
 
-    B** buckets = JOIN(A, _bucket)(self, *value);
-    JOIN(B, push)(buckets, JOIN(B, init)(*value));
-    self->size++;
+    B** buckets = JOIN(A, push_cached)(self, value);
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
         JOIN(A, rehash)(self, 2 * self->bucket_count);
     return JOIN(I, iter)(self, *buckets);
@@ -568,13 +588,8 @@ JOIN(A, emplace_found)(A* self, T* value, int* foundp)
     {
         if(!self->bucket_count)
             JOIN(A, rehash)(self, 12);
-        B** bucket = JOIN(A, _bucket)(self, *value);
-#ifdef CTL_USET_CACHED_HASH
-        JOIN(B, push)(bucket, JOIN(B, init_cached)(*value, self->hash(value)));
-#else
-        JOIN(B, push)(bucket, JOIN(B, init)(*value));
-#endif
-        self->size++;
+        // new value, need to recalc hash
+        JOIN(A, push_cached)(self, value);
         if (self->size > self->max_bucket_count)
         {
             size_t max_bucket_count = JOIN(A, max_bucket_count)(self);
@@ -585,9 +600,7 @@ JOIN(A, emplace_found)(A* self, T* value, int* foundp)
         return JOIN(I, iter)(self, node);
     }
 
-    B** buckets = JOIN(A, _bucket)(self, *value);
-    JOIN(B, push)(buckets, JOIN(B, init)(*value));
-    self->size++;
+    B** buckets = JOIN(A, push_cached)(self, value);
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
         JOIN(A, rehash)(self, 2 * self->bucket_count);
     *foundp = 0;
