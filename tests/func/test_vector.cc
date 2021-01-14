@@ -67,33 +67,58 @@ main(void)
             }
 
 #define FOREACH_METH(TEST) \
-            TEST(PUSH_BACK) \
-            TEST(POP_BACK) \
-            TEST(CLEAR) \
-            TEST(ERASE) \
-            TEST(RESIZE) \
-            TEST(RESERVE) \
-            TEST(SHRINK_TO_FIT) \
-            TEST(SORT) \
-            TEST(COPY) \
-            TEST(SWAP) \
-            TEST(INSERT) \
-            TEST(ASSIGN) \
-            TEST(REMOVE_IF) \
-            TEST(EQUAL) \
-            TEST(FIND) \
-            TEST(COUNT)
+        TEST(PUSH_BACK) \
+        TEST(POP_BACK) \
+        TEST(CLEAR) \
+        TEST(ERASE) \
+        TEST(RESIZE) \
+        TEST(RESERVE) \
+        TEST(SHRINK_TO_FIT) \
+        TEST(SORT) \
+        TEST(COPY) \
+        TEST(SWAP) \
+        TEST(INSERT) \
+        TEST(ASSIGN) \
+        TEST(REMOVE_IF) \
+        TEST(EQUAL) \
+        TEST(FIND) \
+        TEST(ALL_OF) \
+        TEST(FIND_IF) \
+        TEST(FIND_IF_NOT) \
+        TEST(NONE_OF) \
+        TEST(COUNT) \
+        TEST(COUNT_IF) \
+
+#define FOREACH_DEBUG(TEST) \
+        TEST(INSERT_COUNT) \
+        TEST(INSERT_RANGE) \
+        TEST(EQUAL_RANGE) \
+        TEST(FIND_RANGE) \
+        TEST(FIND_IF_RANGE) \
+        TEST(FIND_IF_NOT_RANGE) \
+        TEST(ANY_OF) \
+        TEST(ALL_OF_RANGE) \
+        TEST(ANY_OF_RANGE) \
+        TEST(NONE_OF_RANGE) \
+        TEST(COUNT_IF_RANGE) \
+        TEST(COUNT_RANGE) \
+        TEST(INTERSECTION) \
+        TEST(DIFFERENCE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
             enum {
                 FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+                FOREACH_DEBUG(GENERATE_ENUM)
+#endif
                 TEST_TOTAL
             };
 #ifdef DEBUG
             static const char *test_names[] = {
                 FOREACH_METH(GENERATE_NAME)
+                FOREACH_DEBUG(GENERATE_NAME)
                 ""
             };
 #endif
@@ -245,6 +270,74 @@ main(void)
                             assert(*aa->value == *bb->value);
                         digi_free(&key);
                     }
+                    break;
+                }
+#ifdef DEBUG    // missing range algorithm
+                case TEST_EQUAL_RANGE:
+                case TEST_FIND_RANGE:
+                case TEST_FIND_IF_RANGE:
+                case TEST_FIND_IF_NOT_RANGE:
+                case TEST_ALL_OF_RANGE:
+                case TEST_ANY_OF_RANGE:
+                case TEST_NONE_OF_RANGE:
+                case TEST_COUNT_IF_RANGE:
+                case TEST_COUNT_RANGE:
+                    break;
+                case TEST_ANY_OF: // broken
+                {
+                    bool is_a = vec_digi_all_of(&a, digi_is_odd);
+                    bool is_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
+                    assert(is_a == is_b);
+                    break;
+                }
+#endif
+                case TEST_FIND_IF:
+                {
+                    digi* aa = vec_digi_find_if(&a, digi_is_odd);
+                    auto bb = std::find_if(b.begin(), b.end(), DIGI_is_odd);
+                    if(bb == b.end())
+                        assert(vec_digi_end(&a) == aa);
+                    else
+                        assert(*bb->value == *aa->value);
+                    break;
+                }
+                case TEST_FIND_IF_NOT:
+                {
+                    digi* aa = vec_digi_find_if_not(&a, digi_is_odd);
+                    auto bb = std::find_if_not(b.begin(), b.end(), DIGI_is_odd);
+                    if(bb == b.end())
+                        assert(vec_digi_end(&a) == aa);
+                    else
+                        assert(*bb->value == *aa->value);
+                    break;
+                }
+                case TEST_ALL_OF:
+                {
+                    bool is_a = vec_digi_all_of(&a, digi_is_odd);
+                    bool is_b = std::all_of(b.begin(), b.end(), DIGI_is_odd);
+                    assert(is_a == is_b);
+                    break;
+                }
+                case TEST_NONE_OF:
+                {
+                    bool is_a = vec_digi_none_of(&a, digi_is_odd);
+                    bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
+                    assert(is_a == is_b);
+                    break;
+                }
+                case TEST_COUNT:
+                {
+                    int key = TEST_RAND(TEST_MAX_SIZE);
+                    int aa = vec_digi_count(&a, digi_init(key));
+                    int bb = std::count(b.begin(), b.end(), DIGI{key});
+                    assert(aa == bb);
+                    break;
+                }
+                case TEST_COUNT_IF:
+                {
+                    size_t count_a = vec_digi_count_if(&a, digi_is_odd);
+                    size_t count_b = std::count_if(b.begin(), b.end(), DIGI_is_odd);
+                    assert(count_a == count_b);
                     break;
                 }
             }
