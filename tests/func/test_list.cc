@@ -198,6 +198,7 @@ main(void)
         TEST(COUNT) \
         TEST(COUNT_IF) \
         TEST(COUNT_RANGE) \
+        TEST(COUNT_IF_RANGE) \
         TEST(ALL_OF_RANGE) \
         TEST(ANY_OF_RANGE) \
         TEST(NONE_OF_RANGE) \
@@ -209,7 +210,6 @@ main(void)
         TEST(INSERT_COUNT) \
         TEST(INSERT_RANGE) \
         TEST(EQUAL_RANGE) \
-        TEST(COUNT_IF_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -676,6 +676,24 @@ main(void)
                 assert(numa == numb);
                 break;
             }
+            case TEST_COUNT_IF_RANGE:
+            {
+                list_digi_it first_a, last_a;
+                std::_List_iterator<DIGI> first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                size_t numa = list_digi_count_if_range(&first_a, &last_a,
+                                                        digi_is_odd);
+                size_t numb = count_if(first_b, last_b, DIGI_is_odd);
+                if (numa != numb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d FAIL\n", (int)numa, (int)numb);
+                    errors++;
+                }
+                assert(numa == numb); //fails. off by one, counts one too much
+                break;
+            }
 #ifdef DEBUG
             case TEST_INSERT_COUNT:
             case TEST_INSERT_RANGE:
@@ -706,24 +724,6 @@ main(void)
                 bool bb = equal_range(first_b, last_b, find(b.begin(), b.end(), DIGI{vb}));
                 assert(aa == bb);
                 */
-                break;
-            }
-            case TEST_COUNT_IF_RANGE:
-            {
-                list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                size_t numa = list_digi_count_if_range(&first_a, &last_a,
-                                                        digi_is_odd);
-                size_t numb = count_if(first_b, last_b, DIGI_is_odd);
-                if (numa != numb)
-                {
-                    print_lst(&a);
-                    print_list(b);
-                    printf ("%d != %d FAIL\n", (int)numa, (int)numb);
-                    errors++;
-                }
-                //assert(numa == numb); //fails. off by one, counts one too much
                 break;
             }
 #endif

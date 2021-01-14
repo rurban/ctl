@@ -69,6 +69,8 @@ JOIN(A, none_of)(A* self, int _match(T*))
 static inline IT*
 JOIN(A, find_range)(I* first, I* last, T value)
 {
+    if (!first->container)
+        return iter_IT_endp(last);
     foreach_range(A, it, first, last)
         if(JOIN(A, _equal)(first->container, it.ref, &value))
             return iter_IT(it);
@@ -120,9 +122,9 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
 static inline size_t
 JOIN(A, count_range)(I* first, I* last, T value)
 {
-    if (first->done || !first->container)
-        return 0;
     A* self = first->container;
+    if (!self)
+        return 0; // leak!
     size_t count = 0;
     foreach_range(A, it, first, last)
         if(JOIN(A, _equal)(self, it.ref, &value))
@@ -172,6 +174,7 @@ JOIN(A, count)(A* self, T value)
 
 #ifdef DEBUG
 #if !defined(CTL_USET) && !defined(CTL_STR)
+// API? 3rd arg should be an iter, not a value
 static inline bool
 JOIN(A, equal_range)(I* first, I* last, T value)
 {

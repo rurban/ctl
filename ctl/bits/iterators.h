@@ -18,6 +18,8 @@
 #  define foreach_range(A, it, first, last)      \
       if (last && !last->done)                   \
           first->end = last->node;               \
+      if (first->node == last->node)             \
+          first->done = 1;                       \
       for(JOIN(A, it) it = *first; !it.done; it.step(&it))
 
 # else
