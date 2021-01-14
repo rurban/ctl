@@ -154,6 +154,7 @@ get_random_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
 int
 main(void)
 {
+    int errors = 0;
     INIT_SRAND;
 #if defined DEBUG && defined SEED
     printf("\n"); // flush the buffer in case of aborts
@@ -529,15 +530,15 @@ main(void)
             }
             case TEST_FIND_RANGE:
             {
-                int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
+                int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                                          : random_element(&a);
-                digi key = digi_init(value);
+                digi key = digi_init(vb);
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_node *n =
                     list_digi_find_range(&first_a, &last_a, key);
-                auto it = find(first_b, last_b, DIGI{value});
+                auto it = find(first_b, last_b, vb);
                 CHECK_ITER(n, b, it);
                 digi_free (&key); // special
                 CHECK(a, b);
@@ -666,16 +667,13 @@ main(void)
                 int test_value = 0;
                 int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                                      : test_value;
-                digi key = digi_init(v);
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                // fails with 0,0 of 0
-                size_t numa = list_digi_count_range(&first_a, &last_a, key);
+                // used to fail with 0,0 of 0
+                size_t numa = list_digi_count_range(&first_a, &last_a, digi_init(v));
                 size_t numb = count(first_b, last_b, DIGI{v});
                 assert(numa == numb);
-                if (first_a.done)
-                    digi_free (&key); // no self, avoid leaks
                 break;
             }
 #ifdef DEBUG
@@ -690,23 +688,24 @@ main(void)
                 {
                     print_lst(&a);
                     print_list(b);
-                    printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                    printf ("%d != %d is_odd FAIL\n", (int)aa, (int)bb);
+                    errors++;
                 }
-                assert(aa == bb);
+                //assert(aa == bb);
                 break;
             }
             case TEST_EQUAL_RANGE:
             {
+                /*
                 int vb = TEST_RAND(TEST_MAX_VALUE);
-                digi key = digi_init(vb);
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = list_digi_equal_range(&first_a, &last_a, key);
-                bool bb = equal_range(first_b, last_b, vb);
+                // FIXME API take iter as third arg, not value
+                bool aa = list_digi_equal_range(&first_a, &last_a, digi_init(vb));
+                bool bb = equal_range(first_b, last_b, find(b.begin(), b.end(), DIGI{vb}));
                 assert(aa == bb);
-                if (first_a.done)
-                    digi_free (&key); // no self, avoid leaks
+                */
                 break;
             }
             case TEST_COUNT_IF_RANGE:
@@ -717,7 +716,14 @@ main(void)
                 size_t numa = list_digi_count_if_range(&first_a, &last_a,
                                                         digi_is_odd);
                 size_t numb = count_if(first_b, last_b, DIGI_is_odd);
-                assert(numa == numb); //fails
+                if (numa != numb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d FAIL\n", (int)numa, (int)numb);
+                    errors++;
+                }
+                //assert(numa == numb); //fails
                 break;
             }
 #endif
@@ -725,5 +731,8 @@ main(void)
         CHECK(a, b);
         list_digi_free(&a);
     }
-    TEST_PASS(__FILE__);
+    if (errors)
+        TEST_FAIL(__FILE__);
+    else
+        TEST_PASS(__FILE__);
 }

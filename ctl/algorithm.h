@@ -175,8 +175,6 @@ JOIN(A, count)(A* self, T value)
 static inline bool
 JOIN(A, equal_range)(I* first, I* last, T value)
 {
-    if (first->done || !first->container)
-        return false;
     A* self = first->container;
     bool result = true;
     foreach_range(A, it, first, last)
@@ -185,7 +183,7 @@ JOIN(A, equal_range)(I* first, I* last, T value)
             result = false;
             break;
         }
-    if(self->free)
+    if(self && self->free)
         self->free(&value);
     return result;
 }

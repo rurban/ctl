@@ -88,6 +88,7 @@ JOIN(I, range)(A* container, B* begin, B* end)
 {
     static I zero;
     I self = zero;
+    self.container = container; // needed for self->free
     if(begin)
     {
         self.next = begin->next;
@@ -96,7 +97,6 @@ JOIN(I, range)(A* container, B* begin, B* end)
         self.end = end;
         self.done = 0;
         self.node = begin;
-        self.container = container;
     }
     else
         self.done = 1;
