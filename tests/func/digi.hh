@@ -136,4 +136,10 @@ DIGI_is_odd(DIGI& d)
     return *d.value % 2;
 }
 
+static inline bool
+DIGIc_is_odd(const DIGI d)
+{
+    return *d.value % 2;
+}
+
 #endif

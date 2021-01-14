@@ -465,21 +465,65 @@ main(void)
 #ifdef DEBUG // algorithm
             case TEST_EQUAL_RANGE:
             case TEST_FIND_RANGE:
-            case TEST_FIND_IF:
-            case TEST_FIND_IF_NOT:
             case TEST_FIND_IF_RANGE:
             case TEST_FIND_IF_NOT_RANGE:
-            case TEST_ALL_OF:
-            case TEST_ANY_OF:
-            case TEST_NONE_OF:
             case TEST_ALL_OF_RANGE:
             case TEST_ANY_OF_RANGE:
             case TEST_NONE_OF_RANGE:
-            case TEST_COUNT:
-            case TEST_COUNT_IF:
             case TEST_COUNT_IF_RANGE:
             case TEST_COUNT_RANGE:
                 break;
+            case TEST_FIND_IF:
+            {
+                list_digi_node* aa = list_digi_find_if(&a, digi_is_odd);
+                auto bb = std::find_if(b.begin(), b.end(), DIGI_is_odd);
+                if(bb == b.end())
+                    assert(list_digi_end(&a) == aa);
+                else
+                    assert(*bb->value == *aa->value.value);
+                break;
+            }
+            case TEST_FIND_IF_NOT:
+            {
+                list_digi_node* aa = list_digi_find_if_not(&a, digi_is_odd);
+                auto bb = std::find_if_not(b.begin(), b.end(), DIGI_is_odd);
+                if(bb == b.end())
+                    assert(list_digi_end(&a) == aa);
+                else
+                    assert(*bb->value == *aa->value.value);
+                break;
+            }
+            case TEST_ALL_OF:
+            {
+                bool is_a = list_digi_all_of(&a, digi_is_odd);
+                bool is_b = std::all_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
+            case TEST_ANY_OF:
+            {
+                bool is_a = list_digi_all_of(&a, digi_is_odd);
+                bool is_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
+            case TEST_NONE_OF:
+            {
+                bool is_a = list_digi_none_of(&a, digi_is_odd);
+                bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
+            case TEST_COUNT_IF:
+            {
+                const size_t count_a = list_digi_count_if(&a, digi_is_odd);
+#ifdef __cpp_lib_erase_if // C++20
+                const
+#endif
+                    size_t count_b = std::count_if(b.begin(), b.end(), DIGI_is_odd);
+                assert(count_a == count_b);
+                break;
+            }
 #endif
         }
         CHECK(a, b);

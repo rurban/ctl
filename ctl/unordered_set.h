@@ -694,6 +694,16 @@ JOIN(A, count)(A* self, T value)
     return count;
 }
 
+static inline size_t
+JOIN(A, count_if)(A* self, int _match(T*))
+{
+    size_t count = 0;
+    foreach(A, self, it)
+        if(_match(it.ref))
+            count++;
+    return count;
+}
+
 // C++20
 static inline bool
 JOIN(A, contains)(A* self, T value)
@@ -820,6 +830,8 @@ JOIN(A, union)(A* a, A* b)
     return self;
 }
 
+#ifdef DEBUG
+// FIXME
 static inline A
 JOIN(A, difference)(A* a, A* b)
 {
@@ -827,6 +839,7 @@ JOIN(A, difference)(A* a, A* b)
     foreach(A, b, i) JOIN(A, erase)(&self, *i.ref);
     return self;
 }
+#endif
 
 static inline A
 JOIN(A, symmetric_difference)(A* a, A* b)

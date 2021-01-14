@@ -241,25 +241,18 @@ JOIN(A, _equal)(A* self, T* a, T* b)
 #undef _IS_PARENT_CHILD_FOLLOWS
 #if defined CTL_VEC && (defined CTL_STACK || defined CTL_STR  || defined CTL_U8STR)
 #define _IS_PARENT_CHILD_FOLLOWS
-#pragma message "vec child"
 #endif
 #if defined CTL_DEQ && (defined CTL_QUEUE || defined CTL_STACK)
 #define _IS_PARENT_CHILD_FOLLOWS
-#pragma message "deq child"
 #endif
 #if defined CTL_SET && defined CTL_MAP
 #define _IS_PARENT_CHILD_FOLLOWS
-#pragma message "map"
 #endif
 #if defined CTL_USET && defined CTL_UMAP
 #define _IS_PARENT_CHILD_FOLLOWS
-#pragma message "umap"
 #endif
 
 #ifndef _IS_PARENT_CHILD_FOLLOWS
-#pragma message "include algorithm"
 #include <ctl/algorithm.h>
-#else
-#pragma message "ignore algorithm"
 #endif
 #undef _IS_PARENT_CHILD_FOLLOWS
