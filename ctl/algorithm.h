@@ -153,6 +153,7 @@ JOIN(A, count_if)(A* self, int _match(T*))
     return count;
 }
 
+#ifndef CTL_USET
 static inline size_t
 JOIN(A, count)(A* self, T value)
 {
@@ -164,6 +165,7 @@ JOIN(A, count)(A* self, T value)
         self->free(&value);
     return count;
 }
+#endif // USET
 #endif // SET/STR
 
 #ifdef DEBUG

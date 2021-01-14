@@ -211,6 +211,12 @@ str_key_compare(str* self, str* other)
     return strcmp (self->value, other->value);
 }
 
+static inline int
+str_equal(str* self, str* other)
+{
+    return strcmp (self->value, other->value) == 0;
+}
+
 #ifndef HOLD
 #undef CTL_STR
 #undef POD

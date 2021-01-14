@@ -76,7 +76,7 @@ JOIN(A, equal)(A* self, A* other)
 // _set_default_methods
 #include <ctl/bits/integral.h>
 
-#if !defined(CTL_STR) && !defined(CTL_USET)
+#if !defined(CTL_USET)
 static inline int
 JOIN(A, _equal)(A* self, T* a, T* b)
 {

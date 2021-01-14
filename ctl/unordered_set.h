@@ -209,6 +209,15 @@ JOIN(I, range)(A* container, B* begin, B* end)
     return self;
 }
 
+static inline int
+JOIN(A, _equal)(A* self, T* a, T* b)
+{
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert(self->equal || !"equal undefined");
+#endif
+    return self->equal(a, b);
+}
+
 #include <ctl/bits/container.h>
 
 static inline I

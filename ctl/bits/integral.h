@@ -124,9 +124,9 @@ _JOIN(A, _set_default_methods)(A* self)
 #  ifdef CTL_USET
         __set_str_hash(self,T);
 #  else
-        self->compare = _JOIN(A, _default_string_compare);
+        self->compare = str_key_compare;
 #  endif
-        self->equal = _JOIN(A, _default_string_equal);
+        self->equal = str_equal;
     }
     else
 # endif
