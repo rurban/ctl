@@ -221,24 +221,64 @@ JOIN(I, iter)(A* self, B *node)
     return it;
 }
 
-// TODO:
-// primes[] obtained experimentally - is there a quicker way to get more primes
-// other than checking bucket_count() on std::unorderd_set::insert()?
-static inline int
-JOIN(A, __next_prime)(size_t n)
+static inline size_t
+JOIN(A, __next_prime)(size_t number)
 {
-    const size_t primes[] = {
-        13, 29, 59, 127, 257, 541, 1109, 2357, 5087, 10273, 20753,
-        42043, 85229, 172933, 351061, 712697, 1447153, 2938679,
-        5967347, 12117689, 24607243, 49969847, 101473717
+    static const uint32_t primes[] = {
+        2, 3, 5, 7, 11,
+        13, 17, 19, 23, 29, 31,
+        37, 41, 43, 47, 53, 59,
+        61, 67, 71, 73, 79, 83,
+        89, 97, 103, 109, 113, 127,
+        137, 139, 149, 157, 167, 179,
+        193, 199, 211, 227, 241, 257,
+        277, 293, 313, 337, 359, 383,
+        409, 439, 467, 503, 541, 577,
+        619, 661, 709, 761, 823, 887,
+        953, 1031, 1109, 1193, 1289, 1381,
+        1493, 1613, 1741, 1879, 2029, 2179,
+        2357, 2549, 2753, 2971, 3209, 3469,
+        3739, 4027, 4349, 4703, 5087, 5503,
+        5953, 6427, 6949, 7517, 8123, 8783,
+        9497, 10273, 11113, 12011, 12983, 14033,
+        15173, 16411, 17749, 19183, 20753, 22447,
+        24281, 26267, 28411, 30727, 33223, 35933,
+        38873, 42043, 45481, 49201, 53201, 57557,
+        62233, 67307, 72817, 78779, 85229, 92203,
+        99733, 107897, 116731, 126271, 136607, 147793,
+        159871, 172933, 187091, 202409, 218971, 236897,
+        256279, 277261, 299951, 324503, 351061, 379787,
+        410857, 444487, 480881, 520241, 562841, 608903,
+        658753, 712697, 771049, 834181, 902483, 976369,
+        1056323, 1142821, 1236397, 1337629, 1447153, 1565659,
+        1693859, 1832561, 1982627, 2144977, 2320627, 2510653,
+        2716249, 2938679, 3179303, 3439651, 3721303, 4026031,
+        4355707, 4712381, 5098259, 5515729, 5967347, 6456007,
+        6984629, 7556579, 8175383, 8844859, 9569143, 10352717,
+        11200489, 12117689, 13109983, 14183539, 15345007, 16601593,
+        17961079, 19431899, 21023161, 22744717, 24607243, 26622317,
+        28802401, 31160981, 33712729, 36473443, 39460231, 42691603,
+        46187573, 49969847, 54061849, 58488943, 63278561, 68460391,
+        74066549, 80131819, 86693767, 93793069, 101473717, 109783337,
+        118773397, 128499677, 139022417, 150406843, 162723577, 176048909,
+        190465427, 206062531, 222936881, 241193053, 260944219, 282312799,
+        305431229, 330442829, 357502601, 386778277, 418451333, 452718089,
+        489790921, 529899637, 573292817, 620239453, 671030513, 725980837,
+        785430967, 849749479, 919334987, 994618837, 1076067617, 1164186217,
+        1259520799, 1362662261, 1474249943, 1594975441, 1725587117
     };
-    for(size_t i = 0; i < len(primes); i++)
+    size_t min = primes[0];
+    if(number < min)
+        return min;
+    size_t size = len(primes);
+    for(size_t i = 0; i < size - 1; i++)
     {
-        size_t p = primes[i];
-        if(n < p)
-            return p;
+        size_t a = primes[i + 0];
+        size_t b = primes[i + 1];
+        if(number >= a && number <= b)
+            return number == a ? a : b;
     }
-    return primes[n - 1];
+    return primes[size - 1];
 }
 
 // Support huge hash tables with wordsize 64? currently we have a 32bit max_size
@@ -402,7 +442,7 @@ JOIN(A, reserve)(A* self, size_t desired_count)
     const size_t new_size = JOIN(A, __next_prime)(desired_count);
     LOG("primed growth policy %zu => %zu ", desired_count, new_size);
 #endif
-    if (new_size == self->bucket_count)
+    if (new_size <= self->bucket_count)
         return;
     JOIN(A, _rehash)(self, new_size);
 }
@@ -799,12 +839,15 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 static inline int
 JOIN(A, equal)(A* self, A* other)
 {
-    if(self->size != other->size)
-        return 0;
-    A diff = JOIN(A, difference)(self, other);
-    int result = JOIN(A, empty)(&diff);
-    JOIN(A, free)(&diff);
-    return result;
+    size_t count_a = 0;
+    size_t count_b = 0;
+    foreach(A, self, it)
+        if(JOIN(A, find)(self, *it.ref))
+            count_a += 1;
+    foreach(A, other, it)
+        if(JOIN(A, find)(other, *it.ref))
+            count_b += 1;
+    return count_a == count_b;
 }
 
 static inline void
