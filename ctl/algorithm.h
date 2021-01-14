@@ -70,6 +70,7 @@
 
 // i.e. for LIST, SET, USET with B*
 //      and VEC, DEQ with T*
+// find does not free the value!
 static inline IT*
 JOIN(A, find_range)(A* self, IT* first, IT* last, T value)
 {
@@ -197,6 +198,8 @@ JOIN(A, count_range)(A* self, IT* first, IT* last, T value)
     foreach_range(A, it, first, last)
         if(JOIN(A, _equal)(self, it.ref, &value))
             count++;
+    if (self->free)
+        self->free(&value);
     return count;
 }
 #endif // SET/USET/STR
@@ -222,6 +225,8 @@ JOIN(A, count)(A* self, T value)
     foreach(A, self, it)
         if(JOIN(A, _equal)(self, it.ref, &value))
             count++;
+    if (self->free)
+        self->free(&value);
     return count;
 }
 

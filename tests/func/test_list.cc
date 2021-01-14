@@ -106,24 +106,25 @@ main(void)
         TEST(EQUAL) \
         TEST(SORT) \
         TEST(UNIQUE) \
-        TEST(FIND)
+        TEST(FIND) \
+        TEST(ALL_OF) \
+        TEST(FIND_IF) \
+        TEST(FIND_IF_NOT) \
+        TEST(NONE_OF) \
+        TEST(COUNT) \
+        TEST(COUNT_IF) \
+
 #define FOREACH_DEBUG(TEST) \
         TEST(INSERT_COUNT) \
         TEST(INSERT_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(FIND_RANGE) \
-        TEST(FIND_IF) \
-        TEST(FIND_IF_NOT) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
-        TEST(ALL_OF) \
         TEST(ANY_OF) \
-        TEST(NONE_OF) \
         TEST(ALL_OF_RANGE) \
         TEST(ANY_OF_RANGE) \
         TEST(NONE_OF_RANGE) \
-        TEST(COUNT) \
-        TEST(COUNT_IF) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE)
 #define GENERATE_ENUM(x) TEST_##x,
@@ -473,6 +474,14 @@ main(void)
             case TEST_COUNT_IF_RANGE:
             case TEST_COUNT_RANGE:
                 break;
+            case TEST_ANY_OF:
+            {
+                bool is_a = list_digi_all_of(&a, digi_is_odd);
+                bool is_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
+#endif
             case TEST_FIND_IF:
             {
                 list_digi_node* aa = list_digi_find_if(&a, digi_is_odd);
@@ -500,18 +509,19 @@ main(void)
                 assert(is_a == is_b);
                 break;
             }
-            case TEST_ANY_OF:
-            {
-                bool is_a = list_digi_all_of(&a, digi_is_odd);
-                bool is_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
-                assert(is_a == is_b);
-                break;
-            }
             case TEST_NONE_OF:
             {
                 bool is_a = list_digi_none_of(&a, digi_is_odd);
                 bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
                 assert(is_a == is_b);
+                break;
+            }
+            case TEST_COUNT:
+            {
+                int key = TEST_RAND(TEST_MAX_SIZE);
+                int aa = list_digi_count(&a, digi_init(key));
+                int bb = std::count(b.begin(), b.end(), DIGI{key});
+                assert(aa == bb);
                 break;
             }
             case TEST_COUNT_IF:
@@ -524,7 +534,6 @@ main(void)
                 assert(count_a == count_b);
                 break;
             }
-#endif
         }
         CHECK(a, b);
         list_digi_free(&a);
