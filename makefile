@@ -258,4 +258,14 @@ tests/func/test_vector:   .cflags ${COMMON_H} ctl/vector.h \
                           tests/func/test_vector.cc
 	${CXX} ${CFLAGS} -o $@ $@.cc
 
+stress:
+	if test -n "$(CTL)"; then timeout 10m sh -c "while $(MAKE) -s SANITIZE=1 \
+	        tests/func/test_$(CTL) && tests/func/test_$(CTL); do true; done"; \
+	else timeout 20m sh -c "while $(MAKE) -s SANITIZE=1; do true; done"; fi
+
+stress-long:
+	if test -n "$(CTL)"; then timeout 20m sh -c "while $(MAKE) -s SANITIZE=1 LONG=1 \
+                tests/func/test_$(CTL) && tests/func/test_$(CTL); do true; done"; \
+	else timeout 30m sh -c "while $(MAKE) -s SANITIZE=1 LONG=1; do true; done"; fi
+
 ALWAYS:

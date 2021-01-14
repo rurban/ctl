@@ -272,12 +272,12 @@ tests/func/%: tests/func/%.cc .cflags $(H)
 stress:
 	if test -n "$(CTL)"; then timeout 10m sh -c "while $(MAKE) -s SANITIZE=1 \
 	        tests/func/test_$(CTL) && tests/func/test_$(CTL); do true; done"; \
-	else timeout 20m sh -c "while $(MAKE) -s; do true; done"; fi
+	else timeout 20m sh -c "while $(MAKE) -s SANITIZE=1; do true; done"; fi
 
 stress-long:
 	if test -n "$(CTL)"; then timeout 20m sh -c "while $(MAKE) -s SANITIZE=1 LONG=1 \
                 tests/func/test_$(CTL) && tests/func/test_$(CTL); do true; done"; \
-	else timeout 30m sh -c "while $(MAKE) -s; do true; done"; fi
+	else timeout 30m sh -c "while $(MAKE) -s SANITIZE=1 LONG=1; do true; done"; fi
 
 define expand
 	@$(CC) $(CFLAGS) $(1).h -E $(2) | clang-format -style=webkit
