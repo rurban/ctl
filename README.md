@@ -225,6 +225,11 @@ for POD integral types.
 
 See [Differences](#differences) below.
 
+Other STL attempts in C are [glib](http://suckless.org/sucks/), and
+partially [libmowgli](https://github.com/atheme/libmowgli-2),
+[libulz](https://github.com/rofl0r/libulz). This is the only header-only
+variant.
+
 ## Base Implementation Details
 
 ```
