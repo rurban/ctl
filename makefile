@@ -2,8 +2,21 @@ PREFIX ?= /usr/local
 CC ?= gcc
 CXX ?= g++
 
-# TODO probe for -std=c++20
+# probe for -std=c++20, 17 or 11
+TRY_CXX20!=(${CXX} -std=c++20 -I. tests/func/test_deque.cc -o /dev/null && echo -std=c++20) || true
+.if ${TRY_CXX20} != ""
+CXX += -std=c++20
+.else
+TRY_CXX17!=(${CXX} -std=c++17 -I. tests/func/test_deque.cc -o /dev/null && echo -std=c++17) || true
+. if ${TRY_CXX17} != ""
 CXX += -std=c++17
+. else
+TRY_CXX11!=(${CXX} -std=c++11 -I. tests/func/test_deque.cc -o /dev/null && echo -std=c++11) || true
+.  if ${TRY_CXX11} != ""
+CXX += -std=c++11
+.  endif
+. endif
+.endif
 CC  += -std=c11
 
 .SUFFIXES: .o .i .3 .cc .c .md

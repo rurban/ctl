@@ -1,18 +1,23 @@
 PREFIX = /usr/local
-CC = gcc
-CXX = g++
+CC ?= gcc
+CXX ?= g++
 
 .SUFFIXES: .cc .c .i .o .md .3
 .PHONY: all man install clean doc images perf examples ALWAYS
 
 TRY_CXX20 := $(shell $(CXX) -std=c++20 -I. tests/func/test_deque.cc -o /dev/null)
-ifneq ($(.SHELLSTATUS),0)
+ifeq ($(.SHELLSTATUS),0)
+CXX += -std=c++20
+else
 TRY_CXX17 := $(shell $(CXX) -std=c++17 -I. tests/func/test_deque.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
 CXX += -std=c++17
-endif
 else
-CXX += -std=c++20
+TRY_CXX11 := $(shell $(CXX) -std=c++11 -I. tests/func/test_deque.cc -o /dev/null)
+ifeq ($(.SHELLSTATUS),0)
+CXX += -std=c++11
+endif
+endif
 endif
 CC += -std=c11
 
