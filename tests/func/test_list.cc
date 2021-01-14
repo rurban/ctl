@@ -155,6 +155,9 @@ int
 main(void)
 {
     INIT_SRAND;
+#if defined DEBUG && defined SEED
+    printf("\n"); // flush the buffer in case of aborts
+#endif
     INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
     {
@@ -663,13 +666,16 @@ main(void)
                 int test_value = 0;
                 int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                                      : test_value;
+                digi key = digi_init(v);
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                size_t numa = list_digi_count_range(&first_a, &last_a,
-                                                    digi_init(v));
+                // fails with 0,0 of 0
+                size_t numa = list_digi_count_range(&first_a, &last_a, key);
                 size_t numb = count(first_b, last_b, DIGI{v});
                 assert(numa == numb);
+                if (first_a.done)
+                    digi_free (&key); // no self, avoid leaks
                 break;
             }
 #ifdef DEBUG
@@ -691,17 +697,16 @@ main(void)
             }
             case TEST_EQUAL_RANGE:
             {
-                /*
                 int vb = TEST_RAND(TEST_MAX_VALUE);
+                digi key = digi_init(vb);
                 list_digi_it first_a, last_a;
                 std::_List_iterator<DIGI> first_b, last_b;
-                LOG("EQUAL_RANGE\n");
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = list_digi_equal_range(&first_a, &last_a,
-                                                digi_init(vb));
+                bool aa = list_digi_equal_range(&first_a, &last_a, key);
                 bool bb = equal_range(first_b, last_b, vb);
                 assert(aa == bb);
-                */
+                if (first_a.done)
+                    digi_free (&key); // no self, avoid leaks
                 break;
             }
             case TEST_COUNT_IF_RANGE:

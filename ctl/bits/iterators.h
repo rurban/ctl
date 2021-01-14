@@ -16,7 +16,7 @@
 #  define iter_IT(iter) (iter).node
 #  define iter_IT_end(iter) (iter.done ? NULL : iter.node)
 #  define foreach_range(A, it, first, last)      \
-      if (!last->done)                           \
+      if (last && !last->done)                   \
           first->end = last->next;               \
       for(JOIN(A, it) it = *first; !it.done; it.step(&it))
 

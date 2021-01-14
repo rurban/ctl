@@ -120,6 +120,8 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
 static inline size_t
 JOIN(A, count_range)(I* first, I* last, T value)
 {
+    if (first->done || !first->container)
+        return 0;
     A* self = first->container;
     size_t count = 0;
     foreach_range(A, it, first, last)
@@ -173,6 +175,8 @@ JOIN(A, count)(A* self, T value)
 static inline bool
 JOIN(A, equal_range)(I* first, I* last, T value)
 {
+    if (first->done || !first->container)
+        return false;
     A* self = first->container;
     bool result = true;
     foreach_range(A, it, first, last)
