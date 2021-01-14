@@ -550,7 +550,7 @@ JOIN(A, push_cached)(A* self, T* value)
     B** buckets = JOIN(A, _bucket)(self, *value);
     JOIN(B, push)(buckets, JOIN(B, init)(*value));
 #endif
-    LOG ("push_bucket[%zu]\n", JOIN(B, bucket_size)(*buckets));
+    //LOG ("push_bucket[%zu]\n", JOIN(B, bucket_size)(*buckets));
     self->size++;
     return buckets;
 }
@@ -600,6 +600,9 @@ JOIN(A, insert_found)(A* self, T value, int* foundp)
     }
     if(JOIN(A, empty)(self))
         JOIN(A, rehash)(self, 12);
+#ifdef DEBUG
+    B** bucket =
+#endif
     JOIN(A, push_cached)(self, &value);
     LOG ("insert_found: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
@@ -791,7 +794,7 @@ JOIN(A, copy)(A* self)
     A other = JOIN(A, init)(self->hash, self->equal);
     JOIN(A, _reserve)(&other, self->bucket_count);
     foreach(A, self, it) {
-        LOG ("size: %lu\n", other.size);
+        //LOG ("size: %lu\n", other.size);
         JOIN(A, insert)(&other, self->copy(it.ref));
     }
     LOG ("final size: %lu\n", other.size);
