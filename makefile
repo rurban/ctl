@@ -20,7 +20,7 @@ CXX += -std=c++11
 CC  += -std=c11
 
 .SUFFIXES: .o .i .3 .cc .c .md
-.PHONY: all man install clean doc images perf examples ALWAYS
+.PHONY: all man install clean doc images perf examples asan debug stress stress-long ALWAYS
 
 #LONG ?= 0
 #SANITIZE ?= 0
@@ -258,6 +258,10 @@ tests/func/test_vector:   .cflags ${COMMON_H} ctl/vector.h \
                           tests/func/test_vector.cc
 	${CXX} ${CFLAGS} -o $@ $@.cc
 
+asan:
+	$(MAKE) SANITIZE=1
+debug:
+	$(MAKE) DEBUG=1
 stress:
 	if test -n "$(CTL)"; then timeout 10m sh -c "while $(MAKE) -s SANITIZE=1 \
 	        tests/func/test_$(CTL) && tests/func/test_$(CTL); do true; done"; \

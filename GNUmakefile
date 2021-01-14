@@ -3,7 +3,7 @@ CC ?= gcc
 CXX ?= g++
 
 .SUFFIXES: .cc .c .i .o .md .3
-.PHONY: all man install clean doc images perf examples ALWAYS
+.PHONY: all man install clean doc images perf examples asan debug stress stress-long ALWAYS
 
 TRY_CXX20 := $(shell $(CXX) -std=c++20 -I. tests/func/test_deque.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
@@ -269,6 +269,10 @@ tests/func/%: tests/func/%.c .cflags $(H)
 tests/func/%: tests/func/%.cc .cflags $(H)
 	$(CXX) $(CFLAGS) -o $@ $@.cc
 
+asan:
+	$(MAKE) SANITIZE=1
+debug:
+	$(MAKE) DEBUG=1
 stress:
 	if test -n "$(CTL)"; then timeout 10m sh -c "while $(MAKE) -s SANITIZE=1 \
 	        tests/func/test_$(CTL) && tests/func/test_$(CTL); do true; done"; \
