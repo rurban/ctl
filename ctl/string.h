@@ -1,5 +1,5 @@
 /* A vector class
-   See MIT LICENSE. */
+   SPDX-License-Identifier: MIT */
 #ifndef __STR__H__
 #define __STR__H__
 

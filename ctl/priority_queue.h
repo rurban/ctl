@@ -1,6 +1,6 @@
 /* Its first element is always the greatest of the elements it contains, according to
    some strict weak ordering criterion. deriving from vector.
-   See MIT LICENSE. */
+   SPDX-License-Identifier: MIT */
 
 #ifndef T
 #error "Template type T undefined for <ctl/priority_queue.h>"

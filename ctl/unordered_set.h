@@ -4,18 +4,27 @@
    The faster open addressing moves pointers. Maybe add another class for open
    hashes (hmap, hashtable).
 
-   See MIT LICENSE.
+   SPDX-License-Identifier: MIT
 
    Tunable policies:
 
 Growth policies:
- - CTL_USET_GROWTH_PRIMED:  slower but more secure. uses all hash
-                            bits. (default)
- - CTL_USET_GROWTH_POWER2:  faster, but less secure. uses only some left-most
+  - CTL_USET_GROWTH_PRIMED:  slower but more secure. uses all hash
+                             bits. (default)
+  - CTL_USET_GROWTH_POWER2:  faster, but less secure. uses only some left-most
                              bits. not recommended with inet access.
 
-CTL_USET_CACHED_HASH:       store the hash in the bucket. faster find, but
-                            needs a bit more space. (not yet stable)
+- CTL_USET_CACHED_HASH:      store the hash in the bucket. faster find when
+                             unsuccesful (eg on high load factor), but needs a bit more space.
+
+Planned:
+
+- CTL_USET_MOVE_TO_FRONT moves a bucket in a chain not at the top
+position to the top in each access, such as find and contains, not only insert.
+
+- CTL_USET_GROWTH_FACTOR defaults to 2.0 for CTL_USET_GROWTH_POWER2 and
+`1.618` for CTL_USET_GROWTH_PRIMED.
+
 */
 #ifndef T
 #error "Template type T undefined for <unordered_set.h>"

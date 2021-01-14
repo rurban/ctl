@@ -1,4 +1,5 @@
 // See MIT LICENSE
+// SPDX-License-Identifier: MIT
 #ifndef __CTL_H__
 #define __CTL_H__
 

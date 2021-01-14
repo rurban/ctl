@@ -1,5 +1,6 @@
 /* List containers are implemented as doubly-linked lists
-   See MIT LICENSE. */
+   SPDX-License-Identifier: MIT
+ */
 
 #ifndef T
 #error "Template type T undefined for <ctl/list.h>"

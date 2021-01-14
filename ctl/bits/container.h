@@ -1,5 +1,5 @@
 /* Common bits for all containers.
-   See MIT LICENSE. */
+   SPDX-License-Identifier: MIT */
 
 // DO NOT STANDALONE INCLUDE.
 #if !defined CTL_LIST && !defined CTL_SET && !defined CTL_USET && \

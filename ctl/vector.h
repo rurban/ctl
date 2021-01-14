@@ -1,5 +1,5 @@
 /* Arrays that can change in size.
-   See MIT LICENSE. */
+   SPDX-License-Identifier: MIT */
 
 // TODO emplace, emplace_back
 

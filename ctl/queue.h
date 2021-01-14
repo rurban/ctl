@@ -1,5 +1,5 @@
 /* FIFO deque
-   See MIT LICENSE. */
+   SPDX-License-Identifier: MIT */
 
 #ifndef T
 #error "Template type T undefined for <ctl/queue.h>"

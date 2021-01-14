@@ -1,5 +1,5 @@
 /* Same hash table as unordered_set
-   See MIT LICENSE.
+   SPDX-License-Identifier: MIT
 
   TODO: add pairs, to handle the extra free for key and value pairs.
 

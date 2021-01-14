@@ -1,6 +1,6 @@
-// Optional algorithms
-// See MIT LICENSE
+// Optional generic algorithms
 // DO NOT STANDALONE INCLUDE, need container included before.
+// SPDX-License-Identifier: MIT
 //
 // Might only be included once. By the child. not the parent.
 #ifndef __CTL_ALGORITHM_H__

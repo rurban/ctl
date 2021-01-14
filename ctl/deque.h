@@ -1,6 +1,6 @@
 /* Double-ended queues are sequence containers with dynamic sizes
    that can be expanded or contracted on both ends.
-   See MIT LICENSE.
+   SPDX-License-Identifier: MIT
 */
 /* It should be possible to do it thread-safe. Not yet. */
 
