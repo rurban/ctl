@@ -723,7 +723,7 @@ main(void)
                     printf ("%d != %d FAIL\n", (int)numa, (int)numb);
                     errors++;
                 }
-                //assert(numa == numb); //fails
+                //assert(numa == numb); //fails. off by one, counts one too much
                 break;
             }
 #endif
