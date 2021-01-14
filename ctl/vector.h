@@ -480,6 +480,12 @@ JOIN(A, find)(A* self, T key)
 }
 #endif
 
+#if defined(CTL_PQU) || \
+    defined(CTL_STR) || \
+    defined(CTL_U8STR)
+# include <ctl/algorithm.h>
+#endif
+
 #undef A
 #undef I
 #undef MUST_ALIGN_16

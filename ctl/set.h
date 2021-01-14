@@ -7,12 +7,12 @@
 
 // TODO emplace, lower_bound, upper_bound, equal_range
 
-#include <ctl/ctl.h>
-
 #define CTL_SET
 #define A JOIN(set, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+
+#include <ctl/ctl.h>
 
 typedef struct B
 {
@@ -706,6 +706,10 @@ JOIN(A, symmetric_difference)(A* a, A* b)
     JOIN(A, free)(&intersection);
     return self;
 }
+
+#if defined(CTL_MAP)
+# include <ctl/algorithm.h>
+#endif
 
 #ifndef HOLD
 #undef POD

@@ -239,7 +239,7 @@ JOIN(A, _equal)(A* self, T* a, T* b)
 // parents are vec: str, pqu. deq: queue, stack. set: map, uset: umap
 // ignore str: u8str, u8id for now.
 #undef _IS_PARENT_CHILD_FOLLOWS
-#if defined CTL_VEC && (defined CTL_STACK || defined CTL_STR  || defined CTL_U8STR)
+#if defined CTL_VEC && (defined CTL_PQU || defined CTL_STR  || defined CTL_U8STR)
 #define _IS_PARENT_CHILD_FOLLOWS
 #endif
 #if defined CTL_DEQ && (defined CTL_QUEUE || defined CTL_STACK)

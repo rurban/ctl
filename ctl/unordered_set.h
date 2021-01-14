@@ -874,6 +874,10 @@ JOIN(A, swap)(A* self, A* other)
     *other = temp;
 }
 
+#if defined(CTL_UMAP)
+# include <ctl/algorithm.h>
+#endif
+
 #undef POD
 #ifndef HOLD
 #undef A

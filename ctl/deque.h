@@ -8,12 +8,12 @@
 #error "Template type T undefined for <ctl/deque.h>"
 #endif
 
-#include <ctl/ctl.h>
-
 #define CTL_DEQ
 #define A JOIN(deq, T)
 #define B JOIN(A, bucket)
 #define I JOIN(A, it)
+
+#include <ctl/ctl.h>
 
 #define DEQ_BUCKET_SIZE (512)
 
@@ -577,6 +577,10 @@ JOIN(A, find_range)(A* self, I* first, I* last, T value)
 
 #endif
 
+#if defined(CTL_QUEUE) || \
+    defined(CTL_STACK)
+# include <ctl/algorithm.h>
+#endif
 
 #undef T
 #undef A
