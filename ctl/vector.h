@@ -2,6 +2,7 @@
    SPDX-License-Identifier: MIT */
 
 // TODO emplace, emplace_back
+// TODO end of empty vec follows NULL value
 
 #ifndef T
 #error "Template type T undefined for <ctl/vector.h>"
@@ -72,7 +73,7 @@ JOIN(A, begin)(A* self)
 static inline T*
 JOIN(A, end)(A* self)
 {
-    return JOIN(A, back)(self) + 1;
+    return self->size ? JOIN(A, back)(self) + 1 : NULL;
 }
 
 static inline void
