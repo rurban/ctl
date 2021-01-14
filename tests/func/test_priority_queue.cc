@@ -37,38 +37,16 @@ main(void)
         TEST(POP) \
         TEST(SWAP)
 
-#define FOREACH_DEBUG(TEST) \
-        TEST(EQUAL_RANGE) \
-        TEST(FIND_RANGE) \
-        TEST(FIND_IF) \
-        TEST(FIND_IF_NOT) \
-        TEST(FIND_IF_RANGE) \
-        TEST(FIND_IF_NOT_RANGE) \
-        TEST(ALL_OF) \
-        TEST(ANY_OF) \
-        TEST(NONE_OF) \
-        TEST(ALL_OF_RANGE) \
-        TEST(ANY_OF_RANGE) \
-        TEST(NONE_OF_RANGE) \
-        TEST(COUNT) \
-        TEST(COUNT_IF) \
-        TEST(COUNT_IF_RANGE) \
-        TEST(COUNT_RANGE)
-
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
         enum {
             FOREACH_METH(GENERATE_ENUM)
-#ifdef DEBUG
-            FOREACH_DEBUG(GENERATE_ENUM)
-#endif
             TEST_TOTAL
         };
 #ifdef DEBUG
         static const char *test_names[] = {
             FOREACH_METH(GENERATE_NAME)
-            FOREACH_DEBUG(GENERATE_NAME)
             ""
         };
 #endif

@@ -89,9 +89,11 @@ tests/test_c11.c:11:11: error: ‘type_free’ undeclared (first use in this fun
 ## Compare
 
 In contrast to the original CTL, this applies default `compare` and `equal` methods
-to all integral types T as
-int, long, bool, char, short, float, double, char8_t, wchar_t, char16_t,
-char32_t, long double, long long, unsigned int, unsigned long, unsigned char.
+to all integral types T as `int`, `long`, `bool`, `char`, `short`, `float`, `double`, `char8_t`,
+`uint8_t` - `uin64_t`, `int8_t` - `in64_t`.
+Since T may not contain a space, we also accept `long double` as `ldbl`,
+`long long` as `llong`, `unsigned int` as `uint` and `uint8_t` - `uin64_t`,
+`unsigned long` as `ulong`, `unsigned char` as `uchar`.
 
 Only with structs a `compare` and optionally an `equal` method must be set.
 Removed the compare and equal args from `equal`, `sort`, `sort_range`, `find`,
@@ -121,6 +123,24 @@ have to define `NOT_INTEGRAL`.
 ```
 
 Forgetting a compare method will assert with "compare undefined", if enabled.
+
+## Iterators and Ranges
+
+We accept and return three types of iterators: `T*` for simple types in arrays,
+as vector derived containers, `size_t` index for deque iterators,
+and `B*` node pointers for the rest: list, set and uset derived containers with
+extra nodes.
+
+Contrary to the STL we mostly return `T*`, `size_t` or `B*`, not full `I` iterators.
+But you can convert those return values via the `iter` method to full iterators,
+to be acceptable as `I*` argument, e.g. for range methods.
+
+Note: We will redesign `I*` iterators soon to be faster (not 3 assignments per step, just a
+single incement or ->next assignemt for B* iters) and be more compatible to the
+STL. The foreach and foreach_range macros will need args then, and split into
+variants with and without setting ref (value pointers).
+
+range methods are suffixed with `_range`, special iterator methods with `_it`.
 
 ## Performance
 
@@ -219,8 +239,9 @@ See `tests/func/test_container_composing.cc`
 UTF-8 strings and identifiers will be added eventually, Wide, UTF-16 or UTF-32
 not.
 
-All methods from algorithm, iterator and range are in work.
-Implemented are type utilities to omit default compare, equal and hash methods
+Many methods from algorithm, with iterators and range are now implemented, but
+iterators will change soon.
+Also implemented are type utilities to omit default compare, equal and hash methods
 for POD integral types.
 
 See [Differences](#differences) below.
@@ -274,6 +295,20 @@ union                                   x    x                   x    x
 difference                              x    x                   x    x
 symmetric_difference                    x    x                   x    x
 contains                                x    x                   x    x
+find_if             x    x    x    x    x    x                   x    x
+find_if_not         x    x    x    x    x    x                   x    x
+all_of              x    x    x    x    x    x                   x    x
+none_of             x    x    x    x    x    x                   x    x
+find_range          x    x    x    x    x    x                   x    x
+find_if_range       x    x    x    x    x    x                   x    x
+find_if_not_range   x    x    x    x    x    x                   x    x
+all_of_range        x    x    x    x    x    x                   x    x
+any_of_range        x    x    x    x    x    x                   x    x
+none_of_range       x    x    x    x    x    x                   x    x
+count_if            x         x    x         x                   x    x
+count_if_range      x         x    x         x                   x    x
+count_range         x         x    x         x                        x
+count               x         x    x         x                        x
 top                                               x         x
 push                                              x    x    x
 pop                                               x    x    x
@@ -344,9 +379,9 @@ Added compare and equal fields to all.
 Added many `_it` and `_range` method variants to accept iterators, `_found` to
 return found or not.
 
-    deque: insert_it, insert_range, insert_count, erase_it, erase_range,
+    deque: insert_range, insert_count, erase_range,
            emplace, emplace_back, emplace_front, sort_range
-    vector: assign_range, erase_it, erase_range
+    vector: assign_range, erase_range
     list: remove, emplace, emplace_front, insert_range, insert_count
     set: erase_it, erase_range
     map: insert_or_assign
@@ -362,25 +397,27 @@ Optimized test dependencies, time went from 25s to 3s even with ccache.
 
 Optimized hashmaps with two growth policies, about 100x faster with the policy
 `CTL_USET_GROWTH_POWER2`, instead of the default `CTL_USET_GROWTH_PRIMED`.
+Added the `CTL_USET_CACHED_HASH` policy for faster unsuccessful finds with high
+load factors, but more memory.
 
-hashmaps will be changed from chained lists to open addressing, thus no internal
+Hashmaps will be changed from chained lists to open addressing, thus no internal
 bucket methods, and even more faster, but pointers into it are disallowed.
-The `CTL_USET_CACHED_HASH` policy is still in work, for faster finds but more memory.
 
 Optimized list, seperate connect before and after methods.
 
 Implemented correct short string and vector capacity policies, as in gcc
 libstdc++ and llvm libc++.
 
-Work is ongoing for all `algorithms.h` and `ranges`, with full iterator support
-and `foreach_range`.
+Work is ongoing for all `algorithms.h`, `iterators` and `ranges`, with better
+iterators.
 
 On errors, like `size > max_size` return silently. This avoids DDOS attacks.
 When assert is used, throw them. (when assert.h included, no NDEBUG)
-
 glouw/ctl does not treat errors at all. There cannot be any.
 
 Support not only GNU make, but also BSD make.
+
+Tested also against the libc++ from llvm, not just the GNU libstdc++ v3.
 
 ### Differences to the STL
 
@@ -395,12 +432,14 @@ return the iterator and set a `int *foundp` value. Eg.
     int found;
     map_T_insert_assign_found (self, key, &found);
 
-`emplace`, `erase_if` and many algorithms still missing, most C++20 methods
+`emplace`, `erase_if` and many algorithms still missing, many C++20 methods
 also still missing.
 
 hashmaps will not rely on chained lists with buckets, and will be either changed
-to open addressing or a better modern layout, such greg7mdp/parallel-hashmap.
-Thus the bucket interface methods will go, except maybe `max_bucket_count`.
+to open addressing or a better modern layout, such [greg7mdp/parallel-hashmap](https://github.com/greg7mdp/parallel-hashmap).
+Thus the bucket interface methods will not be defined for all hashmap variants,
+except maybe `max_bucket_count`. hashmap policies are compile-time defined via
+`#define CTL_USET_...`
 
 **u8string** will get proper utf-8/unicode support, exceeding C++ STL.
 compare will check u8strings normalized to NFD.
@@ -433,7 +472,6 @@ No bloat and not many indirect calls (only compare and equal).
 
 Not yet implemented:
 
-    foreach_range
     foreach_n C++17
     foreach_n_range C++20
     mismatch
