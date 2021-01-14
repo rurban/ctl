@@ -4,6 +4,7 @@
 #define USE_INTERNAL_VERIFY
 #define T digi
 #include <ctl/unordered_set.h>
+#include <ctl/algorithm.h>
 
 #include <inttypes.h>
 #include <unordered_set>
@@ -119,22 +120,24 @@ main(void)
         TEST(EQUAL) \
         TEST(REHASH) \
         TEST(RESERVE) \
-        TEST(UNION)
-
-#define FOREACH_DEBUG(TEST) \
-        /* TEST(EMPLACE) */ \
-        /* TEST(EXTRACT) */ \
-        /* TEST(MERGE) */ \
-        /* TEST(REMOVE_IF) */ \
-        /* TEST(SYMMETRIC_DIFFERENCE) */    \
-        /* TEST(INTERSECTION)  */ \
-        /* TEST(DIFFERENCE)  */ \
+        TEST(UNION) \
+        TEST(SYMMETRIC_DIFFERENCE) \
+        TEST(INTERSECTION) \
+        TEST(DIFFERENCE) \
+        \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
         TEST(ALL_OF) \
         TEST(ANY_OF) \
         TEST(NONE_OF) \
         TEST(COUNT_IF)
+
+#define FOREACH_DEBUG(TEST) \
+        /* TEST(EMPLACE) */ \
+        /* TEST(EXTRACT) */ \
+        /* TEST(MERGE) */ \
+        /* TEST(REMOVE_IF) */
+
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -345,7 +348,7 @@ main(void)
                 uset_digi_free(&aaa);
                 break;
             }
-#if 0
+#if 1
             case TEST_SYMMETRIC_DIFFERENCE:
             {
                 uset_digi aa;
@@ -398,14 +401,37 @@ main(void)
             case TEST_EMPLACE:
             case TEST_EXTRACT:
             case TEST_MERGE:
-            case TEST_CONTAINS:
             case TEST_EQUAL_RANGE:
                 break;
 #endif
-#ifdef DEBUG // algorithm
+#if 1       // algorithm
             case TEST_FIND_IF:
+            {
+                uset_digi_node* aa = uset_digi_find_if(&a, digi_is_odd);
+                auto bb = b.find_if(DIGI_is_odd);
+                if(bb == b.end())
+                    assert(uset_digi_end(&a) == aa);
+                else
+                    assert(*bb->value == *aa->value.value);
+                break;
+            }
             case TEST_FIND_IF_NOT:
+            {
+                uset_digi_node* aa = uset_digi_find_if_not(&a, digi_is_odd);
+                auto bb = b.find_if_not(DIGI_is_odd);
+                if(bb == b.end())
+                    assert(uset_digi_end(&a) == aa);
+                else
+                    assert(*bb->value == *aa->value.value);
+                break;
+            }
             case TEST_ALL_OF:
+            {
+                bool is_a = uset_digi_all_of(&a, digi_is_odd);
+                bool is_b = b.all_of(.b.begin(), b.end(), DIGI_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
             case TEST_ANY_OF:
             case TEST_NONE_OF:
             case TEST_COUNT_IF:

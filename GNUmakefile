@@ -208,7 +208,7 @@ ctl/unordered_map.i:
 %.i : %.c
 	@$(CC) $(CFLAGS) $< -E | clang-format -style=webkit
 %.i : %.cc
-	@$(CXX) $(CFLAGS) $< -P -E | clang-format -style=webkit
+	@$(CXX) $(CFLAGS) $< -E | clang-format -style=webkit
 
 examples/% : examples/%.c .cflags $(H)
 	$(CC) $(CFLAGS) -o $@ $@.c

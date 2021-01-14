@@ -2,8 +2,11 @@
    SPDX-License-Identifier: MIT */
 
 // DO NOT STANDALONE INCLUDE.
-#if !defined CTL_LIST && !defined CTL_SET && !defined CTL_USET && \
-    !defined CTL_VEC && !defined CTL_DEQ
+#if !defined CTL_LIST && \
+    !defined CTL_SET && \
+    !defined CTL_USET && \
+    !defined CTL_VEC && \
+    !defined CTL_DEQ
 #error "No CTL container defined for <ctl/bits/container.h>"
 #endif
 
@@ -232,24 +235,31 @@ JOIN(A, _equal)(A* self, T* a, T* b)
 }
 #endif
 
-// if parent, include only for the child later.
+// If parent, include only for the child later.
 // parents are vec: str, pqu. deq: queue, stack. set: map, uset: umap
 // ignore str: u8str, u8id for now.
 #undef _IS_PARENT_CHILD_FOLLOWS
 #if defined CTL_VEC && (defined CTL_STACK || defined CTL_STR  || defined CTL_U8STR)
 #define _IS_PARENT_CHILD_FOLLOWS
+#pragma message "vec child"
 #endif
 #if defined CTL_DEQ && (defined CTL_QUEUE || defined CTL_STACK)
 #define _IS_PARENT_CHILD_FOLLOWS
+#pragma message "deq child"
 #endif
 #if defined CTL_SET && defined CTL_MAP
 #define _IS_PARENT_CHILD_FOLLOWS
+#pragma message "map"
 #endif
 #if defined CTL_USET && defined CTL_UMAP
 #define _IS_PARENT_CHILD_FOLLOWS
+#pragma message "umap"
 #endif
 
 #ifndef _IS_PARENT_CHILD_FOLLOWS
+#pragma message "include algorithm"
 #include <ctl/algorithm.h>
+#else
+#pragma message "ignore algorithm"
 #endif
 #undef _IS_PARENT_CHILD_FOLLOWS

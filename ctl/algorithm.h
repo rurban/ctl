@@ -7,17 +7,23 @@
 #define __CTL_ALGORITHM_H__
 #define CTL_ALGORITHM
 
-#if !defined CTL_LIST && !defined CTL_SET && !defined CTL_USET && \
-    !defined CTL_VEC && !defined CTL_DEQ && \
+#if !defined CTL_LIST && \
+    !defined CTL_SET && \
+    !defined CTL_USET && \
+    !defined CTL_VEC && \
+    !defined CTL_DEQ && \
     /* plus all children also. we dont include it for parents */ \
-    !defined CTL_STACK && !defined CTL_QUEUE  && !defined CTL_PQU && \
-    !defined CTL_MAP && !defined CTL_UMAP
+    !defined CTL_STACK && \
+    !defined CTL_QUEUE  && \
+    !defined CTL_PQU && \
+    !defined CTL_MAP && \
+    !defined CTL_UMAP
 #error "No CTL container defined for <ctl/algorithm.h>"
 #endif
 
 // Generic algorithms with ranges
 
-#if 0
+#if 1
 #include <stdbool.h>
 
 /* We have two major kinds of iterators:
@@ -26,11 +32,13 @@
 */
 
 #if !defined IT /* && !defined foreach_range */
-# if defined CTL_LIST || defined CTL_SET || defined CTL_USET
+# if defined CTL_LIST || \
+    defined CTL_SET || \
+    defined CTL_USET
 #  define CTL_B_ITER
 #  define IT B
 /* return it.node */
-#  define foreach_range(A, it, first, last)      \
+#  define notyet_foreach_range(A, it, first, last)      \
     A* other = first->container;                 \
     if (last != JOIN(A, end)(&other)             \
         first->end = last->node;                 \
@@ -40,13 +48,13 @@
 #  define IT T
 /* return it.ref */
 #  ifdef CTL_VEC
-#   define foreach_range(A, it, first, last)       \
+#   define notyet_foreach_range(A, it, first, last) \
       A* itercont = first->container;              \
       if (last != JOIN(A, end)(&itercont)          \
           first->end = last->end;                  \
       foreach(A, other, it)
 #  else // DEQ
-#   define foreach_range(A, it, first, last)
+#   define notyet_foreach_range(A, it, first, last)
 /* FIXME: T -> I, deque needs a container field really
 #   define foreach_range(A, it, first, last)       \
       A* itercont = first->container;              \
@@ -99,6 +107,7 @@ JOIN(A, equal_range)(A* self, IT* first, IT* last)
     return true;
 }
 #endif // USET+STR
+#endif // foreach_range
 
 static inline IT*
 JOIN(A, find_if)(A* self, int _match(T*))
@@ -108,7 +117,7 @@ JOIN(A, find_if)(A* self, int _match(T*))
 #ifdef CTL_T_ITER
             return it.ref;
 #else
-            return it;
+            return it.node;
 #endif
     return JOIN(A, end)(self);
 }
@@ -122,7 +131,7 @@ JOIN(A, find_if_not)(A* self, int _match(T*))
 #ifdef CTL_T_ITER
             return it.ref;
 #else
-            return it;
+            return it.node;
 #endif
     return JOIN(A, end)(self);
 }
@@ -146,6 +155,8 @@ JOIN(A, none_of)(A* self, int _match(T*))
 {
     return JOIN(A, find_if)(self, _match) == JOIN(A, end)(self);
 }
+
+#ifdef foreach_range
 
 // C++20
 static inline bool
