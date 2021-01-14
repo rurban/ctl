@@ -5,7 +5,6 @@
 #include <ctl/priority_queue.h>
 
 #include <queue>
-#include <algorithm>
 
 #define CHECK(_x, _y) {                                       \
     while(_x.size > 0) {                                      \
@@ -37,6 +36,7 @@ main(void)
         TEST(PUSH) \
         TEST(POP) \
         TEST(SWAP)
+
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) \
         TEST(FIND_RANGE) \
@@ -106,25 +106,6 @@ main(void)
                 pqu_digi_free(&aaa);
                 break;
             }
-#ifdef DEBUG // algorithm
-            case TEST_EQUAL_RANGE:
-            case TEST_FIND_RANGE:
-            case TEST_FIND_IF:
-            case TEST_FIND_IF_NOT:
-            case TEST_FIND_IF_RANGE:
-            case TEST_FIND_IF_NOT_RANGE:
-            case TEST_ALL_OF:
-            case TEST_ANY_OF:
-            case TEST_NONE_OF:
-            case TEST_ALL_OF_RANGE:
-            case TEST_ANY_OF_RANGE:
-            case TEST_NONE_OF_RANGE:
-            case TEST_COUNT:
-            case TEST_COUNT_IF:
-            case TEST_COUNT_IF_RANGE:
-            case TEST_COUNT_RANGE:
-                break;
-#endif
         }
         CHECK(a, b);
         pqu_digi_free(&a);

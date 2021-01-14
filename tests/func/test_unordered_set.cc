@@ -410,6 +410,7 @@ main(void)
             case TEST_EQUAL_RANGE:
                 break;
 #endif
+            // algorithm
             case TEST_FIND_IF:
             {
                 uset_digi_node* aa = uset_digi_find_if(&a, digi_is_odd);
@@ -430,7 +431,6 @@ main(void)
                     assert(!(*bb->value % 2));
                 break;
             }
-#if 1   // algorithm
             case TEST_ALL_OF:
             {
                 bool is_a = uset_digi_all_of(&a, digi_is_odd);
@@ -452,7 +452,6 @@ main(void)
                 assert(count_a == count_b);
                 break;
             }
-#endif
         }
         CHECK(a, b);
         uset_digi_free(&a);

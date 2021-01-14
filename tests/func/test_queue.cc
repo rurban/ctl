@@ -5,7 +5,6 @@
 #include <ctl/queue.h>
 
 #include <queue>
-#include <algorithm>
 
 #define CHECK(_x, _y) {                                           \
     while(_x.size > 0) {                                          \
@@ -38,38 +37,17 @@ main(void)
         TEST(PUSH) \
         TEST(POP) \
         TEST(SWAP)
-#define FOREACH_DEBUG(TEST) \
-        TEST(EQUAL_RANGE) \
-        TEST(FIND_RANGE) \
-        TEST(FIND_IF) \
-        TEST(FIND_IF_NOT) \
-        TEST(FIND_IF_RANGE) \
-        TEST(FIND_IF_NOT_RANGE) \
-        TEST(ALL_OF) \
-        TEST(ANY_OF) \
-        TEST(NONE_OF) \
-        TEST(ALL_OF_RANGE) \
-        TEST(ANY_OF_RANGE) \
-        TEST(NONE_OF_RANGE) \
-        TEST(COUNT) \
-        TEST(COUNT_IF) \
-        TEST(COUNT_IF_RANGE) \
-        TEST(COUNT_RANGE)
         
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
         enum {
             FOREACH_METH(GENERATE_ENUM)
-#ifdef DEBUG
-            FOREACH_DEBUG(GENERATE_ENUM)
-#endif
             TEST_TOTAL
         };
 #ifdef DEBUG
         static const char *test_names[] = {
             FOREACH_METH(GENERATE_NAME)
-            FOREACH_DEBUG(GENERATE_NAME)
             ""
         };
 #endif
@@ -107,25 +85,6 @@ main(void)
                 queue_digi_free(&aaa);
                 break;
             }
-#ifdef DEBUG // algorithm
-            case TEST_EQUAL_RANGE:
-            case TEST_FIND_RANGE:
-            case TEST_FIND_IF:
-            case TEST_FIND_IF_NOT:
-            case TEST_FIND_IF_RANGE:
-            case TEST_FIND_IF_NOT_RANGE:
-            case TEST_ALL_OF:
-            case TEST_ANY_OF:
-            case TEST_NONE_OF:
-            case TEST_ALL_OF_RANGE:
-            case TEST_ANY_OF_RANGE:
-            case TEST_NONE_OF_RANGE:
-            case TEST_COUNT:
-            case TEST_COUNT_IF:
-            case TEST_COUNT_IF_RANGE:
-            case TEST_COUNT_RANGE:
-                break;
-#endif
         }
         CHECK(a, b);
         queue_digi_free(&a);

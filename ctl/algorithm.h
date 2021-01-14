@@ -13,9 +13,6 @@
     !defined CTL_VEC && \
     !defined CTL_DEQ && \
     /* plus all children also. we dont include it for parents */ \
-    !defined CTL_STACK && \
-    !defined CTL_QUEUE  && \
-    !defined CTL_PQU && \
     !defined CTL_MAP && \
     !defined CTL_UMAP
 #error "No CTL container defined for <ctl/algorithm.h>"

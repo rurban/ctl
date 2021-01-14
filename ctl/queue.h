@@ -28,7 +28,6 @@
 #define CTL_QUEUE
 #define deq queue
 #include <ctl/deque.h>
-#include <ctl/algorithm.h>
 #undef deq
 #undef CTL_QUEUE
 
