@@ -11,9 +11,11 @@
 
 // mark functions which need 16 align
 #define LOG_CAP(a,b) \
-    LOG("ctl capacity %zu (0x%lx) vs %zu (0x%lx)\n", a.capacity, a.capacity, \
-        b.capacity(), b.capacity())
+    LOG("ctl capacity %zu (0x%lx) vs %zu (0x%lx) %s\n", \
+        a.capacity, a.capacity,                         \
+        b.capacity(), b.capacity(), a.capacity == b.capacity() ? "" : "FAIL")
 
+#ifndef _LIBCPP_STD_VER
 #define CHECK(_x, _y) {                              \
     assert(strlen(str_c_str(&_x)) == strlen(_y.c_str())); \
     assert(strcmp(str_c_str(&_x), _y.c_str()) == 0); \
@@ -37,6 +39,35 @@
     for(size_t i = 0; i < _y.size(); i++)            \
         assert(_y.at(i) == *str_at(&_x, i));         \
 }
+#else
+#define CHECK(_x, _y) {                              \
+    assert(strlen(str_c_str(&_x)) == strlen(_y.c_str())); \
+    assert(strcmp(str_c_str(&_x), _y.c_str()) == 0); \
+    if(_x.capacity != _y.capacity()) {               \
+        LOG_CAP(_x, _y);                             \
+        errors++;                                    \
+    }                                                \
+    /*assert(_x.capacity == _y.capacity());*/        \
+    assert(_x.size == _y.size());                    \
+    assert(str_empty(&_x) == _y.empty());            \
+    if(_x.size > 0) {                                \
+        assert(_y.front() == *str_front(&_x));       \
+        assert(_y.back() == *str_back(&_x));         \
+    }                                                \
+    std::string::iterator _iter = _y.begin();        \
+    foreach(str, &_x, _it) {                         \
+        assert(*_it.ref == *_iter);                  \
+        _iter++;                                     \
+    }                                                \
+    str_it _it = str_it_each(&_x);                   \
+    for(auto& _d : _y) {                             \
+        assert(*_it.ref == _d);                      \
+        _it.step(&_it);                              \
+    }                                                \
+    for(size_t i = 0; i < _y.size(); i++)            \
+        assert(_y.at(i) == *str_at(&_x, i));         \
+}
+#endif
 
 static char*
 create_test_string(size_t size)
@@ -60,6 +91,7 @@ char_compare(char* a, char* b)
 int
 main(void)
 {
+    int errors = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
@@ -373,5 +405,8 @@ main(void)
             free(base);
         }
     }
-    TEST_PASS(__FILE__);
+    if (errors)
+        TEST_FAIL(__FILE__);
+    else
+        TEST_PASS(__FILE__);
 }

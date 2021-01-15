@@ -46,7 +46,8 @@ TEST_TIME(void)
 #    define INIT_SRAND                                               \
        unsigned int seed = rand()*clock()*getpid();                  \
        srand(seed);                                                  \
-       printf("SEED=%u ", seed)
+       printf("SEED=%u ", seed);                                     \
+       fflush(stdout)
 #  endif
 #else
 #  define INIT_SRAND

@@ -161,35 +161,6 @@ JOIN(A, pop_back)(A* self)
 }
 
 static inline void
-JOIN(A, wipe)(A* self, size_t n)
-{
-    while(n != 0)
-    {
-        JOIN(A, pop_back)(self);
-        n--;
-    }
-}
-
-static inline void
-JOIN(A, clear)(A* self)
-{
-    if(self->size > 0)
-        JOIN(A, wipe)(self, self->size);
-}
-
-static inline void
-JOIN(A, free)(A* self)
-{
-    JOIN(A, clear)(self);
-    JOIN(A, compare_fn) *compare = &self->compare;
-    JOIN(A, compare_fn) *equal = &self->equal;
-    free(self->value);
-    *self = JOIN(A, init)();
-    self->compare = *compare;
-    self->equal = *equal;
-}
-
-static inline void
 JOIN(A, fit)(A* self, size_t capacity)
 {
     size_t overall = capacity;
@@ -211,6 +182,39 @@ JOIN(A, fit)(A* self, size_t capacity)
 #endif
     }
     self->capacity = capacity;
+}
+
+static inline void
+JOIN(A, wipe)(A* self, size_t n)
+{
+    while(n != 0)
+    {
+        JOIN(A, pop_back)(self);
+        n--;
+    }
+#if defined CTL_STR && defined _LIBCPP_STD_VER
+    if (self->capacity <= 30)
+        JOIN(A, fit)(self, 47);
+#endif
+}
+
+static inline void
+JOIN(A, clear)(A* self)
+{
+    if(self->size > 0)
+        JOIN(A, wipe)(self, self->size);
+}
+
+static inline void
+JOIN(A, free)(A* self)
+{
+    JOIN(A, clear)(self);
+    JOIN(A, compare_fn) *compare = &self->compare;
+    JOIN(A, compare_fn) *equal = &self->equal;
+    free(self->value);
+    *self = JOIN(A, init)();
+    self->compare = *compare;
+    self->equal = *equal;
 }
 
 static inline void
@@ -336,9 +340,25 @@ JOIN(A, assign_range)(A* self, T* from, T* last)
 static inline void
 JOIN(A, shrink_to_fit)(A* self)
 {
-    if(MUST_ALIGN_16(T) && self->size <= 15)
+    LOG("shrink_to_fit size %zu\n", self->size);
+    if(MUST_ALIGN_16(T) // only for string
+#ifndef _LIBCPP_STD_VER // gcc optimizes <16, llvm < 22. msvc??
+        && self->size <= 15
+#endif
+        )
     {
-        size_t size = ((self->size + 15) & ~15) - 1;
+        size_t size;
+#ifdef _LIBCPP_STD_VER
+        if (self->size < 22)
+            size = 22;
+        else {
+            size = ((self->size + 15) & ~15) - 1;
+            if (size < self->size)
+                size += 16;
+        }
+#else
+        size = self->size ? ((self->size + 15) & ~15) - 1 : 15;
+#endif
         JOIN(A, fit)(self, size);
     }
     else

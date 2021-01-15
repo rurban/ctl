@@ -9,7 +9,7 @@
 #if defined(DEBUG)
 #define ASSERT_EQUAL_CAP(c, s) if (s.capacity() != c.capacity) fail++
 // capacity is implemention-defined and we tested against gcc libstdc++ v3
-// and llvm libc++ v1 ver 18
+// and llvm libc++ v1 ver 18. MSVC ?
 // gcc libstdc++ had the latest change with __cplusplus >= 201103L
 // libc++ had the latest change in __grow_by in PR17148, 2013
 #elif (defined _LIBCPP_STD_VER || \
@@ -45,7 +45,7 @@ main(void)
                 str_resize (&a, size, '\0');
                 LOG("ctl resize 0 -> %zu vs %zu\n", a.size, b.size());
             }
-            if(mode == MODE_GROWTH)
+            else if(mode == MODE_GROWTH)
             {
                 LOG("mode GROWTH\n");
                 for(size_t pushes = 0; pushes < size; pushes++)
@@ -57,6 +57,12 @@ main(void)
                         a.capacity != b.capacity() ? "FAIL" : "");
                 }
                 LOG("ctl growth   %zu vs %zu\n", a.size, b.size());
+                if (TEST_RAND(10) < 3)
+                {
+                    b.shrink_to_fit();
+                    str_shrink_to_fit(&a);
+                    LOG("ctl shrink_to_fit cap %zu vs %zu\n", a.capacity, b.capacity());
+                }
             }
             ASSERT_EQUAL_SIZE (a, b);
             LOG("ctl capacity %zu (0x%lx) vs %zu (0x%lx) %s\n", a.capacity, a.capacity,

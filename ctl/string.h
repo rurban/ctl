@@ -186,6 +186,8 @@ static inline str
 str_substr(str* self, size_t index, size_t size)
 {
     str substr = str_init("");
+#ifndef _LIBCPP_STD_VER // gcc shrinks, llvm not
+#endif
     str_resize (&substr, size, '\0');
     for(size_t i = 0; i < size; i++)
         substr.value[i] = self->value[index + i];
