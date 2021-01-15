@@ -61,12 +61,19 @@ JOIN(A, last)(A* self)
 static inline T*
 JOIN(A, at)(A* self, size_t index)
 {
-    if(self->size == 0 || index >= self->size)
+    if(UNLIKELY(self->size == 0 || index >= self->size))
     {
 #if defined(_ASSERT_H) && !defined(NDEBUG)
         assert (index < self->size);
 #endif
-        return NULL;
+        self->capacity = 1;
+        self->pages = (B**) calloc(1, sizeof(B*));
+        if (!self->pages)
+            return NULL;
+        self->pages[0] = (B*) calloc(1, sizeof(B));
+        if (!self->pages[0])
+            return NULL;
+        return &self->pages[0]->value[0];
     }
     else
     {
@@ -150,27 +157,6 @@ JOIN(I, range)(A* container, T* begin, T* end)
 
 #include <ctl/bits/container.h>
 
-static inline A
-JOIN(A, init)(void)
-{
-    static A zero;
-    A self = zero;
-#ifdef POD
-    self.copy = JOIN(A, implicit_copy);
-# ifndef NOT_INTEGRAL
-    if (_JOIN(A, _type_is_integral)())
-    {
-        self.compare = _JOIN(A, _default_integral_compare);
-        self.equal = _JOIN(A, _default_integral_equal);
-    }
-# endif
-#else
-    self.free = JOIN(T, free);
-    self.copy = JOIN(T, copy);
-#endif
-    return self;
-}
-
 static inline B*
 JOIN(B, init)(size_t cut)
 {
@@ -204,6 +190,27 @@ JOIN(A, alloc)(A* self, size_t capacity, size_t shift_from)
     }
     self->mark_a += shift;
     self->mark_b += shift;
+}
+
+static inline A
+JOIN(A, init)(void)
+{
+    static A zero;
+    A self = zero;
+#ifdef POD
+    self.copy = JOIN(A, implicit_copy);
+# ifndef NOT_INTEGRAL
+    if (_JOIN(A, _type_is_integral)())
+    {
+        self.compare = _JOIN(A, _default_integral_compare);
+        self.equal = _JOIN(A, _default_integral_equal);
+    }
+# endif
+#else
+    self.free = JOIN(T, free);
+    self.copy = JOIN(T, copy);
+#endif
+    return self;
 }
 
 static inline void

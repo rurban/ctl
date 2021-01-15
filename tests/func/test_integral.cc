@@ -88,12 +88,14 @@ typedef unsigned long ulong;
 #define T long
 #include <ctl/unordered_set.h>
 
+#ifdef DEBUG
 void print_deq_int(deq_int *a)
 {
     for(size_t i = 0; i < a->size; i++)
         printf ("%zu: %d\n", i, *deq_int_at(a, i));
     printf ("\n");
 }
+#endif
 
 int
 main(void)

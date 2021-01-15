@@ -67,4 +67,9 @@
 #define CTL_ASSERT_COMPARE
 #endif
 
+#if __GNUC__ >= 3
+#define UNLIKELY(x) __builtin_expect((long)(x) != 0, 0)
+#else
+#define UNLIKELY(x) x
+#endif
 #endif
