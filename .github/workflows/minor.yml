@@ -21,9 +21,11 @@ jobs:
       fail-fast: false
       matrix:
         MAKE:
-          - make -j9 SANITIZE=1
-          - make -j9 CC=gcc\ -std=c99
-          - make -j9 CC=gcc\ -std=c11
+          - make -j4 SANITIZE=1
+          - make -j4 CC='gcc -std=c99'
+          - make -j4 CC='gcc -std=c11'
+          # TODO fails with -std=c++2a and c++17 on vec capacity
+          - make -j4 CXX='clang++ -std=c++11 -stdlib=libc++'
           - make examples SANITIZE=1
           - make perf
     steps:

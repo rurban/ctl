@@ -28,6 +28,7 @@ jobs:
           - make -j9 Ofast=1 LONG=1
           - make -j9 CC=gcc\ -std=c99
           - make -j9 CC=gcc\ -std=c11
+          - make -j4 CC='clang -std=c11' CXX='clang++ -stdlib=libc++'
           - make examples SANITIZE=1
           - make perf
     steps:
