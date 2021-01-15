@@ -7,6 +7,7 @@
 
 #include <map>
 #include <algorithm>
+#include <iterator>
 
 #define CHECK(_x, _y) {                                      \
     assert(_x.size == _y.size());                            \

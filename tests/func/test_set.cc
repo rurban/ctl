@@ -13,6 +13,7 @@ digi_key_compare(digi* a, digi* b)
 
 #include <set>
 #include <algorithm>
+#include <iterator>
 
 #define CHECK(_x, _y) {                           \
     assert(_x.size == _y.size());                 \
@@ -231,12 +232,15 @@ main(void)
                 std::set<DIGI> bb;
                 setup_sets(&aa, bb);
                 set_digi aaa = set_digi_union(&a, &aa);
+//#ifndef _WIN32
                 std::set<DIGI> bbb;
-                std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
+                std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
+                               std::inserter(bbb, bbb.begin()));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
-                set_digi_free(&aa);
                 set_digi_free(&aaa);
+//#endif
+                set_digi_free(&aa);
                 break;
             }
             case TEST_INTERSECTION:
@@ -245,12 +249,15 @@ main(void)
                 std::set<DIGI> bb;
                 setup_sets(&aa, bb);
                 set_digi aaa = set_digi_intersection(&a, &aa);
+//#ifndef _WIN32
                 std::set<DIGI> bbb;
-                std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
+                std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
+                                      std::inserter(bbb, bbb.begin()));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
-                set_digi_free(&aa);
                 set_digi_free(&aaa);
+//#endif
+                set_digi_free(&aa);
                 break;
             }
             case TEST_SYMMETRIC_DIFFERENCE:
@@ -259,13 +266,15 @@ main(void)
                 std::set<DIGI> bb;
                 setup_sets(&aa, bb);
                 set_digi aaa = set_digi_symmetric_difference(&a, &aa);
+//#ifndef _WIN32
                 std::set<DIGI> bbb;
                 std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                               std::inserter(bbb, bbb.begin()));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
-                set_digi_free(&aa);
                 set_digi_free(&aaa);
+//#endif
+                set_digi_free(&aa);
                 break;
             }
             case TEST_DIFFERENCE:
@@ -274,12 +283,15 @@ main(void)
                 std::set<DIGI> bb;
                 setup_sets(&aa, bb);
                 set_digi aaa = set_digi_difference(&a, &aa);
+//#ifndef _WIN32
                 std::set<DIGI> bbb;
-                std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
+                std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                    std::inserter(bbb, bbb.begin()));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
-                set_digi_free(&aa);
                 set_digi_free(&aaa);
+//#endif
+                set_digi_free(&aa);
                 break;
             }
 #ifdef DEBUG
