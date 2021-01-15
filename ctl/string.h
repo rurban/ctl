@@ -9,14 +9,16 @@
 
 #define CTL_STR
 #define vec_char str
+#define HOLD
 #define POD
-#define NOT_INTEGRAL
 #define T char
 #define MUST_ALIGN_16(T) (sizeof(T) == sizeof(char))
 #define str_init str___INIT
 #define str_equal str___EQUAL
 #define str_find str___FIND
+
 #include <ctl/vector.h>
+
 #undef str_init
 #undef str_equal
 #undef str_find
@@ -220,7 +222,6 @@ str_equal(str* self, str* other)
 #ifndef HOLD
 #undef CTL_STR
 #undef POD
-#undef NOT_INTEGRAL
 #undef vec_char
 #undef T
 #else

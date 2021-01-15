@@ -142,8 +142,12 @@ JOIN(A, init)(int _compare(T*, T*))
 static inline void
 JOIN(A, free_node)(A* self, B* node)
 {
+#ifndef POD
     if(self->free)
         self->free(&node->key);
+#else
+    (void) self;
+#endif
     free(node);
 }
 

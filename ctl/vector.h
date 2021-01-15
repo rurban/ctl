@@ -145,8 +145,10 @@ static inline void
 JOIN(A, set)(A* self, size_t index, T value)
 {
     T* ref = JOIN(A, at)(self, index);
+#ifndef POD
     if(self->free)
         self->free(ref);
+#endif
     *ref = value;
 }
 
@@ -303,8 +305,10 @@ JOIN(A, resize)(A* self, size_t size, T value)
         for(size_t i = 0; self->size < size; i++)
             JOIN(A, push_back)(self, self->copy(&value));
     }
+#ifndef POD
     if(self->free)
         self->free(&value);
+#endif
 }
 
 static inline void
@@ -313,8 +317,10 @@ JOIN(A, assign)(A* self, size_t count, T value)
     JOIN(A, resize)(self, count, self->copy(&value));
     for(size_t i = 0; i < count; i++)
         JOIN(A, set)(self, i, self->copy(&value));
+#ifndef POD
     if(self->free)
         self->free(&value);
+#endif
 }
 
 static inline void

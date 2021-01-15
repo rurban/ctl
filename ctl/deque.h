@@ -183,8 +183,10 @@ static inline void
 JOIN(A, set)(A* self, size_t index, T value)
 {
     T* ref = JOIN(A, at)(self, index);
+#ifndef POD
     if(self->free)
         self->free(ref);
+#endif
     *ref = value;
 }
 
@@ -235,11 +237,13 @@ static inline void
 JOIN(A, pop_front)(A* self)
 {
     B* page = *JOIN(A, first)(self);
+#ifndef POD
     if(self->free)
     {
         T* ref = &page->value[page->a];
         self->free(ref);
     }
+#endif
     page->a++;
     self->size--;
     if(page->a == page->b)
@@ -282,11 +286,13 @@ JOIN(A, pop_back)(A* self)
     B* page = *JOIN(A, last)(self);
     page->b--;
     self->size--;
+#ifndef POD
     if(self->free)
     {
         T* ref = &page->value[page->b];
         self->free(ref);
     }
+#endif
     if(page->b == page->a)
     {
         free(page);
@@ -299,8 +305,10 @@ JOIN(A, erase)(A* self, size_t index)
 {
     static T zero;
     JOIN(A, set)(self, index, zero);
+#ifndef POD
     void (*saved)(T*) = self->free;
     self->free = NULL;
+#endif
     if(index < self->size / 2)
     {
         for(size_t i = index; i > 0; i--)
@@ -313,7 +321,9 @@ JOIN(A, erase)(A* self, size_t index)
             *JOIN(A, at)(self, i) = *JOIN(A, at)(self, i + 1);
         JOIN(A, pop_back)(self);
     }
+#ifndef POD
     self->free = saved;
+#endif
 }
 
 static inline void
@@ -321,8 +331,10 @@ JOIN(A, insert)(A* self, size_t index, T value)
 {
     if(self->size > 0)
     {
+#ifndef POD
         void (*saved)(T*) = self->free;
         self->free = NULL;
+#endif
         if(index < self->size / 2)
         {
             JOIN(A, push_front)(self, *JOIN(A, at)(self, 0));
@@ -336,7 +348,9 @@ JOIN(A, insert)(A* self, size_t index, T value)
                 *JOIN(A, at)(self, i) = *JOIN(A, at)(self, i - 1);
         }
         *JOIN(A, at)(self, index) = value;
+#ifndef POD
         self->free = saved;
+#endif
     }
     else
         JOIN(A, push_back)(self, value);
@@ -381,9 +395,7 @@ JOIN(A, resize)(A* self, size_t size, T value)
             else
                 JOIN(A, push_back)(self, self->copy(&value));
     }
-    if(self->free)
-        self->free(&value);
-
+    FREE_VALUE(self, value);
 }
 
 static inline I*
@@ -473,14 +485,12 @@ JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
         assert (pos->index + count >= count || !"pos overflow");
         assert (self->size + count < JOIN(A, max_size)() || !"max_size overflow");
 #endif
-        if(self->free)
-            self->free(&value);
+        FREE_VALUE(self, value);
         return NULL;
     }
     for(size_t i = pos->index; i < count + pos->index; i++)
         JOIN(A, insert)(self, i, self->copy(&value));
-    if(self->free)
-        self->free(&value);
+    FREE_VALUE(self, value);
     return pos;
 }
 
@@ -490,8 +500,7 @@ JOIN(A, assign)(A* self, size_t size, T value)
     JOIN(A, resize)(self, size, self->copy(&value));
     for(size_t i = 0; i < size; i++)
         JOIN(A, set)(self, i, self->copy(&value));
-    if(self->free)
-        self->free(&value);
+    FREE_VALUE(self, value);
 }
 
 // including to

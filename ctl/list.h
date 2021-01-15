@@ -232,8 +232,7 @@ static inline void
 JOIN(A, erase)(A* self, B* node)
 {
     JOIN(A, disconnect)(self, node);
-    if(self->free)
-        self->free(&node->value);
+    FREE_VALUE(self, node->value);
     free(node);
 }
 
@@ -317,8 +316,7 @@ JOIN(A, resize)(A* self, size_t size, T value)
             (size < self->size)
                 ? JOIN(A, pop_back)(self)
                 : JOIN(A, push_back)(self, self->copy(&value));
-    if(self->free)
-        self->free(&value);
+    FREE_VALUE(self, value);
 }
 
 static inline A
@@ -337,13 +335,14 @@ JOIN(A, assign)(A* self, size_t size, T value)
     size_t i = 0;
     foreach(A, self, it)
     {
+#ifndef POD
         if(self->free)
             self->free(it.ref);
+#endif
         *it.ref = self->copy(&value);
         i++;
     }
-    if(self->free)
-        self->free(&value);
+    FREE_VALUE(self, value);
 }
 
 static inline void

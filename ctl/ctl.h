@@ -3,7 +3,7 @@
 #ifndef __CTL_H__
 #define __CTL_H__
 
-#define CTL_VERSION 202101
+#define CTL_VERSION 202101L
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -37,6 +37,14 @@
 #define foreach(a, b, c) for(JOIN(a, it) c = JOIN(JOIN(a, it), each) (b); !c.done; c.step(&c))
 
 #define len(a) (sizeof(a) / sizeof(*(a)))
+
+#ifndef POD
+#define FREE_VALUE(self, value) \
+    if(self->free)              \
+        self->free(&(value))
+#else
+#define FREE_VALUE(self, value)
+#endif
 
 #ifdef DEBUG
 #define LOG(...) fprintf(stderr, __VA_ARGS__)

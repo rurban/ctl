@@ -386,8 +386,17 @@ JOIN(A, bucket_size)(A* self, size_t index)
 static inline void
 JOIN(A, _free_node)(A* self, B* n)
 {
+#ifndef POD
+# if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert(self->free || !"no uset free without POD");
+# endif
     if(self->free)
         self->free(&n->value);
+#else
+# if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert(!self->free || !"uset free with POD");
+# endif
+#endif
     free(n);
     self->size--;
 }
@@ -569,8 +578,7 @@ JOIN(A, insert)(A* self, T value)
 {
     if(JOIN(A, find)(self, value))
     {
-        if(self->free)
-            self->free(&value);
+        FREE_VALUE(self, value);
     }
     else
     {
@@ -603,8 +611,7 @@ JOIN(A, insert_found)(A* self, T value, int* foundp)
     if(JOIN(A, find)(self, value))
     {
         *foundp = 1;
-        if(self->free)
-            self->free(&value);
+        FREE_VALUE(self, value);
         return;
     }
     if(JOIN(A, empty)(self))
@@ -698,8 +705,7 @@ JOIN(A, count)(A* self, T value)
         if(self->equal(it.ref, &value))
             count++;
     }
-    if(self->free)
-        self->free(&value);
+    FREE_VALUE(self, value);
     return count;
 }
 
@@ -718,14 +724,12 @@ JOIN(A, contains)(A* self, T value)
 #endif
         if(self->equal(it.ref, &value))
         {
-            if(self->free)
-                self->free(&value);
+            FREE_VALUE(self, value);
             // TODO: the popular move-to-front strategy
             return true;
         }
     }
-    if(self->free)
-        self->free(&value);
+    FREE_VALUE(self, value);
     return false;
 }
 

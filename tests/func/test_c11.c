@@ -35,9 +35,6 @@ typedef struct {
   int value;
 } charint;
 
-#undef POD
-#define T charint
-
 static inline size_t
 charint_hash(charint *a) {
   return FNV1a(a->key);
@@ -65,6 +62,8 @@ charint_copy(charint *self) {
   return copy;
 }
 
+#undef POD
+#define T charint
 #include <ctl/unordered_map.h>
 
 #undef POD
@@ -279,8 +278,9 @@ main(void)
         char c_char[36];
         for (int i=0; i<1000; i++) {
           snprintf(c_char, 36, "%c%d", 48 + (rand() % 74), rand());
+          charint copy = charint_copy(&(charint){ c_char, i });
           //str s = (str){.value = c_char};
-          umap_charint_insert(&a, charint_copy(&(charint){ c_char, i }));
+          umap_charint_insert(&a, copy);
         }
         foreach(umap_charint, &a, it) { strcpy (c_char, it.ref->key); }
         printf("last key \"%s\", ", c_char);
