@@ -222,7 +222,6 @@ str_equal(str* self, str* other)
 }
 
 #ifndef HOLD
-#undef CTL_STR
 #undef POD
 #undef vec_char
 #undef T
@@ -230,5 +229,6 @@ str_equal(str* self, str* other)
 #else
 #undef HOLD
 #endif
+#undef CTL_STR
 
 #endif // once

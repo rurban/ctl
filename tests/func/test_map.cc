@@ -12,7 +12,7 @@
 #define CHECK(_x, _y) {                                      \
     assert(_x.size == _y.size());                            \
     std::map<std::string,int>::iterator _iter = _y.begin();  \
-    foreach_ref(map_strint, strint, &_x, _it, _ref) {        \
+    foreach_ref(map, strint, &_x, _it, _ref) {               \
         assert(ref->value == _iter->second);                 \
         _iter++;                                             \
     }                                                        \

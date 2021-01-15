@@ -40,7 +40,7 @@ void print_setpp(std::set<DIGI>& b) {
 #define CHECK(_x, _y) {                           \
     assert(_x.size == _y.size());                 \
     std::set<DIGI>::iterator _iter = _y.begin();  \
-    foreach_ref(set_digi, digi, &_x, _it, _ref) { \
+    foreach_ref(set, digi, &_x, _it, _ref) {      \
         assert(*_ref->value == *_iter->value);    \
         _iter++;                                  \
     }                                             \
@@ -219,10 +219,10 @@ main(void)
             case TEST_SELF:
             {
                 set_digi aa = set_digi_copy(&a);
-                foreach(set_digi, &aa, it)
-                    assert(set_digi_find(&a, *it.ref));
-                foreach(set_digi, &a, it)
-                    set_digi_erase(&aa, *it.ref);
+                foreach_ref(set, digi, &aa, it, ref)
+                    assert(set_digi_find(&a, *ref));
+                foreach_ref(set, digi, &a, it, ref2)
+                    set_digi_erase(&aa, *ref2);
                 assert(set_digi_empty(&aa));
                 set_digi_free(&aa);
                 break;

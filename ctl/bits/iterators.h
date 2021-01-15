@@ -36,7 +36,7 @@
     int done;                 \
     A* container
 
-#if defined CTL_LIST || defined CTL_SET
+#if defined CTL_LIST || defined CTL_SET || defined CTL_MAP
 #  define CTL_B_ITER
 #  undef IT
 #  define IT B*
@@ -45,53 +45,54 @@
 B* JOIN(B, next)(B*);
 
 #ifndef foreach
-# define foreach(A, T, self, it) \
-    JOIN(A, node) *it; \
-    for(it = JOIN(A, begin)(self); it; it = JOIN(JOIN(A, node), next)(it))
-# define foreach_ref(A, T, self, it, ref) \
-    JOIN(A, node) *it; \
+# define foreach(C, T, self, it) \
     T* ref; \
-    for(it = JOIN(A, begin)(self), ref = &it->value; it; \
-        it = JOIN(JOIN(A, node), next)(it), ref = &it->value)
-# define foreach_range(A, T, self, it, first, last) \
-    JOIN(A, node) *it; \
-    for(it = first; it; it = JOIN(JOIN(A, node), next)(it))
-# define foreach_ref_range(A, T, self, it, ref, first, last) \
-    JOIN(A, node) *it; \
+    for(JOIN(C, JOIN(T, node)) *it = JOIN(C, JOIN(T, begin))(self); \
+        it; \
+        it = JOIN(JOIN(C, JOIN(T, node)), next)(it))
+# define foreach_ref(C, T, self, it, ref) \
+    for(JOIN(C, JOIN(T, node)) *it = JOIN(C, JOIN(T, begin))(self), ref = &it->value; \
+        it;                                                             \
+        it = JOIN(JOIN(C, JOIN(T, node)), next)(it), ref = &it->value)
+# define foreach_range(C, T, self, it, first, last) \
+    for(JOIN(C, JOIN(T, node)) *it = first; \
+        it; \
+        it = JOIN(JOIN(C, JOIN(T, node)), next)(it))
+# define foreach_ref_range(C, T, self, it, ref, first, last) \
     T* ref; \
-    for(it = first, ref = &first->value; \
+    for(JOIN(C, JOIN(T, node)) *it = first, ref = &first->value; \
         last == NULL ? it != NULL : it != last; \
-        it = JOIN(JOIN(A, node), next)(it), ref = &it->value)
+        it = JOIN(JOIN(C, JOIN(T, node)), next)(it), ref = &it->value)
 # endif
 
-#elif defined CTL_USET
+#elif defined CTL_USET || defined CTL_UMAP
 // different bucket next method
 #  define CTL_B_ITER
 #  undef IT
 #  define IT B*
 /* return B* it node. end is NULL */
 
-B* JOIN(B, next)(B*);
+//B* JOIN(B, next)(A*, B*);
 
 #ifndef foreach
-# define foreach(A, T, self, it) \
-    JOIN(A, node) *it; \
-    for(it = JOIN(A, begin)(self); it; it = JOIN(JOIN(A, node), next)(self, it))
-# define foreach_ref(A, T, self, it, ref) \
-    JOIN(A, node) *it; \
+# define foreach(C, T, self, it) \
+    for(JOIN(C, JOIN(T, node)) *it = JOIN(C, JOIN(T, begin))(self); \
+        it; \
+        it = JOIN(JOIN(C, JOIN(T, node)), next)(self, it))
+# define foreach_ref(C, T, self, it, ref) \
     T* ref; \
-    for(it = JOIN(A, begin)(self), ref = &it->value; \
-        it;                                          \
-        it = JOIN(JOIN(A, node), next)(self, it), ref = &it->value)
-# define foreach_range(A, T, self, it, first, last)  \
-    JOIN(A, node) *it; \
-    for(it = first; it; it = JOIN(JOIN(A, node), next)(self, it))
-# define foreach_ref_range(A, T, self, it, ref, first, last) \
-    JOIN(A, node) *it; \
+    for(JOIN(C, JOIN(T, node)) *it = JOIN(C, JOIN(T, begin))(self), ref = &(it->value); \
+        it; \
+        it = JOIN(JOIN(C, JOIN(T, node)), next)(self, it), ref = &(it->value))
+# define foreach_range(C, T, self, it, first, last)  \
+    for(JOIN(C, JOIN(T, node)) *it = first; \
+        it; \
+        it = JOIN(JOIN(C, JOIN(T, node)), next)(self, it))
+# define foreach_ref_range(C, T, self, it, ref, first, last) \
     T* ref; \
-    for(it = first, ref = &first->value; \
+    for(JOIN(C, JOIN(T, node)) *it = first, ref = &first->value; \
         last == NULL ? it != NULL : it != last; \
-        it = JOIN(JOIN(A, node), next)(self, it), ref = &it->value)
+        it = JOIN(JOIN(C, JOIN(T, node)), next)(self, it), ref = &(it->value))
 # endif
 
 #else
@@ -104,22 +105,28 @@ B* JOIN(B, next)(B*);
 /* array of T*. end() = size+1 */
 
 #ifndef foreach
-# define foreach(A, T, self, it) \
-    T *it; \
-    T* _JOIN(A, __endvar) = JOIN(A, end)(self); \
-    for(it = JOIN(A, begin)(self); it < _JOIN(A, __endvar); it++)
-# define foreach_ref(A, T, self, it, ref) \
-    T *it; \
-    T *ref; \
-    T* _JOIN(A, __endvar) = JOIN(A, end)(self); \
-    for(ref = it = JOIN(A, begin)(self); it < _JOIN(A, __endvar); it++, ref = it)
-# define foreach_range(A, T, self, it, first, last) \
-    T *it; \
-    for(it = first; it < last; it++)
-# define foreach_ref_range(A, T, self, it, ref, first, last) \
-    T* it; \
+# define foreach(C, T, self, it) \
+    if (!JOIN(C, JOIN(T, empty))(self)) \
+      for(T* it = JOIN(C, JOIN(T, begin))(self); \
+          it < JOIN(C, JOIN(T, end))(self); \
+          it++)
+# define foreach_ref(C, T, self, it, ref) \
     T* ref; \
-    for(ref = it = first; it < last; it++, ref = it)
+    if (!JOIN(C, JOIN(T, empty))(self)) \
+        for(T* it = ref = JOIN(C, JOIN(T, begin))(self); \
+            it < JOIN(C, JOIN(T, end))(self);            \
+            it++, ref = it)
+# define foreach_range(C, T, self, it, first, last) \
+    if (last) \
+        for(T* it = first; \
+            it < last; \
+            it++)
+# define foreach_ref_range(C, T, self, it, ref, first, last) \
+    T* ref; \
+    if (last) \
+        for(T* it = ref = first; \
+            it < last; \
+            it++, ref = it)
 # endif
 
 # else // DEQ
@@ -129,18 +136,20 @@ B* JOIN(B, next)(B*);
 /* return it index */
 
 #ifndef foreach
-# define foreach(A, T, self, it) \
-    size_t _JOIN(A, __endvar) = JOIN(A, end)(self); \
-    for(size_t it = JOIN(A, begin)(self); it < _JOIN(A, __endvar); it++)
-# define foreach_ref(A, T, self, it, ref) \
-    T* ref = JOIN(A, at)(self, 0); \
-    size_t _JOIN(A, __endvar) = JOIN(A, end)(self); \
-    for(size_t it = JOIN(A, begin)(self); it < _JOIN(A, __endvar); ref = JOIN(A, at)(self, it), it++)
-# define foreach_range(A, T, self, it, first, last) \
+# define foreach(C, T, self, it) \
+    for(size_t it = JOIN(C, JOIN(T, begin))(self); it < JOIN(C, JOIN(T, end))(self); it++)
+# define foreach_ref(C, T, self, it, ref) \
+    T* ref = JOIN(C, JOIN(T, at))(self, 0); \
+    for(size_t it = JOIN(C, JOIN(T, begin))(self); \
+        it < JOIN(C, JOIN(T, end))(self); \
+        ref = JOIN(C, JOIN(T, at))(self, it), it++)
+# define foreach_range(C, T, self, it, first, last) \
     for(size_t it = first; it < last; it++)
-# define foreach_ref_range(A, T, self, it, ref, first, last)    \
-    T* ref = JOIN(A, at)(self, first); \
-    for(size_t it = first; it < last; ref = JOIN(A, at)(self, it), it++)
+# define foreach_ref_range(C, T, self, it, ref, first, last) \
+    T* ref = JOIN(C, JOIN(T, at))(self, first); \
+    for(size_t it = first; \
+        it < last; \
+        ref = JOIN(C, JOIN(T, at))(self, it), it++)
 # endif
 # endif
 

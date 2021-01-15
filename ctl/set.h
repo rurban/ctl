@@ -10,6 +10,9 @@
 #define CTL_SET
 #define A JOIN(set, T)
 #define B JOIN(A, node)
+#ifndef C
+# define C set
+#endif
 #define I JOIN(A, it)
 #undef IT
 #define IT B*
@@ -683,7 +686,7 @@ static inline A
 JOIN(A, copy)(A* self)
 {
     A copy =  JOIN(A, init)(self->compare);
-    foreach_ref(A, T, self, it, ref)
+    foreach_ref(C, T, self, it, ref)
         JOIN(A, insert)(&copy, self->copy(ref));
     return copy;
 }
@@ -700,7 +703,7 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    foreach_ref(A, T, self, it, ref)
+    foreach_ref(C, T, self, it, ref)
         if(_match(ref))
         {
             JOIN(A, erase_node)(self, it);
@@ -719,7 +722,7 @@ static inline A
 JOIN(A, intersection)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->compare);
-    foreach_ref(A, T, a, it, ref)
+    foreach_ref(C, T, a, it, ref)
         if(JOIN(A, find)(b, *ref))
             JOIN(A, insert)(&self, self.copy(ref));
     return self;
@@ -729,8 +732,10 @@ static inline A
 JOIN(A, union)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->compare);
-    foreach_ref(A, T, a, it, ref) JOIN(A, insert)(&self, self.copy(ref));
-    foreach_ref(A, T, b, it2, ref2) JOIN(A, insert)(&self, self.copy(ref2));
+    foreach_ref(C, T, a, it, ref)
+        JOIN(A, insert)(&self, self.copy(ref));
+    foreach_ref(C, T, b, it, ref2)
+        JOIN(A, insert)(&self, self.copy(ref2));
     return self;
 }
 
@@ -738,7 +743,8 @@ static inline A
 JOIN(A, difference)(A* a, A* b)
 {
     A self = JOIN(A, copy)(a);
-    foreach_ref(A, T, b, it, ref) JOIN(A, erase)(&self, *ref);
+    foreach_ref(C, T, b, it, ref)
+        JOIN(A, erase)(&self, *ref);
     return self;
 }
 
@@ -747,7 +753,8 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 {
     A self = JOIN(A, union)(a, b);
     A intersection = JOIN(A, intersection)(a, b);
-    foreach_ref(A, T, &intersection, it, ref) JOIN(A, erase)(&self, *ref);
+    foreach_ref(C, T, &intersection, it, ref)
+        JOIN(A, erase)(&self, *ref);
     JOIN(A, free)(&intersection);
     return self;
 }
@@ -762,6 +769,7 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 #undef T
 #undef A
 #undef B
+#undef C
 #undef I
 #else
 #undef HOLD

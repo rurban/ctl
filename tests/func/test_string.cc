@@ -37,8 +37,8 @@
         assert(_y.back() == *str_back(&_x));         \
     }                                                \
     std::string::iterator _iter = _y.begin();        \
-    foreach(str, &_x, _it) {                         \
-        assert(*_it.ref == *_iter);                  \
+    foreach_ref(vec, char, &_x, _it, _ref) {         \
+        assert(*_ref == *_iter);                     \
         _iter++;                                     \
     }                                                \
     str_it _it = str_it_each(&_x);                   \

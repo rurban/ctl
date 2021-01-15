@@ -127,9 +127,9 @@ to_postfix(ls* tokens)
 {
     ls postfix = ls_init();
     ss operators = ss_init();
-    foreach(ls, tokens, it)
+    foreach_ref(list, str, tokens, it, ref)
     {
-        str* token = it.ref;
+        str* token = ref;
         char c = token->vector[0];
         if(is_digit(c))
         {
@@ -199,9 +199,19 @@ main(void)
     str s = str_init("64 * (128 / 2 - 128 / (2 - 1))");
     ls tokens = tokenize(&s);
     ls postfix = to_postfix(&tokens);
+<<<<<<< HEAD
     puts(str_c_str(&s));
     foreach(ls, &postfix, it)
         puts(str_c_str(it.ref));
+||||||| parent of 329ba7b... WIP iter redesign step 3, add C for the container type
+    puts(s.value);
+    foreach(ls, &postfix, it)
+        puts(it.ref->value);
+=======
+    puts(s.value);
+    foreach(list, str, &postfix, it, ref)
+        puts(ref->value);
+>>>>>>> 329ba7b... WIP iter redesign step 3, add C for the container type
     ls_free(&tokens);
     ls_free(&postfix);
     str_free(&s);

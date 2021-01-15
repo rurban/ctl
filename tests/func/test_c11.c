@@ -271,9 +271,9 @@ main(void)
           uset_int_insert(&a, i);
         for (int i=0; i < 27; i++)
           uset_int_insert(&a, i);
-        foreach(uset_int, &a, it) { j = *it.ref; }
+        foreach_ref(uset_int, int, &a, it, ref) { j = *ref; }
         printf("last int %d, ", j);
-        foreach(uset_int, &a, it) { uset_int_node_bucket_size(it.node); }
+        foreach(uset_int, int, &a, it) { uset_int_node_bucket_size(it); }
         printf("uset load_factor: %f\n", uset_int_load_factor(&a));
         uset_int_free(&a);
     }
@@ -287,9 +287,9 @@ main(void)
           //str s = (str){.value = c_char};
           umap_charint_insert(&a, copy);
         }
-        foreach(umap_charint, &a, it) { strcpy (c_char, it.ref->key); }
+        foreach_ref(umap_charint, charint, &a, it, ref) { strcpy (c_char, ref->key); }
         printf("last key \"%s\", ", c_char);
-        foreach(umap_charint, &a, it) { umap_charint_node_bucket_size(it.node); }
+        foreach(umap_charint, charint, &a, it) { umap_charint_node_bucket_size(it); }
         printf("umap_charint load_factor: %f\n", umap_charint_load_factor(&a));
         umap_charint_free(&a);
     }
@@ -302,7 +302,7 @@ main(void)
           //str s = (str){.value = c_char};
           map_charint_insert(&a, charint_copy(&(charint){ c_char, i }));
         }
-        foreach(map_charint, &a, it) { strcpy (c_char, it.ref->key); }
+        foreach_ref(map_charint, charint, &a, it, ref) { strcpy (c_char, ref->key); }
         printf("last key \"%s\", ", c_char);
         map_charint_node *b = map_charint_begin(&a);
         printf("min {\"%s\", %d} ", b->key.key, b->key.value);

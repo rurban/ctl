@@ -26,9 +26,11 @@
 #define remove_if   __REMOVE_IF
 
 #define CTL_QUEUE
+#define C queue
 #define deq queue
 #include <ctl/deque.h>
 #undef deq
+#undef C
 #undef CTL_QUEUE
 
 #undef push_back

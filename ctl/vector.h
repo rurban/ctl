@@ -12,6 +12,9 @@
 
 #define CTL_VEC
 #define A JOIN(vec, T)
+#ifndef C
+# define C vec
+#endif
 #define I JOIN(A, it)
 #undef IT
 #define IT T*
@@ -507,7 +510,7 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    foreach(A, T, self, ref)
+    foreach(C, T, self, ref)
     {
         if(_match(ref))
         {
@@ -529,7 +532,7 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
 static inline T*
 JOIN(A, find)(A* self, T key)
 {
-    foreach(A, T, self, ref)
+    foreach(C, T, self, ref)
         if (JOIN(A, _equal)(self, ref, &key))
             return ref;
     return NULL;
@@ -551,6 +554,7 @@ JOIN(A, find)(A* self, T key)
 #ifdef HOLD
 #undef HOLD
 #else
+#undef C
 #undef T
 #undef POD
 #undef NOT_INTEGRAL

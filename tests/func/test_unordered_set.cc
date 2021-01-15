@@ -17,9 +17,9 @@
     {                                                                  \
         size_t a_found = 0;                                            \
         size_t b_found = 0;                                            \
-        foreach_ref(uset_digi, digi, &_x, it, ref)                     \
+        foreach_ref(uset, digi, &_x, it, _ref)                         \
         {                                                              \
-            auto found = _y.find(DIGI(*ref->value));                   \
+            auto found = _y.find(DIGI(*_ref->value));                  \
             assert(found != _y.end());                                 \
             a_found++;                                                 \
         }                                                              \
@@ -167,14 +167,14 @@ main(void)
                 uset_digi aa = uset_digi_copy(&a);
                 LOG ("before\n");
                 print_uset(&a);
-                foreach(uset_digi, &aa, it)
+                foreach_ref(uset, digi, &aa, it, ref)
                 {
-                    LOG("find %d [%zu]\n", *it.ref->value, it.bucket_index);
-                    assert(uset_digi_find(&a, *it.ref));
+                    //LOG("find %d [%zu]\n", *ref->value, it.bucket_index);
+                    assert(uset_digi_find(&a, *ref));
                 }
                 LOG ("all found\n");
-                foreach(uset_digi, &a, it)
-                    uset_digi_erase(&aa, *it.ref);
+                foreach_ref(uset_digi, &a, it, ref2)
+                    uset_digi_erase(&aa, *ref2);
                 LOG ("all erased\n");
                 print_uset(&a);
                 assert(uset_digi_empty(&aa));

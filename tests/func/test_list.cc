@@ -9,7 +9,7 @@
 
 void print_lst(list_digi *a)
 {
-    foreach_ref(list_digi, digi, a, it, ref)
+    foreach_ref(list, digi, a, it, ref)
         printf ("%d ", *ref->value);
     printf ("\n");
 }
@@ -34,11 +34,11 @@ int random_element(list_digi* a)
     const size_t index = TEST_RAND(a->size);
     int test_value = 0;
     size_t current = 0;
-    foreach(list_digi, a, it)
+    foreach_ref(list, digi, a, it, ref)
     {
         if(current == index)
         {
-            test_value = *it.ref->value;
+            test_value = *ref->value;
             break;
         }
         current++;
@@ -54,7 +54,7 @@ int random_element(list_digi* a)
         assert(*_y.back().value == *list_digi_back(&_x)->value);  \
     }                                                             \
     std::list<DIGI>::iterator _iter = _y.begin();                 \
-    foreach_ref(list_digi, digi, &_x, _it, _ref) {                \
+    foreach_ref(list, digi, &_x, _it, _ref) {                     \
         assert(*_ref->value == *_iter->value);                    \
         _iter++;                                                  \
     }                                                             \
@@ -277,7 +277,7 @@ main(void)
                 size_t index = TEST_RAND(a.size);
                 size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                foreach(list_digi, digi, &a, it)
+                foreach(list, digi, &a, it)
                 {
                     if(current == index)
                     {
@@ -297,7 +297,7 @@ main(void)
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                foreach(list_digi, digi, &a, it)
+                foreach(list, digi, &a, it)
                 {
                     if(current == index)
                     {
@@ -680,7 +680,7 @@ main(void)
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                foreach(list_digi, digi, &a, it)
+                foreach(list, digi, &a, it)
                 {
                     if(current == index)
                     {

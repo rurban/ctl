@@ -11,6 +11,9 @@
 #define CTL_DEQ
 #define A JOIN(deq, T)
 #define B JOIN(A, bucket)
+#ifndef C
+# define C deq
+#endif
 #define I JOIN(A, it)
 #undef IT
 #define IT size_t
@@ -526,7 +529,7 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    foreach_ref(A, T, self, it, ref)
+    foreach_ref(C, T, self, it, ref)
         if(_match(ref))
         {
             JOIN(A, erase)(self, it);
@@ -544,7 +547,7 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
 static inline T*
 JOIN(A, find)(A* self, T key)
 {
-    foreach_ref(A, T, self, it, ref)
+    foreach_ref(C, T, self, it, ref)
         if(JOIN(A, _equal)(self, ref, &key))
             return ref;
     return NULL;
@@ -563,6 +566,7 @@ JOIN(A, swap)(A* self, A* other)
 #undef T
 #undef A
 #undef B
+#undef C
 #undef I
 #undef POD
 #undef NOT_INTEGRAL

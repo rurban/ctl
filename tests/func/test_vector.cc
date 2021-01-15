@@ -9,8 +9,8 @@
 
 void print_vec(vec_digi *a)
 {
-    foreach(vec_digi, a, it)
-        printf ("%d ", *it.ref->value);
+    foreach(vec, digi, a, ref)
+        printf ("%d ", *ref->value);
     printf ("\n");
 }
 
@@ -57,7 +57,7 @@ int random_element(vec_digi* a)
         assert(*_y.back().value == *vec_digi_back(&_x)->value);   \
     }                                                             \
     std::vector<DIGI>::iterator _iter = _y.begin();               \
-    foreach(vec_digi, digi, &_x, _ref) {                          \
+    foreach(vec, digi, &_x, _ref) {                               \
         assert(*_ref->value == *_iter->value);                    \
         _iter++;                                                  \
     }                                                             \

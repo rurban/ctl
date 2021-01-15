@@ -9,6 +9,9 @@
 #define CTL_LIST
 #define A JOIN(list, T)
 #define B JOIN(A, node)
+#ifndef C
+# define C list
+#endif
 #define I JOIN(A, it)
 #undef IT
 #define IT B*
@@ -315,7 +318,7 @@ JOIN(A, assign)(A* self, size_t size, T value)
 {
     JOIN(A, resize)(self, size, self->copy(&value));
     size_t i = 0;
-    foreach_ref(A, T, self, it, ref)
+    foreach_ref(C, T, self, it, ref)
     {
 #ifndef POD
         if(self->free)
@@ -330,7 +333,7 @@ JOIN(A, assign)(A* self, size_t size, T value)
 static inline void
 JOIN(A, reverse)(A* self)
 {
-    foreach(A, T, self, it)
+    foreach(C, T, self, it)
     {
         B* next = it->next;
         B* prev = it->prev;
@@ -373,7 +376,7 @@ static inline size_t
 JOIN(A, remove)(A* self, T* value)
 {
     size_t erased = 0;
-    foreach_ref(A, T, self, it, ref)
+    foreach_ref(C, T, self, it, ref)
         if(JOIN(A, _equal)(self, ref, value))
         {
             JOIN(A, erase)(self, it);
@@ -432,7 +435,7 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int _match(T*))
 {
     size_t erases = 0;
-    foreach(A, T, self, it)
+    foreach(C, T, self, it)
         if(_match(ref))
         {
             JOIN(A, erase)(self, it);
@@ -553,7 +556,7 @@ JOIN(A, sort)(A* self)
 static inline void /* B* ?? */
 JOIN(A, unique)(A* self)
 {
-    foreach_ref(A, T, self, it, ref)
+    foreach_ref(C, T, self, it, ref)
         if(it->next && JOIN(A, _equal)(self, ref, &it.next->value))
             JOIN(A, erase)(self, it);
 }
@@ -561,7 +564,7 @@ JOIN(A, unique)(A* self)
 static inline B*
 JOIN(A, find)(A* self, T key)
 {
-    foreach_ref(A, T, self, it, ref)
+    foreach_ref(C, T, self, it, ref)
         if(JOIN(A, _equal)(self, ref, &key))
             return it;
     return NULL;
@@ -572,5 +575,6 @@ JOIN(A, find)(A* self, T key)
 #undef T
 #undef A
 #undef B
+#undef C
 #undef I
 #undef CTL_LIST

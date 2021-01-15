@@ -48,7 +48,7 @@ void print_deque(std::deque<DIGI> &b)
             assert(*_y.back().value == *deq_digi_back(&_x)->value);\
     }                                                             \
     std::deque<DIGI>::iterator _iter = _y.begin();                \
-    foreach_ref(deq_digi, digi, &_x, _it, _ref) {                 \
+    foreach_ref(deq, digi, &_x, _it, _ref) {                      \
         /* The STL may be corrupt */                              \
         if (_iter->value)                                         \
             assert(*_ref->value == *_iter->value);                \
@@ -82,7 +82,7 @@ void print_deque(std::deque<DIGI> &b)
             fprintf(stderr, "STL empty back value\n");                \
     }                                                             \
     std::deque<DIGI>::iterator _iter = _y.begin();                \
-    foreach_ref(deq_digi, digi, &_x, _it, _ref) {                 \
+    foreach_ref(deq, digi, &_x, _it, _ref) {                      \
         if (*_ref->value != *_iter->value)                        \
             fprintf(stderr, "CTL %d at %lu vs STL %d\n",          \
                     *_ref->value, _it,                            \
