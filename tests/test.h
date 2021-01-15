@@ -5,11 +5,19 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-#include <sys/time.h>
 #include <limits.h>
 #include <time.h>
+#ifndef _WIN32
+#include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#else
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <sysinfoapi.h>
+#include <process.h>
+#define getpid _getpid
+#endif
 #include <assert.h>
 
 #ifdef LONG
@@ -28,16 +36,23 @@
 #define TEST_RAND(max) (((max) == 0) ? 0 : (rand() % (max)))
 
 #define TEST_PERF_RUNS (100)
-
 #define TEST_PERF_CHUNKS (256)
 
-static inline int
+#ifndef _WIN32
+static inline long
 TEST_TIME(void)
 {
     struct timeval now;
     gettimeofday(&now, NULL);
-    return 1000000 * now.tv_sec + now.tv_usec;
+    return 1000000L * now.tv_sec + now.tv_usec;
 }
+#else
+static inline long
+TEST_TIME(void)
+{
+    return GetTickCount();
+}
+#endif
 
 #ifdef SRAND
 #  ifdef SEED
@@ -62,7 +77,7 @@ TEST_TIME(void)
     if (test >= 0)                            \
         loops = n;                            \
     if ((env = getenv ("LOOPS")))             \
-        sscanf(env, "%lu", &loops)
+        sscanf(env, "%zu", &loops)
 
 
 #endif

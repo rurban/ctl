@@ -1,0 +1,10 @@
+# Build configuration for https://cirrus-ci.org
+
+freebsd_instance:
+  image_family: freebsd-12-1
+
+task:
+  install_script:
+    - pkg install -y git
+  test_script:
+    - make

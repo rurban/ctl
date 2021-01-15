@@ -19,11 +19,11 @@ int main(void)
         for(int elem = 0; elem < elems; elem++)
             set_int_insert(&c, rand() % elems);
         volatile int sum = 0;
-        int t0 = TEST_TIME();
+        long t0 = TEST_TIME();
         foreach(set_int, &c, it)
             sum += *it.ref;
-        int t1 = TEST_TIME();
-        printf("%10d %10d\n", elems, t1 - t0);
+        long t1 = TEST_TIME();
+        printf("%10d %10ld\n", elems, t1 - t0);
         set_int_free(&c);
     }
 }

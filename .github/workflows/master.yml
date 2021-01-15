@@ -34,3 +34,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run:  ${{ matrix.MAKE }}
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: ilammy/msvc-dev-cmd@v1
+    - run:  nmake -f Makefile.win all
+  macOS:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run:  make CXX='c++ -std=c++2a'

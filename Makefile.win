@@ -1,0 +1,294 @@
+# nmake windows makefile just for GitHub Actions
+PREFIX = install
+CC = cl
+CXX = cl -std=c++17
+
+.SUFFIXES: .cc .c .i .obj .md .3
+.PHONY: all clean examples asan debug ALWAYS
+
+LONG = 0
+SANITIZE = 0
+SRAND = 1
+
+O0 = 0
+O1 = 0
+O2 = 0
+O3 = 0
+Og = 0
+Ofast = 0
+Os = 0
+
+CFLAGS  = /I. /Ot /DSRAND /Wall /nologo
+#CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
+#CFLAGS += -march=native
+#CFLAGS += -g
+
+#ifeq (1, $(LONG))
+#CFLAGS += -Werror
+#CFLAGS += -DLONG
+#endif
+#
+#ifeq (1, $(DEBUG))
+#O0 = 1
+#CFLAGS += -DDEBUG
+#endif
+
+#ifeq (1, $(SANITIZE))
+#CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
+#endif
+
+#ifeq (1, $(Og))
+#CFLAGS += -Og
+#else
+#ifeq (1, $(O0))
+#CFLAGS += -O0
+#else
+#ifeq (1, $(O1))
+#CFLAGS += -O1
+#else
+#ifeq (1, $(O2))
+#CFLAGS += -O2
+#else
+#ifeq (1, $(O3))
+#CFLAGS += -O3
+#else
+#ifeq (1, $(Ofast))
+#CFLAGS += -Ofast
+#else
+#ifeq (1, $(Os))
+#CFLAGS += -Os
+#else
+#CFLAGS += -O3
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+
+#ifeq (1, $(SRAND))
+#CFLAGS += -DSRAND
+#ifneq ($(SEED),)
+#CFLAGS += -DSEED=$(SEED)
+#endif
+#else
+#ifneq ($(SEED),)
+#CFLAGS += -DSRAND -DSEED=$(SEED)
+#endif
+#endif
+
+CXXFLAGS=$(CFLAGS)
+
+H        = ctl/list.h ctl/vector.h ctl/deque.h ctl/queue.h ctl/priority_queue.h \
+           ctl/unordered_map.h ctl/unordered_set.h ctl/stack.h \
+           ctl/map.h ctl/set.h 
+COMMON_H = ctl/ctl.h ctl/algorithm.h ctl/bits/container.h \
+           ctl/bits/integral.h ctl/bits/iterators.h
+TESTS = \
+	tests\func\test_c11.exe \
+	tests\func\test_container_composing.exe \
+	tests\func\test_integral.exe \
+	tests\func\test_integral_c11.exe \
+	tests\func\test_deque.exe \
+	tests\func\test_list.exe \
+	tests\func\test_string.exe \
+	tests\func\test_priority_queue.exe \
+	tests\func\test_queue.exe \
+	tests\func\test_set.exe \
+	tests\func\test_unordered_set.exe \
+	tests\func\test_unordered_set_power2.exe \
+	tests\func\test_unordered_set_cached.exe \
+	tests\func\test_stack.exe \
+	tests\func\test_vector.exe \
+	tests\func\test_vec_capacity.exe \
+	tests\func\test_str_capacity.exe
+!ifdef DEBUG
+TESTS +=.exe \
+	tests\func\test_map.exe \
+	tests\func\test_unordered_map.exe
+!endif
+
+EXAMPLES = \
+	examples\astar.exe \
+	examples\postfix.exe \
+	examples\json.exe \
+	examples\6502.exe
+# sys/select
+#	examples\snow.exe
+
+all: $(TESTS)
+	tests\func\test_c11.exe
+	tests\func\test_container_composing.exe
+	tests\func\test_integral.exe
+	tests\func\test_integral_c11.exe
+	tests\func\test_deque.exe
+	tests\func\test_list.exe
+	tests\func\test_string.exe
+	tests\func\test_priority_queue.exe
+	tests\func\test_queue.exe
+	tests\func\test_set.exe
+	tests\func\test_unordered_set.exe
+	tests\func\test_unordered_set_power2.exe
+	tests\func\test_unordered_set_cached.exe
+	tests\func\test_stack.exe
+	tests\func\test_vector.exe
+	tests\func\test_vec_capacity.exe
+	tests\func\test_str_capacity.exe
+	@echo $(CC) $(CFLAGS)
+	@echo $(CXX) $(CXXFLAGS)
+
+check: all
+
+#.cflags: ALWAYS
+#	@echo "$(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
+#images:
+#	./gen_images.sh
+#
+#PERFS_C  = $(patsubst %.c,%, $(wildcard tests/perf/*/perf*.c) tests/perf/perf_compile_c11.c)
+#PERFS_CC = $(patsubst %.cc,%, $(wildcard tests/perf/*/perf*.cc) tests/perf/perf_compile_cc.cc)
+#
+#perf: $(PERFS_C) $(PERFS_CC)
+#
+#$(wildcard tests/perf/lst/perf*.c) : $(COMMON_H) ctl/list.h
+#$(wildcard tests/perf/set/perf*.c) : $(COMMON_H) ctl/set.h
+#$(wildcard tests/perf/deq/perf*.c) : $(COMMON_H) ctl/deque.h
+#$(wildcard tests/perf/pqu/perf*.c) : $(COMMON_H) ctl/priority_queue.h
+#$(wildcard tests/perf/vec/perf*.c) : $(COMMON_H) ctl/vector.h
+#$(wildcard tests/perf/uset/perf*.c): $(COMMON_H) ctl/unordered_set.h
+
+examples: $(EXAMPLES)
+
+#MANPAGES = $(patsubst docs/%.md,docs/man/%.h.3, $(wildcard docs/*.md))
+#
+#docs/index.md : README.md
+#	perl update-index.pl
+#
+#man: docs/man/ctl.h.3 $(MANPAGES)
+#
+#docs/man/ctl.h.3: docs/index.md
+#	@mkdir -p docs/man
+#	ronn < $< > $@
+#docs/man/%.h.3 : docs/%.md
+#	ronn < $< > $@
+#
+#install: man
+#	-rm docs/man/index.h.3
+#	mkdir -p $(DESTDIR)$(PREFIX)/include/ctl
+#	cp ctl/*.h $(DESTDIR)$(PREFIX)/include/ctl/
+#	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man3
+#	cp docs/man/* $(DESTDIR)$(PREFIX)/share/man/man3/
+#	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/ctl/images
+#	cp docs/*.md $(DESTDIR)$(PREFIX)/share/doc/ctl/
+#	cp -r docs/*/*.md $(DESTDIR)$(PREFIX)/share/doc/ctl/
+#	cp docs/images/*.log.png $(DESTDIR)$(PREFIX)/share/doc/ctl/images/
+
+clean:
+	-@del $(TESTS)
+	-@del $(EXAMPLES)
+	-@del tests/perf/*/*.exe
+
+help:
+	@echo " make targets for the ctl, a header-only library for C"
+	@echo " "
+	@echo " all, check: run all tests"
+	@echo "" # images:     generate the performance graphs"
+	@echo " perf:       compile the performance binaries seperately"
+	@echo " examples:   compile the examples"
+	@echo "" # man:        create the manpages in docs/man"
+	@echo " install:    copy to $(DESTDIR)$(PREFIX)/include/ctl"
+	@echo "                     $(DESTDIR)$(PREFIX)/share/man/man3"
+	@echo "                     $(DESTDIR)$(PREFIX)/share/doc/ctl"
+	@echo " clean:      the tests, perf, examples"
+	@echo "" # <file>.i:   expand the file with -DT=int for debugging"
+
+#ctl/string.i:
+#	$(call expand,$(subst .i,,$@))
+#ctl/map.i:
+#	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
+#ctl/unordered_map.i:
+#	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
+#
+#%.i : %.h
+#	@$(CC) $(CFLAGS) -DT=int -DPOD $< -E | clang-format -style=webkit
+#%.i : %.c
+#	@$(CC) $(CFLAGS) $< -E | clang-format -style=webkit
+#%.i : %.cc
+#	@$(CXX) $(CFLAGS) $< -E | clang-format -style=webkit
+#
+#examples/.exe : examples/%.c
+#	$(CC) $(CFLAGS) /Fe:"$@" $@.c
+
+tests/func/test_deque.exe: $(COMMON_H) ctl/deque.h \
+                           tests/func/test_deque.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_list.exe:  $(COMMON_H) ctl/list.h \
+                          tests/func/test_list.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_priority_queue.exe: $(COMMON_H) ctl/priority_queue.h ctl/vector.h \
+                          tests/func/test_priority_queue.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_queue.exe: $(COMMON_H) ctl/queue.h ctl/deque.h \
+                          tests/func/test_queue.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_set.exe:  $(COMMON_H) ctl/set.h \
+                          tests/func/test_set.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_map.exe:  $(COMMON_H) ctl/map.h ctl/set.h \
+                          tests/func/test_map.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_unordered_set.exe: $(COMMON_H) ctl/unordered_set.h \
+                          tests/func/test_unordered_set.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_unordered_set_power2.exe: $(COMMON_H) ctl/unordered_set.h \
+                          tests/func/test_unordered_set.cc
+	$(CXX) $(CFLAGS) -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc /Fe:"$@"
+tests/func/test_unordered_set_cached.exe: $(COMMON_H) ctl/unordered_set.h \
+                          tests/func/test_unordered_set.cc
+	$(CXX) $(CFLAGS) -DCTL_USET_CACHED_HASH tests/func/test_unordered_set.cc /Fe:"$@"
+tests/func/test_unordered_map.exe: $(COMMON_H) ctl/unordered_map.h ctl/unordered_set.h \
+                          tests/func/test_unordered_map.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_stack.exe: ctl/stack.h ctl/deque.h \
+                          tests/func/test_stack.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_string.exe: $(COMMON_H) ctl/string.h ctl/vector.h \
+                          tests/func/test_string.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_str_capacity.exe: $(COMMON_H) ctl/string.h ctl/vector.h \
+                          tests/func/test_str_capacity.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_vec_capacity.exe: $(COMMON_H) ctl/vector.h \
+                          tests/func/test_vec_capacity.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_vector.exe: $(COMMON_H) ctl/vector.h \
+                          tests/func/test_vector.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_c11.exe: tests/func/test_c11.c
+	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
+tests/func/test_integral_c11.exe: tests/func/test_integral.cc
+	$(CC) $(CFLAGS) /TC /Fe:"$@" $(@:.exe=.c)
+tests/func/test_integral.exe: tests/func/test_integral.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests/func/test_container_composing.exe: $(COMMON_H) \
+                           tests/func/test_container_composing.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+
+asan:
+	$(MAKE) SANITIZE=1
+debug:
+	$(MAKE) DEBUG=1
+#stress:
+#	if test -n "$(CTL)"; then timeout 10m sh -c "while $(MAKE) -s SANITIZE=1 \
+#	        tests/func/test_$(CTL) && tests/func/test_$(CTL); do true; done"; \
+#	else timeout 20m sh -c "while $(MAKE) -s SANITIZE=1; do true; done"; fi
+#stress-long:
+#	if test -n "$(CTL)"; then timeout 20m sh -c "while $(MAKE) -s SANITIZE=1 LONG=1 \
+#                tests/func/test_$(CTL) && tests/func/test_$(CTL); do true; done"; \
+#	else timeout 30m sh -c "while $(MAKE) -s SANITIZE=1 LONG=1; do true; done"; fi
+#
+#define expand
+#	@$(CC) $(CFLAGS) $(1).h -E $(2) | clang-format -style=webkit
+#endef
+
+ALWAYS:

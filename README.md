@@ -415,9 +415,12 @@ On errors, like `size > max_size` return silently. This avoids DDOS attacks.
 When assert is used, throw them. (when assert.h included, no NDEBUG)
 glouw/ctl does not treat errors at all. There cannot be any.
 
-Support not only GNU make, but also BSD make.
+Support not only GNU make, but also BSD make and MSVC nmake.
 
 Tested also against the libc++ from llvm, not just the GNU libstdc++ v3.
+
+Tested also on macOS (default apple clang++ with libc++), FreeBSD (default
+clang with libc++), and Windows MSVC (default CL 19).
 
 ### Differences to the STL
 

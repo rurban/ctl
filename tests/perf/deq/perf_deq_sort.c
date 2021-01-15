@@ -16,10 +16,10 @@ int main(void)
         int elems = TEST_PERF_CHUNKS * run;
         for(int elem = 0; elem < elems; elem++)
             deq_int_push_back(&c, rand());
-        int t0 = TEST_TIME();
+        long t0 = TEST_TIME();
         deq_int_sort(&c);
-        int t1 = TEST_TIME();
-        printf("%10d %10d\n", elems, t1 - t0);
+        long t1 = TEST_TIME();
+        printf("%10d %10ld\n", elems, t1 - t0);
         deq_int_free(&c);
     }
 }

@@ -34,7 +34,7 @@ _JOIN(A, _default_integral_equal)(T* a, T* b)
 static inline size_t
 _JOIN(A, _default_integral_hash)(T* a)
 {
-    return *a;
+    return (size_t)*a;
 }
 
 #include <string.h>

@@ -9,6 +9,10 @@ TRY_CXX20 := $(shell $(CXX) -std=c++20 -I. tests/func/test_deque.cc -o /dev/null
 ifeq ($(.SHELLSTATUS),0)
 CXX += -std=c++20
 else
+TRY_CXX2a := $(shell $(CXX) -std=c++2a -I. tests/func/test_deque.cc -o /dev/null)
+ifeq ($(.SHELLSTATUS),0)
+CXX += -std=c++2a
+else
 TRY_CXX17 := $(shell $(CXX) -std=c++17 -I. tests/func/test_deque.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
 CXX += -std=c++17
@@ -16,6 +20,7 @@ else
 TRY_CXX11 := $(shell $(CXX) -std=c++11 -I. tests/func/test_deque.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
 CXX += -std=c++11
+endif
 endif
 endif
 endif

@@ -4,8 +4,6 @@
 #define T int
 #include <ctl/unordered_set.h>
 
-#include <time.h>
-
 static size_t int_hash(int* a) { return *a; }
 static int int_equal(int* a, int* b)   { return *a == *b; }
 
@@ -19,11 +17,11 @@ int main(void)
         int elems = TEST_PERF_CHUNKS * run;
         for(int elem = 0; elem < elems; elem++)
             uset_int_insert(&c, rand() % elems);
-        int t0 = TEST_TIME();
+        long t0 = TEST_TIME();
         for(int elem = 0; elem < elems; elem++)
             uset_int_erase(&c, rand() % elems);
-        int t1 = TEST_TIME();
-        printf("%10d %10d\n", elems, t1 - t0);
+        long t1 = TEST_TIME();
+        printf("%10d %10ld\n", elems, t1 - t0);
         uset_int_free(&c);
     }
 }

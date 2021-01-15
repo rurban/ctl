@@ -18,11 +18,11 @@ int main(void)
         int elems = TEST_PERF_CHUNKS * run;
         for(int elem = 0; elem < elems; elem++)
             pqu_int_push(&c, rand());
-        int t0 = TEST_TIME();
+        long t0 = TEST_TIME();
         for(int elem = 0; elem < elems; elem++)
             pqu_int_pop(&c);
-        int t1 = TEST_TIME();
-        printf("%10d %10d\n", elems, t1 - t0);
+        long t1 = TEST_TIME();
+        printf("%10d %10ld\n", elems, t1 - t0);
         pqu_int_free(&c);
     }
 }

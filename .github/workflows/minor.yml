@@ -24,10 +24,21 @@ jobs:
           - make -j4 SANITIZE=1
           - make -j4 CC='gcc -std=c99'
           - make -j4 CC='gcc -std=c11'
-          # TODO fails with -std=c++2a and c++17 on vec capacity
-          - make -j4 CXX='clang++ -std=c++11 -stdlib=libc++'
+          # TODO fails with -std=c++2a ... on vec capacity
+          - make -j4 CXX='clang++ -std=c++17 -stdlib=libc++'
           - make examples SANITIZE=1
           - make perf
     steps:
     - uses: actions/checkout@v2
     - run:  ${{ matrix.MAKE }}
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: ilammy/msvc-dev-cmd@v1
+    - run:  nmake -f Makefile.win
+  macOS:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run:  make CXX='c++ -std=c++2a'
