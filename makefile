@@ -1,3 +1,8 @@
+# nmake guard: \
+# https://stackoverflow.com/questions/8270391/use-the-same-makefile-for-make-linux-and-nmake-windows \
+.ifndef 0 # \
+.else
+# bmake starts here
 PREFIX ?= /usr/local
 CC ?= gcc
 CXX ?= g++
@@ -273,3 +278,6 @@ stress-long:
 	else timeout 30m sh -c "while $(MAKE) -s SANITIZE=1 LONG=1; do true; done"; fi
 
 ALWAYS:
+
+# \
+.endif

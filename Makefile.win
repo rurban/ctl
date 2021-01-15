@@ -10,73 +10,36 @@ LONG = 0
 SANITIZE = 0
 SRAND = 1
 
-O0 = 0
-O1 = 0
-O2 = 0
-O3 = 0
-Og = 0
-Ofast = 0
-Os = 0
-
 CFLAGS  = /I. /Ot /DSRAND /Wall /nologo
 #CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
 #CFLAGS += -march=native
 #CFLAGS += -g
 
-#ifeq (1, $(LONG))
+#!ifeq (1, $(LONG))
 #CFLAGS += -Werror
 #CFLAGS += -DLONG
-#endif
+#!endif
 #
-#ifeq (1, $(DEBUG))
+#!ifeq (1, $(DEBUG))
 #O0 = 1
 #CFLAGS += -DDEBUG
-#endif
+#!endif
 
 #ifeq (1, $(SANITIZE))
 #CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
 #endif
 
-#ifeq (1, $(Og))
-#CFLAGS += -Og
-#else
-#ifeq (1, $(O0))
-#CFLAGS += -O0
-#else
-#ifeq (1, $(O1))
-#CFLAGS += -O1
-#else
-#ifeq (1, $(O2))
-#CFLAGS += -O2
-#else
-#ifeq (1, $(O3))
-#CFLAGS += -O3
-#else
-#ifeq (1, $(Ofast))
-#CFLAGS += -Ofast
-#else
-#ifeq (1, $(Os))
-#CFLAGS += -Os
-#else
-#CFLAGS += -O3
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
 
-#ifeq (1, $(SRAND))
+#!ifeq (1, $(SRAND))
 #CFLAGS += -DSRAND
-#ifneq ($(SEED),)
+#!ifneq ($(SEED),)
 #CFLAGS += -DSEED=$(SEED)
-#endif
-#else
-#ifneq ($(SEED),)
+#!endif
+#!else
+#!ifneq ($(SEED),)
 #CFLAGS += -DSRAND -DSEED=$(SEED)
-#endif
-#endif
+#!endif
+#!endif
 
 CXXFLAGS=$(CFLAGS)
 
