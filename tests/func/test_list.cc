@@ -100,8 +100,8 @@ setup_lists(list_digi* a, std::list<DIGI>& b, size_t size, int* max_value)
 // _List_iterator<DIGI>* first_b, *last_b;
 static void
 get_random_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
-                  std::list<DIGI>& b, std::_List_iterator<DIGI>& first_b,
-                  std::_List_iterator<DIGI>&last_b)
+                  std::list<DIGI>& b, std::list<DIGI>::iterator& first_b,
+                  std::list<DIGI>::iterator& last_b)
 {
     size_t r1 = TEST_RAND(a->size / 2);
     size_t r2 = std::min(r1 + TEST_RAND(a->size / 2), a->size);
@@ -534,7 +534,7 @@ main(void)
                                          : random_element(&a);
                 digi key = digi_init(vb);
                 list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
+                std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_node *n =
                     list_digi_find_range(&first_a, &last_a, key);
@@ -547,7 +547,7 @@ main(void)
             case TEST_ALL_OF_RANGE:
             {
                 list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
+                std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 bool aa = list_digi_all_of_range(&first_a, &last_a,
                                                  digi_is_odd);
@@ -564,7 +564,7 @@ main(void)
             case TEST_ANY_OF_RANGE:
             {
                 list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
+                std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 bool aa = list_digi_any_of_range(&first_a, &last_a,
                                                  digi_is_odd);
@@ -581,7 +581,7 @@ main(void)
             case TEST_NONE_OF_RANGE:
             {
                 list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
+                std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 bool aa = list_digi_none_of_range(&first_a, &last_a,
                                                  digi_is_odd);
@@ -612,7 +612,7 @@ main(void)
             case TEST_FIND_IF_RANGE:
             {
                 list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
+                std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_node *n =
                     list_digi_find_if_range(&first_a, &last_a, digi_is_odd);
@@ -625,7 +625,7 @@ main(void)
             case TEST_FIND_IF_NOT_RANGE:
             {
                 list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
+                std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_node *n =
                     list_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
@@ -668,7 +668,7 @@ main(void)
                 int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                                      : test_value;
                 list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
+                std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 // used to fail with 0,0 of 0
                 size_t numa = list_digi_count_range(&first_a, &last_a, digi_init(v));
@@ -679,7 +679,7 @@ main(void)
             case TEST_COUNT_IF_RANGE:
             {
                 list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
+                std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 size_t numa = list_digi_count_if_range(&first_a, &last_a,
                                                         digi_is_odd);
@@ -717,7 +717,7 @@ main(void)
                 /*
                 int vb = TEST_RAND(TEST_MAX_VALUE);
                 list_digi_it first_a, last_a;
-                std::_List_iterator<DIGI> first_b, last_b;
+                std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 // FIXME API take iter as third arg, not value
                 bool aa = list_digi_equal_range(&first_a, &last_a, digi_init(vb));
