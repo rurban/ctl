@@ -290,6 +290,7 @@ JOIN(A, __next_prime)(size_t number)
     return primes[size - 1];
 }
 
+#ifdef CTL_USET_GROWTH_POWER2
 // Support huge hash tables with wordsize 64? currently we have a 32bit max_size
 static inline uint32_t
 JOIN(A, __next_power2)(uint32_t n)
@@ -297,9 +298,10 @@ JOIN(A, __next_power2)(uint32_t n)
 #ifdef __GNUC__
     return n >= 8 ? 1 << (32 - __builtin_clz(n-1)) : 8;
 #else
-    return 1 << ceil(log2((double)n));
+    return 1 << (uint32_t)ceil(log2((double)n));
 #endif
 }
+#endif
 
 static inline B*
 JOIN(B, init)(T value)
