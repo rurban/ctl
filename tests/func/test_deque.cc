@@ -539,7 +539,8 @@ main(void)
                     break;
                 case TEST_INSERT_RANGE:
                 {
-                    const size_t index = (std::min)(TEST_RAND(a.size - 4), 2UL);
+                    const size_t rnd = TEST_RAND(a.size - 4);
+                    const size_t index = MIN(rnd, 2UL);
                     deq_digi aa = deq_digi_copy(&a);
                     std::deque<DIGI> bb = b;
                     deq_digi_it *pos;
@@ -601,7 +602,8 @@ main(void)
                         deq_digi_resize(&a, 10, digi_init(value));
                         b.resize(10, DIGI{value});
                     }
-                    const size_t index = std::max(TEST_RAND(a.size/2), 2UL);
+                    const size_t rnd = TEST_RAND(a.size/2);
+                    const size_t index = MAX(rnd, 2UL);
                     LOG ("erase_range %zu of %zu\n", index, a.size);
                     deq_digi_it* pos;
                     deq_digi_it from = deq_digi_it_each(&a);

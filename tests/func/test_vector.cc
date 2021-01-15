@@ -85,7 +85,8 @@ get_random_iters (vec_digi *a, vec_digi_it *first_a, vec_digi_it *last_a,
                   std::vector<DIGI>::iterator &last_b)
 {
     size_t r1 = TEST_RAND(a->size / 2);
-    size_t r2 = (std::min)(r1 + TEST_RAND(a->size / 2), a->size);
+    const size_t rnd = TEST_RAND(a->size / 2);
+    size_t r2 = MIN(r1 + rnd, a->size);
     LOG("iters %zu, %zu of %zu\n", r1, r2, a->size);
     if (a->size)
     {

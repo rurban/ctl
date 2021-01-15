@@ -12,7 +12,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #else
-#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <sysinfoapi.h>
@@ -81,4 +80,9 @@ TEST_TIME(void)
         sscanf(env, "%zu", &loops)
 
 
+#endif
+
+#ifndef MIN
+# define MIN(a,b) (a) < (b) ? (a) : (b)
+# define MAX(a,b) (a) > (b) ? (a) : (b)
 #endif
