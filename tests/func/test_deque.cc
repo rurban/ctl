@@ -539,7 +539,7 @@ main(void)
                     break;
                 case TEST_INSERT_RANGE:
                 {
-                    const size_t index = std::min(TEST_RAND(a.size - 4), 2UL);
+                    const size_t index = (std::min)(TEST_RAND(a.size - 4), 2UL);
                     deq_digi aa = deq_digi_copy(&a);
                     std::deque<DIGI> bb = b;
                     deq_digi_it *pos;
