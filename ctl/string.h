@@ -65,7 +65,7 @@ str_append(str* self, const char* s)
     size_t len = strlen(s);
     str_resize(self, self->size + len, '\0');
     for(size_t i = 0; i < len; i++)
-        self->value[start + i] = s[i];
+        self->vector[start + i] = s[i];
 }
 
 static inline void
@@ -102,7 +102,7 @@ str_c_str(str* self)
 static inline size_t
 str_find(str* self, const char* s)
 {
-    char* c_str = self->value;
+    char* c_str = self->vector;
     char* found = strstr(c_str, s);
     if(found)
         return found - c_str;
@@ -114,7 +114,7 @@ str_count(str* self, char c)
 {
     size_t count = 0;
     for(size_t i = 0; i < self->size; i++)
-        if(self->value[i] == c)
+        if(self->vector[i] == c)
             count++;
     return count;
 }
@@ -122,7 +122,7 @@ str_count(str* self, char c)
 static inline size_t
 str_rfind(str* self, const char* s)
 {
-    char* c_str = self->value;
+    char* c_str = self->vector;
     for(size_t i = self->size; i != SIZE_MAX; i--)
     {
         char* found = strstr(&c_str[i], s);
@@ -137,7 +137,7 @@ str_find_first_of(str* self, const char* s)
 {
     for(size_t i = 0; i < self->size; i++)
     for(const char* p = s; *p; p++)
-        if(self->value[i] == *p)
+        if(self->vector[i] == *p)
             return i;
     return SIZE_MAX;
 }
@@ -147,7 +147,7 @@ str_find_last_of(str* self, const char* s)
 {
     for(size_t i = self->size; i != SIZE_MAX; i--)
     for(const char* p = s; *p; p++)
-        if(self->value[i] == *p)
+        if(self->vector[i] == *p)
             return i;
     return SIZE_MAX;
 }
@@ -159,7 +159,7 @@ str_find_first_not_of(str* self, const char* s)
     {
         size_t count = 0;
         for(const char* p = s; *p; p++)
-            if(self->value[i] == *p)
+            if(self->vector[i] == *p)
                 count++;
         if(count == 0)
             return i;
@@ -174,7 +174,7 @@ str_find_last_not_of(str* self, const char* s)
     {
         size_t count = 0;
         for(const char* p = s; *p; p++)
-            if(self->value[i] == *p)
+            if(self->vector[i] == *p)
                 count++;
         if(count == 0)
             return i;
@@ -190,7 +190,7 @@ str_substr(str* self, size_t index, size_t size)
 #endif
     str_resize (&substr, size, '\0');
     for(size_t i = 0; i < size; i++)
-        substr.value[i] = self->value[index + i];
+        substr.vector[i] = self->vector[index + i];
     return substr;
 }
 
@@ -198,7 +198,7 @@ str_substr(str* self, size_t index, size_t size)
 static inline int
 str_compare(str* self, const char* s)
 {
-    return strcmp (self->value, s);
+    return strcmp (self->vector, s);
 }
 
 /* STL clash
@@ -212,13 +212,13 @@ str_equal(str* self, const char* s)
 static inline int
 str_key_compare(str* self, str* other)
 {
-    return strcmp (self->value, other->value);
+    return strcmp (self->vector, other->vector);
 }
 
 static inline int
 str_equal(str* self, str* other)
 {
-    return strcmp (self->value, other->value) == 0;
+    return strcmp (self->vector, other->vector) == 0;
 }
 
 #ifndef HOLD

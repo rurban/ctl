@@ -127,7 +127,7 @@ astar(str* maze, int width)
             point delta = deltas[i];
             point next = point_init(current.x + delta.x, current.y + delta.y, width);
             int new_cost = set_pi_find(&costs, (pi) {.p = current})->key.i;
-            if(maze->value[point_index(&next)] != '#')
+            if(maze->vector[point_index(&next)] != '#')
             {
                 set_pi_node* cost = set_pi_find(&costs, (pi) {.p = next});
                 if(cost == set_pi_end(&costs)
@@ -184,8 +184,8 @@ main(void)
         "#########################################################################\n");
     int width = str_find(&maze, "\n") + 1;
     deq_point path = astar(&maze, width);
-    foreach(deq_point, &path, it) maze.value[point_index(it.ref)] = 'x';
-    printf("%s", maze.value);
+    foreach(deq_point, &path, it) maze.vector[point_index(it.ref)] = 'x';
+    printf("%s", str_c_str(&maze));
     str_free(&maze);
     deq_point_free(&path);
 }

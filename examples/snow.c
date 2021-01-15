@@ -25,15 +25,15 @@ static char
 get(vec_vec_char* snow, size_t x, size_t y)
 {
     if(x < snow->size)
-    if(y < snow->value[x].size)
-        return snow->value[x].value[y];
+    if(y < snow->vector[x].size)
+        return snow->vector[x].vector[y];
     return SNOWFLAKE;
 }
 
 static void
 set(vec_vec_char* snow, size_t x, size_t y, char c)
 {
-    snow->value[x].value[y] =  c;
+    snow->vector[x].vector[y] =  c;
 }
 
 static vec_vec_char

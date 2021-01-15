@@ -79,7 +79,7 @@ str
 get_digit(str* s, size_t i)
 {
     size_t j = i;
-    while(is_digit(s->value[j]))
+    while(is_digit(s->vector[j]))
         j++;
     return str_substr(s, i, j - i);
 }
@@ -88,7 +88,7 @@ str
 get_operator(str* s, size_t i)
 {
     size_t j = i;
-    while(is_of_operator(s->value[j]))
+    while(is_of_operator(s->vector[j]))
         j++;
     return str_substr(s, i, j - i);
 }
@@ -99,7 +99,7 @@ tokenize(str* s)
     ls tokens = ls_init();
     for(size_t i = 0; i < s->size; i++)
     {
-        char c = s->value[i];
+        char c = s->vector[i];
         if(is_space(c))
             continue;
         str token;
@@ -130,7 +130,7 @@ to_postfix(ls* tokens)
     foreach(ls, tokens, it)
     {
         str* token = it.ref;
-        char c = token->value[0];
+        char c = token->vector[0];
         if(is_digit(c))
         {
             ls_push_back(&postfix, str_copy(token));
@@ -139,11 +139,11 @@ to_postfix(ls* tokens)
                 if(it.next)
                 {
                     str* next = &it.next->value;
-                    char cc = next->value[0];
+                    char cc = next->vector[0];
                     if(get_prec(c) < get_prec(cc))
                     {
                         str* operator = ss_top(&operators);
-                        char ccc = operator->value[0];
+                        char ccc = operator->vector[0];
                         if(ccc != '(')
                         {
                             ls_push_back(&postfix, str_copy(operator));
@@ -168,7 +168,7 @@ to_postfix(ls* tokens)
                 while(!done)
                 {
                     str* top = ss_top(&operators);
-                    char cc = top->value[0];
+                    char cc = top->vector[0];
                     if(cc == '(')
                         done = 1;
                     else
@@ -199,9 +199,9 @@ main(void)
     str s = str_init("64 * (128 / 2 - 128 / (2 - 1))");
     ls tokens = tokenize(&s);
     ls postfix = to_postfix(&tokens);
-    puts(s.value);
+    puts(str_c_str(&s));
     foreach(ls, &postfix, it)
-        puts(it.ref->value);
+        puts(str_c_str(it.ref));
     ls_free(&tokens);
     ls_free(&postfix);
     str_free(&s);

@@ -291,7 +291,7 @@ static double
 read_number(stack_char* feed)
 {
     str number = read(feed, is_number);
-    double converted = atof(number.value);
+    double converted = atof(str_c_str(&number));
     str_free(&number);
     return converted;
 }
@@ -388,7 +388,7 @@ traverse(set_pair* json, int tabs)
     foreach(set_pair, json, it)
     {
         tab(tabs);
-        printf("\"%s\" : ", it.ref->string.value);
+        printf("\"%s\" : ", str_c_str(&it.ref->string));
         pprint(it.ref->value, tabs);
         putchar('\n');
     }
@@ -405,7 +405,7 @@ pprint(valp value, int tabs)
             printf("%.2f", value->of.number);
         else
         if(value->family == STRING)
-            printf("\"%s\"", value->of.string.value);
+            printf("\"%s\"", str_c_str(&value->of.string));
         else
         if(value->family == OBJECT)
             traverse(value->of.object, tabs + 1);
@@ -474,7 +474,7 @@ ind(valp value, size_t index)
 {
     if(is_array(value))
         if(is_array_in_bounds(value, index))
-            return value->of.array->value[index];
+            return value->of.array->vector[index];
     return NULL;
 }
 

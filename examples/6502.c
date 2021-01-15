@@ -60,8 +60,8 @@ token
 token_copy(token* self)
 {
     return token_init(
-        self->type.value,
-        self->name.value,
+        str_c_str(&self->type),
+        str_c_str(&self->name),
         self->size,
         self->addr,
         self->fam
@@ -145,7 +145,7 @@ get(str* name)
 {
     token* tok = find(name);
     if(!tok)
-        quit("token '%s' not defined", name->value);
+        quit("token '%s' not defined", str_c_str(name));
     return tok;
 }
 
@@ -164,7 +164,7 @@ stringify(char* fmt, va_list args)
     str s = str_init("");
     size_t size = vsnprintf(NULL, 0, fmt, args);
     str_resize(&s, size + 1, '\0');
-    vsprintf(s.value, fmt, copy);
+    vsprintf(str_c_str(&s), fmt, copy);
     va_end(copy);
     return s;
 }
@@ -195,7 +195,7 @@ save(void)
     FILE* out = fopen("out.asm", "w");
     foreach(list_str, &global.assem, it)
     {
-        char* s = it.ref->value;
+        char* s = str_c_str(it.ref);
         puts(s);
         fprintf(out, "%s\n", s);
     }
@@ -293,7 +293,7 @@ pop(void)
     {
         tidy(&global.comment);
         if(!str_empty(&global.comment))
-            write("; %s", global.comment.value);
+            write("; %s", str_c_str(&global.comment));
         str_clear(&global.comment);
     }
     else
@@ -385,7 +385,7 @@ resolve(token* tok)
         copy.fam = VAR;
         match('[');
         str d = digit();
-        copy.addr += atoi(d.value) * type->size;
+        copy.addr += atoi(str_c_str(&d)) * type->size;
         str_free(&d);
         match(']');
     }
@@ -398,7 +398,7 @@ check(char* name)
     str temp = str_init(name);
     token* exists = find(&temp);
     if(exists)
-        quit("token '%s' already defined", exists->name.value);
+        quit("token '%s' already defined", str_c_str(&exists->name));
     str_free(&temp);
 }
 
@@ -481,7 +481,7 @@ load_digit(int negate)
     get(&integer);
     str_free(&integer);
     str d = digit();
-    int value = atoi(d.value);
+    int value = atoi(str_c_str(&d));
     if(negate)
         value *= -1;
     load_digit_internal(value);
@@ -586,7 +586,8 @@ term(void)
         token* tok = get(&n);
         token res = resolve(tok);
         if(res.fam != VAR)
-            quit("%s '%s %s' cannot be loaded", lookup[res.fam], res.type.value, res.name.value);
+            quit("%s '%s %s' cannot be loaded", lookup[res.fam],
+                 str_c_str(&res.type), str_c_str(&res.name));
         load_value(&res);
         str_free(&n);
         token_free(&res);
@@ -724,7 +725,7 @@ expression(void)
             if(str_equal(&o, ">="))
                 greater_than_or_equal();
             else
-                quit("unknown operator '%s'", o.value);
+                quit("unknown operator '%s'", str_c_str(&o));
         }
         str_free(&o);
     }
@@ -736,7 +737,7 @@ array_setup(void)
     // Array sizes are constants to facilitate fast loads with loop unrolling.
     match('[');
     str d = digit();
-    size_t width = atoi(d.value);
+    size_t width = atoi(str_c_str(&d));
     str_free(&d);
     match(']');
     return width;
@@ -758,7 +759,7 @@ declarations(token* tok)
     // eg. int a[5]
     if(next() == '[')
     {
-        size_t bytes = local_array(tok->type.value, name.value, tok->size);
+        size_t bytes = local_array(str_c_str(&tok->type), str_c_str(&name), tok->size);
         global.local_addr += bytes;
     }
     // eg. int a
@@ -768,7 +769,7 @@ declarations(token* tok)
         size_t addr = global.local_addr;
         match('=');
         expression();
-        define(tok->type.value, name.value, tok->size, addr, VAR);
+        define(str_c_str(&tok->type), str_c_str(&name), tok->size, addr, VAR);
         global.local_addr = addr + tok->size;
     }
     str_free(&name);
@@ -783,7 +784,7 @@ deref(token* tok)
         assign(&res);
     // eg. a[1] + 1;
     else
-        quit("empty statement (deref) has no effect; see '%s'", res.name.value);
+        quit("empty statement (deref) has no effect; see '%s'", str_c_str(&res.name));
     token_free(&res);
 }
 
@@ -808,7 +809,7 @@ misc(str* lead)
             assign(tok);
         // eg. a + 1
         else
-            quit("empty statement (misc) has no effect; see '%s'", lead->value);
+            quit("empty statement (misc) has no effect; see '%s'", str_c_str(lead));
     }
 }
 
@@ -827,8 +828,8 @@ void
 replace(str* s, str* macro, str* with)
 {
     size_t index = 0;
-    while((index = str_find(s, macro->value)) != SIZE_MAX)
-        str_replace(s, index, macro->size, with->value);
+    while((index = str_find(s, str_c_str(macro))) != SIZE_MAX)
+        str_replace(s, index, macro->size, str_c_str(with));
 }
 
 void
@@ -864,7 +865,7 @@ unroll(void)
             replace(&temp, &enumtok, &enumer);
             str_free(&enumer);
         }
-        str reffer = format("%s[%d]", array.value, i);
+        str reffer = format("%s[%d]", str_c_str(&array), i);
         replace(&temp, &reftok, &reffer);
         list_str_push_front(&expanded, str_copy(&temp));
         str_free(&reffer);
@@ -885,7 +886,7 @@ inline_asm(void)
 {
     match('{');
     str assem = buffer(is_scoped);
-    write("%s", assem.value);
+    write("%s", str_c_str(&assem));
     match('}');
     str_free(&assem);
 }
@@ -968,7 +969,7 @@ pop_locals(size_t size)
     {
         token* tok = get(it.ref);
         write("; %8s %8s %6d %6d %6d",
-            tok->type.value, tok->name.value, tok->size, tok->addr, tok->fam);
+              str_c_str(&tok->type), str_c_str(&tok->name), tok->size, tok->addr, tok->fam);
         global.local_addr -= tok->size;
         erase(&tok->name);
     }
@@ -997,8 +998,8 @@ function(str* type, str* name)
 {
     match('(');
     match(')');
-    def_fun(type->value, name->value);
-    write("%s:", name->value);
+    def_fun(str_c_str(type), str_c_str(name));
+    write("%s:", str_c_str(name));
     block();
     write("\tRTS");
 }
@@ -1014,15 +1015,15 @@ global_array(str* type, str* name)
     {
         match('@');
         str d = digit();
-        addr = atoi(d.value);
+        addr = atoi(str_c_str(&d));
         str_free(&d);
         reference = 1;
     }
     size_t bytes = width * tok->size;
-    define(type->value, name->value, bytes, addr, ARRAY);
+    define(str_c_str(type), str_c_str(name), bytes, addr, ARRAY);
     if(!reference)
     {
-        write("%s:", name->value);
+        write("%s:", str_c_str(name));
         for(size_t i = 0; i < bytes; i++)
             write("\t!byte 0");
         global.global_addr += bytes;
@@ -1051,13 +1052,13 @@ program(void)
         {
             if(found_function)
                 quit("array declarations (see '%s %s') must come before the main function",
-                     type.value, name.value);
+                     str_c_str(&type), str_c_str(&name));
             global_array(&type, &name);
             match(';');
         }
         else
             quit("unknown character '%c' in top level definition (see definition for '%s %s')",
-                 next(), type.value, name.value);
+                 next(), str_c_str(&type), str_c_str(&name));
         str_free(&type);
         str_free(&name);
     }

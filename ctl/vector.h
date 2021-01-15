@@ -24,7 +24,7 @@
 
 typedef struct A
 {
-    T* value;
+    T* vector;
     void (*free)(T*);
     T (*copy)(T*);
     int (*compare)(T*, T*);
@@ -49,7 +49,7 @@ JOIN(A, capacity)(A* self)
 static inline T*
 JOIN(A, at)(A* self, size_t index)
 {
-    return &self->value[index];
+    return &self->vector[index];
 }
 
 static inline T*
@@ -169,16 +169,16 @@ JOIN(A, fit)(A* self, size_t capacity)
 #endif
     if(MUST_ALIGN_16(T)) // reserve terminating \0 for strings
         overall++;
-    self->value = (T*) realloc(self->value, overall * sizeof(T));
+    self->vector = (T*) realloc(self->vector, overall * sizeof(T));
     if(MUST_ALIGN_16(T))
     {
 #if 0
         static T zero;
         for(size_t i = self->capacity; i < overall; i++)
-            self->value[i] = zero;
+            self->vector[i] = zero;
 #else
         if (overall > self->capacity)
-            memset (&self->value[self->capacity], 0, (overall - self->capacity) * sizeof(T));
+            memset (&self->vector[self->capacity], 0, (overall - self->capacity) * sizeof(T));
 #endif
     }
     self->capacity = capacity;
@@ -211,7 +211,7 @@ JOIN(A, free)(A* self)
     JOIN(A, clear)(self);
     JOIN(A, compare_fn) *compare = &self->compare;
     JOIN(A, compare_fn) *equal = &self->equal;
-    free(self->value);
+    free(self->vector);
     *self = JOIN(A, init)();
     self->compare = *compare;
     self->equal = *equal;
@@ -276,7 +276,7 @@ JOIN(A, push_back)(A* self, T value)
     *JOIN(A, at)(self, self->size) = value;
     self->size++;
 //#ifdef CTL_STR
-//    self->value[self->size] = '\0';
+//    self->vector[self->size] = '\0';
 //#endif
 }
 
@@ -331,7 +331,7 @@ static inline void
 JOIN(A, assign_range)(A* self, T* from, T* last)
 {
     size_t count = last - from;
-    JOIN(A, resize)(self, count, self->copy(self->value)); // TODO
+    JOIN(A, resize)(self, count, self->copy(self->vector)); // TODO
     JOIN(A, it) it = JOIN(I, range)(self, from, last);
     for(size_t i=0; !it.done; it.step(&it), i++)
         JOIN(A, set)(self, i, *it.ref);
@@ -378,8 +378,8 @@ JOIN(A, insert)(A* self, size_t index, T value)
     {
         JOIN(A, push_back)(self, *JOIN(A, back)(self));
         for(size_t i = self->size - 2; i > index; i--)
-            self->value[i] = self->value[i - 1];
-        self->value[index] = value;
+            self->vector[i] = self->vector[i - 1];
+        self->vector[index] = value;
     }
     else
         JOIN(A, push_back)(self, value);
@@ -393,11 +393,11 @@ JOIN(A, erase)(A* self, size_t index)
     // TODO memmove
     for(size_t i = index; i < self->size - 1; i++)
     {
-        self->value[i] = self->value[i + 1];
-        self->value[i + 1] = zero;
+        self->vector[i] = self->vector[i + 1];
+        self->vector[i + 1] = zero;
     }
     self->size--;
-    return &self->value[self->size - 1];
+    return &self->vector[self->size - 1];
 }
 
 static inline T*
@@ -406,7 +406,7 @@ JOIN(A, erase_range)(A* self, T* from, T* to)
     static T zero;
     if (from >= to)
         return to;
-    T* end = &self->value[self->size];
+    T* end = &self->vector[self->size];
     // TODO memmove
     *from = zero;
     for(T* pos = from; pos < to - 1; pos++)
@@ -442,16 +442,16 @@ JOIN(A, _ranged_sort)(A* self, long a, long b, int _compare(T*, T*))
     if(a >= b)
         return;
     long mid = (a + b) / 2;
-    //printf("sort \"%s\" %ld, %ld\n", self->value, a, b);
-    SWAP(T, &self->value[a], &self->value[mid]);
+    //printf("sort \"%s\" %ld, %ld\n", self->vector, a, b);
+    SWAP(T, &self->vector[a], &self->vector[mid]);
     long z = a;
     for(long i = a + 1; i <= b; i++)
-        if(_compare(&self->value[a], &self->value[i]))
+        if(_compare(&self->vector[a], &self->vector[i]))
         {
             z++;
-            SWAP(T, &self->value[z], &self->value[i]);
+            SWAP(T, &self->vector[z], &self->vector[i]);
         }
-    SWAP(T, &self->value[a], &self->value[z]);
+    SWAP(T, &self->vector[a], &self->vector[z]);
     if (z)
         JOIN(A, _ranged_sort)(self, a, z - 1, _compare);
     JOIN(A, _ranged_sort)(self, z + 1, b, _compare);
@@ -464,7 +464,7 @@ JOIN(A, sort)(A* self)
     if (self->size)
         JOIN(A, _ranged_sort)(self, 0, self->size - 1, self->compare);
 //#ifdef CTL_STR
-//    self->value[self->size] = '\0';
+//    self->vector[self->size] = '\0';
 //#endif
 }
 
@@ -474,7 +474,7 @@ JOIN(A, copy)(A* self)
     A other = JOIN(A, _init)(self);
     JOIN(A, reserve)(&other, self->size); // i.e shrink to fit
     while(other.size < self->size)
-        JOIN(A, push_back)(&other, other.copy(&self->value[other.size]));
+        JOIN(A, push_back)(&other, other.copy(&self->vector[other.size]));
     return other;
 }
 
