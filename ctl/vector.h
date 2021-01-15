@@ -205,7 +205,7 @@ JOIN(A, fit)(A* self, size_t capacity)
             self->value[i] = zero;
 #else
         if (overall > self->capacity)
-            memset (&self->value[self->capacity], 0, overall - self->capacity);
+            memset (&self->value[self->capacity], 0, (overall - self->capacity) * sizeof(T));
 #endif
     }
     self->capacity = capacity;
