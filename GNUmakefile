@@ -98,7 +98,7 @@ CFLAGS += -DSRAND -DSEED=$(SEED)
 endif
 endif
 
-CXXFLAGS=$(CFLAGS)
+CXXFLAGS += $(CFLAGS)
 
 H        = $(wildcard ctl/*.h) ctl/bits/*.h
 COMMON_H = ctl/ctl.h ctl/algorithm.h ctl/bits/container.h \
@@ -226,53 +226,53 @@ examples/% : examples/%.c .cflags $(H)
 
 tests/func/test_deque:    .cflags $(COMMON_H) ctl/deque.h \
                           tests/func/test_deque.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_list:     .cflags $(COMMON_H) ctl/list.h \
                           tests/func/test_list.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_priority_queue: .cflags $(COMMON_H) ctl/priority_queue.h ctl/vector.h \
                           tests/func/test_priority_queue.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_queue:    .cflags $(COMMON_H) ctl/queue.h ctl/deque.h \
                           tests/func/test_queue.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_set:      .cflags $(COMMON_H) ctl/set.h \
                           tests/func/test_set.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_map:      .cflags $(COMMON_H) ctl/map.h ctl/set.h \
                           tests/func/test_map.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_unordered_set: .cflags $(COMMON_H) ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_unordered_set_power2: .cflags $(COMMON_H) ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
-	$(CXX) $(CFLAGS) -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc -o $@
+	$(CXX) $(CXXFLAGS) -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc -o $@
 tests/func/test_unordered_set_cached: .cflags $(COMMON_H) ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
-	$(CXX) $(CFLAGS) -DCTL_USET_CACHED_HASH tests/func/test_unordered_set.cc -o $@
+	$(CXX) $(CXXFLAGS) -DCTL_USET_CACHED_HASH tests/func/test_unordered_set.cc -o $@
 tests/func/test_unordered_map: .cflags $(COMMON_H) ctl/unordered_map.h ctl/unordered_set.h \
                           tests/func/test_unordered_map.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_stack:    .cflags $(COMMON_H) ctl/stack.h ctl/deque.h \
                           tests/func/test_stack.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_string:   .cflags $(COMMON_H) ctl/string.h ctl/vector.h \
                           tests/func/test_string.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_str_capacity: .cflags $(COMMON_H) ctl/string.h ctl/vector.h \
                           tests/func/test_str_capacity.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_vec_capacity: .cflags $(COMMON_H) ctl/vector.h \
                           tests/func/test_vec_capacity.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_vector:   .cflags $(COMMON_H) ctl/vector.h \
                           tests/func/test_vector.cc
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/%: tests/func/%.c .cflags $(H)
 	$(CC) $(CFLAGS) -o $@ $@.c
 tests/func/%: tests/func/%.cc .cflags $(H)
-	$(CXX) $(CFLAGS) -o $@ $@.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 
 asan:
 	$(MAKE) SANITIZE=1

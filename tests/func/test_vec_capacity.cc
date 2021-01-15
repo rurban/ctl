@@ -33,13 +33,14 @@
 #define ASSERT_EQUAL_SIZE(_x, _y) (assert(_x.size() == _y.size))
 
 // tested variants
-#if (_LIBCPP_STD_VER == 18 || \
-       (defined _GLIBCXX_RELEASE && __cplusplus >= 201103L))
-// Tested ok with g++ 10, g++ 7.5, clang 10 (libc++ 18), apple clang 12
-#define ASSERT_EQUAL_CAP(_x, _y) (assert(_x.capacity() == _y.capacity))
+#if /* (_LIBCPP_STD_VER >= 11 && _LIBCPP_STD_VER <= 18) ||*/ \
+     (defined _GLIBCXX_RELEASE && __cplusplus >= 201103L)
+// Tested ok with g++ 10, g++ 7.5, clang 10 (libc++ 11-18), apple clang 12
+# define ASSERT_EQUAL_CAP(s, c) (assert(s.capacity() == c.capacity))
 #else
 // other llvm libc++ fail (gh actions), msvc untested
-#define ASSERT_EQUAL_CAP(_x, _y) if (s.capacity() != c.capacity) fail++
+# define ASSERT_EQUAL_CAP(s, c) if (s.capacity() != c.capacity) \
+    { printf("capacity %zu vs %zu FAIL\n", c.capacity, s.capacity()); fail++; }
 #endif
 
 int
@@ -48,11 +49,11 @@ main(void)
     INIT_SRAND;
     int fail = 0;
 #if defined __GNUC__ && defined _GLIBCXX_RELEASE
-    fprintf(stderr, "_GLIBCXX_RELEASE %ld\n", _GLIBCXX_RELEASE);
+    fprintf(stderr, "_GLIBCXX_RELEASE %d\n", (int)_GLIBCXX_RELEASE);
 #elif defined _LIBCPP_STD_VER
-    fprintf(stderr, "_LIBCPP_STD_VER %ld\n", _LIBCPP_STD_VER);
+    fprintf(stderr, "_LIBCPP_STD_VER %d\n", (int)_LIBCPP_STD_VER);
 #else
-    fprintf(stderr, "unknown libc++: __cplusplus %ld\n", __cplusplus);
+    fprintf(stderr, "unknown libc++: __cplusplus %d\n", (int)__cplusplus);
 #endif
     const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
     for(size_t loop = 0; loop < loops; loop++)

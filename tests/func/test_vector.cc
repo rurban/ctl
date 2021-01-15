@@ -37,8 +37,19 @@ int random_element(vec_digi* a)
     return *vp->value;
 }
 
+// tested variants
+#if (defined _GLIBCXX_RELEASE && __cplusplus >= 201103L)
+// Tested ok with g++ 10, g++ 7.5,
+// clang 10 (libc++ 11-18), apple clang 12 fail
+# define ASSERT_EQUAL_CAP(c, s) assert(s.capacity() == c.capacity);
+#else
+// other llvm libc++ fail (gh actions), msvc untested
+# define ASSERT_EQUAL_CAP(c, s) if (s.capacity() != c.capacity) \
+    { printf("capacity %zu vs %zu FAIL\n", c.capacity, s.capacity()); fail++; }
+#endif
+
 #define CHECK(_x, _y) {                                           \
-    assert(_x.capacity == _y.capacity());                         \
+    ASSERT_EQUAL_CAP(_x, _y)                                      \
     assert(_x.size == _y.size());                                 \
     assert(vec_digi_empty(&_x) == _y.empty());                    \
     if(_x.size > 0) {                                             \
@@ -124,7 +135,7 @@ get_random_iters (vec_digi *a, vec_digi_it *first_a, vec_digi_it *last_a,
 int
 main(void)
 {
-    int errors = 0;
+    int fail = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
@@ -472,7 +483,7 @@ main(void)
                         print_vec(&a);
                         print_vector(b);
                         printf ("%d != %d FAIL\n", (int)numa, (int)numb);
-                        errors++;
+                        fail++;
                     }
                     assert(numa == numb); //fails. off by one, counts one too much
                     break;
@@ -500,7 +511,7 @@ main(void)
                         //print_vec(&a);
                         //print_vector(b);
                         printf ("%d != %d FAIL\n", (int)is_a, (int)is_b);
-                        errors++;
+                        fail++;
                     }
                     //assert(is_a == is_b);
                     break;
@@ -560,7 +571,7 @@ main(void)
             vec_digi_free(&a);
         }
     }
-    if (errors)
+    if (fail)
         TEST_FAIL(__FILE__);
     else
         TEST_PASS(__FILE__);

@@ -24,8 +24,7 @@ jobs:
           - make -j4 SANITIZE=1
           - make -j4 CC='gcc -std=c99'
           - make -j4 CC='gcc -std=c11'
-          # TODO fails with -std=c++2a ... on vec capacity
-          - make -j4 CXX='clang++ -std=c++17 -stdlib=libc++'
+          - make -j4 CXX='clang++ -std=c++2a -stdlib=libc++'
           - make examples SANITIZE=1
           - make perf
     steps:

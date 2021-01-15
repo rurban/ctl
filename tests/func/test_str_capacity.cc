@@ -7,14 +7,18 @@
 
 #define ASSERT_EQUAL_SIZE(c, s) (assert(s.size() == c.size))
 #if defined(DEBUG)
-#define ASSERT_EQUAL_CAP(c, s) if (s.capacity() != c.capacity) fail++
-// capacity is implemention-defined and we tested against gcc libstdc++ v3
-// and llvm libc++ v1 ver 18. MSVC ?
+#define ASSERT_EQUAL_CAP(c, s) if (s.capacity() != c.capacity) \
+    { printf("capacity %zu vs %zu FAIL\n", c.capacity, s.capacity()); fail++; }
+// capacity is implemention-defined and we tested against gcc libstdc++ v3 (7.5
+// - 10), llvm libc++ v1 ver 18. MSVC ?
 // gcc libstdc++ had the latest change with __cplusplus >= 201103L
 // libc++ had the latest change in __grow_by in PR17148, 2013
-#elif (_LIBCPP_STD_VER == 18 || \
-       (defined _GLIBCXX_RELEASE && __cplusplus >= 201103L))
+#elif (defined _GLIBCXX_RELEASE && __cplusplus >= 201103L)
+// Fails with libc++ 11, 14, 17, 18
 #define ASSERT_EQUAL_CAP(c, s) (assert(s.capacity() == c.capacity))
+#else
+#define ASSERT_EQUAL_CAP(c, s) if (s.capacity() != c.capacity) \
+    { printf("capacity %zu vs %zu FAIL\n", c.capacity, s.capacity()); fail++; }
 #endif
 
 int
@@ -22,6 +26,13 @@ main(void)
 {
     INIT_SRAND;
     size_t fail = 0;
+#if defined __GNUC__ && defined _GLIBCXX_RELEASE
+    fprintf(stderr, "_GLIBCXX_RELEASE %d\n", (int)_GLIBCXX_RELEASE);
+#elif defined _LIBCPP_STD_VER
+    fprintf(stderr, "_LIBCPP_STD_VER %d\n", (int)_LIBCPP_STD_VER);
+#else
+    fprintf(stderr, "unknown libc++: __cplusplus %ld\n", (int)__cplusplus);
+#endif
     const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
     for(size_t loop = 0; loop < loops; loop++)
     {
