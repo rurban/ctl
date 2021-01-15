@@ -42,7 +42,7 @@
 #  define IT B*
 /* return B* it node. end is NULL */
 
-B* JOIN(B, next)(B*);
+//B* JOIN(B, next)(B*);
 
 #ifndef foreach
 # define foreach(C, T, self, it) \
@@ -106,13 +106,13 @@ B* JOIN(B, next)(B*);
 
 #ifndef foreach
 # define foreach(C, T, self, it) \
-    if (!JOIN(C, JOIN(T, empty))(self)) \
+    if (self->size) \
       for(T* it = JOIN(C, JOIN(T, begin))(self); \
           it < JOIN(C, JOIN(T, end))(self); \
           it++)
 # define foreach_ref(C, T, self, it, ref) \
     T* ref; \
-    if (!JOIN(C, JOIN(T, empty))(self)) \
+    if (self->size) \
         for(T* it = ref = JOIN(C, JOIN(T, begin))(self); \
             it < JOIN(C, JOIN(T, end))(self);            \
             it++, ref = it)
