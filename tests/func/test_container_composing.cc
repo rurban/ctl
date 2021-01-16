@@ -22,6 +22,9 @@
 #define T deq_int
 #include <ctl/vector.h>
 
+#define T deq_int
+#include <ctl/unordered_set.h>
+
 #define POD
 #define T int
 #include <ctl/list.h>
@@ -44,6 +47,9 @@
 #define T list_int
 #include <ctl/deque.h>
 
+#define T list_int
+#include <ctl/unordered_set.h>
+
 #define POD
 #define T int
 #include <ctl/priority_queue.h>
@@ -66,6 +72,9 @@
 #define T pqu_int
 #include <ctl/list.h>
 
+#define T pqu_int
+#include <ctl/unordered_set.h>
+
 #define POD
 #define T int
 #include <ctl/queue.h>
@@ -88,6 +97,9 @@
 #define T queue_int
 #include <ctl/priority_queue.h>
 
+#define T queue_int
+#include <ctl/unordered_set.h>
+
 #define POD
 #define T int
 #include <ctl/set.h>
@@ -110,6 +122,9 @@
 #define T set_int
 #include <ctl/queue.h>
 
+#define T set_int
+#include <ctl/unordered_set.h>
+
 #define POD
 #define T int
 #include <ctl/stack.h>
@@ -132,6 +147,9 @@
 #define T stack_int
 #include <ctl/set.h>
 
+#define T stack_int
+#include <ctl/unordered_set.h>
+
 #define POD
 #define T int
 #include <ctl/vector.h>
@@ -152,6 +170,31 @@
 #include <ctl/set.h>
 
 #define T vec_int
+#include <ctl/stack.h>
+
+#define T vec_int
+#include <ctl/unordered_set.h>
+
+#define POD
+#define T int
+#include <ctl/unordered_set.h>
+
+#define T uset_int
+#include <ctl/deque.h>
+
+#define T uset_int
+#include <ctl/list.h>
+
+#define T uset_int
+#include <ctl/priority_queue.h>
+
+#define T uset_int
+#include <ctl/queue.h>
+
+#define T uset_int
+#include <ctl/set.h>
+
+#define T uset_int
 #include <ctl/stack.h>
 
 int
