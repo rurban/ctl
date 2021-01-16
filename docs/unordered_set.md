@@ -3,7 +3,8 @@
 Defined in header **<ctl/unordered_set.h>**, CTL prefix **uset**,
 parent of [unordered_map](unordered_map.md)
 
-Implementation in work still.
+Implementation in work still. There needs to be more security policies,
+and better map/pair support.
 
 # SYNOPSIS
 
@@ -238,6 +239,14 @@ position to the top in each access, such as find and contains, not only insert.
 
 - `CTL_USET_GROWTH_FACTOR` defaults to `2.0` for `CTL_USET_GROWTH_POWER2` and
 `1.618` for `CTL_USET_GROWTH_PRIMED`.
+
+- Security policies against DDOS attacks, overflowing the chained list:
+  - a seeded hash might need a 2nd hash arg (esp. with threads),
+  - collision counting with abort,
+  - collision counting with sleep,
+  - collision counting with change to sorted vector,
+  - collision counting with change to tree (as in java),
+  - sorted vector.
 
 Methods:
 
