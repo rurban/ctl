@@ -143,7 +143,7 @@ all: $(TESTS) docs/index.md
 
 check: all
 .cflags: ALWAYS
-	@echo "$(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
+	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
 images:
 	./gen_images.sh
 
