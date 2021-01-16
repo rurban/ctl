@@ -246,10 +246,11 @@ for POD integral types.
 
 See [Differences](#differences) below.
 
+The other header-only STL variant in C is [pottery](https://github.com/ludocode/pottery),
+which also sucks less and also fairly complete and decent.
 Other STL attempts in C are [glib](http://suckless.org/sucks/), and
 partially [libmowgli](https://github.com/atheme/libmowgli-2),
-[libulz](https://github.com/rofl0r/libulz). This is the only header-only
-variant.
+[libulz](https://github.com/rofl0r/libulz).
 
 ## Base Implementation Details
 
@@ -401,12 +402,14 @@ Added the `CTL_USET_CACHED_HASH` policy for faster unsuccessful finds with high
 load factors, but more memory.
 
 Hashmaps will be changed from chained lists to open addressing, thus no internal
-bucket methods, and even more faster, but pointers into it are disallowed.
+bucket methods, and faster, but pointers into it are disallowed.
 
 Optimized list, seperate connect before and after methods.
 
 Implemented correct short string and vector capacity policies, as in gcc
 libstdc++ and llvm libc++.
+Tested also against the libc++ from llvm and the Windows MSVC STL, not
+just the GNU libstdc++ v3.
 
 Work is ongoing for all `algorithms.h`, `iterators` and `ranges`, with better
 iterators.
@@ -416,8 +419,6 @@ When assert is used, throw them. (when assert.h included, no NDEBUG)
 glouw/ctl does not treat errors at all. There cannot be any.
 
 Support not only GNU make, but also BSD make and MSVC nmake.
-
-Tested also against the libc++ from llvm, not just the GNU libstdc++ v3.
 
 Tested also on macOS (default apple clang++ with libc++), FreeBSD (default
 clang with libc++), and Windows MSVC (default CL 19).
