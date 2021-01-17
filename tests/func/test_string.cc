@@ -75,13 +75,6 @@ main(void)
     int fail = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
-#if defined __GNUC__ && defined _GLIBCXX_RELEASE
-    fprintf(stderr, "_GLIBCXX_RELEASE %d\n", (int)_GLIBCXX_RELEASE);
-#elif defined _LIBCPP_STD_VER
-    fprintf(stderr, "_LIBCPP_STD_VER %d\n", (int)_LIBCPP_STD_VER);
-#else
-    fprintf(stderr, "unknown libc++: __cplusplus %d\n", (int)__cplusplus);
-#endif
     for(size_t loop = 0; loop < loops; loop++)
     {
         size_t str_size = TEST_RAND(TEST_MAX_SIZE);

@@ -28,6 +28,9 @@ main(void)
     size_t fail = 0;
 #if defined __GNUC__ && defined _GLIBCXX_RELEASE
     fprintf(stderr, "_GLIBCXX_RELEASE %d\n", (int)_GLIBCXX_RELEASE);
+#elif defined __GNUC__ && defined _GLIBCXX_PACKAGE__GLIBCXX_VERSION
+    fprintf(stderr, "_GLIBCXX_VERSION %s %d\n", _GLIBCXX_PACKAGE__GLIBCXX_VERSION,
+            (int)__cplusplus);
 #elif defined _LIBCPP_STD_VER
     fprintf(stderr, "_LIBCPP_STD_VER %d\n", (int)_LIBCPP_STD_VER);
 #else
