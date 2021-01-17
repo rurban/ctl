@@ -31,7 +31,7 @@ main(void)
 #elif defined _LIBCPP_STD_VER
     fprintf(stderr, "_LIBCPP_STD_VER %d\n", (int)_LIBCPP_STD_VER);
 #else
-    fprintf(stderr, "unknown libc++: __cplusplus %ld\n", (int)__cplusplus);
+    fprintf(stderr, "unknown libc++: __cplusplus %d\n", (int)__cplusplus);
 #endif
     const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
     for(size_t loop = 0; loop < loops; loop++)
