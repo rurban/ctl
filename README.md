@@ -128,20 +128,20 @@ Forgetting a compare method will assert with "compare undefined", if enabled.
 
 ## Iterators and Ranges
 
-We accept and return three types of iterators: `T*` for simple types in arrays,
-as vector derived containers, `size_t` index for deque iterators,
+We accept and return two types of iterators: `T*` for simple types in arrays,
+as vector derived containers,
 and `B*` node pointers for the rest: list, set and uset derived containers with
 extra nodes.
 
-Contrary to the STL we mostly return `T*`, `size_t` or `B*`, not full `I` iterators.
-But you can convert those return values via the `iter` method to full iterators,
-to be acceptable as `I*` argument, e.g. for range methods.
+In spirit of the STL the iterator objects created by `begin`, `end` and
+returned by `next`, `advance` return the positions as `T*` or `B*` pointers, but
+have more iterator specific fields contained within.
+All other general methods just return pointers to the `T*` values or `B*` nodes
+without any iterator struct embedded.
 
-_Note_: I am redesigning `I*` iterators to be faster (not 3 assignments per
-step, just a single incement or `->next` assignment for B* and T* iters) and be
-more compatible to the STL. The `foreach` and `foreach_range` macros are also
-split into variants with and without setting ref (value pointers). It is even
-faster than the STL, now they are 2x slower.
+Previous versions of the ctl had different heavy and incompatible iterators.
+Now the iterator contains the value or node ref, and nothing else.
+Now they are compatible with the STL and are even faster than them.
 
 range methods are suffixed with `_range`.
 

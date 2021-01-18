@@ -15,8 +15,8 @@
 # define C deq
 #endif
 #define I JOIN(A, it)
-#undef IT
-#define IT size_t
+//#undef IT
+#define IT T*
 
 #include <ctl/ctl.h>
 #include <ctl/bits/iterators.h>
@@ -24,6 +24,25 @@
 #ifndef DEQ_BUCKET_SIZE
 #define DEQ_BUCKET_SIZE (512)
 #endif
+
+#ifdef DEBUG
+# if defined(_ASSERT_H) && !defined(NDEBUG)
+# define CHECK_TAG(it,ret)                      \
+    if (it->tag != CTL_DEQ_TAG)                 \
+    {                                           \
+        assert (it->tag == CTL_DEQ_TAG &&       \
+                "invalid deque iterator");      \
+        return ret;                             \
+    }
+# else
+# define CHECK_TAG(it,ret)                      \
+    if (it->tag != CTL_DEQ_TAG)                 \
+        return ret;
+# endif
+#else
+# define CHECK_TAG(it,ret)
+#endif
+
 
 typedef struct B
 {
@@ -47,11 +66,41 @@ typedef struct A
 
 typedef struct I
 {
-    CTL_B_ITER_FIELDS;
+    T* ref;
+    A* container;
     size_t index;
-    size_t index_next;
-    size_t index_last;
+#ifdef DEBUG
+    uint32_t tag;
+#endif
 } I;
+
+static I _deq_begin_it = {NULL, NULL, 0
+#ifdef DEBUG
+    , CTL_DEQ_TAG
+#endif
+};
+static I _deq_end_it = {NULL, NULL, 0
+#ifdef DEBUG
+    , CTL_DEQ_TAG
+#endif
+};
+
+/* Fast typed iters */
+#define deq_foreach(A, T, self, pos)                  \
+    if (self->size)                                   \
+        for(T* pos = JOIN(A, begin)(self);            \
+            pos != JOIN(A, end)(self);                \
+            pos = JOIN(I, next)(pos))
+#define deq_foreach_ref(A, T, self, i, ref)           \
+    T* ref = (self)->size ? JOIN(A, at)(self, 0) : NULL; \
+    for(size_t i = 0;                                 \
+        i < (self)->size;                             \
+        ++i, ref = JOIN(A, at)(self, i))
+#define deq_foreach_range(A, T, pos, first, last)     \
+    if (self->size)                                   \
+        for(T* pos = first;                           \
+            pos != last;                              \
+            pos = JOIN(I, next)(pos))
 
 static inline B**
 JOIN(A, first)(A* self)
@@ -68,10 +117,13 @@ JOIN(A, last)(A* self)
 static inline T*
 JOIN(A, at)(A* self, size_t index)
 {
-    if(UNLIKELY(self->size == 0 || index >= self->size))
+    // allow accessing end (for iters)
+    if (index == self->size)
+        return NULL;
+    else if(UNLIKELY(self->size == 0 || index > self->size))
     {
 #if defined(_ASSERT_H) && !defined(NDEBUG)
-        assert (index < self->size);
+        assert (index <= self->size || !"invalid deque index");
 #endif
         self->capacity = 1;
         self->pages = (B**) calloc(1, sizeof(B*));
@@ -105,62 +157,95 @@ JOIN(A, back)(A* self)
     return JOIN(A, at)(self, self->size - 1);
 }
 
-static inline size_t
+// Embed index and container into the iter, returned as T*.
+// Note that we can only have one single deq iter per deque.
+static inline T*
 JOIN(A, begin)(A* self)
 {
-    (void) self;
-    return 0;
+    I *iter = &_deq_begin_it;
+    iter->ref = JOIN(A, at)(self, 0);
+    //only valid if not empty
+    //iter.value = *JOIN(A, first)(self);
+    iter->index = 0;
+    iter->container = self;
+    return (T*)iter;
+}
+
+// We support `it.advance(a.end() - 1)`, so we must create a fresh iter
+// and embed the full iter into the T*.
+// Note that we can only have one single deq end iter per deque.
+static inline T*
+JOIN(A, end)(A* self)
+{
+    I* iter = &_deq_end_it;
+    iter->ref = JOIN(A, back)(self);
+    iter->container = self;
+    iter->index = self->size;
+    return (T*)iter;
+}
+
+static inline I*
+JOIN(I, iter)(T* self)
+{
+    I* iter = (I*)self;
+    CHECK_TAG(iter, 0)
+    return iter;
 }
 
 static inline size_t
-JOIN(A, end)(A* self)
+JOIN(I, index)(T* self)
 {
-    return self->size;
+    I* iter = (I*)self;
+    CHECK_TAG(iter, 0)
+    return iter->index;
 }
 
-static inline void
-JOIN(I, step)(I* self)
+static inline int
+JOIN(I, done)(T* self)
 {
-    self->index = self->index_next;
-    if(self->index == self->index_last)
-        self->done = 1;
+    return self != JOIN(A, end)(((I*)self)->container);
+}
+
+// must be constructed via begin or end, not first, last
+static inline T*
+JOIN(I, next)(T* self)
+{
+    I* iter = (I*)self;
+    CHECK_TAG(iter, NULL)
+    iter->index++;
+    if(iter->index == iter->container->size)
+        return JOIN(A, end)(iter->container);
     else
     {
-        self->ref = JOIN(A, at)(self->container, self->index);
-        self->index_next++;
+        iter->ref = JOIN(A, at)(iter->container, iter->index);
+        return (T*)iter;
     }
 }
 
-static inline void
-JOIN(I, advance)(I* self, int i)
+static inline T*
+JOIN(I, advance)(T* self, int i)
 {
-    if(self->index + i >= self->index_last || (long)self->index + i < 0)
-        self->done = 1;
+    I* iter = (I*)self;
+    CHECK_TAG(iter, NULL)
+    // error case: overflow => end or NULL?
+    if(iter->index + i >= iter->container->size || (long)iter->index + i < 0)
+        return JOIN(A, end)(iter->container);
     else
     {
-        self->index += i;
-        self->ref = JOIN(A, at)(self->container, self->index);
-        self->index_next += i;
+        iter->index += i;
+        iter->ref = JOIN(A, at)(iter->container, iter->index);
+        return (T*)iter;
     }
 }
 
-static inline I
-JOIN(I, range)(A* container, size_t begin, size_t end)
+static inline long
+JOIN(I, distance)(T* self, T* other)
 {
-    static I zero;
-    I self = zero;
-    if(begin && end)
-    {
-        self.container = container;
-        self.step = JOIN(I, step);
-        self.index = begin - JOIN(A, begin)(container);
-        self.index_next = self.index + 1;
-        self.index_last = container->size - (JOIN(A, end)(container) - end);
-        self.ref = JOIN(A, at)(container, self.index);
-    }
-    else
-        self.done = 1;
-    return self;
+    I* iter1 = (I*)self;
+    I* iter2 = (I*)other;
+    CHECK_TAG(iter1, 0)
+    CHECK_TAG(iter2, 0)
+    return iter2->index - iter1->index;
 }
 
 #include <ctl/bits/container.h>
@@ -170,6 +255,12 @@ JOIN(B, init)(size_t cut)
 {
     B* self = (B*) malloc(sizeof(B));
     self->a = self->b = cut;
+    return self;
+}
+
+static inline B*
+JOIN(B, next)(B* self)
+{
     return self;
 }
 
@@ -310,7 +401,7 @@ JOIN(A, pop_back)(A* self)
 }
 
 static inline size_t
-JOIN(A, erase)(A* self, size_t index)
+JOIN(A, erase_index)(A* self, size_t index)
 {
     static T zero;
     JOIN(A, set)(self, index, zero);
@@ -336,8 +427,14 @@ JOIN(A, erase)(A* self, size_t index)
     return index;
 }
 
+static inline size_t
+JOIN(A, erase)(A* self, T* pos)
+{
+    return JOIN(A, erase_index)(self, JOIN(I, index)(pos));
+}
+
 static inline void
-JOIN(A, insert)(A* self, size_t index, T value)
+JOIN(A, insert_index)(A* self, size_t index, T value)
 {
     if(self->size > 0)
     {
@@ -361,6 +458,18 @@ JOIN(A, insert)(A* self, size_t index, T value)
 #ifndef POD
         self->free = saved;
 #endif
+    }
+    else
+        JOIN(A, push_back)(self, value);
+}
+
+static inline void
+JOIN(A, insert)(A* self, T* pos, T value)
+{
+    if(self->size > 0)
+    {
+        size_t index = JOIN(I, index)(pos);
+        JOIN(A, insert_index)(self, index, value);
     }
     else
         JOIN(A, push_back)(self, value);
@@ -408,16 +517,16 @@ JOIN(A, resize)(A* self, size_t size, T value)
     FREE_VALUE(self, value);
 }
 
-static inline size_t
-JOIN(A, erase_range)(A* self, size_t first, size_t last)
+static inline T*
+JOIN(A, erase_range)(A* self, T* first, T* last)
 {
-    for(size_t i = first; i < last; i++)
-        JOIN(A, erase)(self, first);
+    deq_foreach_range(A, T, pos, first, last)
+        JOIN(A, erase)(self, pos);
     return first;
 }
 
 static inline void
-JOIN(A, emplace)(A* self, size_t pos, T* value)
+JOIN(A, emplace)(A* self, T* pos, T* value)
 {
     JOIN(A, insert)(self, pos, *value);
 }
@@ -434,37 +543,38 @@ JOIN(A, emplace_back)(A* self, T* value)
     JOIN(A, push_back)(self, *value);
 }
 
-static inline size_t
-JOIN(A, insert_range)(A* self, size_t pos, size_t first, size_t last)
+static inline T*
+JOIN(A, insert_range)(A* self, T* pos, T* first, T* last)
 {
-    size_t index = pos;
-    for(size_t i = first; i < last; i++)
+    deq_foreach_range(A, T, iter, first, last)
     {
-        T* ref = JOIN(A, at)(self, i);
+        size_t index = JOIN(I, index)(iter);
+        T* ref = JOIN(A, at)(self, index);
         if (ref)
-            JOIN(A, insert)(self, index++, self->copy(ref));
+            JOIN(A, insert)(self, pos, self->copy(ref));
     }
     return pos;
 }
 
-static inline size_t
-JOIN(A, insert_count)(A* self, size_t pos, size_t count, T value)
+static inline T*
+JOIN(A, insert_count)(A* self, T* pos, size_t count, T value)
 {
     // detect overflows, esp. silent signed conversions, like -1
+    size_t index = JOIN(I, index)(pos);
     if (self->size + count < self->size ||
-        count + pos < count ||
+        index + count < count ||
         self->size + count > JOIN(A, max_size)())
     {
 #if defined(_ASSERT_H) && !defined(NDEBUG)
         assert (self->size + count >= self->size || !"count overflow");
-        assert (pos + count >= count || !"pos overflow");
+        assert (index + count >= count || !"pos overflow");
         assert (self->size + count < JOIN(A, max_size)() || !"max_size overflow");
 #endif
         FREE_VALUE(self, value);
-        return UINT_MAX; // ??
+        return NULL;
     }
-    for(size_t i = pos; i < count + pos; i++)
-        JOIN(A, insert)(self, i, self->copy(&value));
+    for(size_t i = index; i < count + index; i++)
+        JOIN(A, insert_index)(self, i, self->copy(&value));
     FREE_VALUE(self, value);
     return pos;
 }
@@ -529,10 +639,10 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    foreach_ref(C, T, self, it, ref)
+    deq_foreach_ref(A, T, self, i, ref)
         if(_match(ref))
         {
-            JOIN(A, erase)(self, it);
+            JOIN(A, erase_index)(self, i);
             erases++;
         }
     return erases;
@@ -547,9 +657,9 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
 static inline T*
 JOIN(A, find)(A* self, T key)
 {
-    foreach_ref(C, T, self, it, ref)
-        if(JOIN(A, _equal)(self, ref, &key))
-            return ref;
+    deq_foreach(A, T, self, pos)
+        if(JOIN(A, _equal)(self, pos, &key))
+            return pos;
     return NULL;
 }
 
@@ -568,6 +678,7 @@ JOIN(A, swap)(A* self, A* other)
 #undef B
 #undef C
 #undef I
+#undef IT
 #undef POD
 #undef NOT_INTEGRAL
 #undef CTL_DEQ

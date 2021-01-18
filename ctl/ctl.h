@@ -15,9 +15,6 @@
 
 #define SWAP(TYPE, a, b) { TYPE temp = *(a); *(a) = *(b); *(b) = temp; }
 
-// old iterator
-#define foreach_it(a, b, c) for(JOIN(a, it) c = JOIN(JOIN(a, it), each) (b); !c.done; c.step(&c))
-
 #define len(a) (sizeof(a) / sizeof(*(a)))
 
 #ifndef POD
@@ -57,3 +54,8 @@
 #define UNLIKELY(x) x
 #endif
 #endif
+
+/* Three types of iterators */
+#define CTL_DEQ_TAG 0xdeadbee1
+#define CTL_LIST_TAG 0xdeadbee2
+#define CTL_VEC_TAG 0xdeadbee3

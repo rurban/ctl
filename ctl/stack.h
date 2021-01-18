@@ -2,7 +2,7 @@
    SPDX-License-Identifier: MIT */
 
 #ifndef T
-#error "Template type T undefined for <ctl/stack.h>"
+# error "Template type T undefined for <ctl/stack.h>"
 #endif
 
 #define push_back   push

@@ -33,6 +33,7 @@ JOIN(A, max_size)()
 }
 #endif
 
+/*
 static inline I
 JOIN(I, each)(A* a)
 {
@@ -40,6 +41,7 @@ JOIN(I, each)(A* a)
          ? JOIN(I, range)(a, 0, 0)
          : JOIN(I, range)(a, JOIN(A, begin)(a), JOIN(A, end)(a));
 }
+*/
 
 static inline T
 JOIN(A, implicit_copy)(T* self)
@@ -54,23 +56,25 @@ JOIN(A, equal)(A* self, A* other)
 {
     if(JOIN(A, size)(self) != JOIN(A, size)(other))
         return 0;
-    I a = JOIN(I, each)(self);
-    I b = JOIN(I, each)(other);
-    while(!a.done && !b.done)
+    IT i1 = JOIN(A, begin)(self);
+    IT i2 = JOIN(A, begin)(other);
+    IT e1 = JOIN(A, end)(self);
+    IT e2 = JOIN(A, end)(other);
+    while(i1 != e1 && i2 != e2)
     {
         if(self->equal)
         {
-            if(!self->equal(a.ref, b.ref))
+            if(!self->equal(i1, i2))
                 return 0;
         }
         else
         {
-            if(self->compare(a.ref, b.ref) ||
-               self->compare(b.ref, a.ref))
+            if(self->compare(i1, i2) ||
+               self->compare(i2, i1))
                 return 0;
         }
-        a.step(&a);
-        b.step(&b);
+        i1 = JOIN(I, next)(i1);
+        i2 = JOIN(I, next)(i2);
     }
     return 1;
 }
