@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 CC="gcc -std=c11"
 CXX="g++ -std=c++17"
 CFLAGS="-O3 -march=native"
@@ -7,28 +7,28 @@ if test -z "$PNG"; then
   PNG="uset uset_pow2 uset_cached _set pqu vec list deq compile"
 fi
 
-function perf_graph
+perf_graph()
 {
     LOG=$1
     TITLE=$2
     LIST=$3
     OUT=bin
     echo "$LOG"
-    for TEST in ${LIST[*]}
+    for TEST in $LIST
     do
-        if [[ $TEST == *.c ]]
-        then
-            $CC -o "$OUT" $CFLAGS $TEST -I.
-        else
-            $CXX -o "$OUT" $CFLAGS $TEST
-        fi
+        case $TEST in
+        *.c)   $CC -o "$OUT" $CFLAGS $TEST -I.
+               ;;
+        *.cc)  $CXX -o "$OUT" $CFLAGS $TEST
+               ;;
+        esac
         ./$OUT >> "$LOG"
     done
     python3 tests/perf/perf_plot.py "$LOG" "$TITLE" &&
       (mv "$LOG.png" docs/images/; rm -- "./$LOG" "./$OUT")
 }
 
-function perf_compile_two_bar
+perf_compile_two_bar()
 {
     KEY='stamp'
     TIMEFORMAT="$KEY %R"
@@ -47,7 +47,7 @@ function perf_compile_two_bar
       (mv "$LOG.png" docs/images/; rm -- "./$AA" "./$BB")
 }
 
-function uset {
+uset() {
   perf_graph \
     'uset.log' \
     "std::unordered_set<int> (dotted) vs. CTL uset_int (solid) ($CFLAGS) ($VERSION)" \
@@ -59,7 +59,7 @@ function uset {
      tests/perf/uset/perf_uset_iterate.c"
 }
 
-function uset_pow2 {
+uset_pow2() {
   ORIG_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS -DCTL_USET_GROWTH_POWER2"
   perf_graph \
@@ -74,7 +74,7 @@ function uset_pow2 {
   CFLAGS="$ORIG_CFLAGS"
 }
 
-function uset_cached {
+uset_cached() {
   ORIG_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS -DCTL_USET_CACHED_HASH"
   perf_graph \
@@ -89,7 +89,7 @@ function uset_cached {
   CFLAGS="$ORIG_CFLAGS"
 }
 
-function _set {
+_set() {
   perf_graph \
     'set.log' \
     "std::set<int> (dotted) vs. CTL set_int (solid) ($CFLAGS) ($VERSION)" \
@@ -101,7 +101,7 @@ function _set {
      tests/perf/set/perf_set_iterate.c"
 }
 
-function pqu {
+pqu() {
   perf_graph \
     'pqu.log' \
     "std::priority_queue<int> (dotted) vs. CTL pqu_int (solid) ($CFLAGS) ($VERSION)" \
@@ -111,7 +111,7 @@ function pqu {
      tests/perf/pqu/perf_pqu_pop.c"
 }
 
-function vec {
+vec() {
   perf_graph \
     'vec.log' \
     "std::vector<int> (dotted) vs. CTL vec_int (solid) ($CFLAGS) ($VERSION)" \
@@ -125,7 +125,7 @@ function vec {
      tests/perf/vec/perf_vec_iterate.c"
 }
 
-function list {
+list() {
   perf_graph \
     'list.log' \
     "std::list<int> (dotted) vs. CTL list_int (solid) ($CFLAGS) ($VERSION)" \
@@ -144,7 +144,7 @@ function list {
   #   tests/perf/lst/perf_lst_pop_front.c
 }
 
-function deq {
+deq() {
   perf_graph \
     'deq.log' \
     "std::deque<int> (dotted) vs. CTL deq_int (solid) ($CFLAGS) ($VERSION)" \
@@ -163,7 +163,7 @@ function deq {
 #    tests/perf/deq/perf_deq_push_front.c
 }
 
-function compile {
+compile() {
   perf_compile_two_bar \
     'compile.log' \
     "CTL vs STL Compilation ($CFLAGS) ($VERSION)" \
