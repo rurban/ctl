@@ -3,6 +3,9 @@ CC="gcc -std=c11"
 CXX="g++ -std=c++17"
 CFLAGS="-O3 -march=native"
 VERSION=$($CXX --version | head -1)
+if test -z "$PNG"; then
+  PNG="uset uset_pow2 uset_cached _set pqu vec list deq compile"
+fi
 
 function perf_graph
 {
@@ -44,7 +47,8 @@ function perf_compile_two_bar
       (mv "$LOG.png" docs/images/; rm -- "./$AA" "./$BB")
 }
 
-perf_graph \
+function uset {
+  perf_graph \
     'uset.log' \
     "std::unordered_set<int> (dotted) vs. CTL uset_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/uset/perf_uset_insert.cc \
@@ -53,11 +57,12 @@ perf_graph \
      tests/perf/uset/perf_uset_erase.c
      tests/perf/uset/perf_uset_iterate.cc \
      tests/perf/uset/perf_uset_iterate.c"
+}
 
-ORIG_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -DCTL_USET_GROWTH_POWER2"
-
-perf_graph \
+function uset_pow2 {
+  ORIG_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS -DCTL_USET_GROWTH_POWER2"
+  perf_graph \
     'uset_pow2.log' \
     "std::unordered_set<int> (dotted) vs. CTL uset_int POWER2 (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/uset/perf_uset_insert.cc \
@@ -66,11 +71,13 @@ perf_graph \
      tests/perf/uset/perf_uset_erase.c
      tests/perf/uset/perf_uset_iterate.cc \
      tests/perf/uset/perf_uset_iterate.c"
+  CFLAGS="$ORIG_CFLAGS"
+}
 
-CFLAGS="$ORIG_CFLAGS"
-CFLAGS="$CFLAGS -DCTL_USET_CACHED_HASH"
-
-perf_graph \
+function uset_cached {
+  ORIG_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS -DCTL_USET_CACHED_HASH"
+  perf_graph \
     'uset_cached.log' \
     "std::unordered_set<int> (dotted) vs. CTL uset_int CACHED_HASH (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/uset/perf_uset_insert.cc \
@@ -79,11 +86,11 @@ perf_graph \
      tests/perf/uset/perf_uset_erase.c
      tests/perf/uset/perf_uset_iterate.cc \
      tests/perf/uset/perf_uset_iterate.c"
+  CFLAGS="$ORIG_CFLAGS"
+}
 
-CFLAGS="$ORIG_CFLAGS"
-
-
-perf_graph \
+function _set {
+  perf_graph \
     'set.log' \
     "std::set<int> (dotted) vs. CTL set_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/set/perf_set_insert.cc \
@@ -92,16 +99,20 @@ perf_graph \
      tests/perf/set/perf_set_erase.c
      tests/perf/set/perf_set_iterate.cc \
      tests/perf/set/perf_set_iterate.c"
+}
 
-perf_graph \
+function pqu {
+  perf_graph \
     'pqu.log' \
     "std::priority_queue<int> (dotted) vs. CTL pqu_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/pqu/perf_priority_queue_push.cc \
      tests/perf/pqu/perf_pqu_push.c \
      tests/perf/pqu/perf_priority_queue_pop.cc \
      tests/perf/pqu/perf_pqu_pop.c"
+}
 
-perf_graph \
+function vec {
+  perf_graph \
     'vec.log' \
     "std::vector<int> (dotted) vs. CTL vec_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/vec/perf_vector_push_back.cc \
@@ -112,24 +123,29 @@ perf_graph \
      tests/perf/vec/perf_vec_sort.c \
      tests/perf/vec/perf_vector_iterate.cc \
      tests/perf/vec/perf_vec_iterate.c"
+}
 
-perf_graph \
+function list {
+  perf_graph \
     'list.log' \
     "std::list<int> (dotted) vs. CTL list_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/lst/perf_list_push_back.cc
      tests/perf/lst/perf_lst_push_back.c \
      tests/perf/lst/perf_list_pop_back.cc \
      tests/perf/lst/perf_lst_pop_back.c \
-     tests/perf/lst/perf_list_pop_front.cc \
-     tests/perf/lst/perf_lst_pop_front.c \
      tests/perf/lst/perf_list_push_front.cc \
      tests/perf/lst/perf_lst_push_front.c \
      tests/perf/lst/perf_list_sort.cc \
      tests/perf/lst/perf_lst_sort.c \
      tests/perf/lst/perf_list_iterate.cc \
      tests/perf/lst/perf_lst_iterate.c"
+  # removed the one most boring:
+  #   tests/perf/lst/perf_list_pop_front.cc
+  #   tests/perf/lst/perf_lst_pop_front.c
+}
 
-perf_graph \
+function deq {
+  perf_graph \
     'deq.log' \
     "std::deque<int> (dotted) vs. CTL deq_int (solid) ($CFLAGS) ($VERSION)" \
     "tests/perf/deq/perf_deque_push_back.cc
@@ -138,15 +154,23 @@ perf_graph \
      tests/perf/deq/perf_deq_pop_back.c \
      tests/perf/deq/perf_deque_pop_front.cc \
      tests/perf/deq/perf_deq_pop_front.c \
-     tests/perf/deq/perf_deque_push_front.cc \
-     tests/perf/deq/perf_deq_push_front.c \
      tests/perf/deq/perf_deque_sort.cc \
      tests/perf/deq/perf_deq_sort.c \
      tests/perf/deq/perf_deque_iterate.cc \
      tests/perf/deq/perf_deq_iterate.c"
+# removed the one most boring:
+#    tests/perf/deq/perf_deque_push_front.cc
+#    tests/perf/deq/perf_deq_push_front.c
+}
 
-perf_compile_two_bar \
+function compile {
+  perf_compile_two_bar \
     'compile.log' \
     "CTL vs STL Compilation ($CFLAGS) ($VERSION)" \
     'tests/perf/perf_compile_c11.c' \
     'tests/perf/perf_compile_cc.cc'
+}
+
+for png in $PNG; do
+    $png
+done
