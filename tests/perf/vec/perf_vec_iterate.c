@@ -18,7 +18,7 @@ int main(void)
             vec_int_push_back(&c, rand());
         long t0 = TEST_TIME();
         volatile int sum = 0;
-        foreach_ref(vec_int, int, &c, it, ref)
+        vec_foreach(int, &c, ref)
             sum += *ref;
         long t1 = TEST_TIME();
         printf("%10d %10ld\n", elems, t1 - t0);

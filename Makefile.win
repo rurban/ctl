@@ -66,6 +66,7 @@ TESTS = \
 	tests\func\test_array.exe \
 	tests\func\test_double_array.exe \
 	tests\func\test_vector.exe \
+	tests\func\test_int_vector.exe \
 	tests\func\test_vec_capacity.exe \
 	tests\func\test_str_capacity.exe
 !ifdef DEBUG
@@ -100,6 +101,7 @@ all: $(TESTS)
 	tests\func\test_array.exe
 	tests\func\test_double_array.exe
 	tests\func\test_vector.exe
+	tests\func\test_int_vector.exe
 	tests\func\test_vec_capacity.exe
 	tests\func\test_str_capacity.exe
 	@echo $(CC) $(CFLAGS)
@@ -236,6 +238,9 @@ tests\func\test_array.exe: $(COMMON_H) ctl/array.h \
 	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
 tests\func\test_double_array.exe: $(COMMON_H) ctl/array.h \
                           tests\func\test_double_array.cc
+	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests\func\test_int_vector.exe: $(COMMON_H) ctl/vector.h \
+                          tests\func\test_int_vector.cc
 	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
 tests\func\test_c11.exe: tests\func\test_c11.c
 	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)

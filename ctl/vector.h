@@ -3,9 +3,10 @@
 
 // TODO emplace, emplace_back
 // TODO end of empty vec follows NULL value
+// TODO redesigned iters
 
 #ifndef T
-#error "Template type T undefined for <ctl/vector.h>"
+# error "Template type T undefined for <ctl/vector.h>"
 #endif
 
 #include <ctl/ctl.h>
@@ -44,8 +45,29 @@ typedef int (*JOIN(A, compare_fn))(T*, T*);
 
 typedef struct I
 {
-    CTL_T_ITER_FIELDS;
+    T* ref;
+    A* container;
+#ifdef DEBUG
+    uint32_t tag;
+#endif
 } I;
+
+#undef _vec_begin_it
+#define _vec_begin_it JOIN(JOIN(_vec, T), begin_it)
+#undef _vec_end_it
+#define _vec_end_it JOIN(JOIN(_vec, T), end_it)
+
+static I _vec_begin_it = {NULL, NULL
+#ifdef DEBUG
+    , CTL_VEC_TAG
+#endif
+};
+
+static I _vec_end_it = {NULL, NULL
+#ifdef DEBUG
+    , CTL_VEC_TAG
+#endif
+};
 
 static inline size_t
 JOIN(A, capacity)(A* self)
@@ -77,43 +99,82 @@ JOIN(A, back)(A* self)
 static inline T*
 JOIN(A, begin)(A* self)
 {
-    return JOIN(A, front)(self);
+    I *iter = &_vec_begin_it;
+    iter->ref = JOIN(A, at)(self, 0);
+    iter->container = self;
+    return (T*)iter;
 }
 
 static inline T*
 JOIN(A, end)(A* self)
 {
-    return self->size ? JOIN(A, back)(self) + 1 : NULL;
+    I* iter = &_vec_end_it;
+    iter->ref = self->size ? JOIN(A, at)(self, self->size) : NULL;
+    iter->container = self;
+    return (T*)iter;
 }
 
-static inline void
-JOIN(I, step)(I* self)
+static inline I*
+JOIN(I, iter)(T* self)
 {
-    if(self->next >= self->end)
-        self->done = 1;
+    I* iter = (I*)self;
+    CHECK_TAG(iter, 0)
+    return iter;
+}
+
+static inline size_t
+JOIN(I, index)(T* self)
+{
+    I* iter = (I*)self;
+    CHECK_TAG(iter, 0)
+    return (iter->ref - JOIN(A, front)(iter->container)) / sizeof (T);
+}
+
+static inline int
+JOIN(I, done)(T* self)
+{
+    return self != JOIN(A, end)(((I*)self)->container);
+}
+
+// must be constructed via begin or end
+static inline T*
+JOIN(I, next)(T* self)
+{
+    I* iter = (I*)self;
+    CHECK_TAG(iter, NULL)
+    if(iter->ref + 1 > JOIN(A, back)(iter->container))
+        return JOIN(A, end)(iter->container);
     else
     {
-        self->ref = self->next;
-        self->next++;
+        iter->ref++;
+        return (T*)iter;
     }
 }
 
-static inline I
-JOIN(I, range)(A* container, T* begin, T* end)
+static inline T*
+JOIN(I, advance)(T* self, int i)
 {
-    (void) container;
-    static I zero;
-    I self = zero;
-    if(begin && end)
-    {
-        self.step = JOIN(I, step);
-        self.end = end;
-        self.next = begin + 1;
-        self.ref = begin;
-    }
+    I* iter = (I*)self;
+    CHECK_TAG(iter, NULL)
+    // error case: overflow => end or NULL?
+    if(iter->ref + i > JOIN(A, back)(iter->container) ||
+       iter->ref + i < JOIN(A, front)(iter->container))
+        return JOIN(A, end)(iter->container);
     else
-        self.done = 1;
-    return self;
+    {
+        iter->ref += i;
+        return (T*)iter;
+    }
+}
+
+static inline long
+JOIN(I, distance)(T* self, T* other)
+{
+    I* iter1 = (I*)self;
+    I* iter2 = (I*)other;
+    CHECK_TAG(iter1, 0)
+    CHECK_TAG(iter2, 0)
+    return iter2->ref - iter1->ref;
 }
 
 #include <ctl/bits/container.h>
@@ -352,9 +413,8 @@ JOIN(A, assign_range)(A* self, T* from, T* last)
 {
     size_t count = last - from;
     JOIN(A, resize)(self, count, self->copy(self->vector)); // TODO
-    JOIN(A, it) it = JOIN(I, range)(self, from, last);
-    for(size_t i=0; !it.done; it.step(&it), i++)
-        JOIN(A, set)(self, i, *it.ref);
+    for(size_t i = 0; i < self->size; i++)
+        JOIN(A, set)(self, i, *JOIN(A, at)(self, i));
 }
 
 static inline void
@@ -510,7 +570,7 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    foreach(C, T, self, ref)
+    vec_foreach(T, self, ref)
     {
         if(_match(ref))
         {
@@ -532,7 +592,7 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
 static inline T*
 JOIN(A, find)(A* self, T key)
 {
-    foreach(C, T, self, ref)
+    vec_foreach(T, self, ref)
         if (JOIN(A, _equal)(self, ref, &key))
             return ref;
     return NULL;

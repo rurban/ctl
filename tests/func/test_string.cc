@@ -37,14 +37,14 @@
         assert(_y.back() == *str_back(&_x));         \
     }                                                \
     std::string::iterator _iter = _y.begin();        \
-    vec_foreach_ref(char, &_x, _it, _ref) {          \
+    vec_foreach(char, &_x, _ref) {                   \
         assert(*_ref == *_iter);                     \
         _iter++;                                     \
     }                                                \
-    str_it _it = str_it_each(&_x);                   \
+    char* _it = str_begin(&_x);                      \
     for(auto& _d : _y) {                             \
-        assert(*_it.ref == _d);                      \
-        _it.step(&_it);                              \
+        assert(*_it == _d);                          \
+        _it++;                                       \
     }                                                \
     for(size_t i = 0; i < _y.size(); i++)            \
         assert(_y.at(i) == *str_at(&_x, i));         \

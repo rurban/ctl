@@ -121,6 +121,7 @@ TESTS = \
 	tests/func/test_array \
 	tests/func/test_double_array \
 	tests/func/test_vector \
+	tests/func/test_int_vector \
 	tests/func/test_vec_capacity \
 	tests/func/test_str_capacity
 ifneq ($(DEBUG),)

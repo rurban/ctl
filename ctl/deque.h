@@ -25,25 +25,6 @@
 #define DEQ_BUCKET_SIZE (512)
 #endif
 
-#ifdef DEBUG
-# if defined(_ASSERT_H) && !defined(NDEBUG)
-# define CHECK_TAG(it,ret)                      \
-    if (it->tag != CTL_DEQ_TAG)                 \
-    {                                           \
-        assert (it->tag == CTL_DEQ_TAG &&       \
-                "invalid deque iterator");      \
-        return ret;                             \
-    }
-# else
-# define CHECK_TAG(it,ret)                      \
-    if (it->tag != CTL_DEQ_TAG)                 \
-        return ret;
-# endif
-#else
-# define CHECK_TAG(it,ret)
-#endif
-
-
 typedef struct B
 {
     T value[DEQ_BUCKET_SIZE];
@@ -74,6 +55,11 @@ typedef struct I
 #endif
 } I;
 
+#undef _deq_begin_it
+#define _deq_begin_it JOIN(JOIN(_deq, T), begin_it)
+#undef _deq_end_it
+#define _deq_end_it JOIN(JOIN(_deq, T), end_it)
+
 static I _deq_begin_it = {NULL, NULL, 0
 #ifdef DEBUG
     , CTL_DEQ_TAG
@@ -84,23 +70,6 @@ static I _deq_end_it = {NULL, NULL, 0
     , CTL_DEQ_TAG
 #endif
 };
-
-/* Fast typed iters */
-#define deq_foreach(A, T, self, pos)                  \
-    if (self->size)                                   \
-        for(T* pos = JOIN(A, begin)(self);            \
-            pos != JOIN(A, end)(self);                \
-            pos = JOIN(I, next)(pos))
-#define deq_foreach_ref(A, T, self, i, ref)           \
-    T* ref = (self)->size ? JOIN(A, at)(self, 0) : NULL; \
-    for(size_t i = 0;                                 \
-        i < (self)->size;                             \
-        ++i, ref = JOIN(A, at)(self, i))
-#define deq_foreach_range(A, T, pos, first, last)     \
-    if (self->size)                                   \
-        for(T* pos = first;                           \
-            pos != last;                              \
-            pos = JOIN(I, next)(pos))
 
 static inline B**
 JOIN(A, first)(A* self)

@@ -4,7 +4,7 @@
 #define __CTL_STRING__H__
 
 #ifdef T
-#error "Template type T defined for <ctl/string.h>"
+# error "Template type T defined for <ctl/string.h>"
 #endif
 
 #define CTL_STR
@@ -17,28 +17,16 @@
 #define str_equal str___EQUAL
 #define str_find str___FIND
 
-#define str_foreach(self, it)                   \
-    if (self->size)                             \
-        for(char* it = &self->vector[0];        \
-            it < &self->vector[self->size];     \
+#define str_foreach(self, it)                    \
+    if (self->size)                              \
+        for(char* it = &self->vector[0];         \
+            it < &self->vector[self->size];      \
             it++)
-#define str_foreach_ref(self, it, ref)             \
-    char* ref;                                     \
-    if (self->size)                                \
-        for(char* it = ref = &self->vector[0];     \
-            it < &self->vector[self->size];        \
-            it++, ref = it)
-#define str_foreach_range(self, it, first, last) \
+#define str_foreach_range(it, first, last)       \
     if (last)                                    \
         for(char* it = first;                    \
             it < last;                           \
             it++)
-#define str_foreach_ref_range(self, it, ref, first, last) \
-    char* ref;                                               \
-    if (last)                                                \
-        for(char* it = ref = first;                          \
-            it < last;                                       \
-            it++, ref = it)
 
 #include <ctl/vector.h>
 
