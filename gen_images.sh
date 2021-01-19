@@ -16,6 +16,8 @@ perf_graph()
     echo "$LOG"
     for TEST in $LIST
     do
+        # allow glob expansion of CFLAGS and TEST lists
+        # shellcheck disable=SC2086
         case $TEST in
         *.c)   $CC -o "$OUT" $CFLAGS $TEST -I.
                ;;
@@ -39,11 +41,14 @@ perf_compile_two_bar()
     AA=bina
     BB=binb
     echo "$LOG"
-    X=$( (time $CC  -o $AA $CFLAGS $A -I.) 2>&1 | grep $KEY | cut -d ' ' -f 2)
-    Y=$( (time $CXX -o $BB $CFLAGS $B)     2>&1 | grep $KEY | cut -d ' ' -f 2)
+    # allow glob expansion of CFLAGS
+    # shellcheck disable=SC2086
+    X=$( (time $CC  -o $AA $CFLAGS "$A" -I.) 2>&1 | grep $KEY | cut -d ' ' -f 2)
+    # shellcheck disable=SC2086
+    Y=$( (time $CXX -o $BB $CFLAGS "$B")     2>&1 | grep $KEY | cut -d ' ' -f 2)
     I=$(stat --printf="%s" $AA)
     J=$(stat --printf="%s" $BB)
-    python3 tests/perf/perf_plot_bar.py "$LOG" "$TITLE" $X $Y $I $J $A $B &&
+    python3 tests/perf/perf_plot_bar.py "$LOG" "$TITLE" "$X" "$Y" "$I" "$J" "$A" "$B" &&
       (mv "$LOG.png" docs/images/; rm -- "./$AA" "./$BB")
 }
 
