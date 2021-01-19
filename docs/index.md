@@ -55,13 +55,14 @@ the following STL containers in ISO C99/C11:
 | [ctl/map.h](map.md)                       | std::map             | map      |
 | [ctl/unordered_map.h](unordered_map.md)   | std::unordered_map   | umap     |
 | [ctl/unordered_set.h](unordered_set.md)   | std::unordered_set   | uset     |
+|------------------------------------------------|----------------------|
+| [ctl/algorithm.h](algorithm.md)           | `<algorithm>`        |
 
 In work:
 
-[ctl/algorithm.h](algorithm.md),
 [ctl/forward_list.h](slist.md),
 [ctl/u8string.h](u8string.md),
-[ctl/u8ident.h](u8ident.md).
+[ctl/u8ident.h](u8ident.md), and better iterators.
 
 It is based on glouw's ctl, but with proper names, and using the incpath `ctl/` prefix.
 
@@ -135,12 +136,13 @@ Contrary to the STL we mostly return `T*`, `size_t` or `B*`, not full `I` iterat
 But you can convert those return values via the `iter` method to full iterators,
 to be acceptable as `I*` argument, e.g. for range methods.
 
-Note: We will redesign `I*` iterators soon to be faster (not 3 assignments per step, just a
-single incement or ->next assignemt for B* iters) and be more compatible to the
-STL. The foreach and foreach_range macros will need args then, and split into
-variants with and without setting ref (value pointers).
+_Note_: I am redesigning `I*` iterators to be faster (not 3 assignments per step, just a
+single incement or ->next assignemt for B* and T* iters) and be more compatible to the
+STL. The `foreach` and `foreach_range` macros will need args then, and split into
+variants with and without setting ref (value pointers). It is even faster than
+the STL, now they are 2x slower.
 
-range methods are suffixed with `_range`, special iterator methods with `_it`.
+range methods are suffixed with `_range`.
 
 ## Performance
 
@@ -248,7 +250,7 @@ See [Differences](#differences) below.
 
 The other header-only STL variant in C is [pottery](https://github.com/ludocode/pottery),
 which also sucks less and also fairly complete and decent.
-Other STL attempts in C are [glib](http://suckless.org/sucks/), and
+More STL attempts in C are [glib](http://suckless.org/sucks/), and
 partially [libmowgli](https://github.com/atheme/libmowgli-2),
 [libulz](https://github.com/rofl0r/libulz).
 
@@ -411,7 +413,7 @@ libstdc++ and llvm libc++.
 Tested also against the libc++ from llvm and the Windows MSVC STL, not
 just the GNU libstdc++ v3.
 
-Work is ongoing for all `algorithms.h`, `iterators` and `ranges`, with better
+Work is ongoing for all `algorithm.h`, `iterators` and `ranges`, with better
 iterators.
 
 On errors, like `size > max_size` return silently. This avoids DDOS attacks.
@@ -419,6 +421,7 @@ When assert is used, throw them. (when assert.h included, no NDEBUG)
 glouw/ctl does not treat errors at all. There cannot be any.
 
 Support not only GNU make, but also BSD make and MSVC nmake.
+gen_images.sh is not bash-only anymore, and supports updating single graphs.
 
 Tested also on macOS (default apple clang++ with libc++), FreeBSD (default
 clang with libc++), and Windows MSVC (default CL 19).
