@@ -31,9 +31,9 @@
 static inline IT
 JOIN(A, find_if)(A* self, int _match(T*))
 {
-    foreach(A, IT, self, pos)
-        if(_match(pos))
-            return pos;
+    foreach_ref(A, T, IT, self, it, ref)
+        if(_match(ref))
+            return it;
     return JOIN(A, end)(self);
 }
 
@@ -41,9 +41,9 @@ JOIN(A, find_if)(A* self, int _match(T*))
 static inline IT
 JOIN(A, find_if_not)(A* self, int _match(T*))
 {
-    foreach(A, IT, self, pos)
-        if(!_match(pos))
-            return pos;
+    foreach_ref(A, T, IT, self, it, ref)
+        if(!_match(ref))
+            return it;
     return JOIN(A, end)(self);
 }
 
@@ -76,53 +76,49 @@ JOIN(A, none_of)(A* self, int _match(T*))
 static inline IT
 JOIN(A, find_range)(A* self, IT first, IT last, T value)
 {
-    foreach_range(A, IT, pos, first, last)
-        if(JOIN(A, _equal)(self, pos, &value))
+    foreach_range_ref(A, T, IT, it, ref, first, last)
+        if(JOIN(A, _equal)(self, ref, &value))
             return first;
     return last;
 }
 
 static inline IT
-JOIN(A, find_if_range)(A* self, IT first, IT last, int _match(T*))
+JOIN(A, find_if_range)(IT first, IT last, int _match(T*))
 {
-    (void) self;
-    foreach_range(A, IT, pos, first, last)
-        if(_match(pos))
-            return pos;
+    foreach_range_ref(A, T, IT, it, ref, first, last)
+        if(_match(ref))
+            return it;
     return last;
 }
 
 static inline IT
-JOIN(A, find_if_not_range)(A* self, IT first, IT last, int _match(T*))
+JOIN(A, find_if_not_range)(IT first, IT last, int _match(T*))
 {
-    (void) self;
-    foreach_range(A, IT, pos, first, last)
-        if(!_match(pos))
-            return pos;
+    foreach_range_ref(A, T, IT, it, ref, first, last)
+        if(!_match(ref))
+            return it;
     return last;
 }
 
 // C++20
 static inline bool
-JOIN(A, all_of_range)(A* self, IT first, IT last, int _match(T*))
+JOIN(A, all_of_range)(IT first, IT last, int _match(T*))
 {
-    IT n = JOIN(A, find_if_not_range)(self, first, last, _match);
+    IT n = JOIN(A, find_if_not_range)(first, last, _match);
     return n == last;
 }
 // C++20
 static inline bool
-JOIN(A, none_of_range)(A* self, IT first, IT last, int _match(T*))
+JOIN(A, none_of_range)(IT first, IT last, int _match(T*))
 {
-    (void) self;
-    IT n = JOIN(A, find_if_range)(self, first, last, _match);
+    IT n = JOIN(A, find_if_range)(first, last, _match);
     return n == last;
 }
 // C++20
 static inline bool
-JOIN(A, any_of_range)(A* self, IT first, IT last, int _match(T*))
+JOIN(A, any_of_range)(IT first, IT last, int _match(T*))
 {
-    (void) self;
-    return !JOIN(A, none_of_range)(self, first, last, _match);
+    return !JOIN(A, none_of_range)(first, last, _match);
 }
 
 #if !defined(CTL_USET) && !defined(CTL_STR)
@@ -132,8 +128,8 @@ static inline size_t
 JOIN(A, count_range)(A* self, IT first, IT last, T value)
 {
     size_t count = 0;
-    foreach_range(A, IT, pos, first, last)
-        if(JOIN(A, _equal)(self, pos, &value))
+    foreach_range_ref(A, T, IT, it, ref, first, last)
+        if(JOIN(A, _equal)(self, ref, &value))
             count++;
     if (self->free)
         self->free(&value);
@@ -144,12 +140,11 @@ JOIN(A, count_range)(A* self, IT first, IT last, T value)
 #if !defined(CTL_STR)
 // C++20
 static inline size_t
-JOIN(A, count_if_range)(A* self, IT first, IT last, int _match(T*))
+JOIN(A, count_if_range)(IT first, IT last, int _match(T*))
 {
-    (void) self;
     size_t count = 0;
-    foreach_range(A, IT, pos, first, last)
-        if(_match(pos))
+    foreach_range_ref(A, T, IT, it, ref, first, last)
+        if(_match(ref))
             count++;
     return count;
 }
@@ -158,8 +153,8 @@ static inline size_t
 JOIN(A, count_if)(A* self, int _match(T*))
 {
     size_t count = 0;
-    foreach(A, IT, self, pos)
-        if(_match(pos))
+    foreach_ref(A, T, IT, self, it, ref)
+        if(_match(ref))
             count++;
     return count;
 }
@@ -169,8 +164,8 @@ static inline size_t
 JOIN(A, count)(A* self, T value)
 {
     size_t count = 0;
-    foreach(A, IT, self, pos)
-        if(JOIN(A, _equal)(self, pos, &value))
+    foreach_ref(A, T, IT, self, it, ref)
+        if(JOIN(A, _equal)(self, ref, &value))
             count++;
     if(self->free)
         self->free(&value);
@@ -186,8 +181,8 @@ static inline bool
 JOIN(A, equal_range)(A* self, IT first, IT last, T value)
 {
     bool result = true;
-    foreach_range(A, IT, pos, first, last)
-        if(!JOIN(A, _equal)(self, pos, &value))
+    foreach_range_ref(A, T, IT, it, ref, first, last)
+        if(!JOIN(A, _equal)(self, ref, &value))
         {
             result = false;
             break;

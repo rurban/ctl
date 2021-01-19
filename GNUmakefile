@@ -100,7 +100,7 @@ endif
 
 CXXFLAGS += $(CFLAGS)
 
-H        = $(wildcard ctl/*.h) ctl/bits/*.h
+H        = $(wildcard ctl/*.h) $(wildcard ctl/bits/*.h)
 COMMON_H = ctl/ctl.h ctl/algorithm.h ctl/bits/container.h \
            ctl/bits/integral.h ctl/bits/iterators.h
 TESTS = \
@@ -347,5 +347,20 @@ test-pgc++:
 define expand
 	@$(CC) $(CFLAGS) $(1).h -E $(2) | clang-format -style=webkit
 endef
+
+# emacs flymake-mode
+check-syntax:
+	case "$(CHK_SOURCES)" in \
+          *.c) \
+            nice $(CC) $(CFLAGS) -O0 -c ${CHK_SOURCES} ;; \
+          *.cc) \
+            nice $(CXX) $(CXXFLAGS) -O0 -c ${CHK_SOURCES} ;; \
+          ctl/bits/*.h) \
+            nice $(CXX) $(CXXFLAGS) -O0 -c tests/func/test_vector ;; \
+          ctl/*.h) \
+            nice $(CXX) $(CXXFLAGS) -O0 -c tests/func/test_$(subst .h,.cc,$(subst ctl/,,${CHK_SOURCES})) ;; \
+        esac
+
+.PHONY: check-syntax
 
 ALWAYS:

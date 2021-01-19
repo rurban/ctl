@@ -26,16 +26,48 @@
 /* return B* it node. end is NULL */
 
 /* Fast typed iters */
-# define list_foreach(A, IT, self, it)                  \
-    if (self->size)                                     \
-        for(B* it = JOIN(A, begin)(self);               \
-            it;                                         \
+/* list iters loose the I* property at the start of the
+ * loop already and turn into simple B* */
+# define list_foreach(A, self, it)                      \
+    if ((self)->size)                                   \
+        for(JOIN(A, node)* it = JOIN(A, begin)(self);   \
+            it != NULL;                                 \
             it = it->next)
-# define list_foreach_range(A, IT, self, it, first, last)\
-    if (self->size && last)                             \
-        for(B* it = first;                              \
+# define list_foreach_ref(A, T, self, it, ref)          \
+    T* ref = JOIN(A, front)(self);                      \
+    if ((self)->size)                                   \
+        for(JOIN(A, node)* it = JOIN(A, begin)(self);   \
+            it != NULL;                                 \
+            it = it->next, ref = &it->value)
+# define list_foreach_range(A, it, first, last)         \
+    if (first)                                          \
+        for(JOIN(A, node)* it = first;                  \
             it != last;                                 \
             it = it->next)
+# define list_foreach_range_ref(A, T, it, ref, first, last) \
+    T* ref = first ? first->value : NULL;               \
+    if (first)                                          \
+        for(JOIN(A, node)* it = first;                  \
+            it != last;                                 \
+            it = it->next, ref = &it->value)
+
+# ifdef DEBUG
+#  if defined(_ASSERT_H) && !defined(NDEBUG)
+#  define CHECK_TAG(it, ret)                            \
+     if (it->tag != CTL_LIST_TAG)                       \
+     {                                                  \
+         assert (it->tag == CTL_LIST_TAG &&             \
+                 "invalid list iterator");              \
+         return ret;                                    \
+     }
+#  else
+#  define CHECK_TAG(it, ret)                            \
+     if (it->tag != CTL_LIST_TAG)                       \
+         return ret;
+#  endif
+# else
+#  define CHECK_TAG(it, ret)
+# endif
 
 #else
 
@@ -66,7 +98,7 @@
 
 # ifdef DEBUG
 #  if defined(_ASSERT_H) && !defined(NDEBUG)
-#  define CHECK_TAG(it,ret)                      \
+#  define CHECK_TAG(it, ret)                     \
      if (it->tag != CTL_DEQ_TAG)                 \
      {                                           \
          assert (it->tag == CTL_DEQ_TAG &&       \
@@ -74,13 +106,14 @@
          return ret;                             \
      }
 #  else
-#  define CHECK_TAG(it,ret)                      \
+#  define CHECK_TAG(it, ret)                     \
      if (it->tag != CTL_DEQ_TAG)                 \
          return ret;
 #  endif
 # else
-#  define CHECK_TAG(it,ret)
+#  define CHECK_TAG(it, ret)
 # endif
+
 #else
 
 // simplier vector iters
@@ -119,11 +152,25 @@
 #endif // not list
 
 // slower generic iters for algorithm
-#define foreach(A, IT, self, pos)                                    \
-    for(IT pos = JOIN(A, begin)(self);                               \
-        ((JOIN(A, it)*)pos)->ref != JOIN(A, end)(self);              \
-        pos = JOIN(JOIN(A, it), next)(pos))
-#define foreach_range(A, IT, pos, first, last)                       \
-    for(IT pos = first;                                              \
-        ((JOIN(A, it)*)pos)->ref != last;                            \
-        pos = JOIN(JOIN(A, it), next)(pos))
+#define foreach(A, IT, self, it)                                    \
+    for(IT it = JOIN(A, begin)(self);                               \
+        it != JOIN(A, end)(self);                                   \
+        it = JOIN(JOIN(A, node), next)(it))
+#define foreach_ref(A, T, IT, self, it, ref)                        \
+    IT it = JOIN(A, begin)(self);                                   \
+    T* ref = JOIN(JOIN(A, it), ref)(it);                            \
+    for(; it != JOIN(A, end)(self);                                 \
+        it = JOIN(JOIN(A, it), next)(it),                           \
+            ref = JOIN(JOIN(A, it), ref)(it))
+#define foreach_range(A, IT, it, first, last)                       \
+    for(IT it = first;                                              \
+        it != last;                                                 \
+        it = JOIN(JOIN(A, it), next)(it))
+// Only the first entry into foreach must be a valid iterator (begin++),
+// in the loop it may loose it to a mere B* or T* ptr
+#define foreach_range_ref(A, T, IT, it, ref, first, last)           \
+    IT it = first;                                                  \
+    T* ref = JOIN(JOIN(A, it), ref)(first);                         \
+    for(; it != last;                                               \
+        it = JOIN(JOIN(A, it), next)(it),                           \
+            ref = JOIN(JOIN(A, it), ref)(it))

@@ -109,7 +109,7 @@ static inline T*
 JOIN(A, end)(A* self)
 {
     I* iter = &_vec_end_it;
-    iter->ref = self->size ? JOIN(A, at)(self, self->size) : NULL;
+    iter->ref = JOIN(A, at)(self, self->size);
     iter->container = self;
     return (T*)iter;
 }
@@ -120,6 +120,12 @@ JOIN(I, iter)(T* self)
     I* iter = (I*)self;
     CHECK_TAG(iter, 0)
     return iter;
+}
+
+static inline T*
+JOIN(I, ref)(T* iter)
+{
+    return ((I*)iter)->ref;
 }
 
 static inline size_t
@@ -152,7 +158,7 @@ JOIN(I, next)(T* self)
 }
 
 static inline T*
-JOIN(I, advance)(T* self, int i)
+JOIN(I, advance)(T* self, long i)
 {
     I* iter = (I*)self;
     CHECK_TAG(iter, NULL)

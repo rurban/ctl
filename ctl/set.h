@@ -41,7 +41,6 @@ typedef struct A
 
 typedef struct I
 {
-    CTL_B_ITER_FIELDS;
 } I;
 
 static inline B*
@@ -93,6 +92,12 @@ JOIN(B, next)(B* self)
         self = parent;
     }
     return self;
+}
+
+static inline T*
+JOIN(I, ref)(B* node)
+{
+    return &node->value;
 }
 
 static inline void

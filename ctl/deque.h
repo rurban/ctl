@@ -161,6 +161,12 @@ JOIN(I, iter)(T* self)
     return iter;
 }
 
+static inline T*
+JOIN(I, ref)(T* value)
+{
+    return value;
+}
+
 static inline size_t
 JOIN(I, index)(T* self)
 {
@@ -192,7 +198,7 @@ JOIN(I, next)(T* self)
 }
 
 static inline T*
-JOIN(I, advance)(T* self, int i)
+JOIN(I, advance)(T* self, long i)
 {
     I* iter = (I*)self;
     CHECK_TAG(iter, NULL)

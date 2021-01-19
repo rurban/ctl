@@ -9,15 +9,17 @@
 
 void print_lst(list_digi *a)
 {
-    foreach_ref(list, digi, a, it, ref)
-        printf ("%d ", *ref->value);
+    int i = 0;
+    list_foreach_ref(list_digi, digi, a, it, ref)
+        printf ("%d: %d\n", i++, *ref->value);
     printf ("\n");
 }
 
 void print_list(std::list<DIGI> &b)
 {
+    int i = 0;
     for(auto& d: b)
-        printf ("%d ", *d.value);
+        printf ("%d: %d\n", i++, *d.value);
     printf ("\n");
 }
 
@@ -34,7 +36,7 @@ int random_element(list_digi* a)
     const size_t index = TEST_RAND(a->size);
     int test_value = 0;
     size_t current = 0;
-    foreach_ref(list, digi, a, it, ref)
+    list_foreach_ref(list_digi, digi, a, it, ref)
     {
         if(current == index)
         {
@@ -54,14 +56,16 @@ int random_element(list_digi* a)
         assert(*_y.back().value == *list_digi_back(&_x)->value);  \
     }                                                             \
     std::list<DIGI>::iterator _iter = _y.begin();                 \
-    foreach_ref(list, digi, &_x, _it, _ref) {                     \
+    int i = 0;                                                    \
+    list_foreach_ref(list_digi, digi, &_x, _it, _ref) {           \
+        printf("%d: %d, ", i++, *_ref->value);                    \
         assert(*_ref->value == *_iter->value);                    \
         _iter++;                                                  \
     }                                                             \
-    list_digi_it _it = list_digi_it_each(&_x);                    \
+    list_digi_node* _it = list_digi_begin(&_x);                   \
     for(auto& _d : _y) {                                          \
-        assert(*_it.ref->value == *_d.value);                     \
-        _it.step(&_it);                                           \
+        assert(*_it->value.value == *_d.value);                   \
+        _it = _it->next;                                          \
     }                                                             \
 }
 
@@ -70,13 +74,6 @@ int random_element(list_digi* a)
     {                                                             \
         assert (_iter != b.end());                                \
         assert(*_it->value.value == *(*_iter).value);             \
-    } else                                                        \
-        assert (_iter == b.end())
-#define CHECK_ITER_I(_it, b, _iter)                               \
-    if (!_it->done)                                               \
-    {                                                             \
-        assert (_iter != b.end());                                \
-        assert(*_it->ref->value == *(*_iter).value);              \
     } else                                                        \
         assert (_iter == b.end())
 
@@ -109,44 +106,38 @@ get_random_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
     LOG("iters %zu, %zu of %zu\n", r1, r2, a->size);
     if (a->size)
     {
-        list_digi_it it1 = list_digi_it_iter (a, a->head);
+        list_digi_it *it1 = list_digi_it_advance((list_digi_it *)list_digi_begin(a), r1);
         first_b = b.begin();
-        for(size_t i = 0; i < r1; i++)
+        for (size_t i = 0; i<r1; i++)
         {
-            it1.step(&it1);
             first_b++;
         }
-        *first_a = it1;
+        *first_a = *it1;
         if (r1 == r2)
         {
-            *last_a = it1;
+            *last_a = *it1;
             last_b = first_b;
         }
         else if (r2 == a->size)
         {
-            list_digi_it it2 = list_digi_it_iter (a, a->tail);
-            it2.done = 1;
-            *last_a = it2;
+            last_a->node = {NULL,NULL,NULL};
             last_b = b.end();
         }
         else
         {
-            list_digi_it it2 = list_digi_it_iter (a, a->head);
+            list_digi_it *it2 = (list_digi_it*) list_digi_begin (a);
+            it2 = list_digi_it_advance(it2, r2);
             last_b = b.begin();
             for(size_t i = 0; i < r2; i++)
-            {
-                it2.step(&it2);
                 last_b++;
-            }
-            *last_a = it2;
+            *last_a = *it2;
         }
-        first_a->end = last_a->node;
     }
     else
     {
-        list_digi_it end = list_digi_it_range (a, NULL, NULL);
-        *first_a = end;
-        *last_a = end;
+        list_digi_it *end = (list_digi_it*) list_digi_end (a);
+        *first_a = *end;
+        *last_a = *end;
         first_b = b.begin();
         last_b = b.end();
     }
@@ -166,7 +157,13 @@ main(void)
         list_digi a;
         std::list<DIGI> b;
         int max_value = 0;
-        setup_lists(&a, b, TEST_RAND(TEST_MAX_SIZE), &max_value);
+#ifdef DEBUG
+        const size_t size = TEST_RAND(10);
+#else
+        const size_t size = TEST_RAND(TEST_MAX_SIZE);
+#endif
+        setup_lists(&a, b, size, &max_value);
+
 #define FOREACH_METH(TEST) \
         TEST(PUSH_BACK) \
         TEST(PUSH_FRONT) \
@@ -207,9 +204,9 @@ main(void)
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
+        TEST(INSERT_COUNT) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(INSERT_COUNT) \
         TEST(INSERT_RANGE) \
         TEST(EQUAL_RANGE) \
 
@@ -277,9 +274,9 @@ main(void)
                 size_t index = TEST_RAND(a.size);
                 size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                foreach(list, digi, &a, it)
+                list_foreach(list_digi, &a, it)
                 {
-                    if(current == index)
+                    if(index == current)
                     {
                         list_digi_erase(&a, it);
                         b.erase(iter);
@@ -297,9 +294,9 @@ main(void)
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                foreach(list, digi, &a, it)
+                list_foreach(list_digi, &a, it)
                 {
-                    if(current == index)
+                    if(index == current)
                     {
                         list_digi_node *node =
                             list_digi_insert(&a, it, digi_init(value));
@@ -326,6 +323,10 @@ main(void)
                 size_t resize = 3 * TEST_RAND(a.size);
                 list_digi_resize(&a, resize, digi_init(0));
                 b.resize(resize);
+#ifdef DEBUG
+                print_lst(&a);
+                print_list(b);
+#endif
                 CHECK(a, b);
                 break;
             }
@@ -481,20 +482,20 @@ main(void)
                 size_t index = TEST_RAND(a.size);
                 size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                list_digi_it it = list_digi_it_each(&a);
-                while(!it.done)
+                list_digi_node *it = list_digi_begin(&a);
+                while(it)
                 {
                     if(current == index)
                         break;
                     iter++;
+                    it = it->next;
                     current++;
-                    it.step(&it);
                 }
                 list_digi aa;
                 std::list<DIGI> bb;
                 setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
                 b.splice(iter, bb);
-                list_digi_splice(&a, it.node, &aa);
+                list_digi_splice(&a, it, &aa);
                 CHECK(a, b);
                 break;
             }
@@ -502,7 +503,6 @@ main(void)
             {
                 list_digi aa = list_digi_init();
                 std::list<DIGI> bb;
-                size_t size = TEST_RAND(TEST_MAX_SIZE);
                 int total = 0;
                 for(size_t pushes = 0; pushes < size; pushes++)
                 {
@@ -576,8 +576,7 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                list_digi_node *n =
-                    list_digi_find_range(&first_a, &last_a, key);
+                list_digi_node *n = list_digi_find_range(&a, &first_a.node, &last_a.node, key);
                 auto it = find(first_b, last_b, vb);
                 CHECK_ITER(n, b, it);
                 digi_free (&key); // special
@@ -589,8 +588,7 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = list_digi_all_of_range(&first_a, &last_a,
-                                                 digi_is_odd);
+                bool aa = list_digi_all_of_range(&first_a.node, &last_a.node, digi_is_odd);
                 bool bb = all_of(first_b, last_b, DIGI_is_odd);
                 if (aa != bb)
                 {
@@ -606,8 +604,7 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = list_digi_any_of_range(&first_a, &last_a,
-                                                 digi_is_odd);
+                bool aa = list_digi_any_of_range(&first_a.node, &last_a.node, digi_is_odd);
                 bool bb = any_of(first_b, last_b, DIGI_is_odd);
                 if (aa != bb)
                 {
@@ -623,8 +620,7 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = list_digi_none_of_range(&first_a, &last_a,
-                                                 digi_is_odd);
+                bool aa = list_digi_none_of_range(&first_a.node, &last_a.node, digi_is_odd);
                 bool bb = none_of(first_b, last_b, DIGI_is_odd);
                 if (aa != bb)
                 {
@@ -655,7 +651,7 @@ main(void)
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_node *n =
-                    list_digi_find_if_range(&first_a, &last_a, digi_is_odd);
+                    list_digi_find_if_range(&first_a.node, &last_a.node, digi_is_odd);
                 auto it = find_if(first_b, last_b, DIGI_is_odd);
                 print_lst(&a);
                 print_list(b);
@@ -668,7 +664,7 @@ main(void)
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_node *n =
-                    list_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
+                    list_digi_find_if_not_range(&first_a.node, &last_a.node, digi_is_odd);
                 auto it = find_if_not(first_b, last_b, DIGI_is_odd);
                 CHECK_ITER(n, b, it);
                 break;
@@ -680,7 +676,7 @@ main(void)
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                foreach(list, digi, &a, it)
+                list_foreach(list_digi, &a, it)
                 {
                     if(current == index)
                     {
@@ -728,7 +724,8 @@ main(void)
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 // used to fail with 0,0 of 0
-                size_t numa = list_digi_count_range(&first_a, &last_a, digi_init(v));
+                size_t numa = list_digi_count_range(&a, &first_a.node, &last_a.node,
+                                                    digi_init(v));
                 size_t numb = count(first_b, last_b, DIGI{v});
                 assert(numa == numb);
                 break;
@@ -738,8 +735,8 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                size_t numa = list_digi_count_if_range(&first_a, &last_a,
-                                                        digi_is_odd);
+                size_t numa =
+                    list_digi_count_if_range(&first_a.node, &last_a.node, digi_is_odd);
                 size_t numb = count_if(first_b, last_b, DIGI_is_odd);
                 if (numa != numb)
                 {
@@ -752,7 +749,6 @@ main(void)
                 break;
             }
 #ifdef DEBUG
-            case TEST_INSERT_COUNT:
             case TEST_INSERT_RANGE:
             // algorithms + ranges
             case TEST_ANY_OF:
@@ -777,7 +773,7 @@ main(void)
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 // FIXME API take iter as third arg, not value
-                bool aa = list_digi_equal_range(&first_a, &last_a, digi_init(vb));
+                bool aa = list_digi_equal_range(&first_a.node, &last_a.node, digi_init(vb));
                 bool bb = equal_range(first_b, last_b, find(b.begin(), b.end(), DIGI{vb}));
                 assert(aa == bb);
                 */

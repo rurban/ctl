@@ -56,6 +56,26 @@
 #endif
 
 /* Three types of iterators */
-#define CTL_DEQ_TAG 0xdeadbee1
+#define CTL_DEQ_TAG  0xdeadbee1
 #define CTL_LIST_TAG 0xdeadbee2
-#define CTL_VEC_TAG 0xdeadbee3
+#define CTL_VEC_TAG  0xdeadbee3
+
+#ifdef DEBUG
+# define CTL_T_ITER_FIELDS \
+    T* ref;                \
+    A* container;          \
+    uint32_t tag
+# define CTL_B_ITER_FIELDS \
+    B* node;               \
+    A* container;          \
+    uint32_t tag
+
+#else
+
+# define CTL_T_ITER_FIELDS \
+    T* ref;                \
+    A* container
+# define CTL_B_ITER_FIELDS \
+    B* node;               \
+    A* container
+#endif

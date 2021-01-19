@@ -49,7 +49,7 @@ JOIN(A, implicit_copy)(T* self)
     return *self;
 }
 
-// not valid for uset, str
+// not valid for uset, str.
 #if !defined(CTL_USET) && !defined(CTL_STR)
 static inline int
 JOIN(A, equal)(A* self, A* other)
@@ -62,15 +62,17 @@ JOIN(A, equal)(A* self, A* other)
     IT e2 = JOIN(A, end)(other);
     while(i1 != e1 && i2 != e2)
     {
+        T* r1 = JOIN(I, ref)(i1);
+        T* r2 = JOIN(I, ref)(i2);
         if(self->equal)
         {
-            if(!self->equal(i1, i2))
+            if(!self->equal(r1, r2))
                 return 0;
         }
         else
         {
-            if(self->compare(i1, i2) ||
-               self->compare(i2, i1))
+            if(self->compare(r1, r2) ||
+               self->compare(r2, r1))
                 return 0;
         }
         i1 = JOIN(I, next)(i1);

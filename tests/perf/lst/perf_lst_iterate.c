@@ -27,7 +27,7 @@ int main(int argc, char** argv)
         {
             t0 = TEST_TIME();
             volatile int sum = 0;
-            foreach_ref(list_int, int, &c, it, ref)
+            list_foreach_ref(list_int, int, &c, it, ref)
                 sum += *ref;
         }
         if (!silent)
