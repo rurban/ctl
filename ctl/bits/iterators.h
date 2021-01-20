@@ -176,3 +176,24 @@
     for(; pos != last;                                              \
         pos = JOIN(JOIN(A, it), next)(pos),                         \
             _ref = JOIN(JOIN(A, it), ref)(pos))
+
+// pos and _ref being just unique names for internal vars
+#define foreach_n(A, T, IT, self, i, pos, _ref, n, fn)              \
+    IT pos = JOIN(A, begin)(self);                                  \
+    T* _ref = JOIN(JOIN(A, it), ref)(pos);                          \
+    for(size_t JOIN(i, __LINE__) = 0, fn(_ref);                     \
+        i < n && pos != JOIN(A, end)(self);                         \
+        pos = JOIN(JOIN(A, it), next)(pos),                         \
+            _ref = JOIN(JOIN(A, it), ref)(pos),                     \
+            JOIN(i, __LINE__)++,                                    \
+            fn(_ref))
+// pos and _ref being just unique names for internal vars
+#define foreach_n_range(A, T, IT, pos, _ref, n, first)              \
+    IT pos = first;                                                 \
+    T* _ref = JOIN(JOIN(A, it), ref)(first);                        \
+    for(size_t JOIN(i, __LINE__) = 0;                               \
+        i < n && pos != JOIN(A, end)(self);                         \
+        pos = JOIN(JOIN(A, it), next)(pos),                         \
+            _ref = JOIN(JOIN(A, it), ref)(pos),                     \
+            JOIN(i, __LINE__)++,                                    \
+            fn(_ref))

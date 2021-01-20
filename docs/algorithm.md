@@ -64,7 +64,7 @@ applies a block to a range of elements with iter.
     foreach_n (A, T, IT, self, n, void func(T*)) {...} (C++17)
     foreach_n_range (A, T, IT, first, n, void func(T*)) {...} (C++20)
 
-applies a block with iter to the first n elements of a sequence. (NYI, see branch `iter-redesign`)
+applies a block with iter to the first n elements of a sequence.
 
     size_t count (A* self, T value)
     size_t count_if (A* self, int _match(T*))
