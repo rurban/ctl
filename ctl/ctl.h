@@ -66,7 +66,7 @@
     A* container;          \
     uint32_t tag
 # define CTL_B_ITER_FIELDS \
-    B* node;               \
+    B node;                \
     A* container;          \
     uint32_t tag
 
@@ -76,6 +76,6 @@
     T* ref;                \
     A* container
 # define CTL_B_ITER_FIELDS \
-    B* node;               \
+    B node;                \
     A* container
 #endif

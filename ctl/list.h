@@ -64,17 +64,13 @@ JOIN(A, back)(A* self)
 #undef _list_end_it
 #define _list_end_it JOIN(JOIN(_list, T), end_it)
 
-static I _list_begin_it = {{0}, NULL
-#ifdef DEBUG
-    , CTL_LIST_TAG
+#ifdef __cplusplus
+static I _list_begin_it = {};
+static I _list_end_it = {};
+#else
+static I _list_begin_it = {0};
+static I _list_end_it = {0};
 #endif
-};
-
-static I _list_end_it = {{0}, NULL
-#ifdef DEBUG
-    , CTL_LIST_TAG
-#endif
-};
 
 static inline B*
 JOIN(A, begin)(A* self)
@@ -83,6 +79,9 @@ JOIN(A, begin)(A* self)
     if (self->head)
         iter->node = *self->head;
     iter->container = self;
+#ifdef DEBUG
+    iter->tag = CTL_LIST_TAG;
+#endif
     return (B*)iter;
 }
 
@@ -91,6 +90,9 @@ JOIN(A, end)(A* self)
 {
     I *iter = &_list_end_it;
     iter->container = self;
+#ifdef DEBUG
+    iter->tag = CTL_LIST_TAG;
+#endif
     return (B*)iter;
 }
 

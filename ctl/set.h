@@ -51,17 +51,13 @@ typedef struct I
 #undef _set_end_it
 #define _set_end_it JOIN(JOIN(_set, T), end_it)
 
-static I _set_begin_it = {{NULL,NULL,NULL}, NULL
-#ifdef DEBUG
-    , CTL_LIST_TAG
+#ifdef __cplusplus
+static I _set_begin_it = {};
+static I _set_end_it = {};
+#else
+static I _set_begin_it = {0};
+static I _set_end_it = {0};
 #endif
-};
-
-static I _set_end_it = {{NULL,NULL,NULL}, NULL
-#ifdef DEBUG
-    , CTL_LIST_TAG
-#endif
-};
 
 static inline B*
 JOIN(A, begin)(A* self)
@@ -70,6 +66,9 @@ JOIN(A, begin)(A* self)
     if (self->root)
         iter->node = *self->root;
     iter->container = self;
+#ifdef DEBUG
+    iter->tag = CTL_LIST_TAG;
+#endif
     return (B*)iter;
 }
 
@@ -78,6 +77,9 @@ JOIN(A, end)(A* self)
 {
     I *iter = &_set_end_it;
     iter->container = self;
+#ifdef DEBUG
+    iter->tag = CTL_LIST_TAG;
+#endif
     return (B*)iter;
 }
 
@@ -782,7 +784,7 @@ static inline A
 JOIN(A, copy)(A* self)
 {
     A copy =  JOIN(A, init)(self->compare);
-    foreach_ref(A, T, IT, self, it, ref)
+    list_foreach_ref(A, T, self, pos, ref)
         JOIN(A, insert)(&copy, self->copy(ref));
     return copy;
 }
@@ -799,10 +801,10 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    foreach_ref(A, T, IT, self, it, ref)
+    list_foreach_ref(A, T, self, pos, ref)
         if(_match(ref))
         {
-            JOIN(A, erase_node)(self, it);
+            JOIN(A, erase_node)(self, pos);
             erases++;
         }
     return erases;
@@ -818,7 +820,7 @@ static inline A
 JOIN(A, intersection)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->compare);
-    foreach_ref(A, T, IT, a, it, ref)
+    list_foreach_ref(A, T, a, pos, ref)
         if(JOIN(A, find)(b, *ref))
             JOIN(A, insert)(&self, self.copy(ref));
     return self;
@@ -828,9 +830,9 @@ static inline A
 JOIN(A, union)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->compare);
-    foreach_ref(A, T, IT, a, it, ref)
+    list_foreach_ref(A, T, a, pos, ref)
         JOIN(A, insert)(&self, self.copy(ref));
-    foreach_ref(A, T, IT, b, it2, ref2)
+    list_foreach_ref(A, T, b, pos2, ref2)
         JOIN(A, insert)(&self, self.copy(ref2));
     return self;
 }
@@ -839,7 +841,7 @@ static inline A
 JOIN(A, difference)(A* a, A* b)
 {
     A self = JOIN(A, copy)(a);
-    foreach_ref(A, T, IT, b, it, ref)
+    list_foreach_ref(A, T, b, pos, ref)
         JOIN(A, erase)(&self, *ref);
     return self;
 }
@@ -849,7 +851,7 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 {
     A self = JOIN(A, union)(a, b);
     A intersection = JOIN(A, intersection)(a, b);
-    foreach_ref(A, T, IT, &intersection, it, ref)
+    list_foreach_ref(A, T, &intersection, pos, ref)
         JOIN(A, erase)(&self, *ref);
     JOIN(A, free)(&intersection);
     return self;

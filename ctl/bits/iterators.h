@@ -28,28 +28,30 @@
 /* Fast typed iters */
 /* list iters loose the I* property at the start of the
  * loop already and turn into simple B* */
-# define list_foreach(A, self, it)                      \
+# define list_foreach(A, self, pos)                     \
     if ((self)->size)                                   \
-        for(JOIN(A, node)* it = JOIN(A, begin)(self);   \
-            it != NULL;                                 \
-            it = it->next)
-# define list_foreach_ref(A, T, self, it, ref)          \
+        for(JOIN(A, node)* pos = JOIN(A, begin)(self);  \
+            pos != NULL;                                \
+            pos = JOIN(JOIN(A, it), next)(pos))
+# define list_foreach_ref(A, T, self, pos, ref)         \
     T* ref = JOIN(A, front)(self);                      \
     if ((self)->size)                                   \
-        for(JOIN(A, node)* it = JOIN(A, begin)(self);   \
-            it != NULL;                                 \
-            it = it->next, ref = &it->value)
-# define list_foreach_range(A, it, first, last)         \
+        for(JOIN(A, node)* pos = JOIN(A, begin)(self);  \
+            pos != NULL;                                \
+            pos = JOIN(JOIN(A, it), next)(pos),         \
+              ref = &pos->value)
+# define list_foreach_range(A, pos, first, last)        \
     if (first)                                          \
-        for(JOIN(A, node)* it = first;                  \
-            it != last;                                 \
-            it = it->next)
-# define list_foreach_range_ref(A, T, it, ref, first, last) \
+        for(JOIN(A, node)* pos = first;                 \
+            pos != last;                                \
+            pos = JOIN(JOIN(A, it), next)(pos))
+# define list_foreach_range_ref(A, T, pos, ref, first, last) \
     T* ref = first ? first->value : NULL;               \
     if (first)                                          \
-        for(JOIN(A, node)* it = first;                  \
-            it != last;                                 \
-            it = it->next, ref = &it->value)
+        for(JOIN(A, node)* pos = first;                 \
+            pos != last;                                \
+            pos = JOIN(A, JOIN(A, it)->next)(pos),      \
+                ref = &pos->value)
 
 # ifdef DEBUG
 #  if defined(_ASSERT_H) && !defined(NDEBUG)
@@ -155,7 +157,7 @@
 #define foreach(A, IT, self, pos)                                   \
     for(IT pos = JOIN(A, begin)(self);                              \
         pos != JOIN(A, end)(self);                                  \
-        pos = JOIN(JOIN(A, node), next)(pos))
+        pos = JOIN(JOIN(A, it), next)(pos))
 #define foreach_ref(A, T, IT, self, pos, _ref)                      \
     IT pos = JOIN(A, begin)(self);                                  \
     T* _ref = JOIN(JOIN(A, it), ref)(pos);                          \

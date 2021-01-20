@@ -17,7 +17,7 @@
     {                                                                  \
         size_t a_found = 0;                                            \
         size_t b_found = 0;                                            \
-        foreach_ref(uset, digi, &_x, it, _ref)                         \
+        foreach_ref(uset_digi, digi, uset_digi_node*, &_x, it, _ref)   \
         {                                                              \
             auto found = _y.find(DIGI(*_ref->value));                  \
             assert(found != _y.end());                                 \
@@ -44,8 +44,8 @@
 void print_uset(uset_digi* a)
 {
     int i = 0;
-    foreach_ref(uset_digi, digi, a, it, ref)
-        printf("%d: %d [%zu]\n", i++, *ref->value, it->bucket_index);
+    foreach_ref(uset_digi, digi, uset_digi_node*, a, it, ref)
+        printf("%d: %d [%zu]\n", i++, *ref->value, ((uset_digi_it*)it)->bucket_index);
     printf("--\n");
 }
 void print_unordered_set(std::unordered_set<DIGI,DIGI_hash> b)
@@ -167,13 +167,13 @@ main(void)
                 uset_digi aa = uset_digi_copy(&a);
                 LOG ("before\n");
                 print_uset(&a);
-                foreach_ref(uset, digi, &aa, it, ref)
+                foreach_ref(uset_digi, digi, uset_digi_node*, &aa, it, ref)
                 {
                     //LOG("find %d [%zu]\n", *ref->value, it.bucket_index);
                     assert(uset_digi_find(&a, *ref));
                 }
                 LOG ("all found\n");
-                foreach_ref(uset_digi, &a, it, ref2)
+                foreach_ref(uset_digi, digi, uset_digi_node*, &a, it2, ref2)
                     uset_digi_erase(&aa, *ref2);
                 LOG ("all erased\n");
                 print_uset(&a);
