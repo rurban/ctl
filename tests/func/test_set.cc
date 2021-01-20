@@ -40,14 +40,14 @@ void print_setpp(std::set<DIGI>& b) {
 #define CHECK(_x, _y) {                           \
     assert(_x.size == _y.size());                 \
     std::set<DIGI>::iterator _iter = _y.begin();  \
-    foreach_ref(set, digi, &_x, _it, _ref) {      \
+    foreach_ref(set_digi, digi, set_digi_node*, &_x, _it, _ref) { \
         assert(*_ref->value == *_iter->value);    \
         _iter++;                                  \
     }                                             \
-    set_digi_it _it = set_digi_it_each(&_x);      \
+    set_digi_node* _it2 = set_digi_begin(&_x);     \
     for(auto& _d : _y) {                          \
         assert(*_ref->value == *_d.value);        \
-        _it.step(&_it);                           \
+        _it2 = set_digi_node_next(_it2);          \
     }                                             \
 }
 
@@ -153,6 +153,7 @@ main(void)
         set_digi a;
         std::set<DIGI> b;
         setup_sets(&a, b);
+
 #define FOREACH_METH(TEST) \
         TEST(SELF) \
         TEST(INSERT) \
@@ -219,10 +220,10 @@ main(void)
             case TEST_SELF:
             {
                 set_digi aa = set_digi_copy(&a);
-                foreach_ref(set, digi, &aa, it, ref)
+                foreach_ref(set_digi, digi, set_digi_node*, &aa, it, ref)
                     assert(set_digi_find(&a, *ref));
-                foreach_ref(set, digi, &a, it, ref2)
-                    set_digi_erase(&aa, *ref2);
+                foreach(set_digi, set_digi_node*, &a, it2)
+                    set_digi_erase_node(&aa, it2);
                 assert(set_digi_empty(&aa));
                 set_digi_free(&aa);
                 break;
@@ -359,7 +360,7 @@ main(void)
                 if(bb == b.end())
                     assert(set_digi_end(&a) == aa);
                 else
-                    assert(*bb->value == *aa->key.value);
+                    assert(*bb->value == *aa->value.value);
                 CHECK(a, b);
                 digi_free(&kd);
                 break;

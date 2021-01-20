@@ -152,25 +152,25 @@
 #endif // not list
 
 // slower generic iters for algorithm
-#define foreach(A, IT, self, it)                                    \
-    for(IT it = JOIN(A, begin)(self);                               \
-        it != JOIN(A, end)(self);                                   \
-        it = JOIN(JOIN(A, node), next)(it))
-#define foreach_ref(A, T, IT, self, it, ref)                        \
-    IT it = JOIN(A, begin)(self);                                   \
-    T* ref = JOIN(JOIN(A, it), ref)(it);                            \
-    for(; it != JOIN(A, end)(self);                                 \
-        it = JOIN(JOIN(A, it), next)(it),                           \
-            ref = JOIN(JOIN(A, it), ref)(it))
-#define foreach_range(A, IT, it, first, last)                       \
-    for(IT it = first;                                              \
-        it != last;                                                 \
-        it = JOIN(JOIN(A, it), next)(it))
+#define foreach(A, IT, self, pos)                                   \
+    for(IT pos = JOIN(A, begin)(self);                              \
+        pos != JOIN(A, end)(self);                                  \
+        pos = JOIN(JOIN(A, node), next)(pos))
+#define foreach_ref(A, T, IT, self, pos, _ref)                      \
+    IT pos = JOIN(A, begin)(self);                                  \
+    T* _ref = JOIN(JOIN(A, it), ref)(pos);                          \
+    for(; pos != JOIN(A, end)(self);                                \
+        pos = JOIN(JOIN(A, it), next)(pos),                         \
+            _ref = JOIN(JOIN(A, it), ref)(pos))
+#define foreach_range(A, IT, pos, first, last)                      \
+    for(IT pos = first;                                             \
+        pos != last;                                                \
+        pos = JOIN(JOIN(A, it), next)(pos))
 // Only the first entry into foreach must be a valid iterator (begin++),
 // in the loop it may loose it to a mere B* or T* ptr
-#define foreach_range_ref(A, T, IT, it, ref, first, last)           \
-    IT it = first;                                                  \
-    T* ref = JOIN(JOIN(A, it), ref)(first);                         \
-    for(; it != last;                                               \
-        it = JOIN(JOIN(A, it), next)(it),                           \
-            ref = JOIN(JOIN(A, it), ref)(it))
+#define foreach_range_ref(A, T, IT, pos, _ref, first, last)         \
+    IT pos = first;                                                 \
+    T* _ref = JOIN(JOIN(A, it), ref)(first);                        \
+    for(; pos != last;                                              \
+        pos = JOIN(JOIN(A, it), next)(pos),                         \
+            _ref = JOIN(JOIN(A, it), ref)(pos))

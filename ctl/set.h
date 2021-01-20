@@ -41,19 +41,44 @@ typedef struct A
 
 typedef struct I
 {
+    B node;
+    A* container;
+    uint32_t tag;
 } I;
+
+#undef _set_begin_it
+#define _set_begin_it JOIN(JOIN(_set, T), begin_it)
+#undef _set_end_it
+#define _set_end_it JOIN(JOIN(_set, T), end_it)
+
+static I _set_begin_it = {{NULL,NULL,NULL}, NULL
+#ifdef DEBUG
+    , CTL_LIST_TAG
+#endif
+};
+
+static I _set_end_it = {{NULL,NULL,NULL}, NULL
+#ifdef DEBUG
+    , CTL_LIST_TAG
+#endif
+};
 
 static inline B*
 JOIN(A, begin)(A* self)
 {
-    return self->root;
+    I *iter = &_set_begin_it;
+    if (self->root)
+        iter->node = *self->root;
+    iter->container = self;
+    return (B*)iter;
 }
 
 static inline B*
 JOIN(A, end)(A* self)
 {
-    (void) self;
-    return NULL;
+    I *iter = &_set_end_it;
+    iter->container = self;
+    return (B*)iter;
 }
 
 static inline B*
@@ -100,6 +125,69 @@ JOIN(I, ref)(B* node)
     return &node->value;
 }
 
+// expand the iter to a node. only valid for begin/end, before a foreach loop.
+static inline I*
+JOIN(I, iter)(B* self)
+{
+    I* iter = (I*)self;
+    CHECK_TAG(iter, 0)
+    return iter;
+}
+
+static inline int
+JOIN(I, done)(I* iter)
+{
+    return iter->node.r == NULL && iter->node.l == NULL;
+}
+
+static inline B*
+JOIN(I, next)(B* node)
+{
+    return JOIN(B, next)(node);
+}
+
+static inline I* JOIN(I, advance)(I* self, long i);
+
+// the only way to keep the iter struct intact
+static inline I*
+JOIN(I, advance)(I* iter, long i)
+{
+    A* a = iter->container;
+    B* node = &iter->node;
+    if (i < 0)
+    {
+        CHECK_TAG(iter, NULL);
+        if ((size_t)-i > a->size)
+            return NULL;
+        return JOIN(I, advance)(iter, a->size + i);
+    }
+    for(long j = 0; node != NULL && j < i; j++)
+        node = JOIN(B, next)(node);
+    iter->node = *node;
+    return iter;
+}
+
+static inline long
+JOIN(I, distance)(B* self, B* other)
+{
+    long d = 0;
+    if (self == other)
+        return 0;
+    B* i = self;
+    for(; i != NULL && i != other; d++)
+        i = JOIN(B, next)(i);
+    if (i == other)
+        return d;
+    // other before self, negative result
+    I* iter2 = (I*)other;
+    CHECK_TAG(iter2, 0)
+    d = (long)iter2->container->size;
+    for(; other != NULL && other != self; d--)
+        other = JOIN(B, next)(other);
+    return other ? -d : LONG_MAX;
+}
+
+/*
 static inline void
 JOIN(I, step)(I* self)
 {
@@ -140,6 +228,7 @@ JOIN(I, range)(A* container, B* begin, B* end)
         self.done = 1;
     return self;
 }
+*/
 
 #include <ctl/bits/container.h>
 
@@ -529,20 +618,22 @@ JOIN(A, erase_node)(A* self, B* node)
 #endif
 }
 
+/*
 static inline I
 JOIN(I, iter)(A* self, B *node)
 {
-    I it = JOIN(I, each)(self);
-    it.node = node;
-    it.ref = &node->value;
-    it.next = JOIN(B, next)(it.node);
-    return it;
+    I iter = _set_begin_it;
+    if (self->root)
+        iter.node = *self->root;
+    iter->container = self;
+    return iter;
 }
+*/
 
 static inline void
-JOIN(A, erase_it)(A* self, I* pos)
+JOIN(A, erase_it)(A* self, I* it)
 {
-    B* node = pos->node;
+    B* node = &it->node;
     if(node)
         JOIN(A, erase_node)(self, node);
 }
@@ -691,7 +782,7 @@ static inline A
 JOIN(A, copy)(A* self)
 {
     A copy =  JOIN(A, init)(self->compare);
-    foreach_ref(C, T, self, it, ref)
+    foreach_ref(A, T, IT, self, it, ref)
         JOIN(A, insert)(&copy, self->copy(ref));
     return copy;
 }
@@ -708,7 +799,7 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    foreach_ref(C, T, self, it, ref)
+    foreach_ref(A, T, IT, self, it, ref)
         if(_match(ref))
         {
             JOIN(A, erase_node)(self, it);
@@ -727,7 +818,7 @@ static inline A
 JOIN(A, intersection)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->compare);
-    foreach_ref(C, T, a, it, ref)
+    foreach_ref(A, T, IT, a, it, ref)
         if(JOIN(A, find)(b, *ref))
             JOIN(A, insert)(&self, self.copy(ref));
     return self;
@@ -737,9 +828,9 @@ static inline A
 JOIN(A, union)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->compare);
-    foreach_ref(C, T, a, it, ref)
+    foreach_ref(A, T, IT, a, it, ref)
         JOIN(A, insert)(&self, self.copy(ref));
-    foreach_ref(C, T, b, it, ref2)
+    foreach_ref(A, T, IT, b, it2, ref2)
         JOIN(A, insert)(&self, self.copy(ref2));
     return self;
 }
@@ -748,7 +839,7 @@ static inline A
 JOIN(A, difference)(A* a, A* b)
 {
     A self = JOIN(A, copy)(a);
-    foreach_ref(C, T, b, it, ref)
+    foreach_ref(A, T, IT, b, it, ref)
         JOIN(A, erase)(&self, *ref);
     return self;
 }
@@ -758,7 +849,7 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 {
     A self = JOIN(A, union)(a, b);
     A intersection = JOIN(A, intersection)(a, b);
-    foreach_ref(C, T, &intersection, it, ref)
+    foreach_ref(A, T, IT, &intersection, it, ref)
         JOIN(A, erase)(&self, *ref);
     JOIN(A, free)(&intersection);
     return self;

@@ -24,7 +24,7 @@ void print_list(std::list<DIGI> &b)
 }
 
 #ifdef DEBUG
-#define TEST_MAX_VALUE 1000
+#define TEST_MAX_VALUE 10
 #else
 #define print_lst(x)
 #define print_list(x)
