@@ -33,26 +33,41 @@ There are no execution policies yet, but I am planning a **pctl**,
 i.e. `parallel_policy` and `parallel_unsequenced_policy`
 for various backends like openmp or TBB.
 
+## Member types
+
+`T`                      value type
+
+`A` being `list_T`       container type
+
+`B` being `list_T_node`  node type
+
+`I` being `list_T_it`    iterator type for `begin()` and `end()`
+
+`IT` being either `T*` or `B*`, the return type of iterators.
+
 ## Non-modifying sequence operations
 
     all_of (A* self, int _match(T*)) (C++11)
     any_of `(A* self, int _match(T*)) (C++11)
     none_of (A* self, int _match(T*)) (C++11)
-    all_of_range (A* self, I* first, I* last, int _match(T*)) (C++20)
-    any_of_range (A* self, I* first, I* last, int _match(T*)) (C++20)
-    none_of_range (A* self, I* first, I* last, int _match(T*)) (C++20)
+    all_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
+    any_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
+    none_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
 
 checks if a predicate is true for all, any or none of the elements in a range
 
-    foreach (A, self, it)
-    foreach_range (A, it, first, last) (C++20)
+    foreach (A, IT, self, iter)
+    foreach_range (A, IT, iter, first, last) (C++20)
  
-applies a function to a range of elements.
+applies a function to a range of elements and sets IT iter.
  
+    foreach_ref (A, T, IT, self, iter, ref)
+    foreach_range_ref (A, T, IT, iter, ref, first, last) (C++20)
+ 
+applies a function to a range of elements and sets IT iter, and `T*` ref.
 
-    foreach_n (A, first, n, void func(T*)) (C++17)
-
-    foreach_n_range (A, first, n, void func(T*)) (C++20)
+    foreach_n (A, T, IT, self, n, void func(T*)) (C++17)
+    foreach_n_range (A, T, IT, first, n, void func(T*)) (C++20)
  
 applies a function to the first n elements of a sequence.
 
@@ -71,16 +86,16 @@ finds the first position where two ranges differ
     find (A* self, T* value)
     find_if (A* self, int _match(T*))
     find_if_not (A* self, int _match(T*)) (C++11)
-    find_range (C++20)
-    find_if_range (C++20)
-    find_if_not_range (C++20)
+    find_range (A* self, IT first, IT last, T value) (C++20)
+    find_if_range (IT first, IT last, int _match(T*)) (C++20)
+    find_if_not_range (IT first, IT last, int _match(T*)) (C++20)
  
-finds the first element satisfying specific criteria
+finds the first element satisfying specific criteria. Returns IT.
 
     find_end
     find_end_range (C++20)
  
-finds the last sequence of elements in a certain range
+finds the last sequence of elements in a certain range.
 
     find_first_of
     find_first_of_range (C++20)

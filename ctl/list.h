@@ -459,6 +459,12 @@ JOIN(A, remove_if)(A* self, int _match(T*))
     return erases;
 }
 
+static inline size_t
+JOIN(A, erase_if)(A* self, int _match(T*))
+{
+    return JOIN(A, remove_if)(self, _match);
+}
+
 static inline void
 JOIN(A, swap)(A* self, A* other)
 {

@@ -185,6 +185,7 @@ main(void)
         TEST(EMPLACE_FRONT) \
         TEST(EMPLACE_BACK) \
         TEST(REMOVE_IF) \
+        TEST(ERASE_IF) \
         TEST(SPLICE) \
         TEST(MERGE) \
         TEST(EQUAL) \
@@ -416,7 +417,11 @@ main(void)
                 LOG("CTL emplace head->next %d\n", *aa.value);
                 //print_lst(&a);
                 auto iter = b.begin();
+#if __cplusplus >= 201100
                 b.emplace(++iter, DIGI{value});
+#else
+                b.insert(++iter, DIGI{value});
+#endif
                 LOG("STL emplace begin++ %d\n", *DIGI{value});
                 //print_list(b);
                 CHECK(a, b);
@@ -428,7 +433,11 @@ main(void)
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 digi aa = digi_init(value);
                 list_digi_emplace_front(&a, &aa);
+#if __cplusplus >= 201100
                 b.emplace_front(DIGI{value});
+#else
+                b.push_front(DIGI{value});
+#endif
                 CHECK(a, b);
                 digi_free(&aa);
                 break;
@@ -438,7 +447,11 @@ main(void)
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 digi aa = digi_init(value);
                 list_digi_emplace_back(&a, &aa);
+#if __cplusplus >= 201100
                 b.emplace_back(DIGI{value});
+#else
+                b.push_back(DIGI{value});
+#endif
                 CHECK(a, b);
                 digi_free(&aa);
                 break;
@@ -447,6 +460,19 @@ main(void)
             {
                 list_digi_remove_if(&a, digi_is_odd);
                 b.remove_if(DIGI_is_odd);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_ERASE_IF:
+            {
+#if __cpp_lib_erase_if > 202002L
+                size_t num_a = list_digi_erase_if(&a, digi_is_odd);
+                size_t num_b = b.erase_if(DIGI_is_odd);
+                assert(num_a == num_b);
+#else
+                list_digi_erase_if(&a, digi_is_odd);
+                b.remove_if(DIGI_is_odd);
+#endif
                 CHECK(a, b);
                 break;
             }

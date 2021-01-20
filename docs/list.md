@@ -50,170 +50,173 @@ pointers instead.
 
 `I` being `list_T_it`    iterator type
 
+`IT` being `B*`, the return type of iterators.
+
 ## Member functions
 
-[init](list/init.md) `()`
+    A init ()
 
 constructs an empty list.
 
-[free](list/free.md) `(A* self)`
+    free (A* self)
 
 destructs the list.
 
-[copy](list/copy.md) `(A* self)`
+    A copy (A* self)
 
 returns a copy of the container.
 
 ## Element access
 
-[front](list/front.md) `(A* self)`
+    T* front (A* self)
 
 access the first element
 
-[back](list/back.md) `(A* self)`
+    T* back (A* self)
 
 access the last element
 
 ## Iterators
 
-Note: `begin` and `end` return `node*` (`B*`) pointers, not iterators.
+Note: `begin` and `end` return `node*` (`B*`) pointers, not iterators, with
+embedding `B*` into `I*`.
 
-[begin](list/begin.md) `(A* self)`
+    B*/I* begin (A* self)
 
 returns a node pointer to the beginning, different to the STL.
 
-[end](list/end.md) `(A* self)`
+    B*/I* end (A* self)
 
 returns an node pointer to the end, different to the STL.
 
 ## Capacity
 
-[empty](list/empty.md) `(A* self)`
+    int empty (A* self)
 
-checks whether the container is empty
+checks whether the container is empty.
 
-[size](list/size.md) `(A* self)`
+    size_t size (A* self)
 
 returns the number of elements
 
-[max_size](list/max_size.md) ()
+    size_t max_size ()
 
 returns the maximum possible number of elements
 
 ## Modifiers
 
-[assign](list/assign.md) `(A* self, size_t count, T value)`
+    assign (A* self, size_t count, T value)
 
 resizes and sets count elements to the value
 
-[clear](list/clear.md) `(A* self)`
+    clear (A* self)
 
 clears the contents
 
-[insert](list/insert.md) `(A* self, B* node, T value)`
+    B* insert (A* self, B* node, T value)
 
 inserts value before the element.
 
-[insert_count](list/insert.md) `(A* self, I* pos, size_t count, T value)`
+    B* insert_count (A* self, B* pos, size_t count, T value)
 
 inserts count values before the element. (NYI)
 
-[insert_range](list/insert.md) `(A* self, I* pos, I* first, I* last)`
+    B* insert_range (A* self, B* pos, I* first, I* last)
 
 inserts values before pos from first to last. (NYI)
 
-[emplace](list/emplace.md) `(A* self, B* pos, T* value)`
+    B* emplace (A* self, B* pos, T* value)
 
 Insert a copy of the value into the container before pos.
 
-[erase](list/erase.md) `(A* self, B* pos)`
+    erase (A* self, B* pos)
 
 erases the element at pos.
 
-[erase_range](list/erase.md) `(A* self, I* first, I* last)`
+    erase_range (A* self, I* first, I* last)
 
 erases elements (NYI)
 
-[push_front](list/push_front.md) `(A* self, T value)`
+    push_front (A* self, T value)
 
 inserts an element to the beginning.
 
-[emplace_front](list/emplace_front.md) `(A* self, T *value)`
+    B* emplace_front (A* self, T *value)
 
 inserts a copy of the value at the beginning.
 
-[push_back](list/push_back.md) `(A* self, T value)`
+    push_back (A* self, T value)
 
 inserts an element to the end.
 
-[emplace_back](map/emplace_back.md) `(A* self, T* value)`
+    B* emplace_back (A* self, T* value)
 
 adds a copy of the value at the end.
 
-[pop_front](list/pop_front.md) `(A* self)`
+    pop_front (A* self)
 
 removes the first element
 
-[pop_back](list/pop_back.md) `(A* self)`
+    pop_back (A* self)
 
 removes the last element
 
-[resize](list/resize.md) `(A* self, size_t count, T default_value)`
+    resize (A* self, size_t count, T default_value)
 
 Resizes the container to contain count elements.
 
-[swap](list/swap.md) `(A* self, A* other)`
+    swap (A* self, A* other)
 
 swaps the contents
 
 ## Operations
 
-[merge](list/merge.md) `(A* self, A* other, int T_compare(T*, T*))`
+    merge (A* self, A* other, int T_compare(T*, T*))
 
 merges two sorted lists.
 
-[splice](list/splice.md) `(A* self, B* pos, A* other)`
+    splice (A* self, B* pos, A* other)
 
 Moves all elements from the other list to this list before pos.
 
-[splice_it](list/splice.md) `(A* self, B* pos, A* other, B* other_pos)`
+    splice_it (A* self, B* pos, A* other, B* other_pos)
 
 Moves elements from the other list at pos to this list before pos. (NYI)
 
-[splice_range](list/splice.md) `(A* self, B* pos, A* other, B* other_first, B* other_last)`
+    splice_range (A* self, B* pos, A* other, B* other_first, B* other_last)
 
 Moves elements from the other list to this list before pos. (NYI)
 
-[remove](list/remove.md) `(A* self, T* value)`
+    size_t remove (A* self, T* value)
 
-Removes all elements binary equal to the value reference. (not value)
+Removes all elements binary equal to the value reference (not value).
 
-[remove_if](list/remove.md) `(A* self, int T_match(T*))`
+    size_t remove_if (A* self, int T_match(T*))
 
 Removes all elements satisfying specific criteria.
 
-[reverse](list/reverse.md) `(A* self)`
+    reverse (A* self)
 
 reverse the list elements.
 
-[sort](list/sort.md) `(A* self, int T_compare(T*, T*))`
+    sort (A* self, int T_compare(T*, T*))
 
-sorts the list.
+sorts the list in-place.
 
-[unique](list/unique.md) `(A* self, int T_equal(T*, T*))`
+    unique (A* self, int T_equal(T*, T*))
 
 removes consecutive duplicates.
 
 ## Non-member functions
 
-[find](list/find.md) `(A* self, T value, int T_equal(T*, T*))`
+    B* find (A* self, T value, int T_equal(T*, T*))
 
-finds element with specific value
+finds element with specific value.
 
-[erase_if](list/erase_if.md) `(A* self, int T_match(T*))`
+    erase_if (A* self, int T_match(T*))
 
-erases all elements satisfying specific criteria (C++20) NYI
+erases all elements satisfying specific criteria (C++20)
 
-[equal](list/equal.md) `(A* self, A* other, int T_equal(T*, T*))`
+    int equal (A* self, A* other, int T_equal(T*, T*))
 
 Returns 0 or 1 if all elements are equal.
