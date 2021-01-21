@@ -70,7 +70,6 @@ int random_element(vec_digi* a)
         assert(*_y.at(i).value == *vec_digi_at(&_x, i)->value);   \
 }
 
-#ifdef DEBUG
 #define CHECK_ITER(_it, b, _iter)                                 \
     if (_it != NULL)                                              \
     {                                                             \
@@ -79,6 +78,7 @@ int random_element(vec_digi* a)
     } else                                                        \
         assert (_iter == b.end())
 
+#ifdef DEBUG
 static void
 get_random_iters (vec_digi *a, vec_digi_it *first_a, vec_digi_it *last_a,
                   std::vector<DIGI>& b, std::vector<DIGI>::iterator &first_b,
@@ -185,6 +185,7 @@ main(void)
         TEST(INSERT) \
         TEST(ASSIGN) \
         TEST(REMOVE_IF) \
+        TEST(ERASE_IF) \
         TEST(EQUAL) \
         TEST(FIND) \
         TEST(ALL_OF) \
@@ -262,8 +263,9 @@ main(void)
                     if(a.size > 0)
                     {
                         const size_t index = TEST_RAND(a.size);
-                        b.erase(b.begin() + index);
-                        vec_digi_erase(&a, index);
+                        auto it = b.erase(b.begin() + index);
+                        digi* pos = vec_digi_erase(&a, index);
+                        CHECK_ITER(pos, b, it); //FIXME at end
                     }
                     CHECK(a, b);
                     break;
@@ -350,6 +352,18 @@ main(void)
                 {
                     vec_digi_remove_if(&a, digi_is_odd);
                     b.erase(std::remove_if(b.begin(), b.end(), DIGI_is_odd), b.end());
+                    break;
+                }
+                case TEST_ERASE_IF:
+                {
+#if __cpp_lib_erase_if > 202002L
+                    size_t num_a = vec_digi_erase_if(&a, digi_is_odd);
+                    size_t num_b = b.erase_if(DIGI_is_odd);
+                    assert(num_a == num_b);
+#else
+                    vec_digi_erase_if(&a, digi_is_odd);
+                    b.erase(std::remove_if(b.begin(), b.end(), DIGI_is_odd), b.end());
+#endif
                     break;
                 }
                 case TEST_EQUAL:

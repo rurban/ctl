@@ -48,183 +48,173 @@ The complexity (efficiency) of common operations on a `vector` is as follows:
 
 `A` being `vec_T`       container type
 
-`I` being `vec_T_it`    iterator type
+`I` being `vec_T_it`    internal iterator type for loops
+
+`IT` being `T*`, the generic type of iterators.
 
 There is no `B` node type.
 
 ## Member functions
 
-[init](vec/init.md) `()`
+    A init ()
 
 constructs the vector.
 
-[free](vec/free.md) `(A* self)`
+    free (A* self)
 
 destructs the vector.
 
-[assign](vec/assign.md) `(A* self, size_t count, T value)`
+    assign (A* self, size_t count, T value)
 
 replaces the contents of the container.
 
-[assign_range](vec/assign.md) `(A* self, I* first, I* last)`
+    assign_range (A* self, T* first, T* last)
 
 replaces the contents of the container with the values from range.
 
-[copy](vec/copy.md) `(A* self)`
+    A copy (A* self)
 
 returns a copy of the container.
 
 ## Element access
 
-[at](vec/at.md) `(A* self, size_t index)`
+    T* at (A* self, size_t index)
 
 access specified element with bounds checking
 
-[front](vec/front.md) `(A* self)`
+    T* front (A* self)
 
 access the first element
 
-[back](vec/back.md) `(A* self)`
+    T* back (A* self)
 
 access the last element
 
-[data](vec/data.md) `(A* self)`
+    T* data (A* self)
 
 access the underlying array
 
 ## Iterators
 
-[begin](vec/begin.md) `(A* self)`
+Note: `begin` and `end` return `T*` pointers, not iterators yet.
+
+    T* begin (A* self)
 
 returns an iterator to the beginning
 
-[end](vec/end.md) `(A* self)`
+    T* end (A* self)
 
-returns an iterator to the end
+returns an iterator to the end (one past the last element).
 
 ## Capacity
 
-[empty](vec/empty.md) `(A* self)`
+    int empty (A* self)
 
 checks whether the container is empty
 
-[size](vec/size.md) `(A* self)`
+    size_t size (A* self)
 
 returns the number of elements
 
-[max_size](vec/max_size.md) `()`
+    size_t max_size ()
 
-returns the maximum possible number of elements
+returns the maximum possible number of elements, hard-coded to 2GB (32bit).
 
-[reserve](vec/reserve.md) `(A* self, const size_t capacity)`
+    reserve (A* self, const size_t capacity)
 
 reserves storage
 
-[capacity](vec/capacity.md) `(A* self)`
+    size_t capacity (A* self)
 
 returns the number of elements that can be held in currently allocated storage
 
-[shrink_to_fit](vec/shrink_to_fit.md) `(A* self)`
+    shrink_to_fit (A* self)
 
 reduces memory usage by freeing unused memory
 
 ## Modifiers
 
-[clear](vec/clear.md) `(A* self)`
+    clear (A* self)
 
 clears the contents
 
-[insert](vec/insert.md) `(A* self, T key)`
+    insert (A* self, T value)
 
-inserts the element `(C++17)`
+inserts the element, free'ing value. (C++17)
 
-[emplace](vec/emplace.md) `(A* self, ...)`
+    emplace (A* self, I* pos, T* value)
 
-constructs elements in-place
+constructs elements in-place. _(NYI)_
 
-[emplace_back](vec/emplace_back.md) `(A* self, it *position, ...)`
+    emplace_back (A* self, T* value)
 
-constructs elements in-place at position
+appends new element at the back. _(NYI)_
 
-[erase](vec/erase.md) `(A* self, size_t index)`
+    T* erase (A* self, size_t index)
 
-erases the element by index
+erases the element by index, and returns the position following the last removed element.
 
-[erase_it](vec/erase.md) `(A* self, I* pos)`
+    T* erase_it (A* self, I* pos)
 
 erases the element at position
 
-[erase_range](vec/erase.md) `(A* self, I* first, I* last)`
+    T* erase_range (A* self, I* first, I* last)
 
 erases elements from to
 
-[swap](vec/swap.md) `(A* self, A* other)`
+    swap (A* self, A* other)
 
 swaps the contents
 
-[extract](vec/extract.md) `(A* self, T key)`
+    extract (A* self, T value)
 
-extracts a node from the container. NYI
+extracts a value from the container. _(NYI)_
 
-[extract_it](vec/extract.md) `(A* self, I* pos)`
+    extract_it (A* self, I* pos)
 
-extracts nodes from the container. NYI
+extracts a node from the container. _(NYI)_
 
-[merge](vec/merge.md) `(A* self)`
+    merge (A* self)
 
-splices nodes from another container
+splices nodes from another container _(NYI)_
 
 ## Lookup
 
-[count](vec/count.md) `(A* self)`
+    size_t count (A* self, T value)
 
-returns the number of elements matching specific key
+returns the number of elements matching specific key.
 
-[find](vec/find.md) `(A* self, T key)`
+    T* find (A* self, T value)
 
 finds element with specific key
 
-[contains](vec/contains.md) `(A* self, T key)`
+    bool equal_range (A* self)
 
-checks if the container contains element with specific key. (C++20)
+returns range of elements matching a specific key. _(NYI)_
 
-[equal_range](vec/equal_range.md) `(A* self)`
+    T* lower_bound (A* self)
 
-returns range of elements matching a specific key. (NYI)
+returns an iterator to the first element not less than the given key. _(NYI)_
 
-[lower_bound](vec/lower_bound.md) `(A* self)`
+    T* upper_bound (A* self)
 
-returns an iterator to the first element not less than the given key. (NYI)
-
-[upper_bound](vec/upper_bound.md) `(A* self)`
-
-returns an iterator to the first element greater than the given key. (NYI)
+returns an iterator to the first element greater than the given key. _(NYI)_
 
 ## Observers
 
-[value_comp](vec/value_comp.md) `(A* self)`
+    FN value_comp (A* self)
 
-Returns the function that compares keys in objects of type value_type T. (NYI)
+Returns the function that compares keys in objects of type value_type T. _(NYI)_
 
 ## Non-member functions
 
-[swap](vec/swap.md) `(A* self)`
+    swap (A* self)
 
 specializes the swap algorithm
 
-[remove_if](vec/remove_if.md) `(A* self, int T_match(T*))`
+    size_t remove_if (A* self, int T_match(T*))
+    size_t erase_if (A* self, int T_match(T*)) (C++20)
 
-Removes all elements satisfying specific criteria.
+Returns the number of elements removed, satisfying specific criteria.
 
-[erase_if](vec/erase_if.md) `(A* self, int T_match(T*))`
-
-erases all elements satisfying specific criteria (C++20)
-
-[intersection](vec/intersection.md) `(A* self, A* other)`
-
-[union](vec/union.md) `(A* self, A* other)`
-
-[difference](vec/difference.md) `(A* self, A* other)`
-
-[symmetric_difference](vec/symmetric_difference.md) `(A* self, A* other)`
-
+See [algorithm](algorithm.md) for more.

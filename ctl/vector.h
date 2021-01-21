@@ -49,19 +49,22 @@ JOIN(A, capacity)(A* self)
 static inline T*
 JOIN(A, at)(A* self, size_t index)
 {
-    return &self->vector[index];
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+    assert (index < self->size || !"out of range");
+#endif
+    return index < self->size ? &self->vector[index] : NULL;
 }
 
 static inline T*
 JOIN(A, front)(A* self)
 {
-    return JOIN(A, at)(self, 0);
+    return &self->vector[0]; // not bounds-checked
 }
 
 static inline T*
 JOIN(A, back)(A* self)
 {
-    return JOIN(A, at)(self, self->size - 1);
+    return self->size ? JOIN(A, at)(self, self->size - 1) : NULL;
 }
 
 static inline T*
@@ -141,10 +144,11 @@ JOIN(A, _init)(A* copy)
     return self;
 }
 
+// not bounds-checked. like operator[]
 static inline void
 JOIN(A, set)(A* self, size_t index, T value)
 {
-    T* ref = JOIN(A, at)(self, index);
+    T* ref = &self->vector[index];
 #ifndef POD
     if(self->free)
         self->free(ref);
@@ -273,8 +277,8 @@ JOIN(A, push_back)(A* self, T value)
     if(self->size == self->capacity)
         JOIN(A, reserve)(self,
             self->capacity == 0 ? INIT_SIZE : 2 * self->capacity);
-    *JOIN(A, at)(self, self->size) = value;
     self->size++;
+    *JOIN(A, at)(self, self->size - 1) = value;
 //#ifdef CTL_STR
 //    self->vector[self->size] = '\0';
 //#endif
@@ -397,7 +401,7 @@ JOIN(A, erase)(A* self, size_t index)
         self->vector[i + 1] = zero;
     }
     self->size--;
-    return &self->vector[self->size - 1];
+    return index >= self->size ? NULL : &self->vector[index];
 }
 
 static inline T*
@@ -494,6 +498,12 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
         }
     }
     return erases;
+}
+
+static inline size_t
+JOIN(A, erase_if)(A* self, int (*_match)(T*))
+{
+    return JOIN(A, remove_if)(self, _match);
 }
 
 #ifndef CTL_STR

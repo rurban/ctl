@@ -48,9 +48,9 @@ pointers instead.
 
 `B` being `list_T_node`  node type
 
-`I` being `list_T_it`    iterator type
+`I` being `list_T_it`    internal iterator type for loops
 
-`IT` being `B*`, the return type of iterators.
+`IT` being `B*`, the generic type of iterators.
 
 ## Member functions
 
@@ -78,14 +78,13 @@ access the last element
 
 ## Iterators
 
-Note: `begin` and `end` return `node*` (`B*`) pointers, not iterators, with
-embedding `B*` into `I*`.
+Note: `begin` and `end` return `node*` (`B*`) pointers, not iterators yet.
 
-    B*/I* begin (A* self)
+    B* begin (A* self)
 
 returns a node pointer to the beginning, different to the STL.
 
-    B*/I* end (A* self)
+    B* end (A* self)
 
 returns an node pointer to the end, different to the STL.
 
@@ -101,7 +100,7 @@ returns the number of elements
 
     size_t max_size ()
 
-returns the maximum possible number of elements
+returns the maximum possible number of elements, hard-coded to 2GB (32bit).
 
 ## Modifiers
 
@@ -133,7 +132,7 @@ Insert a copy of the value into the container before pos.
 
 erases the element at pos.
 
-    erase_range (A* self, I* first, I* last)
+    erase_range (A* self, B* first, B* last)
 
 erases elements (NYI)
 
