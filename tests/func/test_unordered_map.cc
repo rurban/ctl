@@ -20,7 +20,7 @@
         foreach(umap_strint, &_x, it)                                  \
         {                                                              \
             str *_key = &it.ref->key;                                  \
-            auto found = _y.find(_key->value);                         \
+            auto found = _y.find(str_c_str(_key));                     \
             assert(found != _y.end());                                 \
             a_found++;                                                 \
         }                                                              \

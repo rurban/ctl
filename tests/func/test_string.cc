@@ -334,9 +334,9 @@ main(void)
                 }
                 case TEST_SORT:
                 {
-                    LOG("before sort \"%s\"\n", a.value);
+                    LOG("before sort \"%s\"\n", str_c_str(&a));
                     str_sort(&a);
-                    LOG("after  sort \"%s\"\n", a.value);
+                    LOG("after  sort \"%s\"\n", str_c_str(&a));
                     std::sort(b.begin(), b.end());
                     LOG("STL    sort \"%s\"\n", b.c_str());
                     LOG_CAP(a,b);
@@ -346,8 +346,8 @@ main(void)
                 {
                     str ca = str_copy(&a);
                     std::string cb = b;
-                    LOG("copy  a: \"%s\": %zu\n", a.value, a.capacity);
-                    LOG("copy ca: \"%s\": %zu\n", ca.value, ca.capacity);
+                    LOG("copy  a: \"%s\": %zu\n", str_c_str(&a), a.capacity);
+                    LOG("copy ca: \"%s\": %zu\n", str_c_str(&ca), ca.capacity);
                     CHECK(ca, cb);
                     str_free(&ca);
                     break;

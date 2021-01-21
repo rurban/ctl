@@ -50,7 +50,7 @@ strint_compare(strint* a, strint* b)
 static inline size_t
 strint_hash(strint* a)
 {
-    const char* key = a->key.value;
+    const char* key = a->key.vector;
     return key && *key ? (size_t)FNV1a(key) : 0UL;
 }
 
