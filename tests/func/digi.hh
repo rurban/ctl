@@ -74,22 +74,39 @@ digi_hash(digi* a)
     return (size_t)int_hash_func(*a->value);
 }
 
+#if __cplusplus <= 199711
+# define nullptr NULL
+#endif
+
 struct DIGI
 {
     int* value;
+#if __cplusplus > 199711
     DIGI(int _value): value { new int {_value} }
     {
     }
     DIGI(): DIGI(0)
     {
     }
-    ~DIGI()
-    {
-        delete value;
-    }
     DIGI(const DIGI& a): DIGI()
     {
         *value = a.value ? *a.value : 0;
+    }
+#else
+    DIGI(int _value)
+    {
+        value = new int;
+        *value = _value;
+    }
+    DIGI(const DIGI& a)
+    {
+        value = new int;
+        *value = a.value ? *a.value : 0;
+    }
+#endif
+    ~DIGI()
+    {
+        delete value;
     }
     DIGI& operator=(const DIGI& a)
     {
@@ -110,6 +127,11 @@ struct DIGI
     {
         value = a.value;
         a.value = nullptr;
+    }
+#else
+    DIGI(DIGI& a)
+    {
+        *value = a.value ? *a.value : 0;
     }
 #endif
     bool operator<(const DIGI& a) const
@@ -215,5 +237,11 @@ DIGI_bintrans (const DIGI& d1, const DIGI& d2)
 {
     return DIGI{*d1.value ^ *d2.value};
 }
+
+#if __cplusplus <= 199711
+# define DIGI(n) DIGI(n)
+#else
+# define DIGI(n) DIGI{n}
+#endif
 
 #endif

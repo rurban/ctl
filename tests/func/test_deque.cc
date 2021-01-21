@@ -281,6 +281,37 @@ void print_deque(std::deque<DIGI> &b)
     else                                                                                                               \
         assert(_iter == b_end)
 
+// C++98
+#if __cplusplus <= 199711
+#undef CHECK
+#define CHECK(_x, _y)                                                                                                  \
+    {                                                                                                                  \
+        assert(_x.size == _y.size());                                                                                  \
+        assert(deq_digi_empty(&_x) == _y.empty());                                                                     \
+        if (_x.size > 0)                                                                                               \
+        {                                                                                                              \
+            if (_y.front().value)                                                                                      \
+                assert(*_y.front().value == *deq_digi_front(&_x)->value);                                              \
+            if (_y.back().value)                                                                                       \
+                assert(*_y.back().value == *deq_digi_back(&_x)->value);                                                \
+        }                                                                                                              \
+        std::deque<DIGI>::iterator _iter = _y.begin();                                                                 \
+        foreach (deq_digi, &_x, _it)                                                                                   \
+        {                                                                                                              \
+            assert(*_it.ref->value == *_iter->value);                                                                  \
+            _iter++;                                                                                                   \
+        }                                                                                                              \
+        deq_digi_it _it = deq_digi_it_each(&_x);                                                                       \
+        for (std::deque<DIGI>::iterator _d = _y.begin(); _d != _y.end(); _d++)                                         \
+        {                                                                                                              \
+            assert(*_it.ref->value == *(_d)->value);                                                                   \
+            _it.step(&_it);                                                                                            \
+        }                                                                                                              \
+        for (size_t i = 0; i < _y.size(); i++)                                                                         \
+            assert(*_y.at(i).value == *deq_digi_at(&_x, i)->value);                                                    \
+    }
+#endif
+
 int middle(deq_digi *a)
 {
     if (!a->size)
@@ -434,14 +465,14 @@ void test_random_work_load(void)
         case 0: {
             assert(a.size == b.size());
             deq_digi_push_front(&a, digi_init(1));
-            b.push_front(DIGI{1});
+            b.push_front(DIGI(1));
             assert(a.size == b.size());
             break;
         }
         case 1: {
             assert(a.size == b.size());
             deq_digi_push_back(&a, digi_init(1));
-            b.push_back(DIGI{1});
+            b.push_back(DIGI(1));
             assert(a.size == b.size());
             break;
         }
@@ -484,7 +515,7 @@ static void setup_deque(deq_digi *a, std::deque<DIGI> &b)
     {
         const int vb = TEST_RAND(TEST_MAX_VALUE);
         deq_digi_push_back(a, digi_init(vb));
-        b.push_back(DIGI{vb});
+        b.push_back(DIGI(vb));
     }
 }
 
@@ -528,13 +559,17 @@ int main(void)
             {
                 LOG("mode direct\n");
                 deq_digi_resize(&a, size, digi_init(0));
+#if __cplusplus > 199711
                 b.resize(size);
                 for (size_t i = 0; i < size; i++)
                 {
                     value = TEST_RAND(TEST_MAX_VALUE);
                     deq_digi_set(&a, i, digi_init(value));
-                    b[i] = DIGI{value};
+                    b[i] = DIGI(value);
                 }
+#else
+                b.resize(size, DIGI(0));
+#endif
             }
             if (mode == MODE_GROWTH)
             {
@@ -543,7 +578,7 @@ int main(void)
                 {
                     value = TEST_RAND(TEST_MAX_VALUE);
                     deq_digi_push_back(&a, digi_init(value));
-                    b.push_back(DIGI{value});
+                    b.push_back(DIGI(value));
                 }
             }
             int which;
@@ -560,7 +595,7 @@ int main(void)
             switch (which)
             {
             case TEST_PUSH_BACK: {
-                b.push_back(DIGI{value});
+                b.push_back(DIGI(value));
                 deq_digi_push_back(&a, digi_init(value));
                 CHECK(a, b);
                 break;
@@ -575,7 +610,7 @@ int main(void)
                 break;
             }
             case TEST_PUSH_FRONT: {
-                b.push_front(DIGI{value});
+                b.push_front(DIGI(value));
                 deq_digi_push_front(&a, digi_init(value));
                 CHECK(a, b);
                 break;
@@ -608,7 +643,11 @@ int main(void)
             }
             case TEST_RESIZE: {
                 const size_t resize = 3 * index + 1;
-                b.resize(resize);
+#if __cplusplus > 199711
+                b.resize(size);
+#else
+                b.resize(size, DIGI(0));
+#endif
                 deq_digi_resize(&a, resize, digi_init(0));
                 CHECK(a, b);
                 break;
@@ -636,8 +675,8 @@ int main(void)
                 LOG("sorted 1 - %lu (size-4):\n", cto);
                 print_deq(&a);
 
-                auto from = b.begin();
-                auto to = b.end();
+                std::deque<DIGI>::iterator from = b.begin();
+                std::deque<DIGI>::iterator to = b.end();
                 advance(from, 1);
                 advance(to, -3);
                 LOG("STL sort %ld - %ld:\n", std::distance(b.begin(), from), std::distance(b.begin(), to));
@@ -653,8 +692,8 @@ int main(void)
                     deq_digi_sort_range(&a, 1, a.size - 3);
                 }
                 {
-                    auto from = b.begin();
-                    auto to = b.end();
+                    std::deque<DIGI>::iterator from = b.begin();
+                    std::deque<DIGI>::iterator to = b.end();
                     advance(from, 1);
                     advance(to, -3);
                     std::sort(from, to);
@@ -689,7 +728,7 @@ int main(void)
                     it = deq_digi_begin(&a);
                     deq_digi_it_advance(&it, index);
                     deq_digi_insert(&it, digi_init(value));
-                    b.insert(b.begin() + index, DIGI{value});
+                    b.insert(b.begin() + index, DIGI(value));
                 }
                 CHECK(a, b);
                 break;
@@ -704,7 +743,7 @@ int main(void)
 #ifdef DEBUG
                     iter =
 #endif
-                        b.insert(b.begin() + idx, DIGI{value});
+                        b.insert(b.begin() + idx, DIGI(value));
                     LOG("STL insert %d at %ld:\n", value, std::distance(b.begin(), iter));
                 }
                 CHECK(a, b);
@@ -728,12 +767,12 @@ int main(void)
 
                 if (amount)
                 {
-#ifdef DEBUG
+#if __cplusplus > 199711
                     iter =
 #endif
-                        b.insert(b.begin() + index, amount, DIGI{value});
+                        b.insert(b.begin() + index, amount, DIGI(value));
                     LOG("STL insert %zux %d at %ld:\n", amount, value, std::distance(b.begin(), iter));
-                    // CHECK_ITER (pos, b, iter);
+                    CHECK_ITER(pos, b, iter);
                     print_deque(b); // may be corrupt
                     CHECK(a, b);    // may be NULL
                 }
@@ -756,7 +795,7 @@ int main(void)
                 for (int i = 0; i < (int)size2; i++)
                 {
                     deq_digi_push_back(&aa, digi_init(i));
-                    bb.push_back(DIGI{i});
+                    bb.push_back(DIGI(i));
                 }
                 print_deq(&a);
                 get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
@@ -778,7 +817,7 @@ int main(void)
                 std::vector<DIGI> cc;
                 LOG("add vector (%zu)\n", size2);
                 for(int i = 0; i < (int)size2; i++)
-                    cc.push_back(DIGI{i});
+                    cc.push_back(DIGI(i));
                 b.insert(b.begin() + index, cc.begin(), cc.end());
 #endif
 
@@ -843,7 +882,7 @@ int main(void)
                 if (a.size < 4)
                 {
                     deq_digi_resize(&a, 10, digi_init(value));
-                    b.resize(10, DIGI{value});
+                    b.resize(10, DIGI(value));
                 }
                 const size_t idx = TEST_RAND(a.size / 2);
                 const size_t iend = idx + TEST_RAND(a.size - idx);
@@ -866,13 +905,19 @@ int main(void)
                 CHECK(a, b);
                 break;
             }
+#if __cplusplus > 199711
             case TEST_EMPLACE: {
                 digi key = digi_init(value);
                 if (a.size < 1)
                 {
-                    int v = TEST_RAND(TEST_MAX_VALUE);
-                    deq_digi_push_front(&a, digi_init(v));
-                    b.push_front(DIGI{v});
+                    deq_digi_push_front(&a, digi_init(value));
+                    b.push_front(DIGI(value));
+                }
+#ifdef DEBUG
+                if (a.size > 10)
+                {
+                    deq_digi_resize(&a, 10, digi_init(0));
+                    b.resize(10, DIGI(0));
                 }
 #if defined DEBUG && !defined LONG
                 //if (a.size > 10)
@@ -889,9 +934,9 @@ int main(void)
                 LOG("CTL emplace 1 %d\n", a.size > index ? *it.ref->value : -1);
                 deq_digi_emplace(&it, &key);
                 print_deq(&a);
-                LOG("STL emplace begin++ %d\n", *DIGI{value});
+                LOG("STL emplace begin++ %d\n", *DIGI(value));
                 assert(b.size() > 0);
-                b.emplace(b.begin() + index, DIGI{value});
+                b.emplace(b.begin() + index, DIGI(value));
                 print_deque(b);
                 if (!b.front().value)
                     fprintf(stderr, "!b.front().value size=%zu, index 1\n", b.size());
@@ -909,24 +954,33 @@ int main(void)
                 // digi_free(&key);
                 break;
             }
+#endif
             case TEST_EMPLACE_FRONT: {
                 digi key = digi_init(value);
                 deq_digi_emplace_front(&a, &key);
-                b.emplace_front(DIGI{value});
+#if __cplusplus > 199711
+                b.emplace_front(DIGI(value));
+#else
+                b.push_front(DIGI(value));
+#endif
                 CHECK(a, b);
                 break;
             }
             case TEST_EMPLACE_BACK: {
                 digi key = digi_init(value);
                 deq_digi_emplace_back(&a, &key);
-                b.emplace_back(DIGI{value});
+#if __cplusplus > 199711
+                b.emplace_back(DIGI(value));
+#else
+                b.push_back(DIGI(value));
+#endif
                 CHECK(a, b);
                 break;
             }
             case TEST_ASSIGN: {
                 size_t assign_size = TEST_RAND(a.size) + 1;
                 deq_digi_assign(&a, assign_size, digi_init(value));
-                b.assign(assign_size, DIGI{value});
+                b.assign(assign_size, DIGI(value));
                 CHECK(a, b);
                 break;
             }
@@ -965,7 +1019,7 @@ int main(void)
                     value = TEST_RAND(2) ? value : *deq_digi_at(&a, index)->value;
                     digi key = digi_init(value);
                     it = deq_digi_find(&a, key);
-                    iter = find(b.begin(), b.end(), DIGI{value});
+                    iter = find(b.begin(), b.end(), DIGI(value));
                     found_a = !deq_digi_it_done(&it);
                     found_b = iter != b.end();
                     assert(found_a == found_b);
@@ -1025,7 +1079,7 @@ int main(void)
             }
             case TEST_COUNT: {
                 num_a = deq_digi_count(&a, digi_init((int)index));
-                num_b = std::count(b.begin(), b.end(), DIGI{(int)index});
+                num_b = std::count(b.begin(), b.end(), DIGI((int)index));
                 assert(num_a == num_b);
                 break;
             }
@@ -1040,7 +1094,7 @@ int main(void)
                 digi key = digi_init(value);
                 get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 found_a = deq_digi_find_range(&range_a1, key);
-                iter = find(first_b1, last_b1, DIGI{value});
+                iter = find(first_b1, last_b1, DIGI(value));
                 if (found_a)
                     assert(iter != last_b1);
                 else
@@ -1123,7 +1177,7 @@ int main(void)
                 int v = TEST_RAND(2) ? value : 0;
                 get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 num_a = deq_digi_count_range(&range_a1, digi_init(v));
-                num_b = count(first_b1, last_b1, DIGI{v});
+                num_b = count(first_b1, last_b1, DIGI(v));
                 assert(num_a == num_b);
                 break;
             }
@@ -1601,7 +1655,7 @@ int main(void)
                 { // 50% unsuccessful
                     long i = std::distance(bb.begin(), first_b2);
                     deq_digi_set(&aa, i, digi_init(0));
-                    bb[i] = DIGI{0};
+                    bb[i] = DIGI(0);
                 }
                 print_deq_range(range_a2);
                 it = deq_digi_search(&a, &range_a2);
@@ -1621,7 +1675,7 @@ int main(void)
                 { // 50% unsuccessful
                     long i = std::distance(bb.begin(), first_b2);
                     deq_digi_set(&aa, i, digi_init(0));
-                    bb[i] = DIGI{0};
+                    bb[i] = DIGI(0);
                 }
                 print_deq_range(range_a2);
                 range_a1 = deq_digi_begin(&a);
@@ -1640,7 +1694,7 @@ int main(void)
                 value = pick_random(&a);
                 LOG("search_n %zu %d\n", count, value);
                 it = deq_digi_search_n(&a, count, digi_init(value));
-                iter = search_n(b.begin(), b.end(), count, DIGI{value});
+                iter = search_n(b.begin(), b.end(), count, DIGI(value));
                 CHECK_ITER(it, b, iter);
                 LOG("found %s at %zu\n", deq_digi_it_done(&it) ? "no" : "yes",
                     deq_digi_it_index(&it));
@@ -1653,7 +1707,7 @@ int main(void)
                 LOG("search_n_range %zu %d\n", count, value);
                 print_deq_range(range_a1);
                 pos = deq_digi_search_n_range(&range_a1, count, digi_init(value));
-                iter = search_n(first_b1, last_b1, count, DIGI{value});
+                iter = search_n(first_b1, last_b1, count, DIGI(value));
                 CHECK_RANGE(*pos, iter, last_b1);
                 LOG("found %s at %zu\n", deq_digi_it_done(pos) ? "no" : "yes",
                     deq_digi_it_index(pos));
@@ -1848,7 +1902,7 @@ int main(void)
                 std::sort(b.begin(), b.end());
                 value = pick_random(&a);
                 it = deq_digi_lower_bound(&a, digi_init(value));
-                iter = lower_bound(b.begin(), b.end(), DIGI{value});
+                iter = lower_bound(b.begin(), b.end(), DIGI(value));
                 if (iter != b.end())
                 {
                     LOG("%d: %d vs %d\n", value, *it.ref->value, *iter->value);
@@ -1861,7 +1915,7 @@ int main(void)
                 std::sort(b.begin(), b.end());
                 value = pick_random(&a);
                 it = deq_digi_upper_bound(&a, digi_init(value));
-                iter = upper_bound(b.begin(), b.end(), DIGI{value});
+                iter = upper_bound(b.begin(), b.end(), DIGI(value));
                 if (iter != b.end())
                 {
                     LOG("%d: %d vs %d\n", value, *it.ref->value, *iter->value);
@@ -1875,7 +1929,7 @@ int main(void)
                 get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 value = pick_random(&a);
                 pos = deq_digi_lower_bound_range(&range_a1, digi_init(value));
-                iter = lower_bound(first_b1, last_b1, DIGI{value});
+                iter = lower_bound(first_b1, last_b1, DIGI(value));
                 if (iter != last_b1)
                 {
                     LOG("%d: %d vs %d\n", value, *pos->ref->value, *iter->value);
@@ -1889,7 +1943,7 @@ int main(void)
                 get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 value = pick_random(&a);
                 pos = deq_digi_upper_bound_range(&range_a1, digi_init(value));
-                iter = upper_bound(first_b1, last_b1, DIGI{value});
+                iter = upper_bound(first_b1, last_b1, DIGI(value));
                 if (iter != last_b1)
                 {
                     LOG("%d: %d vs %d\n", value, *pos->ref->value, *iter->value);
@@ -1902,7 +1956,7 @@ int main(void)
                 std::sort(b.begin(), b.end());
                 value = pick_random(&a);
                 found_a = deq_digi_binary_search(&a, digi_init(value));
-                found_b = binary_search(b.begin(), b.end(), DIGI{value});
+                found_b = binary_search(b.begin(), b.end(), DIGI(value));
                 LOG("%d: %d vs %d\n", value, (int)found_a, (int)found_b);
                 assert(found_a == found_b);
                 break;
@@ -1913,7 +1967,7 @@ int main(void)
                 get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 value = pick_random(&a);
                 found_a = deq_digi_binary_search_range(&range_a1, digi_init(value));
-                found_b = binary_search(first_b1, last_b1, DIGI{value});
+                found_b = binary_search(first_b1, last_b1, DIGI(value));
                 LOG("%d: %d vs %d\n", value, (int)found_a, (int)found_b);
                 assert(found_a == found_b);
                 break;
