@@ -51,6 +51,7 @@ int main(void)
 {
     INIT_SRAND;
     int fail = 0;
+    //fprintf(stderr, "__cplusplus %d\n", (int)__cplusplus);
 #if defined __GNUC__ && defined _GLIBCXX_RELEASE
     fprintf(stderr, "_GLIBCXX_RELEASE %d\n", (int)_GLIBCXX_RELEASE);
 #elif defined __GNUC__ && defined _GLIBCXX_PACKAGE__GLIBCXX_VERSION
