@@ -173,18 +173,23 @@ JOIN(A, fit)(A* self, size_t capacity)
 #endif
     if(MUST_ALIGN_16(T)) // reserve terminating \0 for strings
         overall++;
-    self->vector = (T*) realloc(self->vector, overall * sizeof(T));
-    if(MUST_ALIGN_16(T))
+    if (self->vector)
     {
+        self->vector = (T*) realloc(self->vector, overall * sizeof(T));
+        if(MUST_ALIGN_16(T))
+        {
 #if 0
-        static T zero;
-        for(size_t i = self->capacity; i < overall; i++)
-            self->vector[i] = zero;
+            static T zero;
+            for(size_t i = self->capacity; i < overall; i++)
+                self->vector[i] = zero;
 #else
-        if (overall > self->capacity)
-            memset (&self->vector[self->capacity], 0, (overall - self->capacity) * sizeof(T));
+            if (overall > self->capacity)
+                memset (&self->vector[self->capacity], 0, (overall - self->capacity) * sizeof(T));
 #endif
+        }
     }
+    else
+        self->vector = (T*) calloc(overall, sizeof(T));
     self->capacity = capacity;
 }
 

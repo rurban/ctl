@@ -239,7 +239,7 @@ tests/func/test_queue:    .cflags $(COMMON_H) ctl/queue.h ctl/deque.h \
 tests/func/test_set:      .cflags $(COMMON_H) ctl/set.h \
                           tests/func/test_set.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_map:      .cflags $(COMMON_H) ctl/map.h ctl/set.h \
+tests/func/test_map:      .cflags $(H) \
                           tests/func/test_map.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_unordered_set: .cflags $(COMMON_H) ctl/unordered_set.h \
@@ -251,7 +251,7 @@ tests/func/test_unordered_set_power2: .cflags $(COMMON_H) ctl/unordered_set.h \
 tests/func/test_unordered_set_cached: .cflags $(COMMON_H) ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
 	$(CXX) $(CXXFLAGS) -DCTL_USET_CACHED_HASH tests/func/test_unordered_set.cc -o $@
-tests/func/test_unordered_map: .cflags $(COMMON_H) ctl/unordered_map.h ctl/unordered_set.h \
+tests/func/test_unordered_map: .cflags $(H) \
                           tests/func/test_unordered_map.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_stack:    .cflags $(COMMON_H) ctl/stack.h ctl/deque.h \
