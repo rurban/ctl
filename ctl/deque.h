@@ -495,8 +495,18 @@ JOIN(A, resize)(A* self, size_t size, T value)
 static inline T*
 JOIN(A, erase_range)(A* self, T* first, T* last)
 {
-    deq_foreach_range(A, T, pos, first, last)
-        JOIN(A, erase)(self, pos);
+    I* i1 = (I*)first;
+    I* i2 = (I*)last;
+    CHECK_TAG(i1, NULL)
+    CHECK_TAG(i2, NULL)
+    size_t i = i1->index;
+    size_t e = i2->index;
+    if (i >= self->size)
+        return first;
+    for(; i < e; e--)
+    {
+        JOIN(A, erase_index)(self, i);
+    }
     return first;
 }
 
@@ -613,13 +623,21 @@ JOIN(A, sort_range)(A* self, size_t from, size_t to)
 static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
+    if (!self->size)
+        return 0;
     size_t erases = 0;
-    deq_foreach_ref(A, T, self, i, ref)
+    T* ref = JOIN(A, at)(self, 0);
+    for(size_t i = 0; i < self->size;)
+    {
+        ref = JOIN(A, at)(self, i);
         if(_match(ref))
         {
             JOIN(A, erase_index)(self, i);
             erases++;
         }
+        else
+            i++;
+    }
     return erases;
 }
 
