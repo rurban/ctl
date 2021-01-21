@@ -28,11 +28,10 @@ of the underlying container and pops them from the front.
 The function names are composed of the prefix **stack_**, the user-defined type
 **T** and the method name. E.g `stack_int` with `#define T int`.
 
-As opposed to vector, the elements of a stack are not stored contiguously:
-typical implementations use a sequence of individually allocated fixed-size
-arrays, with additional bookkeeping, which means indexed access to stack must
-perform two pointer dereferences, compared to vector's indexed access which
-performs only one.
+As opposed to vector, the elements of a stack (ie deque) are not stored
+contiguously, but in pages of fixed-size arrays, with additional bookkeeping,
+which means indexed access to deque must perform two pointer dereferences,
+compared to vector's indexed access which performs only one.
 
 The storage of a stack is automatically expanded and contracted as
 needed. Expansion of a stack is cheaper than the expansion of a vector
@@ -54,58 +53,62 @@ bytes, whichever is larger, on 64-bit libc++).
 
 ## Member functions
 
-[init](stack/init.md) `()`
+    A init ()
 
 constructs the stack.
 
-[free](stack/free.md) `(A* self)`
+    free (A* self)
 
 destructs the stack.
 
-[copy](stack/copy.md) `(A* self)`
+    A copy (A* self)
 
 returns a copy of the container.
 
 ## Element access
 
-[front](stack/top.md) `(A* self)`
+    T* front (A* self)
 
 access the first element
 
 ## Capacity
 
-[empty](stack/empty.md) `(A* self)`
+    int empty (A* self)
 
 checks whether the container is empty
 
-[size](stack/size.md) `(A* self)`
+    size_t size (A* self)
 
 returns the number of elements
 
-[max_size](stack/max_size.md) ()
+    `max_size ()`
 
-returns the maximum possible number of elements
+returns the maximum possible number of elements, hard-coded to 2GB (32bit).
 
 ## Modifiers
 
-[push](stack/push.md) `(A* self, T value)`
+    push (A* self, T value)
 
 Push element before top
 
-[emplace](stack/emplace.md) `(A* self, T values...)`
+    emplace (A* self, T* value)
 
-Push elements before top. C++11, NYI
+Push elements before top. C++11 _(NYI)_
 
-[pop](stack/pop.md) `(A* self)`
+    pop (A* self)
 
 Removes the first element
 
-[swap](stack/swap.md) `(A* self, A* other)`
+    swap (A* self, A* other)
 
 Swaps the contents
 
 ## Non-member functions
 
-[equal](stack/equal.md) `(A* self, A* other, int T_equal(T*, T*))`
+    int equal (A* self, A* other, int T_equal(T*, T*))
 
 Returns 0 or 1 if all elements are equal.
+
+
+No [algorithm](algorithm.md) applicable, as we have no iterators.
+

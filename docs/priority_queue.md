@@ -51,56 +51,59 @@ There is no `B` node type.
 
 ## Member functions
 
-[init](pqu/init.md) `(int T_compare(T*,T*))`
+    A init (int T_compare(T*,T*))
 
 constructs the priority_queue.
 
-[free](pqu/free.md) `(A* self)`
+    free (A* self)
 
 destructs the priority_queue.
 
-[copy](pqu/copy.md) `(A* self)`
+    A copy (A* self)
 
 returns a copy of the container.
 
 ## Element access
 
-[top](pqu/top.md) `(A* self)`
+    T* top (A* self)
 
 access the first element
 
 ## Capacity
 
-[empty](pqu/empty.md) `(A* self)`
+    int empty (A* self)
 
 checks whether the container is empty
 
-[size](pqu/size.md) `(A* self)`
+    size_t size (A* self)
 
 returns the number of elements
 
-[max_size](pqu/max_size.md) `()`
+    size_t max_size ()
 
-returns the maximum possible number of elements
+returns the maximum possible number of elements, hard-coded to 2GB (32bit).
 
-[capacity](pqu/capacity.md) `(A* self)`
+    size_t capacity (A* self)
 
 returns the number of elements that can be held in currently allocated storage
 
 ## Modifiers
 
-[push](pqu/push.md) `(A* self, T key)`
+    push (A* self, T value)
 
 inserts the element
 
-[emplace](pqu/emplace.md) `(A* self, T values...)`
+    emplace (A* self, T* value)
 
-constructs elements in-place. (C++11, NYI)
+constructs elements in-place. (C++11) _(NYI)_
 
-[pop](pqu/pop.md) `(A* self)`
+    pop (A* self)
 
 removes the top element
 
-[swap](pqu/swap.md) `(A* self, A* other)`
+    swap (A* self, A* other)
 
-swaps the contents
+swaps the contents of both containers.
+
+
+No [algorithm](algorithm.md) applicable, as we have no iterators.

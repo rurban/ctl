@@ -81,7 +81,7 @@ Optional equal `int (*equal)(T*, T*)`. If not set, maximal 2x compare will be ca
 
 ## Member functions
 
-    init ()
+    A init ()
 
 constructs the deque.
 
@@ -89,21 +89,21 @@ constructs the deque.
 
 destructs the deque.
 
-    copy (A* self)
+    A copy (A* self)
 
 returns a copy of the container.
 
 ## Element access
 
-    at (A* self, size_t index)
+    T* at (A* self, size_t index)
 
 access specified element with bounds checking
 
-    front (A* self)
+    T* front (A* self)
 
 access the first element
 
-    back (A* self)
+    T* back (A* self)
 
 access the last element
 
@@ -127,9 +127,9 @@ checks whether the container is empty
 
 returns the number of elements
 
-[max_size](deq/max_size.md) ()
+    `max_size ()`
 
-returns the maximum possible number of elements
+returns the maximum possible number of elements, hard-coded to 2GB (32bit).
 
     shrink_to_fit (A* self)
 
@@ -241,6 +241,7 @@ Currently it's a `stable_sort`, i.e. the order of equal elements is preserved.
     sort_range (A* self, I* first, I* last)
 
 Sorts the elements in the range `[first, last)` in non-descending order.
+
 
 See [algorithm](algorithm.md) for more.
 

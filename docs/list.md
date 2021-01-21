@@ -219,3 +219,5 @@ erases all elements satisfying specific criteria (C++20)
     int equal (A* self, A* other, int T_equal(T*, T*))
 
 Returns 0 or 1 if all elements are equal.
+
+See [algorithm](algorithm.md) for more.

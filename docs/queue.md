@@ -29,11 +29,10 @@ of the underlying container and pops them from the front.
 The function names are composed of the prefix **queue_**, the user-defined type
 **T** and the method name. E.g `queue_int` with `#define T int`.
 
-As opposed to vector, the elements of a queue are not stored contiguously:
-typical implementations use a sequence of individually allocated fixed-size
-arrays, with additional bookkeeping, which means indexed access to queue must
-perform two pointer dereferences, compared to vector's indexed access which
-performs only one.
+As opposed to vector, the elements of a queue (ie deque) are not stored
+contiguously, but in pages of fixed-size arrays, with additional bookkeeping,
+which means indexed access to deque must perform two pointer dereferences,
+compared to vector's indexed access which performs only one.
 
 The storage of a queue is automatically expanded and contracted as
 needed. Expansion of a queue is cheaper than the expansion of a vector
@@ -55,62 +54,65 @@ bytes, whichever is larger, on 64-bit libc++).
 
 ## Member functions
 
-[init](queue/init.md) `()`
+    A init ()
 
 constructs the queue.
 
-[free](queue/free.md) `(A* self)`
+    free (A* self)
 
 destructs the queue.
 
-[copy](queue/copy.md) `(A* self)`
+    A copy (A* self)
 
 returns a copy of the container.
 
 ## Element access
 
-[front](queue/front.md) `(A* self)`
+    T* front (A* self)
 
 access the first element
 
-[back](queue/back.md) `(A* self)`
+    T* back (A* self)
 
 access the last element
 
 ## Capacity
 
-[empty](queue/empty.md) `(A* self)`
+    int empty (A* self)
 
 checks whether the container is empty
 
-[size](queue/size.md) `(A* self)`
+    size_t size (A* self)
 
 returns the number of elements
 
-[max_size](queue/max_size.md) ()
+    `max_size ()`
 
-returns the maximum possible number of elements
+returns the maximum possible number of elements, hard-coded to 2GB (32bit).
 
 ## Modifiers
 
-[push](queue/push.md) `(A* self, T value)`
+    push (A* self, T value)
 
 Push element to the end
 
-[emplace](queue/emplace.md) `(A* self, T values...)`
+    emplace (A* self, T* value)
 
-Push elements to the end. C++11, NYI
+Push possibly uninitialized element to the end. (C++11) _(NYI)_
 
-[pop](queue/pop.md) `(A* self)`
+    pop (A* self)
 
 Removes the first element
 
-[swap](queue/swap.md) `(A* self, A* other)`
+    swap (A* self, A* other)
 
-Swaps the contents
+Swaps the contents of both containers.
 
 ## Non-member functions
 
-[equal](queue/equal.md) `(A* self, A* other, int T_equal(T*, T*))`
+    int equal (A* self, A* other, int T_equal(T*, T*))
 
 Returns 0 or 1 if all elements are equal.
+
+
+No [algorithm](algorithm.md) applicable, as we have no iterators.

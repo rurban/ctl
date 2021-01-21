@@ -52,151 +52,152 @@ other: !comp(a, b) && !comp(b, a).
 
 `I` being `set_T_it`    iterator type
 
+`IT` being `B*`, the generic type of iterators.
+
 ## Member functions
 
-[init](set/init.md) `(T_compare(T*, T*))`
+    A init (T_compare(T*, T*))
 
 constructs the set.
 
-[free](set/free.md) `(A* self)`
+    free (A* self)
 
 destructs the set.
 
-[assign](set/assign.md) `(A* self, A* other)`
+    assign (A* self, A* other)
 
 replaces the contents of the container.
 
-[copy](set/copy.md) `(A* self)`
+    A copy (A* self)
 
 returns a copy of the container.
 
 ## Element access
 
-[at](set/at.md) `(A* self, size_t index)`
+    T* at (A* self, size_t index)
 
 access specified element with bounds checking
 
 ## Iterators
 
-[begin](set/begin.md) `(A* self)`
+    B* begin (A* self)
 
 returns an iterator to the beginning
 
-[end](set/end.md) `(A* self)`
+    B* end (A* self)
 
 returns an iterator to the end
 
 ## Capacity
 
-[empty](set/empty.md) `(A* self)`
+    int empty (A* self)
 
 checks whether the container is empty
 
-[size](set/size.md) `(A* self)`
+    size_t size (A* self)
 
 returns the number of elements
 
-[max_size](set/max_size.md) ()
+    size_t max_size ()
 
-returns the maximum possible number of elements
+returns the maximum possible number of elements, hard-coded to 2GB (32bit).
 
 ## Modifiers
 
-[clear](set/clear.md) `(A* self)`
+    clear (A* self)
 
 clears the contents
 
-[insert](set/insert.md) `(A* self, T key)`
+    B* insert (A* self, T value)
 
-inserts the element `(C++17)`
+inserts the element. (C++17)
 
-[emplace](set/emplace.md) `(A* self, T values...)`
+    emplace (A* self, T* value)
 
-constructs elements in-place. (NYI)
+constructs elements in-place. _(NYI)_
 
-[emplace_hint](map/emplace_hint.md) `(A* self, I* pos, T values...)`
+    emplace_hint (A* self, B* pos, T* value)
 
-constructs elements in-place at position. (NYI)
+constructs elements in-place at position. _(NYI)_
 
-[erase](set/erase.md) `(A* self, T key)`
+    erase (A* self, T value)
 
-erases the element by value
+erases the element by value.
 
-[erase_it](set/erase.md) `(A* self, I* pos)`
+    erase_it (A* self, I* pos)
 
-erases the element at pos
+erases the element at pos.
 
-[erase_range](set/erase.md) `(A* self, I* first, I* last)`
+    erase_range (A* self, I* first, I* last)
 
-erases elements
+erases elements.
 
-[swap](set/swap.md) `(A* self, A* other)`
+    swap (A* self, A* other)
 
 swaps the contents
 
-[extract](set/extract.md) `(A* self, T key)`
+    extract (A* self, T key)
 
-extracts a node from the container. NYI
+extracts a node from the container. _(NYI)_
 
-[extract_it](set/extract.md) `(A* self, I* pos)`
+    extract_it (A* self, I* pos)
 
-extracts nodes from the container. NYI
+extracts nodes from the container. _(NYI)_
 
-[merge](set/merge.md) `(A* self)`
+    merge (A* self)
 
 splices nodes from another container
 
 ## Lookup
 
-[count](set/count.md) `(A* self)`
+    count (A* self)
 
 returns the number of elements matching specific key
 
-[find](set/find.md) `(A* self, T key)`
+    find (A* self, T key)
 
 finds element with specific key
 
-[contains](set/contains.md) `(A* self, T key)`
+    contains (A* self, T key)
 
 checks if the container contains element with specific key. (C++20)
 
-[equal_range](set/equal_range.md) `(A* self)`
+    equal_range (A* self)
 
-returns range of elements matching a specific key. (NYI)
+returns range of elements matching a specific key. _(NYI)_
 
-[lower_bound](set/lower_bound.md) `(A* self)`
+    lower_bound (A* self)
 
-returns an iterator to the first element not less than the given key. (NYI)
+returns an iterator to the first element not less than the given key. _(NYI)_
 
-[upper_bound](set/upper_bound.md) `(A* self)`
+    upper_bound (A* self)
 
-returns an iterator to the first element greater than the given key. (NYI)
+returns an iterator to the first element greater than the given key. _(NYI)_
 
 ## Observers
 
-[value_comp](set/value_comp.md) `(A* self)`
+    value_comp (A* self)
 
-Returns the function that compares keys in objects of type value_type T. (NYI)
+Returns the function that compares keys in objects of type value_type T. _(NYI)_
 
 ## Non-member functions
 
-[swap](set/swap.md) `(A* self)`
+    swap (A* self)
 
 specializes the swap algorithm
 
-[remove_if](set/remove_if.md) `(A* self, int T_match(T*))`
+    size_t remove_if (A* self, int T_match(T*))
 
 Removes all elements satisfying specific criteria.
 
-[erase_if](set/erase_if.md) `(A* self, int T_match(T*))`
+    erase_if (A* self, int T_match(T*))
 
-erases all elements satisfying specific criteria (C++20)
+erases all elements satisfying specific criteria. (C++20)
 
-[intersection](set/intersection.md) `(A* self, A* other)`
+    A intersection (A* self, A* other)
+    A union (A* self, A* other)
+    A difference (A* self, A* other)
+    A symmetric_difference (A* self, A* other)
 
-[union](set/union.md) `(A* self, A* other)`
 
-[difference](set/difference.md) `(A* self, A* other)`
-
-[symmetric_difference](set/symmetric_difference.md) `(A* self, A* other)`
-
+See [algorithm](algorithm.md) for more.
