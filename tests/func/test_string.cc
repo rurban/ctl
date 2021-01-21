@@ -16,7 +16,7 @@
         b.capacity(), b.capacity(), a.capacity == b.capacity() ? "" : "FAIL")
 
 // tested variants
-#if (defined _GLIBCXX_RELEASE && __cplusplus >= 201103L)
+#if (defined _GLIBCXX_RELEASE && __cplusplus >= 201103L && _GLIBCXX_RELEASE < 11)
 // Tested ok with g++ 10, g++ 7.5,
 // clang 10 (libc++ 11-18), apple clang 12 fail
 # define ASSERT_EQUAL_CAP(c, s) assert(s.capacity() == c.capacity);
