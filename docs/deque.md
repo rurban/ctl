@@ -25,7 +25,7 @@ parent for [queue](queue.md) and [stack](stack.md).
 
 ## DESCRIPTION
 
-deque ("double-ended queue") is an indexed sequence container that allows fast
+**deque** ("double-ended queue") is an indexed sequence container that allows fast
 insertion and deletion at both its beginning and its end. In addition, insertion
 and deletion at either end of a deque never invalidates pointers or references
 to the rest of the elements.
@@ -33,11 +33,10 @@ to the rest of the elements.
 The function names are composed of the prefix **deq_**, the user-defined type
 **T** and the method name. E.g `deq_int` with `#define T int`.
 
-As opposed to vector, the elements of a deque are not stored contiguously:
-typical implementations use a sequence of individually allocated fixed-size
-arrays, with additional bookkeeping, which means indexed access to deque must
-perform two pointer dereferences, compared to vector's indexed access which
-performs only one.
+As opposed to vector, the elements of a deque are not stored contiguously, but
+in pages of fixed-size arrays, with additional bookkeeping, which means indexed
+access to deque must perform two pointer dereferences, compared to vector's
+indexed access which performs only one.
 
 The storage of a deque is automatically expanded and contracted as
 needed. Expansion of a deque is cheaper than the expansion of a vector
@@ -63,64 +62,68 @@ The complexity (efficiency) of common operations on a `deque` is as follows:
 
 `I` being `deq_T_it`    iterator type
 
+`IT` iterators are currently specialized (on `index`).
+
+There is a `B` node type, but iterators use the `I*` type.
+
 ## Member fields
 
 with non-POD or NON_INTEGRAL types these fields must be set, if used with sort,
 merge, unique, ...
 
-[`.compare`](uset/.compare.md)
+    .compare
 
-Compare method `int (*compare)(T*, T*)`
+Compare method `int (*compare)(T*, T*)`, mandatory for non-integral types.
 
-[`.equal`](uset/.equal.md)
+    .equal
 
 Optional equal `int (*equal)(T*, T*)`. If not set, maximal 2x compare will be called.
 
 ## Member functions
 
-[init](deq/init.md) `()`
+    init ()
 
 constructs the deque.
 
-[free](deq/free.md) `(A* self)`
+    free (A* self)
 
 destructs the deque.
 
-[copy](deq/copy.md) `(A* self)`
+    copy (A* self)
 
 returns a copy of the container.
 
 ## Element access
 
-[at](deq/at.md) `(A* self, size_t index)`
+    at (A* self, size_t index)
 
 access specified element with bounds checking
 
-[front](deq/front.md) `(A* self)`
+    front (A* self)
 
 access the first element
 
-[back](deq/back.md) `(A* self)`
+    back (A* self)
 
 access the last element
 
 ## Iterators
 
-[begin](deq/begin.md) `(A* self)`
+    begin (A* self)
 
 returns an iterator to the beginning
 
-[end](deq/end.md) `(A* self)`
+    end (A* self)
 
 returns an iterator to the end
 
 ## Capacity
 
-[empty](deq/empty.md) `(A* self)`
+    empty (A* self)
 
 checks whether the container is empty
 
-[size](deq/size.md) `(A* self)`
+    size (A* self)
 
 returns the number of elements
 
@@ -128,128 +131,116 @@ returns the number of elements
 
 returns the maximum possible number of elements
 
-[shrink_to_fit](deq/shrink_to_fit.md) `(A* self)`
+    shrink_to_fit (A* self)
 
 reduces memory usage by freeing unused memory.
 
 ## Modifiers
 
-[assign](deq/assign.md) `(A* self, size_t count, T default_value)`
+    assign (A* self, size_t count, T default_value)
 
 resizes and sets count elements to the default value.
 
-[clear](deq/clear.md) `(A* self)`
+    clear (A* self)
 
 clears the contents
 
-[insert](deq/insert.md) `(A* self, size_t index, T value)`
+    insert (A* self, size_t index, T value)
 
-inserts the element at index.
+inserts the element at index. _(will be replaced by `insert_it` later)_
 
-[insert_it](deq/insert.md) `(A* self, I* pos, T value)`
+    I* insert_it (A* self, I* pos, T value)
 
-inserts value before pos.
+inserts value before pos. _(will be removed later)_
 
-[insert_count](deq/insert.md) `(A* self, I* pos, size_t count, T value)`
+    I* insert_count (A* self, I* pos, size_t count, T value)
 
 inserts count values before pos.
 
-[insert_range](deq/insert.md) `(A* self, I* pos, I* first, I* last)`
+    I* insert_range (A* self, I* pos, I* first, I* last)
 
 inserts values from range [first, last) before pos.
 
-[emplace](deq/emplace.md) `(A* self, I* pos, T* value)`
+    emplace (A* self, I* pos, T* value)
 
 Inserts the value reference into the container directly before pos.
 
-[erase](deq/erase.md) `(A* self, size_t index)`
+    erase (A* self, size_t index)
 
-erases the element at index
+erases the element at index.  _(will be replaced by `erase_it` later)_
 
-[erase_it](deq/erase.md) `(A* self, I* pos)`
+    I* erase_it (A* self, I* pos)
 
-erases the element at pos
+erases the element at pos. _(will be removed later)_
 
-[erase_range](deq/erase.md) `(A* self, I* first, I* last)`
+    I* erase_range (A* self, I* first, I* last)
 
 erases elements
 
-[push_front](deq/push_front.md) `(A* self, T value)`
+    push_front (A* self, T value)
 
 inserts an element to the beginning
 
-[emplace_front](deq/emplace_front.md) `(A* self, T* value)`
+    emplace_front (A* self, T* value)
 
 inserts the value reference to the beginning.
 
-[push_back](deq/push_back.md) `(A* self, T value)`
+    push_back (A* self, T value)
 
 inserts an element to the end.
 
-[emplace_back](map/emplace_back.md) `(A* self, T* value)`
+    emplace_back (A* self, T* value)
 
 adds the value reference to the end.
 
-[pop_front](deq/pop_front.md) `(A* self)`
+    pop_front (A* self)
 
 removes the first element
 
-[pop_back](deq/pop_back.md) `(A* self)`
+    pop_back (A* self)
 
 removes the last element
 
-[resize](deq/resize.md) `(A* self, size_t count, T default_value)`
+    resize (A* self, size_t count, T default_value)
 
 Resizes the container to contain count elements.
 
-[swap](deq/swap.md) `(A* self, A* other)`
+    swap (A* self, A* other)
 
 swaps the contents
 
 ## Non-member functions
 
-[find](deq/find.md) `(A* self, T value)`
+    T* find (A* self, T value)
 
 finds element with specific value
 
-[find_if](algorithm/find_if.md) `(A* self, int _match(T*))`
+    T* find_if (A* self, int _match(T*))
 
 finds element by predicate
 
-[find_if_not](algorithm/find_if.md) `(A* self, int _match(T*))`
+    T* find_if_not (A* self, int _match(T*))
 
 finds element by predicate
 
-[remove_if](deq/remove_if.md) `(A* self, int T_match(T*))`
+    size_t remove_if (A* self, int T_match(T*))
+    size_t erase_if (A* self, int T_match(T*)) (C++20)
 
-Removes all elements satisfying specific criteria.
+Remove all elements satisfying specific criteria.
 
-[erase_if](deq/erase_if.md) `(A* self, int T_match(T*))`
-
-erases all elements satisfying specific criteria (C++20)
-
-[equal](deq/equal.md) `(A* self, A* other)`
+    int equal (A* self, A* other)
 
 Returns 0 or 1 if all elements are equal.
 
-[sort](deq/sort.md) `(A* self)`
+    sort (A* self)
 
 Sorts the elements in non-descending order.
-Currently it's a stable_sort, i.e. the order of equal elements is preserved.
-(merge-sort)
+Currently it's a `stable_sort`, i.e. the order of equal elements is preserved.
+(a merge-sort)
 
-[sort_range](deq/sort.md) `(A* self, I* first, I* last)`
+    sort_range (A* self, I* first, I* last)
 
 Sorts the elements in the range `[first, last)` in non-descending order.
 
-[all_of](algorithm/all_of.md) `(A* self, int _match(T*))`
+See [algorithm](algorithm.md) for more.
 
-[any_of](algorithm/any_of.md) `(A* self, int _match(T*))`
-
-[none_of](algorithm/none_of.md) `(A* self, int _match(T*))`
-
-[all_of_range](algorithm/all_of.md) `(A* self, I* first, I* last, int _match(T*))`
-
-[any_of_range](algorithm/any_of.md) `(A* self, I* first, I* last, int _match(T*))`
-
-[none_of_range](algorithm/none_of.md) `(A* self, I* first, I* last, int _match(T*))`

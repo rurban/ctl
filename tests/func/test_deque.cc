@@ -286,6 +286,7 @@ main(void)
             TEST(INSERT) \
             TEST(ASSIGN) \
             TEST(REMOVE_IF) \
+            TEST(ERASE_IF) \
             TEST(EQUAL) \
             TEST(FIND)
 
@@ -703,6 +704,19 @@ main(void)
                 {
                     deq_digi_remove_if(&a, digi_is_odd);
                     b.erase(std::remove_if(b.begin(), b.end(), DIGI_is_odd), b.end());
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_ERASE_IF:
+                {
+#if __cpp_lib_erase_if > 202002L
+                    size_t num_a = deq_digi_erase_if(&a, digi_is_odd);
+                    size_t num_b = std::erase_if(b.begin(), b.end(), DIGI_is_odd);
+                    assert (num_a == num_b);
+#else
+                    deq_digi_erase_if(&a, digi_is_odd);
+                    b.erase(std::remove_if(b.begin(), b.end(), DIGI_is_odd), b.end());
+#endif
                     CHECK(a, b);
                     break;
                 }
