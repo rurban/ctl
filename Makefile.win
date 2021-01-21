@@ -10,7 +10,7 @@ LONG = 0
 SANITIZE = 0
 SRAND = 1
 
-CFLAGS  = /I. /Ot /DSRAND /Wall /nologo
+CFLAGS  = /I. /Ot /DSRAND /Wall /nologo /Zc:__cplusplus
 #CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
 #CFLAGS += -march=native
 #CFLAGS += -g
@@ -250,6 +250,12 @@ debug:
 #                tests/func/test_$(CTL) && tests/func/test_$(CTL); do true; done"; \
 #	else timeout 30m sh -c "while $(MAKE) -s SANITIZE=1 LONG=1; do true; done"; fi
 #
+test-cl:
+	$(MAKE) CXX="cl /std:c++latest"
+	$(MAKE) CXX="cl /std:c++20"
+	$(MAKE) CXX="cl /std:c++17"
+	$(MAKE) CXX="cl /std:c++14"
+
 #define expand
 #	@$(CC) $(CFLAGS) $(1).h -E $(2) | clang-format -style=webkit
 #endef

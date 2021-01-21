@@ -277,6 +277,18 @@ stress-long:
                 tests/func/test_$(CTL) && tests/func/test_$(CTL); do true; done"; \
 	else timeout 30m sh -c "while $(MAKE) -s SANITIZE=1 LONG=1; do true; done"; fi
 
+.PHONY: test-c++ test-g++ test-clang++ test-icc test-pgc++
+test-c++:
+	for std in 20 2a 17 14 11 03 98; do $(MAKE) CXX="c++ -std=c++$$std"; done
+test-g++:
+	for std in 20 2a 17 14 11 03 98; do $(MAKE) CXX="g++ -std=c++$$std"; done
+test-clang++:
+	for std in 20 2a 17 14 11 03 98; do $(MAKE) CXX="clang++ -std=c++$$std"; done
+test-icc:
+	for std in 17 14 11 0x; do $(MAKE) CXX="icc -static-intel -std=c++$$std"; done
+test-pgc++:
+	for std in 20 2a 17 14 11 03 98; do $(MAKE) CXX="pgc++ -std=c++$$std"; done
+
 ALWAYS:
 
 # \
