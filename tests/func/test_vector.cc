@@ -163,7 +163,7 @@ main(void)
                 LOG("mode GROWTH\n");
                 for(size_t pushes = 0; pushes < size; pushes++)
                 {
-                    const int value = TEST_RAND(INT_MAX);
+                    const int value = TEST_RAND(TEST_MAX_VALUE);
                     vec_digi_push_back(&a, digi_init(value));
                     b.push_back(DIGI{value});
                 }

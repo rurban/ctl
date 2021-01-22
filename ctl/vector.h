@@ -582,14 +582,17 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    vec_foreach(T, self, ref)
+    if (!self->size)
+        return 0;
+    for(size_t i = 0; i < self->size; )
     {
-        if(_match(ref))
+        if(_match(&self->vector[i]))
         {
-            size_t index = ref - &self->vector[0];
-            JOIN(A, erase_index)(self, index);
+            JOIN(A, erase_index)(self, i);
             erases++;
         }
+        else
+            i++;
     }
     return erases;
 }
