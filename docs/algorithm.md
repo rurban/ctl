@@ -73,42 +73,42 @@ applies a block with iter to the first n elements of a sequence.
  
 returns the number of elements satisfying specific criteria.
 
-    mismatch (I* first1, I *last1, I* first2)
-    mismatch_range (I* first1, I *last1, I* first2, I* last2) (C++20)
+    I mismatch (I* first1, I *last1, I* first2)
+    I mismatch_range (I* first1, I *last1, I* first2, I* last2) (C++20)
  
 finds the first position where two ranges differ. _(NYI)_
 
-    find (A* self, T key)
-    find_if (A* self, int _match(T*))
-    find_if_not (A* self, int _match(T*)) (C++11)
-    find_range (A* self, IT first, IT last, T key) (C++20)
-    find_if_range (IT first, IT last, int _match(T*)) (C++20)
-    find_if_not_range (IT first, IT last, int _match(T*)) (C++20)
+    I find (A* self, T* value)
+    I find_if (A* self, int _match(T*))
+    I find_if_not (A* self, int _match(T*)) (C++11)
+    I find_range (A* self, IT first, IT last, T value) (C++20)
+    I find_if_range (IT first, IT last, int _match(T*)) (C++20)
+    I find_if_not_range (IT first, IT last, int _match(T*)) (C++20)
  
-finds the first element satisfying specific criteria. Returns IT. Does not
-consume/free the T key.
+finds the first element satisfying specific criteria. Returns a fresh iterator
+I. Does not consume/free the T key.
 
-    find_end
-    find_end_range (C++20)
+    I find_end
+    I find_end_range (C++20)
  
 finds the last sequence of elements in a certain range. _(NYI)_
 
-    find_first_of
-    find_first_of_range (C++20)
+    I find_first_of
+    I find_first_of_range (C++20)
  
 searches for any one of a set of elements. _(NYI)_
 
-    adjacent_find
-    adjacent_find_range (C++20)
+    I adjacent_find
+    I adjacent_find_range (C++20)
  
 finds the first two adjacent items that are equal (or satisfy a given predicate). _(NYI)_
 
-    search
-    search_range (C++20)
+    I search
+    I search_range (C++20)
  
 searches for a range of elements. _(NYI)_
 
-    search_n
+    I search_n
  
 searches a range for a number of consecutive copies of an element. _(NYI)_
 
@@ -285,13 +285,13 @@ locates the partition point of a partitioned range. _(NYI)_
 
 ## Sorting operations
 
-    is_sorted (C++11)
-    is_sorted_range (C++20)
+    bool is_sorted (C++11)
+    bool is_sorted_range (C++20)
   
 checks whether a range is sorted into ascending order. _(NYI)_
 
-    is_sorted_until (C++11)
-    is_sorted_until_range (C++20)
+    bool is_sorted_until (C++11)
+    bool is_sorted_until_range (C++20)
  
 finds the largest sorted subrange. _(NYI)_
 
@@ -322,13 +322,13 @@ partially sorts the given range making sure that it is partitioned by the given 
 
 ## Binary search operations (on sorted ranges)
 
-    lower_bound
-    lower_bound_range (C++20)
+    I lower_bound
+    I lower_bound_range (C++20)
   
 returns an iterator to the first element not less than the given value. _(NYI)_
 
-    upper_bound
-    upper_bound_range (C++20)
+    I upper_bound
+    I upper_bound_range (C++20)
 
 returns an iterator to the first element greater than a certain value. _(NYI)_
 
@@ -337,8 +337,8 @@ returns an iterator to the first element greater than a certain value. _(NYI)_
   
 determines if an element exists in a certain range. _(NYI)_
 
-    equal_range
-    equal_range_range (C++20)
+    bool equal_range
+    bool equal_range_range (C++20)
   
 returns range of elements matching a specific key. _(NYI)_
 
@@ -383,13 +383,13 @@ computes the union of two sets. _(range NYI)_
  
 ## Heap operations
 
-    is_heap (C++11)
-    is_heap_range (C++20)
+    bool is_heap (C++11)
+    bool is_heap_range (C++20)
  
 checks if the given range is a max heap. _(NYI)_
 
-    is_heap_until (C++11)
-    is_heap_until_range (C++20)
+    bool is_heap_until (C++11)
+    bool is_heap_until_range (C++20)
 
 finds the largest subrange that is a max heap. _(NYI)_
 
@@ -415,33 +415,33 @@ turns a max heap into a range of elements sorted in ascending order. _(NYI)_
 
 # Minimum/maximum operations
 
-    max
-    max_range (C++20)
+    T max
+    T max_range (C++20)
  
 returns the greater of the given values. _(NYI)_
 
-    max_element
-    max_element_range (C++20)
+    T max_element
+    T max_element_range (C++20)
   
 returns the largest element in a range. _(NYI)_
 
-    min
-    min_range (C++20)
+    T min
+    T min_range (C++20)
  
 returns the smaller of the given values. _(NYI)_
 
-    min_element
-    min_element_range (C++20)
+    T min_element
+    T min_element_range (C++20)
  
 returns the smallest element in a range. _(NYI)_
 
-    minmax (C++11)
-    minmax_range (C++20)
+    T minmax (C++11)
+    T minmax_range (C++20)
  
 returns the smaller and larger of two elements. _(NYI)_
 
-    minmax_element (C++11)
-    minmax_element_range (C++20)
+    T minmax_element (C++11)
+    T minmax_element_range (C++20)
  
 returns the smallest and the largest elements in a range. _(NYI)_
  
@@ -457,19 +457,19 @@ clamps a value between a pair of boundary values. _(NYI)_
  
 determines if two sets of elements are the same
  
-    lexicographical_compare
-    lexicographical_compare_range (C++20)
+    int lexicographical_compare
+    int lexicographical_compare_range (C++20)
  
 returns true if one range is lexicographically less than another. _(NYI)_
  
-    lexicographical_compare_three_way (C++20)
+    int lexicographical_compare_three_way (C++20)
  
 compares two ranges using three-way comparison. _(NYI)_
 
 ## Permutation operations
 
-    is_permutation (C++11)
-    is_permutation_range (C++20)
+    bool is_permutation (C++11)
+    bool is_permutation_range (C++20)
  
 determines if a sequence is a permutation of another sequence. _(NYI)_
 

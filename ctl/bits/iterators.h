@@ -25,51 +25,27 @@
 # define IT B*
 /* return B* it node. end is NULL */
 
-/* Fast typed iters */
-/* list iters loose the I* property at the start of the
- * loop already and turn into simple B* */
+/* Fast typed iters. without _ref we dont set ref, just node */
 # define list_foreach(A, self, pos)                     \
     if ((self)->size)                                   \
-        for(JOIN(A, node)* pos = JOIN(A, begin)(self);  \
-            pos != NULL;                                \
-            pos = JOIN(JOIN(A, it), next)(pos))
-# define list_foreach_ref(A, T, self, pos, ref)         \
-    T* ref = JOIN(A, front)(self);                      \
+        for(JOIN(A, it) pos = JOIN(A, begin)(self);     \
+            pos.node != NULL;                           \
+            pos.node = pos.node->next)
+# define list_foreach_ref(A, self, pos)                 \
     if ((self)->size)                                   \
-        for(JOIN(A, node)* pos = JOIN(A, begin)(self);  \
-            pos != NULL;                                \
-            pos = JOIN(JOIN(A, it), next)(pos),         \
-              ref = &pos->value)
+        for(JOIN(A, it) pos = JOIN(A, begin)(self);     \
+            pos.node != NULL;                           \
+            JOIN(JOIN(A, it), next)(&pos))
 # define list_foreach_range(A, pos, first, last)        \
     if (first)                                          \
-        for(JOIN(A, node)* pos = first;                 \
-            pos != last;                                \
-            pos = JOIN(JOIN(A, it), next)(pos))
-# define list_foreach_range_ref(A, T, pos, ref, first, last) \
-    T* ref = first ? first->value : NULL;               \
+        for(JOIN(A, node) pos = *first;                 \
+            pos.node != last->node;                     \
+            pos.node = pos.node->next)
+# define list_foreach_range_ref(A, pos, first, last)    \
     if (first)                                          \
-        for(JOIN(A, node)* pos = first;                 \
-            pos != last;                                \
-            pos = JOIN(A, JOIN(A, it)->next)(pos),      \
-                ref = &pos->value)
-
-# ifdef DEBUG
-#  if defined(_ASSERT_H) && !defined(NDEBUG)
-#  define CHECK_TAG(it, ret)                            \
-     if (it->tag != CTL_LIST_TAG)                       \
-     {                                                  \
-         assert (it->tag == CTL_LIST_TAG &&             \
-                 "invalid list iterator");              \
-         return ret;                                    \
-     }
-#  else
-#  define CHECK_TAG(it, ret)                            \
-     if (it->tag != CTL_LIST_TAG)                       \
-         return ret;
-#  endif
-# else
-#  define CHECK_TAG(it, ret)
-# endif
+        for(JOIN(A, it) pos = *first;                   \
+            pos.node != last->node;                     \
+            JOIN(A, JOIN(A, it), next)(&pos))
 
 #else
 

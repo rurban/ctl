@@ -2,7 +2,7 @@
    This closed, linked list hashing has the advantage of keeping pointers
    into the set valid.
    The faster open addressing moves pointers. Maybe add another class for open
-   hashes (hmap, hashtable).
+   hashes (hmap, hashtable, open_hashtable, ohash).
 
    SPDX-License-Identifier: MIT
 
@@ -27,7 +27,7 @@ position to the top in each access, such as find and contains, not only insert.
 
 */
 #ifndef T
-#error "Template type T undefined for <unordered_set.h>"
+# error "Template type T undefined for <unordered_set.h>"
 #endif
 
 #ifdef CTL_USET_GROWTH_PRIMED // the default
@@ -82,7 +82,10 @@ typedef struct A
 
 typedef struct I
 {
-    CTL_B_ITER_FIELDS;
+    B *node;
+    T* ref;
+    //B* end;
+    A* container;
     size_t bucket_index;
 } I;
 
@@ -99,34 +102,50 @@ static I _uset_begin_it = {0};
 static I _uset_end_it = {0};
 #endif
 
-static inline B*
+static inline I
 JOIN(A, begin)(A* self)
 {
-    I *iter = &_uset_begin_it;
-#ifdef DEBUG
-    iter->tag = CTL_LIST_TAG;
-#endif
+    I iter = _uset_begin_it;
+    iter.node = NULL;
+    iter.container = self;
     for(size_t i = 0; i < self->bucket_count; i++)
     {
         B* node = self->buckets[i];
         if(node) {
-            iter->node = *node;
+            iter.node = node;
             //LOG ("begin %lu %p\n", i, (void*)node);
-            return (B*)iter;
+            return iter;
         }
     }
-    return (B*)iter;
+    return iter;
 }
 
-static inline B*
+static inline I
 JOIN(A, end)(A* self)
 {
-    I *iter = &_uset_end_it;
-    iter->container = self;
-#ifdef DEBUG
-    iter->tag = CTL_LIST_TAG;
-#endif
-    return (B*)iter;
+    I iter = _uset_end_it;
+    iter.node = NULL;
+    iter.container = self;
+    return iter;
+}
+
+static inline T*
+JOIN(I, ref)(I* iter)
+{
+    return iter->node ? &iter->node->value : NULL;
+}
+
+// we dont support uset ranges so far
+static inline int
+JOIN(I, done)(I* iter)
+{
+    return iter->node == NULL;
+}
+static inline int
+JOIN(I, isend)(I* iter, I* last)
+{
+    (void) last;
+    return iter->node == NULL;
 }
 
 static inline size_t
@@ -157,43 +176,55 @@ JOIN(I, update)(I* self)
     self->bucket_index = BUCKET_INDEX(self);
 }
 
+/*
 static inline int
-JOIN(I, scan)(I* self)
+JOIN(I, scan)(I* iter)
 {
-    for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
+    for(size_t i = iter->bucket_index + 1; i < iter->container->bucket_count; i++)
     {
-        self->node.next = self->container->buckets[i];
-        if(self->node.next)
+        iter->node.next = iter->container->buckets[i];
+        if(iter->node.next)
         {
-            self->bucket_index = i;
+            iter->bucket_index = i;
             //JOIN(I, update)(self);
             return 1;
         }
     }
     return 0;
 }
-
-/*
-  Need two states: if next is not empty, we are still in the bucket chain, keep bucket_index.
-  if empty, we need to advance to the next bucket. bucket_index++
-  Must not be a simple node, must be a B* node embedded into an I* iter.
 */
-static inline B*
-JOIN(I, next)(B* iter)
+
+/* Need two states: if next is not empty, we are still in the bucket chain, keep bucket_index.
+ * if empty, we need to advance to the next bucket. bucket_index++.
+ * Note: libstdc++ uses next pointers at the end of the chain to the next bucket
+ * instead, so next does not need the bucket_index.
+ */
+static inline void
+JOIN(I, next)(I* iter)
 {
-    I* self = (I*)iter;
-    CHECK_TAG(self, NULL);
-    if(self->node.next == NULL)
+    if(iter->node.next == NULL)
     {
-        for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
-            if((self->node.next = self->container->buckets[i]))
+        for(size_t i = iter->bucket_index + 1; i < iter->container->bucket_count; i++)
+            if((iter->node.next = iter->container->buckets[i]))
             {
-                self->bucket_index = BUCKET_INDEX(self);
+                iter->bucket_index = BUCKET_INDEX(self);
                 return iter;
             }
     }
     else
-        self->bucket_index = BUCKET_INDEX(self);
+        iter->bucket_index = BUCKET_INDEX(self);
+}
+
+static inline I*
+JOIN(I, advance)(I* iter, long i)
+{
+    if (i < 0)
+    {
+        i = iter->container->size + i;
+        iter->node = JOIN(A, begin)(iter->container);
+    }
+    for (int j = 0; j < i; j++)
+        JOIN(I, next)(iter);
     return iter;
 }
 
@@ -201,6 +232,14 @@ static inline T*
 JOIN(I, ref)(B* node)
 {
     return &node->value;
+}
+
+// no ranges, ignore last iters
+static inline void
+JOIN(I, range)(I* begin, I* end)
+{
+    (void) begin;
+    (void) end;
 }
 
 /*
