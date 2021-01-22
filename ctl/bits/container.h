@@ -56,14 +56,12 @@ JOIN(A, equal)(A* self, A* other)
 {
     if(JOIN(A, size)(self) != JOIN(A, size)(other))
         return 0;
-    IT i1 = JOIN(A, begin)(self);
-    IT i2 = JOIN(A, begin)(other);
-    IT e1 = JOIN(A, end)(self);
-    IT e2 = JOIN(A, end)(other);
-    while(i1 != e1 && i2 != e2)
+    I i1 = JOIN(A, begin)(self);
+    I i2 = JOIN(A, begin)(other);
+    while(!JOIN(I, done)(&i1) && !JOIN(I, done)(&i2))
     {
-        T* r1 = JOIN(I, ref)(i1);
-        T* r2 = JOIN(I, ref)(i2);
+        T* r1 = JOIN(I, ref)(&i1);
+        T* r2 = JOIN(I, ref)(&i2);
         if(self->equal)
         {
             if(!self->equal(r1, r2))
@@ -75,8 +73,8 @@ JOIN(A, equal)(A* self, A* other)
                self->compare(r2, r1))
                 return 0;
         }
-        i1 = JOIN(I, next)(i1);
-        i2 = JOIN(I, next)(i2);
+        JOIN(I, next)(&i1);
+        JOIN(I, next)(&i2);
     }
     return 1;
 }

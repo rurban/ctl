@@ -16,7 +16,7 @@
 #endif
 #define I JOIN(A, it)
 //#undef IT
-#define IT T*
+//#define IT T*
 
 #include <ctl/ctl.h>
 #include <ctl/bits/iterators.h>
@@ -48,11 +48,9 @@ typedef struct A
 typedef struct I
 {
     T* ref;
-    A* container;
     size_t index;
-#ifdef DEBUG
-    uint32_t tag;
-#endif
+    size_t end;
+    A* container;
 } I;
 
 #undef _deq_begin_it
@@ -60,16 +58,13 @@ typedef struct I
 #undef _deq_end_it
 #define _deq_end_it JOIN(JOIN(_deq, T), end_it)
 
-static I _deq_begin_it = {NULL, NULL, 0
-#ifdef DEBUG
-    , CTL_DEQ_TAG
+#ifdef __cplusplus
+static I _deq_begin_it = {};
+static I _deq_end_it = {};
+#else
+static I _deq_begin_it = {0};
+static I _deq_end_it = {0};
 #endif
-};
-static I _deq_end_it = {NULL, NULL, 0
-#ifdef DEBUG
-    , CTL_DEQ_TAG
-#endif
-};
 
 static inline B**
 JOIN(A, first)(A* self)
@@ -126,101 +121,104 @@ JOIN(A, back)(A* self)
     return JOIN(A, at)(self, self->size - 1);
 }
 
-// Embed index and container into the iter, returned as T*.
-// Note that we can only have one single deq iter per deque.
-static inline T*
+static inline I
 JOIN(A, begin)(A* self)
 {
-    I *iter = &_deq_begin_it;
-    iter->ref = JOIN(A, at)(self, 0);
-    //only valid if not empty
-    //iter.value = *JOIN(A, first)(self);
-    iter->index = 0;
-    iter->container = self;
-    return (T*)iter;
+    I iter = _deq_begin_it;
+    iter.ref = JOIN(A, front)(self); // unchecked
+    iter.index = 0;
+    iter.end = self->size;
+    iter.container = self;
+    return iter;
 }
 
-// We support `it.advance(a.end() - 1)`, so we must create a fresh iter
-// and embed the full iter into the T*.
-// Note that we can only have one single deq end iter per deque.
-static inline T*
+// We support `it.advance(a.end(), -1)`, so we must create a fresh iter.
+static inline I
 JOIN(A, end)(A* self)
 {
-    I* iter = &_deq_end_it;
-    iter->ref = JOIN(A, back)(self);
-    iter->container = self;
-    iter->index = self->size;
-    return (T*)iter;
+    I iter = _deq_end_it;
+    iter.ref = JOIN(A, back)(self);
+    iter.index = self->size;
+    iter.end = self->size;
+    iter.container = self;
+    return iter;
 }
 
-static inline I*
-JOIN(I, iter)(T* self)
+// create an iter from an index
+static inline I
+JOIN(B, iter)(A* self, size_t index)
 {
-    I* iter = (I*)self;
-    CHECK_TAG(iter, 0)
+    I iter = _deq_begin_it;
+    iter.ref = JOIN(A, at)(self, index); // bounds-checked
+    iter.container = self;
+    iter.index = index;
+    iter.end = self->size;
     return iter;
 }
 
 static inline T*
-JOIN(I, ref)(T* value)
+JOIN(I, ref)(I* iter)
 {
-    return value;
+    return iter->ref;
 }
 
 static inline size_t
-JOIN(I, index)(T* self)
+JOIN(I, index)(I* iter)
 {
-    I* iter = (I*)self;
-    CHECK_TAG(iter, 0)
     return iter->index;
 }
 
 static inline int
-JOIN(I, done)(T* self)
+JOIN(I, isend)(I* iter, I* last)
 {
-    return self != JOIN(A, end)(((I*)self)->container);
+    return iter->index == last->index;
 }
 
-// must be constructed via begin or end, not first, last
-static inline T*
-JOIN(I, next)(T* self)
+static inline int
+JOIN(I, done)(I* iter)
 {
-    I* iter = (I*)self;
-    CHECK_TAG(iter, NULL)
+    return iter->index == iter->end;
+}
+
+static inline I*
+JOIN(I, next)(I* iter)
+{
     iter->index++;
-    if(iter->index == iter->container->size)
-        return JOIN(A, end)(iter->container);
-    else
-    {
+    if(iter->index < iter->end)
         iter->ref = JOIN(A, at)(iter->container, iter->index);
-        return (T*)iter;
-    }
+    return iter;
 }
 
-static inline T*
-JOIN(I, advance)(T* self, long i)
+static inline void
+JOIN(I, range)(I* begin, I* end)
 {
-    I* iter = (I*)self;
-    CHECK_TAG(iter, NULL)
+    begin->end = end->index;
+}
+
+static inline I*
+JOIN(I, advance)(I* iter, long i)
+{
     // error case: overflow => end or NULL?
-    if(iter->index + i >= iter->container->size || (long)iter->index + i < 0)
-        return JOIN(A, end)(iter->container);
+    if(iter->index + i >= iter->end ||
+       iter->index + i >= iter->container->size ||
+       (long)iter->index + i < 0)
+    {
+        iter->index = iter->end;
+        iter->ref = NULL;
+    }
     else
     {
         iter->index += i;
         iter->ref = JOIN(A, at)(iter->container, iter->index);
-        return (T*)iter;
     }
+    return iter;
 }
 
 static inline long
-JOIN(I, distance)(T* self, T* other)
+JOIN(I, distance)(I* iter, I* other)
 {
-    I* iter1 = (I*)self;
-    I* iter2 = (I*)other;
-    CHECK_TAG(iter1, 0)
-    CHECK_TAG(iter2, 0)
-    return iter2->index - iter1->index;
+    // wrap around?
+    return other->index - iter->index;
 }
 
 #include <ctl/bits/container.h>
@@ -403,9 +401,9 @@ JOIN(A, erase_index)(A* self, size_t index)
 }
 
 static inline size_t
-JOIN(A, erase)(A* self, T* pos)
+JOIN(A, erase)(A* self, I* pos)
 {
-    return JOIN(A, erase_index)(self, JOIN(I, index)(pos));
+    return JOIN(A, erase_index)(self, pos->index);
 }
 
 static inline void
@@ -439,13 +437,10 @@ JOIN(A, insert_index)(A* self, size_t index, T value)
 }
 
 static inline void
-JOIN(A, insert)(A* self, T* pos, T value)
+JOIN(A, insert)(A* self, I* pos, T value)
 {
     if(self->size > 0)
-    {
-        size_t index = JOIN(I, index)(pos);
-        JOIN(A, insert_index)(self, index, value);
-    }
+        JOIN(A, insert_index)(self, pos->index, value);
     else
         JOIN(A, push_back)(self, value);
 }
@@ -492,15 +487,11 @@ JOIN(A, resize)(A* self, size_t size, T value)
     FREE_VALUE(self, value);
 }
 
-static inline T*
-JOIN(A, erase_range)(A* self, T* first, T* last)
+static inline I*
+JOIN(A, erase_range)(A* self, I* first, I* last)
 {
-    I* i1 = (I*)first;
-    I* i2 = (I*)last;
-    CHECK_TAG(i1, NULL)
-    CHECK_TAG(i2, NULL)
-    size_t i = i1->index;
-    size_t e = i2->index;
+    size_t i = first->index;
+    size_t e = last->index;
     if (i >= self->size)
         return first;
     for(; i < e; e--)
@@ -511,7 +502,7 @@ JOIN(A, erase_range)(A* self, T* first, T* last)
 }
 
 static inline void
-JOIN(A, emplace)(A* self, T* pos, T* value)
+JOIN(A, emplace)(A* self, I* pos, T* value)
 {
     JOIN(A, insert)(self, pos, *value);
 }
@@ -528,24 +519,20 @@ JOIN(A, emplace_back)(A* self, T* value)
     JOIN(A, push_back)(self, *value);
 }
 
-static inline T*
-JOIN(A, insert_range)(A* self, T* pos, T* first, T* last)
+static inline I*
+JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
 {
-    deq_foreach_range(A, T, iter, first, last)
-    {
-        size_t index = JOIN(I, index)(iter);
-        T* ref = JOIN(A, at)(self, index);
-        if (ref)
-            JOIN(A, insert)(self, pos, self->copy(ref));
-    }
+    foreach_range(A, iter, first, last)
+        if (iter.ref)
+            JOIN(A, insert)(self, pos, self->copy(iter.ref));
     return pos;
 }
 
-static inline T*
-JOIN(A, insert_count)(A* self, T* pos, size_t count, T value)
+static inline I*
+JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
 {
     // detect overflows, esp. silent signed conversions, like -1
-    size_t index = JOIN(I, index)(pos);
+    size_t index = pos->index;
     if (self->size + count < self->size ||
         index + count < count ||
         self->size + count > JOIN(A, max_size)())
@@ -647,13 +634,13 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
     return JOIN(A, remove_if)(self, _match);
 }
 
-static inline T*
+static inline I
 JOIN(A, find)(A* self, T key)
 {
-    deq_foreach(A, T, self, pos)
-        if(JOIN(A, _equal)(self, pos, &key))
-            return pos;
-    return NULL;
+    foreach(A, self, i)
+        if(JOIN(A, _equal)(self, i.ref, &key))
+            return i;
+    return JOIN(A, end)(self);
 }
 
 static inline void

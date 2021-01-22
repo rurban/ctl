@@ -48,23 +48,23 @@ void print_deque(std::deque<DIGI> &b)
             assert(*_y.back().value == *deq_digi_back(&_x)->value);\
     }                                                             \
     std::deque<DIGI>::iterator _iter = _y.begin();                \
-    deq_foreach_ref(deq_digi, digi, &_x, _i, _ref) {              \
+    foreach(deq_digi, &_x, _it) {                                 \
         /* The STL may be corrupt */                              \
         if (_iter->value)                                         \
-            assert(*_ref->value == *_iter->value);                \
+            assert(*_it.ref->value == *_iter->value);             \
         _iter++;                                                  \
     }                                                             \
     size_t _i = 0;                                                \
     for(auto& _d : _y) {                                          \
-        _ref = deq_digi_at(&_x, _i++);                            \
+        digi* _ref = deq_digi_at(&_x, _i++);                      \
         if (_d.value)                                             \
             assert(*_ref->value == *_d.value);                    \
     }                                                             \
     for(_i = 0; _i < _y.size(); _i++)                             \
         assert(*_y.at(_i).value == *deq_digi_at(&_x, _i)->value); \
 }
-#define CHECK_ITER(cit,_y,iter)
-//    assert(cit == (size_t)std::distance(_y.begin(), iter))
+#define CHECK_ITER(cit,_y,iter)                                   \
+    assert(cit->index == std::distance(_y.begin(), iter))
 
 #else
 
@@ -82,30 +82,31 @@ void print_deque(std::deque<DIGI> &b)
             fprintf(stderr, "STL empty back value\n");                \
     }                                                             \
     std::deque<DIGI>::iterator _iter = _y.begin();                \
-    deq_foreach_ref(deq_digi, digi, &_x, _i, _ref) {              \
-        if (*_ref->value != *_iter->value)                        \
-            fprintf(stderr, "CTL %d at %lu vs STL %d\n",          \
-                    *_ref->value, _i,                             \
+    foreach(deq_digi, &_x, _it) {                                 \
+        if (*_it.ref->value != *_iter->value)                     \
+            fprintf(stderr, "CTL %d at %zu vs STL %d\n",          \
+                    *_it.ref->value, _it.index,                   \
                     *_iter->value);                               \
-        assert(*_ref->value == *_iter->value);                    \
+        assert(*_it.ref->value == *_iter->value);                 \
         _iter++;                                                  \
     }                                                             \
     size_t _i = 0;                                                \
     for(auto& _d : _y) {                                          \
-        _ref = deq_digi_at(&_x, _i++);                            \
+        digi* _ref = deq_digi_at(&_x, _i++);                      \
         if (_d.value)                                             \
             assert(*_ref->value == *_d.value);                    \
     }                                                             \
     for(_i = 0; _i < _y.size(); _i++)                             \
         assert(*_y.at(_i).value == *deq_digi_at(&_x, _i)->value); \
 }
-#define CHECK_ITER(cit,_y,iter)
-//    size_t _dist = std::distance(_y.begin(), iter);
-//    if (cit != _dist)
-//        fprintf(stderr, "CTL iter %zu vs STL %zu\n",
-//                cit,_dist);
-//    assert(cit == _dist);
-//}
+#define CHECK_ITER(cit,_y,iter) {                                 \
+    size_t _dist = std::distance(_y.begin(), iter);               \
+    if ((cit)->index != _dist)                                    \
+        fprintf(stderr, "CTL iter %zu vs STL %zu\n",              \
+                (cit)->index,_dist);                              \
+    assert((cit)->index == _dist);                                \
+}
+
 #endif
 
 
@@ -271,7 +272,6 @@ main(void)
             TEST(ERASE) \
             TEST(ERASE_INDEX) \
             TEST(INSERT_COUNT) \
-            TEST(ERASE_RANGE) \
             TEST(EMPLACE_FRONT) \
             TEST(EMPLACE_BACK) \
             TEST(RESIZE) \
@@ -291,6 +291,7 @@ main(void)
 
 #define FOREACH_DEBUG(TEST)                     \
             TEST(EMPLACE) /* STL problems, not CTL*/    \
+            TEST(ERASE_RANGE) \
             TEST(INSERT_RANGE) /* STL problems, not CTL*/ \
             /* TEST(COUNT) */ \
             /* TEST(EQUAL_RANGE) */
@@ -366,10 +367,10 @@ main(void)
                     if(a.size > 0)
                     {
                         const size_t index = TEST_RAND(a.size);
-                        digi *pos = deq_digi_begin(&a);
-                        pos = deq_digi_it_advance(pos, index);
+                        deq_digi_it pos = deq_digi_begin(&a);
+                        deq_digi_it_advance(&pos, index);
                         b.erase(b.begin() + index);
-                        deq_digi_erase(&a, pos);
+                        deq_digi_erase(&a, &pos);
                     }
                     CHECK(a, b);
                     break;
@@ -459,9 +460,9 @@ main(void)
                     {
                         const int value = TEST_RAND(INT_MAX);
                         const size_t index = TEST_RAND(a.size);
-                        digi* pos = deq_digi_begin(&a);
-                        deq_digi_it_advance(pos, index);
-                        deq_digi_insert(&a, pos, digi_init(value));
+                        deq_digi_it pos = deq_digi_begin(&a);
+                        deq_digi_it_advance(&pos, index);
+                        deq_digi_insert(&a, &pos, digi_init(value));
                         b.insert(b.begin() + index, DIGI{value});
                     }
                     CHECK(a, b);
@@ -475,10 +476,11 @@ main(void)
                         const int value = TEST_RAND(TEST_MAX_VALUE);
                         const size_t index = TEST_RAND(a.size);
                         deq_digi_insert_index(&a, index, digi_init(value));
+#ifdef DEBUG
                         std::deque<DIGI>::iterator iter =
+#endif
                             b.insert(b.begin() + index, DIGI{value});
                         LOG ("STL insert %d at %ld:\n", value, std::distance(b.begin(),iter));
-                        //CHECK_ITER (pos, b, iter);
                     }
                     CHECK(a, b);
                     break;
@@ -492,23 +494,24 @@ main(void)
 #endif
                     const int value = TEST_RAND(TEST_MAX_VALUE);
                     const size_t index = TEST_RAND(a.size); // allow end()
-                    digi* pos = deq_digi_begin(&a);
-                    deq_digi_it_advance(pos, index);
-                    pos = deq_digi_insert_count(&a, pos, amount, digi_init(value));
-                    if (!pos) {
+                    deq_digi_it pos = deq_digi_begin(&a);
+                    deq_digi_it_advance(&pos, index);
+                    if (!deq_digi_insert_count(&a, &pos, amount, digi_init(value))) {
                         fprintf(stderr, "overflow size %zu + amount %zu\n", a.size, amount);
                         break;
                     }
-                    LOG ("CTL insert_count at %p, %zux %d:\n", (void*)pos, amount, value);
+                    LOG ("CTL insert_count at %zu, %zux %d:\n", pos.index, amount, value);
                     print_deq (&a);
 
                     if (amount)
                     {
+#ifdef DEBUG
                         std::deque<DIGI>::iterator iter =
+#endif
                             b.insert(b.begin() + index, amount, DIGI{value});
                         LOG ("STL insert %zux %d at %ld:\n", amount, value,
                              std::distance(b.begin(),iter));
-                        CHECK_ITER (pos, b, iter);
+                        //CHECK_ITER (pos, b, iter);
                         print_deque (b); // may be corrupt
                         CHECK(a, b);     // may be NULL
                     }
@@ -525,7 +528,7 @@ main(void)
                     }
                     CHECK(a, b);
                     break;
-#if 0
+#ifdef DEBUG
                 case TEST_INSERT_RANGE:
                 {
                     const size_t i1 = TEST_RAND(a.size - 2);
@@ -539,10 +542,14 @@ main(void)
                         std::copy(b.begin(), b.end(), bb.begin());
                         // Limitation: we cannot have two begin iters from the
                         // same container type at once
-                        digi* pos   = deq_digi_it_advance(deq_digi_begin(&a), i1);
-                        digi* first = deq_digi_it_advance(deq_digi_begin(&aa), i2);
-                        digi* last  = deq_digi_it_advance(deq_digi_end(&aa), i3 - a.size);
-                        pos = deq_digi_insert_range(&a, pos, first, last);
+                        deq_digi_it *it;
+                        deq_digi_it pos   = deq_digi_begin(&a);
+                        deq_digi_it first = deq_digi_begin(&a);
+                        deq_digi_it last  = deq_digi_begin(&a);
+                        deq_digi_it_advance(&pos, i1);
+                        deq_digi_it_advance(&first, i2);
+                        deq_digi_it_advance(&last, i3);
+                        it = deq_digi_insert_range(&a, &pos, &first, &last);
                         LOG ("CTL insert_range at %zu, [%zu - %ld):\n", i1, i2, i3);
                         print_deq (&a);
 
@@ -553,7 +560,7 @@ main(void)
                             b.insert(b.begin() + i1, bb.begin() + i2, bb.begin() + i3);
                         LOG ("STL insert at %ld:\n", i1);
 #if __cplusplus > 201100
-                        CHECK_ITER (pos, b, iter);
+                        CHECK_ITER (it, b, iter);
 #endif
                         print_deque (b);
                         CHECK(a, b);
@@ -561,7 +568,6 @@ main(void)
                     }
                     break;
                 }
-#endif
                 case TEST_ERASE_RANGE:
                 {
                     int value = TEST_RAND(TEST_MAX_VALUE);
@@ -570,14 +576,15 @@ main(void)
                         deq_digi_resize(&a, 10, digi_init(value));
                         b.resize(10, DIGI{value});
                     }
+                    deq_digi_it from, to;
                     const size_t index = TEST_RAND(a.size/2);
                     const size_t iend = index + TEST_RAND(a.size - index);
-                    digi* from = deq_digi_begin(&a);
-                    from = deq_digi_it_advance(from, index);
-                    digi* to = deq_digi_end(&a);
-                    to = deq_digi_it_advance(to, (long)iend - a.size);
+                    from = deq_digi_begin(&a);
+                    deq_digi_it_advance(&from, index);
+                    to = deq_digi_end(&a);
+                    deq_digi_it_advance(&to, (long)iend - a.size);
                     LOG ("erase_range %zu of %zu\n", index, a.size);
-                    digi* pos = deq_digi_erase_range(&a, from, to);
+                    deq_digi_it *pos = deq_digi_erase_range(&a, &from, &to);
                     LOG ("CTL erase_range [%lu - %lu):\n",
                          index, iend);
                     print_deq (&a);
@@ -590,6 +597,7 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
+#endif
 #if 0 && defined DEBUG
                 case TEST_EMPLACE:
                 {
@@ -610,8 +618,8 @@ main(void)
                     print_deq(&a);
 #endif
                     assert(a.size > 0);
-                    digi* pos = deq_digi_begin(&a);
-                    pos = deq_digi_it_advance(pos, 1);
+                    deq_digi_it pos = deq_digi_begin(&a);
+                    deq_digi_it_advance(&pos, 1);
                     LOG("CTL emplace 1 %d\n", *aa.value);
                     deq_digi_emplace(&a, pos, &aa);
                     print_deq(&a);
@@ -703,20 +711,20 @@ main(void)
                         int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                                                  : *deq_digi_at(&a, index)->value;
                         digi key = digi_init(value);
-                        digi* aa = deq_digi_find(&a, key);
+                        deq_digi_it aa = deq_digi_find(&a, key);
                         auto bb = find(b.begin(), b.end(), DIGI{value});
-                        bool found_a = aa != NULL;
+                        bool found_a = !deq_digi_it_done(&aa);
                         bool found_b = bb != b.end();
                         assert(found_a == found_b);
                         if(found_a && found_b)
-                            assert(*aa->value == *bb->value);
+                            assert(*aa.ref->value == *bb->value);
 
                         a.equal = NULL;
                         aa = deq_digi_find(&a, key);
-                        found_a = aa != NULL;
+                        found_a = !deq_digi_it_done(&aa);
                         assert(found_a == found_b);
                         if(found_a && found_b)
-                            assert(*aa->value == *bb->value);
+                            assert(*aa.ref->value == *bb->value);
 
                         digi_free(&key);
                         CHECK(a, b);
