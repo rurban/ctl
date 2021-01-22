@@ -516,7 +516,7 @@ JOIN(A, erase_range)(A* self, T* from, T* to)
 static inline T*
 JOIN(A, erase)(A* self, T* pos)
 {
-    return JOIN(A, erase_range)(self, pos, pos+1);
+    return JOIN(A, erase_index)(self, pos - &self->vector[0]);
 }
 
 static inline void
