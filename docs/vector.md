@@ -150,17 +150,17 @@ constructs elements in-place. _(NYI)_
 
 appends new element at the back. _(NYI)_
 
-    T* erase (A* self, size_t index)
+    T* erase_index (A* self, size_t index)
 
 erases the element by index, and returns the position following the last removed element.
 
-    T* erase_it (A* self, I* pos)
+    T* erase (A* self, I* pos)
 
-erases the element at position
+erases the element at position.
 
     T* erase_range (A* self, I* first, I* last)
 
-erases elements from to
+erases elements from - to.
 
     swap (A* self, A* other)
 

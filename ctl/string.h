@@ -16,11 +16,13 @@
 #define str_init str___INIT
 #define str_equal str___EQUAL
 #define str_find str___FIND
+#define str_begin str___BEGIN
+#define str_end str___END
 
 #define str_foreach(self, it)                    \
-    if (self->size)                              \
-        for(char* it = &self->vector[0];         \
-            it < &self->vector[self->size];      \
+    if ((self)->size)                            \
+        for(char* it = &(self)->vector[0];       \
+            it < &(self)->vector[(self)->size];  \
             it++)
 #define str_foreach_range(it, first, last)       \
     if (last)                                    \
@@ -33,10 +35,24 @@
 #undef str_init
 #undef str_equal
 #undef str_find
+#undef str_begin
+#undef str_end
 #undef vec_char
 
 #include <stdint.h>
 #include <string.h>
+
+static inline char*
+str_begin(str* self)
+{
+    return &self->vector[0];
+}
+
+static inline char*
+str_end(str* self)
+{
+    return &self->vector[self->size];
+}
 
 // if we compare char by char, for algorithms like sort
 static inline int
@@ -100,7 +116,7 @@ str_replace(str* self, size_t index, size_t size, const char* s)
     if(end >= self->size)
         end = self->size;
     for(size_t i = index; i < end; i++)
-        str_erase(self, index);
+        str_erase_index(self, index);
     str_insert_str(self, index, s);
 }
 

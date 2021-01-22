@@ -463,13 +463,14 @@ JOIN(A, insert)(A* self, size_t index, T value)
 static inline T*
 JOIN(A, erase_index)(A* self, size_t index)
 {
+    static T zero;
 #if 1
     if(self->free)
         self->free(&self->vector[index]);
     if (index < self->size - 1)
         memmove(&self->vector[index], &self->vector[index] + 1, (self->size - index - 1) * sizeof (T));
+    JOIN(A, set)(self, self->size - 1, zero);
 #else
-    static T zero;
     JOIN(A, set)(self, index, zero);
     for(size_t i = index; i < self->size - 1; i++)
     {
@@ -484,6 +485,7 @@ JOIN(A, erase_index)(A* self, size_t index)
 static inline T*
 JOIN(A, erase_range)(A* self, T* from, T* to)
 {
+    static T zero;
     if (from >= to)
         return to;
     T* end = &self->vector[self->size];
@@ -495,10 +497,12 @@ JOIN(A, erase_range)(A* self, T* from, T* to)
             self->free(ref);
 # endif
     if (to != end)
+    {
         memmove(from, to, (end - to) * sizeof (T));
+        JOIN(A, set)(self, self->size - size, zero);
+    }
     self->size -= size;
 #else
-    static T zero;
     *from = zero;
     for(T* pos = from; pos < to - 1; pos++)
     {

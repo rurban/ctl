@@ -11,7 +11,7 @@ deriving from [vector](vector.md).
 
     str_int a = str_int_init ();
 
-    str_digi_resize(&a, 1000, 0);
+    str_digi_resize(&a, 1000, '\0');
     for (i=0; i<1000; i++)
       str_int_push_back(&a, i);
     for (i=0; i<20; i++)

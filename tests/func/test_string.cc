@@ -1,7 +1,6 @@
 #include "../test.h"
 
 #include <ctl/string.h>
-//#include "digi.hh"
 
 #include <string>
 #include <algorithm>
@@ -37,7 +36,7 @@
         assert(_y.back() == *str_back(&_x));         \
     }                                                \
     std::string::iterator _iter = _y.begin();        \
-    vec_foreach(char, &_x, _ref) {                   \
+    str_foreach(&_x, _ref) {                         \
         assert(*_ref == *_iter);                     \
         _iter++;                                     \
     }                                                \
@@ -119,6 +118,7 @@ main(void)
             TEST(C_STR) \
             TEST(CLEAR) \
             TEST(ERASE) \
+            TEST(ERASE_INDEX) \
             TEST(RESIZE) \
             TEST(RESERVE) \
             TEST(SHRINK_TO_FIT) \
@@ -288,9 +288,16 @@ main(void)
                 }
                 case TEST_ERASE:
                 {
-                    const size_t index = TEST_RAND(a.size);
+                    const size_t index = TEST_RAND(a.size - 1);
                     b.erase(b.begin() + index);
-                    str_erase(&a, index);
+                    str_erase(&a, &a.vector[index]);
+                    break;
+                }
+                case TEST_ERASE_INDEX:
+                {
+                    const size_t index = TEST_RAND(a.size - 1);
+                    b.erase(b.begin() + index);
+                    str_erase_index(&a, index);
                     break;
                 }
                 case TEST_INSERT:
