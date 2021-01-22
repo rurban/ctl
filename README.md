@@ -157,12 +157,12 @@ for template type `T` as type `int` for all measurements.
 ![](docs/images/uset.log.png)
 ![](docs/images/pqu.log.png)
 ![](docs/images/arr.log.png)
+![](docs/images/str.log.png)
 ![](docs/images/compile.log.png)
 
-Omitted from these performance measurements are `queue.h`, `stack.h`, and `string.h`,
-as their performance characteristics can be inferred from `deque.h`, and `vector.h`,
-respectively. Likewise `map.h` from `set.h` and `unordered_map.h` from
-`unordered_set.h`.
+Omitted from these performance measurements are `queue.h` and `stack.h`,
+as their performance characteristics can be inferred from `deque.h`.
+Likewise `map.h` from `set.h` and `unordered_map.h` from `unordered_set.h`.
 
 `unordered_set.h` is defined with the default `CTL_USET_GROWTH_PRIMED`.
 libstdc++ uses POWER2 by default, libc++ supports both, depending on the initial size.

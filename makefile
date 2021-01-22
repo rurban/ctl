@@ -147,6 +147,7 @@ ${wildcard tests/perf/pqu/perf*.cc?} : ${COMMON_H} ctl/priority_queue.h
 ${wildcard tests/perf/vec/perf*.cc?} : ${COMMON_H} ctl/vector.h
 ${wildcard tests/perf/uset/perf*.cc?}: ${COMMON_H} ctl/unordered_set.h
 ${wildcard tests/perf/arr/gen*.cc?}: ${COMMON_H} ctl/unordered_set.h
+${wildcard tests/perf/str/perf*.cc?} : ${COMMON_H} ctl/vector.h ctl/string.h
 
 examples: ${EXAMPLES}
 

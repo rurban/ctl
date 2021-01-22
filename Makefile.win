@@ -124,6 +124,7 @@ check: all
 #$(wildcard tests/perf/deq/perf*.c) : $(COMMON_H) ctl/deque.h
 #$(wildcard tests/perf/pqu/perf*.c) : $(COMMON_H) ctl/priority_queue.h
 #$(wildcard tests/perf/vec/perf*.c) : $(COMMON_H) ctl/vector.h
+#$(wildcard tests/perf/str/perf*.c) : $(COMMON_H) ctl/vector.h ctl/string.h
 #$(wildcard tests/perf/uset/perf*.c): $(COMMON_H) ctl/unordered_set.h
 
 examples: $(EXAMPLES)

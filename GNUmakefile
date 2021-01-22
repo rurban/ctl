@@ -166,6 +166,7 @@ $(wildcard tests/perf/deq/perf*.cc?) : $(COMMON_H) ctl/deque.h
 $(wildcard tests/perf/pqu/perf*.cc?) : $(COMMON_H) ctl/priority_queue.h
 $(wildcard tests/perf/vec/perf*.cc?) : $(COMMON_H) ctl/vector.h
 $(wildcard tests/perf/uset/perf*.cc?): $(COMMON_H) ctl/unordered_set.h
+$(wildcard tests/perf/str/perf*.cc?): $(COMMON_H) ctl/string.h ctl/vector.h
 $(wildcard tests/perf/arr/*.cc?): $(COMMON_H) ctl/array.h
 
 tests/perf/arr/gen_array0% : tests/perf/arr/gen_array0%.c \
