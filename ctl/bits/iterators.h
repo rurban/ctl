@@ -82,15 +82,15 @@
 #ifndef CTL_DEQ
 
 /* Make simple vector iters fast */
-# define vec_foreach(T, self, it)                         \
+# define vec_foreach(T, self, ref)                        \
     if ((self)->size)                                     \
-        for(T* it = &(self)->vector[0];                   \
-            it < &(self)->vector[(self)->size];           \
-            it++)
-# define vec_foreach_range(T, self, it, first, last)      \
-    if ((self)->size && last)                             \
-        for(T* it = first;                                \
-            it < last;                                    \
+        for(T* ref = &(self)->vector[0];                  \
+            ref < &(self)->vector[(self)->size];          \
+            ref++)
+# define vec_foreach_range(T, self, it, first, last)     \
+    if ((self)->size && last.ref)                        \
+        for(T* it = first.ref;                           \
+            it < last.ref;                               \
             it++)
 
 #endif // not deq
@@ -104,7 +104,7 @@
         JOIN(JOIN(A, it), next)(&pos))
 #define foreach_range(A, pos, first, last)                          \
     JOIN(A, it) pos = *first;                                       \
-    pos.end = last->index;                                          \
+    JOIN(JOIN(A, it), range)(&pos, last);                           \
     for(; !JOIN(JOIN(A, it), done)(&pos);                           \
         JOIN(JOIN(A, it), next)(&pos))
 
@@ -117,7 +117,7 @@
     }                                                               \
     for(fn(pos.ref);                                                \
         !JOIN(JOIN(A, it), done)(&pos);                             \
-        pos = JOIN(JOIN(A, it), next)(pos),                         \
+        JOIN(JOIN(A, it), next)(&pos),                              \
         fn(pos.ref))
 #define foreach_n_range(A, pos, n, first, fn)                       \
     JOIN(A, it) pos = *first;                                       \
@@ -128,5 +128,5 @@
     }                                                               \
     for(fn(pos.ref);                                                \
         !JOIN(JOIN(A, it), done)(&pos);                             \
-        pos = JOIN(JOIN(A, it), next)(pos),                         \
+        JOIN(JOIN(A, it), next)(&pos),                              \
         fn(pos.ref))

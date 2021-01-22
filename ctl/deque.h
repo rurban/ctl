@@ -11,10 +11,10 @@
 #define CTL_DEQ
 #define A JOIN(deq, T)
 #define B JOIN(A, bucket)
-#ifndef C
-# define C deq
-#endif
 #define I JOIN(A, it)
+//#ifndef C
+//# define C deq
+//#endif
 //#undef IT
 //#define IT T*
 
@@ -180,13 +180,12 @@ JOIN(I, done)(I* iter)
     return iter->index == iter->end;
 }
 
-static inline I*
+static inline void
 JOIN(I, next)(I* iter)
 {
     iter->index++;
     if(iter->index < iter->end)
         iter->ref = JOIN(A, at)(iter->container, iter->index);
-    return iter;
 }
 
 static inline void

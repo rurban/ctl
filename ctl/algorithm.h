@@ -72,16 +72,12 @@ JOIN(A, none_of)(A* self, int _match(T*))
 
 #include <stdbool.h>
 
-// i.e. IT for LIST, SET, USET with B*
-//      for VEC with T*
-//      for DEQ with size_t
-// see bits/iterators.h
 static inline I
-JOIN(A, find_range)(A* self, I* first, I* last, T value)
+JOIN(A, find_range)(I* first, I* last, T value)
 {
     foreach_range(A, i, first, last)
-        if(JOIN(A, _equal)(self, i.ref, &value))
-            return *first;
+        if(JOIN(A, _equal)(first->container, i.ref, &value))
+            return i;
     return *last;
 }
 
@@ -128,8 +124,9 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
 // C++20
 // uset has cached_hash optims
 static inline size_t
-JOIN(A, count_range)(A* self, I* first, I* last, T value)
+JOIN(A, count_range)(I* first, I* last, T value)
 {
+    A* self = first->container;
     size_t count = 0;
     foreach_range(A, i, first, last)
         if(JOIN(A, _equal)(self, i.ref, &value))

@@ -9,17 +9,16 @@
 # error "Template type T undefined for <ctl/vector.h>"
 #endif
 
-#include <ctl/ctl.h>
-
 #define CTL_VEC
 #define A JOIN(vec, T)
-#ifndef C
-# define C vec
-#endif
 #define I JOIN(A, it)
-#undef IT
-#define IT T*
+//#ifndef C
+//# define C vec
+//#endif
+//#undef IT
+//#define IT T*
 
+#include <ctl/ctl.h>
 #include <ctl/bits/iterators.h>
 
 // only for short strings, not vec_uint8_t
@@ -46,10 +45,8 @@ typedef int (*JOIN(A, compare_fn))(T*, T*);
 typedef struct I
 {
     T* ref;
+    T* end;
     A* container;
-#ifdef DEBUG
-    uint32_t tag;
-#endif
 } I;
 
 #undef _vec_begin_it
@@ -57,17 +54,13 @@ typedef struct I
 #undef _vec_end_it
 #define _vec_end_it JOIN(JOIN(_vec, T), end_it)
 
-static I _vec_begin_it = {NULL, NULL
-#ifdef DEBUG
-    , CTL_VEC_TAG
+#ifdef __cplusplus
+static I _vec_begin_it = {};
+static I _vec_end_it = {};
+#else
+static I _vec_begin_it = {0};
+static I _vec_end_it = {0};
 #endif
-};
-
-static I _vec_end_it = {NULL, NULL
-#ifdef DEBUG
-    , CTL_VEC_TAG
-#endif
-};
 
 static inline size_t
 JOIN(A, capacity)(A* self)
@@ -96,91 +89,88 @@ JOIN(A, back)(A* self)
     return self->size ? JOIN(A, at)(self, self->size - 1) : NULL;
 }
 
-static inline T*
+static inline I
 JOIN(A, begin)(A* self)
 {
-    I *iter = &_vec_begin_it;
-    iter->ref = JOIN(A, at)(self, 0);
-    iter->container = self;
-    return (T*)iter;
+    I iter = _vec_begin_it;
+    iter.ref = &self->vector[0];
+    iter.end = &self->vector[self->size];
+    iter.container = self;
+    return iter;
 }
 
-static inline T*
+static inline I
 JOIN(A, end)(A* self)
 {
-    I* iter = &_vec_end_it;
-    iter->ref = JOIN(A, at)(self, self->size);
-    iter->container = self;
-    return (T*)iter;
+    I iter = _vec_end_it;
+    iter.ref = NULL;
+    iter.end = &self->vector[self->size];
+    iter.container = self;
+    return iter;
 }
 
-static inline I*
-JOIN(I, iter)(T* self)
+static inline I
+JOIN(I, iter)(A* self, size_t index)
 {
-    I* iter = (I*)self;
-    CHECK_TAG(iter, 0)
+    I iter = _vec_begin_it;
+    iter.ref = JOIN(A, at)(self, index); // bounds-checked
+    iter.end = &self->vector[self->size];
+    iter.container = self;
     return iter;
 }
 
 static inline T*
-JOIN(I, ref)(T* iter)
+JOIN(I, ref)(I* iter)
 {
-    return ((I*)iter)->ref;
+    return iter->ref;
 }
 
 static inline size_t
-JOIN(I, index)(T* self)
+JOIN(I, index)(I* iter)
 {
-    I* iter = (I*)self;
-    CHECK_TAG(iter, 0)
     return (iter->ref - JOIN(A, front)(iter->container)) / sizeof (T);
 }
 
 static inline int
-JOIN(I, done)(T* self)
+JOIN(I, isend)(I* iter, I* last)
 {
-    return self != JOIN(A, end)(((I*)self)->container);
+    return iter->ref == last->ref;
 }
 
-// must be constructed via begin or end
-static inline T*
-JOIN(I, next)(T* self)
+static inline int
+JOIN(I, done)(I* iter)
 {
-    I* iter = (I*)self;
-    CHECK_TAG(iter, NULL)
-    if(iter->ref + 1 > JOIN(A, back)(iter->container))
-        return JOIN(A, end)(iter->container);
-    else
-    {
-        iter->ref++;
-        return (T*)iter;
-    }
+    return iter->ref == iter->end;
 }
 
-static inline T*
-JOIN(I, advance)(T* self, long i)
+static inline void
+JOIN(I, next)(I* iter)
 {
-    I* iter = (I*)self;
-    CHECK_TAG(iter, NULL)
+    iter->ref++;
+}
+
+static inline void
+JOIN(I, range)(I* begin, I* end)
+{
+    begin->end = end->ref;
+}
+
+static inline I*
+JOIN(I, advance)(I* iter, long i)
+{
     // error case: overflow => end or NULL?
-    if(iter->ref + i > JOIN(A, back)(iter->container) ||
+    if(iter->ref + i > iter->end ||
        iter->ref + i < JOIN(A, front)(iter->container))
-        return JOIN(A, end)(iter->container);
+        iter->ref = iter->end;
     else
-    {
         iter->ref += i;
-        return (T*)iter;
-    }
+    return iter;
 }
 
 static inline long
-JOIN(I, distance)(T* self, T* other)
+JOIN(I, distance)(I* iter, I* other)
 {
-    I* iter1 = (I*)self;
-    I* iter2 = (I*)other;
-    CHECK_TAG(iter1, 0)
-    CHECK_TAG(iter2, 0)
-    return iter2->ref - iter1->ref;
+    return other->ref - iter->ref;
 }
 
 #include <ctl/bits/container.h>
@@ -472,7 +462,7 @@ JOIN(A, insert)(A* self, size_t index, T value)
 }
 
 static inline T*
-JOIN(A, erase)(A* self, size_t index)
+JOIN(A, erase_index)(A* self, size_t index)
 {
     static T zero;
     JOIN(A, set)(self, index, zero);
@@ -508,9 +498,9 @@ JOIN(A, erase_range)(A* self, T* from, T* to)
 }
 
 static inline T*
-JOIN(A, erase_it)(A* self, T* pos)
+JOIN(A, erase)(A* self, T* pos)
 {
-    return JOIN(A, erase_range)(self, pos, JOIN(A, end)(self));
+    return JOIN(A, erase_range)(self, pos, pos+1);
 }
 
 static inline void
@@ -580,8 +570,8 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
     {
         if(_match(ref))
         {
-            size_t index = ref - JOIN(A, begin)(self);
-            JOIN(A, erase)(self, index);
+            size_t index = ref - &self->vector[0];
+            JOIN(A, erase_index)(self, index);
             erases++;
         }
     }

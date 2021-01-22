@@ -76,17 +76,21 @@ int random_element(vec_int* a)
         assert(_y.at(i) == *vec_int_at(&_x, i));                  \
 }
 
+#define CHECK_REF(_ref, b, _iter)                                 \
+    if (_iter != b.end())                                         \
+        assert(*_ref == *_iter)
+
 #ifdef DEBUG
 #define CHECK_ITER(_it, b, _iter)                                 \
-    if (_it != NULL)                                              \
+    if (!vec_int_it_done(&_it))                                   \
     {                                                             \
         assert (_iter != b.end());                                \
-        assert(*_it == *_iter);                                   \
+        assert(*_it.ref == *_iter);                               \
     } else                                                        \
         assert (_iter == b.end())
 
 static void
-get_random_iters (vec_int *a, int** first_a, int** last_a,
+get_random_iters (vec_int *a, vec_int_it* first_a, vec_int_it* last_a,
                   std::vector<int>& b, std::vector<int>::iterator &first_b,
                   std::vector<int>::iterator &last_b)
 {
@@ -96,9 +100,9 @@ get_random_iters (vec_int *a, int** first_a, int** last_a,
     LOG("iters %zu, %zu of %zu\n", r1, r2, a->size);
     if (a->size)
     {
-        int* it1 = vec_int_begin(a);
+        vec_int_it it1 = vec_int_begin(a);
         first_b = b.begin();
-        it1 += r1;
+        vec_int_it_advance(&it1, r1);
         first_b += r1;
         *first_a = it1;
 
@@ -114,16 +118,16 @@ get_random_iters (vec_int *a, int** first_a, int** last_a,
         }
         else
         {
-            int* it2 = vec_int_begin(a);
+            vec_int_it it2 = vec_int_begin(a);
             last_b = b.begin();
-            it2 += r2;
+            vec_int_it_advance(&it2, r2);
             last_b += r2;
             *last_a = it2;
         }
     }
     else
     {
-        int* end = vec_int_end(a);
+        vec_int_it end = vec_int_end(a);
         *first_a = end;
         *last_a = end;
         first_b = b.begin();
@@ -173,6 +177,7 @@ main(void)
         TEST(POP_BACK) \
         TEST(CLEAR) \
         TEST(ERASE) \
+        TEST(ERASE_INDEX) \
         TEST(RESIZE) \
         TEST(RESERVE) \
         TEST(SHRINK_TO_FIT) \
@@ -254,13 +259,28 @@ main(void)
                     vec_int_clear(&a);
                     break;
                 }
+                case TEST_ERASE_INDEX:
+                {
+                    if(a.size > 0)
+                    {
+                        const size_t index = TEST_RAND(a.size);
+                        auto it = b.erase(b.begin() + index);
+                        int* pos = vec_int_erase_index(&a, index);
+                        CHECK_REF(pos, b, it);
+                    }
+                    CHECK(a, b);
+                    break;
+                }
                 case TEST_ERASE:
                 {
                     if(a.size > 0)
                     {
                         const size_t index = TEST_RAND(a.size);
-                        b.erase(b.begin() + index);
-                        vec_int_erase(&a, index);
+                        vec_int_it pos = vec_int_begin(&a);
+                        vec_int_it_advance(&pos, index);
+                        int* i = vec_int_erase(&a, pos.ref);
+                        auto it = b.erase(b.begin() + index);
+                        CHECK_REF(i, b, it);
                     }
                     CHECK(a, b);
                     break;
@@ -364,13 +384,13 @@ main(void)
                     {
                         const size_t index = TEST_RAND(a.size);
                         int value = TEST_RAND(2) ? TEST_RAND(INT_MAX) : *vec_int_at(&a, index);
-                        int* aa = vec_int_find(&a, value);
+                        vec_int_it aa = vec_int_find(&a, value);
                         auto bb = find(b.begin(), b.end(), value);
-                        bool found_a = aa != NULL;
+                        bool found_a = !vec_int_it_done(&aa);
                         bool found_b = bb != b.end();
                         assert(found_a == found_b);
                         if(found_a && found_b)
-                            assert(*aa == *bb);
+                            assert(*aa.ref == *bb);
                     }
                     break;
                 }
@@ -381,43 +401,43 @@ main(void)
                 {
                     int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                         : random_element(&a);
-                    int *first_a, *last_a;
+                    vec_int_it first_a, last_a;
                     std::vector<int>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    int *n = vec_int_find_range(&a, first_a, last_a, vb);
+                    first_a = vec_int_find_range(&first_a, &last_a, vb);
                     auto it = find(first_b, last_b, vb);
-                    CHECK_ITER(n, b, it);
+                    CHECK_ITER(first_a, b, it);
                     CHECK(a, b);
                     break;
                 }
                 case TEST_FIND_IF_RANGE:
                 {
-                    int *first_a, *last_a;
+                    vec_int_it first_a, last_a;
                     std::vector<int>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    int *n = vec_int_find_if_range(&a, first_a, last_a, is_odd);
+                    first_a = vec_int_find_if_range(&first_a, &last_a, is_odd);
                     auto it = find_if(first_b, last_b, stl_is_odd);
                     print_vec(&a);
                     print_vector(b);
-                    CHECK_ITER(n, b, it);
+                    CHECK_ITER(first_a, b, it);
                     break;
                 }
                 case TEST_FIND_IF_NOT_RANGE:
                 {
-                    int *first_a, *last_a;
+                    vec_int_it first_a, last_a;
                     std::vector<int>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    int *n = vec_int_find_if_not_range(&a, first_a, last_a, is_odd);
+                    first_a = vec_int_find_if_not_range(&first_a, &last_a, is_odd);
                     auto it = find_if_not(first_b, last_b, stl_is_odd);
-                    CHECK_ITER(n, b, it);
+                    CHECK_ITER(first_a, b, it);
                     break;
                 }
                 case TEST_ALL_OF_RANGE:
                 {
-                    int *first_a, *last_a;
+                    vec_int_it first_a, last_a;
                     std::vector<int>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = vec_int_all_of_range(&a, first_a, last_a, is_odd);
+                    bool aa = vec_int_all_of_range(&first_a, &last_a, is_odd);
                     bool bb = all_of(first_b, last_b, stl_is_odd);
                     if (aa != bb)
                     {
@@ -430,10 +450,10 @@ main(void)
                 }
                 case TEST_ANY_OF_RANGE:
                 {
-                    int *first_a, *last_a;
+                    vec_int_it first_a, last_a;
                     std::vector<int>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = vec_int_any_of_range(&a, first_a, last_a, is_odd);
+                    bool aa = vec_int_any_of_range(&first_a, &last_a, is_odd);
                     bool bb = any_of(first_b, last_b, stl_is_odd);
                     if (aa != bb)
                     {
@@ -446,10 +466,10 @@ main(void)
                 }
                 case TEST_NONE_OF_RANGE:
                 {
-                    int *first_a, *last_a;
+                    vec_int_it first_a, last_a;
                     std::vector<int>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = vec_int_none_of_range(&a, first_a, last_a, is_odd);
+                    bool aa = vec_int_none_of_range(&first_a, &last_a, is_odd);
                     bool bb = none_of(first_b, last_b, stl_is_odd);
                     if (aa != bb)
                     {
@@ -462,10 +482,10 @@ main(void)
                 }
                 case TEST_COUNT_IF_RANGE:
                 {
-                    int *first_a, *last_a;
+                    vec_int_it first_a, last_a;
                     std::vector<int>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    size_t numa = vec_int_count_if_range(&a, first_a, last_a, is_odd);
+                    size_t numa = vec_int_count_if_range(&first_a, &last_a, is_odd);
                     size_t numb = count_if(first_b, last_b, stl_is_odd);
                     if (numa != numb)
                     {
@@ -482,11 +502,11 @@ main(void)
                     int test_value = 0;
                     int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                         : test_value;
-                    int *first_a, *last_a;
+                    vec_int_it first_a, last_a;
                     std::vector<int>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                     // used to fail with 0,0 of 0
-                    size_t numa = vec_int_count_range(&a, first_a, last_a, v);
+                    size_t numa = vec_int_count_range(&first_a, &last_a, v);
                     size_t numb = count(first_b, last_b, v);
                     assert(numa == numb);
                     break;
@@ -508,22 +528,22 @@ main(void)
 #endif
                 case TEST_FIND_IF:
                 {
-                    int* aa = vec_int_find_if(&a, is_odd);
+                    vec_int_it aa = vec_int_find_if(&a, is_odd);
                     auto bb = find_if(b.begin(), b.end(), stl_is_odd);
                     if(bb == b.end())
-                        assert(vec_int_end(&a) == aa);
+                        assert(vec_int_it_done(&aa));
                     else
-                        assert(*bb == *aa);
+                        assert(*bb == *aa.ref);
                     break;
                 }
                 case TEST_FIND_IF_NOT:
                 {
-                    int* aa = vec_int_find_if_not(&a, is_odd);
+                    vec_int_it aa = vec_int_find_if_not(&a, is_odd);
                     auto bb = find_if_not(b.begin(), b.end(), stl_is_odd);
                     if(bb == b.end())
-                        assert(vec_int_end(&a) == aa);
+                        assert(vec_int_it_done(&aa));
                     else
-                        assert(*bb == *aa);
+                        assert(*bb == *aa.ref);
                     break;
                 }
                 case TEST_ALL_OF:
