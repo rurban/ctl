@@ -175,7 +175,6 @@ main(void)
         TEST(CLEAR) \
         TEST(ERASE_INDEX) \
         TEST(ERASE) \
-        TEST(ERASE_RANGE) \
         TEST(RESIZE) \
         TEST(RESERVE) \
         TEST(SHRINK_TO_FIT) \
@@ -198,6 +197,7 @@ main(void)
 #define FOREACH_DEBUG(TEST) \
         TEST(INSERT_COUNT) \
         TEST(INSERT_RANGE) \
+        TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
@@ -288,6 +288,7 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_ERASE_RANGE:
                 {
                     if(a.size > 0)
@@ -305,6 +306,7 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
+#endif
                 case TEST_INSERT:
                 {
                     size_t amount = TEST_RAND(512);
@@ -641,7 +643,7 @@ main(void)
                 }
                 case TEST_NONE_OF:
                 {
-                    bool is_a = vec_digi_none_of(&a, digi_is_odd);
+                    bool is_a = vec_digi_none_of(&a, digi_is_odd); // FIXME
                     bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
                     assert(is_a == is_b);
                     break;

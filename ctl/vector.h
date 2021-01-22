@@ -103,8 +103,7 @@ static inline I
 JOIN(A, end)(A* self)
 {
     I iter = _vec_end_it;
-    iter.ref = NULL;
-    iter.end = &self->vector[self->size];
+    iter.end = iter.ref = &self->vector[self->size];
     iter.container = self;
     return iter;
 }
@@ -464,26 +463,42 @@ JOIN(A, insert)(A* self, size_t index, T value)
 static inline T*
 JOIN(A, erase_index)(A* self, size_t index)
 {
+#if 1
+    if(self->free)
+        self->free(&self->vector[index]);
+    if (index < self->size - 1)
+        memmove(&self->vector[index], &self->vector[index] + 1, (self->size - index - 1) * sizeof (T));
+#else
     static T zero;
     JOIN(A, set)(self, index, zero);
-    // TODO memmove
     for(size_t i = index; i < self->size - 1; i++)
     {
         self->vector[i] = self->vector[i + 1];
         self->vector[i + 1] = zero;
     }
+#endif
     self->size--;
-    return index >= self->size ? NULL : &self->vector[index];
+    return &self->vector[index];
 }
 
 static inline T*
 JOIN(A, erase_range)(A* self, T* from, T* to)
 {
-    static T zero;
     if (from >= to)
         return to;
     T* end = &self->vector[self->size];
-    // TODO memmove
+#if 1
+    size_t size = (to - from) / sizeof(T);
+# ifndef POD
+    if(self->free)
+        for(T* ref = from; ref < to - 1; ref++)
+            self->free(ref);
+# endif
+    if (to != end)
+        memmove(from, to, (end - to) * sizeof (T));
+    self->size -= size;
+#else
+    static T zero;
     *from = zero;
     for(T* pos = from; pos < to - 1; pos++)
     {
@@ -491,6 +506,7 @@ JOIN(A, erase_range)(A* self, T* from, T* to)
         *(pos + 1) = zero;
         self->size--;
     }
+#endif
     if (to < end)
         return to + 1;
     else

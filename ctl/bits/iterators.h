@@ -82,10 +82,10 @@
 #ifndef CTL_DEQ
 
 /* Make simple vector iters fast */
-# define vec_foreach(T, self, ref)                        \
-    if ((self)->size)                                     \
-        for(T* ref = &(self)->vector[0];                  \
-            ref < &(self)->vector[(self)->size];          \
+# define vec_foreach(T, self, ref)                       \
+    if ((self)->size)                                    \
+        for(T* ref = &(self)->vector[0];                 \
+            ref < &(self)->vector[(self)->size];         \
             ref++)
 # define vec_foreach_range(T, self, it, first, last)     \
     if ((self)->size && last.ref)                        \
