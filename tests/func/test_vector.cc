@@ -211,6 +211,10 @@ main(void)
         TEST(INTERSECTION) \
         TEST(DIFFERENCE) \
 
+      /*TEST(FIND_END)
+        TEST(FIND_END_RANGE)
+      */
+
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
@@ -424,9 +428,27 @@ main(void)
                     }
                     break;
                 }
-#ifdef DEBUG    // missing range algorithm
+#ifdef DEBUG
                 case TEST_EQUAL_RANGE:
+                    // TODO
                     break;
+#if 0
+                case TEST_FIND_END:
+                {
+                    if(a.size > 0)
+                    {
+                        vec_digi_it first_a, last_a;
+                        vec_digi_it aa = vec_digi_find_end(&a, &s_first, &s_last);
+                        auto bb = find_end(b.begin(), b.end(), ...);
+                        bool found_a = !vec_digi_it_done(&aa);
+                        bool found_b = bb != b.end();
+                        assert(found_a == found_b);
+                        if(found_a && found_b)
+                            assert(*(aa->value) == *bb->value);
+                    }
+                    break;
+                }
+#endif
                 case TEST_FIND_RANGE:
                 {
                     int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
@@ -442,6 +464,35 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
+#if 0
+                case TEST_FIND_END_RANGE:
+                {
+                    vec_digi_it first_a, last_a, s_first, s_last;
+                    std::vector<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+# if __cpp_lib_erase_if > 202002L
+                    first_a = vec_digi_find_end_range(&first_a, &last_a, &s_first_a, &s_last_a);
+                    auto it = find_end(first_b, last_b, vb);
+                    CHECK_ITER(&first_a, b, it);
+                    CHECK(a, b);
+# endif
+                    break;
+                }
+                case TEST_FIND_END_IF_RANGE:
+                {
+                    vec_digi_it first_a, last_a, s_first, s_last;
+                    std::vector<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+# if __cpp_lib_erase_if > 202002L
+                    first_a = vec_digi_find_end_if_range(&first_a, &last_a, &s_first, &s_last, digi_is_odd);
+                    auto it = find_end(first_b, last_b, s_first_b, s_last_b, DIGI_is_odd);
+                    CHECK_ITER(&first_a, b, it);
+                    digi_free (&key); // special
+                    CHECK(a, b);
+# endif
+                    break;
+                }
+#endif
                 case TEST_FIND_IF_RANGE:
                 {
                     vec_digi_it first_a, last_a;

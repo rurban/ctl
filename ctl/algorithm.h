@@ -70,16 +70,64 @@ JOIN(A, none_of)(A* self, int _match(T*))
     return JOIN(I, done)(&pos);
 }
 
+#ifdef DEBUG
+// TODO not for value but matching range
+static inline I
+JOIN(A, find_end)(A* self, T value)
+{
+    I* ret = NULL;
+    foreach(A, self, i)
+        if(JOIN(A, _equal)(self, i.ref, &value))
+            ret = &i;
+    return ret ? *ret : JOIN(A, end)(self);
+}
+
+static inline I
+JOIN(A, find_end_if)(A* self, int _match(T*))
+{
+    I* ret = NULL;
+    foreach(A, self, i)
+        if(_match(i.ref))
+            ret = &i;
+    return ret ? *ret : JOIN(A, end)(self);
+}
+#endif
+
 #include <stdbool.h>
 
 static inline I
 JOIN(A, find_range)(I* first, I* last, T value)
 {
+    A* self = first->container;
     foreach_range(A, i, first, last)
-        if(JOIN(A, _equal)(first->container, i.ref, &value))
+        if(JOIN(A, _equal)(self, i.ref, &value))
             return i;
     return *last;
 }
+
+#if 0
+// args
+static inline I
+JOIN(A, find_end_range)(I* first, I* last, T value)
+{
+    I* ret = NULL;
+    A* self = first->container;
+    foreach_range(A, i, first, last)
+        if(JOIN(A, _equal)(self, i.ref, &value))
+            ret = &i;
+    return ret ? *ret : *last;
+}
+
+static inline I
+JOIN(A, find_end_if_range)(I* first, I* last, int _match(T*))
+{
+    I* ret = NULL;
+    foreach_range(A, i, first, last)
+        if(_match(i.ref))
+            ret = &i;
+    return ret ? *ret : *last;
+}
+#endif
 
 static inline I
 JOIN(A, find_if_range)(I* first, I* last, int _match(T*))
@@ -197,8 +245,6 @@ JOIN(A, equal_range)(A* self, I* first, I* last, T value)
 // TODO:
 // mismatch
 // mismatch_range C++20
-// find_end
-// find_end_range C++20
 // find_first_of
 // find_first_of_range C++20
 // adjacent_find
