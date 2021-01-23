@@ -17,16 +17,16 @@
     {                                                                  \
         size_t a_found = 0;                                            \
         size_t b_found = 0;                                            \
-        foreach_ref(uset_digi, digi, uset_digi_node*, &_x, it, _ref)   \
+        list_foreach_ref(uset_digi, &_x, it)                           \
         {                                                              \
-            auto found = _y.find(DIGI(*_ref->value));                  \
+            auto found = _y.find(DIGI(*it.ref->value));                \
             assert(found != _y.end());                                 \
             a_found++;                                                 \
         }                                                              \
         for(auto x : _y)                                               \
         {                                                              \
             digi d = digi_init(*x.value);                              \
-            uset_digi_node* found = uset_digi_find(&_x, d);            \
+            uset_digi_node *found = uset_digi_find(&_x, d);            \
             assert(found != NULL);                                     \
             digi_free(&d);                                             \
             b_found++;                                                 \
@@ -44,8 +44,8 @@
 void print_uset(uset_digi* a)
 {
     int i = 0;
-    foreach_ref(uset_digi, digi, uset_digi_node*, a, it, ref)
-        printf("%d: %d [%zu]\n", i++, *ref->value, ((uset_digi_it*)it)->bucket_index);
+    list_foreach_ref(uset_digi, a, it)
+        printf("%d: %d [%zu]\n", i++, *it.ref->value, it.bucket_index);
     printf("--\n");
 }
 void print_unordered_set(std::unordered_set<DIGI,DIGI_hash> b)
@@ -88,7 +88,6 @@ static void
 test_small_size(void)
 {
     uset_digi a = uset_digi_init(digi_hash, digi_equal);
-    // TODO a.equal = digi_equal
     uset_digi_insert(&a, digi_init(1));
     uset_digi_insert(&a, digi_init(2));
     print_uset(&a);
@@ -167,14 +166,14 @@ main(void)
                 uset_digi aa = uset_digi_copy(&a);
                 LOG ("before\n");
                 print_uset(&a);
-                foreach_ref(uset_digi, digi, uset_digi_node*, &aa, it, ref)
+                list_foreach_ref(uset_digi, &aa, it)
                 {
                     //LOG("find %d [%zu]\n", *ref->value, it.bucket_index);
-                    assert(uset_digi_find(&a, *ref));
+                    assert(uset_digi_find(&a, *it.ref));
                 }
                 LOG ("all found\n");
-                foreach_ref(uset_digi, digi, uset_digi_node*, &a, it2, ref2)
-                    uset_digi_erase(&aa, *ref2);
+                list_foreach_ref(uset_digi, &a, it2)
+                    uset_digi_erase(&aa, *it2.ref);
                 LOG ("all erased\n");
                 print_uset(&a);
                 assert(uset_digi_empty(&aa));
@@ -276,7 +275,6 @@ main(void)
             {
                 uset_digi aa = uset_digi_copy(&a);
                 uset_digi aaa = uset_digi_init(digi_hash, digi_equal);
-                // TODO a.equal = digi_equal
                 std::unordered_set<DIGI,DIGI_hash> bb = b;
                 std::unordered_set<DIGI,DIGI_hash> bbb;
                 uset_digi_swap(&aaa, &aa);
@@ -302,7 +300,7 @@ main(void)
                 uset_digi_node* aa = uset_digi_find(&a, key);
                 auto bb = b.find(DIGI{vb});
                 if(bb == b.end())
-                    assert(uset_digi_end(&a) == aa);
+                    assert(!aa);
                 else
                     assert(*bb->value == *aa->value.value);
                 digi_free (&key);
@@ -414,20 +412,20 @@ main(void)
             // algorithm
             case TEST_FIND_IF:
             {
-                uset_digi_node* aa = uset_digi_find_if(&a, digi_is_odd);
+                uset_digi_it aa = uset_digi_find_if(&a, digi_is_odd);
                 auto bb = std::find_if(b.begin(), b.end(), DIGIc_is_odd);
                 if(bb == b.end())
-                    assert(uset_digi_end(&a) == aa);
+                    assert(!aa.node);
                 else
                     assert(*bb->value % 2);
                 break;
             }
             case TEST_FIND_IF_NOT:
             {
-                uset_digi_node* aa = uset_digi_find_if_not(&a, digi_is_odd);
+                uset_digi_it aa = uset_digi_find_if_not(&a, digi_is_odd);
                 auto bb = std::find_if_not(b.begin(), b.end(), DIGIc_is_odd);
                 if(bb == b.end())
-                    assert(uset_digi_end(&a) == aa);
+                    assert(!aa.node);
                 else
                     assert(!(*bb->value % 2));
                 break;

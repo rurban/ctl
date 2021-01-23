@@ -95,6 +95,8 @@ JOIN(A, find_end_if)(A* self, int _match(T*))
 
 #include <stdbool.h>
 
+#ifndef CTL_USET // no ranges
+
 static inline I
 JOIN(A, find_range)(I* first, I* last, T value)
 {
@@ -168,6 +170,8 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
     return !JOIN(A, none_of_range)(first, last, _match);
 }
 
+#endif
+
 #if !defined(CTL_USET) && !defined(CTL_STR)
 // C++20
 // uset has cached_hash optims
@@ -207,7 +211,7 @@ JOIN(A, count_if)(A* self, int _match(T*))
     return count;
 }
 
-#if !defined(CTL_SET) && !defined(CTL_USET)
+#ifndef CTL_USET
 static inline size_t
 JOIN(A, count)(A* self, T value)
 {
@@ -219,7 +223,7 @@ JOIN(A, count)(A* self, T value)
         self->free(&value);
     return count;
 }
-#endif // SET/USET
+#endif // USET
 #endif // STR
 
 #ifdef DEBUG
