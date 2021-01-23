@@ -26,8 +26,8 @@
         for(auto x : _y)                                               \
         {                                                              \
             digi d = digi_init(*x.value);                              \
-            uset_digi_node *found = uset_digi_find(&_x, d);            \
-            assert(found != NULL);                                     \
+            uset_digi_it found = uset_digi_find(&a, d);                \
+            assert(!uset_digi_it_done(&found));                        \
             digi_free(&d);                                             \
             b_found++;                                                 \
         }                                                              \
@@ -169,7 +169,8 @@ main(void)
                 list_foreach_ref(uset_digi, &aa, it)
                 {
                     //LOG("find %d [%zu]\n", *ref->value, it.bucket_index);
-                    assert(uset_digi_find(&a, *it.ref));
+                    uset_digi_it found = uset_digi_find(&a, *it.ref);
+                    assert(!uset_digi_it_done(&found));
                 }
                 LOG ("all found\n");
                 list_foreach_ref(uset_digi, &a, it2)
@@ -297,12 +298,12 @@ main(void)
                 int vb = TEST_RAND(TEST_MAX_VALUE);
                 digi key = digi_init(vb);
                 // find is special, it doesnt free the key
-                uset_digi_node* aa = uset_digi_find(&a, key);
+                uset_digi_it aa = uset_digi_find(&a, key);
                 auto bb = b.find(DIGI{vb});
                 if(bb == b.end())
-                    assert(!aa);
+                    assert(uset_digi_it_done(&aa));
                 else
-                    assert(*bb->value == *aa->value.value);
+                    assert(*bb->value == *aa.ref->value);
                 digi_free (&key);
                 break;
             }

@@ -58,9 +58,7 @@ JOIN(A, capacity)(A* self)
 static inline T*
 JOIN(A, at)(A* self, size_t index)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert (index < self->size || !"out of range");
-#endif
+    ASSERT (index < self->size || !"out of range");
     return index < self->size ? &self->vector[index] : NULL;
 }
 
@@ -206,9 +204,7 @@ static inline void
 JOIN(A, fit)(A* self, size_t capacity)
 {
     size_t overall = capacity;
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert (capacity < JOIN(A, max_size)() || !"max_size overflow");
-#endif
+    ASSERT (capacity < JOIN(A, max_size)() || !"max_size overflow");
     if(MUST_ALIGN_16(T)) // reserve terminating \0 for strings
         overall++;
     if (self->vector)
@@ -270,9 +266,7 @@ JOIN(A, reserve)(A* self, const size_t n)
     const size_t max_size = JOIN(A, max_size)();
     if(n > max_size)
     {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-        assert (n < max_size || !"max_size overflow");
-#endif
+        ASSERT (n < max_size || !"max_size overflow");
         return;
     }
 #ifdef CTL_STR

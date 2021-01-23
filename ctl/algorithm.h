@@ -250,9 +250,7 @@ JOIN(A, equal_range)(A* self, I* first, I* last, T value)
 static inline I
 JOIN(A, lower_bound)(A* self, T value)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare || !"compare undefined");
-#endif
+    ASSERT(self->compare || !"compare undefined");
     JOIN(A, it) it = JOIN(A, begin)(self);
     size_t count = self->size;
     while (count > 0)
@@ -274,9 +272,7 @@ JOIN(A, lower_bound)(A* self, T value)
 static inline I
 JOIN(A, upper_bound)(A* self, T value)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare || !"compare undefined");
-#endif
+    ASSERT(self->compare || !"compare undefined");
     JOIN(A, it) it = JOIN(A, begin)(self);
     size_t count = self->size;
     while (count > 0)
@@ -299,9 +295,7 @@ static inline I
 JOIN(A, lower_bound_range)(I* first, I* last, T value)
 {
     A* self = first->container;
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare || !"compare undefined");
-#endif
+    ASSERT(self->compare || !"compare undefined");
     JOIN(A, it) it = *first;
     size_t count = JOIN(I, distance)(first, last);
     while (count > 0)
@@ -323,9 +317,7 @@ static inline I
 JOIN(A, upper_bound_range)(I* first, I* last, T value)
 {
     A* self = first->container;
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare || !"compare undefined");
-#endif
+    ASSERT(self->compare || !"compare undefined");
     JOIN(A, it) it = *first;
     size_t count = JOIN(I, distance)(first, last);
     while (count > 0)

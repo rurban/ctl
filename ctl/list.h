@@ -164,9 +164,7 @@ JOIN(I, distance)(I* iter, I* other)
 static inline void
 JOIN(A, disconnect)(A* self, B* node)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert (self->size);
-#endif
+    ASSERT (self->size);
     if(node == self->tail) self->tail = self->tail->prev;
     if(node == self->head) self->head = self->head->next;
     if(node->prev) node->prev->next = node->next;
@@ -239,8 +237,10 @@ JOIN(A, connect_before)(A* self, B* position, B* node)
     }
     /* error handling? silent ignore or stderr or assert or customizable.
     else
-        assert (0 || "list size exceeded");
+    {
+        ASSERT (0 || "list size exceeded");
         fprintf (stderr, "list size exceeded");
+    }
     */
 }
 
@@ -332,8 +332,10 @@ JOIN(A, connect_after)(A* self, B* position, B* node)
     }
     /* error handling? silent ignore or stderr or assert or customizable.
     else
-        assert (0 || "list size exceeded");
+    {
+        ASSERT (0 || "list size exceeded");
         fprintf (stderr, "list size exceeded");
+    }
     */
 }
 
@@ -539,9 +541,7 @@ JOIN(A, splice_range)(A* self, I* pos, I* other_first, I* other_last)
 static inline void
 JOIN(A, merge)(A* self, A* other)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare || !"compare undefined");
-#endif
+    ASSERT(self->compare || !"compare undefined");
     if(JOIN(A, empty)(self))
         JOIN(A, swap)(self, other);
     else
@@ -589,12 +589,15 @@ static inline void /* I, B* ?? */
 JOIN(A, unique)(A* self)
 {
     list_foreach_ref(A, self, it)
-        if(it.node->next != NULL && JOIN(A, _equal)(self, it.ref, &it.node->next->value))
+    {
+        B* next = JOIN(B, next)(it.node);
+        if(next != NULL && JOIN(A, _equal)(self, it.ref, &next->value))
         {
-            B* next = it.node->next;
+            B* n = it.node->next;
             JOIN(A, erase_node)(self, it.node);
-            it.node = next;
+            it.node = n;
         }
+    }
 }
 
 static inline I

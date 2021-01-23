@@ -206,6 +206,7 @@ JOIN(I, scan)(I* iter)
 static inline void
 JOIN(I, next)(I* iter)
 {
+    ASSERT(iter->node);
     if(iter->node->next == NULL)
     {
         for(size_t i = iter->bucket_index + 1; i < iter->container->bucket_count; i++)
@@ -318,9 +319,7 @@ JOIN(I, range)(A* container, B* begin, B* end)
 static inline int
 JOIN(A, _equal)(A* self, T* a, T* b)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->equal || !"equal undefined");
-#endif
+    ASSERT(self->equal || !"equal undefined");
     return self->equal(a, b);
 }
 
@@ -485,15 +484,11 @@ static inline void
 JOIN(A, _free_node)(A* self, B* n)
 {
 #ifndef POD
-# if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->free || !"no uset free without POD");
-# endif
+    ASSERT(self->free || !"no uset free without POD");
     if(self->free)
         self->free(&n->value);
 #else
-# if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(!self->free || !"uset free with POD");
-# endif
+    ASSERT(!self->free || !"uset free with POD");
 #endif
     free(n);
     self->size--;
@@ -539,9 +534,7 @@ JOIN(A, _reserve)(A* self, const size_t new_size)
         self->max_bucket_count = JOIN(A, max_bucket_count(self));
     else
         self->max_bucket_count = new_size; // ignore custom load factors here
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert (self->buckets && "out of memory");
-#endif
+    ASSERT (self->buckets && "out of memory");
 }
 
 static inline void JOIN(A, _rehash)(A* self, size_t count);

@@ -73,9 +73,7 @@ JOIN(A, at)(A* self, size_t index)
         return NULL;
     else if(UNLIKELY(self->size == 0 || index > self->size))
     {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-        assert (index <= self->size || !"invalid deque index");
-#endif
+        ASSERT (index <= self->size || !"invalid deque index");
         self->capacity = 1;
         self->pages = (B**) calloc(1, sizeof(B*));
         if (!self->pages)
@@ -526,11 +524,9 @@ JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
         index + count < count ||
         self->size + count > JOIN(A, max_size)())
     {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-        assert (self->size + count >= self->size || !"count overflow");
-        assert (index + count >= count || !"pos overflow");
-        assert (self->size + count < JOIN(A, max_size)() || !"max_size overflow");
-#endif
+        ASSERT (self->size + count >= self->size || !"count overflow");
+        ASSERT (index + count >= count || !"pos overflow");
+        ASSERT (self->size + count < JOIN(A, max_size)() || !"max_size overflow");
         FREE_VALUE(self, value);
         return NULL;
     }
