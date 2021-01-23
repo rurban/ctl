@@ -53,19 +53,6 @@ typedef struct I
     A* container;
 } I;
 
-#undef _deq_begin_it
-#define _deq_begin_it JOIN(JOIN(_deq, T), begin_it)
-#undef _deq_end_it
-#define _deq_end_it JOIN(JOIN(_deq, T), end_it)
-
-#ifdef __cplusplus
-static const I _deq_begin_it = {};
-static const I _deq_end_it = {};
-#else
-static const I _deq_begin_it = {0};
-static const I _deq_end_it = {0};
-#endif
-
 static inline B**
 JOIN(A, first)(A* self)
 {
@@ -124,7 +111,8 @@ JOIN(A, back)(A* self)
 static inline I
 JOIN(A, begin)(A* self)
 {
-    I iter = _deq_begin_it;
+    static I zero;
+    I iter = zero;
     iter.ref = JOIN(A, front)(self); // unchecked
     iter.index = 0;
     iter.end = self->size;
@@ -136,7 +124,8 @@ JOIN(A, begin)(A* self)
 static inline I
 JOIN(A, end)(A* self)
 {
-    I iter = _deq_end_it;
+    static I zero;
+    I iter = zero;
     iter.ref = JOIN(A, back)(self);
     iter.index = self->size;
     iter.end = self->size;
@@ -148,11 +137,12 @@ JOIN(A, end)(A* self)
 static inline I
 JOIN(B, iter)(A* self, size_t index)
 {
-    I iter = _deq_begin_it;
+    static I zero;
+    I iter = zero;
     iter.ref = JOIN(A, at)(self, index); // bounds-checked
-    iter.container = self;
     iter.index = index;
     iter.end = self->size;
+    iter.container = self;
     return iter;
 }
 

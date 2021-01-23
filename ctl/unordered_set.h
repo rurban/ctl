@@ -89,24 +89,44 @@ typedef struct I
     size_t bucket_index;
 } I;
 
-#undef _uset_begin_it
-#define _uset_begin_it JOIN(JOIN(_uset, T), begin_it)
-#undef _uset_end_it
-#define _uset_end_it JOIN(JOIN(_uset, T), end_it)
+static inline size_t
+JOIN(I, index)(A* self, T value)
+{
+    return self->hash(&value) % self->bucket_count;
+}
 
-#ifdef __cplusplus
-static const I _uset_begin_it = {};
-static const I _uset_end_it = {};
+#ifdef CTL_USET_CACHED_HASH
+static inline size_t
+JOIN(I, cached_index)(A* self, B* node)
+{
+    return node->cached_hash % self->bucket_count;
+}
+#define BUCKET_INDEX(iter)                              \
+    JOIN(I, cached_index)((iter)->container, (iter)->node)
+
 #else
-static const I _uset_begin_it = {0};
-static const I _uset_end_it = {0};
+# define BUCKET_INDEX(iter)                             \
+    JOIN(I, index)((iter)->container, (iter)->node->value)
 #endif
+
+static inline I
+JOIN(I, iter)(A* self, B *node)
+{
+    static I zero;
+    I iter = zero;
+    iter.node = node;
+    if (node)
+        iter.ref = &node->value;
+    iter.container = self;
+    iter.bucket_index = BUCKET_INDEX(&iter);
+    return iter;
+}
 
 static inline I
 JOIN(A, begin)(A* self)
 {
-    I iter = _uset_begin_it;
-    iter.node = NULL;
+    static I zero;
+    I iter = zero;
     iter.container = self;
     for(size_t i = 0; i < self->bucket_count; i++)
     {
@@ -125,8 +145,8 @@ JOIN(A, begin)(A* self)
 static inline I
 JOIN(A, end)(A* self)
 {
-    I iter = _uset_end_it;
-    iter.node = NULL;
+    static I zero;
+    I iter = zero;
     iter.container = self;
     iter.bucket_index = self->bucket_count;
     return iter;
@@ -150,26 +170,6 @@ JOIN(I, isend)(I* iter, I* last)
     (void) last;
     return iter->node == NULL;
 }
-
-static inline size_t
-JOIN(I, index)(A* self, T value)
-{
-    return self->hash(&value) % self->bucket_count;
-}
-
-#ifdef CTL_USET_CACHED_HASH
-static inline size_t
-JOIN(I, cached_index)(A* self, B* node)
-{
-    return node->cached_hash % self->bucket_count;
-}
-#define BUCKET_INDEX(iter)                              \
-    JOIN(I, cached_index)((iter)->container, (iter)->node)
-
-#else
-# define BUCKET_INDEX(iter)                             \
-    JOIN(I, index)((iter)->container, (iter)->node->value)
-#endif
 
 static inline void
 JOIN(I, update)(I* iter)
@@ -325,17 +325,6 @@ JOIN(A, _equal)(A* self, T* a, T* b)
 }
 
 #include <ctl/bits/container.h>
-
-static inline I
-JOIN(I, iter)(A* self, B *node)
-{
-    I it = _uset_begin_it;
-    it.node = node;
-    it.ref = &it.node->value;
-    it.bucket_index = BUCKET_INDEX(&it);
-    it.container = self;
-    return it;
-}
 
 static inline size_t
 JOIN(A, __next_prime)(size_t number)

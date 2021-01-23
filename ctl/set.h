@@ -5,7 +5,7 @@
 #error "Template type T undefined for <ctl/set.h>"
 #endif
 
-// TODO emplace, lower_bound, upper_bound, equal_range
+// TODO emplace, extract, extract_it, merge, equal_range
 
 #define CTL_SET
 #define A JOIN(set, T)
@@ -47,37 +47,29 @@ typedef struct I
     A* container;
 } I;
 
-#undef _set_begin_it
-#define _set_begin_it JOIN(JOIN(_set, T), begin_it)
-#undef _set_end_it
-#define _set_end_it JOIN(JOIN(_set, T), end_it)
-
-#ifdef __cplusplus
-static const I _set_begin_it = {};
-static const I _set_end_it = {};
-#else
-static const I _set_begin_it = {0};
-static const I _set_end_it = {0};
-#endif
+static inline I
+JOIN(I, iter)(A* self, B *node)
+{
+    static I zero;
+    I iter = zero;
+    iter.node = node;
+    if (node)
+        iter.ref = &node->value;
+    iter.container = self;
+    // end defaults to NULL
+    return iter;
+}
 
 static inline I
 JOIN(A, begin)(A* self)
 {
-    I iter = _set_begin_it;
-    iter.node = self->root;
-    iter.ref = self->root ? &iter.node->value : NULL;
-    // end defaults to NULL
-    iter.container = self;
-    return iter;
+    return JOIN(I, iter)(self, self->root);
 }
 
 static inline I
 JOIN(A, end)(A* self)
 {
-    I iter = _set_end_it;
-    // all default to NULL
-    iter.container = self;
-    return iter;
+    return JOIN(I, iter)(self, NULL);
 }
 
 static inline B*
@@ -184,16 +176,6 @@ static inline void
 JOIN(I, range)(I* iter, I* last)
 {
     iter->end = last->node;
-}
-
-static inline I
-JOIN(I, iter)(A* self, B *node)
-{
-    I iter = _set_begin_it;
-    iter.node = node;
-    iter.container = self;
-    // end defaults to NULL
-    return iter;
 }
 
 #include <ctl/bits/container.h>
@@ -776,6 +758,17 @@ static inline size_t
 JOIN(A, erase_if)(A* self, int (*_match)(T*))
 {
     return JOIN(A, remove_if)(self, _match);
+}
+
+static inline void /* I, B* ?? */
+JOIN(A, unique)(A* self)
+{
+    list_foreach_ref(A, self, it)
+    {
+        B* next = JOIN(B, next)(it.node);
+        if(next && JOIN(A, _equal)(self, it.ref, &next->value))
+            JOIN(A, erase_node)(self, it.node);
+    }
 }
 
 static inline A

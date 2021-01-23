@@ -49,19 +49,6 @@ typedef struct I
     A* container;
 } I;
 
-#undef _vec_begin_it
-#define _vec_begin_it JOIN(JOIN(_vec, T), begin_it)
-#undef _vec_end_it
-#define _vec_end_it JOIN(JOIN(_vec, T), end_it)
-
-#ifdef __cplusplus
-static const I _vec_begin_it = {};
-static const I _vec_end_it = {};
-#else
-static const I _vec_begin_it = {0};
-static const I _vec_end_it = {0};
-#endif
-
 static inline size_t
 JOIN(A, capacity)(A* self)
 {
@@ -90,32 +77,26 @@ JOIN(A, back)(A* self)
 }
 
 static inline I
-JOIN(A, begin)(A* self)
+JOIN(I, iter)(A* self, size_t index)
 {
-    I iter = _vec_begin_it;
-    iter.ref = &self->vector[0];
+    static I zero;
+    I iter = zero;
+    iter.ref = &self->vector[index];
     iter.end = &self->vector[self->size];
     iter.container = self;
     return iter;
+}
+
+static inline I
+JOIN(A, begin)(A* self)
+{
+    return JOIN(I, iter)(self, 0);
 }
 
 static inline I
 JOIN(A, end)(A* self)
 {
-    I iter = _vec_end_it;
-    iter.end = iter.ref = &self->vector[self->size];
-    iter.container = self;
-    return iter;
-}
-
-static inline I
-JOIN(I, iter)(A* self, size_t index)
-{
-    I iter = _vec_begin_it;
-    iter.ref = JOIN(A, at)(self, index); // bounds-checked
-    iter.end = &self->vector[self->size];
-    iter.container = self;
-    return iter;
+    return JOIN(I, iter)(self, self->size);
 }
 
 static inline T*

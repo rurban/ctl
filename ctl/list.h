@@ -60,39 +60,29 @@ JOIN(A, back)(A* self)
     return self->tail ? &self->tail->value : NULL;
 }
 
-#undef _list_begin_it
-#define _list_begin_it JOIN(JOIN(_list, T), begin_it)
-#undef _list_end_it
-#define _list_end_it JOIN(JOIN(_list, T), end_it)
-
-#ifdef __cplusplus
-static const I _list_begin_it = {};
-static const I _list_end_it = {};
-#else
-static const I _list_begin_it = {0};
-static const I _list_end_it = {0};
-#endif
-
 static inline I
-JOIN(A, begin)(A* self)
+JOIN(I, iter)(A* self, B* node)
 {
-    I iter = _list_begin_it;
-    iter.node = self->head;
-    iter.end = NULL;
-    iter.ref = JOIN(A, front)(self);
+    static I zero;
+    I iter = zero;
+    iter.node = node;
+    if (node)
+        iter.ref = &node->value;
+    //iter.end = NULL;
     iter.container = self;
     return iter;
 }
 
 static inline I
+JOIN(A, begin)(A* self)
+{
+    return JOIN(I, iter)(self, self->head);
+}
+
+static inline I
 JOIN(A, end)(A* self)
 {
-    I iter = _list_end_it;
-    iter.node = NULL;
-    iter.ref = NULL;
-    iter.end = NULL;
-    iter.container = self;
-    return iter;
+    return JOIN(I, iter)(self, NULL);
 }
 
 static inline int
