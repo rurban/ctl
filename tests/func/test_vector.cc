@@ -419,9 +419,9 @@ main(void)
                         const size_t index = TEST_RAND(a.size);
                         int value = TEST_RAND(2) ? TEST_RAND(INT_MAX) : *vec_digi_at(&a, index)->value;
                         digi key = digi_init(value);
-                        digi* aa = vec_digi_find(&a, key);
+                        vec_digi_it aa = vec_digi_find(&a, key);
                         auto bb = find(b.begin(), b.end(), DIGI{value});
-                        bool found_a = aa != NULL;
+                        bool found_a = !vec_digi_it_done(&aa);
                         bool found_b = bb != b.end();
                         assert(found_a == found_b);
                         if(found_a && found_b)

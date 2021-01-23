@@ -108,7 +108,8 @@ main(void)
 #define TEST_LIST(type, v1, v2) {             \
     type a = type##_init();                   \
     type##_push_back(&a, v1);                 \
-    assert(type##_find(&a, v1)); /* equal */  \
+    type##_it found = type##_find(&a, v1);    \
+    assert(!type##_it_done(&found)); /* equal */ \
     type##_push_back(&a, v2);                 \
     type b = type##_copy(&a);                 \
     type##_sort(&a);            /* compare */ \
@@ -127,20 +128,23 @@ main(void)
     {
         stack_uint8_t a = stack_uint8_t_init();
         stack_uint8_t_push(&a, 1);
-        assert(stack_uint8_t_find(&a, 1)); /* equal */
+        stack_uint8_t_it found = stack_uint8_t_find(&a, 1);
+        assert(!stack_uint8_t_it_done(&found)); /* equal */
         stack_uint8_t_free(&a);
     }
     {
         map_float a = map_float_init(NULL);
         map_float_insert(&a, 1.f);       // compare
-        assert(map_float_find(&a, 1.f)); // equal
+        map_float_it found = map_float_find(&a, 1.f);
+        assert(!map_float_it_done(&found)); // equal
         map_float_free(&a);
     }
     TEST_LIST(vec_double, 1.0, 2.0);
     {
         uset_long a = uset_long_init(NULL, NULL);
         uset_long_insert(&a, 1L);       // hash
-        assert(uset_long_find(&a, 1L)); // equal
+        uset_long_it found = uset_long_find(&a, 1L); // equal
+        assert(!uset_long_it_done(&found)); // equal
         uset_long_free(&a);
     }
     {

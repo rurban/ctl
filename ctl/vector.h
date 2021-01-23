@@ -608,13 +608,13 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
 }
 
 #ifndef CTL_STR
-static inline T*
+static inline I
 JOIN(A, find)(A* self, T key)
 {
     vec_foreach(T, self, ref)
         if (JOIN(A, _equal)(self, ref, &key))
-            return ref;
-    return NULL;
+            return JOIN(I, iter)(self, ref - &self->vector[0]);
+    return JOIN(A, end(self));
 }
 #endif
 

@@ -184,19 +184,21 @@ splices nodes from another container _(NYI)_
 
 returns the number of elements matching specific key.
 
-    T* find (A* self, T value)
+    I find (A* self, T value)
 
-finds element with specific key
+returns an iterator to element with specific key.
 
     bool equal_range (A* self)
 
 returns range of elements matching a specific key. _(NYI)_
 
-    T* lower_bound (A* self)
+    I lower_bound (A* self, T key)
+    I lower_bound_range (I* first, I* last, T key)
 
 returns an iterator to the first element not less than the given key. _(NYI)_
 
-    T* upper_bound (A* self)
+    I upper_bound (A* self, T key)
+    I upper_bound_range (I* first, I* last, T key)
 
 returns an iterator to the first element greater than the given key. _(NYI)_
 

@@ -2,7 +2,7 @@
    SPDX-License-Identifier: MIT */
 
 #ifndef T
-#error "Template struct type T undefined for <ctl/map.h>"
+# error "Template struct type T undefined for <ctl/map.h>"
 #endif
 
 #include <ctl/ctl.h>
@@ -24,7 +24,7 @@ JOIN(A, insert_or_assign)(A* self, T key)
         B* node = self->root;
         while(1)
         {
-            int diff = self->compare(&key, &node->key);
+            int diff = self->compare(&key, &node->value);
             if(diff == 0)
             {
                 JOIN(A, free_node)(self, node);
@@ -74,7 +74,7 @@ JOIN(A, insert_or_assign_found)(A* self, T key, int* foundp)
         B* node = self->root;
         while(1)
         {
-            int diff = self->compare(&key, &node->key);
+            int diff = self->compare(&key, &node->value);
             if(diff == 0)
             {
                 JOIN(A, free_node)(self, node);

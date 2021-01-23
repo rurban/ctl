@@ -164,11 +164,11 @@ JOIN(I, cached_index)(A* self, B* node)
     return node->cached_hash % self->bucket_count;
 }
 #define BUCKET_INDEX(iter)                              \
-    JOIN(I, cached_index)(iter->container, iter->node)
+    JOIN(I, cached_index)((iter)->container, (iter)->node)
 
 #else
 # define BUCKET_INDEX(iter)                             \
-    JOIN(I, index)(iter->container, iter->node->value)
+    JOIN(I, index)((iter)->container, (iter)->node->value)
 #endif
 
 static inline void
@@ -326,17 +326,16 @@ JOIN(A, _equal)(A* self, T* a, T* b)
 
 #include <ctl/bits/container.h>
 
-/*
 static inline I
 JOIN(I, iter)(A* self, B *node)
 {
-    I it = JOIN(I, each)(self);
+    I it = _uset_begin_it;
     it.node = node;
     it.ref = &it.node->value;
-    it.next = it.node->next;
+    it.bucket_index = BUCKET_INDEX(&it);
+    it.container = self;
     return it;
 }
-*/
 
 static inline size_t
 JOIN(A, __next_prime)(size_t number)
@@ -642,7 +641,7 @@ JOIN(A, _rehash)(A* self, size_t count)
 // Note: As this is used internally a lot, don't consume (free) the key.
 // The user must free it by himself.
 static inline B*
-JOIN(A, find)(A* self, T value)
+JOIN(A, find_node)(A* self, T value)
 {
     if(self->size)
     {
@@ -667,6 +666,16 @@ JOIN(A, find)(A* self, T value)
     return NULL;
 }
 
+static inline I
+JOIN(A, find)(A* self, T value)
+{
+    B* node = JOIN(A, find_node)(self, value);
+    if (node)
+        return JOIN(I, iter)(self, node);
+    else
+        return JOIN(A, end)(self);
+}
+
 static inline B**
 JOIN(A, push_cached)(A* self, T* value)
 {
@@ -686,7 +695,7 @@ JOIN(A, push_cached)(A* self, T* value)
 static inline void
 JOIN(A, insert)(A* self, T value)
 {
-    if(JOIN(A, find)(self, value))
+    if(JOIN(A, find_node)(self, value))
     {
         FREE_VALUE(self, value);
     }
@@ -718,7 +727,7 @@ JOIN(A, insert)(A* self, T value)
 static inline void
 JOIN(A, insert_found)(A* self, T value, int* foundp)
 {
-    if(JOIN(A, find)(self, value))
+    if(JOIN(A, find_node)(self, value))
     {
         *foundp = 1;
         FREE_VALUE(self, value);
@@ -740,7 +749,7 @@ static inline B*
 JOIN(A, emplace)(A* self, T* value)
 {
     B* node;
-    if ((node = JOIN(A, find)(self, *value)))
+    if ((node = JOIN(A, find_node)(self, *value)))
         return node;
 
     B** buckets = JOIN(A, push_cached)(self, value);
@@ -753,7 +762,7 @@ static inline B*
 JOIN(A, emplace_found)(A* self, T* value, int* foundp)
 {
     B* node;
-    if ((node = JOIN(A, find)(self, *value)))
+    if ((node = JOIN(A, find_node)(self, *value)))
     {
         if(!self->bucket_count)
             JOIN(A, rehash)(self, 12);
@@ -812,7 +821,7 @@ JOIN(A, free)(A* self)
 static inline size_t
 JOIN(A, count)(A* self, T value)
 {
-    if (JOIN(A, find)(self, value))
+    if (JOIN(A, find_node)(self, value))
     {
         FREE_VALUE(self, value);
         // TODO: the popular move-to-front strategy
@@ -829,7 +838,8 @@ JOIN(A, count)(A* self, T value)
 static inline bool
 JOIN(A, contains)(A* self, T value)
 {
-    if (JOIN(A, find)(self, value))
+    if (JOIN(A, find_node)(self, value))
+    {
         FREE_VALUE(self, value);
         // TODO: the popular move-to-front strategy
         return true;
@@ -927,7 +937,7 @@ JOIN(A, intersection)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
     list_foreach_ref(A, a, it)
-        if(JOIN(A, find)(b, *it.ref))
+        if(JOIN(A, find_node)(b, *it.ref))
             JOIN(A, insert)(&self, self.copy(it.ref));
     return self;
 }
@@ -981,10 +991,10 @@ JOIN(A, equal)(A* self, A* other)
     size_t count_a = 0;
     size_t count_b = 0;
     list_foreach_ref(A, self, it)
-        if(JOIN(A, find)(self, *it.ref))
+        if(JOIN(A, find_node)(self, *it.ref))
             count_a += 1;
     list_foreach_ref(A, other, it2)
-        if(JOIN(A, find)(other, *it2.ref))
+        if(JOIN(A, find_node)(other, *it2.ref))
             count_b += 1;
     return count_a == count_b;
 }
