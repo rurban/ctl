@@ -209,7 +209,7 @@ main(void)
         deq_int a = deq_int_init();
         for(size_t i = 0; i < size; i++) deq_int_push_back(&a, i);
         for(size_t i = 0; i < size; i++) deq_int_push_front(&a, i);
-        deq_int_insert(&a, 1, 99);
+        deq_int_insert_index(&a, 1, 99);
         deq_int_sort(&a);
         deq_int_free(&a);
     }
@@ -271,9 +271,9 @@ main(void)
           uset_int_insert(&a, i);
         for (int i=0; i < 27; i++)
           uset_int_insert(&a, i);
-        foreach_ref(uset_int, int, &a, it, ref) { j = *ref; }
+        foreach(uset_int, &a, it) { j = *it.ref; }
         printf("last int %d, ", j);
-        foreach(uset_int, int, &a, it) { uset_int_node_bucket_size(it); }
+        foreach(uset_int, &a, it) { uset_int_node_bucket_size(it.node); }
         printf("uset load_factor: %f\n", uset_int_load_factor(&a));
         uset_int_free(&a);
     }
@@ -287,9 +287,9 @@ main(void)
           //str s = (str){.value = c_char};
           umap_charint_insert(&a, copy);
         }
-        foreach_ref(umap_charint, charint, &a, it, ref) { strcpy (c_char, ref->key); }
+        foreach(umap_charint, &a, it) { strcpy (c_char, it.ref->key); }
         printf("last key \"%s\", ", c_char);
-        foreach(umap_charint, charint, &a, it) { umap_charint_node_bucket_size(it); }
+        foreach(umap_charint, &a, it) { umap_charint_node_bucket_size(it.node); }
         printf("umap_charint load_factor: %f\n", umap_charint_load_factor(&a));
         umap_charint_free(&a);
     }
@@ -302,12 +302,12 @@ main(void)
           //str s = (str){.value = c_char};
           map_charint_insert(&a, charint_copy(&(charint){ c_char, i }));
         }
-        foreach_ref(map_charint, charint, &a, it, ref) { strcpy (c_char, ref->key); }
+        foreach(map_charint, &a, it) { strcpy (c_char, it.ref->key); }
         printf("last key \"%s\", ", c_char);
-        map_charint_node *b = map_charint_begin(&a);
-        printf("min {\"%s\", %d} ", b->key.key, b->key.value);
-        b = map_charint_node_max(b);
-        printf("max {\"%s\", %d}\n", b->key.key, b->key.value);
+        map_charint_it it = map_charint_begin(&a);
+        printf("min {\"%s\", %d} ", it.ref->key, it.ref->value);
+        map_charint_node* b = map_charint_node_max(it.node);
+        printf("max {\"%s\", %d}\n", b->value.key, b->value.value);
         map_charint_free(&a);
     }
     TEST_PASS(__FILE__);
