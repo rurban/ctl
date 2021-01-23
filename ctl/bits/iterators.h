@@ -30,7 +30,7 @@
     if ((self)->size)                                   \
         for(JOIN(A, it) pos = JOIN(A, begin)(self);     \
             pos.node != NULL;                           \
-            pos.node = pos.node->next)
+            JOIN(JOIN(A, it), next)(&pos))
 # define list_foreach_ref(A, self, pos)                 \
     if ((self)->size)                                   \
         for(JOIN(A, it) pos = JOIN(A, begin)(self);     \
@@ -40,7 +40,7 @@
     if (first)                                          \
         for(JOIN(A, node) pos = *first;                 \
             pos.node != last->node;                     \
-            pos.node = pos.node->next)
+            JOIN(JOIN(A, it), next)(&pos))
 # define list_foreach_range_ref(A, pos, first, last)    \
     if (first)                                          \
         for(JOIN(A, it) pos = *first;                   \

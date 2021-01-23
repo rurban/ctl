@@ -179,27 +179,28 @@ merges two containers
 
 ## Lookup
 
-    count (A* self, T key)
+    size_t count (A* self, T key)
 
 returns the number of elements matching specific key
 
-    find (A* self, T key)
+    I find (A* self, T key)
+    B* find_node (A* self, T key)
 
 finds element with specific key
 
-    contains (A* self, T key)
+    bool contains (A* self, T key)
 
 checks if the container contains element with specific key. `(C++20)
 
-    equal_range (A* self)
+    bool equal_range (A* self, I* first, I* last, T value)
 
-returns range of elements matching a specific key.  _(NYI)_
+if range of elements match a specific key.  _(NYI)_
 
-    lower_bound (A* self)
+    I lower_bound (A* self, T key)
 
 returns an iterator to the first element not less than the given key.  _(NYI)_
 
-    upper_bound (A* self)
+    I upper_bound (A* self, T key)
 
 returns an iterator to the first element greater than the given key.  _(NYI)_
 
@@ -215,7 +216,7 @@ Returns the function that compares keys in objects of type value_type T.  _(NYI)
 
 specializes the swap algorithm
 
-    remove_if (A* self, int T_match(T*))
+    remove_if (A* self, int match(T*))
 
 Removes all elements satisfying specific criteria.
 
@@ -223,10 +224,10 @@ Removes all elements satisfying specific criteria.
 
 erases all elements satisfying specific criteria (C++20)
 
-    intersection (A* self, A* other)
-    union (A* self, A* other)
-    difference (A* self, A* other)
-    symmetric_difference (A* self, A* other)
+    A intersection (A* self, A* other)
+    A union (A* self, A* other)
+    A difference (A* self, A* other)
+    A symmetric_difference (A* self, A* other)
 
 
 See [algorithm](algorithm.md) for more.

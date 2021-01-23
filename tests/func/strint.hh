@@ -70,6 +70,12 @@ strint_is_odd(strint* d)
 }
 
 static inline int
+STRINT_is_odd(STRINT &d)
+{
+    return d.second % 2;
+}
+
+static inline int
 strint_equal(strint* a, strint* b)
 {
     return str_key_compare (&a->key, &b->key) == 0;

@@ -12,14 +12,14 @@
 #define CHECK(_x, _y) {                                      \
     assert(_x.size == _y.size());                            \
     std::map<std::string,int>::iterator _iter = _y.begin();  \
-    foreach_ref(map, strint, &_x, _it, _ref) {               \
-        assert(ref->value == _iter->second);                 \
+    foreach(map_strint, &_x, _it) {                          \
+        assert(_it.ref->value == _iter->second);             \
         _iter++;                                             \
     }                                                        \
-    map_strint_it _it = map_strint_it_each(&_x);             \
+    map_strint_it _it = map_strint_begin(&_x);               \
     for(auto& _d : _y) {                                     \
-        assert(_ref->value == _d.second);                    \
-        _it.step(&_it);                                      \
+        assert(_it.ref->value == _d.second);                 \
+        map_strint_it_next(&_it);                            \
     }                                                        \
 }
 
@@ -62,6 +62,7 @@ main(void)
         TEST(CLEAR) \
         TEST(SWAP) \
         TEST(COUNT) \
+        TEST(FIND_NODE) \
         TEST(FIND) \
         TEST(COPY) \
         TEST(EQUAL) \
@@ -74,8 +75,8 @@ main(void)
         /* TEST(EMPLACE) */ \
         /* TEST(EXTRACT) */ \
         /* TEST(MERGE) */ \
-        /* TEST(CONTAINS) */ \
-        /* TEST(ERASE_IF) */ \
+        TEST(CONTAINS) \
+        TEST(ERASE_IF) \
         TEST(EQUAL_RANGE) \
         TEST(FIND_RANGE) \
         TEST(FIND_IF) \
@@ -175,17 +176,35 @@ main(void)
                 strint_free(&kd);
                 break;
             }
+            case TEST_FIND_NODE:
+            {
+                char *key = new_rand_str();
+                const int value = TEST_RAND(TEST_MAX_SIZE);
+                strint kd = strint_init(str_init(key), value);
+                map_strint_node* aa = map_strint_find_node(&a, kd);
+                auto bb = b.find(key);
+                if(bb == b.end())
+                {
+                    map_strint_it e = map_strint_end(&a);
+                    assert(e.node == aa);
+                }
+                else
+                    assert(bb->second == aa->value.value);
+                CHECK(a, b);
+                strint_free(&kd);
+                break;
+            }
             case TEST_FIND:
             {
                 char *key = new_rand_str();
                 const int value = TEST_RAND(TEST_MAX_SIZE);
                 strint kd = strint_init(str_init(key), value);
-                map_strint_node* aa = map_strint_find(&a, kd);
+                map_strint_it it = map_strint_find(&a, kd);
                 auto bb = b.find(key);
                 if(bb == b.end())
-                    assert(map_strint_end(&a) == aa);
+                    assert(map_strint_it_done(&it));
                 else
-                    assert(bb->second == aa->key.value);
+                    assert(bb->second == it.ref->value);
                 CHECK(a, b);
                 strint_free(&kd);
                 break;
@@ -197,32 +216,42 @@ main(void)
                 CHECK(a, b);
                 break;
             }
-#if 0
-            case TEST_CONTAINS: // C++20.
+#ifdef DEBUG
+            case TEST_CONTAINS: // C++20
             {
                 char *key = new_rand_str();
                 const int value = TEST_RAND(TEST_MAX_SIZE);
                 strint kd = strint_init(str_init(key), value);
                 int aa = map_strint_contains(&a, kd);
-                int bb = b.contains(STRINT{key,value});
+#if __cpp_lib_erase_if >= 202002L
+                int bb = b.contains(key);
+#else
+                int bb = b.count(key}) == 1;
+#endif
                 assert(aa == bb);
                 CHECK(a, b);
                 break;
             }
+            case TEST_ERASE_IF:
+            {
+#if __cpp_lib_erase_if >= 202002L
+                auto is_odd = [](auto const& d) {
+                    auto const& [k,v] = d;
+                    return v % 2;
+                };
+                size_t a_erases = map_strint_erase_if(&a, strint_is_odd);
+                size_t b_erases = std::erase_if(b, is_odd);
+                assert(a_erases == b_erases);
+                CHECK(a, b);
+#endif
+                break;
+            }
+#endif
+#if 0
             case TEST_EMPLACE:
             case TEST_EXTRACT:
             case TEST_MERGE:
             case TEST_CONTAINS:
-            case TEST_ERASE_IF:
-            {
-                size_t a_erases = map_strint_erase_if(&a, strint_is_odd);
-                size_t b_erases = b.erase_if(STRINT_is_odd);
-                assert(a_erases == b_erases);
-                CHECK(a, b);
-                break;
-            }
-            case TEST_EQUAL_RANGE:
-                break;
 #endif
             case TEST_COPY:
               { // C++20
