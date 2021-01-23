@@ -96,11 +96,11 @@ Note: `begin` and `end` return `T*` pointers, not iterators yet.
 
     T* begin (A* self)
 
-returns an iterator to the beginning
+constructs an iterator to the beginning
 
     T* end (A* self)
 
-returns an iterator to the end (one past the last element).
+constructs an iterator to the end (one past the last element).
 
 ## Capacity
 

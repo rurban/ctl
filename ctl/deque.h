@@ -59,11 +59,11 @@ typedef struct I
 #define _deq_end_it JOIN(JOIN(_deq, T), end_it)
 
 #ifdef __cplusplus
-static I _deq_begin_it = {};
-static I _deq_end_it = {};
+static const I _deq_begin_it = {};
+static const I _deq_end_it = {};
 #else
-static I _deq_begin_it = {0};
-static I _deq_end_it = {0};
+static const I _deq_begin_it = {0};
+static const I _deq_end_it = {0};
 #endif
 
 static inline B**

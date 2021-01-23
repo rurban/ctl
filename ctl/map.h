@@ -13,6 +13,7 @@
 #define HOLD
 #define C map
 #define set map
+#define _set _map
 #include <ctl/set.h>
 
 static inline I
@@ -117,6 +118,7 @@ JOIN(A, insert_or_assign_found)(A* self, T key, int* foundp)
     return JOIN(I, iter)(self, insert);
 }
 
+#undef _set
 #undef set
 #undef T
 #undef A

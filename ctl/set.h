@@ -53,11 +53,11 @@ typedef struct I
 #define _set_end_it JOIN(JOIN(_set, T), end_it)
 
 #ifdef __cplusplus
-static I _set_begin_it = {};
-static I _set_end_it = {};
+static const I _set_begin_it = {};
+static const I _set_end_it = {};
 #else
-static I _set_begin_it = {0};
-static I _set_end_it = {0};
+static const I _set_begin_it = {0};
+static const I _set_end_it = {0};
 #endif
 
 static inline I
@@ -66,6 +66,7 @@ JOIN(A, begin)(A* self)
     I iter = _set_begin_it;
     iter.node = self->root;
     iter.ref = self->root ? &iter.node->value : NULL;
+    // end defaults to NULL
     iter.container = self;
     return iter;
 }
@@ -74,6 +75,7 @@ static inline I
 JOIN(A, end)(A* self)
 {
     I iter = _set_end_it;
+    // all default to NULL
     iter.container = self;
     return iter;
 }
@@ -190,6 +192,7 @@ JOIN(I, iter)(A* self, B *node)
     I iter = _set_begin_it;
     iter.node = node;
     iter.container = self;
+    // end defaults to NULL
     return iter;
 }
 

@@ -95,19 +95,19 @@ returns the associated allocator
 
 ## Element access
 
-    at (A* self, size_t index)
+    T* at (A* self, size_t index)
 
 access specified element with bounds checking
 
 ## Iterators
 
-    begin (A* self)
+    I begin (A* self)
 
-returns an iterator to the beginning
+constructs an iterator to the beginning
 
-    end (A* self)
+    I end (A* self)
 
-returns an iterator to the end
+constructs an iterator to the end
 
 ## Capacity
 
@@ -206,9 +206,9 @@ returns an iterator to the first element greater than the given key.  _(NYI)_
 
 ## Observers
 
-    value_comp (A* self)
+    int (*cmp)(T*,T*) value_comp (A* self)
 
-Returns the function that compares keys in objects of type value_type T.  _(NYI)_
+Returns the function that compares keys in objects of type T.  _(NYI)_
 
 ## Non-member functions
 

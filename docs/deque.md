@@ -109,13 +109,13 @@ access the last element
 
 ## Iterators
 
-    begin (A* self)
+    I begin (A* self)
 
-returns an iterator to the beginning
+constructs an iterator to the beginning
 
-    end (A* self)
+    I end (A* self)
 
-returns an iterator to the end
+constructs an iterator to the end
 
 ## Capacity
 

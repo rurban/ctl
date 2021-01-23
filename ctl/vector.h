@@ -55,11 +55,11 @@ typedef struct I
 #define _vec_end_it JOIN(JOIN(_vec, T), end_it)
 
 #ifdef __cplusplus
-static I _vec_begin_it = {};
-static I _vec_end_it = {};
+static const I _vec_begin_it = {};
+static const I _vec_end_it = {};
 #else
-static I _vec_begin_it = {0};
-static I _vec_end_it = {0};
+static const I _vec_begin_it = {0};
+static const I _vec_end_it = {0};
 #endif
 
 static inline size_t

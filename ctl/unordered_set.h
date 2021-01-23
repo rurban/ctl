@@ -95,11 +95,11 @@ typedef struct I
 #define _uset_end_it JOIN(JOIN(_uset, T), end_it)
 
 #ifdef __cplusplus
-static I _uset_begin_it = {};
-static I _uset_end_it = {};
+static const I _uset_begin_it = {};
+static const I _uset_end_it = {};
 #else
-static I _uset_begin_it = {0};
-static I _uset_end_it = {0};
+static const I _uset_begin_it = {0};
+static const I _uset_end_it = {0};
 #endif
 
 static inline I
