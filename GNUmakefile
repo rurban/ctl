@@ -119,6 +119,7 @@ TESTS = \
 	tests/func/test_unordered_set_cached \
 	tests/func/test_stack \
 	tests/func/test_array \
+	tests/func/test_double_array \
 	tests/func/test_vector \
 	tests/func/test_vec_capacity \
 	tests/func/test_str_capacity
@@ -274,6 +275,9 @@ tests/func/test_vector:   .cflags $(COMMON_H) ctl/vector.h \
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_array:   .cflags $(COMMON_H) ctl/array.h \
                           tests/func/test_array.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
+tests/func/test_double_array:   .cflags $(COMMON_H) ctl/array.h \
+                          tests/func/test_double_array.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/%: tests/func/%.c .cflags $(H)
 	$(CC) $(CFLAGS) -o $@ $@.c

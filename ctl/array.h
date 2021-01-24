@@ -25,7 +25,7 @@
 typedef struct A
 {
 #if N > CUTOFF
-    T vector[];
+    T* vector;
 #else
     T vector[N];
 #endif
@@ -180,6 +180,9 @@ JOIN(A, zero)(T* ref)
 #ifndef POD
     static T zero;
     return memcmp(ref, &zero, sizeof(T)) == 0;
+#else
+    (void)ref;
+    return 1;
 #endif
 }
 
