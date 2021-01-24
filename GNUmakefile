@@ -149,17 +149,30 @@ check: all
 images:
 	./gen_images.sh
 
-PERFS_C  = $(patsubst %.c,%, $(wildcard tests/perf/*/perf*.c) tests/perf/perf_compile_c11.c)
-PERFS_CC = $(patsubst %.cc,%, $(wildcard tests/perf/*/perf*.cc) tests/perf/perf_compile_cc.cc)
+PERFS_C  = $(patsubst %.c,%, $(wildcard tests/perf/*/perf_*.c) \
+           $(wildcard tests/perf/arr/gen_*.c) tests/perf/perf_compile_c11.c)
+PERFS_CC = $(patsubst %.cc,%, $(wildcard tests/perf/*/perf_*.cc) \
+	   $(wildcard tests/perf/arr/gen_*.cc) tests/perf/perf_compile_cc.cc)
 
-perf: $(PERFS_C) $(PERFS_CC)
+tests/perf/arr/perf_arr_generate: tests/perf/arr/perf_arr_generate.c
+	$(CC) $(CFLAGS) -o $@ $@.c
+	tests/perf/arr/perf_arr_generate
+perf: $(PERFS_C) $(PERFS_CC) tests/perf/arr/perf_arr_generate
 
-$(wildcard tests/perf/lst/perf*.c) : $(COMMON_H) ctl/list.h
-$(wildcard tests/perf/set/perf*.c) : $(COMMON_H) ctl/set.h
-$(wildcard tests/perf/deq/perf*.c) : $(COMMON_H) ctl/deque.h
-$(wildcard tests/perf/pqu/perf*.c) : $(COMMON_H) ctl/priority_queue.h
-$(wildcard tests/perf/vec/perf*.c) : $(COMMON_H) ctl/vector.h
-$(wildcard tests/perf/uset/perf*.c): $(COMMON_H) ctl/unordered_set.h
+$(wildcard tests/perf/lst/perf*.cc?) : $(COMMON_H) ctl/list.h
+$(wildcard tests/perf/set/perf*.cc?) : $(COMMON_H) ctl/set.h
+$(wildcard tests/perf/deq/perf*.cc?) : $(COMMON_H) ctl/deque.h
+$(wildcard tests/perf/pqu/perf*.cc?) : $(COMMON_H) ctl/priority_queue.h
+$(wildcard tests/perf/vec/perf*.cc?) : $(COMMON_H) ctl/vector.h
+$(wildcard tests/perf/uset/perf*.cc?): $(COMMON_H) ctl/unordered_set.h
+$(wildcard tests/perf/arr/*.cc?): $(COMMON_H) ctl/array.h
+
+tests/perf/arr/gen_array0% : tests/perf/arr/gen_array0%.c \
+  tests/perf/arr/perf_arr_generate .cflags $(COMMON_H) ctl/array.h
+	@$(CC) $(CFLAGS) -o $@ $@.c
+tests/perf/arr/gen_arr0% : tests/perf/arr/gen_arr0%.cc \
+  tests/perf/arr/perf_arr_generate .cflags $(COMMON_H) ctl/array.h
+	@$(CXX) $(CFLAGS) -o $@ $@.c
 
 examples: $(EXAMPLES)
 
@@ -192,6 +205,8 @@ clean:
 	@rm -f $(TESTS)
 	@rm -f $(EXAMPLES)
 	@rm -f $(PERFS_C) $(PERFS_CC)
+	@rm -f tests/perf/arr/perf_arr_generate
+	@rm -f tests/perf/*.log
 	@rm -f docs/man/ctl.h.3 $(MANPAGES)
 	@if test -d docs/man; then rmdir docs/man; fi
 

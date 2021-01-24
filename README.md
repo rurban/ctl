@@ -52,6 +52,7 @@ the following STL containers in ISO C99/C11:
 | [ctl/stack.h](docs/stack.md)                   | std::stack           | stack    |
 | [ctl/string.h](docs/string.md)                 | std::string          | str      |
 | [ctl/vector.h](docs/vector.md)                 | std::vector          | vec      |
+| [ctl/array.h](docs/array.md)                   | std::array           | arrNNNN  |
 | [ctl/map.h](docs/map.md)                       | std::map             | map      |
 | [ctl/unordered_map.h](docs/unordered_map.md)   | std::unordered_map   | umap     |
 | [ctl/unordered_set.h](docs/unordered_set.md)   | std::unordered_set   | uset     |
@@ -136,11 +137,11 @@ Contrary to the STL we mostly return `T*`, `size_t` or `B*`, not full `I` iterat
 But you can convert those return values via the `iter` method to full iterators,
 to be acceptable as `I*` argument, e.g. for range methods.
 
-_Note_: I am redesigning `I*` iterators to be faster (not 3 assignments per step, just a
-single incement or ->next assignemt for B* and T* iters) and be more compatible to the
-STL. The `foreach` and `foreach_range` macros will need args then, and split into
-variants with and without setting ref (value pointers). It is even faster than
-the STL, now they are 2x slower.
+_Note_: I am redesigning `I*` iterators to be faster (not 3 assignments per
+step, just a single incement or `->next` assignment for B* and T* iters) and be
+more compatible to the STL. The `foreach` and `foreach_range` macros are also
+split into variants with and without setting ref (value pointers). It is even
+faster than the STL, now they are 2x slower.
 
 range methods are suffixed with `_range`.
 
@@ -155,6 +156,7 @@ for template type `T` as type `int` for all measurements.
 ![](docs/images/set.log.png)
 ![](docs/images/uset.log.png)
 ![](docs/images/pqu.log.png)
+![](docs/images/arr.log.png)
 ![](docs/images/compile.log.png)
 
 Omitted from these performance measurements are `queue.h`, `stack.h`, and `string.h`,
@@ -225,6 +227,7 @@ make ctl/set.i
 make ctl/stack.i
 make ctl/string.i
 make ctl/vector.i
+make ctl/array.i
 make ctl/map.i
 make ctl/unordered_set.i
 make ctl/unordered_map.i
@@ -257,6 +260,7 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 ## Base Implementation Details
 
 ```
+array.h:            stack/heap allocated
 vector.h:           realloc
 string.h:           vector.h
 deque.h:            realloc (paged)
@@ -367,7 +371,7 @@ Use the original long names, not three-letter abbrevations.
 Added lots of missing methods, like `max_size`, `size`, `capacity`, ...
 Probe for -std=c++20 c++ support and use this for testing against the STL.
 
-Added **map** and **unordered_map**.
+Added **array**, **map** and **unordered_map**.
 
 Added docs and manpages.
 
@@ -431,7 +435,7 @@ clang with libc++), and Windows MSVC (default CL 19).
 STL multiset and multimap variants will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 
-STL array and span is missing. array is just a vector.
+STL span is missing.
 
 STL methods returning a pair of iterator and bool have a `_found` suffix,
 return the iterator and set a `int *foundp` value. Eg.
@@ -504,8 +508,6 @@ Not yet implemented:
     move_range
     move_backward C++11
     move_backward_range C++20
-    fill
-    fill_range C++20
     fill_n
     fill_n_range C++20
     transform

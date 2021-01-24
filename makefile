@@ -128,21 +128,24 @@ all: ${TESTS} docs/index.md
 
 check: all
 .cflags: ALWAYS
-	@echo "${CFLAGS}" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
+	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
 images:
 	./gen_images.sh
 
-PERFS_C  = ${patsubst %.c,%, ${wildcard tests/perf/*/perf*.c} tests/perf/perf_compile_c11.c}
-PERFS_CC = ${patsubst %.cc,%, ${wildcard tests/perf/*/perf*.cc} tests/perf/perf_compile_cc.cc}
+PERFS_C  = ${patsubst %.c,%, ${wildcard tests/perf/*/perf*.c} \
+	     $(wildcard tests/perf/arr/gen_*.c)tests/perf/perf_compile_c11.c}
+PERFS_CC = ${patsubst %.cc,%, ${wildcard tests/perf/*/perf*.cc} \
+	     $(wildcard tests/perf/arr/gen_*.cc) tests/perf/perf_compile_cc.cc}
 
 perf: ${PERFS_C} ${PERFS_CC}
 
-${wildcard tests/perf/lst/perf*.c} : ${COMMON_H} ctl/list.h
-${wildcard tests/perf/set/perf*.c} : ${COMMON_H} ctl/set.h
-${wildcard tests/perf/deq/perf*.c} : ${COMMON_H} ctl/deque.h
-${wildcard tests/perf/pqu/perf*.c} : ${COMMON_H} ctl/priority_queue.h
-${wildcard tests/perf/vec/perf*.c} : ${COMMON_H} ctl/vector.h
-${wildcard tests/perf/uset/perf*.c}: ${COMMON_H} ctl/unordered_set.h
+${wildcard tests/perf/lst/perf*.cc?} : ${COMMON_H} ctl/list.h
+${wildcard tests/perf/set/perf*.cc?} : ${COMMON_H} ctl/set.h
+${wildcard tests/perf/deq/perf*.cc?} : ${COMMON_H} ctl/deque.h
+${wildcard tests/perf/pqu/perf*.cc?} : ${COMMON_H} ctl/priority_queue.h
+${wildcard tests/perf/vec/perf*.cc?} : ${COMMON_H} ctl/vector.h
+${wildcard tests/perf/uset/perf*.cc?}: ${COMMON_H} ctl/unordered_set.h
+${wildcard tests/perf/arr/gen*.cc?}: ${COMMON_H} ctl/unordered_set.h
 
 examples: ${EXAMPLES}
 

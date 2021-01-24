@@ -268,6 +268,8 @@ JOIN(A, free)(A* self)
 #if N > CUTOFF
     free(self->vector); // heap allocated
     self->vector = NULL;
+#else
+    (void) self;
 #endif
 }
 

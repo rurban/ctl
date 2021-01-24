@@ -27,7 +27,7 @@ perf_graph()
         ./$OUT >> "$LOG"
     done
     python3 tests/perf/perf_plot.py "$LOG" "$TITLE" &&
-      (mv "$LOG.png" docs/images/; rm -- "./$LOG" "./$OUT")
+      (mv "./$LOG.png" docs/images/; mv "./$LOG" tests/perf/; rm -- "./$OUT")
 }
 
 perf_compile_two_bar()
@@ -166,6 +166,34 @@ deq() {
 # removed the one most boring:
 #    tests/perf/deq/perf_deque_push_front.cc
 #    tests/perf/deq/perf_deq_push_front.c
+}
+
+arr() {
+  rm tests/perf/arr/gen_arr*
+  make tests/perf/arr/perf_arr_generate && tests/perf/arr/perf_arr_generate
+  for TEST in tests/perf/arr/gen_array*.cc; do
+      $CXX -o "${TEST//.cc/}" $CFLAGS $TEST -I.
+  done
+  for TEST in tests/perf/arr/gen_arr*.c; do
+      $CC -o "${TEST//.c/}" $CFLAGS $TEST -I.
+  done
+  LOG=arr.log
+  TITLE="std::array<double,NNN> (dotted) vs. CTL arrNNN_double (solid) ($CFLAGS) ($VERSION)"
+  echo "$LOG"
+  rm -- "./$LOG"
+  for m in find fill_n sort iterate
+  do
+      echo "tests/perf/arr/gen_array_$m.cc" >> "$LOG"
+      for OUT in tests/perf/arr/gen_array*_$m; do
+          $OUT >> "$LOG"
+      done
+      echo "tests/perf/arr/gen_arr_$m.c" >> "$LOG"
+      for OUT in tests/perf/arr/gen_arr0*_$m; do
+          $OUT >> "$LOG"
+      done
+  done
+  python3 tests/perf/perf_plot.py "$LOG" "$TITLE" &&
+      (mv "$LOG.png" docs/images/; mv $LOG tests/perf/; rm tests/perf/arr/gen_arr* )
 }
 
 compile() {
