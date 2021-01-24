@@ -6,12 +6,14 @@
     !defined CTL_SET && \
     !defined CTL_USET && \
     !defined CTL_VEC && \
+    !defined CTL_ARR && \
     !defined CTL_DEQ
-#error "No CTL container defined for <ctl/bits/container.h>"
+# error "No CTL container defined for <ctl/bits/container.h>"
 #endif
 
 #include <stdbool.h>
 
+#ifndef CTL_ARR
 static inline int
 JOIN(A, empty)(A* self)
 {
@@ -29,6 +31,7 @@ JOIN(A, max_size)()
 {
     return 4294967296 / sizeof(T); // 32bit at most. avoid DDOS
 }
+#endif
 
 static inline I
 JOIN(I, each)(A* a)
@@ -49,7 +52,7 @@ JOIN(A, implicit_copy)(T* self)
 static inline int
 JOIN(A, equal)(A* self, A* other)
 {
-    if(self->size != other->size)
+    if(JOIN(A, size)(self) != JOIN(A, size)(other))
         return 0;
     I a = JOIN(I, each)(self);
     I b = JOIN(I, each)(other);

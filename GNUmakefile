@@ -118,6 +118,7 @@ TESTS = \
 	tests/func/test_unordered_set_power2 \
 	tests/func/test_unordered_set_cached \
 	tests/func/test_stack \
+	tests/func/test_array \
 	tests/func/test_vector \
 	tests/func/test_vec_capacity \
 	tests/func/test_str_capacity
@@ -213,6 +214,8 @@ ctl/map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 ctl/unordered_map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
+ctl/array.i:
+	$(call expand,$(subst .i,,$@),-DT=int -DN=20 -DPOD)
 
 %.i : %.h
 	@$(CC) $(CFLAGS) -DT=int -DPOD $< -E | clang-format -style=webkit
@@ -268,6 +271,9 @@ tests/func/test_vec_capacity: .cflags $(COMMON_H) ctl/vector.h \
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_vector:   .cflags $(COMMON_H) ctl/vector.h \
                           tests/func/test_vector.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
+tests/func/test_array:   .cflags $(COMMON_H) ctl/array.h \
+                          tests/func/test_array.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/%: tests/func/%.c .cflags $(H)
 	$(CC) $(CFLAGS) -o $@ $@.c

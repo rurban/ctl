@@ -98,6 +98,7 @@ TESTS = \
 	tests/func/test_unordered_set_power2 \
 	tests/func/test_unordered_set_cached \
 	tests/func/test_stack \
+	tests/func/test_array \
 	tests/func/test_vector \
 	tests/func/test_vec_capacity \
 	tests/func/test_str_capacity
@@ -261,6 +262,9 @@ tests/func/test_vec_capacity: .cflags ${COMMON_H} ctl/vector.h \
 	${CXX} ${CFLAGS} -o $@ $@.cc
 tests/func/test_vector:   .cflags ${COMMON_H} ctl/vector.h \
                           tests/func/test_vector.cc
+	${CXX} ${CFLAGS} -o $@ $@.cc
+tests/func/test_array:   .cflags ${COMMON_H} ctl/array.h \
+                          tests/func/test_array.cc
 	${CXX} ${CFLAGS} -o $@ $@.cc
 
 asan:

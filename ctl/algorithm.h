@@ -11,11 +11,12 @@
     !defined CTL_SET && \
     !defined CTL_USET && \
     !defined CTL_VEC && \
+    !defined CTL_ARR && \
     !defined CTL_DEQ && \
     /* plus all children also. we dont include it for parents */ \
     !defined CTL_MAP && \
     !defined CTL_UMAP
-#error "No CTL container defined for <ctl/algorithm.h>"
+# error "No CTL container defined for <ctl/algorithm.h>"
 #endif
 
 // Generic algorithms with ranges

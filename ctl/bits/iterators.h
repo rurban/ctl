@@ -31,7 +31,7 @@
 #  define iter_IT_endp(iter) (iter->done ? NULL : iter->ref)
 #  define iter_IT(iter) (iter).ref
 #  define iter_IT_end(iter) (iter.done ? NULL : iter.ref)
-#  ifdef CTL_VEC
+#  if defined CTL_VEC || defined CTL_ARR
 #   define foreach_range(A, it, first, last)       \
     if (!last->done)                               \
           first->end = last->end;                  \
