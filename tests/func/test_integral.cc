@@ -88,6 +88,11 @@ typedef unsigned long ulong;
 #define T long
 #include <ctl/unordered_set.h>
 
+#define POD
+#define N 128
+#define T int
+#include <ctl/array.h>
+
 #ifdef DEBUG
 void print_deq_int(deq_int *a)
 {
@@ -137,6 +142,19 @@ main(void)
         uset_long_insert(&a, 1L);       // hash
         assert(uset_long_find(&a, 1L)); // equal
         uset_long_free(&a);
+    }
+    {
+        arr128_int a = arr128_int_init();
+        for (int i=0; i<127; i++)
+            arr128_int_set(&a, i, rand() % INT_MAX);
+        arr128_int_set(&a, 127, 1);
+        assert(arr128_int_find(&a, 1)); /* equal */
+        arr128_int b = arr128_int_copy(&a);
+        arr128_int_sort(&b); 		/* compare */
+        arr128_int_sort(&a);
+        assert(arr128_int_equal(&a, &b));
+        arr128_int_free(&b);
+        arr128_int_free(&a);
     }
     TEST_PASS(__FILE__);
 }

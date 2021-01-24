@@ -136,6 +136,11 @@ typedef char* charp;
 #define T double
 #include <ctl/vector.h>
 
+#define POD
+#define N 128
+#define T double
+#include <ctl/array.h>
+
 typedef struct
 {
     int x;

@@ -197,6 +197,35 @@
 #define T uset_int
 #include <ctl/stack.h>
 
+#define POD
+#define N 128
+#define T int
+#include <ctl/array.h>
+
+#define T arr128_int
+#include <ctl/stack.h>
+
+#define T arr128_int
+#include <ctl/vector.h>
+
+#define T arr128_int
+#include <ctl/deque.h>
+
+#define T arr128_int
+#include <ctl/list.h>
+
+#define T arr128_int
+#include <ctl/priority_queue.h>
+
+#define T arr128_int
+#include <ctl/queue.h>
+
+#define T arr128_int
+#include <ctl/set.h>
+
+#define T arr128_int
+#include <ctl/unordered_set.h>
+
 int
 main(void)
 {
