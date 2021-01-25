@@ -4,7 +4,7 @@
 //
 // Might only be included once. By the child. not the parent.
 #ifndef __CTL_ALGORITHM_H__
-# define __CTL_ALGORITHM_H__
+#define __CTL_ALGORITHM_H__
 #define CTL_ALGORITHM
 
 #if !defined CTL_LIST && \
@@ -170,7 +170,36 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
     return !JOIN(A, none_of_range)(first, last, _match);
 }
 
+static inline void
+JOIN(A, generate_range)(I* first, I* last, T _gen(void))
+{
+#ifndef POD
+    A* self = first->container;
 #endif
+    foreach_range(A, i, first, last)
+    {
+#ifndef POD
+        if (self->free)
+            self->free(i.ref);
+#endif
+        *i.ref = _gen();
+    }
+}
+
+#endif
+
+static inline void
+JOIN(A, generate)(A* self, T _gen(void))
+{
+    foreach(A, self, i)
+    {
+#ifndef POD
+        if (self->free)
+            self->free(i.ref);
+#endif
+        *i.ref = _gen();
+    }
+}
 
 #if !defined(CTL_USET) && !defined(CTL_STR)
 // C++20
@@ -184,6 +213,17 @@ JOIN(A, count_range)(I* first, I* last, T value)
         if(JOIN(A, _equal)(self, i.ref, &value))
             count++;
     if (self->free)
+        self->free(&value);
+    return count;
+}
+static inline size_t
+JOIN(A, count)(A* self, T value)
+{
+    size_t count = 0;
+    foreach(A, self, i)
+        if(JOIN(A, _equal)(self, i.ref, &value))
+            count++;
+    if(self->free)
         self->free(&value);
     return count;
 }
@@ -210,20 +250,6 @@ JOIN(A, count_if)(A* self, int _match(T*))
             count++;
     return count;
 }
-
-#ifndef CTL_USET
-static inline size_t
-JOIN(A, count)(A* self, T value)
-{
-    size_t count = 0;
-    foreach(A, self, i)
-        if(JOIN(A, _equal)(self, i.ref, &value))
-            count++;
-    if(self->free)
-        self->free(&value);
-    return count;
-}
-#endif // USET
 #endif // STR
 
 #ifdef DEBUG
@@ -252,7 +278,7 @@ JOIN(A, lower_bound)(A* self, T value)
 {
     ASSERT(self->compare || !"compare undefined");
     JOIN(A, it) it = JOIN(A, begin)(self);
-    size_t count = self->size;
+    size_t count = JOIN(A, size)(self);
     while (count > 0)
     {
         size_t step = count / 2;
@@ -274,7 +300,7 @@ JOIN(A, upper_bound)(A* self, T value)
 {
     ASSERT(self->compare || !"compare undefined");
     JOIN(A, it) it = JOIN(A, begin)(self);
-    size_t count = self->size;
+    size_t count = JOIN(A, size)(self);
     while (count > 0)
     {
         size_t step = count / 2;
@@ -335,6 +361,7 @@ JOIN(A, upper_bound_range)(I* first, I* last, T value)
         self->free(&value);
     return it;
 }
+
 #endif // USET
 
 #endif // DEBUG

@@ -161,8 +161,7 @@ applies a function to a range of elements, storing results in a destination rang
     generate
     generate_range (C++20)
  
-assigns the results of successive function calls to every element in a range. _(NYI)_
-saves the result of a function in a range.
+assigns the results of successive function calls to every element in a range.
 
     generate_n
     generate_n_range (C++20)

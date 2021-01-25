@@ -20,6 +20,8 @@
 #define A JOIN(C, T)
 #define I JOIN(A, it)
 
+#include <ctl/bits/iterators.h>
+
 typedef struct A
 {
 #if N > CUTOFF
@@ -90,46 +92,81 @@ JOIN(A, back)(A* self)
     return &self->vector[N-1];
 }
 
-static inline T*
-JOIN(A, begin)(A* self)
+static inline I
+JOIN(I, iter)(A* self, size_t index)
 {
-    return JOIN(A, front)(self);
-}
-
-static inline T*
-JOIN(A, end)(A* self)
-{
-    return JOIN(A, back)(self) + 1;
-}
-
-static inline void
-JOIN(I, step)(I* self)
-{
-    if(self->next >= self->end)
-        self->done = 1;
-    else
-    {
-        self->ref = self->next;
-        self->next++;
-    }
+    static I zero;
+    I iter = zero;
+    iter.ref = &self->vector[index];
+    iter.end = &self->vector[N];
+    iter.container = self;
+    return iter;
 }
 
 static inline I
-JOIN(I, range)(A* container, T* begin, T* end)
+JOIN(A, begin)(A* self)
 {
-    (void) container;
-    static I zero;
-    I self = zero;
-    if(begin && end)
-    {
-        self.step = JOIN(I, step);
-        self.end = end;
-        self.next = begin + 1;
-        self.ref = begin;
-    }
+    return JOIN(I, iter)(self, 0);
+}
+
+static inline I
+JOIN(A, end)(A* self)
+{
+    return JOIN(I, iter)(self, N);
+}
+
+static inline T*
+JOIN(I, ref)(I* iter)
+{
+    return iter->ref;
+}
+
+static inline size_t
+JOIN(I, index)(I* iter)
+{
+    return (iter->ref - JOIN(A, front)(iter->container)) / sizeof (T);
+}
+
+static inline int
+JOIN(I, isend)(I* iter, I* last)
+{
+    return iter->ref == last->ref;
+}
+
+static inline int
+JOIN(I, done)(I* iter)
+{
+    return iter->ref == iter->end;
+}
+
+static inline void
+JOIN(I, next)(I* iter)
+{
+    iter->ref++;
+}
+
+static inline void
+JOIN(I, range)(I* begin, I* end)
+{
+    begin->end = end->ref;
+}
+
+static inline I*
+JOIN(I, advance)(I* iter, long i)
+{
+    // error case: overflow => end or NULL?
+    if(iter->ref + i > iter->end ||
+       iter->ref + i < JOIN(A, front)(iter->container))
+        iter->ref = iter->end;
     else
-        self.done = 1;
-    return self;
+        iter->ref += i;
+    return iter;
+}
+
+static inline long
+JOIN(I, distance)(I* iter, I* other)
+{
+    return other->ref - iter->ref;
 }
 
 #include <ctl/bits/container.h>
@@ -279,10 +316,9 @@ JOIN(A, assign)(A* self, size_t count, T value)
 static inline void
 JOIN(A, assign_range)(A* self, T* from, T* last)
 {
-    //size_t count = last - from;
-    JOIN(A, it) it = JOIN(I, range)(self, from, last);
-    for(size_t i=0; !it.done; it.step(&it), i++)
-        JOIN(A, set)(self, i, self->copy(it.ref));
+    size_t l = last - JOIN(A, front)(self);
+    for(size_t i = from - JOIN(A, front)(self); i < l; i++)
+        JOIN(A, set)(self, i, *JOIN(A, at)(self, i));
 }
 
 static inline T*
@@ -357,8 +393,6 @@ JOIN(A, find)(A* self, T key)
             return it.ref;
     return NULL;
 }
-
-#include <ctl/algorithm.h>
 
 #undef A
 #undef I

@@ -130,6 +130,26 @@ public:
     }
 };
 
+static int _generator_state = 0;
+
+static inline digi
+digi_generate(void)
+{
+    return digi_init(++_generator_state);
+}
+
+static inline DIGI
+DIGI_generate(void)
+{
+    return DIGI{++_generator_state};
+}
+
+static inline void
+digi_generate_reset()
+{
+    _generator_state = 0;
+}
+
 static inline bool
 DIGI_is_odd(DIGI& d)
 {
