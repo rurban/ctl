@@ -6,20 +6,21 @@ Defined in header **<ctl/array.h>**, CTL prefix **array**.
 
     #define POD
     #define T int
-    #define N 15
+    #define N 128
     #include <ctl/array.h>
 
-    vec_int a = vec_int_init ();
+    arr128_int a = arr128_int_init ();
 
-    vec_digi_resize(&a, 1000, 0);
-    for (i=0; i<1000; i++)
-      vec_int_push_back(&a, i);
-    for (i=0; i<20; i++)
-       vec_digi_pop_back(&a);
-    vec_int_erase(&a, 5);
-    vec_int_insert(&a, 5, 2);
+    for (i=0; i<128; i++)
+        arr128_int_set(&a, rand() % 100);
+    int* p = arr128_int_find(&a, 5);
+    if (p)
+        printf ("Element 5 found at a[%ld]\n", p - a.vector);
+    arr128_int aa = arr128_int_copy (&a);
+    arr128_int_sort(&aa);
 
-    vec_int_free(&a);
+    arr128_int_free(&aa);
+    arr128_int_free(&a);
 
 # DESCRIPTION
 
@@ -30,7 +31,7 @@ of a vector may be passed to any function that expects a pointer to an element
 of an array.
 
 The function names are composed of the prefix **arrN_**, the user-defined type
-**T** and the method name. E.g `arr15_int` with `#define T int` and `#define A 15`.
+**T** and the method name. E.g `arr128_int` with `#define T int` and `#define N 128`.
 
 # Member types
 
