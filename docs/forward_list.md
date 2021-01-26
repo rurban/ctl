@@ -101,7 +101,7 @@ returns an iterator to the end
 
 checks whether the container is empty
 
-[max_size](slist/max_size.md) ()
+    size_t max_size ()
 
 returns the maximum possible number of elements
 

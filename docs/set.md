@@ -150,15 +150,15 @@ splices nodes from another container
 
 ## Lookup
 
-    count (A* self)
+    size_t count (A* self)
 
 returns the number of elements matching specific key
 
-    find (A* self, T key)
+    B* find (A* self, T key)
 
 finds element with specific key
 
-    contains (A* self, T key)
+    int contains (A* self, T key)
 
 checks if the container contains element with specific key. (C++20)
 
@@ -166,11 +166,11 @@ checks if the container contains element with specific key. (C++20)
 
 returns range of elements matching a specific key. _(NYI)_
 
-    lower_bound (A* self)
+    B* lower_bound (A* self)
 
 returns an iterator to the first element not less than the given key. _(NYI)_
 
-    upper_bound (A* self)
+    B* upper_bound (A* self)
 
 returns an iterator to the first element greater than the given key. _(NYI)_
 

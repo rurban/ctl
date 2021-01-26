@@ -43,185 +43,182 @@ The complexity (efficiency) of common operations on a `string` is as follows:
 
 # Member types
 
-`T`                     value type
+`T` being `char`     value type
 
-`A` being `str_T`       container type
+`A` being `str`       container type
 
-`I` being `str_T_it`    iterator type
+`I` being `str_it`    iterator type
 
 ## Member functions
 
-[init](str/init.md) `()`
+    str init (char* str)
 
 constructs the string.
 
-[free](str/free.md) `(A* self)`
+    free (str* self)
 
 destructs the string.
 
-[assign](str/assign.md) `(A* self, size_t count, T value)`
+    assign (str* self, size_t count, char value)
 
 replaces the contents of the container.
 
-[assign_range](str/assign.md) `(A* self, I* first, I* last)`
+    assign_range (str* self, I* first, I* last)
 
 replaces the contents of the container with the values from range.
 
-[copy](str/copy.md) `(A* self)`
+    str copy (str* self)
 
 returns a copy of the container.
 
 ## Element access
 
-[at](str/at.md) `(A* self, size_t index)`
+    char* at (str* self, size_t index)
 
 access specified element with bounds checking
 
-[front](str/front.md) `(A* self)`
+    char* front (str* self)
 
 access the first element
 
-[back](str/back.md) `(A* self)`
+    char* back (str* self)
 
 access the last element
 
-[data](str/data.md) `(A* self)`
+    char* data (str* self)
 
 access the underlying array
 
 ## Iterators
 
-[begin](str/begin.md) `(A* self)`
+    char* begin (str* self)
 
 returns an iterator to the beginning
 
-[end](str/end.md) `(A* self)`
+    char* end (str* self)
 
 returns an iterator to the end
 
 ## Capacity
 
-[empty](str/empty.md) `(A* self)`
+    int empty (str* self)
 
 checks whether the container is empty
 
-[size](str/size.md) `(A* self)`
+    size_t size (str* self)
 
 returns the number of elements
 
-[max_size](str/max_size.md) `()`
+    size_t max_size ()
 
 returns the maximum possible number of elements
 
-[reserve](str/reserve.md) `(A* self, const size_t capacity)`
+    reserve (str* self, const size_t capacity)
 
 reserves storage
 
-[capacity](str/capacity.md) `(A* self)`
+    size_t capacity (str* self)
 
 returns the number of elements that can be held in currently allocated storage
 
-[shrink_to_fit](str/shrink_to_fit.md) `(A* self)`
+    shrink_to_fit (str* self)
 
 reduces memory usage by freeing unused memory
 
 ## Modifiers
 
-[clear](str/clear.md) `(A* self)`
+    clear (str* self)
 
 clears the contents
 
-[insert](str/insert.md) `(A* self, T key)`
+    char* insert (str* self, char key)
 
-inserts the element `(C++17)`
+inserts the element (C++17)
 
-[emplace](str/emplace.md) `(A* self, ...)`
+    emplace (str* self, char* key)
 
 constructs elements in-place
 
-[emplace_back](str/emplace_back.md) `(A* self, I* position, ...)`
+    emplace_back (str* self, I* position, char* key)
 
 constructs elements in-place at position
 
-[erase](str/erase.md) `(A* self, size_t index)`
+    erase (str* self, size_t index)
 
 erases the element by index
 
-[erase_it](str/erase.md) `(A* self, I* position)`
+    erase_it (str* self, I* position)
 
 erases the element at position
 
-[erase_range](str/erase.md) `(A* self, I* first, I* last)`
+    erase_range (str* self, I* first, I* last)
 
 erases elements from to
 
-[swap](str/swap.md) `(A* self, A* other)`
+    swap (str* self, str* other)
 
 swaps the contents
 
-[extract](str/extract.md) `(A* self, T key)`
+    extract (str* self, charkey)
 
 extracts a node from the container. NYI
 
-[extract_it](str/extract.md) `(A* self, I* position)`
+    extract_it (str* self, I* position)
 
 extracts nodes from the container. NYI
 
-[merge](str/merge.md) `(A* self)`
+    merge (str* self)
 
 splices nodes from another container
 
 ## Lookup
 
-[count](str/count.md) `(A* self)`
+    size_t count (str* self)
 
 returns the number of elements matching specific key
 
-[find](str/find.md) `(A* self, T key)`
+    char* find (str* self, char key)
 
 finds element with specific key
 
-[contains](str/contains.md) `(A* self, T key)`
+    bool contains (str* self, char key)
 
 checks if the container contains element with specific key. (C++20)
 
-[equal_range](str/equal_range.md) `(A* self)`
+    int equal_range (str* self)
 
-returns range of elements matching a specific key. (NYI)
+returns range of elements matching a specific key. _(NYI)_
 
-[lower_bound](str/lower_bound.md) `(A* self)`
+    size_t lower_bound (str* self)
 
-returns an iterator to the first element not less than the given key. (NYI)
+returns an iterator to the first element not less than the given key. _(NYI)_
 
-[upper_bound](str/upper_bound.md) `(A* self)`
+    char* upper_bound (str* self)
 
-returns an iterator to the first element greater than the given key. (NYI)
+returns an iterator to the first element greater than the given key. _(NYI)_
 
 ## Observers
 
-[value_comp](str/value_comp.md) `(A* self)`
+    value_comp (str* self)
 
-Returns the function that compares keys in objects of type value_type T. (NYI)
+Returns the function that compares keys in objects of type value_type T. _(NYI)_
 
 ## Non-member functions
 
-[swap](str/swap.md) `(A* self)`
+    swap (str* self)
 
 specializes the swap algorithm
 
-[remove_if](str/remove_if.md) `(A* self, int T_match(T*))`
+    remove_if (str* self, int match(T*))
 
 Removes all elements satisfying specific criteria.
 
-[erase_if](str/erase_if.md) `(A* self, int T_match(T*))`
+    erase_if (str* self, int match(T*))
 
 erases all elements satisfying specific criteria (C++20)
 
-[intersection](str/intersection.md) `(A* self, A* other)`
-
-[union](str/union.md) `(A* self, A* other)`
-
-[difference](str/difference.md) `(A* self, A* other)`
-
-[symmetric_difference](str/symmetric_difference.md) `(A* self, A* other)`
+    intersection (str* self, str* other)
+    union (str* self, str* other)
+    difference (str* self, str* other)
+    symmetric_difference (str* self, str* other)
 

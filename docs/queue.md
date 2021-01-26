@@ -86,7 +86,7 @@ checks whether the container is empty
 
 returns the number of elements
 
-    `max_size ()`
+    size_t max_size ()
 
 returns the maximum possible number of elements, hard-coded to 2GB (32bit).
 

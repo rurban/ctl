@@ -197,20 +197,20 @@ returns an iterator to the beginning of the specified bucket _(NYI)_
 
 returns an iterator to the end of the specified bucket _(NYI)_
 
-    bucket_count (A* self)
+    size_t bucket_count (A* self)
 
 returns the number of buckets
 
-    max_bucket_count (A* self)
+    size_t max_bucket_count (A* self)
 
 returns the maximum number of buckets of the set.
 
-    bucket_size (A* self, size_t bucket_index)
-    bucket_size (B* bucket)
+    size_t bucket_size (A* self, size_t bucket_index)
+    size_t bucket_size (B* bucket)
 
 returns the number of elements in the specific bucket, the collisions.
 
-    bucket (A* self, T value)
+    size_t bucket (A* self, T value)
 
 returns the bucket index for the key.
 
@@ -285,16 +285,16 @@ finds element by predicate
 
 finds element by predicate
 
-    intersection (A* self, A* other)
-    union (A* self, A* other)
-    difference (A* self, A* other) (NYI)
-    symmetric_difference (A* self, A* other) (NYI)
+    A intersection (A* self, A* other)
+    A union (A* self, A* other)
+    A difference (A* self, A* other) (NYI)
+    A symmetric_difference (A* self, A* other) (NYI)
 
-    all_of (A* self, int _match(T*))
-    any_of (A* self, int _match(T*))
-    none_of (A* self, int _match(T*))
-    all_of_range (A* self, I* first, I* last, int _match(T*))
-    any_of_range (A* self, I* first, I* last, int _match(T*))
-    none_of_range (A* self, I* first, I* last, int _match(T*))
+    bool all_of (A* self, int _match(T*))
+    bool any_of (A* self, int _match(T*))
+    bool none_of (A* self, int _match(T*))
+    bool all_of_range (A* self, I* first, I* last, int _match(T*))
+    bool any_of_range (A* self, I* first, I* last, int _match(T*))
+    bool none_of_range (A* self, I* first, I* last, int _match(T*))
 
 See [algorithm](algorithm.md) for more.

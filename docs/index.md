@@ -435,7 +435,7 @@ clang with libc++), and Windows MSVC (default CL 19).
 STL multiset and multimap variants will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 
-STL span is missing.
+STL span and short string optimizations is missing.
 
 STL methods returning a pair of iterator and bool have a `_found` suffix,
 return the iterator and set a `int *foundp` value. Eg.

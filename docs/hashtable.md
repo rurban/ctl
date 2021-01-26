@@ -123,7 +123,7 @@ returns the number of non-empty and non-deleted elements
 
 returns the size of the array
 
-[max_size](htbl/max_size.md) `()`
+    size_t max_size ()
 
 returns the maximum possible number of elements
 
