@@ -73,41 +73,41 @@ JOIN(A, end)(A* self)
 }
 
 static inline B*
-JOIN(B, min)(B* self)
+JOIN(B, min)(B* node)
 {
-    while(self->l)
-        self = self->l;
-    return self;
+    while(node->l)
+        node = node->l;
+    return node;
 }
 
 static inline B*
-JOIN(B, max)(B* self)
+JOIN(B, max)(B* node)
 {
-    while(self->r)
-        self = self->r;
-    return self;
+    while(node->r)
+        node = node->r;
+    return node;
 }
 
 static inline B*
-JOIN(B, next)(B* self)
+JOIN(B, next)(B* node)
 {
-    if(self->r)
+    if(node->r)
     {
-        self = self->r;
-        while(self->l)
-            self = self->l;
+        node = node->r;
+        while(node->l)
+            node = node->l;
     }
     else
     {
-        B* parent = self->p;
-        while(parent && self == parent->r)
+        B* parent = node->p;
+        while(parent && node == parent->r)
         {
-            self = parent;
+            node = parent;
             parent = parent->p;
         }
-        self = parent;
+        node = parent;
     }
-    return self;
+    return node;
 }
 
 static inline T*
@@ -119,7 +119,7 @@ JOIN(I, ref)(I* iter)
 static inline int
 JOIN(I, done)(I* iter)
 {
-    return iter->node->r == NULL && iter->node->l == NULL;
+    return iter->node == NULL;
 }
 
 static inline int
@@ -154,20 +154,20 @@ JOIN(I, advance)(I* iter, long i)
 }
 
 static inline long
-JOIN(I, distance)(I* self, I* other)
+JOIN(I, distance)(I* iter, I* other)
 {
     long d = 0;
-    if (self == other || self->node == other->node)
+    if (iter == other || iter->node == other->node)
         return 0;
-    B* n = self->node;
+    B* n = iter->node;
     for(; n != NULL && n != other->node; d++)
         n = JOIN(B, next)(n);
     if (n == other->node)
         return d;
-    // other before self, negative result
+    // other before iter, negative result
     d = (long)other->container->size;
     n = other->node;
-    for(; n != NULL && n != self->node; d--)
+    for(; n != NULL && n != iter->node; d--)
         n = JOIN(B, next)(n);
     return n ? -d : LONG_MAX;
 }
@@ -209,52 +209,52 @@ JOIN(A, free_node)(A* self, B* node)
 }
 
 static inline int
-JOIN(B, color)(B* self)
+JOIN(B, color)(B* node)
 {
-    return self ? self->color : 1;
+    return node ? node->color : 1;
 }
 
 static inline int
-JOIN(B, is_black)(B* self)
+JOIN(B, is_black)(B* node)
 {
-    return JOIN(B, color)(self) == 1;
+    return JOIN(B, color)(node) == 1;
 }
 
 static inline int
-JOIN(B, is_red)(B* self)
+JOIN(B, is_red)(B* node)
 {
-    return JOIN(B, color)(self) == 0;
+    return JOIN(B, color)(node) == 0;
 }
 
 static inline B*
-JOIN(B, grandfather)(B* self)
+JOIN(B, grandfather)(B* node)
 {
-    return self->p->p;
+    return node->p->p;
 }
 
 static inline B*
-JOIN(B, sibling)(B* self)
+JOIN(B, sibling)(B* node)
 {
-    if(self == self->p->l)
-        return self->p->r;
+    if(node == node->p->l)
+        return node->p->r;
     else
-        return self->p->l;
+        return node->p->l;
 }
 
 static inline B*
-JOIN(B, uncle)(B* self)
+JOIN(B, uncle)(B* node)
 {
-    return JOIN(B, sibling)(self->p);
+    return JOIN(B, sibling)(node->p);
 }
 
 static inline B*
 JOIN(B, init)(T key, int color)
 {
-    B* self = (B*) malloc(sizeof(B));
-    self->value = key;
-    self->color = color;
-    self->l = self->r = self->p = NULL;
-    return self;
+    B* node = (B*) malloc(sizeof(B));
+    node->value = key;
+    node->color = color;
+    node->l = node->r = node->p = NULL;
+    return node;
 }
 
 static inline B*
@@ -333,47 +333,47 @@ JOIN(B, replace)(A* self, B* a, B* b)
 #include <assert.h>
 
 static inline void
-JOIN(B, verify_property_1)(B* self)
+JOIN(B, verify_property_1)(B* node)
 {
-    assert(JOIN(B, is_red)(self) || JOIN(B, is_black)(self));
-    if(self)
+    assert(JOIN(B, is_red)(node) || JOIN(B, is_black)(node));
+    if(node)
     {
-        JOIN(B, verify_property_1)(self->l);
-        JOIN(B, verify_property_1)(self->r);
+        JOIN(B, verify_property_1)(node->l);
+        JOIN(B, verify_property_1)(node->r);
     }
 }
 
 static inline void
-JOIN(B, verify_property_2)(B* self)
+JOIN(B, verify_property_2)(B* node)
 {
-    assert(JOIN(B, is_black)(self));
+    assert(JOIN(B, is_black)(node));
 }
 
 static inline void
-JOIN(B, verify_property_4)(B* self)
+JOIN(B, verify_property_4)(B* node)
 {
-    if(JOIN(B, is_red)(self))
+    if(JOIN(B, is_red)(node))
     {
-        assert(JOIN(B, is_black)(self->l));
-        assert(JOIN(B, is_black)(self->r));
-        assert(JOIN(B, is_black)(self->p));
+        assert(JOIN(B, is_black)(node->l));
+        assert(JOIN(B, is_black)(node->r));
+        assert(JOIN(B, is_black)(node->p));
     }
-    if(self)
+    if(node)
     {
-        JOIN(B, verify_property_4)(self->l);
-        JOIN(B, verify_property_4)(self->r);
+        JOIN(B, verify_property_4)(node->l);
+        JOIN(B, verify_property_4)(node->r);
     }
 }
 
 static inline void
-JOIN(B, count_black)(B* self, int nodes, int* in_path)
+JOIN(B, count_black)(B* node, int nodes, int* in_path)
 {
-    if(JOIN(B, is_black)(self))
+    if(JOIN(B, is_black)(node))
         nodes++;
-    if(self)
+    if(node)
     {
-        JOIN(B, count_black)(self->l, nodes, in_path);
-        JOIN(B, count_black)(self->r, nodes, in_path);
+        JOIN(B, count_black)(node->l, nodes, in_path);
+        JOIN(B, count_black)(node->r, nodes, in_path);
     }
     else
     {
@@ -385,10 +385,10 @@ JOIN(B, count_black)(B* self, int nodes, int* in_path)
 }
 
 static inline void
-JOIN(B, verify_property_5)(B* self)
+JOIN(B, verify_property_5)(B* node)
 {
     int in_path = -1;
-    JOIN(B, count_black)(self, 0, &in_path);
+    JOIN(B, count_black)(node, 0, &in_path);
 }
 
 static inline void
