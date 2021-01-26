@@ -140,6 +140,7 @@ JOIN(I, advance)(I* iter, long i)
     for(long j = 0; node != NULL && j < i; j++)
         node = node->next;
     iter->node = node;
+    iter->ref = &node->value;
     return iter;
 }
 
@@ -513,7 +514,7 @@ JOIN(A, splice_it)(I* pos, I* other_pos)
 {
     A* self = pos->container;
     A* other = other_pos->container;
-    if(self->size == 0 && pos->node == NULL)
+    if(self->size == 0)
         JOIN(A, swap)(self, other);
     else
     {

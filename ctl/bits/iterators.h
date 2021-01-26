@@ -26,23 +26,38 @@
 /* return B* it node. end is NULL */
 
 /* Fast typed iters. without _ref we dont set ref, just node */
+/* uset needs node_next with self, node */
+#if defined CTL_USET || defined CTL_UMAP
+# define uset_foreach(A, self, pos)                     \
+    if ((self)->size)                                   \
+        for(JOIN(A, it) pos = JOIN(A, begin)(self);     \
+            pos.node != NULL;                           \
+            pos.node = JOIN(JOIN(A, node), next)(self, pos.node))
+# define uset_foreach_range(A, pos, first, last)        \
+    if (first && first->node)                           \
+        for(JOIN(A, it) pos = *(first);                 \
+            pos.node != (last)->node;                   \
+            pos.node = JOIN(JOIN(A, node), next)(self, pos.node))
+#else
 # define list_foreach(A, self, pos)                     \
     if ((self)->size)                                   \
         for(JOIN(A, it) pos = JOIN(A, begin)(self);     \
             pos.node != NULL;                           \
-            JOIN(JOIN(A, it), next)(&pos))
+            pos.node = JOIN(JOIN(A, node), next)(pos.node))
+# define list_foreach_range(A, pos, first, last)        \
+    if (first && first->node)                           \
+        for(JOIN(A, it) pos = *(first);                 \
+            pos.node != (last)->node;                   \
+            pos.node = JOIN(JOIN(A, node), next)(pos.node))
+#endif
+
 # define list_foreach_ref(A, self, pos)                 \
     if ((self)->size)                                   \
         for(JOIN(A, it) pos = JOIN(A, begin)(self);     \
             pos.node != NULL;                           \
             JOIN(JOIN(A, it), next)(&pos))
-# define list_foreach_range(A, pos, first, last)        \
-    if (first)                                          \
-        for(JOIN(A, it) pos = *(first);                 \
-            pos.node != (last)->node;                   \
-            JOIN(JOIN(A, it), next)(&pos))
 # define list_foreach_range_ref(A, pos, first, last)    \
-    if (first)                                          \
+    if (first && first->node)                           \
         for(JOIN(A, it) pos = *(first);                 \
             pos.node != (last)->node;                   \
             JOIN(JOIN(A, it), next)(&pos))

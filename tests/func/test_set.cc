@@ -96,6 +96,7 @@ get_random_iters (set_digi *a, set_digi_it *first_a, set_digi_it *last_a,
         {
             *last_a = it1;
             last_b = first_b;
+            first_a->end = last_a->node;
         }
         else if (r2 == a->size)
         {

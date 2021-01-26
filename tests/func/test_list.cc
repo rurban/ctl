@@ -120,6 +120,8 @@ get_random_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
         {
             *last_a = it1;
             last_b = first_b;
+            first_a->end = last_a->node;
+
         }
         else if (r2 == a->size)
         {
@@ -141,6 +143,7 @@ get_random_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
         list_digi_it end = list_digi_end (a);
         *first_a = end;
         *last_a = end;
+        last_a->end = first_a->node;
         first_b = b.begin();
         last_b = b.end();
     }

@@ -582,7 +582,7 @@ JOIN(A, rehash)(A* self, size_t desired_count)
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
     JOIN(A, reserve)(&rehashed, desired_count);
-    list_foreach(A, self, it)
+    uset_foreach(A, self, it)
     {
         B** buckets = JOIN(A, _cached_bucket)(&rehashed, it.node);
         if (it.node != *buckets)
@@ -606,7 +606,7 @@ JOIN(A, _rehash)(A* self, size_t count)
     A rehashed = JOIN(A, init)(self->hash, self->equal);
     LOG("_rehash %zu => %zu\n", self->size, count);
     JOIN(A, _reserve)(&rehashed, count);
-    list_foreach(A, self, it)
+    uset_foreach(A, self, it)
     {
         B** buckets = JOIN(A, _cached_bucket)(&rehashed, it.node);
         if (it.node != *buckets)
