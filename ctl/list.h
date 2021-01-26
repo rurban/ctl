@@ -464,15 +464,20 @@ JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
 static inline size_t
 JOIN(A, remove_if)(A* self, int _match(T*))
 {
+    if (!self->size)
+        return 0;
     size_t erases = 0;
-    list_foreach_ref(A, self, it)
-        if(_match(it.ref))
+    B* node = self->head;
+    while (node)
+    {
+        B* next = node->next;
+        if(_match(&node->value))
         {
-            B* next = it.node->next;
-            JOIN(A, erase_node)(self, it.node);
-            it.node = next;
+            JOIN(A, erase_node)(self, node);
             erases++;
         }
+        node = next;
+    }
     return erases;
 }
 

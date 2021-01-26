@@ -24,7 +24,9 @@ void print_list(std::list<DIGI> &b)
 }
 
 #ifdef DEBUG
-#define TEST_MAX_VALUE 10
+#define TEST_MAX_VALUE 15
+#undef TEST_MAX_SIZE
+#define TEST_MAX_SIZE 10
 #else
 #define print_lst(x)
 #define print_list(x)
@@ -155,11 +157,7 @@ main(void)
         list_digi a;
         std::list<DIGI> b;
         int max_value = 0;
-#ifdef DEBUG
-        const size_t size = TEST_RAND(10);
-#else
         const size_t size = TEST_RAND(TEST_MAX_SIZE);
-#endif
         setup_lists(&a, b, size, &max_value);
 
 #define FOREACH_METH(TEST) \
@@ -320,7 +318,7 @@ main(void)
             }
             case TEST_RESIZE:
             {
-                size_t resize = 3 * TEST_RAND(a.size);
+                size_t resize = 2 * TEST_RAND(TEST_MAX_SIZE);
                 list_digi_resize(&a, resize, digi_init(0));
                 b.resize(resize);
                 print_lst(&a);
@@ -459,6 +457,7 @@ main(void)
             }
             case TEST_REMOVE_IF:
             {
+                print_lst(&a);
                 list_digi_remove_if(&a, digi_is_odd);
                 b.remove_if(DIGI_is_odd);
                 CHECK(a, b);
@@ -466,6 +465,7 @@ main(void)
             }
             case TEST_ERASE_IF:
             {
+                print_lst(&a);
 #if __cpp_lib_erase_if > 202002L
                 size_t num_a = list_digi_erase_if(&a, digi_is_odd);
                 size_t num_b = b.erase_if(DIGI_is_odd);
@@ -576,9 +576,9 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                list_digi_it n = list_digi_find_range(&first_a, &last_a, key);
-                auto it = find(first_b, last_b, vb);
-                CHECK_ITER(&n, b, it);
+                list_digi_it aa = list_digi_find_range(&first_a, &last_a, key);
+                auto bb = find(first_b, last_b, vb);
+                CHECK_ITER(&aa, b, bb);
                 digi_free (&key); // special
                 CHECK(a, b);
                 break;
@@ -633,16 +633,16 @@ main(void)
             }
             case TEST_FIND_IF:
             {
-                list_digi_it n = list_digi_find_if(&a, digi_is_odd);
-                auto it = find_if(b.begin(), b.end(), DIGI_is_odd);
-                CHECK_ITER(&n, b, it);
+                list_digi_it aa = list_digi_find_if(&a, digi_is_odd);
+                auto bb = find_if(b.begin(), b.end(), DIGI_is_odd);
+                CHECK_ITER(&aa, b, bb);
                 break;
             }
             case TEST_FIND_IF_NOT:
             {
-                list_digi_it n = list_digi_find_if_not(&a, digi_is_odd);
-                auto it = find_if_not(b.begin(), b.end(), DIGI_is_odd);
-                CHECK_ITER(&n, b, it);
+                list_digi_it aa = list_digi_find_if_not(&a, digi_is_odd);
+                auto bb = find_if_not(b.begin(), b.end(), DIGI_is_odd);
+                CHECK_ITER(&aa, b, bb);
                 break;
             }
             case TEST_FIND_IF_RANGE:
@@ -650,12 +650,11 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                list_digi_it n =
-                    list_digi_find_if_range(&first_a, &last_a, digi_is_odd);
-                auto it = find_if(first_b, last_b, DIGI_is_odd);
+                list_digi_it aa = list_digi_find_if_range(&first_a, &last_a, digi_is_odd);
+                auto bb = find_if(first_b, last_b, DIGI_is_odd);
                 print_lst(&a);
                 print_list(b);
-                CHECK_ITER(&n, b, it);
+                CHECK_ITER(&aa, b, bb);
                 break;
             }
             case TEST_FIND_IF_NOT_RANGE:
@@ -663,10 +662,9 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                list_digi_it n =
-                    list_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
-                auto it = find_if_not(first_b, last_b, DIGI_is_odd);
-                CHECK_ITER(&n, b, it);
+                list_digi_it aa = list_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
+                auto bb = find_if_not(first_b, last_b, DIGI_is_odd);
+                CHECK_ITER(&aa, b, bb);
                 break;
             }
             case TEST_INSERT_COUNT:
