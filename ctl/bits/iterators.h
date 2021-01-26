@@ -38,14 +38,14 @@
             JOIN(JOIN(A, it), next)(&pos))
 # define list_foreach_range(A, pos, first, last)        \
     if (first)                                          \
-        for(JOIN(A, node) pos = *first;                 \
-            pos.node != last->node;                     \
+        for(JOIN(A, it) pos = *(first);                 \
+            pos.node != (last)->node;                   \
             JOIN(JOIN(A, it), next)(&pos))
 # define list_foreach_range_ref(A, pos, first, last)    \
     if (first)                                          \
-        for(JOIN(A, it) pos = *first;                   \
-            pos.node != last->node;                     \
-            JOIN(A, JOIN(A, it), next)(&pos))
+        for(JOIN(A, it) pos = *(first);                 \
+            pos.node != (last)->node;                   \
+            JOIN(JOIN(A, it), next)(&pos))
 
 #else
 

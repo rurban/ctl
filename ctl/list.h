@@ -502,6 +502,37 @@ JOIN(A, splice)(A* self, I* pos, A* other)
     }
 }
 
+#ifdef DEBUG
+static inline void
+JOIN(A, splice_it)(I* pos, I* other_pos)
+{
+    A* self = pos->container;
+    A* other = other_pos->container;
+    if(self->size == 0 && pos->node == NULL)
+        JOIN(A, swap)(self, other);
+    else
+    {
+        I end = JOIN(A, end)(other);
+        list_foreach_range(A, it, other_pos, &end)
+            JOIN(A, transfer_before)(self, other, pos->node, it.node);
+    }
+}
+
+static inline void
+JOIN(A, splice_range)(I* pos, I* other_first, I* other_last)
+{
+    A* self = pos->container;
+    A* other = other_first->container;
+    if(self->size == 0 && pos->node == NULL)
+        JOIN(A, swap)(self, other);
+    else
+    {
+        list_foreach_range(A, it, other_first, other_last)
+            JOIN(A, transfer_before)(self, other, pos->node, it.node);
+    }
+}
+#endif
+
 // only needed for merge
 static inline void
 JOIN(A, transfer_after)(A* self, A* other, B* position, B* node)
@@ -509,34 +540,6 @@ JOIN(A, transfer_after)(A* self, A* other, B* position, B* node)
     JOIN(A, disconnect)(other, node);
     JOIN(A, connect_after)(self, position, node);
 }
-
-#ifdef DEBUG
-static inline void
-JOIN(A, splice_it)(A* self, I* pos, A* other, I* other_pos)
-{
-    if(self->size == 0 && pos == NULL)
-        JOIN(A, swap)(self, other);
-    else
-    {
-        //??
-        JOIN(A, transfer_before)(self, other, pos->node, other_pos->node);
-    }
-}
-
-static inline void
-JOIN(A, splice_range)(A* self, I* pos, I* other_first, I* other_last)
-{
-    if(self->size == 0 && pos == NULL)
-        JOIN(A, swap)(self, other_first->container);
-    else
-    {
-        // FIXME util other_last
-        (void) other_last;
-        JOIN(A, transfer_before)(self, other_first->container, pos->node, other_first->node);
-    }
-}
-
-#endif
 
 static inline void
 JOIN(A, merge)(A* self, A* other)

@@ -205,6 +205,8 @@ main(void)
         TEST(INSERT_COUNT) \
 
 #define FOREACH_DEBUG(TEST) \
+        TEST(SPLICE_IT) \
+        TEST(SPLICE_RANGE) \
         TEST(INSERT_RANGE) \
         TEST(EQUAL_RANGE) \
 
@@ -746,8 +748,69 @@ main(void)
                 break;
             }
 #ifdef DEBUG
+            case TEST_SPLICE_IT:
+            {
+                size_t index = TEST_RAND(a.size);
+                size_t current = 0;
+                std::list<DIGI>::iterator iter = b.begin();
+                list_digi_it it = list_digi_begin(&a);
+                while(it.node)
+                {
+                    if(current == index)
+                        break;
+                    iter++;
+                    list_digi_it_next(&it);
+                    current++;
+                }
+                list_digi aa;
+                std::list<DIGI> bb;
+                size_t bsize = TEST_RAND(TEST_MAX_SIZE);
+                setup_lists(&aa, bb, bsize, NULL);
+                std::list<DIGI>::iterator bbpos = bb.begin();
+                std::advance(bbpos, bsize / 2);
+                list_digi_it aapos = list_digi_begin(&aa);
+                list_digi_it_advance(&aapos, bsize / 2);
+
+                b.splice(iter, bb, bbpos);
+                list_digi_splice_it(&it, &aapos);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_SPLICE_RANGE:
+            {
+                size_t index = TEST_RAND(a.size);
+                size_t current = 0;
+                std::list<DIGI>::iterator iter = b.begin();
+                list_digi_it it = list_digi_begin(&a);
+                while(it.node)
+                {
+                    if(current == index)
+                        break;
+                    iter++;
+                    list_digi_it_next(&it);
+                    current++;
+                }
+                list_digi aa;
+                std::list<DIGI> bb;
+                size_t bsize = TEST_RAND(TEST_MAX_SIZE);
+                setup_lists(&aa, bb, bsize, NULL);
+                std::list<DIGI>::iterator bbpos = bb.begin();
+                std::advance(bbpos, bsize / 2);
+                std::list<DIGI>::iterator bbend = bb.begin();
+                std::advance(bbend, bsize - 1);
+                list_digi_it aapos = list_digi_begin(&aa);
+                list_digi_it_advance(&aapos, bsize / 2);
+                list_digi_it aaend = list_digi_begin(&aa);
+                list_digi_it_advance(&aaend, bsize - 1);
+
+                b.splice(iter, bb, bbpos, bbend);
+                list_digi_splice_range(&it, &aapos, &aaend);
+                CHECK(a, b);
+                break;
+            }
             case TEST_INSERT_RANGE:
             // algorithms + ranges
+                break;
             case TEST_ANY_OF:
             {
                 bool aa = list_digi_all_of(&a, digi_is_odd);
