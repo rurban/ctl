@@ -517,8 +517,8 @@ Not yet implemented:
 
 ## Acknowledgements
 
-Thank you `glouw` for the initial three-letter variant https://github.com/glouw/ctl.
+Thank you https://github.com/glouw/ctl for the initial three-letter variant.
 
-Thank you `kully` for the Plotly code, and thank you for the general review.
+Thank you https://github.com/kully for the Plotly code, and thank you for the general review.
 
 Thank you `smlckz` for the `foreach` cleanup.
