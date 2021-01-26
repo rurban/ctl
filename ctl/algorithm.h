@@ -216,6 +216,8 @@ JOIN(A, count_range)(I* first, I* last, T value)
         self->free(&value);
     return count;
 }
+#ifndef CTL_SET
+// has its own variant via faster find
 static inline size_t
 JOIN(A, count)(A* self, T value)
 {
@@ -227,6 +229,7 @@ JOIN(A, count)(A* self, T value)
         self->free(&value);
     return count;
 }
+#endif //SET
 #endif //USET/STR
 
 #if !defined(CTL_STR)
