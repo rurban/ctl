@@ -16,11 +16,9 @@
 // stack allocated if N < 2048, else heap
 #define CUTOFF 2047
 #define CTL_ARR
-#define X #N
 #define C PASTE(arr, N)
 #define A JOIN(C, T)
 #define I JOIN(A, it)
-#undef X
 
 typedef struct A
 {
@@ -59,7 +57,7 @@ JOIN(A, empty)(A* self)
 static inline size_t
 JOIN(A, max_size)()
 {
-    return N / sizeof(T);
+    return N;
 }
 
 static inline T*
@@ -143,8 +141,8 @@ JOIN(A, init)(void)
     A self = zero;
 #if N > CUTOFF
     self.vector = (T*) calloc(N, sizeof(T));
-#else
-    memset(self.vector, 0, N * sizeof(T));
+//#else
+//    memset(self.vector, 0, N * sizeof(T));
 #endif
 #ifdef POD
     self.copy = JOIN(A, implicit_copy);
@@ -163,7 +161,7 @@ JOIN(A, init)(void)
 }
 
 static inline A
-JOIN(A, _init)(A* copy)
+JOIN(A, init_from)(A* copy)
 {
     static A zero;
     A self = zero;

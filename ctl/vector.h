@@ -133,7 +133,7 @@ JOIN(A, init)(void)
 }
 
 static inline A
-JOIN(A, _init)(A* copy)
+JOIN(A, init_from)(A* copy)
 {
     static A zero;
     A self = zero;
@@ -480,7 +480,7 @@ JOIN(A, sort)(A* self)
 static inline A
 JOIN(A, copy)(A* self)
 {
-    A other = JOIN(A, _init)(self);
+    A other = JOIN(A, init_from)(self);
     JOIN(A, reserve)(&other, self->size); // i.e shrink to fit
     while(other.size < self->size)
         JOIN(A, push_back)(&other, other.copy(&self->vector[other.size]));

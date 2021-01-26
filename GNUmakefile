@@ -231,7 +231,7 @@ ctl/map.i:
 ctl/unordered_map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 ctl/array.i:
-	$(call expand,$(subst .i,,$@),-DT=int -DN=20 -DPOD)
+	$(call expand,$(subst .i,,$@),-DT=int -DN=128 -DPOD)
 
 %.i : %.h
 	@$(CC) $(CFLAGS) -DT=int -DPOD $< -E | clang-format -style=webkit

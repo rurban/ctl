@@ -149,7 +149,7 @@ JOIN(A, init)(void)
 }
 
 static inline A
-JOIN(A, _init)(A* copy)
+JOIN(A, init_from)(A* copy)
 {
     static A zero;
     A self = zero;
@@ -322,7 +322,7 @@ JOIN(A, resize)(A* self, size_t size, T value)
 static inline A
 JOIN(A, copy)(A* self)
 {
-    A other = JOIN(A, _init)(self);
+    A other = JOIN(A, init_from)(self);
     for(B* node = self->head; node; node = node->next)
         JOIN(A, push_back)(&other, self->copy(&node->value));
     return other;
@@ -543,10 +543,10 @@ JOIN(A, sort)(A* self)
 {
     if(self->size > 1)
     {
-        A carry = JOIN(A, _init)(self);
+        A carry = JOIN(A, init_from)(self);
         A temp[64];
         for(size_t i = 0; i < len(temp); i++)
-            temp[i] = JOIN(A, _init)(self);
+            temp[i] = JOIN(A, init_from)(self);
         A* fill = temp;
         A* counter = NULL;
         do

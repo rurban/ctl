@@ -1,4 +1,4 @@
-# arrau - CTL - C Container Template library
+# array - CTL - C Container Template library
 
 Defined in header **<ctl/array.h>**, CTL prefix **array**.
 
@@ -9,18 +9,21 @@ Defined in header **<ctl/array.h>**, CTL prefix **array**.
     #define N 128
     #include <ctl/array.h>
 
-    arr128_int a = arr128_int_init ();
+    #define ARRAY     arr128_int
+    #define ARR(name) JOIN(ARRAY, name)
 
-    for (i=0; i<128; i++)
-        arr128_int_set(&a, rand() % 100);
-    int* p = arr128_int_find(&a, 5);
+    ARRAY a = ARR(init)();
+
+    for (int i=0; i<128; i++)
+        ARR(set)(&a, i, rand() % 50);
+    int* p = ARR(find)(&a, 5);
     if (p)
-        printf ("Element 5 found at a[%ld]\n", p - a.vector);
-    arr128_int aa = arr128_int_copy (&a);
-    arr128_int_sort(&aa);
+        printf ("First element 5 found at a[%ld]\n", p - a.vector);
+    ARRAY aa = ARR(copy)(&a);
+    ARR(sort)(&aa);
 
-    arr128_int_free(&aa);
-    arr128_int_free(&a);
+    ARR(free)(&aa);
+    ARR(free)(&a);
 
 # DESCRIPTION
 
@@ -111,7 +114,7 @@ returns the number of elements, i.e. N.
 
     size_t max_size ()
 
-returns the maximum possible number of elements, hard-coded to 2GB (32bit).
+returns the maximum possible number of elements, i.e. N.
 
 ## Modifiers
 
