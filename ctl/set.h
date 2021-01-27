@@ -517,17 +517,20 @@ JOIN(A, erase_it)(A* self, I* pos)
         JOIN(A, erase_node)(self, node);
 }
 
+#ifdef DEBUG
 static inline void
 JOIN(A, erase_range)(A* self, I* from, I* to)
 {
     B* node = from->node;
     if(node)
     {
+        // TODO: check if clear would be faster (from==begin && to==end)
         JOIN(A, it) it = JOIN(I, range)(self, from->node, to->node);
         for(; !it.done; it.step(&it))
             JOIN(A, erase_node)(self, it.node);
     }
 }
+#endif
 
 static inline void
 JOIN(A, erase)(A* self, T key)
@@ -691,6 +694,12 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
             erases++;
         }
     return erases;
+}
+
+static inline size_t
+JOIN(A, erase_if)(A* self, int (*_match)(T*))
+{
+    return JOIN(A, remove_if)(self, _match);
 }
 
 static inline A

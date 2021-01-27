@@ -15,6 +15,28 @@ digi_key_compare(digi* a, digi* b)
 #include <algorithm>
 #include <iterator>
 
+#ifndef DEBUG
+#define print_set(a)
+#define print_setpp(a)
+#define TEST_MAX_VALUE INT_MAX
+#else
+#undef TEST_MAX_SIZE
+#define TEST_MAX_SIZE 15
+#define TEST_MAX_VALUE 50
+void print_set(set_digi* a) {
+    int i = 0;
+    foreach(set_digi, a, it)
+        printf("[%d] %d\n", i++, *it.ref->value);
+    printf("--\n");
+}
+void print_setpp(std::set<DIGI>& b) {
+    int i = 0;
+    for(auto& d : b)
+        printf("[%d] %d\n", i++, *d.value);
+    printf("--\n");
+}
+#endif
+
 #define CHECK(_x, _y) {                           \
     assert(_x.size == _y.size());                 \
     std::set<DIGI>::iterator _iter = _y.begin();  \
@@ -57,6 +79,8 @@ main(void)
         TEST(INSERT) \
         TEST(ERASE) \
         TEST(REMOVE_IF) \
+        TEST(ERASE_IF) \
+        TEST(ERASE_IT) \
         TEST(CLEAR) \
         TEST(SWAP) \
         TEST(COUNT) \
@@ -69,10 +93,10 @@ main(void)
         TEST(SYMMETRIC_DIFFERENCE) \
         TEST(DIFFERENCE)
 #define FOREACH_DEBUG(TEST) \
+        TEST(ERASE_RANGE) \
         /* TEST(EMPLACE) */ \
         /* TEST(EXTRACT) */ \
         /* TEST(MERGE) */ \
-        /* TEST(ERASE_IF) */ \
         TEST(EQUAL_RANGE) \
         TEST(FIND_RANGE) \
         TEST(FIND_IF) \
@@ -145,6 +169,22 @@ main(void)
                     }
                 break;
             }
+            case TEST_ERASE_IT:
+            {
+                const size_t erases = TEST_RAND(TEST_MAX_SIZE) / 4;
+                for(size_t i = 0; i < erases; i++)
+                    if(a.size > 1)
+                    {
+                        set_digi_it it = set_digi_it_each(&a);
+                        it.step(&it);
+                        set_digi_erase_it(&a, &it);
+                        auto iter = b.begin();
+                        iter++;
+                        b.erase(iter);
+                        CHECK(a, b);
+                    }
+                break;
+            }
             case TEST_REMOVE_IF:
             {
                 size_t b_erases = 0;
@@ -163,6 +203,31 @@ main(void)
                     }
                 }
                 size_t a_erases = set_digi_remove_if(&a, digi_is_odd);
+                assert(a_erases == b_erases);
+                break;
+            }
+            case TEST_ERASE_IF:
+            {
+                size_t b_erases = 0;
+#if __cpp_lib_erase_if >= 202002L
+                b_erases = std::erase_if(b, DIGIc_is_odd);
+#else
+                {
+                    auto iter = b.begin();
+                    auto end = b.end();
+                    while(iter != end)
+                    {
+                        if(*iter->value % 2)
+                        {
+                            iter = b.erase(iter);
+                            b_erases++;
+                        }
+                        else
+                            iter++;
+                    }
+                }
+#endif
+                size_t a_erases = set_digi_erase_if(&a, digi_is_odd);
                 assert(a_erases == b_erases);
                 break;
             }
@@ -197,7 +262,7 @@ main(void)
             {
                 int key = TEST_RAND(TEST_MAX_SIZE);
                 int aa = set_digi_contains(&a, digi_init(key));
-#if defined(__cpp_lib_erase_if) && __cpp_lib_erase_if > 202002L
+#if __cpp_lib_erase_if >= 202002L
                 int bb = b.contains(DIGI{key});
 #else
                 int bb = b.count(DIGI{key}) == 1;
@@ -304,7 +369,26 @@ main(void)
                 set_digi_free(&aa);
                 break;
             }
-#ifdef DEBUG // algorithm
+#ifdef DEBUG // algorithm and ranges
+            case TEST_ERASE_RANGE:
+            {
+                const size_t erases = TEST_RAND(TEST_MAX_SIZE) / 4;
+                for(size_t i = 0; i < erases; i++)
+                    if(a.size > 2)
+                    {
+                        set_digi_it it = set_digi_it_each(&a);
+                        it.step(&it);
+                        set_digi_it end = set_digi_it_range(&a, NULL, NULL);
+                        set_digi_erase_range(&a, &it, &end);
+                        auto iter = b.begin();
+                        iter++;
+                        b.erase(iter, b.end());
+                        print_set(&a);
+                        print_setpp(b);
+                        CHECK(a, b);
+                    }
+                break;
+            }
             case TEST_EQUAL_RANGE:
             case TEST_FIND_RANGE:
             case TEST_FIND_IF:
