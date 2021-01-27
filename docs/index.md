@@ -402,6 +402,9 @@ Added many return values as iterators, as in the STL.
 Reproducible tests with `SEED=n`,
 Optimized test dependencies, time went from 25s to 3s even with ccache.
 
+Many performance improvements. e.g. set.clear is much faster, even than in the
+STL.
+
 Optimized hashmaps with two growth policies, about 100x faster with the policy
 `CTL_USET_GROWTH_POWER2`, instead of the default `CTL_USET_GROWTH_PRIMED`.
 Added the `CTL_USET_CACHED_HASH` policy for faster unsuccessful finds with high
@@ -412,20 +415,19 @@ bucket methods, and faster, but pointers into it are disallowed.
 
 Optimized list, seperate connect before and after methods.
 
-Implemented correct short string and vector capacity policies, as in gcc
-libstdc++ and llvm libc++.
-Tested also against the libc++ from llvm and the Windows MSVC STL, not
-just the GNU libstdc++ v3.
+Implemented correct string and vector capacity policies, as in gcc libstdc++ and
+llvm libc++.  Tested also against the libc++ from llvm and the Windows MSVC STL,
+not just the GNU libstdc++ v3.
 
 Work is ongoing for all `algorithm.h`, `iterators` and `ranges`, with better
-iterators.
+iterators. `string_view` and `span` (i.e. vector\_view) not yet.
 
 On errors, like `size > max_size` return silently. This avoids DDOS attacks.
 When assert is used, throw them. (when assert.h included, no NDEBUG)
 glouw/ctl does not treat errors at all. There cannot be any.
 
 Support not only GNU make, but also BSD make and MSVC nmake.
-gen_images.sh is not bash-only anymore, and supports updating single graphs.
+`gen_images.sh` is not bash-only anymore, and supports updating single graphs.
 
 Tested also on macOS (default apple clang++ with libc++), FreeBSD (default
 clang with libc++), and Windows MSVC (default CL 19).
