@@ -102,6 +102,8 @@ _set() {
      tests/perf/set/perf_set_insert.c \
      tests/perf/set/perf_set_erase.cc \
      tests/perf/set/perf_set_erase.c
+     tests/perf/set/perf_set_clear.cc \
+     tests/perf/set/perf_set_clear.c
      tests/perf/set/perf_set_iterate.cc \
      tests/perf/set/perf_set_iterate.c"
 }

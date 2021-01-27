@@ -626,11 +626,25 @@ JOIN(A, erase_6)(A* self, B* node)
     }
 }
 
+// erase without rebalancing. e.g. for clear
+static inline void
+JOIN(B, erase_fast)(A* self, B* node)
+{
+    while(node)
+    {
+        JOIN(B, erase_fast)(self, node->r);
+        B* left = node->l;
+        JOIN(A, free_node)(self, node);
+        node = left;
+        self->size--;
+    }
+}
+
 static inline void
 JOIN(A, clear)(A* self)
 {
     while(!JOIN(A, empty)(self))
-        JOIN(A, erase)(self, self->root->key);
+        JOIN(B, erase_fast)(self, self->root);
 }
 
 static inline void
