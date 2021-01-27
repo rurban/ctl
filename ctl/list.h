@@ -103,28 +103,6 @@ JOIN(I, range)(A* container, B* begin, B* end)
     return self;
 }
 
-#if 0
-// those iters would need to be freed
-// or we would need to create static ones for those two
-static inline I*
-JOIN(A, begin)(A* self)
-{
-    I it = JOIN(I, range)(self, self->head, self->tail + 1);
-    I *ret = (I*) malloc (sizeof(I));
-    memcpy(ret, &it, sizeof(I));
-    return ret;
-}
-
-static inline I*
-JOIN(A, end)(A* self)
-{
-    I it = JOIN(I, range)(self, NULL, self->tail + 1);
-    I *ret = (I*) malloc (sizeof(I));
-    memcpy(ret, &it, sizeof(I));
-    return ret;
-}
-#endif
-
 #include <ctl/bits/container.h>
 
 static inline A

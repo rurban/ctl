@@ -117,7 +117,7 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
     return !JOIN(A, none_of_range)(first, last, _match);
 }
 
-#if !defined(CTL_SET) && !defined(CTL_USET) && !defined(CTL_STR)
+#if !defined(CTL_USET) && !defined(CTL_STR)
 // C++20
 // uset has cached_hash optims
 static inline size_t
@@ -134,9 +134,9 @@ JOIN(A, count_range)(I* first, I* last, T value)
         self->free(&value);
     return count;
 }
-#endif //SET/USET/STR
+#endif //USET/STR
 
-#if !defined(CTL_SET) && !defined(CTL_STR)
+#if !defined(CTL_STR)
 // C++20
 static inline size_t
 JOIN(A, count_if_range)(I* first, I* last, int _match(T*))
@@ -158,7 +158,7 @@ JOIN(A, count_if)(A* self, int _match(T*))
     return count;
 }
 
-#ifndef CTL_USET
+#if !defined(CTL_SET) && !defined(CTL_USET)
 static inline size_t
 JOIN(A, count)(A* self, T value)
 {
@@ -170,8 +170,8 @@ JOIN(A, count)(A* self, T value)
         self->free(&value);
     return count;
 }
-#endif // USET
-#endif // SET/STR
+#endif // SET/USET
+#endif // STR
 
 #ifdef DEBUG
 #if !defined(CTL_USET) && !defined(CTL_STR)

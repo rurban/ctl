@@ -97,17 +97,26 @@ JOIN(I, step)(I* self)
     else
     {
         self->node = self->next;
-        self->ref = &self->node->key;
-        self->next = JOIN(B, next)(self->node);
+        if (self->node)
+        {
+            self->ref = &self->node->key;
+            self->next = JOIN(B, next)(self->node);
+        }
+        else
+        {
+            self->done = 1;
+            self->ref = NULL;
+            self->next = NULL;
+        }
     }
 }
 
 static inline I
 JOIN(I, range)(A* container, B* begin, B* end)
 {
-    (void) container;
     static I zero;
     I self = zero;
+    self.container = container;
     if(begin)
     {
         self.step = JOIN(I, step);
