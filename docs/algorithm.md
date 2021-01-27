@@ -47,50 +47,46 @@ for various backends like openmp or TBB.
 
 ## Non-modifying sequence operations
 
-    all_of (A* self, int _match(T*)) (C++11)
-    any_of `(A* self, int _match(T*)) (C++11)
-    none_of (A* self, int _match(T*)) (C++11)
-    all_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
-    any_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
-    none_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
+    bool all_of (A* self, int _match(T*)) (C++11)
+    bool any_of `(A* self, int _match(T*)) (C++11)
+    bool none_of (A* self, int _match(T*)) (C++11)
+    bool all_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
+    bool any_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
+    bool none_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
 
 checks if a predicate is true for all, any or none of the elements in a range
 
-    foreach (A, IT, self, iter)
-    foreach_range (A, IT, iter, first, last) (C++20)
- 
-applies a function to a range of elements and sets IT iter.
- 
-    foreach_ref (A, T, IT, self, iter, ref)
-    foreach_range_ref (A, T, IT, iter, ref, first, last) (C++20)
- 
-applies a function to a range of elements and sets IT iter, and `T*` ref.
+    foreach (A, self, iter) {...}
+    foreach_range (A, iter, first, last) {...} (C++20)
 
-    foreach_n (A, T, IT, self, n, void func(T*)) (C++17)
-    foreach_n_range (A, T, IT, first, n, void func(T*)) (C++20)
+applies a block to a range of elements with iter.
  
-applies a function to the first n elements of a sequence. (NYI, see branch `iter-redesign`)
+    foreach_n (A, T, IT, self, n, void func(T*)) {...} (C++17)
+    foreach_n_range (A, T, IT, first, n, void func(T*)) {...} (C++20)
 
-    count (A* self, T value)
-    count_if (A* self, int _match(T*))
-    count_range (I* first, I* last, T value) (C++20)
-    count_if_range (I* first, I *last, int _match(T*)) (C++20)
+applies a block with iter to the first n elements of a sequence. (NYI, see branch `iter-redesign`)
+
+    size_t count (A* self, T value)
+    size_t count_if (A* self, int _match(T*))
+    size_t count_range (I* first, I* last, T value) (C++20)
+    size_t count_if_range (I* first, I *last, int _match(T*)) (C++20)
  
-returns the number of elements satisfying specific criteria
+returns the number of elements satisfying specific criteria.
 
     mismatch (I* first1, I *last1, I* first2)
     mismatch_range (I* first1, I *last1, I* first2, I* last2) (C++20)
  
 finds the first position where two ranges differ. _(NYI)_
 
-    find (A* self, T* value)
+    find (A* self, T key)
     find_if (A* self, int _match(T*))
     find_if_not (A* self, int _match(T*)) (C++11)
-    find_range (A* self, IT first, IT last, T value) (C++20)
+    find_range (A* self, IT first, IT last, T key) (C++20)
     find_if_range (IT first, IT last, int _match(T*)) (C++20)
     find_if_not_range (IT first, IT last, int _match(T*)) (C++20)
  
-finds the first element satisfying specific criteria. Returns IT.
+finds the first element satisfying specific criteria. Returns IT. Does not
+consume/free the T key.
 
     find_end
     find_end_range (C++20)
@@ -365,22 +361,22 @@ merges two ordered ranges in-place. _(NYI)_
  
 returns true if one sequence is a subsequence of another. _(NYI)_
 
-    difference
+    A difference (A* self, A* other)
     difference_range (C++20)
  
 computes the difference between two sets. _(range NYI)_
 
-    intersection
+    A intersection (A* self, A* other)
     intersection_range (C++20)
  
 computes the intersection of two sets. _(range NYI)_
  
-    symmetric_difference
+    A symmetric_difference (A* self, A* other)
     symmetric_difference_range (C++20)
  
 computes the symmetric difference between two sets. _(range NYI)_
 
-    union
+    A union (A* self, A* other)
     union_range (C++20)
  
 computes the union of two sets. _(range NYI)_
@@ -456,7 +452,7 @@ clamps a value between a pair of boundary values. _(NYI)_
 
 ## Comparison operations
 
-    equal
+    int equal (A* self, A* other)
     equal_range (C++20)
  
 determines if two sets of elements are the same

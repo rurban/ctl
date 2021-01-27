@@ -199,5 +199,31 @@ erases all elements satisfying specific criteria. (C++20)
     A difference (A* self, A* other)
     A symmetric_difference (A* self, A* other)
 
+    bool all_of (A* self, int _match(T*)) (C++11)
+    bool any_of `(A* self, int _match(T*)) (C++11)
+    bool none_of (A* self, int _match(T*)) (C++11)
+    bool all_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
+    bool any_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
+    bool none_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
+
+    foreach (A, self, iter) {...}
+    foreach_range (A, iter, first, last) {...} (C++20)
+
+    size_t count (A* self, T value)
+    size_t count_if (A* self, int _match(T*))
+    size_t count_range (I* first, I* last, T value) (C++20)
+    size_t count_if_range (I* first, I *last, int _match(T*)) (C++20)
+
+    find (A* self, T key)
+    find_if (A* self, int _match(T*))
+    find_if_not (A* self, int _match(T*)) (C++11)
+    find_range (A* self, IT first, IT last, T key) (C++20)
+    find_if_range (IT first, IT last, int _match(T*)) (C++20)
+    find_if_not_range (IT first, IT last, int _match(T*)) (C++20)
+
+    remove (A* self, T key)                        _(NYI)_
+    size_t remove_if (A* self, int match(T*))
+    merge  (A* self, A* other)                     _(NYI)_
+    int equal (A* self, A* other)
 
 See [algorithm](algorithm.md) for more.
