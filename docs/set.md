@@ -31,7 +31,7 @@ parent for [map](map.md).
 ## DESCRIPTION
 
 set is a sorted associative container that contains key-value pairs with unique
-keys. Keys are sorted by using the custom comparison function T_cmp. Search, removal,
+keys. Keys are sorted by using the custom comparison function. Search, removal,
 and insertion operations have logarithmic complexity. set is implemented as red-black tree.
 
 The function names are composed of the prefix **set_**, the user-defined type
@@ -56,7 +56,7 @@ other: !comp(a, b) && !comp(b, a).
 
 ## Member functions
 
-    A init (T_compare(T*, T*))
+    A init (int compare(T*, T*))
 
 constructs the set.
 
@@ -152,25 +152,25 @@ splices nodes from another container
 
     size_t count (A* self)
 
-returns the number of elements matching specific key
+returns the number of elements matching specific key.
 
     B* find (A* self, T key)
 
-finds element with specific key
+finds element with specific key. does not consume/delete the key.
 
     int contains (A* self, T key)
 
 checks if the container contains element with specific key. (C++20)
 
-    equal_range (A* self)
+    equal_range ??
 
 returns range of elements matching a specific key. _(NYI)_
 
-    B* lower_bound (A* self)
+    B* lower_bound (A* self, T key)
 
 returns an iterator to the first element not less than the given key. _(NYI)_
 
-    B* upper_bound (A* self)
+    B* upper_bound (A* self, T key)
 
 returns an iterator to the first element greater than the given key. _(NYI)_
 
@@ -186,11 +186,11 @@ Returns the function that compares keys in objects of type value_type T. _(NYI)_
 
 specializes the swap algorithm
 
-    size_t remove_if (A* self, int T_match(T*))
+    size_t remove_if (A* self, int match(T*))
 
 Removes all elements satisfying specific criteria.
 
-    erase_if (A* self, int T_match(T*))
+    erase_if (A* self, int match(T*))
 
 erases all elements satisfying specific criteria. (C++20)
 

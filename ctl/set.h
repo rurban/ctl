@@ -221,7 +221,12 @@ JOIN(A, find)(A* self, T key)
 static inline int
 JOIN(A, count)(A* self, T key)
 {
-    return JOIN(A, find)(self, key) ? 1 : 0;
+    int result = JOIN(A, find)(self, key) ? 1 : 0;
+#ifndef POD
+    if(self->free)
+        self->free(&key);
+#endif
+    return result;
 }
 
 static inline int

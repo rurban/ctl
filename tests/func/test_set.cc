@@ -60,6 +60,7 @@ main(void)
         TEST(CLEAR) \
         TEST(SWAP) \
         TEST(COUNT) \
+        TEST(CONTAINS) \
         TEST(FIND) \
         TEST(COPY) \
         TEST(EQUAL) \
@@ -68,7 +69,6 @@ main(void)
         TEST(SYMMETRIC_DIFFERENCE) \
         TEST(DIFFERENCE)
 #define FOREACH_DEBUG(TEST) \
-        TEST(CONTAINS) \
         /* TEST(EMPLACE) */ \
         /* TEST(EXTRACT) */ \
         /* TEST(MERGE) */ \
@@ -187,12 +187,22 @@ main(void)
             case TEST_COUNT:
             {
                 int key = TEST_RAND(TEST_MAX_SIZE);
-                digi kd = digi_init(key);
-                int aa = set_digi_count(&a, kd);
+                int aa = set_digi_count(&a, digi_init(key));
                 int bb = b.count(DIGI{key});
                 assert(aa == bb);
                 CHECK(a, b);
-                digi_free(&kd);
+                break;
+            }
+            case TEST_CONTAINS: // C++20
+            {
+                int key = TEST_RAND(TEST_MAX_SIZE);
+                int aa = set_digi_contains(&a, digi_init(key));
+#if defined(__cpp_lib_erase_if) && __cpp_lib_erase_if > 202002L
+                int bb = b.contains(DIGI{key});
+#else
+                int bb = b.count(DIGI{key}) == 1;
+#endif
+                assert(aa == bb);
                 break;
             }
             case TEST_FIND:
@@ -294,20 +304,6 @@ main(void)
                 set_digi_free(&aa);
                 break;
             }
-#ifdef DEBUG
-            case TEST_CONTAINS: // C++20
-            {
-                int key = TEST_RAND(TEST_MAX_SIZE);
-                int aa = set_digi_contains(&a, digi_init(key));
-#if defined(__cpp_lib_erase_if) && __cpp_lib_erase_if > 202002L
-                int bb = b.contains(DIGI{key});
-#else
-                int bb = b.count(DIGI{key}) == 1;
-#endif
-                assert(aa == bb);
-                break;
-            }
-#endif
 #ifdef DEBUG // algorithm
             case TEST_EQUAL_RANGE:
             case TEST_FIND_RANGE:
@@ -324,6 +320,7 @@ main(void)
             case TEST_COUNT_IF:
             case TEST_COUNT_IF_RANGE:
             case TEST_COUNT_RANGE:
+                printf("nyi\n");
                 break;
 #endif
         }
