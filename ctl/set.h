@@ -167,7 +167,7 @@ JOIN(B, color)(B* self)
 }
 
 static inline int
-JOIN(B, is_blk)(B* self)
+JOIN(B, is_black)(B* self)
 {
     return JOIN(B, color)(self) == 1;
 }
@@ -267,7 +267,7 @@ JOIN(B, replace)(A* self, B* a, B* b)
 static inline void
 JOIN(B, verify_property_1)(B* self)
 {
-    assert(JOIN(B, is_red)(self) || JOIN(B, is_blk)(self));
+    assert(JOIN(B, is_red)(self) || JOIN(B, is_black)(self));
     if(self)
     {
         JOIN(B, verify_property_1)(self->l);
@@ -278,7 +278,7 @@ JOIN(B, verify_property_1)(B* self)
 static inline void
 JOIN(B, verify_property_2)(B* self)
 {
-    assert(JOIN(B, is_blk)(self));
+    assert(JOIN(B, is_black)(self));
 }
 
 static inline void
@@ -286,9 +286,9 @@ JOIN(B, verify_property_4)(B* self)
 {
     if(JOIN(B, is_red)(self))
     {
-        assert(JOIN(B, is_blk)(self->l));
-        assert(JOIN(B, is_blk)(self->r));
-        assert(JOIN(B, is_blk)(self->p));
+        assert(JOIN(B, is_black)(self->l));
+        assert(JOIN(B, is_black)(self->r));
+        assert(JOIN(B, is_black)(self->p));
     }
     if(self)
     {
@@ -298,14 +298,14 @@ JOIN(B, verify_property_4)(B* self)
 }
 
 static inline void
-JOIN(B, count_blk)(B* self, int nodes, int* in_path)
+JOIN(B, count_black)(B* self, int nodes, int* in_path)
 {
-    if(JOIN(B, is_blk)(self))
+    if(JOIN(B, is_black)(self))
         nodes++;
     if(self)
     {
-        JOIN(B, count_blk)(self->l, nodes, in_path);
-        JOIN(B, count_blk)(self->r, nodes, in_path);
+        JOIN(B, count_black)(self->l, nodes, in_path);
+        JOIN(B, count_black)(self->r, nodes, in_path);
     }
     else
     {
@@ -320,7 +320,7 @@ static inline void
 JOIN(B, verify_property_5)(B* self)
 {
     int in_path = -1;
-    JOIN(B, count_blk)(self, 0, &in_path);
+    JOIN(B, count_black)(self, 0, &in_path);
 }
 
 static inline void
@@ -329,7 +329,7 @@ JOIN(A, verify)(A* self)
     JOIN(B, verify_property_1)(self->root); // Property 1: Each node is either red or black.
     JOIN(B, verify_property_2)(self->root); // Property 2: The root node is black.
     /* Implicit */                          // Property 3: Leaves are colored black
-    JOIN(B, verify_property_4)(self->root); // Property 4: Every red node has two black ndoes.
+    JOIN(B, verify_property_4)(self->root); // Property 4: Every red node has two black nodes.
     JOIN(B, verify_property_5)(self->root); // Property 5: All paths from a node have the same number of black nodes.
 }
 
@@ -427,7 +427,7 @@ JOIN(A, insert_1)(A* self, B* node)
 static inline void
 JOIN(A, insert_2)(A* self, B* node)
 {
-    if(JOIN(B, is_blk)(node->p))
+    if(JOIN(B, is_black)(node->p))
         return;
     else
        JOIN(A, insert_3)(self, node);
@@ -493,7 +493,7 @@ JOIN(A, erase_node)(A* self, B* node)
         node = pred;
     }
     B* child = node->r ? node->r : node->l;
-    if(JOIN(B, is_blk)(node))
+    if(JOIN(B, is_black)(node))
     {
         node->color = JOIN(B, color)(child);
         JOIN(A, erase_1)(self, node);
@@ -574,10 +574,10 @@ JOIN(A, erase_2)(A* self, B* node)
 static inline void
 JOIN(A, erase_3)(A* self, B* node)
 {
-    if(JOIN(B, is_blk)(node->p)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node))
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->l)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->r))
+    if(JOIN(B, is_black)(node->p)
+    && JOIN(B, is_black)(JOIN(B, sibling)(node))
+    && JOIN(B, is_black)(JOIN(B, sibling)(node)->l)
+    && JOIN(B, is_black)(JOIN(B, sibling)(node)->r))
     {
         JOIN(B, sibling)(node)->color = 0;
         JOIN(A, erase_1)(self, node->p);
@@ -590,9 +590,9 @@ static inline void
 JOIN(A, erase_4)(A* self, B* node)
 {
     if(JOIN(B, is_red)(node->p)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node))
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->l)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->r))
+    && JOIN(B, is_black)(JOIN(B, sibling)(node))
+    && JOIN(B, is_black)(JOIN(B, sibling)(node)->l)
+    && JOIN(B, is_black)(JOIN(B, sibling)(node)->r))
     {
         JOIN(B, sibling)(node)->color = 0;
         node->p->color = 1;
@@ -605,9 +605,9 @@ static inline void
 JOIN(A, erase_5)(A* self, B* node)
 {
     if(node == node->p->l
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node))
+    && JOIN(B, is_black)(JOIN(B, sibling)(node))
     && JOIN(B, is_red)(JOIN(B, sibling)(node)->l)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->r))
+    && JOIN(B, is_black)(JOIN(B, sibling)(node)->r))
     {
         JOIN(B, sibling)(node)->color = 0;
         JOIN(B, sibling)(node)->l->color = 1;
@@ -615,9 +615,9 @@ JOIN(A, erase_5)(A* self, B* node)
     }
     else
     if(node == node->p->r
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node))
+    && JOIN(B, is_black)(JOIN(B, sibling)(node))
     && JOIN(B, is_red)(JOIN(B, sibling)(node)->r)
-    && JOIN(B, is_blk)(JOIN(B, sibling)(node)->l))
+    && JOIN(B, is_black)(JOIN(B, sibling)(node)->l))
     {
         JOIN(B, sibling)(node)->color = 0;
         JOIN(B, sibling)(node)->r->color = 1;
