@@ -332,8 +332,7 @@ main(void)
                 arr100_digi_it first_a, last_a;
                 std::array<DIGI,100>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = arr100_digi_all_of_range(&first_a, &last_a,
-                                                   digi_is_odd);
+                bool aa = arr100_digi_all_of_range(&first_a, &last_a, digi_is_odd);
                 bool bb = std::all_of(first_b, last_b, DIGI_is_odd);
                 if (aa != bb)
                 {

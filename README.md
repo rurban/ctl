@@ -275,77 +275,90 @@ map.h:              set.h
 unordered_set.h:    hashed forward linked lists (will change)
 unordered_map.h:    unordered_set.h
 
-                    vec  str  deq  list set  map  pqu  que  stk  uset umap
-+------------------------------------------------------------------------+
-empty               x    x    x    x    x    x    x    x    x    x    x
-each                x    x    x    x    x    x                   x    x
-equal               x    x    x    x    x    x    x    x    x    x    x
-swap                x    x    x    x    x    x    x    x    x    x    x
-load_factor                                                      x    x
-max_load_factor                                                  x    x
-max_bucket_count                                                 x    x
-insert_or_assign                                                 x    x
-rehash                                                           x    x
-reserve             x    x                                       x    x
-insert              x    x    x    x    x    x                   x    x
-init                x    x    x    x    x    x    x    x    x    x    x
-free                x    x    x    x    x    x    x    x    x    x    x
-step                x    x    x    x    x    x                   x    x
-range               x    x    x    x    x    x                   x    x
-find                x    x    x    x    x    x                   x    x
-count                    x              x    x                   x    x
-erase               x    x    x    x    x    x                   x    x
-copy                x    x    x    x    x    x                   x    x
-begin               x    x    x    x    x    x                   x    x
-end                 x    x    x    x    x    x                   x    x
-intersection                            x    x                   x    x
-union                                   x    x                   x    x
-difference                              x    x                   x    x
-symmetric_difference                    x    x                   x    x
-contains                                x    x                   x    x
-find_if             x    x    x    x    x    x                   x    x
-find_if_not         x    x    x    x    x    x                   x    x
-all_of              x    x    x    x    x    x                   x    x
-none_of             x    x    x    x    x    x                   x    x
-find_range          x    x    x    x    x    x                   x    x
-find_if_range       x    x    x    x    x    x                   x    x
-find_if_not_range   x    x    x    x    x    x                   x    x
-all_of_range        x    x    x    x    x    x                   x    x
-any_of_range        x    x    x    x    x    x                   x    x
-none_of_range       x    x    x    x    x    x                   x    x
-count_if            x         x    x         x                   x    x
-count_if_range      x         x    x         x                   x    x
-count_range         x         x    x         x                        x
-count               x         x    x         x                        x
-top                                               x         x
-push                                              x    x    x
-pop                                               x    x    x
-at                  x    x    x
-front               x    x    x    x              x
-back                x    x    x    x              x
-set                 x    x    x
-pop_back            x    x    x    x
-pop_front                     x    x
-clear               x    x    x    x    x
-push_back           x    x    x    x
-push_front                    x    x
-transfer                           x
-disconnect                         x
-connect                            x
-assign              x    x    x    x
-resize              x    x    x    x
-reverse                            x
-shrink_to_fit       x    x
-data                x    x
-erase_node                              x
-sort                x    x    x    x
-remove_if           x    x    x    x    x
-splice                             x
-merge                              x
-unique                             x
+                    vec  str  arr  deq  list set  map  pqu  que  stk  uset umap
++----------------------------------------------------------------------------+
+size                x    x    x    x    x    x    x    x    x    x    x    x
+max_size            x    x    x    x    x    x    x    x    x    x    x    x
+empty               x    x    x    x    x    x    x    x    x    x    x    x
+each                x    x    x    x    x    x    x                   x    x
+equal               x    x    x    x    x    x    x    x    x    x    x    x
+swap                x    x    x    x    x    x    x    x    x    x    x    x
+load_factor                                                           x    x
+max_load_factor                                                       x    x
+max_bucket_count                                                      x    x
+bucket_size                                                           x    x
+insert_or_assign                                                           x
+insert_or_assign_found                                                     x
+insert_found                                                          x
+rehash                                                                x    x
+reserve             x         x                                       x    x
+insert              x         x    x    x    x    x                   x    x
+init                x    x    x    x    x    x    x    x    x    x    x    x
+free                x    x    x    x    x    x    x    x    x    x    x    x
+step                x    x    x    x    x    x    x                   x    x
+range               x    x    x    x    x    x    x                   x    x
+find                x    x    x    x    x    x    x                   x    x
+erase               x    x    x    x    x    x    x                   x    x
+erase_if            x    x         x    x    x    x                   x    x
+erase_it            x              x         x    x
+erase_node                                   x    x
+erase_range         x              x         x    x
+copy                x    x    x    x    x    x    x                   x    x
+begin               x    x    x    x    x    x    x                   x    x
+end                 x    x    x    x    x    x    x                   x    x
+intersection                                 x    x                   x    x
+union                                        x    x                   x    x
+difference                                   x    x                   x    x
+symmetric_difference                         x    x                   x    x
+contains                                     x    x                   x    x
+find_if             x    x    x    x    x    x    x                   x    x
+find_if_not         x    x    x    x    x    x    x                   x    x
+all_of              x    x    x    x    x    x    x                   x    x
+any_of              x    x    x    x    x    x    x                   x    x
+none_of             x    x    x    x    x    x    x                   x    x
+find_range          x         x    x    x    x    x                   x    x
+find_if_range       x         x    x    x    x    x                   x    x
+find_if_not_range   x         x    x    x    x    x                   x    x
+all_of_range        x         x    x    x    x    x                   x    x
+any_of_range        x         x    x    x    x    x                   x    x
+none_of_range       x         x    x    x    x    x                   x    x
+count               x    x    x    x    x    x    x                   x    x
+count_if            x    x    x    x    x    x    x                   x    x
+count_if_range      x         x    x    x    x    x                   x    x
+count_range         x         x    x    x    x    x                   x    x
+top                                                    x         x
+push                                                   x    x    x
+pop                                                    x    x    x
+at                  x    x    x    x
+front               x    x    x    x    x              x
+back                x    x    x    x    x              x
+set                 x    x    x    x
+pop_back            x    x    x    x    x
+pop_front                          x    x
+clear               x    x    x    x    x    x
+push_back           x    x    x    x    x
+push_front                         x    x
+transfer                                x
+disconnect                              x
+connect                                 x
+assign              x    x    x    x    x
+resize              x    x    x    x    x
+reverse                                 x
+shrink_to_fit       x    x    x
+data                x    x    x
+sort                x    x    x    x    x
+remove                                  x
+remove_if           x    x    x    x    x    x
+splice                                  x
+splice_it                               x
+splice_range                            x
+merge                                   x
+unique                                  x
+fill                          x
+fill_n                        x
 append                   x
 insert_str               x
-replace                  x              x
+replace                  x                   x
 c_str                    x
 find                     x
 rfind                    x
