@@ -252,12 +252,8 @@ static inline A JOIN(A, init_from)(A *copy)
 {
     static A zero;
     A self = zero;
-#ifdef POD
-    self.copy = JOIN(A, implicit_copy);
-#else
-    self.free = JOIN(T, free);
-    self.copy = JOIN(T, copy);
-#endif
+    self.copy = from->copy;
+    self.free = from->free;
     self.compare = copy->compare;
     self.equal = copy->equal;
     return self;
@@ -942,7 +938,144 @@ static inline void JOIN(A, erase_generic)(A* self, GI *range)
     }
 }
 
-static inline A JOIN(A, intersection)(A *a, A *b)
+// join and split for fast bulk insert, bulk erase and the algos below.
+// also needed for pctl.
+static inline size_t
+JOIN(B, rank)(B* node)
+{
+    size_t count = 0;
+    while (node) {
+        if (!node->r) {
+            count++;
+        }
+        node = node->l;
+    }
+    return count;
+}
+
+#ifdef DEBUG
+
+// From https://arxiv.org/pdf/1602.02120.pdf
+// or also called concatenate sometimes
+static inline A *JOIN(A, join_right)(A *left, T key, B *right)
+{
+    // require the 3 parts to be ordered:
+    ASSERT(left->compare(JOIN(B, max)(left->root), key));
+    ASSERT(left->compare(key, JOIN(B, min)(right->root)));
+    // same black height
+    if (JOIN(B, rank)(left->root) == (JOIN(B, rank)(right->root) / 2) * 2)
+    {
+        B *old = left->root;
+        int color = JOIN(B, is_black)(left->root) & JOIN(B, is_black)(right->root) ? 0 : 1;
+        left->root = JOIN(B, init)(key, color);
+        left->root->l = old;
+        left->root->r = right->root;
+        left->size += right->size + 1;
+        return left;
+    }
+    else
+    {
+        B *l1 = left->root->l;
+        B *r1 = left->root->r;
+        T k1 = left->root->key;
+        int c1 = left->root->color;
+        A new_t = JOIN(A, init_from)(left);
+        new_t->root = r1;
+        new_t->root->r = join_right(&new_r, key, right);
+        new_t->root->l = l1;
+        new_t->key = k1;
+        new_t->color = c1;
+        /*
+        if(c == black) and (c(R(T′)) == c(R(R(T′))) == red)
+        {
+            c(R(R(T′))) = black;
+            JOIN(A, rotate_l)(new_t);
+        }
+        */
+        return new_t;
+    }
+}
+
+static inline A*
+JOIN(A, join_left)(A* left, T key, B* right)
+{
+    // require the 3 parts to be ordered
+    ASSERT(left->compare(JOIN(B, max)(left->root), key));
+    ASSERT(left->compare(key, JOIN(B, min)(right->root)));
+    /*
+    if r(TL)/2 > r(TR)/2
+        T′ = join_right(TL, k, TR);
+    if(c(T′) == red) and (c(R(T′))=red) then
+        Node(L(T′),〈k(T′),black〉, R(T′))
+        else T′
+    else if r(TR)/2c>br(TL)/2 then
+        T′ = join_left(TL, k, TR);
+        if (c(T′)==red) and (c(L(T′)) == red)
+            Node(L(T′),〈k(T′),black〉, R(T′));
+        else
+            T′
+    else if (c(TL) == black and c(TR) == black)
+        Node(TL,〈k,red〉, TR)
+    else
+        Node(TL,〈k,black〉, TR)
+    */
+}
+
+/*
+split(T, k) =
+  if T=Leaf then (Leaf,false,Leaf)
+  else (L, m, R) = expose(T);
+  if k=m then (L,true,R)
+  else  if k < m then
+    (LL, b, LR) = split(L, k);
+    (LL,b,join(LR, m, R))
+  else
+    (RL, b, RR) =split(R, k);
+    (join(L, m, RL), b, RR)
+
+splitLast(T) = 
+  (L, k, R) =expose(T);
+  if R=Leaf then (L, k)
+  else (T′, k′) =splitLast(R);
+  (join(L, k, T′),k′)
+
+join2(TL,TR) =
+  if TL=Leaf then TR
+  else (T′L, k) =splitLast(TL);
+  join(T′L, k, TR)
+
+union(T1,T2) =
+  if T1=Leaf then T2
+  else if T2=Leaf then T1
+  else
+    (L2,k2,R2) =expose(T2);
+    (L1,b,R1) =split(T1,k2);
+    TL=union(L1,L2)‖TR=union(R1,R2);
+    join(TL,k2,TR)
+
+intersect(T1,T2) =
+  if T1=Leaf then Leaf
+  else if T2=Leaf then Leaf 
+  else
+    (L2,k2,R2) =expose(T2);
+    (L1,b,R1) =split(T1,k2);
+    TL=intersect(L1,L2)‖TR=intersect(R1,R2);
+    if b=true then join(TL,k2,TR)
+    else join2(TL,TR)
+
+difference(T1,T2) =
+  if T1=Leaf then Leaf
+  else if T2=Leaf then T1
+  else
+    (L2,k2,R2) =expose(T2);
+    (L1,b,R1) =split(T1,k2);
+    TL=difference(L1,L2)‖TR=difference(R1,R2);
+    join2(TL,TR)
+ */
+
+#endif
+
+static inline A JOIN(A, intersection)(A* a, A* b)
 {
     A self = JOIN(A, init_from)(a);
     B *node = JOIN(A, first)(a);
