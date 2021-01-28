@@ -144,7 +144,9 @@ TESTS = \
 
 ifneq ($(DEBUG),)
 TESTS += \
-	tests/func/test_map     \
+	tests/func/test_btree_set \
+	tests/func/test_btree_map \
+	tests/func/test_map       \
 	tests/func/test_unordered_map
 endif
 
@@ -186,6 +188,7 @@ perf: $(PERFS_C) $(PERFS_CC) tests/perf/arr/perf_arr_generate
 
 $(wildcard tests/perf/lst/perf*.cc?) : $(COMMON_H) ctl/list.h
 $(wildcard tests/perf/set/perf*.cc?) : $(COMMON_H) ctl/set.h
+$(wildcard tests/perf/btset/perf*.cc?) : $(COMMON_H) ctl/btree_set.h
 $(wildcard tests/perf/deq/perf*.cc?) : $(COMMON_H) ctl/deque.h
 $(wildcard tests/perf/pqu/perf*.cc?) : $(COMMON_H) ctl/priority_queue.h
 $(wildcard tests/perf/vec/perf*.cc?) : $(COMMON_H) ctl/vector.h
@@ -292,6 +295,8 @@ ctl/string.i:
 	$(call expand,$(subst .i,,$@))
 ctl/map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
+ctl/btree_map.i:
+	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 ctl/unordered_map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 ctl/array.i:
@@ -328,7 +333,11 @@ tests/func/test_queue:    .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ct
 tests/func/test_set:      .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/set.h \
                           tests/func/test_set.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_map:      .cflags $(H) tests/test.h tests/func/strint.hh ctl/set.h ctl/map.h tests/func/test_map.cc
+tests/func/test_btree_set: .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/btree_set.h \
+                          tests/func/test_btree_set.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
+tests/func/test_map:      .cflags $(H) tests/test.h tests/func/strint.hh \
+                          tests/func/test_map.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_unordered_set: .cflags $(COMMON_H) ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc

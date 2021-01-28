@@ -61,6 +61,8 @@ all containers in ISO C99/C11:
 | [ctl/map.h](docs/map.md)                       | std::map             | map      |
 | [ctl/unordered_map.h](docs/unordered_map.md)   | std::unordered_map   | umap     |
 | [ctl/unordered_set.h](docs/unordered_set.md)   | std::unordered_set   | uset     |
+| [ctl/btree_set.h](docs/btree_set.md)           | absl::btree_set      | btset    |
+| [ctl/btree_map.h](docs/btree_map.md)           | absl::btree_map      | btmap    |
 |------------------------------------------------|----------------------|
 | [ctl/algorithm.h](docs/algorithm.md)           | `<algorithm>`        |
 | [ctl/numeric.h](docs/numeric.md)               | `<numeric>`          |
@@ -359,7 +361,6 @@ And in its grandiosity (esp. not header-only):
 
 ## Base Implementation Details
 
-
     array.h:            stack/heap allocated
     vector.h:           realloc
     string.h:           vector.h
@@ -371,6 +372,8 @@ And in its grandiosity (esp. not header-only):
     forward_list.h:     single linked list
     set.h:              red black tree
     map.h:              set.h
+    btree_set.h:        b-tree
+    btree_map.h:        - " -
     unordered_set.h:    hashed forward linked lists
     unordered_map.h:    unordered_set.h (pair in work)
     hashmap.h:          stanford hash for integer keys, intel only.

@@ -2,7 +2,7 @@
    SPDX-License-Identifier: MIT */
 
 #ifndef T
-#error "Template type T undefined for <ctl/set.h>"
+# error "Template type T undefined for <ctl/set.h>"
 #endif
 
 // TODO emplace, extract, extract_it
