@@ -242,7 +242,8 @@ similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 See `tests/func/test_container_composing.cc`
 
 UTF-8 strings and identifiers will be added eventually, Wide, UTF-16 or UTF-32
-not.
+not. Parallel variants of all containers and aglos in `pctl` with openmp are in
+planning.
 
 Many methods from algorithm, with iterators and range are now implemented, but
 iterators will change soon.
@@ -420,10 +421,11 @@ llvm libc++.  Tested also against the libc++ from llvm and the Windows MSVC STL,
 not just the GNU libstdc++ v3.
 
 Work is ongoing for all `algorithm.h`, `iterators` and `ranges`, with better
-iterators. `string_view` and `span` (i.e. vector\_view) not yet.
+iterators. `btree_set`, `string_view` and `span` (i.e. vector\_view) not yet.
 
 On errors, like `size > max_size` return silently. This avoids DDOS attacks.
-When assert is used, throw them. (when assert.h included, no NDEBUG)
+When assert is used, throw them. (when assert.h included, no NDEBUG. This is
+simlar to the no-exception abseil)
 glouw/ctl does not treat errors at all. There cannot be any.
 
 Support not only GNU make, but also BSD make and MSVC nmake.
@@ -437,7 +439,7 @@ clang with libc++), and Windows MSVC (default CL 19).
 STL multiset and multimap variants will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 
-STL span and short string optimizations is missing.
+STL string_view, span and short string optimizations are missing.
 
 STL methods returning a pair of iterator and bool have a `_found` suffix,
 return the iterator and set a `int *foundp` value. Eg.
@@ -449,7 +451,8 @@ return the iterator and set a `int *foundp` value. Eg.
 also still missing.
 
 hashmaps will not rely on chained lists with buckets, and will be either changed
-to open addressing or a better modern layout, such [greg7mdp/parallel-hashmap](https://github.com/greg7mdp/parallel-hashmap).
+to open addressing or a better modern layout, such as Swiss tables (flat or
+node variants) or better [greg7mdp/parallel-hashmap](https://github.com/greg7mdp/parallel-hashmap).
 Thus the bucket interface methods will not be defined for all hashmap variants,
 except maybe `max_bucket_count`. hashmap policies are compile-time defined via
 `#define CTL_USET_...`
