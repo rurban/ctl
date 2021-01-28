@@ -1,0 +1,44 @@
+CBMC version 5.17.0 (n/a) 64-bit x86_64 linux
+Parsing tests/verify/set.c
+Converting
+Type-checking set
+Generating GOTO Program
+Adding CPROVER library (x86_64)
+Removal of function pointers and virtual functions
+file ./ctl/set.h line 231 function set_int_find: replacing function pointer by 2 possible targets
+file ./ctl/set.h line 232 function set_int_find: replacing function pointer by 2 possible targets
+file ./ctl/set.h line 390 function set_int_insert: replacing function pointer by 2 possible targets
+Generic Property Instrumentation
+Running with 8 object bits, 56 offset bits (default)
+Starting Bounded Model Checking
+Unwinding loop set_int_find.0 iteration 1 file ./ctl/set.h line 228 function set_int_find thread 0
+Unwinding loop set_int_find.0 iteration 2 file ./ctl/set.h line 228 function set_int_find thread 0
+Unwinding loop set_int_find.0 iteration 1 file ./ctl/set.h line 228 function set_int_find thread 0
+Unwinding loop set_int_find.0 iteration 1 file ./ctl/set.h line 228 function set_int_find thread 0
+Unwinding loop set_int_find.0 iteration 2 file ./ctl/set.h line 228 function set_int_find thread 0
+size of program expression: 559 steps
+simple slicing removed 0 assignments
+Generated 5 VCC(s), 0 remaining after simplification
+
+** Results:
+./ctl/set.h function set_int_free_node
+[set_int_free_node.precondition_instance.1] line 172 free argument must be NULL or valid pointer: SUCCESS
+[set_int_free_node.precondition_instance.2] line 172 free argument must be dynamic object: SUCCESS
+[set_int_free_node.precondition_instance.3] line 172 free argument has offset zero: SUCCESS
+[set_int_free_node.precondition_instance.4] line 172 double free: SUCCESS
+[set_int_free_node.precondition_instance.5] line 172 free called for new[] object: SUCCESS
+[set_int_free_node.precondition_instance.6] line 172 free called for stack-allocated object: SUCCESS
+
+<builtin-library-malloc> function malloc
+[malloc.assertion.1] line 26 max allocation size exceeded: SUCCESS
+[malloc.assertion.2] line 31 max allocation may fail: SUCCESS
+
+tests/verify/set.c function main
+[main.assertion.1] line 15 assertion a.size == 2: SUCCESS
+[main.assertion.2] line 16 assertion set_int_count(&a, -1) == 0: SUCCESS
+[main.assertion.3] line 17 assertion set_int_count(&a, 0) == 1: SUCCESS
+[main.assertion.4] line 18 assertion set_int_count(&a, 1) == 1: SUCCESS
+[main.assertion.5] line 19 assertion set_int_count(&a, 2) == 0: SUCCESS
+
+** 0 of 13 failed (1 iterations)
+VERIFICATION SUCCESSFUL

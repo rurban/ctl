@@ -3,7 +3,7 @@ CC ?= gcc
 CXX ?= g++
 
 .SUFFIXES: .cc .c .i .o .md .3
-.PHONY: all man install clean doc images perf examples asan debug stress stress-long ALWAYS
+.PHONY: all man install clean doc images perf examples verify asan debug stress stress-long ALWAYS
 
 TRY_CXX20 := $(shell $(CXX) -std=c++20 -I. tests/func/test_deque.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
@@ -175,6 +175,27 @@ tests/perf/arr/gen_arr0% : tests/perf/arr/gen_arr0%.cc \
 	@$(CXX) $(CFLAGS) -o $@ $@.c
 
 examples: $(EXAMPLES)
+
+VERIFY = $(patsubst %.c,%, $(wildcard tests/verify/*.c))
+tests/verify/% : tests/verify/%.c $(H)
+	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
+	-cbmc --unwind 12 -I. $@.c
+tests/verify/uset-1 : tests/verify/uset-1.c $(H)
+	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
+	-cbmc --unwind 4 -I. $@.c
+tests/verify/deq-1 : tests/verify/deq-1.c $(H)
+	$(CC) $(CFLAGS) -DDEQ_BUCKET_SIZE=8 $@.c -o $@ && ./$@
+	@echo Neither cbmc nor satabs work with deq
+	-cbmc --unwind 6 -DDEQ_BUCKET_SIZE=8 -I. $@.c
+tests/verify/array-1 : tests/verify/array-1.c $(H)
+	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
+	-cbmc --unwind 12 -I. $@.c
+	-for c in `satabs --show-claims -I. $@.c | grep "Claim main." \
+                   | cut -c7-12`; do \
+           satabs --claim $$c -I. $@.c; \
+         done
+
+verify: $(VERIFY)
 
 MANPAGES = $(patsubst docs/%.md,docs/man/%.h.3, $(wildcard docs/*.md))
 

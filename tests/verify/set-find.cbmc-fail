@@ -1,0 +1,423 @@
+CBMC version 5.17.0 (n/a) 64-bit x86_64 linux
+Parsing tests/verify/set.c
+Converting
+Type-checking set
+Generating GOTO Program
+Adding CPROVER library (x86_64)
+Removal of function pointers and virtual functions
+file ./ctl/set.h line 230 function set_int_find: replacing function pointer by 2 possible targets
+file ./ctl/set.h line 390 function set_int_insert: replacing function pointer by 2 possible targets
+Generic Property Instrumentation
+Running with 8 object bits, 56 offset bits (default)
+Starting Bounded Model Checking
+Unwinding loop set_int_find.0 iteration 1 file ./ctl/set.h line 228 function set_int_find thread 0
+Unwinding loop set_int_find.0 iteration 1 file ./ctl/set.h line 228 function set_int_find thread 0
+Unwinding loop set_int_find.0 iteration 2 file ./ctl/set.h line 228 function set_int_find thread 0
+size of program expression: 477 steps
+simple slicing removed 140 assignments
+Generated 5 VCC(s), 1 remaining after simplification
+Passing problem to propositional reduction
+converting SSA
+Running propositional reduction
+Post-processing
+Solving with MiniSAT 2.2.1 with simplifier
+3480 variables, 1159 clauses
+SAT checker: instance is SATISFIABLE
+Runtime decision procedure: 0.00258756s
+Building error trace
+
+** Results:
+./ctl/set.h function set_int_free_node
+[set_int_free_node.precondition_instance.1] line 172 free argument must be NULL or valid pointer: SUCCESS
+[set_int_free_node.precondition_instance.2] line 172 free argument must be dynamic object: SUCCESS
+[set_int_free_node.precondition_instance.3] line 172 free argument has offset zero: SUCCESS
+[set_int_free_node.precondition_instance.4] line 172 double free: SUCCESS
+[set_int_free_node.precondition_instance.5] line 172 free called for new[] object: SUCCESS
+[set_int_free_node.precondition_instance.6] line 172 free called for stack-allocated object: SUCCESS
+
+<builtin-library-malloc> function malloc
+[malloc.assertion.1] line 26 max allocation size exceeded: SUCCESS
+[malloc.assertion.2] line 31 max allocation may fail: SUCCESS
+
+tests/verify/set.c function main
+[main.assertion.1] line 14 assertion a.size == 2: SUCCESS
+[main.assertion.2] line 15 assertion set_int_count(&a, -1) == 0: FAILURE
+[main.assertion.3] line 16 assertion set_int_count(&a, 0) == 1: SUCCESS
+[main.assertion.4] line 17 assertion set_int_count(&a, 1) == 1: SUCCESS
+[main.assertion.5] line 18 assertion set_int_count(&a, 2) == 0: SUCCESS
+
+Trace for main.assertion.2:
+
+State 32 file tests/verify/set.c function main line 11 thread 0
+----------------------------------------------------
+  a={ .root=a!0@1#1..root, .size=a!0@1#1..size, .free=a!0@1#1..free,
+    .copy=a!0@1#1..copy, .compare=a!0@1#1..compare,
+    .equal=a!0@1#1..equal } ({ ?, ?, ?, ?, ?, ? })
+
+State 35 file tests/verify/set.c function main line 11 thread 0
+----------------------------------------------------
+  _compare=((signed int (*)(signed int *, signed int *))NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 36 file ./ctl/set.h function set_int_init line 139 thread 0
+----------------------------------------------------
+  self={ .root=self!0@1#1..root, .size=self!0@1#1..size, .free=self!0@1#1..free,
+    .copy=self!0@1#1..copy, .compare=self!0@1#1..compare,
+    .equal=self!0@1#1..equal } ({ ?, ?, ?, ?, ?, ? })
+
+State 37 file ./ctl/set.h function set_int_init line 139 thread 0
+----------------------------------------------------
+  self.root=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 38 file ./ctl/set.h function set_int_init line 139 thread 0
+----------------------------------------------------
+  self.size=0ul (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 39 file ./ctl/set.h function set_int_init line 139 thread 0
+----------------------------------------------------
+  self.free=((const void (*)(signed int *))NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 40 file ./ctl/set.h function set_int_init line 139 thread 0
+----------------------------------------------------
+  self.copy=((signed int (*)(signed int *))NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 41 file ./ctl/set.h function set_int_init line 139 thread 0
+----------------------------------------------------
+  self.compare=((signed int (*)(signed int *, signed int *))NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 42 file ./ctl/set.h function set_int_init line 139 thread 0
+----------------------------------------------------
+  self.equal=((signed int (*)(signed int *, signed int *))NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 43 file ./ctl/set.h function set_int_init line 140 thread 0
+----------------------------------------------------
+  self.compare=((signed int (*)(signed int *, signed int *))NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 44 file ./ctl/set.h function set_int_init line 142 thread 0
+----------------------------------------------------
+  self.copy=set_int_implicit_copy (00000010 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 47 file ./ctl/set.h function set_int_init line 143 thread 0
+----------------------------------------------------
+  self=&self!0@1 (00000011 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 48 file ./ctl/bits/integral.h function _set_int__set_default_methods line 137 thread 0
+----------------------------------------------------
+  self.compare=_set_int__default_integral_compare (00000100 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 49 file ./ctl/bits/integral.h function _set_int__set_default_methods line 139 thread 0
+----------------------------------------------------
+  self.equal=_set_int__default_integral_equal (00000101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 58 file tests/verify/set.c function main line 11 thread 0
+----------------------------------------------------
+  a.root=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 59 file tests/verify/set.c function main line 11 thread 0
+----------------------------------------------------
+  a.size=0ul (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 60 file tests/verify/set.c function main line 11 thread 0
+----------------------------------------------------
+  a.free=((const void (*)(signed int *))NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 61 file tests/verify/set.c function main line 11 thread 0
+----------------------------------------------------
+  a.copy=set_int_implicit_copy (00000010 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 62 file tests/verify/set.c function main line 11 thread 0
+----------------------------------------------------
+  a.compare=_set_int__default_integral_compare (00000100 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 63 file tests/verify/set.c function main line 11 thread 0
+----------------------------------------------------
+  a.equal=_set_int__default_integral_equal (00000101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 66 file tests/verify/set.c function main line 12 thread 0
+----------------------------------------------------
+  self=&a!0@1 (00000110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 67 file tests/verify/set.c function main line 12 thread 0
+----------------------------------------------------
+  key=0 (00000000 00000000 00000000 00000000)
+
+State 68 file ./ctl/set.h function set_int_insert line 384 thread 0
+----------------------------------------------------
+  insert=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 71 file ./ctl/set.h function set_int_insert line 384 thread 0
+----------------------------------------------------
+  key=0 (00000000 00000000 00000000 00000000)
+
+State 72 file ./ctl/set.h function set_int_insert line 384 thread 0
+----------------------------------------------------
+  color=0 (00000000 00000000 00000000 00000000)
+
+State 73 file ./ctl/set.h function set_int_node_init line 217 thread 0
+----------------------------------------------------
+  self=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 77 file ./ctl/set.h function set_int_node_init line 217 thread 0
+----------------------------------------------------
+  malloc_size=32ul (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00100000)
+
+State 83 file <builtin-library-malloc> function malloc line 38 thread 0
+----------------------------------------------------
+  dynamic_object1.l=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 84 file <builtin-library-malloc> function malloc line 38 thread 0
+----------------------------------------------------
+  dynamic_object1.r=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 85 file <builtin-library-malloc> function malloc line 38 thread 0
+----------------------------------------------------
+  dynamic_object1.p=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 86 file <builtin-library-malloc> function malloc line 38 thread 0
+----------------------------------------------------
+  dynamic_object1.key=0 (00000000 00000000 00000000 00000000)
+
+State 87 file <builtin-library-malloc> function malloc line 38 thread 0
+----------------------------------------------------
+  dynamic_object1.color=0 (00000000 00000000 00000000 00000000)
+
+State 102 file ./ctl/set.h function set_int_node_init line 217 thread 0
+----------------------------------------------------
+  self=&dynamic_object1 (00000111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 103 file ./ctl/set.h function set_int_node_init line 218 thread 0
+----------------------------------------------------
+  dynamic_object1.key=0 (00000000 00000000 00000000 00000000)
+
+State 104 file ./ctl/set.h function set_int_node_init line 219 thread 0
+----------------------------------------------------
+  dynamic_object1.color=0 (00000000 00000000 00000000 00000000)
+
+State 105 file ./ctl/set.h function set_int_node_init line 220 thread 0
+----------------------------------------------------
+  dynamic_object1.p=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 106 file ./ctl/set.h function set_int_node_init line 220 thread 0
+----------------------------------------------------
+  dynamic_object1.r=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 107 file ./ctl/set.h function set_int_node_init line 220 thread 0
+----------------------------------------------------
+  dynamic_object1.l=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 110 file ./ctl/set.h function set_int_insert line 384 thread 0
+----------------------------------------------------
+  insert=&dynamic_object1 (00000111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 112 file ./ctl/set.h function set_int_insert line 421 thread 0
+----------------------------------------------------
+  a.root=&dynamic_object1 (00000111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 115 file ./ctl/set.h function set_int_insert line 422 thread 0
+----------------------------------------------------
+  self=&a!0@1 (00000110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 116 file ./ctl/set.h function set_int_insert line 422 thread 0
+----------------------------------------------------
+  node=&dynamic_object1 (00000111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 118 file ./ctl/set.h function set_int_insert_1 line 436 thread 0
+----------------------------------------------------
+  dynamic_object1.color=1 (00000000 00000000 00000000 00000001)
+
+State 120 file ./ctl/set.h function set_int_insert line 423 thread 0
+----------------------------------------------------
+  a.size=1ul (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001)
+
+State 125 file tests/verify/set.c function main line 13 thread 0
+----------------------------------------------------
+  self=&a!0@1 (00000110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 126 file tests/verify/set.c function main line 13 thread 0
+----------------------------------------------------
+  key=1 (00000000 00000000 00000000 00000001)
+
+State 127 file ./ctl/set.h function set_int_insert line 384 thread 0
+----------------------------------------------------
+  insert=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 130 file ./ctl/set.h function set_int_insert line 384 thread 0
+----------------------------------------------------
+  key=1 (00000000 00000000 00000000 00000001)
+
+State 131 file ./ctl/set.h function set_int_insert line 384 thread 0
+----------------------------------------------------
+  color=0 (00000000 00000000 00000000 00000000)
+
+State 132 file ./ctl/set.h function set_int_node_init line 217 thread 0
+----------------------------------------------------
+  self=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 136 file ./ctl/set.h function set_int_node_init line 217 thread 0
+----------------------------------------------------
+  malloc_size=32ul (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00100000)
+
+State 142 file <builtin-library-malloc> function malloc line 38 thread 0
+----------------------------------------------------
+  dynamic_object2.l=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 143 file <builtin-library-malloc> function malloc line 38 thread 0
+----------------------------------------------------
+  dynamic_object2.r=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 144 file <builtin-library-malloc> function malloc line 38 thread 0
+----------------------------------------------------
+  dynamic_object2.p=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 145 file <builtin-library-malloc> function malloc line 38 thread 0
+----------------------------------------------------
+  dynamic_object2.key=0 (00000000 00000000 00000000 00000000)
+
+State 146 file <builtin-library-malloc> function malloc line 38 thread 0
+----------------------------------------------------
+  dynamic_object2.color=0 (00000000 00000000 00000000 00000000)
+
+State 161 file ./ctl/set.h function set_int_node_init line 217 thread 0
+----------------------------------------------------
+  self=&dynamic_object2 (00001000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 162 file ./ctl/set.h function set_int_node_init line 218 thread 0
+----------------------------------------------------
+  dynamic_object2.key=1 (00000000 00000000 00000000 00000001)
+
+State 163 file ./ctl/set.h function set_int_node_init line 219 thread 0
+----------------------------------------------------
+  dynamic_object2.color=0 (00000000 00000000 00000000 00000000)
+
+State 164 file ./ctl/set.h function set_int_node_init line 220 thread 0
+----------------------------------------------------
+  dynamic_object2.p=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 165 file ./ctl/set.h function set_int_node_init line 220 thread 0
+----------------------------------------------------
+  dynamic_object2.r=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 166 file ./ctl/set.h function set_int_node_init line 220 thread 0
+----------------------------------------------------
+  dynamic_object2.l=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 169 file ./ctl/set.h function set_int_insert line 384 thread 0
+----------------------------------------------------
+  insert=&dynamic_object2 (00001000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 171 file ./ctl/set.h function set_int_insert line 387 thread 0
+----------------------------------------------------
+  node=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 172 file ./ctl/set.h function set_int_insert line 387 thread 0
+----------------------------------------------------
+  node=&dynamic_object1 (00000111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 174 file ./ctl/set.h function set_int_insert line 390 thread 0
+----------------------------------------------------
+  diff=0 (00000000 00000000 00000000 00000000)
+
+State 179 file ./ctl/set.h function set_int_insert line 390 thread 0
+----------------------------------------------------
+  a=&key!0@2 (00001001 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 180 file ./ctl/set.h function set_int_insert line 390 thread 0
+----------------------------------------------------
+  b=&dynamic_object1.key (00000111 00000000 00000000 00000000 00000000 00000000 00000000 00011000)
+
+State 183 file ./ctl/set.h function set_int_insert line 390 thread 0
+----------------------------------------------------
+  diff=1 (00000000 00000000 00000000 00000001)
+
+State 187 file ./ctl/set.h function set_int_insert line 413 thread 0
+----------------------------------------------------
+  dynamic_object1.r=&dynamic_object2 (00001000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 189 file ./ctl/set.h function set_int_insert line 418 thread 0
+----------------------------------------------------
+  dynamic_object2.p=&dynamic_object1 (00000111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 193 file ./ctl/set.h function set_int_insert line 422 thread 0
+----------------------------------------------------
+  self=&a!0@1 (00000110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 194 file ./ctl/set.h function set_int_insert line 422 thread 0
+----------------------------------------------------
+  node=&dynamic_object2 (00001000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 198 file ./ctl/set.h function set_int_insert_1 line 434 thread 0
+----------------------------------------------------
+  self=&a!0@1 (00000110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 199 file ./ctl/set.h function set_int_insert_1 line 434 thread 0
+----------------------------------------------------
+  node=&dynamic_object2 (00001000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 203 file ./ctl/set.h function set_int_insert_2 line 442 thread 0
+----------------------------------------------------
+  self=&dynamic_object1 (00000111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 207 file ./ctl/set.h function set_int_node_is_black line 184 thread 0
+----------------------------------------------------
+  self=&dynamic_object1 (00000111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 223 file ./ctl/set.h function set_int_insert line 423 thread 0
+----------------------------------------------------
+  a.size=2ul (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000010)
+
+State 229 file tests/verify/set.c function main line 15 thread 0
+----------------------------------------------------
+  self=&a!0@1 (00000110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 230 file tests/verify/set.c function main line 15 thread 0
+----------------------------------------------------
+  key=-1 (11111111 11111111 11111111 11111111)
+
+State 231 file ./ctl/set.h function set_int_count line 245 thread 0
+----------------------------------------------------
+  result=0 (00000000 00000000 00000000 00000000)
+
+State 235 file ./ctl/set.h function set_int_count line 245 thread 0
+----------------------------------------------------
+  self=&a!0@1 (00000110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 236 file ./ctl/set.h function set_int_count line 245 thread 0
+----------------------------------------------------
+  key=-1 (11111111 11111111 11111111 11111111)
+
+State 237 file ./ctl/set.h function set_int_find line 227 thread 0
+----------------------------------------------------
+  node=((set_int_node *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 238 file ./ctl/set.h function set_int_find line 227 thread 0
+----------------------------------------------------
+  node=&dynamic_object1 (00000111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 240 file ./ctl/set.h function set_int_find line 230 thread 0
+----------------------------------------------------
+  diff=0 (00000000 00000000 00000000 00000000)
+
+State 245 file ./ctl/set.h function set_int_find line 230 thread 0
+----------------------------------------------------
+  a=&key!0@1 (00001010 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+State 246 file ./ctl/set.h function set_int_find line 230 thread 0
+----------------------------------------------------
+  b=&dynamic_object1.key (00000111 00000000 00000000 00000000 00000000 00000000 00000000 00011000)
+
+State 249 file ./ctl/set.h function set_int_find line 230 thread 0
+----------------------------------------------------
+  diff=0 (00000000 00000000 00000000 00000000)
+
+State 255 file ./ctl/set.h function set_int_count line 245 thread 0
+----------------------------------------------------
+  result=1 (00000000 00000000 00000000 00000001)
+
+Violated property:
+  file tests/verify/set.c function main line 15 thread 0
+  assertion set_int_count(&a, -1) == 0
+  return_value_set_int_count == 0
+
+
+
+** 1 of 13 failed (2 iterations)
+VERIFICATION FAILED

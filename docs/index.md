@@ -441,6 +441,9 @@ When assert is used, throw them. (when assert.h included, no NDEBUG. This is
 simlar to the no-exception abseil)
 glouw/ctl does not treat errors at all. There cannot be any.
 
+Added formal verification tests for many functions, via `cbmc`, and even caught
+a set.find error not caught by review, random testing nor sanitizers.
+
 Support not only GNU make, but also BSD make and MSVC nmake.
 `gen_images.sh` is not bash-only anymore, and supports updating single graphs.
 

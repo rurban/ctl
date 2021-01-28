@@ -15,7 +15,9 @@
 
 #include <ctl/ctl.h>
 
+#ifndef DEQ_BUCKET_SIZE
 #define DEQ_BUCKET_SIZE (512)
+#endif
 
 typedef struct B
 {

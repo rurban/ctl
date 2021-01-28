@@ -216,10 +216,16 @@ JOIN(A, find)(A* self, T key)
     while(node)
     {
         int diff = self->compare(&key, &node->key);
+        // Don't rely on valid 3-way compare. can be just a simple >
         if(diff == 0)
-            return node;
-        else
-        if(diff < 0)
+            if (self->equal)
+            {
+                if (self->equal(&key, &node->key))
+                    return node;
+            }
+            else
+                return node;
+        else if(diff < 0)
             node = node->l;
         else
             node = node->r;
