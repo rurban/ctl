@@ -1,0 +1,1 @@
+{"version":1,"ops":[{"type":1,"author":{"id":"67acf4ce3a9e0b675b41dc633e984435404c2f17"},"timestamp":1611819780,"metadata":{"github-id":"MDU6SXNzdWU3OTU3NTY3NDg=","github-url":"https://github.com/rurban/ctl/issues/6","origin":"github"},"title":"Add btree_set","message":"See e.g. https://abseil.io/blog/20190812-btree","files":null}]}
