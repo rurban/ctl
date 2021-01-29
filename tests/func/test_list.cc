@@ -279,7 +279,7 @@ main(void)
                 {
                     if(index == current)
                     {
-                        list_digi_erase(&a, &it);
+                        list_digi_erase(&it);
                         b.erase(iter);
                         break;
                     }
@@ -415,7 +415,7 @@ main(void)
 #endif
                 list_digi_it it = list_digi_begin(&a);
                 list_digi_it_advance(&it, 1);
-                list_digi_emplace(&a, &it, &aa);
+                list_digi_emplace(&it, &aa);
                 LOG("CTL emplace head->next %d\n", *aa.value);
                 //print_lst(&a);
                 auto iter = b.begin();
@@ -681,11 +681,14 @@ main(void)
                 {
                     if(current == index)
                     {
-                        list_digi_it *pos =
-                            list_digi_insert_count(&a, &it, count, digi_init(value));
-                        std::list<DIGI>::iterator ii =
-                            b.insert(iter, DIGI{value});
-                        CHECK_ITER(pos, b, ii);
+                        LOG("insert %zu x %d at %zu\n", count, value, index);
+                        list_digi_it *aa =
+                            list_digi_insert_count(&it, count, digi_init(value));
+                        // libstc++ violates the docs
+                        std::list<DIGI>::iterator bb = b.insert(iter, count, DIGI{value});
+                        //CHECK_ITER(aa, b, bb);
+                        print_lst(&a);
+                        print_list(b);
                         break;
                     }
                     iter++;

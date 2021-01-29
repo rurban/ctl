@@ -110,28 +110,28 @@ resizes and sets count elements to the value
 
 clears the contents
 
-    I* insert (A* self, B* node, T value)
+    I* insert (A* self, I* pos, T value)
 
 inserts value before the element.
 
-    I* insert_count (A* self, B* pos, size_t count, T value)
+    I* insert_count (I* pos, size_t count, T value)
 
-inserts count values before the element. (NYI)
+inserts count copies of value before the element.
 
-    I* insert_range (A* self, B* pos, I* first, I* last)
+    I* insert_range (I* pos, I* first, I* last)
 
-inserts values before pos from first to last. (NYI)
+inserts values before pos from first to last. _(NYI)_
 
-    I* emplace (A* self, B* pos, T* value)
+    I* emplace (I* pos, T* value)
 
 Insert a copy of the value into the container before pos.
 
     erase_node (A* self, B* node)
-    erase (A* self, I* pos)
+    erase (I* pos)
 
 erases the element.
 
-    erase_range (A* self, I* first, I* last)
+    erase_range (I* first, I* last)
 
 erases elements _(NYI)_
 

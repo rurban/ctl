@@ -268,9 +268,9 @@ JOIN(A, erase_node)(A* self, B* node)
 }
 
 static inline void
-JOIN(A, erase)(A* self, I* it)
+JOIN(A, erase)(I* it)
 {
-    JOIN(A, erase_node)(self, it->node);
+    JOIN(A, erase_node)(it->container, it->node);
 }
 
 static inline void
@@ -416,7 +416,8 @@ JOIN(A, remove)(A* self, T* value)
 }
 
 static inline I*
-JOIN(A, emplace)(A* self, I* pos, T* value) {
+JOIN(A, emplace)(I* pos, T* value) {
+    A* self = pos->container;
     B* node = JOIN(B, init)(self->copy(value));
     JOIN(A, connect_before)(self, pos->node, node);
     JOIN(I, next)(pos);
@@ -427,6 +428,7 @@ static inline B*
 JOIN(A, emplace_front)(A* self, T* value) {
     B* node = JOIN(B, init)(self->copy(value));
     JOIN(A, connect_before)(self, self->head, node);
+    // FIXME return iter
     return self->head;
 }
 
@@ -434,24 +436,34 @@ static inline B*
 JOIN(A, emplace_back)(A* self, T* value) {
     B* node = JOIN(B, init)(self->copy(value));
     JOIN(A, connect_after)(self, self->tail, node);
+    // FIXME return iter
     return self->tail;
 }
 
 static inline I*
-JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
+JOIN(A, insert_count)(I* pos, size_t count, T value)
 {
-    B* node = JOIN(B, init)(value);
+    if (!count)
+        return pos;
+    A* self = pos->container;
+    B* node;
     for (size_t i=0; i < count; i++)
+    {
+        node = JOIN(B, init)(self->copy(&value));
         JOIN(A, connect_before)(self, pos->node, node);
+    }
+    if(self->free)
+        self->free(&value);
     return pos;
 }
 
 #ifdef DEBUG
 
 static inline I*
-JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
+JOIN(A, insert_range)(I* pos, I* first, I* last)
 {
     B* node = NULL;
+    A* self = pos->container;
     for(JOIN(A, it) it = *first; it.node != last->node; JOIN(I, next)(&it))
     {
         node = JOIN(B, init)(*it.ref);
