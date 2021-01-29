@@ -65,6 +65,7 @@ int random_element(list_digi* a)
         i++;                                                      \
         _iter++;                                                  \
     }                                                             \
+    LOG("\n");                                                    \
     list_digi_it _it = list_digi_begin(&_x);                      \
     for(auto& _d : _y) {                                          \
         assert(*_it.ref->value == *_d.value);                     \

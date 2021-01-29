@@ -136,7 +136,7 @@ JOIN(I, done)(I* iter)
 }
 
 static inline int
-JOIN(I, isend)(I* iter, I* last)
+JOIN(I, is_end)(I* iter, I* last)
 {
     return iter->node == last->node;
 }
