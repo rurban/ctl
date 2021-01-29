@@ -1,0 +1,1 @@
+{"version":1,"ops":[{"type":1,"author":{"id":"67acf4ce3a9e0b675b41dc633e984435404c2f17"},"timestamp":1611819915,"metadata":{"github-id":"MDU6SXNzdWU3OTU3NTc5NzM=","github-url":"https://github.com/rurban/ctl/issues/8","origin":"github"},"title":"Add bvector (vector_bool)","message":"prefix `bvec`","files":null}]}
