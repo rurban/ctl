@@ -40,7 +40,13 @@ The function names are composed of the prefix **set_**, the user-defined type
 Everywhere the CTL uses the Compare requirements, uniqueness is
 determined by using the equivalence relation. In imprecise terms, two objects a
 and b are considered equivalent (not unique) if neither compares less than the
-other: !comp(a, b) && !comp(b, a).
+other: `!compare(a, b) && !compare(b, a)`.
+Note that **find** does not use this double comparison, rather a single compare
+call. And if that's `0` it optionally calls the equal method.
+For simple integral types this always works, as the default equal method is
+always set, but for non-POD types with only a simple 2-way compare method,
+(e.g. `*a > *b` instead of the proper 3-way `*a > *b ? 1 : (*a < *b ? -1 : 0))`
+you need to set a proper equal method by yourself.
 
 ## Member types
 
@@ -157,6 +163,7 @@ returns the number of elements matching specific key.
     B* find (A* self, T key)
 
 finds element with specific key. does not consume/delete the key.
+see above the problem with a simple 2-way compare method.
 
     int contains (A* self, T key)
 
