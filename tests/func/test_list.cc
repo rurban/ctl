@@ -683,10 +683,11 @@ main(void)
                     if(current == index)
                     {
                         LOG("insert %zu x %d at %zu\n", count, value, index);
-                        list_digi_it *aa =
+                        //list_digi_it *aa =
                             list_digi_insert_count(&it, count, digi_init(value));
                         // libstc++ violates the docs
-                        std::list<DIGI>::iterator bb = b.insert(iter, count, DIGI{value});
+                        //std::list<DIGI>::iterator bb =
+                            b.insert(iter, count, DIGI{value});
                         //CHECK_ITER(aa, b, bb);
                         print_lst(&a);
                         print_list(b);

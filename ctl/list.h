@@ -94,7 +94,7 @@ JOIN(I, done)(I* iter)
 static inline int
 JOIN(I, is_end)(I* iter, I* last)
 {
-    return iter->end == last->node;
+    return iter->node == last->node;
 }
 
 static inline B*
@@ -258,7 +258,8 @@ JOIN(A, push_front)(A* self, T value)
 static inline void
 JOIN(A, transfer_before)(A* self, A* other, B* position, B* node)
 {
-    JOIN(A, disconnect)(other, node);
+    if (other->size)
+        JOIN(A, disconnect)(other, node);
     JOIN(A, connect_before)(self, position, node);
 }
 
