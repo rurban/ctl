@@ -133,6 +133,7 @@ setup_sets(set_digi* a, std::set<DIGI>& b)
 {
     size_t iters = TEST_RAND(TEST_MAX_SIZE);
     *a = set_digi_init(digi_key_compare);
+    a->equal = digi_equal;
     for(size_t inserts = 0; inserts < iters; inserts++)
     {
         const int vb = TEST_RAND(TEST_MAX_SIZE);

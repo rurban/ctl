@@ -16,9 +16,14 @@ _define_integral_compare(long)
 #if defined(POD) && !defined(NOT_INTEGRAL)
 
 static inline int
-_JOIN(A, _default_integral_compare)(T* a, T* b)
+_JOIN(A, _default_integral_compare3)(T* a, T* b)
 {
     return *a > *b ? 1 : *a < *b ? -1 : 0;
+}
+static inline int
+_JOIN(A, _default_integral_compare)(T* a, T* b)
+{
+    return *a > *b;
 }
 
 static inline int

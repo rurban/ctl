@@ -17,6 +17,7 @@ int main () {
     assert(set_int_count(&a, 0) == 1);
     assert(set_int_count(&a, 1) == 1);
     assert(set_int_count(&a, 2) == 0);
+    set_int_free(&a);
 }
 
 /* See tests/verify/set-find.cbmc* */

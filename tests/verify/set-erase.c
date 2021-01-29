@@ -15,6 +15,8 @@ int main () {
     set_int_insert(&a, 2);
     assert(a.size == 3);
     set_int_erase(&a, 1);
+    assert(a.size == 2);
     assert(set_int_count(&a, 0) == 1);
     assert(set_int_count(&a, 1) == 0);
+    set_int_free(&a);
 }

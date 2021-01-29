@@ -22,14 +22,10 @@ int main () {
     *arr4_int_at(&a, 2) = 3;
     for (int i=0; i<4; i++)
         LOG("arr4[%d] %d\n", i, *arr4_int_at(&a, i));
-    arr4_int_sort(&a);
-    for (int i=0; i<4; i++)
-        LOG("arr4[%d] %d\n", i, *arr4_int_at(&a, i));
-    // sort is broken with 3-way compare
-    //assert(*arr4_int_at(&a, 0) == 0);
-    //assert(*arr4_int_at(&a, 1) == 1);
-    //assert(*arr4_int_at(&a, 2) == 2);
-    //assert(*arr4_int_at(&a, 3) == 3);
+    assert(a.vector[0] == 0);
+    assert(a.vector[1] == 2);
+    assert(a.vector[2] == 3);
+    assert(a.vector[3] == 1);
     LOG("arr4_int_count(&a, 0) %zu\n", arr4_int_count(&a, 0));
     LOG("arr4_int_count(&a, 1) %zu\n", arr4_int_count(&a, 1));
     LOG("arr4_int_count(&a, 2) %zu\n", arr4_int_count(&a, 2));

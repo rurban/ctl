@@ -44,7 +44,10 @@ static inline A
 JOIN(A, init)(int _compare(T*, T*))
 {
     A self = JOIN(A, __INIT)();
-    self.compare = _compare;
+    if (_compare)
+        self.compare = _compare;
+    else
+        _JOIN(A, _set_default_methods)(&self);
     return self;
 }
 

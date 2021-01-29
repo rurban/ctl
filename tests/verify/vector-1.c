@@ -20,7 +20,8 @@ int main () {
     vec_int_erase(&a, 1);
     vec_int_push_back(&a, 3);
     vec_int_push_back(&a, 4);
-    //vec_int_sort(&a);
+    //vec_int_sort(&a); => vector-2.c
     assert(vec_int_count(&a, 0) == 1);
     assert(vec_int_count(&a, 1) == 1);
+    vec_int_free(&a);
 }

@@ -1,8 +1,12 @@
 /*
-  cbmc --trace --unwind 12 -I. tests/verify/deq-1.c
+  cbmc --trace --unwind 6 -I. tests/verify/deq-1.c
 */
+#ifdef DEBUG
+#include <stdio.h>
+#endif
 #include <assert.h>
 
+#define DEQ_BUCKET_SIZE 4
 #define POD
 #define T int
 #include "ctl/deque.h"
@@ -20,4 +24,5 @@ int main () {
     deq_int_push_back(&a, 4);
     assert(deq_int_count(&a, 0) == 1);
     assert(deq_int_count(&a, 1) == 1);
+    deq_int_free(&a);
 }

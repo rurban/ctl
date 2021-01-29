@@ -112,13 +112,7 @@ JOIN(A, init)(void)
     A self = zero;
 #ifdef POD
     self.copy = JOIN(A, implicit_copy);
-# ifndef NOT_INTEGRAL
-    if (_JOIN(A, _type_is_integral)())
-    {
-        self.compare = _JOIN(A, _default_integral_compare);
-        self.equal = _JOIN(A, _default_integral_equal);
-    }
-# endif
+    _JOIN(A, _set_default_methods)(&self);
 #else
     self.free = JOIN(T, free);
     self.copy = JOIN(T, copy);

@@ -179,20 +179,16 @@ examples: $(EXAMPLES)
 VERIFY = $(patsubst %.c,%, $(wildcard tests/verify/*.c))
 tests/verify/% : tests/verify/%.c $(H)
 	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
-	-cbmc --unwind 12 -I. $@.c
+	-cbmc --unwind 6 -I. $@.c
 tests/verify/uset-1 : tests/verify/uset-1.c $(H)
 	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
 	-cbmc --unwind 4 -I. $@.c
-tests/verify/deq-1 : tests/verify/deq-1.c $(H)
-	$(CC) $(CFLAGS) -DDEQ_BUCKET_SIZE=8 $@.c -o $@ && ./$@
-	@echo Neither cbmc nor satabs work with deq
-	-cbmc --unwind 6 -DDEQ_BUCKET_SIZE=8 -I. $@.c
-tests/verify/array-1 : tests/verify/array-1.c $(H)
+tests/verify/%-2 : tests/verify/%-2.c $(H)
 	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
-	-cbmc --unwind 12 -I. $@.c
-	-for c in `satabs --show-claims -I. $@.c | grep "Claim main." \
-                   | cut -c7-12`; do \
-           satabs --claim $$c -I. $@.c; \
+	-cbmc --unwind 6 -I. $@.c
+	-for c in `satabs --show-claims -I. $@.c | \
+                   perl -lne'/Claim (main.\d+):/ && print $$1'`; do \
+             timeout 5m satabs --concurrency --max-threads 4 --iterations 24 --claim $$c -I. $@.c; \
          done
 
 verify: $(VERIFY)
@@ -225,7 +221,7 @@ clean:
 	@rm -f .cflags .cflags.tmp
 	@rm -f $(TESTS)
 	@rm -f $(EXAMPLES)
-	@rm -f $(PERFS_C) $(PERFS_CC)
+	@rm -f $(PERFS_C) $(PERFS_CC) $(VERIFY)
 	@rm -f tests/perf/arr/perf_arr_generate
 	@rm -f tests/perf/*.log
 	@rm -f docs/man/ctl.h.3 $(MANPAGES)

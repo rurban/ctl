@@ -16,8 +16,14 @@ int main () {
     assert(a.size == 4);
     uset_int_erase(&a, 2);
     assert(a.size == 3);
+    assert(uset_int_count(&a, 2) == 0);
+    assert(uset_int_count(&a, 3) == 1);
     uset_int_insert(&a, 2);
     uset_int_erase(&a, 3);
     assert(uset_int_count(&a, 0) == 0);
     assert(uset_int_count(&a, 1) == 1);
+    assert(uset_int_count(&a, 2) == 1);
+    assert(uset_int_count(&a, 3) == 0);
+    assert(uset_int_count(&a, 4) == 1);
+    uset_int_free(&a);
 }
