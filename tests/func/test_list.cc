@@ -60,8 +60,9 @@ int random_element(list_digi* a)
     std::list<DIGI>::iterator _iter = _y.begin();                 \
     int i = 0;                                                    \
     list_foreach_ref(list_digi, &_x, _it) {                       \
-        printf("%d: %d, ", i++, *_it.ref->value);                 \
+        LOG("%d: %d, ", i, *_it.ref->value);                      \
         assert(*_it.ref->value == *_iter->value);                 \
+        i++;                                                      \
         _iter++;                                                  \
     }                                                             \
     list_digi_it _it = list_digi_begin(&_x);                      \
@@ -375,23 +376,22 @@ main(void)
                 digi *value = list_digi_front(&a);
                 if (value) // not empty
                 {
-#ifdef DEBUG
-                    list_digi_resize(&a, 10, digi_init(0));
-                    b.resize(10);
-#endif
                     int vb = *value->value;
                     LOG("before remove %d\n", vb);
                     print_lst(&a);
-                    digi copy = digi_init(vb);
-#ifdef DEBUG // only used in logging
-                    size_t erased_a =
-#endif
-                        list_digi_remove(&a, &copy);
+#if __cpp_lib_erase_if > 202002L
+                    size_t erased_a = list_digi_remove(&a, digi_init(vb));
                     LOG("removed %zu\n", erased_a);
+#else
+                    list_digi_remove(&a, digi_init(vb));
+#endif
                     print_lst(&a);
-                    digi_free (&copy);
-                    // if C++20: size_t only since C++20
-                    b.remove(b.front());
+#if __cpp_lib_erase_if > 202002L
+                    size_t erased_b = b.remove(DIGI{vb});
+                    assert(erased_a == erased_b);
+#else
+                    b.remove(DIGI{vb});
+#endif
                     LOG("removed STL\n");
                     print_list(b);
                     CHECK(a, b);

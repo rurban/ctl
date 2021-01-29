@@ -185,9 +185,9 @@ Moves elements from the other list to this list before pos. _(NYI)_
 
 Moves elements from the other list to this list before pos. _(NYI)_
 
-    size_t remove (A* self, T* value)
+    size_t remove (A* self, T value)
 
-Removes all elements binary equal to the value reference (not value).
+Removes all elements binary equal to the value.
 
     size_t remove_if (A* self, int match(T*))
 

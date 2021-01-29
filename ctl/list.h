@@ -106,9 +106,12 @@ JOIN(B, next)(B* node)
 static inline void
 JOIN(I, next)(I* iter)
 {
-    iter->node = iter->node->next;
     if (iter->node)
-        iter->ref = &iter->node->value;
+    {
+        iter->node = iter->node->next;
+        if (iter->node)
+            iter->ref = &iter->node->value;
+    }
 }
 
 static inline void
@@ -401,17 +404,18 @@ JOIN(A, reverse)(A* self)
 }
 
 static inline size_t
-JOIN(A, remove)(A* self, T* value)
+JOIN(A, remove)(A* self, T value)
 {
     size_t erased = 0;
     list_foreach_ref(A, self, it)
-        if(JOIN(A, _equal)(self, it.ref, value))
+        if(JOIN(A, _equal)(self, it.ref, &value))
         {
             B* next = it.node->next;
             JOIN(A, erase_node)(self, it.node);
             it.node = next;
             erased += 1;
         }
+    FREE_VALUE(self, value);
     return erased;
 }
 
