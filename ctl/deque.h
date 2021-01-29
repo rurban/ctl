@@ -508,23 +508,29 @@ JOIN(A, assign)(A* self, size_t size, T value)
 
 // including to
 static inline void
-JOIN(A, _ranged_sort)(A* self, long from, long to, int _compare(T*, T*))
+JOIN(A, _ranged_sort)(A* self, size_t from, size_t to, int _compare(T*, T*))
 {
     if(from >= to)
         return;
-    long mid = (from + to) / 2;
+    //long mid = (from + to) / 2; // overflow!
+    // Dietz formula http://aggregate.org/MAGIC/#Average%20of%20Integers
+    size_t mid = ((from ^ to) >> 1) + (from & to);
     SWAP(T, JOIN(A, at)(self, from), JOIN(A, at)(self, mid));
-    long z = from;
-    for(long i = from + 1; i <= to; i++)
-        if(_compare(JOIN(A, at)(self, from), JOIN(A, at)(self, i)))
-        {
-            z++;
-            SWAP(T, JOIN(A, at)(self, z), JOIN(A, at)(self, i));
-        }
+    size_t z = from;
+    // check overflow of a + 1
+    if (from + 1 > from)
+        for(size_t i = from + 1; i <= to; i++)
+            if(_compare(JOIN(A, at)(self, from), JOIN(A, at)(self, i)))
+            {
+                z++;
+                SWAP(T, JOIN(A, at)(self, z), JOIN(A, at)(self, i));
+            }
     SWAP(T, JOIN(A, at)(self, from), JOIN(A, at)(self, z));
     if (z)
         JOIN(A, _ranged_sort)(self, from, z - 1, _compare);
-    JOIN(A, _ranged_sort)(self, z + 1, to, _compare);
+    // check overflow of z + 1
+    if (z + 1 > z)
+        JOIN(A, _ranged_sort)(self, z + 1, to, _compare);
 }
 
 static inline void

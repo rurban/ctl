@@ -447,7 +447,7 @@ JOIN(A, _ranged_sort)(A* self, size_t a, size_t b, int _compare(T*, T*))
     //long mid = (a + b) / 2; // overflow!
     // Dietz formula http://aggregate.org/MAGIC/#Average%20of%20Integers
     size_t mid = ((a ^ b) >> 1) + (a & b);
-    //printf("sort \"%s\" %ld, %ld\n", self->vector, a, b);
+    //LOG("sort \"%s\" %ld, %ld\n", self->vector, a, b);
     SWAP(T, &self->vector[a], &self->vector[mid]);
     size_t z = a;
     // check overflow of a + 1
