@@ -1,1 +1,1 @@
-{"version":1,"ops":[{"type":1,"author":{"id":"67acf4ce3a9e0b675b41dc633e984435404c2f17"},"timestamp":1611819884,"metadata":{"github-id":"MDU6SXNzdWU3OTU3NTc2OTA=","github-url":"https://github.com/rurban/ctl/issues/7","origin":"github"},"title":"Add string_view and span (i.e. vector_view)","message":"prefix `strv` and `span`","files":null}]}
+{"version":1,"ops":[{"type":5,"author":{"id":"67acf4ce3a9e0b675b41dc633e984435404c2f17"},"timestamp":1611820070,"metadata":{"github-id":"MDEyOkxhYmVsZWRFdmVudDQyNTk2MzgzNjE="},"added":["enhancement"],"removed":[]}]}
