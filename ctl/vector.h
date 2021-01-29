@@ -185,10 +185,7 @@ static inline void
 JOIN(A, set)(A* self, size_t index, T value)
 {
     T* ref = &self->vector[index];
-#ifndef POD
-    if(self->free)
-        self->free(ref);
-#endif
+    FREE_VALUE(self, *ref);
     *ref = value;
 }
 
@@ -360,10 +357,7 @@ JOIN(A, resize)(A* self, size_t size, T value)
         for(size_t i = 0; self->size < size; i++)
             JOIN(A, push_back)(self, self->copy(&value));
     }
-#ifndef POD
-    if(self->free)
-        self->free(&value);
-#endif
+    FREE_VALUE(self, value);
 }
 
 static inline void
@@ -372,10 +366,7 @@ JOIN(A, assign)(A* self, size_t count, T value)
     JOIN(A, resize)(self, count, self->copy(&value));
     for(size_t i = 0; i < count; i++)
         JOIN(A, set)(self, i, self->copy(&value));
-#ifndef POD
-    if(self->free)
-        self->free(&value);
-#endif
+    FREE_VALUE(self, value);
 }
 
 static inline void
@@ -444,7 +435,7 @@ JOIN(A, erase_index)(A* self, size_t index)
         self->free(&self->vector[index]);
     if (index < self->size - 1)
         memmove(&self->vector[index], &self->vector[index] + 1, (self->size - index - 1) * sizeof (T));
-    JOIN(A, set)(self, self->size - 1, zero);
+    self->vector[self->size - 1] = zero;
 #else
     JOIN(A, set)(self, index, zero);
     for(size_t i = index; i < self->size - 1; i++)
