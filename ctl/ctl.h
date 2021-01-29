@@ -68,8 +68,10 @@
 #endif
 
 #if __GNUC__ >= 3
+#define LIKELY(x) __builtin_expect((long)(x) != 0, 1)
 #define UNLIKELY(x) __builtin_expect((long)(x) != 0, 0)
 #else
+#define LIKELY(x) x
 #define UNLIKELY(x) x
 #endif
 #endif

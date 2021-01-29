@@ -302,8 +302,9 @@ JOIN(A, swap)(A* self, A* other)
 static inline void
 JOIN(A, _ranged_sort)(A* self, size_t a, size_t b, int _compare(T*, T*))
 {
-    if(a >= b)
+    if(UNLIKELY(a >= b))
         return;
+    // TODO insertion_sort cutoff
     //long mid = (a + b) / 2; // overflow!
     // Dietz formula http://aggregate.org/MAGIC/#Average%20of%20Integers
     size_t mid = ((a ^ b) >> 1) + (a & b);
@@ -311,7 +312,7 @@ JOIN(A, _ranged_sort)(A* self, size_t a, size_t b, int _compare(T*, T*))
     SWAP(T, &self->vector[a], &self->vector[mid]);
     size_t z = a;
     // check overflow of a + 1
-    if (a + 1 > a)
+    if (LIKELY(a + 1 > a))
         for(size_t i = a + 1; i <= b; i++)
             if(_compare(&self->vector[a], &self->vector[i]))
             {
@@ -319,10 +320,10 @@ JOIN(A, _ranged_sort)(A* self, size_t a, size_t b, int _compare(T*, T*))
                 SWAP(T, &self->vector[z], &self->vector[i]);
             }
     SWAP(T, &self->vector[a], &self->vector[z]);
-    if (z)
+    if (LIKELY(z))
         JOIN(A, _ranged_sort)(self, a, z - 1, _compare);
     // check overflow of z + 1
-    if (z + 1 > z)
+    if (LIKELY(z + 1 > z))
         JOIN(A, _ranged_sort)(self, z + 1, b, _compare);
 }
 
@@ -330,11 +331,9 @@ static inline void
 JOIN(A, sort)(A* self)
 {
     CTL_ASSERT_COMPARE
-    if (N)
+    // TODO insertion_sort cutoff
+    if (LIKELY(N > 1))
         JOIN(A, _ranged_sort)(self, 0, N - 1, self->compare);
-//#ifdef CTL_STR
-//    self->vector[self->size] = '\0';
-//#endif
 }
 
 static inline A

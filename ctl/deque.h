@@ -510,15 +510,16 @@ JOIN(A, assign)(A* self, size_t size, T value)
 static inline void
 JOIN(A, _ranged_sort)(A* self, size_t from, size_t to, int _compare(T*, T*))
 {
-    if(from >= to)
+    if(UNLIKELY(from >= to))
         return;
+    // TODO insertion_sort cutoff
     //long mid = (from + to) / 2; // overflow!
     // Dietz formula http://aggregate.org/MAGIC/#Average%20of%20Integers
     size_t mid = ((from ^ to) >> 1) + (from & to);
     SWAP(T, JOIN(A, at)(self, from), JOIN(A, at)(self, mid));
     size_t z = from;
     // check overflow of a + 1
-    if (from + 1 > from)
+    if (LIKELY(from + 1 > from))
         for(size_t i = from + 1; i <= to; i++)
             if(_compare(JOIN(A, at)(self, from), JOIN(A, at)(self, i)))
             {
@@ -526,10 +527,10 @@ JOIN(A, _ranged_sort)(A* self, size_t from, size_t to, int _compare(T*, T*))
                 SWAP(T, JOIN(A, at)(self, z), JOIN(A, at)(self, i));
             }
     SWAP(T, JOIN(A, at)(self, from), JOIN(A, at)(self, z));
-    if (z)
+    if (LIKELY(z))
         JOIN(A, _ranged_sort)(self, from, z - 1, _compare);
     // check overflow of z + 1
-    if (z + 1 > z)
+    if (LIKELY(z + 1 > z))
         JOIN(A, _ranged_sort)(self, z + 1, to, _compare);
 }
 
@@ -537,7 +538,8 @@ static inline void
 JOIN(A, sort)(A* self)
 {
     CTL_ASSERT_COMPARE
-    if (self->size)
+    // TODO insertion_sort cutoff
+    if (self->size > 1)
         JOIN(A, _ranged_sort)(self, 0, self->size - 1, self->compare);
 }
 
@@ -546,7 +548,8 @@ static inline void
 JOIN(A, sort_range)(A* self, I* from, I* to)
 {
     CTL_ASSERT_COMPARE
-    if (to->index)
+    // TODO insertion_sort cutoff
+    if (to->index > 1)
         JOIN(A, _ranged_sort)(self, from->index, to->index - 1, self->compare);
 }
 

@@ -513,7 +513,7 @@ JOIN(A, merge)(A* self, A* other)
 static inline void
 JOIN(A, sort)(A* self)
 {
-    if(self->size > 1)
+    if(LIKELY(self->size > 1))
     {
         A carry = JOIN(A, init_from)(self);
         A temp[64];
