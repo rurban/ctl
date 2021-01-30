@@ -73,6 +73,16 @@ int random_element(list_digi* a)
     }                                                             \
 }
 
+#define LOG_ITER(_it, b, _iter)                                   \
+    if ((_it)->node != NULL)                                      \
+    {                                                             \
+        if (_iter == b.end())                                     \
+            printf("STL iter at end FAIL\n");                     \
+        if (*(_it)->ref->value != *(*_iter).value)                \
+            printf("iter %d vs %d FAIL\n", *(_it)->ref->value,    \
+                *(*_iter).value);                                 \
+    } else                                                        \
+        assert (_iter == b.end())
 #define CHECK_ITER(_it, b, _iter)                                 \
     if ((_it)->node != NULL)                                      \
     {                                                             \
@@ -275,19 +285,12 @@ main(void)
             case TEST_ERASE:
             {
                 size_t index = TEST_RAND(a.size);
-                size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                list_foreach(list_digi, &a, it)
-                {
-                    if(index == current)
-                    {
-                        list_digi_erase(&it);
-                        b.erase(iter);
-                        break;
-                    }
-                    iter++;
-                    current++;
-                }
+                std::advance(iter, index);
+                list_digi_it it = list_digi_begin(&a);
+                list_digi_it_advance (&it, index);
+                list_digi_erase(&it);
+                b.erase(iter);
                 CHECK(a, b);
                 break;
             }
@@ -295,22 +298,14 @@ main(void)
             {
                 size_t index = TEST_RAND(a.size);
                 int value = TEST_RAND(TEST_MAX_VALUE);
-                size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                list_foreach(list_digi, &a, it)
-                {
-                    if(index == current)
-                    {
-                        list_digi_it *pos =
-                            list_digi_insert(&a, &it, digi_init(value));
-                        std::list<DIGI>::iterator ii =
-                            b.insert(iter, DIGI{value});
-                        CHECK_ITER(pos, b, ii);
-                        break;
-                    }
-                    iter++;
-                    current++;
-                }
+                std::advance(iter, index);
+                list_digi_it it = list_digi_begin(&a);
+                list_digi_it_advance (&it, index);
+                list_digi_it *aa = list_digi_insert(&a, &it, digi_init(value));
+                std::list<DIGI>::iterator bb = b.insert(iter, DIGI{value});
+                // insert libstc++ seems to violate the specs, as insert_range
+                LOG_ITER(aa, b, bb);
                 CHECK(a, b);
                 break;
             }
@@ -676,26 +671,17 @@ main(void)
                 size_t index = TEST_RAND(a.size);
                 size_t count = TEST_RAND(a.size - 4) + 1;
                 int value = TEST_RAND(TEST_MAX_VALUE);
-                size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                list_foreach(list_digi, &a, it)
-                {
-                    if(current == index)
-                    {
-                        LOG("insert %zu x %d at %zu\n", count, value, index);
-                        //list_digi_it *aa =
-                            list_digi_insert_count(&it, count, digi_init(value));
-                        // libstc++ violates the docs
-                        //std::list<DIGI>::iterator bb =
-                            b.insert(iter, count, DIGI{value});
-                        //CHECK_ITER(aa, b, bb);
-                        print_lst(&a);
-                        print_list(b);
-                        break;
-                    }
-                    iter++;
-                    current++;
-                }
+                std::advance(iter, index);
+                list_digi_it it = list_digi_begin(&a);
+                list_digi_it_advance (&it, index);
+                LOG("insert %zu x %d at %zu\n", count, value, index);
+                list_digi_it *aa = list_digi_insert_count(&it, count, digi_init(value));
+                // libstc++ violates the docs
+                std::list<DIGI>::iterator bb = b.insert(iter, count, DIGI{value});
+                LOG_ITER(aa, b, bb);
+                print_lst(&a);
+                print_list(b);
                 CHECK(a, b);
                 break;
             }
@@ -757,17 +743,10 @@ main(void)
             case TEST_SPLICE_IT:
             {
                 size_t index = TEST_RAND(a.size);
-                size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
+                std::advance(iter, index);
                 list_digi_it it = list_digi_begin(&a);
-                while(it.node)
-                {
-                    if(current == index)
-                        break;
-                    iter++;
-                    list_digi_it_next(&it);
-                    current++;
-                }
+                list_digi_it_advance (&it, index);
                 list_digi aa;
                 std::list<DIGI> bb;
                 size_t bsize = TEST_RAND(TEST_MAX_SIZE);
@@ -785,17 +764,10 @@ main(void)
             case TEST_SPLICE_RANGE:
             {
                 size_t index = TEST_RAND(a.size);
-                size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
+                std::advance(iter, index);
                 list_digi_it it = list_digi_begin(&a);
-                while(it.node)
-                {
-                    if(current == index)
-                        break;
-                    iter++;
-                    list_digi_it_next(&it);
-                    current++;
-                }
+                list_digi_it_advance (&it, index);
                 list_digi aa;
                 std::list<DIGI> bb;
                 size_t bsize = TEST_RAND(TEST_MAX_SIZE);

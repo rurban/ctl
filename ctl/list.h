@@ -537,7 +537,11 @@ JOIN(A, splice_it)(I* pos, I* other_pos)
     {
         I end = JOIN(A, end)(other);
         list_foreach_range(A, it, other_pos, &end)
+        {
+            B* next = it.node->next;
             JOIN(A, transfer_before)(self, other, pos->node, it.node);
+            it.node->next = next;
+        }
     }
 }
 
@@ -549,10 +553,12 @@ JOIN(A, splice_range)(I* pos, I* other_first, I* other_last)
     if(self->size == 0 && pos->node == NULL)
         JOIN(A, swap)(self, other);
     else
-    {
         list_foreach_range(A, it, other_first, other_last)
+        {
+            B* next = it.node->next;
             JOIN(A, transfer_before)(self, other, pos->node, it.node);
-    }
+            it.node->next = next;
+        }
 }
 #endif
 
