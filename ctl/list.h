@@ -391,15 +391,19 @@ JOIN(A, assign)(A* self, size_t size, T value)
 static inline void
 JOIN(A, reverse)(A* self)
 {
-    list_foreach(A, self, it)
-    {
-        B* next = it.node->next;
-        B* prev = it.node->prev;
-        it.node->prev = next;
-        it.node->next = prev;
-    }
+    if (self->size < 2)
+        return;
     B* tail = self->tail;
     B* head = self->head;
+    B* node = self->head;
+    while(node)
+    {
+        B* next = node->next;
+        B* prev = node->prev;
+        node->prev = next;
+        node->next = prev;
+        node = next;
+    }
     self->tail = head;
     self->head = tail;
 }
