@@ -284,6 +284,16 @@ JOIN(A, push_back)(A* self, T value)
 }
 
 static inline void
+JOIN(A, emplace)(A* self, T* value)
+{
+    if(self->size == self->capacity)
+        JOIN(A, reserve)(self,
+            self->capacity == 0 ? INIT_SIZE : 2 * self->capacity);
+    self->size++;
+    *JOIN(A, at)(self, self->size - 1) = *value;
+}
+
+static inline void
 JOIN(A, resize)(A* self, size_t size, T value)
 {
     if(size < self->size)

@@ -95,7 +95,7 @@ inserts the element
 
     emplace (A* self, T* value)
 
-constructs elements in-place. (C++11) _(NYI)_
+constructs elements in-place. (C++11)
 
     pop (A* self)
 

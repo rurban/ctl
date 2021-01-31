@@ -33,20 +33,27 @@ main(void)
             b.push(DIGI{value});
         }
 #define FOREACH_METH(TEST) \
-        TEST(PUSH) \
-        TEST(POP) \
+        TEST(TOP)          \
+        TEST(PUSH)         \
+        TEST(POP)          \
+        TEST(EMPLACE)      \
         TEST(SWAP)
+#define FOREACH_DEBUG(TEST)\
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
         enum {
             FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+            FOREACH_DEBUG(GENERATE_ENUM)
+#endif
             TEST_TOTAL
         };
 #ifdef DEBUG
         static const char *test_names[] = {
             FOREACH_METH(GENERATE_NAME)
+            FOREACH_DEBUG(GENERATE_NAME)
             ""
         };
 #endif
@@ -56,6 +63,16 @@ main(void)
         LOG ("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
         switch(which)
         {
+            case TEST_TOP:
+            {
+                if(a.size > 0)
+                {
+                    DIGI bb = b.top();
+                    digi *aa = pqu_digi_top(&a);
+                    assert(*bb.value == *aa->value);
+                }
+                break;
+            }
             case TEST_PUSH:
             {
                 const int value = TEST_RAND(INT_MAX);
@@ -82,6 +99,18 @@ main(void)
                 std::swap(bb, bbb);
                 CHECK(aaa, bbb);
                 pqu_digi_free(&aaa);
+                break;
+            }
+            case TEST_EMPLACE:
+            {
+                const int value = TEST_RAND(INT_MAX);
+                digi bb = digi_init(value);
+#if __cpp_lib_erase_if > 202002L
+                b.emplace(DIGI{value});
+#else
+                b.push(DIGI{value});
+#endif
+                pqu_digi_emplace(&a, &bb);
                 break;
             }
         }

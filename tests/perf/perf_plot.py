@@ -36,7 +36,7 @@ def plot_from_data(name_plot_hash, title):
    # lst has 6 items
    color_list = [
        "#003f5c", # dark blue
-       "#5965AB", # medium light blue
+       "#006400", # green
        "#955196", # violet
        "#dd5182", # reddish
        "#ff6e54", # orange

@@ -3,7 +3,7 @@
    SPDX-License-Identifier: MIT */
 
 #ifndef T
-#error "Template type T undefined for <ctl/priority_queue.h>"
+# error "Template type T undefined for <ctl/priority_queue.h>"
 #endif
 
 #define front         top
@@ -22,6 +22,7 @@
 #define assign        __ASSIGN
 #define shrink_to_fit __SHRINK_TO_FIT
 #define data          __DATA
+#define emplace       __EMPLACE
 #define insert        __INSERT
 #define erase         __ERASE
 #define sort          __SORT
@@ -37,6 +38,7 @@
 #include <ctl/vector.h>
 #undef init
 #undef vec
+#undef emplace
 
 #define A JOIN(pqu, T)
 
@@ -120,10 +122,12 @@ JOIN(A, pop)(A* self)
     JOIN(A, down)(self, 0);
 }
 
-#if 0
 static inline void
-JOIN(A, emplace)(A* self, ...) {}
-#endif
+JOIN(A, emplace)(A* self, T* value)
+{
+    JOIN(A, __EMPLACE)(self, value);
+    JOIN(A, up)(self, self->size - 1);
+}
 
 #undef front
 #undef at

@@ -4,7 +4,7 @@ CXX="g++ -std=c++17"
 CFLAGS="-O3 -march=native"
 VERSION=$($CXX --version | head -1)
 if test -z "$PNG"; then
-  PNG="uset uset_pow2 uset_cached _set pqu vec list deq compile"
+  PNG="uset uset_pow2 uset_cached _set pqu vec list deq arr compile"
 fi
 
 perf_graph()
@@ -115,7 +115,9 @@ pqu() {
     "tests/perf/pqu/perf_priority_queue_push.cc \
      tests/perf/pqu/perf_pqu_push.c \
      tests/perf/pqu/perf_priority_queue_pop.cc \
-     tests/perf/pqu/perf_pqu_pop.c"
+     tests/perf/pqu/perf_pqu_pop.c \
+     tests/perf/pqu/perf_priority_queue_top.cc \
+     tests/perf/pqu/perf_pqu_top.c"
 }
 
 vec() {
