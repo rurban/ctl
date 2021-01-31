@@ -223,6 +223,8 @@ JOIN(A, find)(A* self, T key)
             {
                 if (self->equal(&key, &node->key))
                     return node;
+                else
+                    node = node->r;
             }
             else
                 return node;

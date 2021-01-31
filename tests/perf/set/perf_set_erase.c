@@ -6,7 +6,8 @@
 
 #include <time.h>
 
-static int compare(int* a, int* b) { return *a == *b ? 0 : *a < *b ? -1 : 1; }
+static int compare(int* a, int* b) { return *a > *b; }
+//static int equal(int* a, int* b) { return *a == *b; }
 
 int main(void)
 {
