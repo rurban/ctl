@@ -180,7 +180,7 @@ JOIN(I, update)(I* iter)
 {
     iter->ref = &iter->node->value;
     iter->next = iter->node->next;
-    iter->bucket_index = BUCKET_INDEX(iter);
+    //iter->bucket_index = BUCKET_INDEX(iter); this is updated in next instead
 }
 
 /*
@@ -215,15 +215,14 @@ JOIN(I, next)(I* iter)
         for(size_t i = iter->bucket_index + 1; i < iter->container->bucket_count; i++)
             if((iter->node = iter->container->buckets[i]))
             {
+                iter->bucket_index = i;
                 JOIN(I, update)(iter);
                 return;
             }
         iter->node = NULL;
     }
     else
-    {
         JOIN(I, update)(iter);
-    }
 }
 
 static inline I*

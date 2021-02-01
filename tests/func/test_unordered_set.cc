@@ -44,7 +44,7 @@
 void print_uset(uset_digi* a)
 {
     int i = 0;
-    list_foreach_ref(uset_digi, a, it)
+    foreach(uset_digi, a, it)
         printf("%d: %d [%zu]\n", i++, *it.ref->value, it.bucket_index);
     printf("--\n");
 }
@@ -72,9 +72,6 @@ static void
 setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
 {
     size_t size = TEST_RAND(TEST_MAX_SIZE);
-#ifdef DEBUG
-    //size = 12;
-#endif
     LOG ("\nsetup_sets %lu\n", size);
     *a = uset_digi_init(digi_hash, digi_equal);
     uset_digi_rehash(a, size);
