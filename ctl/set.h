@@ -844,7 +844,7 @@ JOIN(A, difference)(A* a, A* b)
     while (node)
     {
         B* next = JOIN(B, next)(node);
-        JOIN(A, erase_node)(&self, node);
+        JOIN(A, erase)(&self, node->value);
         node = next;
     }
     return self;
@@ -859,7 +859,7 @@ JOIN(A, symmetric_difference)(A* a, A* b)
     while (node)
     {
         B* next = JOIN(B, next)(node);
-        JOIN(A, erase_node)(&self, node);
+        JOIN(A, erase)(&self, node->value);
         node = next;
     }
     JOIN(A, free)(&intersection);

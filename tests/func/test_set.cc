@@ -440,6 +440,7 @@ main(void)
                 set_digi aa;
                 std::set<DIGI> bb;
                 setup_sets(&aa, bb);
+                print_set(&a);
                 set_digi aaa = set_digi_difference(&a, &aa);
 //#ifndef _WIN32
                 std::set<DIGI> bbb;
