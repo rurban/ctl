@@ -694,45 +694,34 @@ JOIN(A, free)(A* self)
 static inline size_t
 JOIN(A, count)(A* self, T value)
 {
-    size_t count = 0;
-#ifdef CTL_USET_CACHED_HASH
-    size_t hash = self->hash(&value);
-#endif
-    foreach(A, self, it)
+    if (JOIN(A, find)(self, value))
     {
-#ifdef CTL_USET_CACHED_HASH
-        if(it.node->cached_hash != hash)
-            continue;
-#endif
-        if(self->equal(it.ref, &value))
-            count++;
+        FREE_VALUE(self, value);
+        // TODO: the popular move-to-front strategy
+        return 1UL;
     }
-    FREE_VALUE(self, value);
-    return count;
+    else
+    {
+        FREE_VALUE(self, value);
+        return 0UL;
+    }
 }
 
 // C++20
 static inline bool
 JOIN(A, contains)(A* self, T value)
 {
-#ifdef CTL_USET_CACHED_HASH
-    size_t hash = self->hash(&value);
-#endif
-    foreach(A, self, it)
+    if (JOIN(A, find)(self, value))
     {
-#ifdef CTL_USET_CACHED_HASH
-        if(it.node->cached_hash != hash)
-            continue;
-#endif
-        if(self->equal(it.ref, &value))
-        {
-            FREE_VALUE(self, value);
-            // TODO: the popular move-to-front strategy
-            return true;
-        }
+        FREE_VALUE(self, value);
+        // TODO: the popular move-to-front strategy
+        return true;
     }
-    FREE_VALUE(self, value);
-    return false;
+    else
+    {
+        FREE_VALUE(self, value);
+        return false;
+    }
 }
 
 static inline void
