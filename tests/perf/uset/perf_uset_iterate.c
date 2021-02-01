@@ -16,8 +16,9 @@ int main(void)
     for(int run = 0; run < TEST_PERF_RUNS; run++)
     {
         uset_int c = uset_int_init(int_hash, int_equal);
-        int elems = TEST_PERF_CHUNKS * run;
-        for(int elem = 0; elem < elems; elem++)
+        unsigned int elems = TEST_PERF_CHUNKS * run;
+        uset_int_reserve(&c, elems);
+        for(unsigned int elem = 0; elem < elems; elem++)
             uset_int_insert(&c, rand() % elems);
         volatile int sum = 0;
         long t0 = TEST_TIME();
