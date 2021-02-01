@@ -161,6 +161,8 @@ static inline bool
 JOIN(A, none_of_range)(I* first, I* last, int _match(T*))
 {
     I pos = JOIN(A, find_if_range)(first, last, _match);
+    if (JOIN(I, done)(first))
+        return true;
     return JOIN(I, done)(&pos);
 }
 // C++20
