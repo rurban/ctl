@@ -92,15 +92,31 @@ access the underlying array
 
 ## Iterators
 
-Note: `begin` and `end` return `T*` pointers, not iterators yet.
+    I begin (A* self)
 
-    T* begin (A* self)
+constructs an iterator to the beginning.
 
-constructs an iterator to the beginning
-
-    T* end (A* self)
+    I end (A* self)
 
 constructs an iterator to the end (one past the last element).
+
+    I* next (I* iter)
+
+Advances the iterator by 1 forwards. There's no prev yet.
+
+    I* advance (I* iter, long i)
+
+All our variants accepts negative `i` to move back. The return value may be ignored.
+
+    I iter (A* self, size_t index)
+
+Constructs an iterator to an element.
+
+    size_t index (I* iter)
+
+Returns the index of the iterator, which is just a `T* ref`.
+
+See [iterators](iterators.md) for more.
 
 ## Capacity
 

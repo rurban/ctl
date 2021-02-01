@@ -158,11 +158,8 @@ JOIN(I, distance)(I* iter, I* other)
         i = i->next;
     if (i == other->node)
         return d;
-    // other before self, negative result
-    d = other->container->size;
-    for(; other->node != NULL && other->node != iter->node; d--)
-        other->node = other->node->next;
-    return other->node ? -d : LONG_MAX;
+    // other before self, negative result. in STL undefined
+    return -1L;
 }
 
 static inline void

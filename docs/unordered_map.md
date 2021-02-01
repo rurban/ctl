@@ -100,13 +100,16 @@ returns a copy of the container.
 
 ## Iterators
 
-    B* begin (A* self)
+    I begin (A* self)
 
-returns an iterator to the beginning
+Constructs an iterator to the begin.
 
-    B* end (A* self)
+    I end (A* self)
 
-returns an iterator to the end
+constructs an iterator to the end.
+
+`unordered_set` does not support ranges, as this does not make sense.
+Our iterator just supports `foreach` and `foreach_n`.
 
 ## Capacity
 

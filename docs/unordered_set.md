@@ -89,6 +89,9 @@ constructs an iterator to the beginning
 
 constructs an iterator to the end
 
+`unordered_set` does not support ranges, as this does not make sense.
+Our iterator just supports `foreach` and `foreach_n`.
+
 ## Capacity
 
     int empty (A* self)

@@ -87,11 +87,22 @@ access specified element with bounds checking
 
     I begin (A* self)
 
-returns a new iterator to the beginning
+constructs an iterator to the beginning
 
     I end (A* self)
 
-returns a new iterator to the end
+constructs an iterator to the end.
+
+    I* next (I* iter)
+
+Advances the iterator by 1 forwards. There's no prev yet.
+
+    I* advance (I* iter, long i)
+
+All our variants accepts negative `i` to move back. The return value may be ignored.
+
+
+See [iterators](iterators.md) for more.
 
 ## Capacity
 

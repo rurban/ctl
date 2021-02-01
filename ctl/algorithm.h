@@ -384,6 +384,8 @@ JOIN(A, upper_bound_range)(I* first, I* last, T value)
 // search_range C++20
 // search_n
 // search_n_range C++20
+// transform
+// transform_range C++20
 // copy_range C++20
 // copy_if C++11
 // copy_if_range C++20
@@ -395,13 +397,5 @@ JOIN(A, upper_bound_range)(I* first, I* last, T value)
 // move_range
 // move_backward C++11
 // move_backward_range C++20
-// fill
-// fill_range C++20
-// fill_n
-// fill_n_range C++20
-// transform
-// transform_range C++20
-// generate
-// generate_range C++20
 
 #endif // only once

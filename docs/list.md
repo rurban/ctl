@@ -50,8 +50,6 @@ pointers instead.
 
 `I` being `list_T_it`    internal iterator type for loops
 
-`IT` being `B*`, the generic type of iterators.
-
 ## Member functions
 
     A init ()
@@ -84,7 +82,18 @@ Constructs an iterator to the begin.
 
     I end (A* self)
 
-Constructs an iterator to the end.
+constructs an iterator to the end.
+
+    I* next (I* iter)
+
+Advances the iterator by 1 forwards. There's no prev yet.
+
+    I* advance (I* iter, long i)
+
+All our variants accepts negative `i` to move back. The return value may be ignored.
+
+
+See [iterators](iterators.md) for more.
 
 ## Capacity
 
