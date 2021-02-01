@@ -132,7 +132,7 @@ JOIN(I, ref)(I* iter)
 static inline int
 JOIN(I, done)(I* iter)
 {
-    return iter->node == NULL;
+    return iter->node == iter->end;
 }
 
 static inline int
@@ -736,6 +736,7 @@ JOIN(A, clear)(A* self)
 {
     while(!JOIN(A, empty)(self))
         JOIN(B, erase_fast)(self, self->root);
+    self->root = NULL;
 }
 
 static inline void
