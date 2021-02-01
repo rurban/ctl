@@ -185,10 +185,11 @@ JOIN(I, distance)(I* iter, I* other)
     return n ? -d : LONG_MAX;
 }
 
+// set first and last ranges
 static inline void
 JOIN(I, range)(I* iter, I* last)
 {
-    iter->end = last->node;
+    last->end = iter->end = last->node;
 }
 
 #include <ctl/bits/container.h>
@@ -311,12 +312,12 @@ JOIN(A, find)(A* self, T key)
 static inline int
 JOIN(A, count)(A* self, T key)
 {
-    I iter = JOIN(A, find)(self, key);
+    B* node = JOIN(A, find_node)(self, key);
 #ifndef POD
     if(self->free)
         self->free(&key);
 #endif
-    return JOIN(I, done)(&iter) ? 1 : 0;
+    return node ? 1 : 0;
 }
 
 static inline int

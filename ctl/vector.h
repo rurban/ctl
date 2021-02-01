@@ -128,9 +128,9 @@ JOIN(I, next)(I* iter)
 }
 
 static inline void
-JOIN(I, range)(I* begin, I* end)
+JOIN(I, range)(I* first, I* last)
 {
-    begin->end = end->ref;
+    last->end = first->end = last->ref;
 }
 
 static inline I*
