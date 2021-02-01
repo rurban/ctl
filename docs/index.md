@@ -174,7 +174,7 @@ libstdc++ uses POWER2 by default, libc++ supports both, depending on the initial
 
 ![](images/uset_cached.log.png)
 
-This trades memory for faster unsuccesful searches, such as with insert with
+This trades memory for faster unsuccessful searches, such as with insert with
 high load factor.
 
 ## Running Tests
