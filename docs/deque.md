@@ -149,33 +149,33 @@ clears the contents
 
 inserts the element at index. _(will be replaced by `insert_it` later)_
 
-    I* insert_it (A* self, I* pos, T value)
+    I* insert_it (I* pos, T value)
 
 inserts value before pos. _(will be removed later)_
 
-    I* insert_count (A* self, I* pos, size_t count, T value)
+    I* insert_count (I* pos, size_t count, T value)
 
 inserts count values before pos.
 
-    I* insert_range (A* self, I* pos, I* first, I* last)
+    I* insert_range (I* pos, I* first, I* last)
 
-inserts values from range [first, last) before pos.
+inserts values from range [first, last) before pos. _(in work)_
 
-    emplace (A* self, I* pos, T* value)
+    emplace (I* pos, T* value)
 
 Inserts the value reference into the container directly before pos.
 
-    erase (A* self, size_t index)
+    size_t erase_index (A* self, size_t index)
 
-erases the element at index.  _(will be replaced by `erase_it` later)_
+erases the element at index.
 
-    I* erase_it (A* self, I* pos)
+    I* erase (I* pos)
 
-erases the element at pos. _(will be removed later)_
+erases the element at pos.
 
-    I* erase_range (A* self, I* first, I* last)
+    I* erase_range (I* first, I* last)
 
-erases elements
+erases elements _(in work)_
 
     push_front (A* self, T value)
 
@@ -211,15 +211,15 @@ swaps the contents
 
 ## Non-member functions
 
-    T* find (A* self, T value)
+    I find (A* self, T value)
 
 finds element with specific value
 
-    T* find_if (A* self, int _match(T*))
+    I find_if (A* self, int _match(T*))
 
 finds element by predicate
 
-    T* find_if_not (A* self, int _match(T*))
+    I find_if_not (A* self, int _match(T*))
 
 finds element by predicate
 

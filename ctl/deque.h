@@ -387,10 +387,11 @@ JOIN(A, erase_index)(A* self, size_t index)
     return index;
 }
 
-static inline size_t
-JOIN(A, erase)(A* self, I* pos)
+static inline I*
+JOIN(A, erase)(I* pos)
 {
-    return JOIN(A, erase_index)(self, pos->index);
+    pos->index = JOIN(A, erase_index)(pos->container, pos->index);
+    return pos;
 }
 
 static inline void
@@ -424,8 +425,9 @@ JOIN(A, insert_index)(A* self, size_t index, T value)
 }
 
 static inline void
-JOIN(A, insert)(A* self, I* pos, T value)
+JOIN(A, insert)(I* pos, T value)
 {
+    A* self = pos->container;
     if(self->size > 0)
         JOIN(A, insert_index)(self, pos->index, value);
     else
@@ -479,8 +481,8 @@ JOIN(A, erase_range)(A* self, I* first, I* last)
 {
     size_t i = first->index;
     size_t e = last->index;
-    if (i >= self->size)
-        return first;
+    if (i >= self->size || i >= e)
+        return last;
     for(; i < e; e--)
     {
         JOIN(A, erase_index)(self, i);
@@ -489,9 +491,9 @@ JOIN(A, erase_range)(A* self, I* first, I* last)
 }
 
 static inline void
-JOIN(A, emplace)(A* self, I* pos, T* value)
+JOIN(A, emplace)(I* pos, T* value)
 {
-    JOIN(A, insert)(self, pos, *value);
+    JOIN(A, insert)(pos, *value);
 }
 
 static inline void
@@ -507,17 +509,19 @@ JOIN(A, emplace_back)(A* self, T* value)
 }
 
 static inline I*
-JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
+JOIN(A, insert_range)(I* pos, I* first, I* last)
 {
+    A* self = pos->container;
     foreach_range(A, iter, first, last)
         if (iter.ref)
-            JOIN(A, insert)(self, pos, self->copy(iter.ref));
+            JOIN(A, insert_index)(self, iter.index, self->copy(iter.ref));
     return pos;
 }
 
 static inline I*
-JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
+JOIN(A, insert_count)(I* pos, size_t count, T value)
 {
+    A* self = pos->container;
     // detect overflows, esp. silent signed conversions, like -1
     size_t index = pos->index;
     if (self->size + count < self->size ||

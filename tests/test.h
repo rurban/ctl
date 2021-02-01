@@ -62,7 +62,7 @@ TEST_TIME(void)
        fflush(stdout)
 #  else
 #    define INIT_SRAND                               \
-       unsigned int seed = rand()*clock()*getpid();  \
+       unsigned int seed = rand()^clock()^getpid();  \
        srand(seed);                                  \
        printf("SEED=%u ", seed);                     \
        fflush(stdout)
