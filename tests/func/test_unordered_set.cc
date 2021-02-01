@@ -48,7 +48,7 @@ void print_uset(uset_digi* a)
         printf("%d: %d [%zu]\n", i++, *it.ref->value, it.bucket_index);
     printf("--\n");
 }
-void print_unordered_set(std::unordered_set<DIGI,DIGI_hash> b)
+void print_unordered_set(std::unordered_set<DIGI,DIGI_hash> &b)
 {
     int i = 0;
     for(auto& x : b)
@@ -61,6 +61,8 @@ void print_unordered_set(std::unordered_set<DIGI,DIGI_hash> b)
 #endif
 
 #ifdef DEBUG
+#undef TEST_MAX_SIZE
+#define TEST_MAX_SIZE 15
 #define TEST_MAX_VALUE TEST_MAX_SIZE
 #else
 #define TEST_MAX_VALUE INT_MAX
@@ -73,7 +75,7 @@ setup_sets(uset_digi* a, std::unordered_set<DIGI,DIGI_hash>& b)
 #ifdef DEBUG
     //size = 12;
 #endif
-    LOG ("\nSETUP_SETS %lu\n", size);
+    LOG ("\nsetup_sets %lu\n", size);
     *a = uset_digi_init(digi_hash, digi_equal);
     uset_digi_rehash(a, size);
     for(size_t inserts = 0; inserts < size; inserts++)
@@ -243,9 +245,12 @@ main(void)
             {
                 size_t size = uset_digi_size(&a);
                 LOG ("size %lu -> %lu, cap: %lu\n", size, size * 2, a.bucket_count);
+                print_uset(&a);
+                print_unordered_set(b);
                 b.rehash(size * 2);
                 LOG ("STL size: %lu, cap: %lu\n", b.size(), b.bucket_count());
                 uset_digi_rehash(&a, size * 2);
+                print_uset(&a);
                 break;
             }
             case TEST_RESERVE:
@@ -456,8 +461,10 @@ main(void)
         CHECK(a, b);
         uset_digi_free(&a);
     }
-#ifdef CTL_USET_GROWTH_POWER2
+#if defined CTL_USET_GROWTH_POWER2
     TEST_PASS("tests/func/test_unordered_set_power2");
+#elif defined CTL_USET_CACHED_HASH
+    TEST_PASS("tests/func/test_unordered_set_cached");
 #else
     TEST_PASS(__FILE__);
 #endif
