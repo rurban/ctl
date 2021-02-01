@@ -17,9 +17,9 @@
     {                                                                  \
         size_t a_found = 0;                                            \
         size_t b_found = 0;                                            \
-        foreach_ref(umap, strint, &_x, it, _ref)                       \
+        foreach(umap_strint, &_x, _it)                                 \
         {                                                              \
-            str *_key = _ref->key;                                     \
+            str *_key = &_it.ref->key;                                 \
             auto found = _y.find(str_c_str(_key));                     \
             assert(found != _y.end());                                 \
             a_found++;                                                 \
@@ -28,8 +28,8 @@
         {                                                              \
             const char *_key = x.first.c_str();                        \
             strint d = strint_init(str_init(_key), x.second);          \
-            umap_strint_node* found = umap_strint_find(&_x, d);        \
-            assert(found != NULL);                                     \
+            umap_strint_it found = umap_strint_find(&_x, d);           \
+            assert(!umap_strint_it_done(&found));                      \
             strint_free(&d);                                           \
             b_found++;                                                 \
         }                                                              \
@@ -224,12 +224,12 @@ main(void)
                 char *key = new_rand_str();
                 const int value = TEST_RAND(TEST_MAX_SIZE);
                 strint kd = strint_init(str_init(key), value);
-                umap_strint_node* aa = umap_strint_find(&a, kd);
+                umap_strint_it aa = umap_strint_find(&a, kd);
                 auto bb = b.find(key);
                 if(bb == b.end())
-                    assert(umap_strint_end(&a) == aa);
+                    assert(umap_strint_it_done(&aa));
                 else
-                    assert(bb->second == aa->value.value);
+                    assert(bb->second == aa.ref->value);
                 CHECK(a, b);
                 strint_free(&kd);
                 break;
