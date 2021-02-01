@@ -183,9 +183,9 @@ main(void)
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
+        TEST(ERASE_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(ERASE_RANGE) /* broken */ \
         /* TEST(EMPLACE) */ \
         /* TEST(EXTRACT) */ \
         /* TEST(MERGE) */ \
@@ -219,11 +219,12 @@ main(void)
                 set_digi aa = set_digi_copy(&a);
                 list_foreach_ref(set_digi, &aa, it)
                     assert(set_digi_find_node(&a, *it.ref));
+                //set_digi_clear(&aa);
                 set_digi_node* node = set_digi_first(&a);
                 while (node)
                 {
                     set_digi_node* next = set_digi_node_next(node);
-                    set_digi_erase_node(&aa, node);
+                    set_digi_erase(&aa, node->value);
                     node = next;
                 }
                 assert(set_digi_empty(&aa));
@@ -612,15 +613,17 @@ main(void)
                 set_digi_it aa = set_digi_find_if_range(&first_a, &last_a, digi_is_odd);
                 auto bb = find_if(first_b, last_b, DIGIc_is_odd);
                 print_set(&a);
-                LOG("%d\n", *aa.ref->value);
                 print_setpp(b);
-                LOG("vs %d\n", *bb->value);
                 if (set_digi_it_done(&aa))
                 {
                     assert(bb == last_b);
                 }
                 else
+                {
+                    LOG("%d\n", *aa.ref->value);
+                    LOG("vs %d\n", *bb->value);
                     CHECK_ITER(aa, b, bb);
+                }
                 break;
             }
             case TEST_FIND_IF_NOT_RANGE:
@@ -642,6 +645,7 @@ main(void)
             case TEST_EQUAL_RANGE:
                 printf("nyi\n");
                 break;
+#endif
             case TEST_ERASE_RANGE:
             {
                 const size_t erases = TEST_RAND(TEST_MAX_SIZE) / 4;
@@ -661,7 +665,6 @@ main(void)
                     }
                 break;
             }
-#endif
         }
         print_set(&a);
         print_setpp(b);
