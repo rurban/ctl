@@ -45,7 +45,8 @@ void print_uset(uset_digi* a)
 {
     int i = 0;
     foreach(uset_digi, a, it)
-        printf("%d: %d [%zu]\n", i++, *it.ref->value, it.bucket_index);
+        printf("%d: %d [%ld]\n", i++, *it.ref->value,
+               it.buckets - a->buckets);
     printf("--\n");
 }
 void print_unordered_set(std::unordered_set<DIGI,DIGI_hash> &b)
@@ -349,7 +350,7 @@ main(void)
                 uset_digi_free(&aaa);
                 break;
             }
-#if 0
+#ifdef DEBUG
             case TEST_SYMMETRIC_DIFFERENCE:
             {
                 uset_digi aa;
@@ -399,9 +400,9 @@ main(void)
             }
             case TEST_ANY_OF:
             {
-                bool is_a = uset_digi_all_of(&a, digi_is_odd);
+                bool is_a = uset_digi_any_of(&a, digi_is_odd);
                 bool is_b = std::any_of(b.begin(), b.end(), DIGIc_is_odd);
-                assert(is_a == is_b); //fails
+                assert(is_a == is_b);
                 break;
             }
 #endif
