@@ -129,11 +129,11 @@ constructs elements in-place at position. _(NYI)_
 
 erases the element by value.
 
-    erase_it (A* self, I* pos)
+    erase_it (I* pos)
 
 erases the element at pos.
 
-    erase_range (A* self, I* first, I* last)
+    erase_range (I* first, I* last)
 
 erases elements.
 
@@ -145,7 +145,7 @@ swaps the contents
 
 extracts a node from the container. _(NYI)_
 
-    extract_it (A* self, I* pos)
+    extract_it (I* pos)
 
 extracts nodes from the container. _(NYI)_
 
@@ -169,7 +169,7 @@ see above the problem with a simple 2-way compare method.
 
 checks if the container contains an element with specific key. (C++20)
 
-    bool equal_range (A* self, I* first, I* last, T value)
+    bool equal_range (I* first, I* last, T value)
 
 if range of elements match a specific key. _(NYI)_
 
@@ -209,9 +209,9 @@ erases all elements satisfying specific criteria. (C++20) _(NYI)_
     bool all_of (A* self, int _match(T*)) (C++11)
     bool any_of `(A* self, int _match(T*)) (C++11)
     bool none_of (A* self, int _match(T*)) (C++11)
-    bool all_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
-    bool any_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
-    bool none_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
+    bool all_of_range (I* first, I* last, int _match(T*)) (C++20)
+    bool any_of_range (I* first, I* last, int _match(T*)) (C++20)
+    bool none_of_range (I* first, I* last, int _match(T*)) (C++20)
 
     foreach (A, self, iter) {...}
     foreach_range (A, iter, first, last) {...} (C++20)
@@ -224,9 +224,9 @@ erases all elements satisfying specific criteria. (C++20) _(NYI)_
     find (A* self, T key)
     find_if (A* self, int _match(T*))
     find_if_not (A* self, int _match(T*)) (C++11)
-    find_range (A* self, IT first, IT last, T key) (C++20)
-    find_if_range (IT first, IT last, int _match(T*)) (C++20)
-    find_if_not_range (IT first, IT last, int _match(T*)) (C++20)
+    find_range (I* first, I* last, T key) (C++20)
+    find_if_range (I* first, I* last, int _match(T*)) (C++20)
+    find_if_not_range (I* first, I* last, int _match(T*)) (C++20)
 
     remove (A* self, T key)                        _(NYI)_
     size_t remove_if (A* self, int match(T*))

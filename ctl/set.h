@@ -591,16 +591,15 @@ JOIN(A, erase_node)(A* self, B* node)
 }
 
 static inline void
-JOIN(A, erase_it)(A* self, I* it)
+JOIN(A, erase_it)(I* it)
 {
     B* node = it->node;
     if(node)
-        JOIN(A, erase_node)(self, node);
+        JOIN(A, erase_node)(it->container, node);
 }
 
-#ifdef DEBUG
 static inline void
-JOIN(A, erase_range)(A* self, I* from, I* to)
+JOIN(A, erase_range)(I* from, I* to)
 {
     if(!JOIN(I, done)(from))
     {
@@ -609,12 +608,11 @@ JOIN(A, erase_range)(A* self, I* from, I* to)
         while(node != to->node)
         {
             B* next = JOIN(B, next)(node);
-            JOIN(A, erase_node)(self, node);
+            JOIN(A, erase_node)(from->container, node);
             node = next;
         }
     }
 }
-#endif
 
 static inline void
 JOIN(A, erase)(A* self, T key)
