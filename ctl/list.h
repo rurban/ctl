@@ -289,10 +289,10 @@ JOIN(A, pop_front)(A* self)
 }
 
 static inline I*
-JOIN(A, insert)(A* self, I* pos, T value)
+JOIN(A, insert)(I* pos, T value)
 {
     B* node = JOIN(B, init)(value);
-    JOIN(A, connect_before)(self, pos->node, node);
+    JOIN(A, connect_before)(pos->container, pos->node, node);
     return pos;
 }
 

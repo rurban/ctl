@@ -119,7 +119,7 @@ resizes and sets count elements to the value
 
 clears the contents
 
-    I* insert (A* self, I* pos, T value)
+    I* insert (I* pos, T value)
 
 inserts value before the element.
 

@@ -302,7 +302,7 @@ main(void)
                 std::advance(iter, index);
                 list_digi_it it = list_digi_begin(&a);
                 list_digi_it_advance (&it, index);
-                list_digi_it *aa = list_digi_insert(&a, &it, digi_init(value));
+                list_digi_it *aa = list_digi_insert(&it, digi_init(value));
                 std::list<DIGI>::iterator bb = b.insert(iter, DIGI{value});
                 // insert libstc++ seems to violate the specs, as insert_range
                 LOG_ITER(aa, b, bb);
