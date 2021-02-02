@@ -517,29 +517,34 @@ JOIN(A, swap)(A* self, A* other)
 }
 
 static inline void
-JOIN(A, splice)(A* self, I* pos, A* other)
+JOIN(A, splice)(I* pos, A* other)
 {
+    A* self = pos->container;
     if(self->size == 0 && pos->node == NULL)
         JOIN(A, swap)(self, other);
     else
     {
         list_foreach(A, other, it)
+        {
+            B* next = it.node->next;
             JOIN(A, transfer_before)(self, other, pos->node, it.node);
+            it.node->next = next;
+        }
     }
 }
 
 #ifdef DEBUG
 static inline void
-JOIN(A, splice_it)(I* pos, I* other_pos)
+JOIN(A, splice_it)(I* pos, I* first2)
 {
     A* self = pos->container;
-    A* other = other_pos->container;
+    A* other = first2->container;
     if(self->size == 0)
         JOIN(A, swap)(self, other);
     else
     {
         I end = JOIN(A, end)(other);
-        list_foreach_range(A, it, other_pos, &end)
+        list_foreach_range(A, it, first2, &end)
         {
             B* next = it.node->next;
             JOIN(A, transfer_before)(self, other, pos->node, it.node);
@@ -549,14 +554,14 @@ JOIN(A, splice_it)(I* pos, I* other_pos)
 }
 
 static inline void
-JOIN(A, splice_range)(I* pos, I* other_first, I* other_last)
+JOIN(A, splice_range)(I* pos, I* first2, I* last2)
 {
     A* self = pos->container;
-    A* other = other_first->container;
+    A* other = first2->container;
     if(self->size == 0 && pos->node == NULL)
         JOIN(A, swap)(self, other);
     else
-        list_foreach_range(A, it, other_first, other_last)
+        list_foreach_range(A, it, first2, last2)
         {
             B* next = it.node->next;
             JOIN(A, transfer_before)(self, other, pos->node, it.node);

@@ -479,22 +479,15 @@ main(void)
             case TEST_SPLICE:
             {
                 size_t index = TEST_RAND(a.size);
-                size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
                 list_digi_it it = list_digi_begin(&a);
-                while(it.node)
-                {
-                    if(current == index)
-                        break;
-                    iter++;
-                    list_digi_it_next(&it);
-                    current++;
-                }
+                list_digi_it_advance(&it, index);
+                std::advance(iter, index);
                 list_digi aa;
                 std::list<DIGI> bb;
                 setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
                 b.splice(iter, bb);
-                list_digi_splice(&a, &it, &aa);
+                list_digi_splice(&it, &aa);
                 CHECK(a, b);
                 break;
             }

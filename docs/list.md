@@ -182,17 +182,17 @@ swaps the contents
 
 merges two sorted lists.
 
-    splice (A* self, I* pos, A* other)
+    splice (I* pos, A* other)
 
 Moves all elements from the other list to this list before pos.
 
-    splice_it (I* pos, I* other_pos)
+    splice_it (I* pos, I* first2)
 
 Moves elements from the other list to this list before pos. _(NYI)_
 
-    splice_range (I* pos, I* other_first, I* other_last)
+    splice_range (I* pos, I* first2, I* last2)
 
-Moves elements from the other list to this list before pos. _(NYI)_
+Moves a range of elements from the other list to this list before pos. _(NYI)_
 
     size_t remove (A* self, T value)
 
