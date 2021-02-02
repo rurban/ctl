@@ -10,16 +10,18 @@
 void print_lst(list_digi *a)
 {
     int i = 0;
-    list_foreach_ref(list_digi, a, it)
-        printf ("%d: %d\n", i++, *it.ref->value);
+    if (a->size)
+        list_foreach_ref(list_digi, a, it)
+            printf ("%d: %d\n", i++, *it.ref->value);
     printf ("====\n");
 }
 
 void print_list(std::list<DIGI> &b)
 {
     int i = 0;
-    for(auto& d: b)
-        printf ("%d: %d\n", i++, *d.value);
+    if (b.size())
+        for(auto& d: b)
+            printf ("%d: %d\n", i++, *d.value);
     printf ("----\n");
 }
 
@@ -195,6 +197,8 @@ main(void)
         TEST(REMOVE_IF) \
         TEST(ERASE_IF) \
         TEST(SPLICE) /* 18 */ \
+        TEST(SPLICE_IT) \
+        TEST(SPLICE_RANGE) \
         TEST(MERGE) \
         TEST(EQUAL) \
         TEST(SORT) \
@@ -218,8 +222,6 @@ main(void)
         TEST(INSERT_COUNT) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(SPLICE_IT) \
-        TEST(SPLICE_RANGE) \
         TEST(INSERT_RANGE) \
         TEST(EQUAL_RANGE) \
 
@@ -569,6 +571,27 @@ main(void)
                 assert(aa == bb);
                 break;
             }
+            case TEST_ANY_OF:
+            {
+                bool aa = list_digi_any_of(&a, digi_is_odd);
+                bool bb = any_of(b.begin(), b.end(), DIGI_is_odd);
+                if (aa != bb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d is_odd FAIL\n", (int)aa, (int)bb);
+                    errors++;
+                }
+                assert(aa == bb);
+                break;
+            }
+            case TEST_NONE_OF:
+            {
+                bool is_a = list_digi_none_of(&a, digi_is_odd);
+                bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
             case TEST_FIND_RANGE:
             {
                 int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
@@ -687,13 +710,6 @@ main(void)
                 CHECK(a, b);
                 break;
             }
-            case TEST_NONE_OF:
-            {
-                bool is_a = list_digi_none_of(&a, digi_is_odd);
-                bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
-                assert(is_a == is_b);
-                break;
-            }
             case TEST_COUNT:
             {
                 int key = TEST_RAND(TEST_MAX_SIZE);
@@ -741,7 +757,6 @@ main(void)
                 assert(numa == numb); //fails. off by one, counts one too much
                 break;
             }
-#ifdef DEBUG
             case TEST_SPLICE_IT:
             {
                 size_t index = TEST_RAND(a.size);
@@ -753,18 +768,23 @@ main(void)
                 std::list<DIGI> bb;
                 size_t bsize = TEST_RAND(TEST_MAX_SIZE);
                 setup_lists(&aa, bb, bsize, NULL);
-                std::list<DIGI>::iterator bbpos = bb.begin();
-                std::advance(bbpos, bsize / 2);
-                list_digi_it aapos = list_digi_begin(&aa);
-                list_digi_it_advance(&aapos, bsize / 2);
-                LOG("splice at b[%zu]: bb[%zu] => result, a\n", index, bsize / 2);
-                print_list(b);
-                print_list(bb);
-                b.splice(iter, bb, bbpos);
-                print_list(b);
-                list_digi_splice_it(&it, &aapos);
-                print_lst(&a);
-                CHECK(a, b);
+                // STL crashes with empty lists, CTL not
+                if (b.size() && bb.size())
+                {
+                    std::list<DIGI>::iterator bbpos = bb.begin();
+                    std::advance(bbpos, bsize / 2);
+                    list_digi_it aapos = list_digi_begin(&aa);
+                    list_digi_it_advance(&aapos, bsize / 2);
+                    LOG("splice at b[%zu]: bb[%zu] => result, a\n", index, bsize / 2);
+                    print_list(b);
+                    print_list(bb);
+                    b.splice(iter, bb, bbpos);
+                    print_list(b);
+                    list_digi_splice_it(&it, &aapos);
+                    print_lst(&a);
+                    CHECK(a, b);
+                }
+                list_digi_free(&aa);
                 break;
             }
             case TEST_SPLICE_RANGE:
@@ -786,29 +806,19 @@ main(void)
                 list_digi_it_advance(&aapos, bsize / 2);
                 list_digi_it aaend = list_digi_begin(&aa);
                 list_digi_it_advance(&aaend, bsize - 1);
-
-                b.splice(iter, bb, bbpos, bbend);
-                list_digi_splice_range(&it, &aapos, &aaend);
-                CHECK(a, b);
+                if (b.size() && bb.size())
+                {
+                    b.splice(iter, bb, bbpos, bbend);
+                    list_digi_splice_range(&it, &aapos, &aaend);
+                    CHECK(a, b);
+                }
+                list_digi_free(&aa);
                 break;
             }
+#ifdef DEBUG
             case TEST_INSERT_RANGE:
             // algorithms + ranges
                 break;
-            case TEST_ANY_OF:
-            {
-                bool aa = list_digi_all_of(&a, digi_is_odd);
-                bool bb = all_of(b.begin(), b.end(), DIGI_is_odd);
-                if (aa != bb)
-                {
-                    print_lst(&a);
-                    print_list(b);
-                    printf ("%d != %d is_odd FAIL\n", (int)aa, (int)bb);
-                    errors++;
-                }
-                //assert(aa == bb);
-                break;
-            }
             case TEST_EQUAL_RANGE:
             {
                 /*

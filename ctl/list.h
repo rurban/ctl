@@ -467,7 +467,6 @@ JOIN(A, insert_count)(I* pos, size_t count, T value)
 }
 
 #ifdef DEBUG
-
 static inline I*
 JOIN(A, insert_range)(I* pos, I* first, I* last)
 {
@@ -536,25 +535,17 @@ JOIN(A, splice)(I* pos, A* other)
     }
 }
 
-#ifdef DEBUG
 static inline void
 JOIN(A, splice_it)(I* pos, I* first2)
 {
     A* self = pos->container;
     A* other = first2->container;
-    if(self->size == 0 && pos->node == NULL)
+    if(UNLIKELY(self->size == 0 &&
+                pos->node == NULL &&
+                first2->node == other->head))
         JOIN(A, swap)(self, other);
-    else if (other->size)
-    {
-        B *node = first2->node;
-        B *next;
-        while(node)
-        {
-            next = node->next;
-            JOIN(A, transfer_before)(self, other, pos->node, node);
-            node = next;
-        }
-    }
+    else if (LIKELY(first2->node))
+        JOIN(A, transfer_before)(self, other, pos->node, first2->node);
 }
 
 static inline void
@@ -562,7 +553,10 @@ JOIN(A, splice_range)(I* pos, I* first2, I* last2)
 {
     A* self = pos->container;
     A* other = first2->container;
-    if(self->size == 0 && pos->node == NULL)
+    if(UNLIKELY(self->size == 0 &&
+                pos->node == NULL &&
+                first2->node == other->head &&
+                last2->node == NULL))
         JOIN(A, swap)(self, other);
     else if (other->size)
     {
@@ -576,7 +570,6 @@ JOIN(A, splice_range)(I* pos, I* first2, I* last2)
         }
     }
 }
-#endif
 
 // only needed for merge
 static inline void

@@ -178,7 +178,7 @@ swaps the contents
 
 ## Operations
 
-    merge (A* self, A* other, int compare(T*, T*))
+    merge (A* self, A* other)
 
 merges two sorted lists.
 
@@ -188,11 +188,11 @@ Moves all elements from the other list to this list before pos.
 
     splice_it (I* pos, I* first2)
 
-Moves elements from the other list to this list before pos. _(NYI)_
+Moves the element first2 from the other list to this list before pos.
 
     splice_range (I* pos, I* first2, I* last2)
 
-Moves a range of elements from the other list to this list before pos. _(NYI)_
+Moves a range of elements from the other list to this list before pos.
 
     size_t remove (A* self, T value)
 
@@ -206,11 +206,11 @@ Removes all elements satisfying specific criteria.
 
 reverse the list elements.
 
-    sort (A* self, int compare(T*, T*))
+    sort (A* self)
 
 sorts the list in-place.
 
-    unique (A* self, int equal(T*, T*))
+    unique (A* self)
 
 removes consecutive duplicates.
 
@@ -227,5 +227,6 @@ erases all elements satisfying specific criteria (C++20)
     int equal (A* self, A* other, int equal(T*,T*))
 
 Returns 0 or 1 if all elements are equal.
+
 
 See [algorithm](algorithm.md) for more.
