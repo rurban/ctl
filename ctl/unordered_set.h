@@ -702,25 +702,24 @@ JOIN(A, insert)(A* self, T value)
 
 #ifdef DEBUG
 
-static inline void
+static inline I
 JOIN(A, insert_found)(A* self, T value, int* foundp)
 {
-    if(JOIN(A, find_node)(self, value))
+    B* node;
+    if((node = JOIN(A, find_node)(self, value)))
     {
-        *foundp = 1;
         FREE_VALUE(self, value);
-        return;
+        *foundp = 1;
+        return JOIN(I, iter)(self, node);
     }
     if(JOIN(A, empty)(self))
         JOIN(A, rehash)(self, 12);
-#ifdef DEBUG
-    //B** bucket =
-#endif
-    JOIN(A, push_cached)(self, &value);
+    node = *JOIN(A, push_cached)(self, &value);
     //LOG ("insert_found: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
         JOIN(A, rehash)(self, 2 * self->bucket_count);
     *foundp = 0;
+    return JOIN(I, iter)(self, node);
 }
 
 static inline I
@@ -736,7 +735,7 @@ JOIN(A, emplace)(A* self, T* value)
     return JOIN(I, iter)(self, *buckets);
 }
 
-static inline I
+static inline B*
 JOIN(A, emplace_found)(A* self, T* value, int* foundp)
 {
     B* node;
@@ -775,8 +774,8 @@ JOIN(A, emplace_hint)(I* pos, T* value)
         B* node = JOIN(B, init_cached)(*value, hash);
         B** buckets = JOIN(A, _bucket_hash)(self, hash);
 #else
-        B* node = JOIN(B, init)(*value, 0);
-        B** buckets = JOIN(A, _bucket)(self, value);
+        B* node = JOIN(B, init)(*value);
+        B** buckets = JOIN(A, _bucket)(self, *value);
 #endif
         for(B* n = *buckets; n; n = n->next)
         {
@@ -784,7 +783,7 @@ JOIN(A, emplace_hint)(I* pos, T* value)
             if(n->cached_hash != hash)
                 continue;
 #endif
-            if(self->equal(&value, &n->value))
+            if(self->equal(value, &n->value))
                 // TODO move-to-front
                 return JOIN(I, iter)(self, n);
         }
@@ -821,6 +820,7 @@ JOIN(A, clear)(A* self)
             JOIN(A, _free_node)(self, n);
             n = next;
         }
+        JOIN(A, _free_node)(self, n);
     }
     memset(self->buckets, 0, self->bucket_count * sizeof(B*));
     /* for(size_t i = 0; i < self->bucket_count; i++)
@@ -953,6 +953,7 @@ JOIN(A, copy)(A* self)
     return other;
 }
 
+#ifdef DEBUG
 static inline A
 JOIN(A, intersection)(A* a, A* b)
 {
@@ -960,9 +961,9 @@ JOIN(A, intersection)(A* a, A* b)
     foreach(A, a, it)
         if(JOIN(A, find_node)(b, *it.ref))
         {
-            B* next = it.node->next;
+            B* next = it.next;
             JOIN(A, insert)(&self, self.copy(it.ref));
-            it.node->next = next;
+            it.next = next;
         }
     return self;
 }
@@ -972,13 +973,20 @@ JOIN(A, union)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
     foreach(A, a, it1)
+    {
+        B* next = it1.next;
         JOIN(A, insert)(&self, self.copy(it1.ref));
+        it1.next = next;
+    }
     foreach(A, b, it2)
+    {
+        B* next = it2.next;
         JOIN(A, insert)(&self, self.copy(it2.ref));
+        it2.next = next;
+    }
     return self;
 }
 
-#ifdef DEBUG
 // FIXME
 static inline A
 JOIN(A, difference)(A* a, A* b)
@@ -986,13 +994,12 @@ JOIN(A, difference)(A* a, A* b)
     A self = JOIN(A, init)(a->hash, a->equal);
     foreach(A, b, it)
     {
-        B* next = it.node->next;
+        B* next = it.next;
         JOIN(A, erase)(&self, *it.ref);
-        it.node->next = next;
+        it.next = next;
     }
     return self;
 }
-#endif
 
 static inline A
 JOIN(A, symmetric_difference)(A* a, A* b)
@@ -1001,13 +1008,14 @@ JOIN(A, symmetric_difference)(A* a, A* b)
     A intersection = JOIN(A, intersection)(a, b);
     foreach(A, &intersection, it)
     {
-        B* next = it.node->next;
+        B* next = it.next;
         JOIN(A, erase)(&self, *it.ref);
-        it.node->next = next;
+        it.next = next;
     }
     JOIN(A, free)(&intersection);
     return self;
 }
+#endif
 
 // different to the shared equal
 static inline int

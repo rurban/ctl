@@ -120,21 +120,21 @@ clears the contents
 
 inserts the element. (C++17)
 
-    insert_found (A* self, T value, int* foundp)
+    I insert_found (A* self, T value, *foundp)
 
-inserts the element and sets foundp if it already existed.
+inserts the element and set *foundp if it already existed.
 
     I emplace (A* self, T *value)
 
-constructs elements in-place. _(NYI)_
+constructs elements in-place. _(NY)_
 
     I emplace_hint (I* pos, T *value)
 
-constructs elements in-place at position. _(NYI)_
+constructs elements in-place at position. _(NY)_
 
-    I emplace_found (A* self, T *value, int* foundp)
+    B* emplace_found (A* self, T *value, int* foundp)
 
-constructs elements in-place and sets foundp if it already existed. _(NYI)_
+constructs elements in-place and sets foundp if it already existed. _(NY)_
 
     erase (A* self, T key)
 
@@ -154,7 +154,7 @@ swaps the contents
 
     extract (A* self, T key)
 
-extracts a node from the container. NYI
+extracts a node from the container. _(NYI)_
 
     merge (A* self, A* other)
 
@@ -284,10 +284,12 @@ finds element by predicate
 
 finds element by predicate
 
-    A intersection (A* self, A* other)
-    A union (A* self, A* other)
-    A difference (A* self, A* other) (NYI)
-    A symmetric_difference (A* self, A* other) (NYI)
+    A intersection (A* self, A* other) (NY)
+    A union (A* self, A* other) (NY)
+    A difference (A* self, A* other) (NY)
+    A symmetric_difference (A* self, A* other) (NY)
+
+Those specialized algorithm variants do not work yet.
 
     bool all_of (A* self, int match(T*))
     bool any_of (A* self, int match(T*))

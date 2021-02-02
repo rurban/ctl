@@ -17,7 +17,7 @@
     {                                                                  \
         size_t a_found = 0;                                            \
         size_t b_found = 0;                                            \
-        list_foreach_ref(uset_digi, &_x, it)                           \
+        foreach(uset_digi, &_x, it)                                    \
         {                                                              \
             auto found = _y.find(DIGI(*it.ref->value));                \
             assert(found != _y.end());                                 \
@@ -26,19 +26,26 @@
         for(auto x : _y)                                               \
         {                                                              \
             digi d = digi_init(*x.value);                              \
-            uset_digi_it found = uset_digi_find(&a, d);                \
-            assert(!uset_digi_it_done(&found));                        \
+            assert(uset_digi_find_node(&a, d));                        \
             digi_free(&d);                                             \
             b_found++;                                                 \
         }                                                              \
         assert(a_found == b_found);                                    \
-        /* only if we use the very same policies                      \
+        /* only if we use the very same policies                       \
         assert(_x.bucket_count == _y.bucket_count());                  \
         for(size_t _i = 0; _i < _x.bucket_count; _i++)                 \
             assert(uset_digi_bucket_size(&_x, _i) == _y.bucket_size(_i));\
         */                                                              \
     }                                                                  \
 }
+
+#define CHECK_ITER(_it, b, _iter)                  \
+    if (!uset_digi_it_done(&_it))                  \
+    {                                              \
+        assert (_iter != b.end());                 \
+        assert(*_it.ref->value == *(*_iter).value);\
+    } else                                         \
+        assert (_iter == b.end())
 
 #ifdef DEBUG
 void print_uset(uset_digi* a)
@@ -120,19 +127,22 @@ main(void)
         TEST(EQUAL) \
         TEST(REHASH) \
         TEST(RESERVE) \
-        TEST(UNION) \
         TEST(SYMMETRIC_DIFFERENCE) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
         TEST(ALL_OF) \
+        TEST(ANY_OF) \
         TEST(NONE_OF) \
-        TEST(COUNT_IF)
+        TEST(COUNT_IF) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(INTERSECTION) \
+        TEST(INTERSECTION) /* 20 */ \
+        TEST(UNION) \
         TEST(DIFFERENCE) \
-        TEST(ANY_OF) \
-        /* TEST(EMPLACE) */ \
+        TEST(INSERT_FOUND) \
+        TEST(EMPLACE) \
+        TEST(EMPLACE_FOUND) \
+        TEST(EMPLACE_HINT) \
         /* TEST(EXTRACT) */ \
         /* TEST(MERGE) */ \
         /* TEST(REMOVE_IF) */ \
@@ -335,6 +345,7 @@ main(void)
                 uset_digi_free(&aa);
                 break;
             }
+#ifdef DEBUG
             case TEST_UNION:
             {
                 uset_digi aa;
@@ -350,7 +361,6 @@ main(void)
                 uset_digi_free(&aaa);
                 break;
             }
-#ifdef DEBUG
             case TEST_SYMMETRIC_DIFFERENCE:
             {
                 uset_digi aa;
@@ -405,11 +415,33 @@ main(void)
                 assert(is_a == is_b);
                 break;
             }
+            case TEST_INSERT_FOUND:
+            {
+                const int vb = TEST_RAND(TEST_MAX_VALUE);
+                int a_found;
+                uset_digi_it it = uset_digi_insert_found(&a, digi_init(vb), &a_found);
+#if __cplusplus >= 201100L
+                // C++11
+                std::pair<std::unordered_set<DIGI>::iterator, bool> pair;
+                pair = b.insert(DIGI{vb});
+                assert(a_found == (int)pair.second);
+                CHECK_ITER(it, b, pair.first);
+#else
+                auto iter = b.insert(DIGI{vb});
+                CHECK_ITER(it, b, iter);
+#endif
+                break;
+            }
+            case TEST_EMPLACE:
+            case TEST_EMPLACE_FOUND:
+            case TEST_EMPLACE_HINT:
+                printf("nyi\n");
+                break;
 #endif
 #if 0
-            case TEST_EMPLACE:
             case TEST_EXTRACT:
             case TEST_MERGE:
+            case TEST_REMOVE_IF:
             case TEST_EQUAL_RANGE:
                 break;
 #endif
