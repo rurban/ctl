@@ -208,6 +208,8 @@ JOIN(I, distance)(I* iter, I* other)
     return other->index - iter->index;
 }
 
+static inline A JOIN(A, copy)(A* self);
+
 #include <ctl/bits/container.h>
 
 static inline B*

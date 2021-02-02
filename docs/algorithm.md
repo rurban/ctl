@@ -153,21 +153,25 @@ assigns a range of elements a certain value.
 copy-assigns the given value to N elements in a range. _(NYI)_
 assigns a value to a number of elements
 
-    transform
-    transform_range
+    A transform (A* self, T unop(T*))
+    A transform_it (A* self, I* pos, T _binop(T*, T*))
+    I transform_range (I* first1, I* last1, I dest, T _unop(T*))
+    I transform_it_range (I* first1, I* last1, I* pos, I dest,
+                          T _binop(T*, T*))
 
-applies a function to a range of elements, storing results in a destination range. _(NYI)_
+applies a function to a range of elements. Returning results in a copy, or for
+the range variants in an output iterator `dest`.  unop takes the iterator
+element, binop takes as 2nd argument the 2nd iterator `pos`.
 
-    generate
-    generate_range (C++20)
+    generate (A* self, T _gen(void))
+    generate_range (I* first, I* last, T _gen(void)) (C++20)
  
 assigns the results of successive function calls to every element in a range.
 
-    generate_n
-    generate_n_range (C++20)
+    generate_n (A* self, size_t count, T _gen(void))
+    generate_n_range (I* first, size_t count, T _gen(void))   (C++20)
  
-assigns the results of successive function calls to N elements in a range. _(NYI)_
-saves the result of N applications of a function
+assigns the results of successive function calls to N elements in a range.
 
     remove
     remove_if

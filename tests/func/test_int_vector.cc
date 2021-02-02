@@ -14,6 +14,27 @@ int stl_is_odd(int a) {
     return a % 2;
 }
 
+static int _generator_state = 0;
+void int_generate_reset () {
+    _generator_state = 0.0;
+}
+int int_generate (void) {
+    _generator_state += 1.0;
+    return  _generator_state;
+}
+int int_untrans (int* v) {
+    return 2.0 * *v;
+}
+int INT_untrans (int& v) {
+    return 2.0 * v;
+}
+int int_bintrans (int* v1, int* v2) {
+    return *v1 * *v2;
+}
+int INT_bintrans (int& v1, int& v2) {
+    return v1 * v2;
+}
+
 void print_vec(vec_int *a)
 {
     vec_foreach(int, a, ref)
@@ -209,8 +230,13 @@ main(void)
         TEST(NONE_OF_RANGE) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
-        TEST(INTERSECTION) \
         TEST(DIFFERENCE) \
+        TEST(INTERSECTION) \
+        TEST(GENERATE_N) \
+        TEST(GENERATE_N_RANGE) \
+        TEST(TRANSFORM) \
+        TEST(TRANSFORM_IT) \
+        TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -232,8 +258,8 @@ main(void)
             int which = TEST_RAND(TEST_TOTAL);
             if (test >= 0 && test < (int)TEST_TOTAL)
                 which = test;
-            if (which > TEST_COUNT_IF)
-                which = 0;
+            //if (which > TEST_COUNT_IF)
+            //    which = 0;
             LOG ("TEST=%d %s (size %zu, cap %zu)\n", which, test_names[which], a.size, a.capacity);
             switch(which)
             {
@@ -394,9 +420,7 @@ main(void)
                     }
                     break;
                 }
-#ifdef DEBUG    // missing range algorithm
-                case TEST_EQUAL_RANGE:
-                    break;
+#ifdef DEBUG    // wrong range end condition. ref == last is already too late.
                 case TEST_FIND_RANGE:
                 {
                     int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
@@ -575,6 +599,77 @@ main(void)
                     assert(count_a == count_b);
                     break;
                 }
+#ifdef DEBUG
+                case TEST_INSERT_COUNT:
+                case TEST_INSERT_RANGE:
+                case TEST_EQUAL_RANGE:
+                case TEST_DIFFERENCE:
+                case TEST_INTERSECTION:
+                    printf("nyi\n");
+                    break;
+                case TEST_GENERATE_N:
+                {
+                    size_t count = TEST_RAND(20);
+                    int_generate_reset();
+                    vec_int_generate_n(&a, count, int_generate);
+                    int_generate_reset();
+                    std::generate_n(b.begin(), count, int_generate);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_GENERATE_N_RANGE:
+                {
+                    vec_int_it first_a, last_a;
+                    std::vector<int>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    size_t off = first_b - b.begin();
+                    size_t count = TEST_RAND(20 - off);
+                    int_generate_reset();
+                    vec_int_generate_n_range(&first_a, count, int_generate);
+                    int_generate_reset();
+                    std::generate_n(first_b, count, int_generate);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_TRANSFORM:
+                {
+                    vec_int aa = vec_int_transform(&a, int_untrans);
+                    std::vector<int> bb;
+                    std::transform(b.begin(), b.end(), bb.begin(), INT_untrans);
+                    CHECK(aa, bb);
+                    CHECK(a, b);
+                    vec_int_free(&aa);
+                    break;
+                }
+                case TEST_TRANSFORM_IT:
+                {
+                    vec_int_it pos = vec_int_begin(&a);
+                    vec_int_it_advance(&pos, 1);
+                    vec_int aa = vec_int_transform_it(&a, &pos, int_bintrans);
+                    std::vector<int> bb;
+                    std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), INT_bintrans);
+                    CHECK(aa, bb);
+                    CHECK(a, b);
+                    vec_int_free(&aa);
+                    break;
+                }
+                case TEST_TRANSFORM_RANGE:
+                {
+                    vec_int_it first_a, last_a;
+                    std::vector<int>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    vec_int aa = vec_int_init();
+                    vec_int_it dest = vec_int_begin(&aa);
+                    vec_int_it it = vec_int_transform_range(&first_a, &last_a, dest, int_untrans);
+                    std::vector<int> bb;
+                    auto iter = std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), INT_bintrans);
+                    CHECK_ITER(it, bb, iter);
+                    CHECK(aa, bb);
+                    CHECK(a, b);
+                    vec_int_free(&aa);
+                    break;
+                }
+#endif
             }
             CHECK(a, b);
             vec_int_free(&a);

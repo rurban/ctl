@@ -190,6 +190,22 @@ JOIN(A, generate_range)(I* first, I* last, T _gen(void))
     }
 }
 
+static inline void
+JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
+{
+#ifndef POD
+    A* self = first->container;
+#endif
+    foreach_n_range(A, first, i, count)
+    {
+#ifndef POD
+        if (self->free)
+            self->free(i.ref);
+#endif
+        *i.ref = _gen();
+    }
+}
+
 #endif
 
 static inline void
@@ -205,9 +221,110 @@ JOIN(A, generate)(A* self, T _gen(void))
     }
 }
 
+static inline A
+JOIN(A, transform)(A* self, T _unop(T*))
+{
+    A other = JOIN(A, copy)(self);
+    foreach(A, &other, i)
+    {
+#ifndef POD
+        T tmp = _unop(i.ref);
+        if (self->free)
+            self->free(i.ref);
+        *i.ref = tmp;
+#else
+        *i.ref = _unop(i.ref);
+#endif
+    }
+    return other;
+}
+
+static inline A
+JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
+{
+    A other = JOIN(A, copy)(self);
+    foreach(A, &other, i)
+    {
+        if (JOIN(I, done)(pos))
+            break;
+#ifndef POD
+        T tmp = _binop(i.ref, pos->ref);
+        if (self->free)
+            self->free(i.ref);
+        *i.ref = tmp;
+#else
+        *i.ref = _binop(i.ref, pos->ref);
+#endif
+        JOIN(JOIN(A, it), next)(pos);
+    }
+    return other;
+}
+
+#if !defined(CTL_USET)
+
+static inline void
+JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
+{
+    foreach_n(A, self, i, count)
+    {
+#ifndef POD
+        if (self->free)
+            self->free(i.ref);
+#endif
+        *i.ref = _gen();
+    }
+}
+
+static inline I
+JOIN(A, transform_range)(I* first1, I* last1, I dest, T _unop(T*))
+{
+#ifndef POD
+    A *self = first1->container;
+#endif
+    foreach_range(A, i, first1, last1)
+    {
+        if (JOIN(I, done)(&dest))
+            break;
+#ifndef POD
+        T tmp = _unop(i.ref);
+        if (self->free)
+            self->free(i.ref);
+        *dest.ref = tmp;
+#else
+        *dest.ref = _unop(i.ref);
+#endif
+        JOIN(JOIN(A, it), next)(&dest);
+    }
+    return dest;
+}
+
+static inline I
+JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*))
+{
+#ifndef POD
+    A *self = first1->container;
+#endif
+    foreach_range(A, i, first1, last1)
+    {
+        if (JOIN(I, done)(pos) || JOIN(I, done)(&dest))
+            break;
+#ifndef POD
+        T tmp = _binop(i.ref, pos->ref);
+        if (self->free)
+            self->free(i.ref);
+        *dest.ref = tmp;
+#else
+        *dest.ref = _binop(i.ref, pos->ref);
+#endif
+        JOIN(JOIN(A, it), next)(pos);
+        JOIN(JOIN(A, it), next)(&dest);
+    }
+    return dest;
+}
+#endif
+
 #if !defined(CTL_USET) && !defined(CTL_STR)
-// C++20
-// uset has cached_hash optims
+/// uset has cached_hash optims
 static inline size_t
 JOIN(A, count_range)(I* first, I* last, T value)
 {

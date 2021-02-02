@@ -174,6 +174,8 @@ JOIN(A, disconnect)(A* self, B* node)
     self->size--;
 }
 
+static inline A JOIN(A, copy)(A* self);
+
 #include <ctl/bits/container.h>
 
 static inline A

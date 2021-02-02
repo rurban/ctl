@@ -84,25 +84,23 @@
     for(; !JOIN(JOIN(A, it), done)(&pos);                           \
         JOIN(JOIN(A, it), next)(&pos))
 
-#define foreach_n(A, self, pos, n, fn)                              \
+#define foreach_n(A, self, pos, n)                                  \
     JOIN(A, it) pos = JOIN(A, begin)(self);                         \
     {                                                               \
         JOIN(A, it) JOIN(pos,__LINE__) = JOIN(A, begin)(self);      \
         JOIN(JOIN(A, it), advance)(&JOIN(pos,__LINE__), n);         \
         pos.end = JOIN(pos,__LINE__).end;                           \
     }                                                               \
-    for(fn(pos.ref);                                                \
+    for(;                                                           \
         !JOIN(JOIN(A, it), done)(&pos);                             \
-        JOIN(JOIN(A, it), next)(&pos),                              \
-        fn(pos.ref))
-#define foreach_n_range(A, pos, n, first, fn)                       \
+        JOIN(JOIN(A, it), next)(&pos))
+#define foreach_n_range(A, first, pos, n)                           \
     JOIN(A, it) pos = *first;                                       \
     {                                                               \
         JOIN(A, it) JOIN(pos,__LINE__) = *first;                    \
         JOIN(JOIN(A, it), advance)(&JOIN(pos,__LINE__), n);         \
         pos.end = JOIN(pos,__LINE__).end;                           \
     }                                                               \
-    for(fn(pos.ref);                                                \
+    for(;                                                           \
         !JOIN(JOIN(A, it), done)(&pos);                             \
-        JOIN(JOIN(A, it), next)(&pos),                              \
-        fn(pos.ref))
+        JOIN(JOIN(A, it), next)(&pos))

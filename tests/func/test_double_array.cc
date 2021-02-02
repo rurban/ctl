@@ -23,6 +23,18 @@ double double_generate (void) {
     _generator_state += 1.0;
     return  _generator_state;
 }
+double double_untrans (double* v) {
+    return 2.0 * *v;
+}
+double DOUBLE_untrans (double& v) {
+    return 2.0 * v;
+}
+double double_bintrans (double* v1, double* v2) {
+    return *v1 * *v2;
+}
+double DOUBLE_bintrans (double& v1, double& v2) {
+    return v1 * v2;
+}
 
 #define N 20
 
@@ -179,6 +191,11 @@ main(void)
         TEST(EQUAL_RANGE) \
         TEST(INTERSECTION) \
         TEST(DIFFERENCE) \
+        TEST(GENERATE_N) \
+        TEST(GENERATE_N_RANGE) \
+        TEST(TRANSFORM) \
+        TEST(TRANSFORM_IT) \
+        TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -429,6 +446,68 @@ main(void)
             case TEST_INTERSECTION:
             case TEST_DIFFERENCE:
                 break;
+            case TEST_GENERATE_N:
+            {
+                size_t count = TEST_RAND(20);
+                double_generate_reset();
+                arr20_double_generate_n(&a, count, double_generate);
+                double_generate_reset();
+                std::generate_n(b.begin(), count, double_generate);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_GENERATE_N_RANGE:
+            {
+                arr20_double_it first_a, last_a;
+                std::array<double,20>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                size_t off = first_b - b.begin();
+                size_t count = TEST_RAND(20 - off);
+                double_generate_reset();
+                arr20_double_generate_n_range(&first_a, count, double_generate);
+                double_generate_reset();
+                std::generate_n(first_b, count, double_generate);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_TRANSFORM:
+            {
+                arr20_double aa = arr20_double_transform(&a, double_untrans);
+                std::array<double,20> bb;
+                std::transform(b.begin(), b.end(), bb.begin(), DOUBLE_untrans);
+                CHECK(aa, bb);
+                CHECK(a, b);
+                arr20_double_free(&aa);
+                break;
+            }
+            case TEST_TRANSFORM_IT:
+            {
+                arr20_double_it pos = arr20_double_begin(&a);
+                arr20_double_it_advance(&pos, 1);
+                arr20_double aa = arr20_double_transform_it(&a, &pos, double_bintrans);
+                std::array<double,20> bb;
+                std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), DOUBLE_bintrans);
+                CHECK(aa, bb);
+                CHECK(a, b);
+                arr20_double_free(&aa);
+                break;
+            }
+            case TEST_TRANSFORM_RANGE:
+            {
+                arr20_double_it first_a, last_a;
+                std::array<double,20>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                arr20_double aa = arr20_double_init();
+                arr20_double_it dest = arr20_double_begin(&aa);
+                arr20_double_it it = arr20_double_transform_range(&first_a, &last_a, dest, double_untrans);
+                std::array<double,20> bb;
+                auto iter = std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), DOUBLE_bintrans);
+                CHECK_ITER(it, bb, iter);
+                CHECK(aa, bb);
+                CHECK(a, b);
+                arr20_double_free(&aa);
+                break;
+            }
 #endif
             case TEST_GENERATE_RANGE:
             {

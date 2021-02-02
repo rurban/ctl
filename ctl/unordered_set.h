@@ -316,6 +316,8 @@ JOIN(A, _equal)(A* self, T* a, T* b)
     return self->equal(a, b);
 }
 
+static inline A JOIN(A, copy)(A* self);
+
 #include <ctl/bits/container.h>
 
 static inline size_t

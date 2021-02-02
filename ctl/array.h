@@ -169,6 +169,8 @@ JOIN(I, distance)(I* iter, I* other)
     return other->ref - iter->ref;
 }
 
+static inline A JOIN(A, copy)(A* self);
+
 #include <ctl/bits/container.h>
 
 static inline A
