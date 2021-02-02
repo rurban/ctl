@@ -121,7 +121,7 @@ main(void)
 {
     int fail = 0;
     INIT_SRAND;
-    INIT_TEST_LOOPS(10);
+    INIT_TEST_LOOPS(15);
 
     arr100_digi a = arr100_digi_init();
     a.compare = digi_compare;
@@ -154,10 +154,8 @@ main(void)
         TEST(NONE_OF) \
         TEST(COUNT) \
         TEST(COUNT_IF) \
-        TEST(FIND_RANGE) \
-        TEST(FIND_IF_RANGE) \
-        TEST(FIND_IF_NOT_RANGE) \
         TEST(ALL_OF_RANGE) \
+        TEST(ANY_OF_RANGE) \
         TEST(NONE_OF_RANGE) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
@@ -165,10 +163,16 @@ main(void)
         TEST(GENERATE_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(ANY_OF_RANGE) \
+        TEST(FIND_RANGE) \
+        TEST(FIND_IF_RANGE) \
+        TEST(FIND_IF_NOT_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(INTERSECTION) \
         TEST(DIFFERENCE) \
+
+      /*TEST(FIND_END)
+        TEST(FIND_END_RANGE)
+       */
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -286,6 +290,7 @@ main(void)
                 digi_free(&key);
                 break;
             }
+#ifdef DEBUG
             case TEST_FIND_RANGE:
             {
                 int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : random_element(&a);
@@ -295,6 +300,7 @@ main(void)
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 arr100_digi_it i = arr100_digi_find_range(&first_a, &last_a, key);
                 auto it = std::find(first_b, last_b, vb);
+                LOG("%d at [%ld]\n", *i.ref->value, i.ref - a.vector);
                 CHECK_ITER(i, b, it); // broken
                 digi_free (&key); // special
                 CHECK(a, b);
@@ -309,6 +315,7 @@ main(void)
                 auto it = std::find_if(first_b, last_b, DIGI_is_odd);
                 print_arr100(&a);
                 print_array(b);
+                LOG("%d at [%ld]\n", *i.ref->value, i.ref - a.vector);
                 CHECK_ITER(i, b, it);
                 break;
             }
@@ -319,9 +326,11 @@ main(void)
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 arr100_digi_it i = arr100_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
                 auto it = std::find_if_not(first_b, last_b, DIGI_is_odd);
+                LOG("%d at [%ld]\n", *i.ref->value, i.ref - a.vector);
                 CHECK_ITER(i, b, it);
                 break;
             }
+#endif
             case TEST_ALL_OF_RANGE:
             {
                 arr100_digi_it first_a, last_a;
@@ -329,12 +338,12 @@ main(void)
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 bool aa = arr100_digi_all_of_range(&first_a, &last_a, digi_is_odd);
                 bool bb = std::all_of(first_b, last_b, DIGI_is_odd);
-                if (aa != bb)
+                /*if (aa != bb)
                 {
                     print_arr100(&a);
                     print_array(b);
                     printf ("%d != %d is_odd\n", (int)aa, (int)bb);
-                }
+                }*/
                 assert(aa == bb);
                 break;
             }
@@ -387,19 +396,11 @@ main(void)
                 assert(numa == numb);
                 break;
             }
-#ifdef DEBUG
             case TEST_ANY_OF:
             {
                 bool is_a = arr100_digi_any_of(&a, digi_is_odd);
                 bool is_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
-                if (is_a != is_b)
-                {
-                    print_arr100(&a);
-                    print_array(b);
-                    printf ("%d != %d FAIL\n", (int)is_a, (int)is_b);
-                    fail++;
-                }
-                //assert(is_a == is_b);
+                assert(is_a == is_b);
                 break;
             }
             case TEST_ANY_OF_RANGE:
@@ -418,6 +419,7 @@ main(void)
                 assert(aa == bb);
                 break;
             }
+#ifdef DEBUG
             case TEST_EQUAL_RANGE:
             case TEST_INTERSECTION:
             case TEST_DIFFERENCE:

@@ -428,23 +428,10 @@ main(void)
                 assert(aa == bb);
                 break;
             }
-            case TEST_ANY_OF: // broken
-            {
-                bool is_a = arr20_double_all_of(&a, double_is_odd);
-                bool is_b = std::any_of(b.begin(), b.end(), DOUBLE_is_odd);
-                if (is_a != is_b)
-                {
-                    print_arr20(&a);
-                    print_array(b);
-                    printf ("%d != %d FAIL\n", (int)is_a, (int)is_b);
-                    fail++;
-                }
-                //assert(is_a == is_b);
-                break;
-            }
             case TEST_EQUAL_RANGE:
             case TEST_INTERSECTION:
             case TEST_DIFFERENCE:
+                printf("nyi\n");
                 break;
             case TEST_GENERATE_N:
             {
@@ -548,6 +535,20 @@ main(void)
             {
                 bool is_a = arr20_double_all_of(&a, double_is_odd);
                 bool is_b = std::all_of(b.begin(), b.end(), DOUBLE_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
+            case TEST_ANY_OF:
+            {
+                bool is_a = arr20_double_any_of(&a, double_is_odd);
+                bool is_b = std::any_of(b.begin(), b.end(), DOUBLE_is_odd);
+                /*if (is_a != is_b)
+                {
+                    print_arr20(&a);
+                    print_array(b);
+                    printf ("%d != %d FAIL\n", (int)is_a, (int)is_b);
+                    fail++;
+                }*/
                 assert(is_a == is_b);
                 break;
             }

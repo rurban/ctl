@@ -122,7 +122,8 @@ JOIN(A, pop)(A* self)
 static inline void
 JOIN(A, emplace)(A* self, T* value)
 {
-    JOIN(A, __EMPLACE)(self, value);
+    JOIN(A, it) pos = JOIN(A, begin)(self);
+    JOIN(A, __EMPLACE)(&pos, value);
     JOIN(A, up)(self, self->size - 1);
 }
 

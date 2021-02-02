@@ -321,13 +321,10 @@ JOIN(A, push_back)(A* self, T value)
 }
 
 static inline void
-JOIN(A, emplace)(A* self, T* value)
+JOIN(A, emplace)(I* pos, T* value)
 {
-    if(self->size == self->capacity)
-        JOIN(A, reserve)(self,
-            self->capacity == 0 ? INIT_SIZE : 2 * self->capacity);
-    self->size++;
-    *JOIN(A, at)(self, self->size - 1) = *value;
+    if (!JOIN(I, done)(pos))
+        *pos->ref = *value;
 }
 
 static inline void
@@ -428,7 +425,7 @@ JOIN(A, insert)(A* self, size_t index, T value)
         JOIN(A, push_back)(self, value);
 }
 
-static inline T*
+static inline I
 JOIN(A, erase_index)(A* self, size_t index)
 {
     static T zero;
@@ -436,7 +433,8 @@ JOIN(A, erase_index)(A* self, size_t index)
     if(self->free)
         self->free(&self->vector[index]);
     if (index < self->size - 1)
-        memmove(&self->vector[index], &self->vector[index] + 1, (self->size - index - 1) * sizeof (T));
+        memmove(&self->vector[index], &self->vector[index] + 1,
+                (self->size - index - 1) * sizeof (T));
     self->vector[self->size - 1] = zero;
 #else
     JOIN(A, set)(self, index, zero);
@@ -447,48 +445,49 @@ JOIN(A, erase_index)(A* self, size_t index)
     }
 #endif
     self->size--;
-    return &self->vector[index];
+    return JOIN(I, iter)(self, index);
 }
 
-static inline T*
-JOIN(A, erase_range)(A* self, T* from, T* to)
+static inline I
+JOIN(A, erase_range)(A* self, I* from, I* to)
 {
     static T zero;
-    if (from >= to)
-        return to;
+    if (from->ref >= to->ref)
+        return *to;
     T* end = &self->vector[self->size];
 #if 1
-    size_t size = (to - from) / sizeof(T);
+    size_t size = (to->ref - from->ref) / sizeof(T);
 # ifndef POD
     if(self->free)
-        for(T* ref = from; ref < to - 1; ref++)
+        for(T* ref = from->ref; ref < to->ref - 1; ref++)
             self->free(ref);
 # endif
-    if (to != end)
+    if (to->ref != end)
     {
-        memmove(from, to, (end - to) * sizeof (T));
+        memmove(from->ref, to->ref, (end - to->ref) * sizeof (T));
         JOIN(A, set)(self, self->size - size, zero);
     }
     self->size -= size;
 #else
-    *from = zero;
-    for(T* pos = from; pos < to - 1; pos++)
+    *from->ref = zero;
+    for(T* pos = from->ref; pos < to->ref - 1; pos++)
     {
         *pos = *(pos + 1);
         *(pos + 1) = zero;
         self->size--;
     }
 #endif
-    if (to < end)
-        return to + 1;
+    if (to->ref < end)
+        return JOIN(A, end)(from->container);
     else
-        return to;
+        return *to;
 }
 
-static inline T*
-JOIN(A, erase)(A* self, T* pos)
+static inline I
+JOIN(A, erase)(I* pos)
 {
-    return JOIN(A, erase_index)(self, pos - &self->vector[0]);
+    A* self = pos->container;
+    return JOIN(A, erase_index)(self, pos->ref - &self->vector[0]);
 }
 
 static inline void

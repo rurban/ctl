@@ -128,7 +128,7 @@ inserts the element and sets foundp if it already existed.
 
 constructs elements in-place. _(NYI)_
 
-    I emplace_hint (A* self, I* pos, T *value)
+    I emplace_hint (I* pos, T *value)
 
 constructs elements in-place at position. _(NYI)_
 

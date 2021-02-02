@@ -20,19 +20,19 @@ void int_generate_reset () {
 }
 int int_generate (void) {
     _generator_state += 1.0;
-    return  _generator_state;
+    return _generator_state;
 }
 int int_untrans (int* v) {
-    return 2.0 * *v;
+    return *v >> 1;
 }
 int INT_untrans (int& v) {
-    return 2.0 * v;
+    return v >> 1;
 }
 int int_bintrans (int* v1, int* v2) {
-    return *v1 * *v2;
+    return *v1 ^ *v2;
 }
 int INT_bintrans (int& v1, int& v2) {
-    return v1 * v2;
+    return v1 ^ v2;
 }
 
 void print_vec(vec_int *a)
@@ -101,7 +101,6 @@ int random_element(vec_int* a)
     if (_iter != b.end())                                         \
         assert(*_ref == *_iter)
 
-#ifdef DEBUG
 #define CHECK_ITER(_it, b, _iter)                                 \
     if (!vec_int_it_done(&_it))                                   \
     {                                                             \
@@ -110,6 +109,7 @@ int random_element(vec_int* a)
     } else                                                        \
         assert (_iter == b.end())
 
+#ifdef DEBUG
 static void
 get_random_iters (vec_int *a, vec_int_it* first_a, vec_int_it* last_a,
                   std::vector<int>& b, std::vector<int>::iterator &first_b,
@@ -178,13 +178,13 @@ main(void)
             std::vector<int> b;
             if(mode == MODE_DIRECT)
             {
-                LOG("mode DIRECT\n");
+                LOG("mode direct\n");
                 vec_int_resize(&a, size, 0);
                 b.resize(size);
             }
             if(mode == MODE_GROWTH)
             {
-                LOG("mode GROWTH\n");
+                LOG("mode growth\n");
                 for(size_t pushes = 0; pushes < size; pushes++)
                 {
                     const int value = TEST_RAND(INT_MAX);
@@ -199,20 +199,21 @@ main(void)
         TEST(CLEAR) \
         TEST(ERASE) \
         TEST(ERASE_INDEX) \
+        TEST(INSERT) \
         TEST(RESIZE) \
         TEST(RESERVE) \
         TEST(SHRINK_TO_FIT) \
         TEST(SORT) \
         TEST(COPY) \
         TEST(SWAP) \
-        TEST(INSERT) \
         TEST(ASSIGN) \
         TEST(REMOVE_IF) \
         TEST(EQUAL) \
         TEST(FIND) \
-        TEST(ALL_OF) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
+        TEST(ALL_OF) \
+        TEST(ANY_OF) \
         TEST(NONE_OF) \
         TEST(COUNT) \
         TEST(COUNT_IF) \
@@ -224,7 +225,6 @@ main(void)
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
-        TEST(ANY_OF) \
         TEST(ALL_OF_RANGE) \
         TEST(ANY_OF_RANGE) \
         TEST(NONE_OF_RANGE) \
@@ -290,9 +290,9 @@ main(void)
                     if(a.size > 0)
                     {
                         const size_t index = TEST_RAND(a.size);
-                        auto it = b.erase(b.begin() + index);
-                        int* pos = vec_int_erase_index(&a, index);
-                        CHECK_REF(pos, b, it);
+                        auto iter = b.erase(b.begin() + index);
+                        vec_int_it it = vec_int_erase_index(&a, index);
+                        CHECK_ITER(it, b, iter);
                     }
                     CHECK(a, b);
                     break;
@@ -304,9 +304,9 @@ main(void)
                         const size_t index = TEST_RAND(a.size);
                         vec_int_it pos = vec_int_begin(&a);
                         vec_int_it_advance(&pos, index);
-                        int* i = vec_int_erase(&a, pos.ref);
+                        pos = vec_int_erase(&pos);
                         auto it = b.erase(b.begin() + index);
-                        CHECK_REF(i, b, it);
+                        CHECK_ITER(pos, b, it);
                     }
                     CHECK(a, b);
                     break;
@@ -535,20 +535,6 @@ main(void)
                     assert(numa == numb);
                     break;
                 }
-                case TEST_ANY_OF: // broken
-                {
-                    bool is_a = vec_int_all_of(&a, is_odd);
-                    bool is_b = any_of(b.begin(), b.end(), stl_is_odd);
-                    if (is_a != is_b)
-                    {
-                        //print_vec(&a);
-                        //print_vector(b);
-                        printf ("%d != %d FAIL\n", (int)is_a, (int)is_b);
-                        fail++;
-                    }
-                    //assert(is_a == is_b);
-                    break;
-                }
 #endif
                 case TEST_FIND_IF:
                 {
@@ -574,6 +560,13 @@ main(void)
                 {
                     bool is_a = vec_int_all_of(&a, is_odd);
                     bool is_b = all_of(b.begin(), b.end(), stl_is_odd);
+                    assert(is_a == is_b);
+                    break;
+                }
+                case TEST_ANY_OF:
+                {
+                    bool is_a = vec_int_any_of(&a, is_odd);
+                    bool is_b = any_of(b.begin(), b.end(), stl_is_odd);
                     assert(is_a == is_b);
                     break;
                 }
@@ -635,6 +628,7 @@ main(void)
                 {
                     vec_int aa = vec_int_transform(&a, int_untrans);
                     std::vector<int> bb;
+                    bb.resize(b.size());
                     std::transform(b.begin(), b.end(), bb.begin(), INT_untrans);
                     CHECK(aa, bb);
                     CHECK(a, b);
@@ -647,6 +641,7 @@ main(void)
                     vec_int_it_advance(&pos, 1);
                     vec_int aa = vec_int_transform_it(&a, &pos, int_bintrans);
                     std::vector<int> bb;
+                    bb.resize(b.size());
                     std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), INT_bintrans);
                     CHECK(aa, bb);
                     CHECK(a, b);
@@ -662,7 +657,8 @@ main(void)
                     vec_int_it dest = vec_int_begin(&aa);
                     vec_int_it it = vec_int_transform_range(&first_a, &last_a, dest, int_untrans);
                     std::vector<int> bb;
-                    auto iter = std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), INT_bintrans);
+                    bb.resize(last_b - first_b);
+                    auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(), INT_bintrans);
                     CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
                     CHECK(a, b);

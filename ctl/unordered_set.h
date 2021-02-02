@@ -723,20 +723,20 @@ JOIN(A, insert_found)(A* self, T value, int* foundp)
     *foundp = 0;
 }
 
-static inline B*
+static inline I
 JOIN(A, emplace)(A* self, T* value)
 {
     B* node;
     if ((node = JOIN(A, find_node)(self, *value)))
-        return node;
+        return JOIN(I, iter)(self, node);
 
     B** buckets = JOIN(A, push_cached)(self, value);
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
         JOIN(A, rehash)(self, 2 * self->bucket_count);
-    return *buckets;
+    return JOIN(I, iter)(self, *buckets);
 }
 
-static inline B*
+static inline I
 JOIN(A, emplace_found)(A* self, T* value, int* foundp)
 {
     B* node;
@@ -762,6 +762,49 @@ JOIN(A, emplace_found)(A* self, T* value, int* foundp)
     *foundp = 0;
     return *buckets;
 }
+
+static inline I
+JOIN(A, emplace_hint)(I* pos, T* value)
+{
+    A* self = pos->container;
+    if (!JOIN(I, done)(pos))
+    {
+        // TODO: equal check if already exists
+#ifdef CTL_USET_CACHED_HASH
+        size_t hash = self->hash(value);
+        B* node = JOIN(B, init_cached)(*value, hash);
+        B** buckets = JOIN(A, _bucket_hash)(self, hash);
+#else
+        B* node = JOIN(B, init)(*value, 0);
+        B** buckets = JOIN(A, _bucket)(self, value);
+#endif
+        for(B* n = *buckets; n; n = n->next)
+        {
+#ifdef CTL_USET_CACHED_HASH
+            if(n->cached_hash != hash)
+                continue;
+#endif
+            if(self->equal(&value, &n->value))
+                // TODO move-to-front
+                return JOIN(I, iter)(self, n);
+        }
+        // not found
+        JOIN(B, push)(buckets, node);
+        pos->container->size++;
+        pos->node = node;
+        JOIN(I, update)(pos);
+        pos->buckets = buckets;
+        return *pos;
+    }
+    else
+    {
+        B** buckets = JOIN(A, push_cached)(self, value);
+        if (JOIN(A, load_factor)(self) > self->max_load_factor)
+            JOIN(A, rehash)(self, 2 * self->bucket_count);
+        return JOIN(I, iter)(self, *buckets);
+    }
+}
+
 #endif
 
 static inline void

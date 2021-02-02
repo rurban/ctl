@@ -154,13 +154,13 @@ main(void)
             std::vector<DIGI> b;
             if(mode == MODE_DIRECT)
             {
-                LOG("mode DIRECT\n");
+                LOG("mode direct\n");
                 vec_digi_resize(&a, size, digi_init(0));
                 b.resize(size);
             }
             if(mode == MODE_GROWTH)
             {
-                LOG("mode GROWTH\n");
+                LOG("mode growth\n");
                 for(size_t pushes = 0; pushes < size; pushes++)
                 {
                     const int value = TEST_RAND(TEST_MAX_VALUE);
@@ -175,21 +175,22 @@ main(void)
         TEST(CLEAR) \
         TEST(ERASE_INDEX) \
         TEST(ERASE) \
+        TEST(INSERT) \
         TEST(RESIZE) \
         TEST(RESERVE) \
         TEST(SHRINK_TO_FIT) \
         TEST(SORT) \
         TEST(COPY) \
         TEST(SWAP) \
-        TEST(INSERT) \
         TEST(ASSIGN) \
         TEST(REMOVE_IF) \
         TEST(ERASE_IF) \
         TEST(EQUAL) \
         TEST(FIND) \
-        TEST(ALL_OF) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
+        TEST(ALL_OF) \
+        TEST(ANY_OF) \
         TEST(NONE_OF) \
         TEST(COUNT) \
         TEST(COUNT_IF) \
@@ -202,7 +203,6 @@ main(void)
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
-        TEST(ANY_OF) \
         TEST(ALL_OF_RANGE) \
         TEST(ANY_OF_RANGE) \
         TEST(NONE_OF_RANGE) \
@@ -213,7 +213,7 @@ main(void)
 
       /*TEST(FIND_END)
         TEST(FIND_END_RANGE)
-      */
+       */
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -267,9 +267,9 @@ main(void)
                     if(a.size > 0)
                     {
                         const size_t index = TEST_RAND(a.size);
-                        auto it = b.erase(b.begin() + index);
-                        digi* pos = vec_digi_erase_index(&a, index);
-                        CHECK_REF(pos, b, it);
+                        auto iter = b.erase(b.begin() + index);
+                        vec_digi_it it = vec_digi_erase_index(&a, index);
+                        CHECK_ITER(&it, b, iter);
                     }
                     CHECK(a, b);
                     break;
@@ -281,9 +281,9 @@ main(void)
                         const size_t index = TEST_RAND(a.size);
                         vec_digi_it pos = vec_digi_begin(&a);
                         vec_digi_it_advance(&pos, index);
-                        digi* i = vec_digi_erase(&a, pos.ref);
+                        pos = vec_digi_erase(&pos);
                         auto it = b.erase(b.begin() + index);
-                        CHECK_REF(i, b, it);
+                        CHECK_ITER(&pos, b, it);
                     }
                     CHECK(a, b);
                     break;
@@ -299,9 +299,9 @@ main(void)
                         vec_digi_it_advance(&from, i1);
                         vec_digi_it to = vec_digi_begin(&a);
                         vec_digi_it_advance(&from, i2);
-                        digi* pos = vec_digi_erase_range(&a, from.ref, to.ref);
+                        from = vec_digi_erase_range(&a, &from, &to);
                         auto it = b.erase(b.begin() + i1, b.begin() + i2);
-                        CHECK_REF(pos, b, it); //FIXME at end
+                        CHECK_ITER(&from, b, it);
                     }
                     CHECK(a, b);
                     break;
@@ -596,20 +596,6 @@ main(void)
                     assert(numa == numb);
                     break;
                 }
-                case TEST_ANY_OF: // broken
-                {
-                    bool is_a = vec_digi_all_of(&a, digi_is_odd);
-                    bool is_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
-                    if (is_a != is_b)
-                    {
-                        //print_vec(&a);
-                        //print_vector(b);
-                        printf ("%d != %d FAIL\n", (int)is_a, (int)is_b);
-                        fail++;
-                    }
-                    //assert(is_a == is_b);
-                    break;
-                }
 #endif
                 case TEST_FIND_IF:
                 {
@@ -638,6 +624,20 @@ main(void)
                 {
                     bool is_a = vec_digi_all_of(&a, digi_is_odd);
                     bool is_b = std::all_of(b.begin(), b.end(), DIGI_is_odd);
+                    assert(is_a == is_b);
+                    break;
+                }
+                case TEST_ANY_OF:
+                {
+                    bool is_a = vec_digi_any_of(&a, digi_is_odd);
+                    bool is_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
+                    if (is_a != is_b)
+                    {
+                        //print_vec(&a);
+                        //print_vector(b);
+                        printf ("%d != %d FAIL\n", (int)is_a, (int)is_b);
+                        fail++;
+                    }
                     assert(is_a == is_b);
                     break;
                 }

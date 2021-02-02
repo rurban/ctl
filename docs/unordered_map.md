@@ -155,7 +155,7 @@ inserts the new element, or replaces its value (C++17)
 
 constructs elements in-place. _(NYI)_
 
-    emplace_hint (A* self, I* pos, T* value)
+    emplace_hint (I* pos, T* value)
 
 constructs elements in-place at position. _(NYI)_
 
@@ -169,7 +169,7 @@ inserts in-place if the key does not exist, does nothing if the key exists. _(NY
 
     erase (A* self, T key)
 
-erases the element by key
+erases the element by key, i.e. pair.first
 
     erase_if (A* self, int _match(T*))
 
@@ -210,14 +210,15 @@ unless your equal method s broken.
 
     B* find (A* self, T key)
 
-finds element with specific key
+finds element with specific key, i.e. pair.first
 
     bool contains (A* self, T key)
 
-checks if the container contains element with specific key. (C++20)
+checks if the container contains element with specific key,
+i.e. pair.first. (C++20)
 
     int equal (A* self, A* other)
-    int equal_range (A* self, I* first, I* last)
+    int equal_range (A* self, I* first2, I* last2)
 
 if range of elements match a specific key. _(NYI)_
 

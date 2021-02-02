@@ -290,7 +290,8 @@ main(void)
                 {
                     const size_t index = TEST_RAND(a.size - 1);
                     b.erase(b.begin() + index);
-                    str_erase(&a, &a.vector[index]);
+                    str_it it = str_it_iter(&a, index);
+                    str_erase(&it);
                     break;
                 }
                 case TEST_ERASE_INDEX:

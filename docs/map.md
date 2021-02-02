@@ -77,7 +77,7 @@ other: !comp(a, b) && !comp(b, a).
 
 ## Member functions
 
-    init (int compare(T*, T*))
+    A init (int compare(T*, T*))
 
 constructs the map
 
@@ -140,35 +140,35 @@ returns the maximum possible number of elements
 
 clears the contents
 
-    insert (A* self)
+    insert (A* self, T pair)
 
-inserts elements or nodes `(since C++17)
+inserts a key-value pair (since C++17)
 
-    insert_or_assign (A* self)
+    insert_or_assign (A* self, T pair)
 
 inserts an element or assigns to the current element if the key already exists
 
-    emplace (A* self, T* value)
+    emplace (A* self, T* pair)
 
 constructs element in-place
 
-    emplace_hint (A* self, it *position, T* value)
+    emplace_hint (I *pos, T* pair)
 
 constructs elements in-place at position. _(NYI)_
 
-    try_emplace (A* self, T* value)
+    try_emplace (A* self, T* pair)
 
 inserts in-place if the key does not exist, does nothing if the key exists
 
     erase (A* self, T key)
 
-erases the element by value
+erases the element by pair.first
 
-    erase_it (A* self, I* position)
+    erase_it (I* pos)
 
 erases the element at position
 
-    erase_range (A* self, I* first, I* last)
+    erase_range (I* first, I* last)
 
 erases elements
 
@@ -180,9 +180,9 @@ swaps the contents
 
 extracts a node from the container. NYI
 
-    extract_it (A* self, I* position)
+    extract_it (I* pos)
 
-extracts nodes from the container. NYI
+extracts a node from the container. NYI
 
     merge (A* self, A* other)
 
@@ -197,7 +197,7 @@ returns the number of elements matching specific key
     I find (A* self, T key)
     B* find_node (A* self, T key)
 
-finds element with specific key
+finds element with specific key, i.e. pair.first
 
     bool contains (A* self, T key)
 

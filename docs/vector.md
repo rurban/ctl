@@ -158,7 +158,7 @@ clears the contents
 
 inserts the element, free'ing value. (C++17)
 
-    emplace (A* self, I* pos, T* value)
+    emplace (I* pos, T* value)
 
 constructs elements in-place. _(NYI)_
 
@@ -166,15 +166,15 @@ constructs elements in-place. _(NYI)_
 
 appends new element at the back. _(NYI)_
 
-    T* erase_index (A* self, size_t index)
+    I erase_index (A* self, size_t index)
 
 erases the element by index, and returns the position following the last removed element.
 
-    T* erase (A* self, I* pos)
+    I erase (I* pos)
 
 erases the element at position.
 
-    T* erase_range (A* self, I* first, I* last)
+    I* erase_range (I* first, I* last)
 
 erases elements from - to.
 
@@ -186,7 +186,7 @@ swaps the contents
 
 extracts a value from the container. _(NYI)_
 
-    extract_it (A* self, I* pos)
+    extract_it (I* pos)
 
 extracts a node from the container. _(NYI)_
 
