@@ -284,14 +284,18 @@ main(void)
             }
             case TEST_ERASE:
             {
-                size_t index = TEST_RAND(a.size);
-                std::list<DIGI>::iterator iter = b.begin();
-                std::advance(iter, index);
-                list_digi_it it = list_digi_begin(&a);
-                list_digi_it_advance (&it, index);
-                list_digi_erase(&it);
-                b.erase(iter);
-                CHECK(a, b);
+                if (a.size > 0) // we survive, but STL segfaults
+                {
+                    size_t index = TEST_RAND(a.size);
+                    std::list<DIGI>::iterator iter = b.begin();
+                    std::advance(iter, index);
+                    list_digi_it it = list_digi_begin(&a);
+                    list_digi_it_advance (&it, index);
+                    LOG("erase %zu\n", index);
+                    list_digi_erase(&it);
+                    b.erase(iter);
+                    CHECK(a, b);
+                }
                 break;
             }
             case TEST_INSERT:

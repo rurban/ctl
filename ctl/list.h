@@ -66,7 +66,7 @@ JOIN(I, iter)(A* self, B* node)
     static I zero;
     I iter = zero;
     iter.node = node;
-    if (node)
+    if (LIKELY(node))
         iter.ref = &node->value;
     //iter.end = NULL;
     iter.container = self;
@@ -106,7 +106,7 @@ JOIN(B, next)(B* node)
 static inline void
 JOIN(I, next)(I* iter)
 {
-    if (iter->node)
+    if (LIKELY(iter->node))
     {
         iter->node = iter->node->next;
         if (iter->node)
@@ -134,7 +134,7 @@ JOIN(I, advance)(I* iter, long i)
 {
     A* a = iter->container;
     B* node = iter->node;
-    if (i < 0)
+    if (UNLIKELY(i < 0))
     {
         if ((size_t)-i > a->size)
             return NULL;
@@ -143,7 +143,8 @@ JOIN(I, advance)(I* iter, long i)
     for(long j = 0; node != NULL && j < i; j++)
         node = node->next;
     iter->node = node;
-    iter->ref = &node->value;
+    if (LIKELY(node))
+        iter->ref = &node->value;
     return iter;
 }
 
@@ -151,7 +152,7 @@ static inline long
 JOIN(I, distance)(I* iter, I* other)
 {
     long d = 0;
-    if (iter == other || iter->node == other->node)
+    if (UNLIKELY(iter == other || iter->node == other->node))
         return 0;
     B* i = iter->node;
     for(; i != NULL && i != other->node; d++)
@@ -226,8 +227,7 @@ JOIN(A, connect_before)(A* self, B* position, B* node)
         self->head = self->tail = node;
         self->size++;
     }
-    else
-    if (self->size < JOIN(A, max_size)())
+    else if (LIKELY(self->size < JOIN(A, max_size)()))
     {
         node->next = position;
         node->prev = position->prev;
@@ -257,7 +257,7 @@ JOIN(A, push_front)(A* self, T value)
 static inline void
 JOIN(A, transfer_before)(A* self, A* other, B* position, B* node)
 {
-    if (other->size)
+    if (LIKELY(other->size))
         JOIN(A, disconnect)(other, node);
     JOIN(A, connect_before)(self, position, node);
 }
@@ -265,7 +265,8 @@ JOIN(A, transfer_before)(A* self, A* other, B* position, B* node)
 static inline void
 JOIN(A, erase_node)(A* self, B* node)
 {
-    JOIN(A, disconnect)(self, node);
+    if (LIKELY(self->size))
+        JOIN(A, disconnect)(self, node);
     FREE_VALUE(self, node->value);
     free(node);
 }
@@ -273,7 +274,8 @@ JOIN(A, erase_node)(A* self, B* node)
 static inline void
 JOIN(A, erase)(I* it)
 {
-    JOIN(A, erase_node)(it->container, it->node);
+    if (LIKELY(it->node))
+        JOIN(A, erase_node)(it->container, it->node);
 }
 
 static inline void
@@ -322,8 +324,7 @@ JOIN(A, connect_after)(A* self, B* position, B* node)
         self->head = self->tail = node;
         self->size += 1;
     }
-    else
-    if (self->size < JOIN(A, max_size)())
+    else if (LIKELY(self->size < JOIN(A, max_size)()))
     {
         node->prev = position;
         node->next = position->next;
@@ -353,7 +354,7 @@ JOIN(A, push_back)(A* self, T value)
 static inline void
 JOIN(A, resize)(A* self, size_t size, T value)
 {
-    if(size != self->size && size < JOIN(A, max_size)())
+    if(LIKELY(size != self->size && size < JOIN(A, max_size)()))
         for(size_t i = 0; size != self->size; i++)
             (size < self->size)
                 ? JOIN(A, pop_back)(self)
@@ -574,6 +575,7 @@ JOIN(A, splice_range)(I* pos, I* first2, I* last2)
 static inline void
 JOIN(A, transfer_after)(A* self, A* other, B* position, B* node)
 {
+    ASSERT(other->size);
     JOIN(A, disconnect)(other, node);
     JOIN(A, connect_after)(self, position, node);
 }
