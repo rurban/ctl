@@ -523,13 +523,15 @@ JOIN(A, splice)(I* pos, A* other)
     A* self = pos->container;
     if(self->size == 0 && pos->node == NULL)
         JOIN(A, swap)(self, other);
-    else
+    else if (other->size)
     {
-        list_foreach(A, other, it)
+        B *node = other->head;
+        B *next;
+        while(node)
         {
-            B* next = it.node->next;
-            JOIN(A, transfer_before)(self, other, pos->node, it.node);
-            it.node->next = next;
+            next = node->next;
+            JOIN(A, transfer_before)(self, other, pos->node, node);
+            node = next;
         }
     }
 }
@@ -540,16 +542,17 @@ JOIN(A, splice_it)(I* pos, I* first2)
 {
     A* self = pos->container;
     A* other = first2->container;
-    if(self->size == 0)
+    if(self->size == 0 && pos->node == NULL)
         JOIN(A, swap)(self, other);
-    else
+    else if (other->size)
     {
-        I end = JOIN(A, end)(other);
-        list_foreach_range(A, it, first2, &end)
+        B *node = first2->node;
+        B *next;
+        while(node)
         {
-            B* next = it.node->next;
-            JOIN(A, transfer_before)(self, other, pos->node, it.node);
-            it.node->next = next;
+            next = node->next;
+            JOIN(A, transfer_before)(self, other, pos->node, node);
+            node = next;
         }
     }
 }
@@ -561,13 +564,17 @@ JOIN(A, splice_range)(I* pos, I* first2, I* last2)
     A* other = first2->container;
     if(self->size == 0 && pos->node == NULL)
         JOIN(A, swap)(self, other);
-    else
-        list_foreach_range(A, it, first2, last2)
+    else if (other->size)
+    {
+        B *node = first2->node;
+        B *next;
+        while(node != last2->node)
         {
-            B* next = it.node->next;
-            JOIN(A, transfer_before)(self, other, pos->node, it.node);
-            it.node->next = next;
+            next = node->next;
+            JOIN(A, transfer_before)(self, other, pos->node, node);
+            node = next;
         }
+    }
 }
 #endif
 

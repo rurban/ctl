@@ -12,7 +12,7 @@ void print_lst(list_digi *a)
     int i = 0;
     list_foreach_ref(list_digi, a, it)
         printf ("%d: %d\n", i++, *it.ref->value);
-    printf ("\n");
+    printf ("====\n");
 }
 
 void print_list(std::list<DIGI> &b)
@@ -20,7 +20,7 @@ void print_list(std::list<DIGI> &b)
     int i = 0;
     for(auto& d: b)
         printf ("%d: %d\n", i++, *d.value);
-    printf ("\n");
+    printf ("----\n");
 }
 
 #ifdef DEBUG
@@ -191,10 +191,10 @@ main(void)
         TEST(REMOVE) \
         TEST(EMPLACE) \
         TEST(EMPLACE_FRONT) \
-        TEST(EMPLACE_BACK) \
+        TEST(EMPLACE_BACK) /* 15 */ \
         TEST(REMOVE_IF) \
         TEST(ERASE_IF) \
-        TEST(SPLICE) \
+        TEST(SPLICE) /* 18 */ \
         TEST(MERGE) \
         TEST(EQUAL) \
         TEST(SORT) \
@@ -489,9 +489,14 @@ main(void)
                 std::advance(iter, index);
                 list_digi aa;
                 std::list<DIGI> bb;
+                LOG("splice at b[%zu]: bb => result, a\n", index);
+                print_list(b);
                 setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                print_list(bb);
                 b.splice(iter, bb);
+                print_list(b);
                 list_digi_splice(&it, &aa);
+                print_lst(&a);
                 CHECK(a, b);
                 break;
             }
@@ -752,9 +757,13 @@ main(void)
                 std::advance(bbpos, bsize / 2);
                 list_digi_it aapos = list_digi_begin(&aa);
                 list_digi_it_advance(&aapos, bsize / 2);
-
+                LOG("splice at b[%zu]: bb[%zu] => result, a\n", index, bsize / 2);
+                print_list(b);
+                print_list(bb);
                 b.splice(iter, bb, bbpos);
+                print_list(b);
                 list_digi_splice_it(&it, &aapos);
+                print_lst(&a);
                 CHECK(a, b);
                 break;
             }
