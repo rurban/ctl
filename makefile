@@ -118,7 +118,7 @@ EXAMPLES = \
 	examples/6502
 
 # was GNU ${foreach bin,${TESTS},./${bin} &&}
-all: ${TESTS} docs/index.md
+check: ${TESTS} docs/index.md
 .for t in ${TESTS}
 	./${t}
 .endfor
@@ -127,7 +127,8 @@ all: ${TESTS} docs/index.md
 	@${CXX} --version | head -n2
 	@echo ${CXX} ${CXXFLAGS}
 
-check: all
+all: check perf examples #verify
+
 .cflags: ALWAYS
 	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
 images:
@@ -214,6 +215,30 @@ ${srcc} : ${srcc}.c .cflags ${H}
 ${srccc} : ${srccc}.cc .cflags ${H}
 	${CXX} ${CFLAGS} -o $@ $@.cc
 .endfor
+
+VERIFY = ${subst .c,, ${wildcard tests/verify/*.c}}
+
+tests/verify/set-erase tests/verify/set-find : tests/verify/set-erase.c \
+	                                       tests/verify/set-find.c .cflags ${H}
+	${CC} ${CFLAGS} -o $@ $@.c && ./$@
+	-cbmc --unwind 6 -I. $@.c
+
+.for srcc1 in ${subst .c,, ${wildcard tests/verify/*-1.c}}
+${srcc1} : ${srcc1}.c .cflags ${H}
+	${CC} ${CFLAGS} -o $@ $@.c && ./$@
+	-cbmc --unwind 4 -I. $@.c
+.endfor
+.for srcc2 in ${subst .c,, ${wildcard tests/verify/*-2.c}}
+${srcc2} : ${srcc2}.c .cflags ${H}
+	${CC} ${CFLAGS} -o $@ $@.c && ./$@
+	-cbmc --unwind 6 -I. $@.c
+	-for c in `satabs --show-claims -I. $@.c | \
+                   perl -lne'/Claim (main.\d+):/ && print $$1'`; do \
+             timeout 5m satabs --concurrency --max-threads 4 --iterations 24 --claim $$c -I. $@.c; \
+         done
+.endfor
+
+verify: ${VERIFY}
 
 #tests/func/%: tests/func/%.cc .cflags ${H}
 #	${CXX} ${CFLAGS} -o $@ $@.cc

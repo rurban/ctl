@@ -182,7 +182,7 @@ JOIN(I, distance)(I* iter, I* other)
     n = other->node;
     for(; n != NULL && n != iter->node; d--)
         n = JOIN(B, next)(n);
-    return n ? -d : LONG_MAX;
+    return n ? -d : -(long)(iter->container->size);
 }
 
 // set first and last ranges

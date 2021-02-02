@@ -156,13 +156,13 @@ resizes and sets count elements to the default value.
 
 clears the contents
 
-    insert (A* self, size_t index, T value)
+    insert_index (A* self, size_t index, T value)
 
-inserts the element at index. _(will be replaced by `insert_it` later)_
+inserts the element at index.
 
-    I* insert_it (I* pos, T value)
+    I* insert (I* pos, T value)
 
-inserts value before pos. _(will be removed later)_
+inserts value before pos.
 
     I* insert_count (I* pos, size_t count, T value)
 

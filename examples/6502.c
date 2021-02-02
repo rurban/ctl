@@ -135,8 +135,8 @@ find(str* name)
     token key;
     key.name = *name;
     set_token_node* node;
-    if((node = set_token_find(&global.tokens, key)))
-        return &node->key;
+    if((node = set_token_find_node(&global.tokens, key)))
+        return &node->value;
     return NULL;
 }
 
@@ -193,9 +193,9 @@ void
 save(void)
 {
     FILE* out = fopen("out.asm", "w");
-    foreach_ref(list, str, &global.assem, it, ref)
+    foreach(list_str, &global.assem, it)
     {
-        char* s = str_c_str(ref);
+        char* s = str_c_str(it.ref);
         puts(s);
         fprintf(out, "%s\n", s);
     }
@@ -872,8 +872,8 @@ unroll(void)
         str_free(&temp);
     }
     match('}');
-    foreach_ref(list, str, &expanded, it, ref)
-        prime(ref);
+    foreach(list_str, &expanded, it)
+        prime(it.ref);
     list_str_free(&expanded);
     str_free(&meta);
     str_free(&reftok);
@@ -965,9 +965,9 @@ pop_locals(size_t size)
         size--;
     }
     write("; %8s %8s %6s %6s %6s", "TYPE", "NAME", "SIZE", "ADDR", "FAM");
-    foreach_ref(list, str, &reversed, it, ref)
+    foreach(list_str, &reversed, it)
     {
-        token* tok = get(ref);
+        token* tok = get(it.ref);
         write("; %8s %8s %6d %6d %6d",
               str_c_str(&tok->type), str_c_str(&tok->name), tok->size, tok->addr, tok->fam);
         global.local_addr -= tok->size;

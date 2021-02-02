@@ -385,11 +385,11 @@ static void
 traverse(set_pair* json, int tabs)
 {
     printf("{\n");
-    foreach_ref(set, pair, json, it, ref)
+    foreach(set_pair, json, it)
     {
         tab(tabs);
-        printf("\"%s\" : ", str_c_str(&ref->string));
-        pprint(ref->value, tabs);
+        printf("\"%s\" : ", str_c_str(&it.ref->string));
+        pprint(it.ref->value, tabs);
         putchar('\n');
     }
     tab(tabs - 1);
@@ -415,12 +415,12 @@ pprint(valp value, int tabs)
             printf("[");
             vec_valp* array = value->of.array;
             int index = 0;
-            foreach_ref(vec, valp, array, it, ref)
+            foreach(vec_valp, array, it)
             {
-                valp v = *ref;
+                valp v = *it.ref;
                 printf("[%d] = ", index);
                 pprint(v, tabs);
-                if(ref < vec_valp_end(array) - 1)
+                if(it.ref < vec_valp_back(array))
                     printf(", ");
                 index++;
             }
@@ -455,10 +455,10 @@ get(valp value, char* s)
     {
         pair p;
         p.string = str_init(s);
-        set_pair_node* node = set_pair_find(value->of.object, p);
+        set_pair_node* node = set_pair_find_node(value->of.object, p);
         str_free(&p.string);
         if(node)
-            return node->key.value;
+            return node->value.value;
     }
     return NULL;
 }
@@ -495,7 +495,7 @@ erase_ind(valp value, size_t index)
 {
     if(is_array(value))
         if(is_array_in_bounds(value, index))
-            vec_valp_erase(value->of.array, index);
+            vec_valp_erase_index(value->of.array, index);
 }
 
 int

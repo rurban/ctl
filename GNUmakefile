@@ -137,14 +137,15 @@ EXAMPLES = \
 	examples/snow \
 	examples/6502
 
-all: $(TESTS) docs/index.md
+check: $(TESTS) docs/index.md
 	$(foreach bin,$(TESTS),./$(bin) &&) exit 0
 	@$(CC) --version | head -n2
 	@echo $(CC) $(CFLAGS)
 	@$(CXX) --version | head -n2
 	@echo $(CXX) $(CXXFLAGS)
 
-check: all
+all: check perf examples #verify
+
 .cflags: ALWAYS
 	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
 images:
