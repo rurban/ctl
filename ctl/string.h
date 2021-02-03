@@ -16,8 +16,8 @@
 #define str_init str___INIT
 #define str_equal str___EQUAL
 #define str_find str___FIND
-#define str_begin str___BEGIN
-#define str_end str___END
+#define str_begin str_it_begin
+#define str_end str_it_end
 
 #define str_foreach(self, it)                    \
     if ((self)->size)                            \

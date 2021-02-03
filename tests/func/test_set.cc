@@ -190,6 +190,26 @@ main(void)
         /* TEST(EXTRACT) */ \
         /* TEST(MERGE) */ \
         TEST(EQUAL_RANGE) \
+        TEST(INSERT_RANGE) \
+        TEST(FIND_END) \
+        TEST(FIND_END_IF) \
+        TEST(FIND_END_RANGE) \
+        TEST(FIND_END_IF_RANGE) \
+        TEST(LOWER_BOUND) \
+        TEST(UPPER_BOUND) \
+        TEST(LOWER_BOUND_RANGE) \
+        TEST(UPPER_BOUND_RANGE) \
+        TEST(UNION) \
+        TEST(DIFFERENCE) \
+        TEST(SYMETRIC_DIFFERENCE) \
+        TEST(INTERSECTION) \
+        TEST(GENERATE) \
+        TEST(GENERATE_RANGE) \
+        TEST(TRANSFORM) \
+        TEST(GENERATE_N) \
+        TEST(GENERATE_N_RANGE) \
+        TEST(TRANSFORM_IT) \
+        TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -641,11 +661,6 @@ main(void)
                     CHECK_ITER(aa, b, bb);
                 break;
             }
-#ifdef DEBUG // algorithm and ranges
-            case TEST_EQUAL_RANGE:
-                printf("nyi\n");
-                break;
-#endif
             case TEST_ERASE_RANGE:
             {
                 const size_t erases = TEST_RAND(TEST_MAX_SIZE) / 4;
@@ -665,6 +680,14 @@ main(void)
                     }
                 break;
             }
+#ifdef DEBUG // algorithm and ranges
+            case TEST_EQUAL_RANGE:
+                printf("nyi\n");
+                break;
+#endif
+            default:
+                printf("unhandled testcase %d\n", which);
+                break;
         }
         print_set(&a);
         print_setpp(b);

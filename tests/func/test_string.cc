@@ -49,14 +49,24 @@
         assert(_y.at(i) == *str_at(&_x, i));         \
 }
 
+#define CHECK_ITER(aa,b,bb)                          \
+    if (!str_it_done(&aa))                           \
+    {                                                \
+        assert (bb != b.end());                      \
+        assert(*aa.ref == *bb);                      \
+    } else                                           \
+        assert (bb == b.end())
+
+#define RAND_CHAR   ('0' + TEST_RAND('z' - '0'))
+#define RAND_ALPHA  ((TEST_RAND(2) ? 'a' : 'A') + TEST_RAND(ALPHA_LETTERS))
+
 static char*
 create_test_string(size_t size)
 {
     char* temp = (char*) malloc(size + 1);
     for(size_t i = 0; i < size; i++)
     {
-        const int r = TEST_RAND(ALPHA_LETTERS);
-        temp[i] = (TEST_RAND(2) ? 'a' : 'A') + r;
+        temp[i] = RAND_ALPHA;
     }
     temp[size] = '\0';
     return temp;
@@ -66,6 +76,85 @@ static int
 char_compare(char* a, char* b)
 {
     return *a > *b;
+}
+
+int is_upper(char* a) {
+    return *a >= 'A' && *a <= 'Z';
+}
+
+int STL_is_upper(const char &a) {
+    return a >= 'A' && a <= 'Z';
+}
+
+static int _generator_state = 0;
+void str_generate_reset () {
+    _generator_state = 0;
+}
+char str_generate (void) {
+    _generator_state++;
+    return '0' + (_generator_state % ('z' - '0'));
+}
+char STR_generate (void) {
+    _generator_state++;
+    return '0' + (_generator_state % ('z' - '0'));
+}
+char str_untrans (char* s) {
+    return *s + 1;
+}
+char STR_untrans (const char& s) {
+    return s + 1;
+}
+char str_bintrans (char* s1, char* s2) {
+    return *s1 ^ *s2;
+}
+char STR_bintrans (const char& s1, const char& s2) {
+    return s1 ^ s2;
+}
+
+static void
+get_random_iters (str *a, str_it* first_a, str_it* last_a,
+                  std::string& b, std::string::iterator &first_b,
+                  std::string::iterator &last_b)
+{
+    size_t r1 = TEST_RAND(a->size / 2);
+    const size_t rnd = TEST_RAND(a->size / 2);
+    size_t r2 = MIN(r1 + rnd, a->size);
+    LOG("iters %zu, %zu of %zu\n", r1, r2, a->size);
+    if (a->size)
+    {
+        str_it it1 = str_it_begin(a);
+        first_b = b.begin();
+        str_it_advance(&it1, r1);
+        first_b += r1;
+        *first_a = it1;
+
+        if (r1 == r2)
+        {
+            *last_a = it1;
+            last_b = first_b;
+        }
+        else if (r2 == a->size)
+        {
+            *last_a = str_it_end(a);
+            last_b = b.end();
+        }
+        else
+        {
+            str_it it2 = str_it_begin(a);
+            last_b = b.begin();
+            str_it_advance(&it2, r2);
+            last_b += r2;
+            *last_a = it2;
+        }
+    }
+    else
+    {
+        str_it end = str_it_end(a);
+        *first_a = end;
+        *last_a = end;
+        first_b = b.begin();
+        last_b = b.end();
+    }
 }
 
 int
@@ -136,18 +225,54 @@ main(void)
             TEST(FIND_LAST_NOT_OF) \
             TEST(SUBSTR) \
             TEST(COMPARE) \
-            TEST(COUNT)
+            TEST(COUNT) \
+            TEST(COUNT_IF) \
+            TEST(ALL_OF) \
+            TEST(ANY_OF) \
+            TEST(NONE_OF) \
+            TEST(FIND_RANGE) \
+            TEST(FIND_IF_RANGE) \
+            TEST(FIND_IF_NOT_RANGE) \
+            TEST(ALL_OF_RANGE) \
+            TEST(ANY_OF_RANGE) \
+            TEST(NONE_OF_RANGE) \
+            TEST(COUNT_IF_RANGE) \
+            TEST(COUNT_RANGE) \
+            TEST(GENERATE) \
+            TEST(GENERATE_RANGE) \
+            TEST(TRANSFORM) \
+            TEST(TRANSFORM_IT) \
+
+#define FOREACH_DEBUG(TEST) \
+            TEST(INSERT_COUNT) \
+            TEST(INSERT_RANGE) \
+            TEST(EQUAL_RANGE) \
+            TEST(LOWER_BOUND) \
+            TEST(UPPER_BOUND) \
+            TEST(LOWER_BOUND_RANGE) \
+            TEST(UPPER_BOUND_RANGE) \
+            TEST(UNION) \
+            TEST(DIFFERENCE) \
+            TEST(SYMETRIC_DIFFERENCE) \
+            TEST(INTERSECTION) \
+            TEST(GENERATE_N) \
+            TEST(GENERATE_N_RANGE) \
+            TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
             enum {
                 FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+                FOREACH_DEBUG(GENERATE_ENUM)
+#endif
                 TEST_TOTAL
             };
 #ifdef DEBUG
             static const char *test_names[] = {
                 FOREACH_METH(GENERATE_NAME)
+                FOREACH_DEBUG(GENERATE_NAME)
                 ""
             };
 #endif
@@ -306,7 +431,7 @@ main(void)
                     size_t letters = TEST_RAND(512);
                     for(size_t count = 0; count < letters; count++)
                     {
-                        const char value = TEST_RAND(ALPHA_LETTERS);
+                        const char value = RAND_ALPHA;
                         const size_t index = TEST_RAND(a.size);
                         b.insert(b.begin() + index, value);
                         str_insert(&a, index, value);
@@ -362,7 +487,7 @@ main(void)
                 }
                 case TEST_ASSIGN:
                 {
-                    const char value = TEST_RAND(ALPHA_LETTERS);
+                    const char value = RAND_ALPHA;
                     size_t assign_size = TEST_RAND(a.size);
                     str_assign(&a, assign_size, value);
                     b.assign(assign_size, value);
@@ -384,10 +509,219 @@ main(void)
                 }
                 case TEST_COUNT:
                 {
-                    const char value = TEST_RAND(ALPHA_LETTERS);
+                    const char value = RAND_ALPHA;
                     assert(count(b.begin(), b.end(), value) == str_count(&a, value));
                     break;
                 }
+                case TEST_GENERATE:
+                {
+                    str_generate_reset();
+                    str_generate(&a, str_generate);
+                    str_generate_reset();
+                    std::generate(b.begin(), b.end(), STR_generate);
+                    CHECK(a, b);
+                    break;
+                }
+                // wrong range end condition. ref == last is already too late.
+                case TEST_FIND_RANGE:
+                {
+                    const char c = RAND_CHAR;
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    first_a = str_find_range(&first_a, &last_a, c);
+                    auto bb = std::find(first_b, last_b, c);
+                    CHECK_ITER(first_a, b, bb);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_FIND_IF_RANGE:
+                {
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    first_a = str_find_if_range(&first_a, &last_a, is_upper);
+                    auto bb = std::find_if(first_b, last_b, STL_is_upper);
+                    CHECK_ITER(first_a, b, bb);
+                    break;
+                }
+                case TEST_FIND_IF_NOT_RANGE:
+                {
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    first_a = str_find_if_not_range(&first_a, &last_a, is_upper);
+                    auto bb = std::find_if_not(first_b, last_b, STL_is_upper);
+                    CHECK_ITER(first_a, b, bb);
+                    break;
+                }
+                case TEST_ALL_OF_RANGE:
+                {
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    bool aa = str_all_of_range(&first_a, &last_a, is_upper);
+                    bool bb = std::all_of(first_b, last_b, STL_is_upper);
+                    assert(aa == bb);
+                    break;
+                }
+                case TEST_ANY_OF_RANGE:
+                {
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    bool aa = str_any_of_range(&first_a, &last_a, is_upper);
+                    bool bb = std::any_of(first_b, last_b, STL_is_upper);
+                    assert(aa == bb);
+                    break;
+                }
+                case TEST_NONE_OF_RANGE:
+                {
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    bool aa = str_none_of_range(&first_a, &last_a, is_upper);
+                    bool bb = std::none_of(first_b, last_b, STL_is_upper);
+                    assert(aa == bb);
+                    break;
+                }
+                case TEST_COUNT_IF_RANGE:
+                {
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    size_t numa = str_count_if_range(&first_a, &last_a, is_upper);
+                    size_t numb = std::count_if(first_b, last_b, STL_is_upper);
+                    assert(numa == numb); //fails. off by one, counts one too much
+                    break;
+                }
+                case TEST_COUNT_RANGE:
+                {
+                    char c = RAND_CHAR;
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    // used to fail with 0,0 of 0
+                    size_t numa = str_count_range(&first_a, &last_a, c);
+                    size_t numb = count(first_b, last_b, c);
+                    assert(numa == numb);
+                    break;
+                }
+                case TEST_ALL_OF:
+                {
+                    bool is_a = str_all_of(&a, is_upper);
+                    bool is_b = all_of(b.begin(), b.end(), STL_is_upper);
+                    assert(is_a == is_b);
+                    break;
+                }
+                case TEST_ANY_OF:
+                {
+                    bool is_a = str_any_of(&a, is_upper);
+                    bool is_b = any_of(b.begin(), b.end(), STL_is_upper);
+                    assert(is_a == is_b);
+                    break;
+                }
+                case TEST_NONE_OF:
+                {
+                    bool is_a = str_none_of(&a, is_upper);
+                    bool is_b = none_of(b.begin(), b.end(), STL_is_upper);
+                    assert(is_a == is_b);
+                    break;
+                }
+                case TEST_COUNT_IF:
+                {
+                    size_t count_a = str_count_if(&a, is_upper);
+                    size_t count_b = count_if(b.begin(), b.end(), STL_is_upper);
+                    assert(count_a == count_b);
+                    break;
+                }
+                case TEST_GENERATE_RANGE:
+                {
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    str_generate_reset();
+                    str_generate_range(&first_a, &last_a, str_generate);
+                    str_generate_reset();
+                    std::generate(first_b, last_b, STR_generate);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_TRANSFORM:
+                {
+                    str aa = str_transform(&a, str_untrans);
+                    std::string bb;
+                    bb.resize(b.size());
+                    std::transform(b.begin(), b.end(), bb.begin(), STR_untrans);
+                    CHECK(aa, bb);
+                    CHECK(a, b);
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_TRANSFORM_IT:
+                {
+                    str_it pos = str_it_begin(&a);
+                    str_it_advance(&pos, 1);
+                    str aa = str_transform_it(&a, &pos, str_bintrans);
+                    std::string bb;
+                    bb.resize(b.size());
+                    std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), STR_bintrans);
+                    CHECK(aa, bb);
+                    CHECK(a, b);
+                    str_free(&aa);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_INSERT_COUNT:
+                case TEST_INSERT_RANGE:
+                case TEST_EQUAL_RANGE:
+                    printf("nyi\n");
+                    break;
+                case TEST_TRANSFORM_RANGE:
+                {
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    str aa = str_init(a.vector);
+                    str_it dest = str_it_begin(&aa);
+                    str_it it = str_transform_range(&first_a, &last_a, dest, str_untrans);
+                    std::string bb;
+                    bb.resize(last_b - first_b);
+                    auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(), STR_bintrans);
+                    CHECK_ITER(it, bb, iter);
+                    CHECK(aa, bb);
+                    CHECK(a, b);
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_GENERATE_N:
+                {
+                    size_t count = TEST_RAND(20);
+                    str_generate_reset();
+                    str_generate_n(&a, count, str_generate);
+                    str_generate_reset();
+                    std::generate_n(b.begin(), count, STR_generate);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_GENERATE_N_RANGE:
+                {
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    size_t off = first_b - b.begin();
+                    size_t count = TEST_RAND(20 - off);
+                    str_generate_reset();
+                    str_generate_n_range(&first_a, count, str_generate);
+                    str_generate_reset();
+                    std::generate_n(first_b, count, STR_generate);
+                    CHECK(a, b);
+                    break;
+                }
+#endif
+            default:
+                printf("unhandled testcase %d\n", which);
+                break;
             }
             CHECK(a, b);
             str_free(&a);

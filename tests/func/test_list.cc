@@ -224,6 +224,25 @@ main(void)
 #define FOREACH_DEBUG(TEST) \
         TEST(INSERT_RANGE) \
         TEST(EQUAL_RANGE) \
+        TEST(FIND_END) \
+        TEST(FIND_END_IF) \
+        TEST(FIND_END_RANGE) \
+        TEST(FIND_END_IF_RANGE) \
+        TEST(LOWER_BOUND) \
+        TEST(UPPER_BOUND) \
+        TEST(LOWER_BOUND_RANGE) \
+        TEST(UPPER_BOUND_RANGE) \
+        TEST(UNION) \
+        TEST(DIFFERENCE) \
+        TEST(SYMETRIC_DIFFERENCE) \
+        TEST(INTERSECTION) \
+        TEST(GENERATE) \
+        TEST(GENERATE_RANGE) \
+        TEST(TRANSFORM) \
+        TEST(GENERATE_N) \
+        TEST(GENERATE_N_RANGE) \
+        TEST(TRANSFORM_IT) \
+        TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -816,8 +835,9 @@ main(void)
                 break;
             }
 #ifdef DEBUG
-            case TEST_INSERT_RANGE:
             // algorithms + ranges
+            case TEST_INSERT_RANGE:
+                printf("nyi\n");
                 break;
             case TEST_EQUAL_RANGE:
             {
@@ -834,6 +854,9 @@ main(void)
                 break;
             }
 #endif
+            default:
+                printf("unhandled testcase %d\n", which);
+                break;
         }
         CHECK(a, b);
         list_digi_free(&a);

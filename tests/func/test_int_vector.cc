@@ -217,21 +217,33 @@ main(void)
         TEST(NONE_OF) \
         TEST(COUNT) \
         TEST(COUNT_IF) \
+        TEST(GENERATE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(INSERT_COUNT) \
         TEST(INSERT_RANGE) \
         TEST(EQUAL_RANGE) \
+        TEST(FIND_END) \
+        TEST(FIND_END_IF) \
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
+        TEST(FIND_END_RANGE) \
+        TEST(FIND_END_IF_RANGE) \
         TEST(ALL_OF_RANGE) \
         TEST(ANY_OF_RANGE) \
         TEST(NONE_OF_RANGE) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
+        TEST(LOWER_BOUND) \
+        TEST(UPPER_BOUND) \
+        TEST(LOWER_BOUND_RANGE) \
+        TEST(UPPER_BOUND_RANGE) \
+        TEST(UNION) \
         TEST(DIFFERENCE) \
+        TEST(SYMETRIC_DIFFERENCE) \
         TEST(INTERSECTION) \
+        TEST(GENERATE_RANGE) \
         TEST(GENERATE_N) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM) \
@@ -592,6 +604,15 @@ main(void)
                     assert(count_a == count_b);
                     break;
                 }
+                case TEST_GENERATE:
+                {
+                    int_generate_reset();
+                    vec_int_generate(&a, int_generate);
+                    int_generate_reset();
+                    std::generate(b.begin(), b.end(), int_generate);
+                    CHECK(a, b);
+                    break;
+                }
 #ifdef DEBUG
                 case TEST_INSERT_COUNT:
                 case TEST_INSERT_RANGE:
@@ -600,6 +621,18 @@ main(void)
                 case TEST_INTERSECTION:
                     printf("nyi\n");
                     break;
+                case TEST_GENERATE_RANGE:
+                {
+                    vec_int_it first_a, last_a;
+                    std::vector<int>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    int_generate_reset();
+                    vec_int_generate_range(&first_a, &last_a, int_generate);
+                    int_generate_reset();
+                    std::generate(first_b, last_b, int_generate);
+                    CHECK(a, b);
+                    break;
+                }
                 case TEST_GENERATE_N:
                 {
                     size_t count = TEST_RAND(20);
@@ -666,6 +699,9 @@ main(void)
                     break;
                 }
 #endif
+            default:
+                printf("unhandled testcase %d\n", which);
+                break;
             }
             CHECK(a, b);
             vec_int_free(&a);

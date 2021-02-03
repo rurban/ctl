@@ -168,29 +168,29 @@ main(void)
         TEST(ASSIGN) \
         TEST(EQUAL) \
         TEST(FIND) \
-        TEST(ALL_OF) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
+        TEST(ALL_OF) \
+        TEST(ANY_OF) \
         TEST(NONE_OF) \
         TEST(COUNT) \
         TEST(COUNT_IF) \
-        TEST(ALL_OF_RANGE) \
         TEST(CLEAR) \
+        TEST(GENERATE) \
+
+#define FOREACH_DEBUG(TEST) \
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
         TEST(NONE_OF_RANGE) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
-        TEST(GENERATE) \
-        TEST(GENERATE_RANGE) \
-
-#define FOREACH_DEBUG(TEST) \
-        TEST(ANY_OF) \
+        TEST(ALL_OF_RANGE) \
         TEST(ANY_OF_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(INTERSECTION) \
         TEST(DIFFERENCE) \
+        TEST(GENERATE_RANGE) \
         TEST(GENERATE_N) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM) \
@@ -311,6 +311,66 @@ main(void)
                     assert(*aa == *bb);
                 break;
             }
+            case TEST_GENERATE:
+            {
+                double_generate_reset();
+                arr20_double_generate(&a, double_generate);
+                double_generate_reset();
+                std::generate(b.begin(), b.end(), double_generate);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_FIND_IF:
+            {
+                arr20_double_it aa = arr20_double_find_if(&a, double_is_odd);
+                auto bb = std::find_if(b.begin(), b.end(), DOUBLE_is_odd);
+                CHECK_ITER(aa, b, bb);
+                break;
+            }
+            case TEST_FIND_IF_NOT:
+            {
+                arr20_double_it aa = arr20_double_find_if_not(&a, double_is_odd);
+                auto bb = std::find_if_not(b.begin(), b.end(), DOUBLE_is_odd);
+                CHECK_ITER(aa, b, bb);
+                break;
+            }
+            case TEST_ALL_OF:
+            {
+                bool is_a = arr20_double_all_of(&a, double_is_odd);
+                bool is_b = std::all_of(b.begin(), b.end(), DOUBLE_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
+            case TEST_ANY_OF:
+            {
+                bool is_a = arr20_double_any_of(&a, double_is_odd);
+                bool is_b = std::any_of(b.begin(), b.end(), DOUBLE_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
+            case TEST_NONE_OF:
+            {
+                bool is_a = arr20_double_none_of(&a, double_is_odd);
+                bool is_b = std::none_of(b.begin(), b.end(), DOUBLE_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
+            case TEST_COUNT:
+            {
+                double v = TEST_RAND(2) ? rand() * 1.0 : 0.0;
+                int aa = arr20_double_count(&a, v);
+                int bb = std::count(b.begin(), b.end(), v);
+                assert(aa == bb);
+                break;
+            }
+            case TEST_COUNT_IF:
+            {
+                size_t count_a = arr20_double_count_if(&a, double_is_odd);
+                size_t count_b = std::count_if(b.begin(), b.end(), DOUBLE_is_odd);
+                assert(count_a == count_b);
+                break;
+            }
+#ifdef DEBUG
             case TEST_FIND_RANGE:
             {
                 int vb = TEST_RAND(2) ? rand() * 1.0 : random_element(&a);
@@ -410,7 +470,6 @@ main(void)
                 assert(numa == numb);
                 break;
             }
-#ifdef DEBUG
             case TEST_ANY_OF_RANGE:
             {
                 arr20_double_it first_a, last_a;
@@ -433,6 +492,20 @@ main(void)
             case TEST_DIFFERENCE:
                 printf("nyi\n");
                 break;
+            case TEST_GENERATE_RANGE:
+            {
+                arr20_double_it first_a, last_a;
+                std::array<double,20>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                size_t off = first_b - b.begin();
+                size_t count = TEST_RAND(20 - off);
+                double_generate_reset();
+                arr20_double_generate_range(&first_a, &last_a, double_generate);
+                double_generate_reset();
+                std::generate(first_b, last_b, double_generate);
+                CHECK(a, b);
+                break;
+            }
             case TEST_GENERATE_N:
             {
                 size_t count = TEST_RAND(20);
@@ -495,7 +568,6 @@ main(void)
                 arr20_double_free(&aa);
                 break;
             }
-#endif
             case TEST_GENERATE_RANGE:
             {
                 arr20_double_it first_a, last_a;
@@ -508,72 +580,7 @@ main(void)
                 CHECK(a, b);
                 break;
             }
-            case TEST_GENERATE:
-            {
-                double_generate_reset();
-                arr20_double_generate(&a, double_generate);
-                double_generate_reset();
-                std::generate(b.begin(), b.end(), double_generate);
-                CHECK(a, b);
-                break;
-            }
-            case TEST_FIND_IF:
-            {
-                arr20_double_it aa = arr20_double_find_if(&a, double_is_odd);
-                auto bb = std::find_if(b.begin(), b.end(), DOUBLE_is_odd);
-                CHECK_ITER(aa, b, bb);
-                break;
-            }
-            case TEST_FIND_IF_NOT:
-            {
-                arr20_double_it aa = arr20_double_find_if_not(&a, double_is_odd);
-                auto bb = std::find_if_not(b.begin(), b.end(), DOUBLE_is_odd);
-                CHECK_ITER(aa, b, bb);
-                break;
-            }
-            case TEST_ALL_OF:
-            {
-                bool is_a = arr20_double_all_of(&a, double_is_odd);
-                bool is_b = std::all_of(b.begin(), b.end(), DOUBLE_is_odd);
-                assert(is_a == is_b);
-                break;
-            }
-            case TEST_ANY_OF:
-            {
-                bool is_a = arr20_double_any_of(&a, double_is_odd);
-                bool is_b = std::any_of(b.begin(), b.end(), DOUBLE_is_odd);
-                /*if (is_a != is_b)
-                {
-                    print_arr20(&a);
-                    print_array(b);
-                    printf ("%d != %d FAIL\n", (int)is_a, (int)is_b);
-                    fail++;
-                }*/
-                assert(is_a == is_b);
-                break;
-            }
-            case TEST_NONE_OF:
-            {
-                bool is_a = arr20_double_none_of(&a, double_is_odd);
-                bool is_b = std::none_of(b.begin(), b.end(), DOUBLE_is_odd);
-                assert(is_a == is_b);
-                break;
-            }
-            case TEST_COUNT:
-            {
-                double v = TEST_RAND(2) ? rand() * 1.0 : 0.0;
-                int aa = arr20_double_count(&a, v);
-                int bb = std::count(b.begin(), b.end(), v);
-                assert(aa == bb);
-                break;
-            }
-            case TEST_COUNT_IF:
-            {
-                size_t count_a = arr20_double_count_if(&a, double_is_odd);
-                size_t count_b = std::count_if(b.begin(), b.end(), DOUBLE_is_odd);
-                assert(count_a == count_b);
-                break;
-            }
+#endif
         }
         CHECK(a, b);
         arr20_double_free(&a);

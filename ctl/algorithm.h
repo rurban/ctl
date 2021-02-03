@@ -323,7 +323,7 @@ JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*
 }
 #endif
 
-#if !defined(CTL_USET) && !defined(CTL_STR)
+#if !defined(CTL_USET)
 /// uset has cached_hash optims
 static inline size_t
 JOIN(A, count_range)(I* first, I* last, T value)
@@ -337,7 +337,7 @@ JOIN(A, count_range)(I* first, I* last, T value)
         self->free(&value);
     return count;
 }
-#ifndef CTL_SET
+#if !defined(CTL_SET) && !defined(CTL_STR)
 // has its own variant via faster find
 static inline size_t
 JOIN(A, count)(A* self, T value)
@@ -350,10 +350,10 @@ JOIN(A, count)(A* self, T value)
         self->free(&value);
     return count;
 }
-#endif //SET
-#endif //USET/STR
+#endif //SET/STR
+#endif //USET
 
-#if !defined(CTL_STR)
+//#if !defined(CTL_STR)
 // C++20
 static inline size_t
 JOIN(A, count_if_range)(I* first, I* last, int _match(T*))
@@ -374,7 +374,7 @@ JOIN(A, count_if)(A* self, int _match(T*))
             count++;
     return count;
 }
-#endif // STR
+//#endif // STR
 
 #ifdef DEBUG
 #if !defined(CTL_USET) && !defined(CTL_STR)
@@ -501,8 +501,6 @@ JOIN(A, upper_bound_range)(I* first, I* last, T value)
 // search_range C++20
 // search_n
 // search_n_range C++20
-// transform
-// transform_range C++20
 // copy_range C++20
 // copy_if C++11
 // copy_if_range C++20
