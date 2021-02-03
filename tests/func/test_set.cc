@@ -135,8 +135,8 @@ setup_sets(set_digi* a, std::set<DIGI>& b)
         set_digi_insert(a, digi_init(vb));
         b.insert(DIGI{vb});
     }
-    print_set(a);
-    print_setpp(b);
+    //print_set(a);
+    //print_setpp(b);
 }
 
 int
@@ -186,9 +186,9 @@ main(void)
         TEST(ERASE_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        /* TEST(EMPLACE) */ \
-        /* TEST(EXTRACT) */ \
-        /* TEST(MERGE) */ \
+        TEST(EMPLACE) \
+        TEST(EXTRACT) \
+        TEST(MERGE) \
         TEST(EQUAL_RANGE) \
         TEST(INSERT_RANGE) \
         TEST(FIND_END) \
@@ -199,10 +199,6 @@ main(void)
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
-        TEST(UNION) \
-        TEST(DIFFERENCE) \
-        TEST(SYMETRIC_DIFFERENCE) \
-        TEST(INTERSECTION) \
         TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
@@ -684,7 +680,143 @@ main(void)
             case TEST_EQUAL_RANGE:
                 printf("nyi\n");
                 break;
+#if 0
+            case TEST_GENERATE:
+            {
+                digi_generate_reset();
+                set_digi_generate(&a, digi_generate);
+                digi_generate_reset();
+                std::generate(std::inserter(b, b.begin()), std::inserter(b, b.end()), DIGI_generate);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_GENERATE_RANGE:
+            {
+                set_digi_it first_a, last_a;
+                std::set<DIGI>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                digi_generate_reset();
+                set_digi_generate_range(&first_a, &last_a, digi_generate);
+                digi_generate_reset();
+                std::generate(std::inserter(b, first_b), std::inserter(b, last_b), DIGI_generate);
+                CHECK(a, b);
+                break;
+            }
 #endif
+            case TEST_TRANSFORM:
+            {
+                set_digi aa = set_digi_transform(&a, digi_untrans);
+                std::set<DIGI> bb;
+                std::transform(b.begin(), b.end(), std::inserter(bb, bb.begin()),
+                               DIGI_untrans);
+                CHECK(aa, bb);
+                CHECK(a, b);
+                set_digi_free(&aa);
+                break;
+            }
+            case TEST_GENERATE_N:
+            {
+                size_t count = TEST_RAND(20);
+                digi_generate_reset();
+                set_digi_generate_n(&a, count, digi_generate);
+                digi_generate_reset();
+                std::generate_n(std::inserter(b, b.begin()), count, DIGI_generate);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_GENERATE_N_RANGE:
+            {
+                set_digi_it first_a, last_a;
+                std::set<DIGI>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                size_t off = std::distance(b.begin(), first_b);
+                size_t count = TEST_RAND(20 - off);
+                digi_generate_reset();
+                set_digi_generate_n_range(&first_a, count, digi_generate);
+                digi_generate_reset();
+                std::generate_n(std::inserter(b, first_b), count, DIGI_generate);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_TRANSFORM_IT:
+            {
+                set_digi_it pos = set_digi_begin(&a);
+                set_digi_it_advance(&pos, 1);
+                set_digi aa = set_digi_transform_it(&a, &pos, digi_bintrans);
+                std::set<DIGI> bb;
+                auto it = b.begin();
+                advance(it, 1);
+                std::transform(b.begin(), b.end(), it, std::inserter(bb, bb.begin()), DIGI_bintrans);
+                CHECK(aa, bb);
+                CHECK(a, b);
+                set_digi_free(&aa);
+                break;
+            }
+            case TEST_TRANSFORM_RANGE:
+            {
+                set_digi_it first_a, last_a;
+                std::set<DIGI>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                set_digi aa = set_digi_init(digi_key_compare);
+                set_digi_it dest = set_digi_begin(&aa);
+                set_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
+                std::set<DIGI> bb;
+                auto it2 = b.begin();
+                std::advance(it2, 1);
+                std::transform(first_b, last_b, it2,
+                               std::inserter(bb, bb.begin()), DIGI_bintrans);
+                //CHECK_ITER(it, bb, iter);
+                CHECK(aa, bb);
+                // heap use-after-free
+                CHECK(a, b);
+                set_digi_free(&aa);
+                break;
+            }
+#endif // DEBUG
+#if 0
+            case TEST_FIND_END:
+            {
+                if(a.size > 0)
+                {
+                    set_digi_it first_a, last_a;
+                    set_digi_it aa = set_digi_find_end(&a, &s_first, &s_last);
+                    auto bb = std::find_end(b.begin(), b.end(), ...);
+                    bool found_a = !set_digi_it_done(&aa);
+                    bool found_b = bb != b.end();
+                    assert(found_a == found_b);
+                    if(found_a && found_b)
+                        assert(*(aa->value) == *bb->value);
+                }
+                break;
+            }
+            case TEST_FIND_END_RANGE:
+            {
+                set_digi_it first_a, last_a, s_first, s_last;
+                std::set<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+# if __cpp_lib_erase_if > 202002L
+                first_a = set_digi_find_end_range(&first_a, &last_a, &s_first_a, &s_last_a);
+                auto it = std::find_end(first_b, last_b, vb);
+                CHECK_ITER(first_a, b, it);
+                CHECK(a, b);
+# endif
+                break;
+            }
+            case TEST_FIND_END_IF_RANGE:
+            {
+                set_digi_it first_a, last_a, s_first, s_last;
+                std::set<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+# if __cpp_lib_erase_if > 202002L
+                first_a = set_digi_find_end_if_range(&first_a, &last_a, &s_first, &s_last, digi_is_odd);
+                auto it = std::find_end(first_b, last_b, s_first_b, s_last_b, DIGI_is_odd);
+                CHECK_ITER(first_a, b, it);
+                digi_free (&key); // special
+                CHECK(a, b);
+# endif
+                break;
+            }
+#endif // 0
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);
@@ -693,8 +825,8 @@ main(void)
 #endif
                 break;
         }
-        print_set(&a);
-        print_setpp(b);
+        //print_set(&a);
+        //print_setpp(b);
         CHECK(a, b);
         set_digi_free(&a);
     }
