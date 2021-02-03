@@ -59,12 +59,13 @@ int random_element(arr100_digi* a)
 }
 
 #define CHECK_ITER(_it, b, _iter)                                 \
-    if (!arr100_digi_it_done(&_it))                               \
+    if (_it.ref && _it.ref != &_it.container->vector[N])          \
     {                                                             \
         assert (_iter != b.end());                                \
         assert(*(_it.ref->value) == *(*_iter).value);             \
     } else                                                        \
         assert (_iter == b.end())
+
 #define CHECK_REF(_ref, b, _iter)                                 \
     if (_iter != b.end())                                         \
         assert(*(_ref->value) == *(*_iter).value)
@@ -149,30 +150,41 @@ main(void)
         TEST(FIND) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
+        TEST(FIND_RANGE) \
+        TEST(FIND_IF_RANGE) \
+        TEST(FIND_IF_NOT_RANGE) \
         TEST(ALL_OF) \
         TEST(ANY_OF) \
         TEST(NONE_OF) \
-        TEST(COUNT) \
-        TEST(COUNT_IF) \
         TEST(ALL_OF_RANGE) \
         TEST(ANY_OF_RANGE) \
         TEST(NONE_OF_RANGE) \
+        TEST(COUNT) \
+        TEST(COUNT_IF) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
         TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
+        TEST(TRANSFORM) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(FIND_RANGE) \
-        TEST(FIND_IF_RANGE) \
-        TEST(FIND_IF_NOT_RANGE) \
         TEST(EQUAL_RANGE) \
-        TEST(INTERSECTION) \
+        TEST(FIND_END) \
+        TEST(FIND_END_IF) \
+        TEST(FIND_END_RANGE) \
+        TEST(FIND_END_IF_RANGE) \
+        TEST(LOWER_BOUND) \
+        TEST(UPPER_BOUND) \
+        TEST(LOWER_BOUND_RANGE) \
+        TEST(UPPER_BOUND_RANGE) \
+        TEST(UNION) \
         TEST(DIFFERENCE) \
-
-      /*TEST(FIND_END)
-        TEST(FIND_END_RANGE)
-       */
+        TEST(SYMETRIC_DIFFERENCE) \
+        TEST(INTERSECTION) \
+        TEST(GENERATE_N) \
+        TEST(GENERATE_N_RANGE) \
+        TEST(TRANSFORM_IT) \
+        TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -290,7 +302,6 @@ main(void)
                 digi_free(&key);
                 break;
             }
-#ifdef DEBUG
             case TEST_FIND_RANGE:
             {
                 int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : random_element(&a);
@@ -330,7 +341,6 @@ main(void)
                 CHECK_ITER(i, b, it);
                 break;
             }
-#endif
             case TEST_ALL_OF_RANGE:
             {
                 arr100_digi_it first_a, last_a;
@@ -419,34 +429,6 @@ main(void)
                 assert(aa == bb);
                 break;
             }
-#ifdef DEBUG
-            case TEST_EQUAL_RANGE:
-            case TEST_INTERSECTION:
-            case TEST_DIFFERENCE:
-                printf("nyi\n");
-                break;
-#endif
-            case TEST_GENERATE_RANGE:
-            {
-                arr100_digi_it first_a, last_a;
-                std::array<DIGI,100>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                digi_generate_reset();
-                arr100_digi_generate_range(&first_a, &last_a, digi_generate);
-                digi_generate_reset();
-                std::generate(first_b, last_b, DIGI_generate);
-                CHECK(a, b);
-                break;
-            }
-            case TEST_GENERATE:
-            {
-                digi_generate_reset();
-                arr100_digi_generate(&a, digi_generate);
-                digi_generate_reset();
-                std::generate(b.begin(), b.end(), DIGI_generate);
-                CHECK(a, b);
-                break;
-            }
             case TEST_FIND_IF:
             {
                 arr100_digi_it aa = arr100_digi_find_if(&a, digi_is_odd);
@@ -496,6 +478,104 @@ main(void)
                 assert(count_a == count_b);
                 break;
             }
+            case TEST_GENERATE:
+            {
+                digi_generate_reset();
+                arr100_digi_generate(&a, digi_generate);
+                digi_generate_reset();
+                std::generate(b.begin(), b.end(), DIGI_generate);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_GENERATE_RANGE:
+            {
+                arr100_digi_it first_a, last_a;
+                std::array<DIGI,100>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                digi_generate_reset();
+                arr100_digi_generate_range(&first_a, &last_a, digi_generate);
+                digi_generate_reset();
+                std::generate(first_b, last_b, DIGI_generate);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_TRANSFORM:
+            {
+                arr100_digi aa = arr100_digi_transform(&a, digi_untrans);
+                std::array<DIGI,100> bb;
+                std::transform(b.begin(), b.end(), bb.begin(), DIGI_untrans);
+                CHECK(aa, bb);
+                CHECK(a, b);
+                arr100_digi_free(&aa);
+                break;
+            }
+#ifdef DEBUG
+            case TEST_EQUAL_RANGE:
+            case TEST_INTERSECTION:
+            case TEST_DIFFERENCE:
+                printf("nyi\n");
+                break;
+            case TEST_GENERATE_N: // TEST=40
+            {
+                size_t count = TEST_RAND(20);
+                digi_generate_reset();
+                arr100_digi_generate_n(&a, count, digi_generate);
+                digi_generate_reset();
+                std::generate_n(b.begin(), count, DIGI_generate);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_GENERATE_N_RANGE:
+            {
+                arr100_digi_it first_a, last_a;
+                std::array<DIGI,100>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                size_t off = first_b - b.begin();
+                size_t count = TEST_RAND(20 - off);
+                digi_generate_reset();
+                arr100_digi_generate_n_range(&first_a, count, digi_generate);
+                digi_generate_reset();
+                std::generate_n(first_b, count, DIGI_generate);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_TRANSFORM_IT:
+            {
+                arr100_digi_it pos = arr100_digi_begin(&a);
+                arr100_digi_it_advance(&pos, 1);
+                arr100_digi aa = arr100_digi_transform_it(&a, &pos, digi_bintrans);
+                std::array<DIGI,100> bb;
+                std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), DIGI_bintrans);
+                CHECK(aa, bb);
+                CHECK(a, b);
+                arr100_digi_free(&aa);
+                break;
+            }
+            case TEST_TRANSFORM_RANGE:
+            {
+                arr100_digi_it first_a, last_a;
+                std::array<DIGI,100>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                arr100_digi aa = arr100_digi_init();
+                arr100_digi_it dest = arr100_digi_begin(&aa);
+                arr100_digi_it it = arr100_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
+                std::array<DIGI,100> bb;
+                auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(), DIGI_bintrans);
+                CHECK_ITER(it, bb, iter);
+                CHECK(aa, bb);
+                // heap use-after-free
+                CHECK(a, b);
+                arr100_digi_free(&aa);
+                break;
+            }
+#endif
+            default:
+#ifdef DEBUG
+                printf("unhandled testcase %d %s\n", which, test_names[which]);
+#else
+                printf("unhandled testcase %d\n", which);
+#endif
+                break;
         }
         CHECK(a, b);
     }

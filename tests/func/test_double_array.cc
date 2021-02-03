@@ -87,7 +87,7 @@ int random_element(arr20_double* a)
 }
 
 #define CHECK_ITER(_it, b, _iter)                                 \
-    if (!arr20_double_it_done(&_it))                              \
+    if (_it.ref && _it.ref != &_it.container->vector[N])          \
     {                                                             \
         assert (_iter != b.end());                                \
         assert(*_it.ref == *_iter);                               \
@@ -167,6 +167,7 @@ main(void)
         TEST(SWAP) \
         TEST(ASSIGN) \
         TEST(EQUAL) \
+        TEST(CLEAR) \
         TEST(FIND) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
@@ -175,10 +176,6 @@ main(void)
         TEST(NONE_OF) \
         TEST(COUNT) \
         TEST(COUNT_IF) \
-        TEST(CLEAR) \
-        TEST(GENERATE) \
-
-#define FOREACH_DEBUG(TEST) \
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
@@ -187,13 +184,22 @@ main(void)
         TEST(COUNT_RANGE) \
         TEST(ALL_OF_RANGE) \
         TEST(ANY_OF_RANGE) \
-        TEST(EQUAL_RANGE) \
-        TEST(INTERSECTION) \
-        TEST(DIFFERENCE) \
+        TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
+        TEST(TRANSFORM) \
+
+#define FOREACH_DEBUG(TEST) \
+        TEST(EQUAL_RANGE) \
+        TEST(LOWER_BOUND) \
+        TEST(UPPER_BOUND) \
+        TEST(LOWER_BOUND_RANGE) \
+        TEST(UPPER_BOUND_RANGE) \
+        TEST(UNION) \
+        TEST(DIFFERENCE) \
+        TEST(SYMETRIC_DIFFERENCE) \
+        TEST(INTERSECTION) \
         TEST(GENERATE_N) \
         TEST(GENERATE_N_RANGE) \
-        TEST(TRANSFORM) \
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
 
@@ -370,7 +376,6 @@ main(void)
                 assert(count_a == count_b);
                 break;
             }
-#ifdef DEBUG
             case TEST_FIND_RANGE:
             {
                 int vb = TEST_RAND(2) ? rand() * 1.0 : random_element(&a);
@@ -487,18 +492,21 @@ main(void)
                 assert(aa == bb);
                 break;
             }
-            case TEST_EQUAL_RANGE:
-            case TEST_INTERSECTION:
-            case TEST_DIFFERENCE:
-                printf("nyi\n");
+            case TEST_TRANSFORM:
+            {
+                arr20_double aa = arr20_double_transform(&a, double_untrans);
+                std::array<double,20> bb;
+                std::transform(b.begin(), b.end(), bb.begin(), DOUBLE_untrans);
+                CHECK(aa, bb);
+                CHECK(a, b);
+                arr20_double_free(&aa);
                 break;
+            }
             case TEST_GENERATE_RANGE:
             {
                 arr20_double_it first_a, last_a;
                 std::array<double,20>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                size_t off = first_b - b.begin();
-                size_t count = TEST_RAND(20 - off);
                 double_generate_reset();
                 arr20_double_generate_range(&first_a, &last_a, double_generate);
                 double_generate_reset();
@@ -506,6 +514,12 @@ main(void)
                 CHECK(a, b);
                 break;
             }
+#ifdef DEBUG
+            case TEST_EQUAL_RANGE:
+            case TEST_INTERSECTION:
+            case TEST_DIFFERENCE:
+                printf("nyi\n");
+                break;
             case TEST_GENERATE_N:
             {
                 size_t count = TEST_RAND(20);
@@ -528,16 +542,6 @@ main(void)
                 double_generate_reset();
                 std::generate_n(first_b, count, double_generate);
                 CHECK(a, b);
-                break;
-            }
-            case TEST_TRANSFORM:
-            {
-                arr20_double aa = arr20_double_transform(&a, double_untrans);
-                std::array<double,20> bb;
-                std::transform(b.begin(), b.end(), bb.begin(), DOUBLE_untrans);
-                CHECK(aa, bb);
-                CHECK(a, b);
-                arr20_double_free(&aa);
                 break;
             }
             case TEST_TRANSFORM_IT:
@@ -568,19 +572,14 @@ main(void)
                 arr20_double_free(&aa);
                 break;
             }
-            case TEST_GENERATE_RANGE:
-            {
-                arr20_double_it first_a, last_a;
-                std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                double_generate_reset();
-                arr20_double_generate_range(&first_a, &last_a, double_generate);
-                double_generate_reset();
-                std::generate(first_b, last_b, double_generate);
-                CHECK(a, b);
-                break;
-            }
 #endif
+            default:
+#ifdef DEBUG
+                printf("unhandled testcase %d %s\n", which, test_names[which]);
+#else
+                printf("unhandled testcase %d\n", which);
+#endif
+                break;
         }
         CHECK(a, b);
         arr20_double_free(&a);
