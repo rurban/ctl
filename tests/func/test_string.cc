@@ -50,7 +50,7 @@
 }
 
 #define CHECK_ITER(aa,b,bb)                          \
-    if (!str_it_done(&aa))                           \
+    if (aa.ref != &aa.container->vector[aa.container->size]) \
     {                                                \
         assert (bb != b.end());                      \
         assert(*aa.ref == *bb);                      \
@@ -720,7 +720,11 @@ main(void)
                 }
 #endif
             default:
+#ifdef DEBUG
+                printf("unhandled testcase %d %s\n", which, test_names[which]);
+#else
                 printf("unhandled testcase %d\n", which);
+#endif
                 break;
             }
             CHECK(a, b);

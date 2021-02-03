@@ -487,6 +487,13 @@ main(void)
                 assert(count_a == count_b);
                 break;
             }
+            default:
+#ifdef DEBUG
+                printf("unhandled testcase %d %s\n", which, test_names[which]);
+#else
+                printf("unhandled testcase %d\n", which);
+#endif
+                break;
         }
         CHECK(a, b);
         uset_digi_free(&a);

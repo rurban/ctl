@@ -61,7 +61,7 @@ void print_vector(std::vector<int> &b)
 int random_element(vec_int* a)
 {
     const size_t index = TEST_RAND(a->size);
-    return *vec_int_at(a, index);
+    return a->size ? *vec_int_at(a, index) : 0;
 }
 
 // tested variants
@@ -102,14 +102,13 @@ int random_element(vec_int* a)
         assert(*_ref == *_iter)
 
 #define CHECK_ITER(_it, b, _iter)                                 \
-    if (!vec_int_it_done(&_it))                                   \
+    if (_it.ref != &_it.container->vector[_it.container->size])   \
     {                                                             \
         assert (_iter != b.end());                                \
         assert(*_it.ref == *_iter);                               \
     } else                                                        \
         assert (_iter == b.end())
 
-#ifdef DEBUG
 static void
 get_random_iters (vec_int *a, vec_int_it* first_a, vec_int_it* last_a,
                   std::vector<int>& b, std::vector<int>::iterator &first_b,
@@ -155,7 +154,6 @@ get_random_iters (vec_int *a, vec_int_it* first_a, vec_int_it* last_a,
         last_b = b.end();
     }
 }
-#endif
 
 int
 main(void)
@@ -217,24 +215,27 @@ main(void)
         TEST(NONE_OF) \
         TEST(COUNT) \
         TEST(COUNT_IF) \
-        TEST(GENERATE) \
-
-#define FOREACH_DEBUG(TEST) \
-        TEST(INSERT_COUNT) \
-        TEST(INSERT_RANGE) \
-        TEST(EQUAL_RANGE) \
-        TEST(FIND_END) \
-        TEST(FIND_END_IF) \
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
-        TEST(FIND_END_RANGE) \
-        TEST(FIND_END_IF_RANGE) \
         TEST(ALL_OF_RANGE) \
         TEST(ANY_OF_RANGE) \
         TEST(NONE_OF_RANGE) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
+        TEST(GENERATE) \
+        TEST(GENERATE_RANGE) \
+        TEST(TRANSFORM) \
+
+#define FOREACH_DEBUG(TEST) \
+        TEST(INSERT_COUNT) \
+        TEST(INSERT_RANGE) \
+        TEST(ERASE_RANGE) \
+        TEST(EQUAL_RANGE) \
+        TEST(FIND_END) \
+        TEST(FIND_END_IF) \
+        TEST(FIND_END_RANGE) \
+        TEST(FIND_END_IF_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -243,10 +244,8 @@ main(void)
         TEST(DIFFERENCE) \
         TEST(SYMETRIC_DIFFERENCE) \
         TEST(INTERSECTION) \
-        TEST(GENERATE_RANGE) \
         TEST(GENERATE_N) \
         TEST(GENERATE_N_RANGE) \
-        TEST(TRANSFORM) \
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
 
@@ -323,6 +322,25 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
+#ifdef DEBUG
+                case TEST_ERASE_RANGE:
+                {
+                    if(a.size > 0)
+                    {
+                        const size_t i1 = TEST_RAND(a.size);
+                        const size_t i2 = i1 + TEST_RAND(a.size - i1);
+                        vec_int_it from = vec_int_begin(&a);
+                        vec_int_it_advance(&from, i1);
+                        vec_int_it to = vec_int_begin(&a);
+                        vec_int_it_advance(&from, i2);
+                        from = vec_int_erase_range(&from, &to);
+                        auto it = b.erase(b.begin() + i1, b.begin() + i2);
+                        CHECK_ITER(from, b, it);
+                    }
+                    CHECK(a, b);
+                    break;
+                }
+#endif
                 case TEST_INSERT:
                 {
                     size_t amount = TEST_RAND(512);
@@ -432,11 +450,10 @@ main(void)
                     }
                     break;
                 }
-#ifdef DEBUG    // wrong range end condition. ref == last is already too late.
                 case TEST_FIND_RANGE:
                 {
                     int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
-                        : random_element(&a);
+                                          : random_element(&a);
                     vec_int_it first_a, last_a;
                     std::vector<int>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
@@ -547,7 +564,6 @@ main(void)
                     assert(numa == numb);
                     break;
                 }
-#endif
                 case TEST_FIND_IF:
                 {
                     vec_int_it aa = vec_int_find_if(&a, is_odd);
@@ -613,14 +629,6 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-#ifdef DEBUG
-                case TEST_INSERT_COUNT:
-                case TEST_INSERT_RANGE:
-                case TEST_EQUAL_RANGE:
-                case TEST_DIFFERENCE:
-                case TEST_INTERSECTION:
-                    printf("nyi\n");
-                    break;
                 case TEST_GENERATE_RANGE:
                 {
                     vec_int_it first_a, last_a;
@@ -633,6 +641,25 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
+                case TEST_TRANSFORM:
+                {
+                    vec_int aa = vec_int_transform(&a, int_untrans);
+                    std::vector<int> bb;
+                    bb.resize(b.size());
+                    std::transform(b.begin(), b.end(), bb.begin(), INT_untrans);
+                    CHECK(aa, bb);
+                    CHECK(a, b);
+                    vec_int_free(&aa);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_INSERT_COUNT:
+                case TEST_INSERT_RANGE:
+                case TEST_EQUAL_RANGE:
+                case TEST_DIFFERENCE:
+                case TEST_INTERSECTION:
+                    printf("nyi\n");
+                    break;
                 case TEST_GENERATE_N:
                 {
                     size_t count = TEST_RAND(20);
@@ -655,17 +682,6 @@ main(void)
                     int_generate_reset();
                     std::generate_n(first_b, count, int_generate);
                     CHECK(a, b);
-                    break;
-                }
-                case TEST_TRANSFORM:
-                {
-                    vec_int aa = vec_int_transform(&a, int_untrans);
-                    std::vector<int> bb;
-                    bb.resize(b.size());
-                    std::transform(b.begin(), b.end(), bb.begin(), INT_untrans);
-                    CHECK(aa, bb);
-                    CHECK(a, b);
-                    vec_int_free(&aa);
                     break;
                 }
                 case TEST_TRANSFORM_IT:
@@ -700,7 +716,11 @@ main(void)
                 }
 #endif
             default:
+#ifdef DEBUG
+                printf("unhandled testcase %d %s\n", which, test_names[which]);
+#else
                 printf("unhandled testcase %d\n", which);
+#endif
                 break;
             }
             CHECK(a, b);

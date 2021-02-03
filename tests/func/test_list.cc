@@ -223,6 +223,7 @@ main(void)
 
 #define FOREACH_DEBUG(TEST) \
         TEST(INSERT_RANGE) \
+        TEST(MERGE) \
         TEST(EQUAL_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
@@ -855,7 +856,11 @@ main(void)
             }
 #endif
             default:
+#ifdef DEBUG
+                printf("unhandled testcase %d %s\n", which, test_names[which]);
+#else
                 printf("unhandled testcase %d\n", which);
+#endif
                 break;
         }
         CHECK(a, b);

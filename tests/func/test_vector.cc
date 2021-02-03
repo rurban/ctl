@@ -34,6 +34,8 @@ void print_vector(std::vector<DIGI> &b)
 int random_element(vec_digi* a)
 {
     const size_t index = TEST_RAND(a->size);
+    if (!a->size)
+        return 0;
     digi *vp = vec_digi_at(a, index);
     return *vp->value;
 }
@@ -72,10 +74,10 @@ int random_element(vec_digi* a)
 }
 
 #define CHECK_ITER(_it, b, _iter)                                 \
-    if (!vec_digi_it_done(_it))                                   \
+    if (_it.ref != &_it.container->vector[_it.container->size])   \
     {                                                             \
         assert (_iter != b.end());                                \
-        assert(*((_it)->ref->value) == *(*_iter).value);          \
+        assert(*(_it.ref->value) == *(*_iter).value);             \
     } else                                                        \
         assert (_iter == b.end())
 
@@ -187,11 +189,19 @@ main(void)
         TEST(FIND) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
+        TEST(FIND_RANGE) \
+        TEST(FIND_IF_RANGE) \
+        TEST(FIND_IF_NOT_RANGE) \
         TEST(ALL_OF) \
         TEST(ANY_OF) \
         TEST(NONE_OF) \
+        TEST(ALL_OF_RANGE) \
+        TEST(ANY_OF_RANGE) \
+        TEST(NONE_OF_RANGE) \
         TEST(COUNT) \
         TEST(COUNT_IF) \
+        TEST(COUNT_IF_RANGE) \
+        TEST(COUNT_RANGE) \
         TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
@@ -203,16 +213,8 @@ main(void)
         TEST(EQUAL_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
-        TEST(FIND_RANGE) \
-        TEST(FIND_IF_RANGE) \
-        TEST(FIND_IF_NOT_RANGE) \
         TEST(FIND_END_RANGE) \
         TEST(FIND_END_IF_RANGE) \
-        TEST(ALL_OF_RANGE) \
-        TEST(ANY_OF_RANGE) \
-        TEST(NONE_OF_RANGE) \
-        TEST(COUNT_IF_RANGE) \
-        TEST(COUNT_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -280,7 +282,7 @@ main(void)
                         const size_t index = TEST_RAND(a.size);
                         auto iter = b.erase(b.begin() + index);
                         vec_digi_it it = vec_digi_erase_index(&a, index);
-                        CHECK_ITER(&it, b, iter);
+                        CHECK_ITER(it, b, iter);
                     }
                     CHECK(a, b);
                     break;
@@ -294,7 +296,7 @@ main(void)
                         vec_digi_it_advance(&pos, index);
                         pos = vec_digi_erase(&pos);
                         auto it = b.erase(b.begin() + index);
-                        CHECK_ITER(&pos, b, it);
+                        CHECK_ITER(pos, b, it);
                     }
                     CHECK(a, b);
                     break;
@@ -310,9 +312,9 @@ main(void)
                         vec_digi_it_advance(&from, i1);
                         vec_digi_it to = vec_digi_begin(&a);
                         vec_digi_it_advance(&from, i2);
-                        from = vec_digi_erase_range(&a, &from, &to);
+                        from = vec_digi_erase_range(&from, &to);
                         auto it = b.erase(b.begin() + i1, b.begin() + i2);
-                        CHECK_ITER(&from, b, it);
+                        CHECK_ITER(from, b, it); // wrong return value
                     }
                     CHECK(a, b);
                     break;
@@ -457,7 +459,7 @@ main(void)
                     auto bb = std::find_if_not(b.begin(), b.end(), DIGI_is_odd);
                     print_vec(&a);
                     print_vector(b);
-                    CHECK_ITER(&aa, b, bb);
+                    CHECK_ITER(aa, b, bb);
                     if(bb == b.end())
                         assert(vec_digi_it_done(&aa));
                     else
@@ -500,50 +502,6 @@ main(void)
                     assert(count_a == count_b);
                     break;
                 }
-                case TEST_GENERATE:
-                {
-                    digi_generate_reset();
-                    vec_digi_generate(&a, digi_generate);
-                    digi_generate_reset();
-                    std::generate(b.begin(), b.end(), DIGI_generate);
-                    CHECK(a, b);
-                    break;
-                }
-                case TEST_GENERATE_RANGE:
-                {
-                    vec_digi_it first_a, last_a;
-                    std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    digi_generate_reset();
-                    vec_digi_generate_range(&first_a, &last_a, digi_generate);
-                    digi_generate_reset();
-                    std::generate(first_b, last_b, DIGI_generate);
-                    CHECK(a, b);
-                    break;
-                }
-#ifdef DEBUG
-                case TEST_INSERT_COUNT:
-                case TEST_INSERT_RANGE:
-                case TEST_EQUAL_RANGE:
-                    printf("nyi\n");
-                    break;
-#if 0
-                case TEST_FIND_END:
-                {
-                    if(a.size > 0)
-                    {
-                        vec_digi_it first_a, last_a;
-                        vec_digi_it aa = vec_digi_find_end(&a, &s_first, &s_last);
-                        auto bb = find_end(b.begin(), b.end(), ...);
-                        bool found_a = !vec_digi_it_done(&aa);
-                        bool found_b = bb != b.end();
-                        assert(found_a == found_b);
-                        if(found_a && found_b)
-                            assert(*(aa->value) == *bb->value);
-                    }
-                    break;
-                }
-#endif
                 case TEST_FIND_RANGE:
                 {
                     int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
@@ -554,40 +512,11 @@ main(void)
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                     first_a = vec_digi_find_range(&first_a, &last_a, key);
                     auto it = find(first_b, last_b, vb);
-                    CHECK_ITER(&first_a, b, it);
+                    CHECK_ITER(first_a, b, it);
                     digi_free (&key); // special
                     CHECK(a, b);
                     break;
                 }
-#if 0
-                case TEST_FIND_END_RANGE:
-                {
-                    vec_digi_it first_a, last_a, s_first, s_last;
-                    std::vector<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-# if __cpp_lib_erase_if > 202002L
-                    first_a = vec_digi_find_end_range(&first_a, &last_a, &s_first_a, &s_last_a);
-                    auto it = find_end(first_b, last_b, vb);
-                    CHECK_ITER(&first_a, b, it);
-                    CHECK(a, b);
-# endif
-                    break;
-                }
-                case TEST_FIND_END_IF_RANGE:
-                {
-                    vec_digi_it first_a, last_a, s_first, s_last;
-                    std::vector<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-# if __cpp_lib_erase_if > 202002L
-                    first_a = vec_digi_find_end_if_range(&first_a, &last_a, &s_first, &s_last, digi_is_odd);
-                    auto it = find_end(first_b, last_b, s_first_b, s_last_b, DIGI_is_odd);
-                    CHECK_ITER(&first_a, b, it);
-                    digi_free (&key); // special
-                    CHECK(a, b);
-# endif
-                    break;
-                }
-#endif
                 case TEST_FIND_IF_RANGE:
                 {
                     vec_digi_it first_a, last_a;
@@ -597,7 +526,7 @@ main(void)
                     auto it = find_if(first_b, last_b, DIGI_is_odd);
                     print_vec(&a);
                     print_vector(b);
-                    CHECK_ITER(&first_a, b, it);
+                    CHECK_ITER(first_a, b, it);
                     break;
                 }
                 case TEST_FIND_IF_NOT_RANGE:
@@ -607,7 +536,7 @@ main(void)
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                     first_a = vec_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
                     auto it = find_if_not(first_b, last_b, DIGI_is_odd);
-                    CHECK_ITER(&first_a, b, it);
+                    CHECK_ITER(first_a, b, it);
                     break;
                 }
                 case TEST_ALL_OF_RANGE:
@@ -689,6 +618,44 @@ main(void)
                     assert(numa == numb);
                     break;
                 }
+                case TEST_GENERATE:
+                {
+                    digi_generate_reset();
+                    vec_digi_generate(&a, digi_generate);
+                    digi_generate_reset();
+                    std::generate(b.begin(), b.end(), DIGI_generate);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_GENERATE_RANGE:
+                {
+                    vec_digi_it first_a, last_a;
+                    std::vector<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    digi_generate_reset();
+                    vec_digi_generate_range(&first_a, &last_a, digi_generate);
+                    digi_generate_reset();
+                    std::generate(first_b, last_b, DIGI_generate);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_TRANSFORM:
+                {
+                    vec_digi aa = vec_digi_transform(&a, digi_untrans);
+                    std::vector<DIGI> bb;
+                    bb.resize(b.size());
+                    std::transform(b.begin(), b.end(), bb.begin(), DIGI_untrans);
+                    CHECK(aa, bb);
+                    CHECK(a, b);
+                    vec_digi_free(&aa);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_INSERT_COUNT:
+                case TEST_INSERT_RANGE:
+                case TEST_EQUAL_RANGE:
+                    printf("nyi\n");
+                    break;
                 case TEST_GENERATE_N: // TEST=40
                 {
                     size_t count = TEST_RAND(20);
@@ -713,19 +680,6 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-#endif
-                case TEST_TRANSFORM:
-                {
-                    vec_digi aa = vec_digi_transform(&a, digi_untrans);
-                    std::vector<DIGI> bb;
-                    bb.resize(b.size());
-                    std::transform(b.begin(), b.end(), bb.begin(), DIGI_untrans);
-                    CHECK(aa, bb);
-                    CHECK(a, b);
-                    vec_digi_free(&aa);
-                    break;
-                }
-#ifdef DEBUG
                 case TEST_TRANSFORM_IT:
                 {
                     vec_digi_it pos = vec_digi_begin(&a);
@@ -751,16 +705,64 @@ main(void)
                     std::vector<DIGI> bb;
                     bb.resize(last_b - first_b);
                     auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(), DIGI_bintrans);
-                    CHECK_ITER(&it, bb, iter);
+                    CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
                     // heap use-after-free
                     CHECK(a, b);
                     vec_digi_free(&aa);
                     break;
                 }
-#endif
+#endif // DEBUG
+#if 0
+                case TEST_FIND_END:
+                {
+                    if(a.size > 0)
+                    {
+                        vec_digi_it first_a, last_a;
+                        vec_digi_it aa = vec_digi_find_end(&a, &s_first, &s_last);
+                        auto bb = find_end(b.begin(), b.end(), ...);
+                        bool found_a = !vec_digi_it_done(&aa);
+                        bool found_b = bb != b.end();
+                        assert(found_a == found_b);
+                        if(found_a && found_b)
+                            assert(*(aa->value) == *bb->value);
+                    }
+                    break;
+                }
+                case TEST_FIND_END_RANGE:
+                {
+                    vec_digi_it first_a, last_a, s_first, s_last;
+                    std::vector<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+# if __cpp_lib_erase_if > 202002L
+                    first_a = vec_digi_find_end_range(&first_a, &last_a, &s_first_a, &s_last_a);
+                    auto it = find_end(first_b, last_b, vb);
+                    CHECK_ITER(first_a, b, it);
+                    CHECK(a, b);
+# endif
+                    break;
+                }
+                case TEST_FIND_END_IF_RANGE:
+                {
+                    vec_digi_it first_a, last_a, s_first, s_last;
+                    std::vector<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+# if __cpp_lib_erase_if > 202002L
+                    first_a = vec_digi_find_end_if_range(&first_a, &last_a, &s_first, &s_last, digi_is_odd);
+                    auto it = find_end(first_b, last_b, s_first_b, s_last_b, DIGI_is_odd);
+                    CHECK_ITER(first_a, b, it);
+                    digi_free (&key); // special
+                    CHECK(a, b);
+# endif
+                    break;
+                }
+#endif // 0
             default:
+#ifdef DEBUG
+                printf("unhandled testcase %d %s\n", which, test_names[which]);
+#else
                 printf("unhandled testcase %d\n", which);
+#endif
                 break;
             }
             CHECK(a, b);

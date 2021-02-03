@@ -52,7 +52,7 @@ void print_setpp(std::set<DIGI>& b) {
 }
 
 #define CHECK_ITER(_it, b, _iter)                  \
-    if (!set_digi_it_done(&_it))                   \
+    if (_it.node)                                  \
     {                                              \
         assert (_iter != b.end());                 \
         assert(*_it.ref->value == *(*_iter).value);\
@@ -686,7 +686,11 @@ main(void)
                 break;
 #endif
             default:
+#ifdef DEBUG
+                printf("unhandled testcase %d %s\n", which, test_names[which]);
+#else
                 printf("unhandled testcase %d\n", which);
+#endif
                 break;
         }
         print_set(&a);

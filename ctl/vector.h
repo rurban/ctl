@@ -449,11 +449,12 @@ JOIN(A, erase_index)(A* self, size_t index)
 }
 
 static inline I
-JOIN(A, erase_range)(A* self, I* from, I* to)
+JOIN(A, erase_range)(I* from, I* to)
 {
-    static T zero;
     if (from->ref >= to->ref)
         return *to;
+    static T zero;
+    A* self = from->container;
     T* end = &self->vector[self->size];
 #if 1
     size_t size = (to->ref - from->ref) / sizeof(T);

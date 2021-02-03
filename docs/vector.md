@@ -174,9 +174,9 @@ erases the element by index, and returns the position following the last removed
 
 erases the element at position.
 
-    I* erase_range (I* first, I* last)
+    I erase_range (I* first, I* last)
 
-erases elements from - to.
+erases elements from - to. _(NY)_
 
     swap (A* self, A* other)
 
