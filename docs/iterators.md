@@ -35,8 +35,8 @@ position, the end position and additional private fields per container to
 support its methods.
 
 Some iterators advance on linked nodes (_"B iters"_), some others on value
-refs (_"T iters"_). The deque additionally holds the index, the unordered_set
-the `next` pointer and `bucket_index`.
+refs (_"T iters"_). The deque additionally holds the `index`, the unordered_set
+the `next` and `buckets` pointer.
 
 We don't support **output iterators**, like `back_inserter` or `inserter` yet.
 They are currently only defined for `transform_range` and `transform_it_range`,
@@ -56,7 +56,7 @@ Constructs an iterator to the end.
 
     int done (I* iter)
 
-returns 1 if the iterator reached its end.
+returns 1 if the iterator reached its end. With ranges this might not be the container end.
 
     I* next (I* iter)
 

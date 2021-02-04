@@ -239,11 +239,11 @@ similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 See `tests/func/test_container_composing.cc`
 
 UTF-8 strings and identifiers will be added eventually, Wide, UTF-16 or UTF-32
-not. Parallel variants of all containers and aglos in `pctl` with openmp are in
+not. Parallel variants of all containers and algos in `pctl` with openmp are in
 planning.
 
-Many methods from algorithm, with iterators and range are now implemented, but
-iterators will change soon.
+Many methods from algorithm, with iterators and range are now implemented, with
+iterators changed from upstream.
 Also implemented are type utilities to omit default compare, equal and hash methods
 for POD integral types.
 
@@ -277,19 +277,19 @@ unordered_map.h:    unordered_set.h
 size                x    x    x    x    x    x    x    x    x    x    x    x
 max_size            x    x    x    x    x    x    x    x    x    x    x    x
 empty               x    x    x    x    x    x    x    x    x    x    x    x
-each                x    x    x    x    x    x    x                   x    x
 equal               x    x    x    x    x    x    x    x    x    x    x    x
 swap                x    x    x    x    x    x    x    x    x    x    x    x
 load_factor                                                           x    x
 max_load_factor                                                       x    x
 max_bucket_count                                                      x    x
 bucket_size                                                           x    x
+insert              x         x    x    x    x    x                   x    x
+insert_count                       x    x
+insert_found                                                          x
 insert_or_assign                                                           x
 insert_or_assign_found                                                     x
-insert_found                                                          x
 rehash                                                                x    x
 reserve             x         x                                       x    x
-insert              x         x    x    x    x    x                   x    x
 init                x    x    x    x    x    x    x    x    x    x    x    x
 free                x    x    x    x    x    x    x    x    x    x    x    x
 step                x    x    x    x    x    x    x                   x    x
@@ -297,8 +297,8 @@ range               x    x    x    x    x    x    x                   x    x
 find                x    x    x    x    x    x    x                   x    x
 erase               x    x    x    x    x    x    x                   x    x
 erase_if            x    x         x    x    x    x                   x    x
-erase_it            x              x         x    x
-erase_node                                   x    x
+erase_index         x    x         x
+erase_node                              x    x    x
 erase_range         x              x         x    x
 copy                x    x    x    x    x    x    x                   x    x
 begin               x    x    x    x    x    x    x                   x    x
@@ -399,12 +399,13 @@ Added compare and equal fields to all.
 
 Added many `_it` and `_range` method variants to accept iterators, `_found` to
 return found or not.
+Methods working on iterators don't need the container arg `(A* self)`.
 
     deque: insert_range, insert_count, erase_range,
            emplace, emplace_back, emplace_front, sort_range
     vector: assign_range, erase_range
     list: remove, emplace, emplace_front, insert_range, insert_count
-    set: erase_it, erase_range
+    set: erase_node, erase_range
     map: insert_or_assign
     umap: insert_or_assign, insert_or_assign_found
     uset: clear, insert_found
@@ -412,7 +413,8 @@ return found or not.
 vector `swap` does `shrink_to_fit` as in the STL.
 
 Redesigned iterators and better range support. Much closer to the STL, and
-much faster.
+much faster. Full generic iterator support is in `bits/iterator.h`, `algorithms.h`, the 
+extended `range` methods, and `foreach_range`, `foreach_n`, `foreach_n_range` macros.
 
 Reproducible tests with `SEED=n`,
 Optimized test dependencies, time went from 25s to 3s even with ccache.
@@ -420,7 +422,7 @@ Optimized test dependencies, time went from 25s to 3s even with ccache.
 Many performance improvements. e.g. set.clear is much faster, even than in the
 STL.
 
-Optimized hashmaps with two growth policies, about 100x faster with the policy
+Optimized hashmaps with two growth policies, about faster with the policy
 `CTL_USET_GROWTH_POWER2`, instead of the default `CTL_USET_GROWTH_PRIMED`.
 Added the `CTL_USET_CACHED_HASH` policy for faster unsuccessful finds with high
 load factors, but more memory.
@@ -466,8 +468,7 @@ return the iterator and set a `int *foundp` value. Eg.
     int found;
     map_T_insert_assign_found (self, key, &found);
 
-`emplace`, `erase_if` and many algorithms still missing, some other C++20
-methods are also still missing.
+Many algorithms and C++20 methods are still missing or are in work.
 
 hashmaps will not rely on chained lists with buckets, and can be either changed
 to open addressing or a better modern layout, such as Swiss tables (flat or
@@ -520,7 +521,6 @@ Not yet implemented:
     search_range C++20
     search_n
     search_n_range C++20
-    transform
     transform_range C++20
     copy_range C++20
     copy_if C++11
