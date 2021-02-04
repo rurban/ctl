@@ -50,8 +50,6 @@ pointers instead.
 
 `I` being `list_T_it`    internal iterator type for loops
 
-`IT` being `B*`, the generic type of iterators.
-
 ## Member functions
 
     A init ()
@@ -78,15 +76,24 @@ access the last element
 
 ## Iterators
 
-Note: `begin` and `end` return `node*` (`B*`) pointers, not iterators yet.
+    I begin (A* self)
 
-    B* begin (A* self)
+Constructs an iterator to the begin.
 
-returns a node pointer to the beginning, different to the STL.
+    I end (A* self)
 
-    B* end (A* self)
+constructs an iterator to the end.
 
-returns an node pointer to the end, different to the STL.
+    I* next (I* iter)
+
+Advances the iterator by 1 forwards. There's no prev yet.
+
+    I* advance (I* iter, long i)
+
+All our variants accepts negative `i` to move back. The return value may be ignored.
+
+
+See [iterators](iterators.md) for more.
 
 ## Capacity
 
@@ -112,29 +119,30 @@ resizes and sets count elements to the value
 
 clears the contents
 
-    B* insert (A* self, B* node, T value)
+    I* insert (I* pos, T value)
 
 inserts value before the element.
 
-    B* insert_count (A* self, B* pos, size_t count, T value)
+    I* insert_count (I* pos, size_t count, T value)
 
-inserts count values before the element. (NYI)
+inserts count copies of value before the element.
 
-    B* insert_range (A* self, B* pos, I* first, I* last)
+    I* insert_range (I* pos, I* first, I* last)
 
-inserts values before pos from first to last. (NYI)
+inserts values before pos from first to last. _(NYI)_
 
-    B* emplace (A* self, B* pos, T* value)
+    I* emplace (I* pos, T* value)
 
 Insert a copy of the value into the container before pos.
 
-    erase (A* self, B* pos)
+    erase_node (A* self, B* node)
+    erase (I* pos)
 
-erases the element at pos.
+erases the element.
 
-    erase_range (A* self, B* first, B* last)
+    erase_range (I* first, I* last)
 
-erases elements (NYI)
+erases elements _(NYI)_
 
     push_front (A* self, T value)
 
@@ -170,27 +178,27 @@ swaps the contents
 
 ## Operations
 
-    merge (A* self, A* other, int T_compare(T*, T*))
+    merge (A* self, A* other)
 
 merges two sorted lists.
 
-    splice (A* self, B* pos, A* other)
+    splice (I* pos, A* other)
 
 Moves all elements from the other list to this list before pos.
 
-    splice_it (A* self, B* pos, A* other, B* other_pos)
+    splice_it (I* pos, I* first2)
 
-Moves elements from the other list at pos to this list before pos. (NYI)
+Moves the element first2 from the other list to this list before pos.
 
-    splice_range (A* self, B* pos, A* other, B* other_first, B* other_last)
+    splice_range (I* pos, I* first2, I* last2)
 
-Moves elements from the other list to this list before pos. (NYI)
+Moves a range of elements from the other list to this list before pos.
 
-    size_t remove (A* self, T* value)
+    size_t remove (A* self, T value)
 
-Removes all elements binary equal to the value reference (not value).
+Removes all elements binary equal to the value.
 
-    size_t remove_if (A* self, int T_match(T*))
+    size_t remove_if (A* self, int match(T*))
 
 Removes all elements satisfying specific criteria.
 
@@ -198,26 +206,27 @@ Removes all elements satisfying specific criteria.
 
 reverse the list elements.
 
-    sort (A* self, int T_compare(T*, T*))
+    sort (A* self)
 
 sorts the list in-place.
 
-    unique (A* self, int T_equal(T*, T*))
+    unique (A* self)
 
 removes consecutive duplicates.
 
 ## Non-member functions
 
-    B* find (A* self, T value, int T_equal(T*, T*))
+    I find (A* self, T value, int equal(T*,T*))
 
 finds element with specific value.
 
-    erase_if (A* self, int T_match(T*))
+    size_t erase_if (A* self, int match(T*))
 
 erases all elements satisfying specific criteria (C++20)
 
-    int equal (A* self, A* other, int T_equal(T*, T*))
+    int equal (A* self, A* other, int equal(T*,T*))
 
 Returns 0 or 1 if all elements are equal.
+
 
 See [algorithm](algorithm.md) for more.

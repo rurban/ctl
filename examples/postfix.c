@@ -136,9 +136,9 @@ to_postfix(ls* tokens)
             ls_push_back(&postfix, str_copy(token));
             if(postfix.size > 1 && operators.size)
             {
-                if(it.next)
+                if(it.node->next)
                 {
-                    str* next = &it.next->value;
+                    str* next = &it.node->next->value;
                     char cc = next->vector[0];
                     if(get_prec(c) < get_prec(cc))
                     {

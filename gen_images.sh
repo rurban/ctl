@@ -134,6 +134,20 @@ vec() {
      tests/perf/vec/perf_vec_iterate.c"
 }
 
+str() {
+  perf_graph \
+    'str.log' \
+    "std::string (dotted) vs. CTL str (solid) ($CFLAGS) ($VERSION)" \
+    "tests/perf/str/perf_string_push_back.cc \
+     tests/perf/str/perf_str_push_back.c \
+     tests/perf/str/perf_string_erase.cc \
+     tests/perf/str/perf_str_erase.c \
+     tests/perf/str/perf_string_sort.cc \
+     tests/perf/str/perf_str_sort.c \
+     tests/perf/str/perf_string_iterate.cc \
+     tests/perf/str/perf_str_iterate.c"
+}
+
 list() {
   perf_graph \
     'list.log' \

@@ -130,6 +130,24 @@ public:
     }
 };
 
+static int _generator_state = 0;
+static inline digi
+digi_generate(void)
+{
+    return digi_init(++_generator_state);
+}
+static inline DIGI
+DIGI_generate(void)
+{
+    return DIGI{++_generator_state};
+}
+
+static inline void
+digi_generate_reset()
+{
+    _generator_state = 0;
+}
+
 static inline bool
 DIGI_is_odd(DIGI& d)
 {
@@ -140,6 +158,27 @@ static inline bool
 DIGIc_is_odd(const DIGI d)
 {
     return *d.value % 2;
+}
+
+static inline digi
+digi_untrans (digi* d)
+{
+    return digi_init(*d->value >> 1);
+}
+static inline DIGI
+DIGI_untrans (const DIGI& d)
+{
+    return DIGI{*d.value >> 1};
+}
+static inline digi
+digi_bintrans (digi* d1, digi* d2)
+{
+    return digi_init(*d1->value ^ *d2->value);
+}
+static inline DIGI
+DIGI_bintrans (const DIGI& d1, const DIGI& d2)
+{
+    return DIGI{*d1.value ^ *d2.value};
 }
 
 #endif

@@ -20,7 +20,7 @@ int main(void)
             set_int_insert(&c, rand() % elems);
         volatile int sum = 0;
         long t0 = TEST_TIME();
-        foreach(set_int, &c, it)
+        list_foreach_ref(set_int, &c, it)
             sum += *it.ref;
         long t1 = TEST_TIME();
         printf("%10d %10ld\n", elems, t1 - t0);

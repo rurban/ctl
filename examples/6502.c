@@ -135,8 +135,8 @@ find(str* name)
     token key;
     key.name = *name;
     set_token_node* node;
-    if((node = set_token_find(&global.tokens, key)))
-        return &node->key;
+    if((node = set_token_find_node(&global.tokens, key)))
+        return &node->value;
     return NULL;
 }
 

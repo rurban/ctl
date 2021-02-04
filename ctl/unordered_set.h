@@ -2,7 +2,7 @@
    This closed, linked list hashing has the advantage of keeping pointers
    into the set valid.
    The faster open addressing moves pointers. Maybe add another class for open
-   hashes (hmap, hashtable).
+   hashes (hmap, hashtable, open_hashtable, ohash).
 
    SPDX-License-Identifier: MIT
 
@@ -27,7 +27,7 @@ position to the top in each access, such as find and contains, not only insert.
 
 */
 #ifndef T
-#error "Template type T undefined for <unordered_set.h>"
+# error "Template type T undefined for <unordered_set.h>"
 #endif
 
 #ifdef CTL_USET_GROWTH_PRIMED // the default
@@ -50,6 +50,7 @@ position to the top in each access, such as find and contains, not only insert.
 #define I JOIN(A, it)
 
 #include <ctl/ctl.h>
+#include <ctl/bits/iterators.h>
 
 typedef struct B
 {
@@ -76,30 +77,13 @@ typedef struct A
 
 typedef struct I
 {
-    CTL_B_ITER_FIELDS;
-    size_t bucket_index;
+    B *node; // the bucket
+    T* ref;
+    B *next;
+    //B* end; // if ranges were added to usets
+    A* container;
+    B** buckets; // the chain
 } I;
-
-static inline B*
-JOIN(A, begin)(A* self)
-{
-    for(size_t i = 0; i < self->bucket_count; i++)
-    {
-        B* node = self->buckets[i];
-        if(node) {
-            //LOG ("begin %lu %p\n", i, (void*)node);
-            return node;
-        }
-    }
-    return NULL;
-}
-
-static inline B*
-JOIN(A, end)(A* self)
-{
-    (void) self;
-    return NULL;
-}
 
 static inline size_t
 JOIN(I, index)(A* self, T value)
@@ -113,39 +97,170 @@ JOIN(I, cached_index)(A* self, B* node)
 {
     return node->cached_hash % self->bucket_count;
 }
-#define BUCKET_INDEX(self) \
-    JOIN(I, cached_index)(self->container, self->node);
+#define BUCKET_INDEX(iter)                              \
+    JOIN(I, cached_index)((iter)->container, (iter)->node)
+
 #else
-# define BUCKET_INDEX(self) \
-    JOIN(I, index)(self->container, *self->ref);
+# define BUCKET_INDEX(iter)                             \
+    JOIN(I, index)((iter)->container, (iter)->node->value)
 #endif
 
-static inline void
-JOIN(I, update)(I* self)
+static inline I
+JOIN(I, iter)(A* self, B *node)
 {
-    self->node = self->next;
-    self->ref = &self->node->value;
-    self->next = self->node->next;
-    self->bucket_index = BUCKET_INDEX(self);
+    static I zero;
+    I iter = zero;
+    iter.node = node;
+    if (node)
+    {
+        iter.next = node->next;
+        iter.ref = &node->value;
+    }
+    iter.container = self;
+    iter.buckets = &self->buckets[ BUCKET_INDEX(&iter) ];
+    return iter;
 }
 
-static inline int
-JOIN(I, scan)(I* self)
+static inline I
+JOIN(A, begin)(A* self)
 {
-    for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
+    static I zero;
+    I iter = zero;
+    B** bend = &self->buckets[self->bucket_count];
+    iter.container = self;
+    for(B** b = self->buckets; b < bend; b++)
     {
-        self->next = self->container->buckets[i];
-        if(self->next)
-        {
-            self->bucket_index = i;
-            JOIN(I, update)(self);
-            return 1;
+        if(*b) {
+            B* node = *b;
+            iter.ref = &node->value;
+            iter.node = node;
+            iter.next = node->next;
+            iter.buckets = b;
+            return iter;
         }
     }
-    return 0;
+    return iter;
 }
 
-// for later, with redesigned iters
+static inline I
+JOIN(A, end)(A* self)
+{
+    static I zero;
+    I iter = zero;
+    iter.container = self;
+    return iter;
+}
+
+static inline T*
+JOIN(I, ref)(I* iter)
+{
+    return iter->node ? &iter->node->value : NULL;
+}
+
+// We don't support uset ranges
+static inline int
+JOIN(I, done)(I* iter)
+{
+    return iter->node == NULL; /* iter->end */
+}
+// unused
+static inline int
+JOIN(I, is_end)(I* iter, I* last)
+{
+    return iter->node == NULL || iter->node == last->node;
+}
+
+static inline void
+JOIN(I, update)(I* iter)
+{
+    ASSERT(iter);
+    ASSERT(iter->node);
+    ASSERT(iter->buckets - iter->container->buckets < (long)iter->container->bucket_count);
+    iter->ref = &iter->node->value;
+    iter->next = iter->node->next;
+}
+
+/* Need two states: if next is not empty, we are still in the bucket chain.
+ * if empty, we need to advance to the next bucket: buckets++.
+ */
+static inline void
+JOIN(I, next)(I* iter)
+{
+    ASSERT(iter->node);
+    ASSERT(iter->buckets);
+    if(iter->next == NULL)
+    {
+        A* self = iter->container;
+        B** bend = &self->buckets[self->bucket_count];
+        for(B** b = ++iter->buckets; b < bend; b++)
+        {
+            if(*b)
+            {
+                iter->node = *b;
+                iter->buckets = b;
+                JOIN(I, update)(iter);
+                return;
+            }
+        }
+        iter->node = NULL;
+    }
+    else
+    {
+        iter->node = iter->next;
+        JOIN(I, update)(iter);
+    }
+}
+
+static inline I*
+JOIN(I, advance)(I* iter, long i)
+{
+    if (i < 0)
+    {
+        i = iter->container->size + i;
+        JOIN(A, it) it = JOIN(A, begin)(iter->container);
+        iter->buckets = it.buckets;
+        iter->node = it.node;
+        iter->ref  = it.ref;
+        iter->next = it.node->next;
+    }
+    for (int j = 0; j < i; j++)
+        JOIN(I, next)(iter);
+    return iter;
+}
+
+static inline T*
+JOIN(B, ref)(B* node)
+{
+    return &node->value;
+}
+
+// no ranges, ignore last iters
+static inline void
+JOIN(I, range)(I* begin, I* end)
+{
+    (void) begin;
+    (void) end;
+}
+
+/*
+static inline void
+JOIN(I, step)(I* self)
+{
+    if(self->next == NULL)
+    {
+        for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
+            if((self->next = self->container->buckets[i]))
+            {
+                JOIN(I, update)(self);
+                return;
+            }
+        self->done = 1;
+    }
+    else
+        JOIN(I, update)(self);
+}
+*/
+
 static inline B*
 JOIN(B, next)(A* container, B* node)
 {
@@ -163,28 +278,7 @@ JOIN(B, next)(A* container, B* node)
         return NULL;
     }
 }
-
 /*
-  need two states: if next is not empty, we are still in the bucket chain, keep bucket_index.
-  if empty, we need to advance to the next bucket. bucket_index++
-*/
-static inline void
-JOIN(I, step)(I* self)
-{
-    if(self->next == NULL)
-    {
-        for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
-            if((self->next = self->container->buckets[i]))
-            {
-                JOIN(I, update)(self);
-                return;
-            }
-        self->done = 1;
-    }
-    else
-        JOIN(I, update)(self);
-}
-
 static inline I
 JOIN(I, range)(A* container, B* begin, B* end)
 {
@@ -208,27 +302,18 @@ JOIN(I, range)(A* container, B* begin, B* end)
     }
     return self;
 }
+*/
 
 static inline int
 JOIN(A, _equal)(A* self, T* a, T* b)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->equal || !"equal undefined");
-#endif
+    ASSERT(self->equal || !"equal undefined");
     return self->equal(a, b);
 }
 
-#include <ctl/bits/container.h>
+static inline A JOIN(A, copy)(A* self);
 
-static inline I
-JOIN(I, iter)(A* self, B *node)
-{
-    I it = JOIN(I, each)(self);
-    it.node = node;
-    it.ref = &it.node->value;
-    it.next = it.node->next;
-    return it;
-}
+#include <ctl/bits/container.h>
 
 static inline size_t
 JOIN(A, __next_prime)(size_t number)
@@ -389,15 +474,11 @@ static inline void
 JOIN(A, _free_node)(A* self, B* n)
 {
 #ifndef POD
-# if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->free || !"no uset free without POD");
-# endif
+    ASSERT(self->free || !"no uset free without POD");
     if(self->free)
         self->free(&n->value);
 #else
-# if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(!self->free || !"uset free with POD");
-# endif
+    ASSERT(!self->free || !"uset free with POD");
 #endif
     free(n);
     self->size--;
@@ -429,13 +510,14 @@ JOIN(A, _reserve)(A* self, const size_t new_size)
         return;
     if (self->buckets)
     {
-        LOG("_reserve %zu realloc => %zu\n", self->bucket_count, new_size);
+        //LOG("_reserve %zu realloc => %zu\n", self->bucket_count, new_size);
         self->buckets = (B**) realloc(self->buckets, new_size * sizeof(B*));
-        memset(&self->buckets[self->bucket_count], 0, (new_size - self->bucket_count) * sizeof(B*));
+        memset(&self->buckets[self->bucket_count], 0,
+               (new_size - self->bucket_count) * sizeof(B*));
     }
     else
     {
-        LOG("_reserve %zu calloc => %zu\n", self->bucket_count, new_size);
+        //LOG("_reserve %zu calloc => %zu\n", self->bucket_count, new_size);
         self->buckets = (B**) calloc(new_size, sizeof(B*));
     }
     self->bucket_count = new_size;
@@ -443,9 +525,7 @@ JOIN(A, _reserve)(A* self, const size_t new_size)
         self->max_bucket_count = JOIN(A, max_bucket_count(self));
     else
         self->max_bucket_count = new_size; // ignore custom load factors here
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert (self->buckets && "out of memory");
-#endif
+    ASSERT (self->buckets && "out of memory");
 }
 
 static inline void JOIN(A, _rehash)(A* self, size_t count);
@@ -457,10 +537,10 @@ JOIN(A, reserve)(A* self, size_t desired_count)
         return;
 #ifdef CTL_USET_GROWTH_POWER2
     const size_t new_size = JOIN(A, __next_power2)(desired_count);
-    LOG("power2 growth policy %zu => %zu ", desired_count, new_size);
+    //LOG("power2 growth policy %zu => %zu ", desired_count, new_size);
 #else
     const size_t new_size = JOIN(A, __next_prime)(desired_count);
-    LOG("primed growth policy %zu => %zu ", desired_count, new_size);
+    //LOG("primed growth policy %zu => %zu ", desired_count, new_size);
 #endif
     if (new_size <= self->bucket_count)
         return;
@@ -500,10 +580,10 @@ JOIN(A, rehash)(A* self, size_t desired_count)
             JOIN(B, push)(buckets, it.node);
     }
     rehashed.size = self->size;
-    LOG ("rehash temp. from %lu to %lu, load %f\n", rehashed.size, rehashed.bucket_count,
-         JOIN(A, load_factor)(self));
+    //LOG ("rehash temp. from %lu to %lu, load %f\n", rehashed.size, rehashed.bucket_count,
+    //     JOIN(A, load_factor)(self));
     free(self->buckets);
-    LOG ("free old\n");
+    //LOG ("free old\n");
     *self = rehashed;
 }
 
@@ -515,7 +595,7 @@ JOIN(A, _rehash)(A* self, size_t count)
     if (count == self->bucket_count)
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
-    LOG("_rehash %zu => %zu\n", self->size, count);
+    //LOG("_rehash %zu => %zu\n", self->size, count);
     JOIN(A, _reserve)(&rehashed, count);
     foreach(A, self, it)
     {
@@ -524,8 +604,8 @@ JOIN(A, _rehash)(A* self, size_t count)
             JOIN(B, push)(buckets, it.node);
     }
     rehashed.size = self->size;
-    LOG ("_rehash from %lu to %lu, load %f\n", rehashed.size, count,
-         JOIN(A, load_factor)(self));
+    //LOG ("_rehash from %lu to %lu, load %f\n", rehashed.size, count,
+    //     JOIN(A, load_factor)(self));
     free(self->buckets);
     *self = rehashed;
     return;
@@ -534,7 +614,7 @@ JOIN(A, _rehash)(A* self, size_t count)
 // Note: As this is used internally a lot, don't consume (free) the key.
 // The user must free it by himself.
 static inline B*
-JOIN(A, find)(A* self, T value)
+JOIN(A, find_node)(A* self, T value)
 {
     if(self->size)
     {
@@ -559,6 +639,16 @@ JOIN(A, find)(A* self, T value)
     return NULL;
 }
 
+static inline I
+JOIN(A, find)(A* self, T value)
+{
+    B* node = JOIN(A, find_node)(self, value);
+    if (node)
+        return JOIN(I, iter)(self, node);
+    else
+        return JOIN(A, end)(self);
+}
+
 static inline B**
 JOIN(A, push_cached)(A* self, T* value)
 {
@@ -578,7 +668,7 @@ JOIN(A, push_cached)(A* self, T* value)
 static inline void
 JOIN(A, insert)(A* self, T value)
 {
-    if(JOIN(A, find)(self, value))
+    if(JOIN(A, find_node)(self, value))
     {
         FREE_VALUE(self, value);
     }
@@ -590,8 +680,8 @@ JOIN(A, insert)(A* self, T value)
         {
 #ifdef CTL_USET_GROWTH_POWER2
             const size_t bucket_count = 2 * self->bucket_count;
-            LOG ("rehash from %lu to %lu, load %f\n", self->size, self->bucket_count,
-                 JOIN(A, load_factor)(self));
+            //LOG ("rehash from %lu to %lu, load %f\n", self->size, self->bucket_count,
+            //     JOIN(A, load_factor)(self));
             JOIN(A, _rehash)(self, bucket_count);
 #else
             // The natural growth factor is the golden ratio. libstc++ v3 and
@@ -607,32 +697,31 @@ JOIN(A, insert)(A* self, T value)
 
 #ifdef DEBUG
 
-static inline void
+static inline I
 JOIN(A, insert_found)(A* self, T value, int* foundp)
 {
-    if(JOIN(A, find)(self, value))
+    B* node;
+    if((node = JOIN(A, find_node)(self, value)))
     {
-        *foundp = 1;
         FREE_VALUE(self, value);
-        return;
+        *foundp = 1;
+        return JOIN(I, iter)(self, node);
     }
     if(JOIN(A, empty)(self))
         JOIN(A, rehash)(self, 12);
-#ifdef DEBUG
-    B** bucket =
-#endif
-    JOIN(A, push_cached)(self, &value);
-    LOG ("insert_found: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
+    node = *JOIN(A, push_cached)(self, &value);
+    //LOG ("insert_found: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
         JOIN(A, rehash)(self, 2 * self->bucket_count);
     *foundp = 0;
+    return JOIN(I, iter)(self, node);
 }
 
 static inline I
 JOIN(A, emplace)(A* self, T* value)
 {
     B* node;
-    if ((node = JOIN(A, find)(self, *value)))
+    if ((node = JOIN(A, find_node)(self, *value)))
         return JOIN(I, iter)(self, node);
 
     B** buckets = JOIN(A, push_cached)(self, value);
@@ -641,11 +730,11 @@ JOIN(A, emplace)(A* self, T* value)
     return JOIN(I, iter)(self, *buckets);
 }
 
-static inline I
+static inline B*
 JOIN(A, emplace_found)(A* self, T* value, int* foundp)
 {
     B* node;
-    if ((node = JOIN(A, find)(self, *value)))
+    if ((node = JOIN(A, find_node)(self, *value)))
     {
         if(!self->bucket_count)
             JOIN(A, rehash)(self, 12);
@@ -658,22 +747,76 @@ JOIN(A, emplace_found)(A* self, T* value, int* foundp)
             JOIN(A, rehash)(self, new_size);
         }
         *foundp = 1;
-        return JOIN(I, iter)(self, node);
+        return node;
     }
 
     B** buckets = JOIN(A, push_cached)(self, value);
     if (JOIN(A, load_factor)(self) > self->max_load_factor)
         JOIN(A, rehash)(self, 2 * self->bucket_count);
     *foundp = 0;
-    return JOIN(I, iter)(self, *buckets);
+    return *buckets;
 }
+
+static inline I
+JOIN(A, emplace_hint)(I* pos, T* value)
+{
+    A* self = pos->container;
+    if (!JOIN(I, done)(pos))
+    {
+        // TODO: equal check if already exists
+#ifdef CTL_USET_CACHED_HASH
+        size_t hash = self->hash(value);
+        B* node = JOIN(B, init_cached)(*value, hash);
+        B** buckets = JOIN(A, _bucket_hash)(self, hash);
+#else
+        B* node = JOIN(B, init)(*value);
+        B** buckets = JOIN(A, _bucket)(self, *value);
+#endif
+        for(B* n = *buckets; n; n = n->next)
+        {
+#ifdef CTL_USET_CACHED_HASH
+            if(n->cached_hash != hash)
+                continue;
+#endif
+            if(self->equal(value, &n->value))
+                // TODO move-to-front
+                return JOIN(I, iter)(self, n);
+        }
+        // not found
+        JOIN(B, push)(buckets, node);
+        pos->container->size++;
+        pos->node = node;
+        JOIN(I, update)(pos);
+        pos->buckets = buckets;
+        return *pos;
+    }
+    else
+    {
+        B** buckets = JOIN(A, push_cached)(self, value);
+        if (JOIN(A, load_factor)(self) > self->max_load_factor)
+            JOIN(A, rehash)(self, 2 * self->bucket_count);
+        return JOIN(I, iter)(self, *buckets);
+    }
+}
+
 #endif
 
 static inline void
 JOIN(A, clear)(A* self)
 {
-    foreach(A, self, it)
-        JOIN(A, _free_node)(self, it.node);
+    for(size_t i = 0; i < self->bucket_count; i++)
+    {
+        B* next;
+        B* n = self->buckets[i];
+        if (!n)
+            continue;
+        while ((next = n->next))
+        {
+            JOIN(A, _free_node)(self, n);
+            n = next;
+        }
+        JOIN(A, _free_node)(self, n);
+    }
     memset(self->buckets, 0, self->bucket_count * sizeof(B*));
     /* for(size_t i = 0; i < self->bucket_count; i++)
         self->buckets[i] = NULL; */
@@ -684,7 +827,7 @@ JOIN(A, clear)(A* self)
 static inline void
 JOIN(A, free)(A* self)
 {
-    LOG("free calloc %zu, %zu\n", self->bucket_count, self->size);
+    //LOG("free calloc %zu, %zu\n", self->bucket_count, self->size);
     JOIN(A, clear)(self);
     free(self->buckets);
     self->buckets = NULL;
@@ -694,7 +837,7 @@ JOIN(A, free)(A* self)
 static inline size_t
 JOIN(A, count)(A* self, T value)
 {
-    if (JOIN(A, find)(self, value))
+    if (JOIN(A, find_node)(self, value))
     {
         FREE_VALUE(self, value);
         // TODO: the popular move-to-front strategy
@@ -711,7 +854,7 @@ JOIN(A, count)(A* self, T value)
 static inline bool
 JOIN(A, contains)(A* self, T value)
 {
-    if (JOIN(A, find)(self, value))
+    if (JOIN(A, find_node)(self, value))
     {
         FREE_VALUE(self, value);
         // TODO: the popular move-to-front strategy
@@ -794,24 +937,29 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
 static inline A
 JOIN(A, copy)(A* self)
 {
-    LOG ("copy\norig size: %lu\n", self->size);
+    //LOG ("copy\norig size: %lu\n", self->size);
     A other = JOIN(A, init)(self->hash, self->equal);
     JOIN(A, _reserve)(&other, self->bucket_count);
     foreach(A, self, it) {
         //LOG ("size: %lu\n", other.size);
         JOIN(A, insert)(&other, self->copy(it.ref));
     }
-    LOG ("final size: %lu\n", other.size);
+    //LOG ("final size: %lu\n", other.size);
     return other;
 }
 
+#ifdef DEBUG
 static inline A
 JOIN(A, intersection)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
-    foreach(A, a, i)
-        if(JOIN(A, find)(b, *i.ref))
-            JOIN(A, insert)(&self, self.copy(i.ref));
+    foreach(A, a, it)
+        if(JOIN(A, find_node)(b, *it.ref))
+        {
+            B* next = it.next;
+            JOIN(A, insert)(&self, self.copy(it.ref));
+            it.next = next;
+        }
     return self;
 }
 
@@ -819,31 +967,50 @@ static inline A
 JOIN(A, union)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
-    foreach(A, a, i) JOIN(A, insert)(&self, self.copy(i.ref));
-    foreach(A, b, i) JOIN(A, insert)(&self, self.copy(i.ref));
+    foreach(A, a, it1)
+    {
+        B* next = it1.next;
+        JOIN(A, insert)(&self, self.copy(it1.ref));
+        it1.next = next;
+    }
+    foreach(A, b, it2)
+    {
+        B* next = it2.next;
+        JOIN(A, insert)(&self, self.copy(it2.ref));
+        it2.next = next;
+    }
     return self;
 }
 
-#ifdef DEBUG
 // FIXME
 static inline A
 JOIN(A, difference)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
-    foreach(A, b, i) JOIN(A, erase)(&self, *i.ref);
+    foreach(A, b, it)
+    {
+        B* next = it.next;
+        JOIN(A, erase)(&self, *it.ref);
+        it.next = next;
+    }
     return self;
 }
-#endif
 
 static inline A
 JOIN(A, symmetric_difference)(A* a, A* b)
 {
     A self = JOIN(A, union)(a, b);
     A intersection = JOIN(A, intersection)(a, b);
-    foreach(A, &intersection, i) JOIN(A, erase)(&self, *i.ref);
+    foreach(A, &intersection, it)
+    {
+        B* next = it.next;
+        JOIN(A, erase)(&self, *it.ref);
+        it.next = next;
+    }
     JOIN(A, free)(&intersection);
     return self;
 }
+#endif
 
 // different to the shared equal
 static inline int
@@ -852,10 +1019,10 @@ JOIN(A, equal)(A* self, A* other)
     size_t count_a = 0;
     size_t count_b = 0;
     foreach(A, self, it)
-        if(JOIN(A, find)(self, *it.ref))
+        if(JOIN(A, find_node)(self, *it.ref))
             count_a += 1;
-    foreach(A, other, it)
-        if(JOIN(A, find)(other, *it.ref))
+    foreach(A, other, it2)
+        if(JOIN(A, find_node)(other, *it2.ref))
             count_b += 1;
     return count_a == count_b;
 }

@@ -128,22 +128,19 @@ Forgetting a compare method will assert with "compare undefined", if enabled.
 
 ## Iterators and Ranges
 
-We accept and return three types of iterators: `T*` for simple types in arrays,
-as vector derived containers, `size_t` index for deque iterators,
-and `B*` node pointers for the rest: list, set and uset derived containers with
-extra nodes.
+The special iterator objects created by `begin`, `end` and returned by `next`,
+`advance` return the positions, but have more iterator specific fields contained
+within.
 
-Contrary to the STL we mostly return `T*`, `size_t` or `B*`, not full `I` iterators.
-But you can convert those return values via the `iter` method to full iterators,
-to be acceptable as `I*` argument, e.g. for range methods.
+Previous versions of the ctl (_with version numbers < 2020_) had different heavy
+and incompatible iterators, initialized by `each`. Our iterators are as in the
+STL initialized with `begin` or `end`, and for ranges with `range`.  Now the
+iterator contains the value or node ref, and nothing else.  Now they are
+compatible with the STL and are even faster than them.
 
-_Note_: I am redesigning `I*` iterators to be faster (not 3 assignments per
-step, just a single incement or `->next` assignment for B* and T* iters) and be
-more compatible to the STL. The `foreach` and `foreach_range` macros are also
-split into variants with and without setting ref (value pointers). It is even
-faster than the STL, now they are 2x slower.
+See [iterators](iterators.md).
 
-range methods are suffixed with `_range`.
+Range methods are suffixed with `_range`.
 
 ## Performance
 
@@ -157,12 +154,12 @@ for template type `T` as type `int` for all measurements.
 ![](images/uset.log.png)
 ![](images/pqu.log.png)
 ![](images/arr.log.png)
+![](images/str.log.png)
 ![](images/compile.log.png)
 
-Omitted from these performance measurements are `queue.h`, `stack.h`, and `string.h`,
-as their performance characteristics can be inferred from `deque.h`, and `vector.h`,
-respectively. Likewise `map.h` from `set.h` and `unordered_map.h` from
-`unordered_set.h`.
+Omitted from these performance measurements are `queue.h` and `stack.h`,
+as their performance characteristics can be inferred from `deque.h`.
+Likewise `map.h` from `set.h` and `unordered_map.h` from `unordered_set.h`.
 
 `unordered_set.h` is defined with the default `CTL_USET_GROWTH_PRIMED`.
 libstdc++ uses POWER2 by default, libc++ supports both, depending on the initial size.
@@ -382,6 +379,9 @@ Use the original long names, not three-letter abbrevations.
 `#define POD` not `P`
 `#define NOT_INTEGRAL` not `COMPARE`
 
+Our version number `CTL_VERSION` is greater than 2020 (starting with `202101L`),
+the old ctl is lower than 2020, starting with `1.0`.
+
 Added lots of missing methods, like `max_size`, `size`, `capacity`, ...
 Probe for -std=c++20 c++ support and use this for testing against the STL.
 
@@ -411,7 +411,8 @@ return found or not.
 
 vector `swap` does `shrink_to_fit` as in the STL.
 
-Added many return values as iterators, as in the STL.
+Redesigned iterators and better range support. Much closer to the STL, and
+much faster.
 
 Reproducible tests with `SEED=n`,
 Optimized test dependencies, time went from 25s to 3s even with ccache.
@@ -424,8 +425,10 @@ Optimized hashmaps with two growth policies, about 100x faster with the policy
 Added the `CTL_USET_CACHED_HASH` policy for faster unsuccessful finds with high
 load factors, but more memory.
 
-Hashmaps will be changed from chained lists to open addressing, thus no internal
-bucket methods, and faster, but pointers into it are disallowed.
+Flat hashmaps will be added with open addressing, thus no internal
+bucket methods, and faster, but pointers into it are disallowed. Flat sets and
+maps as open hashmaps and btree will support no pointer stability, and no
+iterator stability.
 
 Optimized list, seperate connect before and after methods.
 
@@ -442,7 +445,7 @@ simlar to the no-exception abseil)
 glouw/ctl does not treat errors at all. There cannot be any.
 
 Added formal verification tests for many functions, via `cbmc`, and even caught
-a set.find error not caught by review, random testing nor sanitizers.
+a set.find error not caught by review, nor random testing nor sanitizers.
 
 Support not only GNU make, but also BSD make and MSVC nmake.
 `gen_images.sh` is not bash-only anymore, and supports updating single graphs.
@@ -455,7 +458,7 @@ clang with libc++), and Windows MSVC (default CL 19).
 STL multiset and multimap variants will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 
-STL string_view, span and short string optimizations are missing.
+STL string_view, span and short string optimizations are still missing.
 
 STL methods returning a pair of iterator and bool have a `_found` suffix,
 return the iterator and set a `int *foundp` value. Eg.
@@ -463,12 +466,13 @@ return the iterator and set a `int *foundp` value. Eg.
     int found;
     map_T_insert_assign_found (self, key, &found);
 
-`emplace`, `erase_if` and many algorithms still missing, many C++20 methods
-also still missing.
+`emplace`, `erase_if` and many algorithms still missing, some other C++20
+methods are also still missing.
 
-hashmaps will not rely on chained lists with buckets, and will be either changed
+hashmaps will not rely on chained lists with buckets, and can be either changed
 to open addressing or a better modern layout, such as Swiss tables (flat or
-node variants) or better [greg7mdp/parallel-hashmap](https://github.com/greg7mdp/parallel-hashmap).
+node variants), the stanford hash or even the currently fastest
+[greg7mdp/parallel-hashmap](https://github.com/greg7mdp/parallel-hashmap).
 Thus the bucket interface methods will not be defined for all hashmap variants,
 except maybe `max_bucket_count`. hashmap policies are compile-time defined via
 `#define CTL_USET_...`
@@ -504,8 +508,6 @@ No bloat and not many indirect calls (only compare and equal).
 
 Not yet implemented:
 
-    foreach_n C++17
-    foreach_n_range C++20
     mismatch
     mismatch_range C++20
     find_end
@@ -518,6 +520,8 @@ Not yet implemented:
     search_range C++20
     search_n
     search_n_range C++20
+    transform
+    transform_range C++20
     copy_range C++20
     copy_if C++11
     copy_if_range C++20
@@ -529,12 +533,6 @@ Not yet implemented:
     move_range
     move_backward C++11
     move_backward_range C++20
-    fill_n
-    fill_n_range C++20
-    transform
-    transform_range C++20
-    generate
-    generate_range C++20
 
 ## Acknowledgements
 

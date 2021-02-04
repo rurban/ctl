@@ -9,20 +9,26 @@
 
 void print_lst(list_digi *a)
 {
-    foreach(list_digi, a, it)
-        printf ("%d ", *it.ref->value);
-    printf ("\n");
+    int i = 0;
+    if (a->size)
+        list_foreach_ref(list_digi, a, it)
+            printf ("%d: %d\n", i++, *it.ref->value);
+    printf ("====\n");
 }
 
 void print_list(std::list<DIGI> &b)
 {
-    for(auto& d: b)
-        printf ("%d ", *d.value);
-    printf ("\n");
+    int i = 0;
+    if (b.size())
+        for(auto& d: b)
+            printf ("%d: %d\n", i++, *d.value);
+    printf ("----\n");
 }
 
 #ifdef DEBUG
-#define TEST_MAX_VALUE 1000
+#define TEST_MAX_VALUE 15
+#undef TEST_MAX_SIZE
+#define TEST_MAX_SIZE 10
 #else
 #define print_lst(x)
 #define print_list(x)
@@ -34,7 +40,7 @@ int random_element(list_digi* a)
     const size_t index = TEST_RAND(a->size);
     int test_value = 0;
     size_t current = 0;
-    foreach(list_digi, a, it)
+    list_foreach_ref(list_digi, a, it)
     {
         if(current == index)
         {
@@ -54,29 +60,37 @@ int random_element(list_digi* a)
         assert(*_y.back().value == *list_digi_back(&_x)->value);  \
     }                                                             \
     std::list<DIGI>::iterator _iter = _y.begin();                 \
-    foreach(list_digi, &_x, _it) {                                \
+    int i = 0;                                                    \
+    list_foreach_ref(list_digi, &_x, _it) {                       \
+        LOG("%d: %d, ", i, *_it.ref->value);                      \
         assert(*_it.ref->value == *_iter->value);                 \
+        i++;                                                      \
         _iter++;                                                  \
     }                                                             \
-    list_digi_it _it = list_digi_it_each(&_x);                    \
+    LOG("\n");                                                    \
+    list_digi_it _it = list_digi_begin(&_x);                      \
     for(auto& _d : _y) {                                          \
         assert(*_it.ref->value == *_d.value);                     \
-        _it.step(&_it);                                           \
+        list_digi_it_next(&_it);                                  \
     }                                                             \
 }
 
-#define CHECK_ITER(_it, b, _iter)                                 \
-    if (_it != NULL)                                              \
+#define LOG_ITER(_it, b, _iter, line)                             \
+    if ((_it)->node != NULL)                                      \
     {                                                             \
-        assert (_iter != b.end());                                \
-        assert(*_it->value.value == *(*_iter).value);             \
+        if (_iter == b.end())                                     \
+            printf("STL iter at end, line %u FAIL\n", line);      \
+        if (*((_it)->ref->value) != *(*_iter).value)              \
+            printf("iter %d vs %d, line %u FAIL\n",               \
+                   *((_it)->ref->value),                          \
+                   *(*_iter).value, line);                        \
     } else                                                        \
         assert (_iter == b.end())
-#define CHECK_ITER_I(_it, b, _iter)                               \
-    if (!_it->done)                                               \
+#define CHECK_ITER(_it, b, _iter)                                 \
+    if ((_it)->node != NULL)                                      \
     {                                                             \
         assert (_iter != b.end());                                \
-        assert(*_it->ref->value == *(*_iter).value);              \
+        assert(*(_it)->ref->value == *(*_iter).value);            \
     } else                                                        \
         assert (_iter == b.end())
 
@@ -109,11 +123,11 @@ get_random_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
     LOG("iters %zu, %zu of %zu\n", r1, r2, a->size);
     if (a->size)
     {
-        list_digi_it it1 = list_digi_it_iter (a, a->head);
+        list_digi_it it1 = list_digi_begin(a);
+        list_digi_it_advance(&it1, r1);
         first_b = b.begin();
-        for(size_t i = 0; i < r1; i++)
+        for (size_t i = 0; i<r1; i++)
         {
-            it1.step(&it1);
             first_b++;
         }
         *first_a = it1;
@@ -121,32 +135,30 @@ get_random_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
         {
             *last_a = it1;
             last_b = first_b;
+            first_a->end = last_a->node;
+
         }
         else if (r2 == a->size)
         {
-            list_digi_it it2 = list_digi_it_iter (a, a->tail);
-            it2.done = 1;
-            *last_a = it2;
+            *last_a = list_digi_end(a);
             last_b = b.end();
         }
         else
         {
-            list_digi_it it2 = list_digi_it_iter (a, a->head);
+            list_digi_it it2 = list_digi_begin(a);
+            list_digi_it_advance(&it2, r2);
             last_b = b.begin();
             for(size_t i = 0; i < r2; i++)
-            {
-                it2.step(&it2);
                 last_b++;
-            }
             *last_a = it2;
         }
-        first_a->end = last_a->node;
     }
     else
     {
-        list_digi_it end = list_digi_it_range (a, NULL, NULL);
+        list_digi_it end = list_digi_end (a);
         *first_a = end;
         *last_a = end;
+        last_a->end = first_a->node;
         first_b = b.begin();
         last_b = b.end();
     }
@@ -157,23 +169,22 @@ main(void)
 {
     int errors = 0;
     INIT_SRAND;
-#if defined DEBUG && defined SEED
-    printf("\n"); // flush the buffer in case of aborts
-#endif
     INIT_TEST_LOOPS(10);
     for(size_t loop = 0; loop < loops; loop++)
     {
         list_digi a;
         std::list<DIGI> b;
         int max_value = 0;
-        setup_lists(&a, b, TEST_RAND(TEST_MAX_SIZE), &max_value);
+        const size_t size = TEST_RAND(TEST_MAX_SIZE);
+        setup_lists(&a, b, size, &max_value);
+
 #define FOREACH_METH(TEST) \
         TEST(PUSH_BACK) \
         TEST(PUSH_FRONT) \
         TEST(POP_BACK) \
         TEST(POP_FRONT) \
         TEST(ERASE) \
-        TEST(INSERT) \
+        TEST(INSERT) /* 5 */ \
         TEST(CLEAR) \
         TEST(RESIZE) \
         TEST(ASSIGN) \
@@ -183,10 +194,12 @@ main(void)
         TEST(REMOVE) \
         TEST(EMPLACE) \
         TEST(EMPLACE_FRONT) \
-        TEST(EMPLACE_BACK) \
+        TEST(EMPLACE_BACK) /* 15 */ \
         TEST(REMOVE_IF) \
         TEST(ERASE_IF) \
-        TEST(SPLICE) \
+        TEST(SPLICE) /* 18 */ \
+        TEST(SPLICE_IT) \
+        TEST(SPLICE_RANGE) \
         TEST(MERGE) \
         TEST(EQUAL) \
         TEST(SORT) \
@@ -207,11 +220,30 @@ main(void)
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
+        TEST(INSERT_COUNT) /* 41 */ \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(INSERT_COUNT) \
         TEST(INSERT_RANGE) \
         TEST(EQUAL_RANGE) \
+        TEST(FIND_END) \
+        TEST(FIND_END_IF) \
+        TEST(FIND_END_RANGE) \
+        TEST(FIND_END_IF_RANGE) \
+        TEST(LOWER_BOUND) \
+        TEST(UPPER_BOUND) \
+        TEST(LOWER_BOUND_RANGE) \
+        TEST(UPPER_BOUND_RANGE) \
+        TEST(UNION) \
+        TEST(DIFFERENCE) \
+        TEST(SYMETRIC_DIFFERENCE) \
+        TEST(INTERSECTION) \
+        TEST(GENERATE) \
+        TEST(GENERATE_RANGE) \
+        TEST(TRANSFORM) \
+        TEST(GENERATE_N) \
+        TEST(GENERATE_N_RANGE) \
+        TEST(TRANSFORM_IT) \
+        TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -274,43 +306,35 @@ main(void)
             }
             case TEST_ERASE:
             {
-                size_t index = TEST_RAND(a.size);
-                size_t current = 0;
-                std::list<DIGI>::iterator iter = b.begin();
-                foreach(list_digi, &a, it)
+                if (a.size > 0) // we survive, but STL segfaults
                 {
-                    if(current == index)
-                    {
-                        list_digi_erase(&a, it.node);
-                        b.erase(iter);
-                        break;
-                    }
-                    iter++;
-                    current++;
+                    size_t index = TEST_RAND(a.size);
+                    std::list<DIGI>::iterator iter = b.begin();
+                    std::advance(iter, index);
+                    list_digi_it it = list_digi_begin(&a);
+                    list_digi_it_advance (&it, index);
+                    LOG("erase %zu\n", index);
+                    list_digi_erase(&it);
+                    b.erase(iter);
+                    CHECK(a, b);
                 }
-                CHECK(a, b);
                 break;
             }
             case TEST_INSERT:
             {
                 size_t index = TEST_RAND(a.size);
                 int value = TEST_RAND(TEST_MAX_VALUE);
-                size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                foreach(list_digi, &a, it)
-                {
-                    if(current == index)
-                    {
-                        list_digi_node *node =
-                            list_digi_insert(&a, it.node, digi_init(value));
-                        std::list<DIGI>::iterator ii =
-                            b.insert(iter, DIGI{value});
-                        CHECK_ITER(node, b, ii);
-                        break;
-                    }
-                    iter++;
-                    current++;
-                }
+                std::advance(iter, index);
+                list_digi_it it = list_digi_begin(&a);
+                list_digi_it_advance (&it, index);
+                list_digi_it *aa = list_digi_insert(&it, digi_init(value));
+                std::list<DIGI>::iterator bb = b.insert(iter, DIGI{value});
+                // insert libstc++ seems to violate the specs, as insert_count
+                // LOG("inserted %d at %zu\n", value, index);
+                // print_lst(&a);
+                // print_list(b);
+                CHECK_ITER(aa, b, bb);
                 CHECK(a, b);
                 break;
             }
@@ -323,9 +347,11 @@ main(void)
             }
             case TEST_RESIZE:
             {
-                size_t resize = 3 * TEST_RAND(a.size);
+                size_t resize = 2 * TEST_RAND(TEST_MAX_SIZE);
                 list_digi_resize(&a, resize, digi_init(0));
                 b.resize(resize);
+                print_lst(&a);
+                print_list(b);
                 CHECK(a, b);
                 break;
             }
@@ -375,23 +401,22 @@ main(void)
                 digi *value = list_digi_front(&a);
                 if (value) // not empty
                 {
-#ifdef DEBUG
-                    list_digi_resize(&a, 10, digi_init(0));
-                    b.resize(10);
-#endif
                     int vb = *value->value;
                     LOG("before remove %d\n", vb);
                     print_lst(&a);
-                    digi copy = digi_init(vb);
-#ifdef DEBUG // only used in logging
-                    size_t erased_a =
-#endif
-                        list_digi_remove(&a, &copy);
+#if __cpp_lib_erase_if > 202002L
+                    size_t erased_a = list_digi_remove(&a, digi_init(vb));
                     LOG("removed %zu\n", erased_a);
+#else
+                    list_digi_remove(&a, digi_init(vb));
+#endif
                     print_lst(&a);
-                    digi_free (&copy);
-                    // if C++20: size_t only since C++20
-                    b.remove(b.front());
+#if __cpp_lib_erase_if > 202002L
+                    size_t erased_b = b.remove(DIGI{vb});
+                    assert(erased_a == erased_b);
+#else
+                    b.remove(DIGI{vb});
+#endif
                     LOG("removed STL\n");
                     print_list(b);
                     CHECK(a, b);
@@ -413,7 +438,9 @@ main(void)
                 LOG("before emplace\n");
                 print_lst(&a);
 #endif
-                list_digi_emplace(&a, a.head->next, &aa);
+                list_digi_it it = list_digi_begin(&a);
+                list_digi_it_advance(&it, 1);
+                list_digi_emplace(&it, &aa);
                 LOG("CTL emplace head->next %d\n", *aa.value);
                 //print_lst(&a);
                 auto iter = b.begin();
@@ -458,6 +485,7 @@ main(void)
             }
             case TEST_REMOVE_IF:
             {
+                print_lst(&a);
                 list_digi_remove_if(&a, digi_is_odd);
                 b.remove_if(DIGI_is_odd);
                 CHECK(a, b);
@@ -465,6 +493,7 @@ main(void)
             }
             case TEST_ERASE_IF:
             {
+                print_lst(&a);
 #if __cpp_lib_erase_if > 202002L
                 size_t num_a = list_digi_erase_if(&a, digi_is_odd);
                 size_t num_b = b.erase_if(DIGI_is_odd);
@@ -479,22 +508,20 @@ main(void)
             case TEST_SPLICE:
             {
                 size_t index = TEST_RAND(a.size);
-                size_t current = 0;
                 std::list<DIGI>::iterator iter = b.begin();
-                list_digi_it it = list_digi_it_each(&a);
-                while(!it.done)
-                {
-                    if(current == index)
-                        break;
-                    iter++;
-                    current++;
-                    it.step(&it);
-                }
+                list_digi_it it = list_digi_begin(&a);
+                list_digi_it_advance(&it, index);
+                std::advance(iter, index);
                 list_digi aa;
                 std::list<DIGI> bb;
+                LOG("splice at b[%zu]: bb => result, a\n", index);
+                print_list(b);
                 setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                print_list(bb);
                 b.splice(iter, bb);
-                list_digi_splice(&a, it.node, &aa);
+                print_list(b);
+                list_digi_splice(&it, &aa);
+                print_lst(&a);
                 CHECK(a, b);
                 break;
             }
@@ -502,7 +529,6 @@ main(void)
             {
                 list_digi aa = list_digi_init();
                 std::list<DIGI> bb;
-                size_t size = TEST_RAND(TEST_MAX_SIZE);
                 int total = 0;
                 for(size_t pushes = 0; pushes < size; pushes++)
                 {
@@ -548,11 +574,45 @@ main(void)
                 int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                                          : random_element(&a);
                 digi key = digi_init(value);
-                list_digi_node* aa = list_digi_find(&a, key);
+                list_digi_it aa = list_digi_find(&a, key);
                 auto bb = find(b.begin(), b.end(), DIGI{value});
-                CHECK_ITER(aa, b, bb);
+                CHECK_ITER(&aa, b, bb);
                 digi_free (&key); // special
                 CHECK(a, b);
+                break;
+            }
+            case TEST_ALL_OF:
+            {
+                bool aa = list_digi_all_of(&a, digi_is_odd);
+                bool bb = all_of(b.begin(), b.end(), DIGI_is_odd);
+                if (aa != bb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                }
+                assert(aa == bb);
+                break;
+            }
+            case TEST_ANY_OF:
+            {
+                bool aa = list_digi_any_of(&a, digi_is_odd);
+                bool bb = any_of(b.begin(), b.end(), DIGI_is_odd);
+                if (aa != bb)
+                {
+                    print_lst(&a);
+                    print_list(b);
+                    printf ("%d != %d is_odd FAIL\n", (int)aa, (int)bb);
+                    errors++;
+                }
+                assert(aa == bb);
+                break;
+            }
+            case TEST_NONE_OF:
+            {
+                bool is_a = list_digi_none_of(&a, digi_is_odd);
+                bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(is_a == is_b);
                 break;
             }
             case TEST_FIND_RANGE:
@@ -563,10 +623,9 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                list_digi_node *n =
-                    list_digi_find_range(&first_a, &last_a, key);
-                auto it = find(first_b, last_b, vb);
-                CHECK_ITER(n, b, it);
+                list_digi_it aa = list_digi_find_range(&first_a, &last_a, key);
+                auto bb = find(first_b, last_b, vb);
+                CHECK_ITER(&aa, b, bb);
                 digi_free (&key); // special
                 CHECK(a, b);
                 break;
@@ -576,8 +635,7 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = list_digi_all_of_range(&first_a, &last_a,
-                                                 digi_is_odd);
+                bool aa = list_digi_all_of_range(&first_a, &last_a, digi_is_odd);
                 bool bb = all_of(first_b, last_b, DIGI_is_odd);
                 if (aa != bb)
                 {
@@ -593,8 +651,7 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = list_digi_any_of_range(&first_a, &last_a,
-                                                 digi_is_odd);
+                bool aa = list_digi_any_of_range(&first_a, &last_a, digi_is_odd);
                 bool bb = any_of(first_b, last_b, DIGI_is_odd);
                 if (aa != bb)
                 {
@@ -610,8 +667,7 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = list_digi_none_of_range(&first_a, &last_a,
-                                                 digi_is_odd);
+                bool aa = list_digi_none_of_range(&first_a, &last_a, digi_is_odd);
                 bool bb = none_of(first_b, last_b, DIGI_is_odd);
                 if (aa != bb)
                 {
@@ -624,16 +680,16 @@ main(void)
             }
             case TEST_FIND_IF:
             {
-                list_digi_node *n = list_digi_find_if(&a, digi_is_odd);
-                auto it = find_if(b.begin(), b.end(), DIGI_is_odd);
-                CHECK_ITER(n, b, it);
+                list_digi_it aa = list_digi_find_if(&a, digi_is_odd);
+                auto bb = find_if(b.begin(), b.end(), DIGI_is_odd);
+                CHECK_ITER(&aa, b, bb);
                 break;
             }
             case TEST_FIND_IF_NOT:
             {
-                list_digi_node *n = list_digi_find_if_not(&a, digi_is_odd);
-                auto it = find_if_not(b.begin(), b.end(), DIGI_is_odd);
-                CHECK_ITER(n, b, it);
+                list_digi_it aa = list_digi_find_if_not(&a, digi_is_odd);
+                auto bb = find_if_not(b.begin(), b.end(), DIGI_is_odd);
+                CHECK_ITER(&aa, b, bb);
                 break;
             }
             case TEST_FIND_IF_RANGE:
@@ -641,12 +697,11 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                list_digi_node *n =
-                    list_digi_find_if_range(&first_a, &last_a, digi_is_odd);
-                auto it = find_if(first_b, last_b, DIGI_is_odd);
+                list_digi_it aa = list_digi_find_if_range(&first_a, &last_a, digi_is_odd);
+                auto bb = find_if(first_b, last_b, DIGI_is_odd);
                 print_lst(&a);
                 print_list(b);
-                CHECK_ITER(n, b, it);
+                CHECK_ITER(&aa, b, bb);
                 break;
             }
             case TEST_FIND_IF_NOT_RANGE:
@@ -654,24 +709,28 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                list_digi_node *n =
-                    list_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
-                auto it = find_if_not(first_b, last_b, DIGI_is_odd);
-                CHECK_ITER(n, b, it);
+                list_digi_it aa = list_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
+                auto bb = find_if_not(first_b, last_b, DIGI_is_odd);
+                CHECK_ITER(&aa, b, bb);
                 break;
             }
-            case TEST_ALL_OF:
+            case TEST_INSERT_COUNT:
             {
-                bool is_a = list_digi_all_of(&a, digi_is_odd);
-                bool is_b = all_of(b.begin(), b.end(), DIGI_is_odd);
-                assert(is_a == is_b);
-                break;
-            }
-            case TEST_NONE_OF:
-            {
-                bool is_a = list_digi_none_of(&a, digi_is_odd);
-                bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
-                assert(is_a == is_b);
+                size_t index = TEST_RAND(a.size);
+                size_t count = TEST_RAND(10);
+                int value = TEST_RAND(TEST_MAX_VALUE);
+                std::list<DIGI>::iterator iter = b.begin();
+                std::advance(iter, index);
+                list_digi_it it = list_digi_begin(&a);
+                list_digi_it_advance (&it, index);
+                LOG("insert %d (%zux) at %zu\n", value, count, index);
+                list_digi_it *aa = list_digi_insert_count(&it, count, digi_init(value));
+                // does libstc++ violate its docs?
+                std::list<DIGI>::iterator bb = b.insert(iter, count, DIGI{value});
+                //print_lst(&a);
+                //print_list(b);
+                CHECK_ITER(aa, b, bb);
+                CHECK(a, b);
                 break;
             }
             case TEST_COUNT:
@@ -708,8 +767,8 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                size_t numa = list_digi_count_if_range(&first_a, &last_a,
-                                                        digi_is_odd);
+                size_t numa =
+                    list_digi_count_if_range(&first_a, &last_a, digi_is_odd);
                 size_t numb = count_if(first_b, last_b, DIGI_is_odd);
                 if (numa != numb)
                 {
@@ -721,24 +780,69 @@ main(void)
                 assert(numa == numb); //fails. off by one, counts one too much
                 break;
             }
-#ifdef DEBUG
-            case TEST_INSERT_COUNT:
-            case TEST_INSERT_RANGE:
-            // algorithms + ranges
-            case TEST_ANY_OF:
+            case TEST_SPLICE_IT:
             {
-                bool aa = list_digi_all_of(&a, digi_is_odd);
-                bool bb = all_of(b.begin(), b.end(), DIGI_is_odd);
-                if (aa != bb)
+                size_t index = TEST_RAND(a.size);
+                std::list<DIGI>::iterator iter = b.begin();
+                std::advance(iter, index);
+                list_digi_it it = list_digi_begin(&a);
+                list_digi_it_advance (&it, index);
+                list_digi aa;
+                std::list<DIGI> bb;
+                size_t bsize = TEST_RAND(TEST_MAX_SIZE);
+                setup_lists(&aa, bb, bsize, NULL);
+                // STL crashes with empty lists, CTL not
+                if (b.size() && bb.size())
                 {
-                    print_lst(&a);
+                    std::list<DIGI>::iterator bbpos = bb.begin();
+                    std::advance(bbpos, bsize / 2);
+                    list_digi_it aapos = list_digi_begin(&aa);
+                    list_digi_it_advance(&aapos, bsize / 2);
+                    LOG("splice at b[%zu]: bb[%zu] => result, a\n", index, bsize / 2);
                     print_list(b);
-                    printf ("%d != %d is_odd FAIL\n", (int)aa, (int)bb);
-                    errors++;
+                    print_list(bb);
+                    b.splice(iter, bb, bbpos);
+                    print_list(b);
+                    list_digi_splice_it(&it, &aapos);
+                    print_lst(&a);
+                    CHECK(a, b);
                 }
-                //assert(aa == bb);
+                list_digi_free(&aa);
                 break;
             }
+            case TEST_SPLICE_RANGE:
+            {
+                size_t index = TEST_RAND(a.size);
+                std::list<DIGI>::iterator iter = b.begin();
+                std::advance(iter, index);
+                list_digi_it it = list_digi_begin(&a);
+                list_digi_it_advance (&it, index);
+                list_digi aa;
+                std::list<DIGI> bb;
+                size_t bsize = TEST_RAND(TEST_MAX_SIZE);
+                setup_lists(&aa, bb, bsize, NULL);
+                std::list<DIGI>::iterator bbpos = bb.begin();
+                std::advance(bbpos, bsize / 2);
+                std::list<DIGI>::iterator bbend = bb.begin();
+                std::advance(bbend, bsize - 1);
+                list_digi_it aapos = list_digi_begin(&aa);
+                list_digi_it_advance(&aapos, bsize / 2);
+                list_digi_it aaend = list_digi_begin(&aa);
+                list_digi_it_advance(&aaend, bsize - 1);
+                if (b.size() && bb.size())
+                {
+                    b.splice(iter, bb, bbpos, bbend);
+                    list_digi_splice_range(&it, &aapos, &aaend);
+                    CHECK(a, b);
+                }
+                list_digi_free(&aa);
+                break;
+            }
+#ifdef DEBUG
+            // algorithms + ranges
+            case TEST_INSERT_RANGE:
+                printf("nyi\n");
+                break;
             case TEST_EQUAL_RANGE:
             {
                 /*
@@ -754,6 +858,13 @@ main(void)
                 break;
             }
 #endif
+            default:
+#ifdef DEBUG
+                printf("unhandled testcase %d %s\n", which, test_names[which]);
+#else
+                printf("unhandled testcase %d\n", which);
+#endif
+                break;
         }
         CHECK(a, b);
         list_digi_free(&a);

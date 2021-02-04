@@ -5,7 +5,7 @@
 /* It should be possible to do it thread-safe. Not yet. */
 
 #ifndef T
-#error "Template type T undefined for <ctl/deque.h>"
+# error "Template type T undefined for <ctl/deque.h>"
 #endif
 
 #define CTL_DEQ
@@ -14,6 +14,7 @@
 #define I JOIN(A, it)
 
 #include <ctl/ctl.h>
+#include <ctl/bits/iterators.h>
 
 #ifndef DEQ_BUCKET_SIZE
 #define DEQ_BUCKET_SIZE (512)
@@ -41,11 +42,10 @@ typedef struct A
 
 typedef struct I
 {
-    CTL_B_ITER_FIELDS;
-    // TODO: maybe switch to pointers
+    T* ref;
     size_t index;
-    size_t index_next;
-    size_t index_last;
+    size_t end;
+    A* container;
 } I;
 
 static inline B**
@@ -63,11 +63,12 @@ JOIN(A, last)(A* self)
 static inline T*
 JOIN(A, at)(A* self, size_t index)
 {
-    if(UNLIKELY(self->size == 0 || index >= self->size))
+    // allow accessing end (for iters)
+    if (index == self->size)
+        return NULL;
+    else if(UNLIKELY(self->size == 0 || index > self->size))
     {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-        assert (index < self->size);
-#endif
+        ASSERT (index <= self->size || !"invalid deque index");
         self->capacity = 1;
         self->pages = (B**) calloc(1, sizeof(B*));
         if (!self->pages)
@@ -100,62 +101,109 @@ JOIN(A, back)(A* self)
     return JOIN(A, at)(self, self->size - 1);
 }
 
-static inline T*
+static inline I
 JOIN(A, begin)(A* self)
 {
-    return JOIN(A, front)(self);
+    static I zero;
+    I iter = zero;
+    iter.ref = JOIN(A, front)(self); // unchecked
+    iter.index = 0;
+    iter.end = self->size;
+    iter.container = self;
+    return iter;
+}
+
+// We support `it.advance(a.end(), -1)`, so we must create a fresh iter.
+static inline I
+JOIN(A, end)(A* self)
+{
+    static I zero;
+    I iter = zero;
+    iter.ref = JOIN(A, back)(self);
+    iter.index = self->size;
+    iter.end = self->size;
+    iter.container = self;
+    return iter;
+}
+
+// create an iter from an index
+static inline I
+JOIN(B, iter)(A* self, size_t index)
+{
+    static I zero;
+    I iter = zero;
+    iter.ref = JOIN(A, at)(self, index); // bounds-checked
+    iter.index = index;
+    iter.end = self->size;
+    iter.container = self;
+    return iter;
 }
 
 static inline T*
-JOIN(A, end)(A* self)
+JOIN(I, ref)(I* iter)
 {
-    return JOIN(A, back)(self) + 1;
+    return iter->ref;
+}
+
+static inline size_t
+JOIN(I, index)(I* iter)
+{
+    return iter->index;
+}
+
+static inline int
+JOIN(I, is_end)(I* iter, I* last)
+{
+    return iter->index == last->index;
+}
+
+static inline int
+JOIN(I, done)(I* iter)
+{
+    return iter->index == iter->end;
 }
 
 static inline void
-JOIN(I, step)(I* self)
+JOIN(I, next)(I* iter)
 {
-    self->index = self->index_next;
-    if(self->index == self->index_last)
-        self->done = 1;
-    else
-    {
-        self->ref = JOIN(A, at)(self->container, self->index);
-        self->index_next++;
-    }
+    iter->index++;
+    if(iter->index < iter->end)
+        iter->ref = JOIN(A, at)(iter->container, iter->index);
 }
 
 static inline void
-JOIN(I, advance)(I* self, int i)
+JOIN(I, range)(I* first, I* last)
 {
-    if(self->index + i >= self->index_last || (long)self->index + i < 0)
-        self->done = 1;
-    else
-    {
-        self->index += i;
-        self->ref = JOIN(A, at)(self->container, self->index);
-        self->index_next += i;
-    }
+    last->end = first->end = last->index;
 }
 
-static inline I
-JOIN(I, range)(A* container, T* begin, T* end)
+static inline I*
+JOIN(I, advance)(I* iter, long i)
 {
-    static I zero;
-    I self = zero;
-    if(begin && end)
+    // error case: overflow => end or NULL?
+    if(iter->index + i >= iter->end ||
+       iter->index + i >= iter->container->size ||
+       (long)iter->index + i < 0)
     {
-        self.container = container;
-        self.step = JOIN(I, step);
-        self.index = begin - JOIN(A, begin)(container);
-        self.index_next = self.index + 1;
-        self.index_last = container->size - (JOIN(A, end)(container) - end);
-        self.ref = JOIN(A, at)(container, self.index);
+        iter->index = iter->end;
+        iter->ref = NULL;
     }
     else
-        self.done = 1;
-    return self;
+    {
+        iter->index += i;
+        iter->ref = JOIN(A, at)(iter->container, iter->index);
+    }
+    return iter;
 }
+
+static inline long
+JOIN(I, distance)(I* iter, I* other)
+{
+    // wrap around?
+    return other->index - iter->index;
+}
+
+static inline A JOIN(A, copy)(A* self);
 
 #include <ctl/bits/container.h>
 
@@ -164,6 +212,12 @@ JOIN(B, init)(size_t cut)
 {
     B* self = (B*) malloc(sizeof(B));
     self->a = self->b = cut;
+    return self;
+}
+
+static inline B*
+JOIN(B, next)(B* self)
+{
     return self;
 }
 
@@ -303,8 +357,8 @@ JOIN(A, pop_back)(A* self)
     }
 }
 
-static inline void
-JOIN(A, erase)(A* self, size_t index)
+static inline size_t
+JOIN(A, erase_index)(A* self, size_t index)
 {
     static T zero;
     JOIN(A, set)(self, index, zero);
@@ -327,10 +381,18 @@ JOIN(A, erase)(A* self, size_t index)
 #ifndef POD
     self->free = saved;
 #endif
+    return index;
+}
+
+static inline I*
+JOIN(A, erase)(I* pos)
+{
+    pos->index = JOIN(A, erase_index)(pos->container, pos->index);
+    return pos;
 }
 
 static inline void
-JOIN(A, insert)(A* self, size_t index, T value)
+JOIN(A, insert_index)(A* self, size_t index, T value)
 {
     if(self->size > 0)
     {
@@ -355,6 +417,16 @@ JOIN(A, insert)(A* self, size_t index, T value)
         self->free = saved;
 #endif
     }
+    else
+        JOIN(A, push_back)(self, value);
+}
+
+static inline void
+JOIN(A, insert)(I* pos, T value)
+{
+    A* self = pos->container;
+    if(self->size > 0)
+        JOIN(A, insert_index)(self, pos->index, value);
     else
         JOIN(A, push_back)(self, value);
 }
@@ -402,24 +474,23 @@ JOIN(A, resize)(A* self, size_t size, T value)
 }
 
 static inline I*
-JOIN(A, erase_it)(A* self, I* pos)
-{
-    JOIN(A, erase)(self, pos->index);
-    return pos;
-}
-
-static inline I*
 JOIN(A, erase_range)(A* self, I* first, I* last)
 {
-    for(size_t i = first->index; i < last->index; i++)
-        JOIN(A, erase)(self, first->index);
+    size_t i = first->index;
+    size_t e = last->index;
+    if (i >= self->size || i >= e)
+        return last;
+    for(; i < e; e--)
+    {
+        JOIN(A, erase_index)(self, i);
+    }
     return first;
 }
 
 static inline void
-JOIN(A, emplace)(A* self, I* pos, T* value)
+JOIN(A, emplace)(I* pos, T* value)
 {
-    JOIN(A, insert)(self, pos->index, *value);
+    JOIN(A, insert)(pos, *value);
 }
 
 static inline void
@@ -435,64 +506,33 @@ JOIN(A, emplace_back)(A* self, T* value)
 }
 
 static inline I*
-JOIN(A, insert_it)(A* self, I* pos, T value)
+JOIN(A, insert_range)(I* pos, I* first, I* last)
 {
-    JOIN(A, insert)(self, pos->index, value);
+    A* self = pos->container;
+    foreach_range(A, iter, first, last)
+        if (iter.ref)
+            JOIN(A, insert_index)(self, iter.index, self->copy(iter.ref));
     return pos;
 }
 
 static inline I*
-JOIN(A, insert_range)(A* self, I* pos, I* first, I* last)
+JOIN(A, insert_count)(I* pos, size_t count, T value)
 {
-    if (first->index < last->index)
-    {
-        size_t index = pos->index;
-        if (!last->done)
-            first->index_last = last->index;
-        // broken if overlapping. STL does mostly fine, but undefined behavior.
-        // and sometimes it even fails. so skip or assert.
-        if (first->container == pos->container)
-        {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-            assert (first->container != pos->container || !"container overlap");
-#endif
-#if 0
-            A copy = JOIN(A, copy)(self);
-            for(I it = *first; !it.done; it.step(&it))
-                JOIN(A, insert)(&copy, index++, self->copy(it.ref));
-            for (size_t i = pos->index; i < index; i++)
-            {
-                T value = *JOIN(A, at)(&copy, i);
-                JOIN(A, insert)(self, i, self->copy(&value));
-            }
-            JOIN(A, free)(&copy);
-#endif
-        }
-        else
-            for(I it = *first; !it.done; it.step(&it))
-                JOIN(A, insert)(self, index++, self->copy(it.ref));
-    }
-    return pos;
-}
-
-static inline I*
-JOIN(A, insert_count)(A* self, I* pos, size_t count, T value)
-{
+    A* self = pos->container;
     // detect overflows, esp. silent signed conversions, like -1
+    size_t index = pos->index;
     if (self->size + count < self->size ||
-        count + pos->index < count ||
+        index + count < count ||
         self->size + count > JOIN(A, max_size)())
     {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-        assert (self->size + count >= self->size || !"count overflow");
-        assert (pos->index + count >= count || !"pos overflow");
-        assert (self->size + count < JOIN(A, max_size)() || !"max_size overflow");
-#endif
+        ASSERT (self->size + count >= self->size || !"count overflow");
+        ASSERT (index + count >= count || !"pos overflow");
+        ASSERT (self->size + count < JOIN(A, max_size)() || !"max_size overflow");
         FREE_VALUE(self, value);
         return NULL;
     }
-    for(size_t i = pos->index; i < count + pos->index; i++)
-        JOIN(A, insert)(self, i, self->copy(&value));
+    for(size_t i = index; i < count + index; i++)
+        JOIN(A, insert_index)(self, i, self->copy(&value));
     FREE_VALUE(self, value);
     return pos;
 }
@@ -545,26 +585,32 @@ JOIN(A, sort)(A* self)
 
 // excluding to
 static inline void
-JOIN(A, sort_range)(A* self, I* from, I* to)
+JOIN(A, sort_range)(A* self, size_t from, size_t to)
 {
     CTL_ASSERT_COMPARE
     // TODO insertion_sort cutoff
-    if (to->index > 1)
-        JOIN(A, _ranged_sort)(self, from->index, to->index - 1, self->compare);
+    if (to > 1) // overflow with 0
+        JOIN(A, _ranged_sort)(self, from, to - 1, self->compare);
 }
 
 static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
+    if (!self->size)
+        return 0;
     size_t erases = 0;
-    foreach(A, self, it)
-        if(_match(it.ref))
+    T* ref = JOIN(A, at)(self, 0);
+    for(size_t i = 0; i < self->size;)
+    {
+        ref = JOIN(A, at)(self, i);
+        if(_match(ref))
         {
-            JOIN(A, erase)(self, it.index);
-            it.index_next = it.index;
-            it.index_last--;
+            JOIN(A, erase_index)(self, i);
             erases++;
         }
+        else
+            i++;
+    }
     return erases;
 }
 
@@ -574,13 +620,13 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
     return JOIN(A, remove_if)(self, _match);
 }
 
-static inline T*
+static inline I
 JOIN(A, find)(A* self, T key)
 {
-    foreach(A, self, it)
-        if(JOIN(A, _equal)(self, it.ref, &key))
-            return it.ref;
-    return NULL;
+    foreach(A, self, i)
+        if(JOIN(A, _equal)(self, i.ref, &key))
+            return i;
+    return JOIN(A, end)(self);
 }
 
 static inline void
@@ -591,7 +637,7 @@ JOIN(A, swap)(A* self, A* other)
     *other = temp;
 }
 
-#include <ctl/algorithm.h>
+//#include <ctl/algorithm.h>
 
 #undef T
 #undef A

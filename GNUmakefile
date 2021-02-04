@@ -100,7 +100,7 @@ endif
 
 CXXFLAGS += $(CFLAGS)
 
-H        = $(wildcard ctl/*.h) ctl/bits/*.h
+H        = $(wildcard ctl/*.h) $(wildcard ctl/bits/*.h)
 COMMON_H = ctl/ctl.h ctl/algorithm.h ctl/bits/container.h \
            ctl/bits/integral.h ctl/bits/iterators.h
 TESTS = \
@@ -121,6 +121,7 @@ TESTS = \
 	tests/func/test_array \
 	tests/func/test_double_array \
 	tests/func/test_vector \
+	tests/func/test_int_vector \
 	tests/func/test_vec_capacity \
 	tests/func/test_str_capacity
 ifneq ($(DEBUG),)
@@ -136,14 +137,15 @@ EXAMPLES = \
 	examples/snow \
 	examples/6502
 
-all: $(TESTS) docs/index.md
+check: $(TESTS) docs/index.md
 	$(foreach bin,$(TESTS),./$(bin) &&) exit 0
 	@$(CC) --version | head -n2
 	@echo $(CC) $(CFLAGS)
 	@$(CXX) --version | head -n2
 	@echo $(CXX) $(CXXFLAGS)
 
-check: all
+all: check perf examples #verify
+
 .cflags: ALWAYS
 	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
 images:
@@ -165,6 +167,7 @@ $(wildcard tests/perf/deq/perf*.cc?) : $(COMMON_H) ctl/deque.h
 $(wildcard tests/perf/pqu/perf*.cc?) : $(COMMON_H) ctl/priority_queue.h
 $(wildcard tests/perf/vec/perf*.cc?) : $(COMMON_H) ctl/vector.h
 $(wildcard tests/perf/uset/perf*.cc?): $(COMMON_H) ctl/unordered_set.h
+$(wildcard tests/perf/str/perf*.cc?): $(COMMON_H) ctl/string.h ctl/vector.h
 $(wildcard tests/perf/arr/*.cc?): $(COMMON_H) ctl/array.h
 
 tests/perf/arr/gen_array0% : tests/perf/arr/gen_array0%.c \
@@ -346,5 +349,20 @@ test-pgc++:
 define expand
 	@$(CC) $(CFLAGS) $(1).h -E $(2) | clang-format -style=webkit
 endef
+
+# emacs flymake-mode
+check-syntax:
+	case "$(CHK_SOURCES)" in \
+          *.c) \
+            nice $(CC) $(CFLAGS) -O0 -c ${CHK_SOURCES} ;; \
+          *.cc) \
+            nice $(CXX) $(CXXFLAGS) -O0 -c ${CHK_SOURCES} ;; \
+          ctl/bits/*.h) \
+            nice $(CXX) $(CXXFLAGS) -O0 -c tests/func/test_vector ;; \
+          ctl/*.h) \
+            nice $(CXX) $(CXXFLAGS) -O0 -c tests/func/test_$(subst .h,.cc,$(subst ctl/,,${CHK_SOURCES})) ;; \
+        esac
+
+.PHONY: check-syntax
 
 ALWAYS:

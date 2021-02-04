@@ -5,7 +5,7 @@
 #error "Template type T undefined for <ctl/set.h>"
 #endif
 
-// TODO emplace, lower_bound, upper_bound, equal_range
+// TODO emplace, extract, extract_it, merge, equal_range
 
 #define CTL_SET
 #define A JOIN(set, T)
@@ -13,13 +13,14 @@
 #define I JOIN(A, it)
 
 #include <ctl/ctl.h>
+#include <ctl/bits/iterators.h>
 
 typedef struct B
 {
     struct B* l;
     struct B* r;
     struct B* p;
-    T key;
+    T value;
     int color; // Red = 0, Black = 1
 } B;
 
@@ -35,100 +36,158 @@ typedef struct A
 
 typedef struct I
 {
-    CTL_B_ITER_FIELDS;
+    B* node;
+    T* ref;
+    B* end;
+    A* container;
 } I;
 
-static inline B*
-JOIN(A, begin)(A* self)
+static inline I
+JOIN(I, iter)(A* self, B *node)
 {
-    return self->root;
+    static I zero;
+    I iter = zero;
+    iter.node = node;
+    if (node)
+        iter.ref = &node->value;
+    iter.container = self;
+    // end defaults to NULL
+    return iter;
 }
 
 static inline B*
-JOIN(A, end)(A* self)
+JOIN(B, min)(B* node)
 {
-    (void) self;
-    return NULL;
+    if (node)
+        while(node->l)
+            node = node->l;
+    return node;
 }
 
 static inline B*
-JOIN(B, min)(B* self)
+JOIN(A, first)(A* self)
 {
-    while(self->l)
-        self = self->l;
-    return self;
-}
-
-static inline B*
-JOIN(B, max)(B* self)
-{
-    while(self->r)
-        self = self->r;
-    return self;
-}
-
-static inline B*
-JOIN(B, next)(B* self)
-{
-    if(self->r)
-    {
-        self = self->r;
-        while(self->l)
-            self = self->l;
-    }
-    else
-    {
-        B* parent = self->p;
-        while(parent && self == parent->r)
-        {
-            self = parent;
-            parent = parent->p;
-        }
-        self = parent;
-    }
-    return self;
-}
-
-static inline void
-JOIN(I, step)(I* self)
-{
-    if(self->next == self->end)
-        self->done = 1;
-    else
-    {
-        self->node = self->next;
-        if (self->node)
-        {
-            self->ref = &self->node->key;
-            self->next = JOIN(B, next)(self->node);
-        }
-        else
-        {
-            self->done = 1;
-            self->ref = NULL;
-            self->next = NULL;
-        }
-    }
+    return JOIN(B, min)(self->root);
 }
 
 static inline I
-JOIN(I, range)(A* container, B* begin, B* end)
+JOIN(A, begin)(A* self)
 {
-    static I zero;
-    I self = zero;
-    self.container = container;
-    if(begin)
+    return JOIN(I, iter)(self, JOIN(B, min)(self->root));
+}
+
+static inline I
+JOIN(A, end)(A* self)
+{
+    return JOIN(I, iter)(self, NULL);
+}
+
+static inline B*
+JOIN(B, max)(B* node)
+{
+    while(node->r)
+        node = node->r;
+    return node;
+}
+
+static inline B*
+JOIN(A, last)(A* self)
+{
+    return JOIN(B, max)(self->root);
+}
+
+static inline B*
+JOIN(B, next)(B* node)
+{
+    if(node->r)
     {
-        self.step = JOIN(I, step);
-        self.node = JOIN(B, min)(begin);
-        self.ref = &self.node->key;
-        self.next = JOIN(B, next)(self.node);
-        self.end = end;
+        node = node->r;
+        while(node->l)
+            node = node->l;
     }
     else
-        self.done = 1;
-    return self;
+    {
+        B* parent = node->p;
+        while(parent && node == parent->r)
+        {
+            node = parent;
+            parent = parent->p;
+        }
+        node = parent;
+    }
+    return node;
 }
+
+static inline T*
+JOIN(I, ref)(I* iter)
+{
+    return &iter->node->value;
+}
+
+static inline int
+JOIN(I, done)(I* iter)
+{
+    return iter->node == iter->end;
+}
+
+static inline int
+JOIN(I, is_end)(I* iter, I* last)
+{
+    return iter->node == last->node;
+}
+
+static inline I*
+JOIN(I, next)(I* iter)
+{
+    iter->node = JOIN(B, next)(iter->node);
+    iter->ref = iter->node ? &iter->node->value : NULL;
+    return iter;
+}
+
+static inline I*
+JOIN(I, advance)(I* iter, long i)
+{
+    A* a = iter->container;
+    if (i < 0)
+    {
+        if ((size_t)-i > a->size)
+            return NULL;
+        i = a->size + i;
+        iter->node = iter->container->root;
+    }
+    for(long j = 0; iter->node != NULL && j < i; j++)
+        iter->node = JOIN(B, next)(iter->node);
+    iter->ref = &iter->node->value;
+    return iter;
+}
+
+static inline long
+JOIN(I, distance)(I* iter, I* other)
+{
+    long d = 0;
+    if (iter == other || iter->node == other->node)
+        return 0;
+    B* n = iter->node;
+    for(; n != NULL && n != other->node; d++)
+        n = JOIN(B, next)(n);
+    if (n == other->node)
+        return d;
+    // other before iter, negative result
+    d = (long)other->container->size;
+    n = other->node;
+    for(; n != NULL && n != iter->node; d--)
+        n = JOIN(B, next)(n);
+    return n ? -d : -(long)(iter->container->size);
+}
+
+// set first and last ranges
+static inline void
+JOIN(I, range)(I* iter, I* last)
+{
+    last->end = iter->end = last->node;
+}
+
+static inline A JOIN(A, copy)(A* self);
 
 #include <ctl/bits/container.h>
 
@@ -153,7 +212,7 @@ JOIN(A, free_node)(A* self, B* node)
 {
 #ifndef POD
     if(self->free)
-        self->free(&node->key);
+        self->free(&node->value);
 #else
     (void) self;
 #endif
@@ -161,67 +220,67 @@ JOIN(A, free_node)(A* self, B* node)
 }
 
 static inline int
-JOIN(B, color)(B* self)
+JOIN(B, color)(B* node)
 {
-    return self ? self->color : 1;
+    return node ? node->color : 1;
 }
 
 static inline int
-JOIN(B, is_black)(B* self)
+JOIN(B, is_black)(B* node)
 {
-    return JOIN(B, color)(self) == 1;
+    return JOIN(B, color)(node) == 1;
 }
 
 static inline int
-JOIN(B, is_red)(B* self)
+JOIN(B, is_red)(B* node)
 {
-    return JOIN(B, color)(self) == 0;
+    return JOIN(B, color)(node) == 0;
 }
 
 static inline B*
-JOIN(B, grandfather)(B* self)
+JOIN(B, grandfather)(B* node)
 {
-    return self->p->p;
+    return node->p->p;
 }
 
 static inline B*
-JOIN(B, sibling)(B* self)
+JOIN(B, sibling)(B* node)
 {
-    if(self == self->p->l)
-        return self->p->r;
+    if(node == node->p->l)
+        return node->p->r;
     else
-        return self->p->l;
+        return node->p->l;
 }
 
 static inline B*
-JOIN(B, uncle)(B* self)
+JOIN(B, uncle)(B* node)
 {
-    return JOIN(B, sibling)(self->p);
+    return JOIN(B, sibling)(node->p);
 }
 
 static inline B*
 JOIN(B, init)(T key, int color)
 {
-    B* self = (B*) malloc(sizeof(B));
-    self->key = key;
-    self->color = color;
-    self->l = self->r = self->p = NULL;
-    return self;
+    B* node = (B*) malloc(sizeof(B));
+    node->value = key;
+    node->color = color;
+    node->l = node->r = node->p = NULL;
+    return node;
 }
 
 static inline B*
-JOIN(A, find)(A* self, T key)
+JOIN(A, find_node)(A* self, T key)
 {
     B* node = self->root;
     while(node)
     {
-        int diff = self->compare(&key, &node->key);
+        int diff = self->compare(&key, &node->value);
         // Don't rely on a valid 3-way compare. can be just a simple >
         if(diff == 0)
         {
             if (self->equal)
             {
-                if (self->equal(&key, &node->key))
+                if (self->equal(&key, &node->value))
                     return node;
                 else
                     node = node->r;
@@ -237,15 +296,25 @@ JOIN(A, find)(A* self, T key)
     return NULL;
 }
 
+static inline I
+JOIN(A, find)(A* self, T key)
+{
+    B* node = JOIN(A, find_node)(self, key);
+    if (node)
+        return JOIN(I, iter)(self, node);
+    else
+        return JOIN(A, end)(self);
+}
+
 static inline int
 JOIN(A, count)(A* self, T key)
 {
-    int result = JOIN(A, find)(self, key) ? 1 : 0;
+    B* node = JOIN(A, find_node)(self, key);
 #ifndef POD
     if(self->free)
         self->free(&key);
 #endif
-    return result;
+    return node ? 1 : 0;
 }
 
 static inline int
@@ -275,47 +344,47 @@ JOIN(B, replace)(A* self, B* a, B* b)
 #include <assert.h>
 
 static inline void
-JOIN(B, verify_property_1)(B* self)
+JOIN(B, verify_property_1)(B* node)
 {
-    assert(JOIN(B, is_red)(self) || JOIN(B, is_black)(self));
-    if(self)
+    assert(JOIN(B, is_red)(node) || JOIN(B, is_black)(node));
+    if(node)
     {
-        JOIN(B, verify_property_1)(self->l);
-        JOIN(B, verify_property_1)(self->r);
+        JOIN(B, verify_property_1)(node->l);
+        JOIN(B, verify_property_1)(node->r);
     }
 }
 
 static inline void
-JOIN(B, verify_property_2)(B* self)
+JOIN(B, verify_property_2)(B* node)
 {
-    assert(JOIN(B, is_black)(self));
+    assert(JOIN(B, is_black)(node));
 }
 
 static inline void
-JOIN(B, verify_property_4)(B* self)
+JOIN(B, verify_property_4)(B* node)
 {
-    if(JOIN(B, is_red)(self))
+    if(JOIN(B, is_red)(node))
     {
-        assert(JOIN(B, is_black)(self->l));
-        assert(JOIN(B, is_black)(self->r));
-        assert(JOIN(B, is_black)(self->p));
+        assert(JOIN(B, is_black)(node->l));
+        assert(JOIN(B, is_black)(node->r));
+        assert(JOIN(B, is_black)(node->p));
     }
-    if(self)
+    if(node)
     {
-        JOIN(B, verify_property_4)(self->l);
-        JOIN(B, verify_property_4)(self->r);
+        JOIN(B, verify_property_4)(node->l);
+        JOIN(B, verify_property_4)(node->r);
     }
 }
 
 static inline void
-JOIN(B, count_black)(B* self, int nodes, int* in_path)
+JOIN(B, count_black)(B* node, int nodes, int* in_path)
 {
-    if(JOIN(B, is_black)(self))
+    if(JOIN(B, is_black)(node))
         nodes++;
-    if(self)
+    if(node)
     {
-        JOIN(B, count_black)(self->l, nodes, in_path);
-        JOIN(B, count_black)(self->r, nodes, in_path);
+        JOIN(B, count_black)(node->l, nodes, in_path);
+        JOIN(B, count_black)(node->r, nodes, in_path);
     }
     else
     {
@@ -327,10 +396,10 @@ JOIN(B, count_black)(B* self, int nodes, int* in_path)
 }
 
 static inline void
-JOIN(B, verify_property_5)(B* self)
+JOIN(B, verify_property_5)(B* node)
 {
     int in_path = -1;
-    JOIN(B, count_black)(self, 0, &in_path);
+    JOIN(B, count_black)(node, 0, &in_path);
 }
 
 static inline void
@@ -376,6 +445,7 @@ JOIN(A, insert_3)(A*, B*),
 JOIN(A, insert_4)(A*, B*),
 JOIN(A, insert_5)(A*, B*);
 
+// TODO bulk insert of sorted vector
 static inline B*
 JOIN(A, insert)(A* self, T key)
 {
@@ -385,14 +455,13 @@ JOIN(A, insert)(A* self, T key)
         B* node = self->root;
         while(1)
         {
-            int diff = self->compare(&key, &node->key);
-            if(diff == 0)
+            int diff = self->compare(&key, &node->value);
+            if(diff == 0) // equal: replace
             {
                 JOIN(A, free_node)(self, insert);
                 return node;
             }
-            else
-            if(diff < 0)
+            else if(diff < 0) // lower
             {
                 if(node->l)
                     node = node->l;
@@ -402,7 +471,7 @@ JOIN(A, insert)(A* self, T key)
                     break;
                 }
             }
-            else
+            else // greater
             {
                 if(node->r)
                     node = node->r;
@@ -499,7 +568,7 @@ JOIN(A, erase_node)(A* self, B* node)
     if(node->l && node->r)
     {
         B* pred = JOIN(B, max)(node->l);
-        SWAP(T, &node->key, &pred->key);
+        SWAP(T, &node->value, &pred->value);
         node = pred;
     }
     B* child = node->r ? node->r : node->l;
@@ -509,7 +578,7 @@ JOIN(A, erase_node)(A* self, B* node)
         JOIN(A, erase_1)(self, node);
     }
     JOIN(B, replace)(self, node, child);
-    if(node->p == NULL && child)
+    if(!node->p && child)
         child->color = 1;
     JOIN(A, free_node)(self, node);
     self->size--;
@@ -518,43 +587,34 @@ JOIN(A, erase_node)(A* self, B* node)
 #endif
 }
 
-static inline I
-JOIN(I, iter)(A* self, B *node)
+static inline void
+JOIN(A, erase_it)(I* it)
 {
-    I it = JOIN(I, each)(self);
-    it.node = node;
-    it.ref = &node->key;
-    it.next = JOIN(B, next)(it.node);
-    return it;
+    B* node = it->node;
+    if(node)
+        JOIN(A, erase_node)(it->container, node);
 }
 
 static inline void
-JOIN(A, erase_it)(A* self, I* pos)
+JOIN(A, erase_range)(I* from, I* to)
 {
-    B* node = pos->node;
-    if(node)
-        JOIN(A, erase_node)(self, node);
-}
-
-#ifdef DEBUG
-static inline void
-JOIN(A, erase_range)(A* self, I* from, I* to)
-{
-    B* node = from->node;
-    if(node)
+    if(!JOIN(I, done)(from))
     {
         // TODO: check if clear would be faster (from==begin && to==end)
-        JOIN(A, it) it = JOIN(I, range)(self, from->node, to->node);
-        for(; !it.done; it.step(&it))
-            JOIN(A, erase_node)(self, it.node);
+        B* node = from->node;
+        while(node != to->node)
+        {
+            B* next = JOIN(B, next)(node);
+            JOIN(A, erase_node)(from->container, node);
+            node = next;
+        }
     }
 }
-#endif
 
 static inline void
 JOIN(A, erase)(A* self, T key)
 {
-    B* node = JOIN(A, find)(self, key);
+    B* node = JOIN(A, find_node)(self, key);
     if(node)
         JOIN(A, erase_node)(self, node);
 }
@@ -672,6 +732,7 @@ JOIN(A, clear)(A* self)
 {
     while(!JOIN(A, empty)(self))
         JOIN(B, erase_fast)(self, self->root);
+    self->root = NULL;
 }
 
 static inline void
@@ -684,13 +745,9 @@ JOIN(A, free)(A* self)
 static inline A
 JOIN(A, copy)(A* self)
 {
-    I it = JOIN(I, each)(self);
     A copy =  JOIN(A, init)(self->compare);
-    while(!it.done)
-    {
-        JOIN(A, insert)(&copy, self->copy(&it.node->key));
-        it.step(&it);
-    }
+    list_foreach_ref(A, self, it)
+        JOIN(A, insert)(&copy, self->copy(it.ref));
     return copy;
 }
 
@@ -706,12 +763,17 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    foreach(A, self, it)
-        if(_match(&it.node->key))
+    B* node = JOIN(A, first)(self);
+    while (node)
+    {
+        B* next = JOIN(B, next)(node);
+        if(_match(&node->value))
         {
-            JOIN(A, erase_node)(self, it.node);
+            JOIN(A, erase_node)(self, node);
             erases++;
         }
+        node = next;
+    }
     return erases;
 }
 
@@ -721,13 +783,31 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
     return JOIN(A, remove_if)(self, _match);
 }
 
+static inline void /* I, B* ?? */
+JOIN(A, unique)(A* self)
+{
+    B* node = JOIN(A, first)(self);
+    while (node)
+    {
+        B* next = JOIN(B, next)(node);
+        if(next && JOIN(A, _equal)(self, &node->value, &next->value))
+            JOIN(A, erase_node)(self, node);
+        node = next;
+    }
+}
+
 static inline A
 JOIN(A, intersection)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->compare);
-    foreach(A, a, i)
-        if(JOIN(A, find)(b, *i.ref))
-            JOIN(A, insert)(&self, self.copy(i.ref));
+    B* node = JOIN(A, first)(a);
+    while (node)
+    {
+        B* next = JOIN(B, next)(node);
+        if(JOIN(A, find_node)(b, node->value))
+            JOIN(A, insert)(&self, self.copy(&node->value));
+        node = next;
+    }
     return self;
 }
 
@@ -735,8 +815,20 @@ static inline A
 JOIN(A, union)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->compare);
-    foreach(A, a, i) JOIN(A, insert)(&self, self.copy(i.ref));
-    foreach(A, b, i) JOIN(A, insert)(&self, self.copy(i.ref));
+    B* node = JOIN(A, first)(a);
+    while (node)
+    {
+        B* next = JOIN(B, next)(node);
+        JOIN(A, insert)(&self, self.copy(&node->value));
+        node = next;
+    }
+    node = JOIN(A, first)(b);
+    while (node)
+    {
+        B* next = JOIN(B, next)(node);
+        JOIN(A, insert)(&self, self.copy(&node->value));
+        node = next;
+    }
     return self;
 }
 
@@ -744,7 +836,13 @@ static inline A
 JOIN(A, difference)(A* a, A* b)
 {
     A self = JOIN(A, copy)(a);
-    foreach(A, b, i) JOIN(A, erase)(&self, *i.ref);
+    B* node = JOIN(A, first)(b);
+    while (node)
+    {
+        B* next = JOIN(B, next)(node);
+        JOIN(A, erase)(&self, node->value);
+        node = next;
+    }
     return self;
 }
 
@@ -753,10 +851,136 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 {
     A self = JOIN(A, union)(a, b);
     A intersection = JOIN(A, intersection)(a, b);
-    foreach(A, &intersection, i) JOIN(A, erase)(&self, *i.ref);
+    B* node = JOIN(A, first)(&intersection);
+    while (node)
+    {
+        B* next = JOIN(B, next)(node);
+        JOIN(A, erase)(&self, node->value);
+        node = next;
+    }
     JOIN(A, free)(&intersection);
     return self;
 }
+
+#ifdef DEBUG
+
+static inline bool
+JOIN(A, inserter)(A* self, I* it, T value)
+{
+    if(!JOIN(A, _equal)(self, it->ref, &value))
+    {
+        B* next = JOIN(B, next)(it->node);
+        JOIN(A, erase_node)(self, it->node);
+        JOIN(A, insert)(self, value);
+        it->node = next;
+        return true;
+    }
+    else
+    {
+        if (self->free)
+            self->free(&value);
+        return false;
+    }
+}
+
+// specialize, using our inserter
+static inline void
+JOIN(A, generate)(A* self, T _gen(void))
+{
+    foreach(A, self, i)
+    {
+        T tmp = _gen();
+        JOIN(A, inserter)(self, &i, tmp);
+    }
+}
+
+static inline void
+JOIN(A, generate_range)(I* first, I* last, T _gen(void))
+{
+    foreach_range(A, i, first, last)
+    {
+        T tmp = _gen();
+        JOIN(A, inserter)(first->container, &i, tmp);
+    }
+}
+
+static inline void
+JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
+{
+    foreach_n(A, self, i, count)
+    {
+        T tmp = _gen();
+        JOIN(A, inserter)(self, &i, tmp);
+    }
+}
+
+static inline void
+JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
+{
+    foreach_n_range(A, first, i, count)
+    {
+        T tmp = _gen();
+        JOIN(A, inserter)(first->container, &i, tmp);
+    }
+}
+
+static inline A
+JOIN(A, transform)(A* self, T _unop(T*))
+{
+    A other = JOIN(A, copy)(self);
+    foreach(A, &other, i)
+    {
+        T tmp = _unop(i.ref);
+        JOIN(A, inserter)(&other, &i, tmp);
+    }
+    return other;
+}
+
+static inline A
+JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
+{
+    A other = JOIN(A, copy)(self);
+    foreach(A, &other, i)
+    {
+        if (JOIN(I, done)(pos))
+            break;
+        T tmp = _binop(i.ref, pos->ref);
+        JOIN(A, inserter)(&other, &i, tmp);
+        JOIN(I, next)(pos);
+    }
+    return other;
+}
+
+static inline I
+JOIN(A, transform_range)(I* first1, I* last1, I dest, T _unop(T*))
+{
+    foreach_range(A, i, first1, last1)
+    {
+        if (JOIN(I, done)(&dest))
+            break;
+        T tmp = _unop(i.ref);
+        JOIN(A, inserter)(dest.container, &i, tmp);
+        JOIN(I, next)(&dest);
+    }
+    return dest;
+}
+
+static inline I
+JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*))
+{
+    foreach_range(A, i, first1, last1)
+    {
+        if (JOIN(I, done)(pos) || JOIN(I, done)(&dest))
+            break;
+        T tmp = _binop(i.ref, pos->ref);
+        JOIN(A, inserter)(dest.container, &i, tmp);
+        JOIN(I, next)(pos);
+        JOIN(I, next)(&dest);
+    }
+    return dest;
+}
+
+#endif //DEBUG
 
 #if defined(CTL_MAP)
 # include <ctl/algorithm.h>

@@ -1,8 +1,6 @@
 #include "../../test.h"
 
-#define POD
-#define T int
-#include <ctl/vector.h>
+#include <ctl/string.h>
 
 #include <time.h>
 
@@ -12,16 +10,14 @@ int main(void)
     srand(0xbeef);
     for(int run = 0; run < TEST_PERF_RUNS; run++)
     {
-        vec_int c = vec_int_init();
+        str c = str_init("");
         int elems = TEST_PERF_CHUNKS * run;
         for(int elem = 0; elem < elems; elem++)
-            vec_int_push_back(&c, rand());
+            str_push_back(&c, 'a'+TEST_RAND(23));
         long t0 = TEST_TIME();
-        volatile int sum = 0;
-        vec_foreach(int, &c, ref)
-            sum += *ref;
+        str_sort(&c);
         long t1 = TEST_TIME();
         printf("%10d %10ld\n", elems, t1 - t0);
-        vec_int_free(&c);
+        str_free(&c);
     }
 }

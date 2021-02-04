@@ -77,7 +77,7 @@ other: !comp(a, b) && !comp(b, a).
 
 ## Member functions
 
-    init (int compare(T*, T*))
+    A init (int compare(T*, T*))
 
 constructs the map
 
@@ -95,19 +95,30 @@ returns the associated allocator
 
 ## Element access
 
-    at (A* self, size_t index)
+    T* at (A* self, size_t index)
 
 access specified element with bounds checking
 
 ## Iterators
 
-    begin (A* self)
+    I begin (A* self)
 
-returns an iterator to the beginning
+constructs an iterator to the beginning
 
-    end (A* self)
+    I end (A* self)
 
-returns an iterator to the end
+constructs an iterator to the end
+
+    I* next (I* iter)
+
+Advances the iterator by 1 forwards. There's no prev yet.
+
+    I* advance (I* iter, long i)
+
+All our variants accepts negative `i` to move back. The return value may be ignored.
+
+
+See [iterators](iterators.md) for more.
 
 ## Capacity
 
@@ -129,35 +140,35 @@ returns the maximum possible number of elements
 
 clears the contents
 
-    insert (A* self)
+    insert (A* self, T pair)
 
-inserts elements or nodes `(since C++17)
+inserts a key-value pair (since C++17)
 
-    insert_or_assign (A* self)
+    insert_or_assign (A* self, T pair)
 
 inserts an element or assigns to the current element if the key already exists
 
-    emplace (A* self, T* value)
+    emplace (A* self, T* pair)
 
 constructs element in-place
 
-    emplace_hint (A* self, it *position, T* value)
+    emplace_hint (I *pos, T* pair)
 
 constructs elements in-place at position. _(NYI)_
 
-    try_emplace (A* self, T* value)
+    try_emplace (A* self, T* pair)
 
 inserts in-place if the key does not exist, does nothing if the key exists
 
     erase (A* self, T key)
 
-erases the element by value
+erases the element by pair.first
 
-    erase_it (A* self, I* position)
+    erase_it (I* pos)
 
 erases the element at position
 
-    erase_range (A* self, I* first, I* last)
+    erase_range (I* first, I* last)
 
 erases elements
 
@@ -169,9 +180,9 @@ swaps the contents
 
 extracts a node from the container. NYI
 
-    extract_it (A* self, I* position)
+    extract_it (I* pos)
 
-extracts nodes from the container. NYI
+extracts a node from the container. NYI
 
     merge (A* self, A* other)
 
@@ -179,35 +190,36 @@ merges two containers
 
 ## Lookup
 
-    count (A* self, T key)
+    size_t count (A* self, T key)
 
 returns the number of elements matching specific key
 
-    find (A* self, T key)
+    I find (A* self, T key)
+    B* find_node (A* self, T key)
 
-finds element with specific key
+finds element with specific key, i.e. pair.first
 
-    contains (A* self, T key)
+    bool contains (A* self, T key)
 
 checks if the container contains element with specific key. `(C++20)
 
-    equal_range (A* self)
+    bool equal_range (A* self, I* first, I* last, T value)
 
-returns range of elements matching a specific key.  _(NYI)_
+if range of elements match a specific key.  _(NYI)_
 
-    lower_bound (A* self)
+    I lower_bound (A* self, T key)
 
 returns an iterator to the first element not less than the given key.  _(NYI)_
 
-    upper_bound (A* self)
+    I upper_bound (A* self, T key)
 
 returns an iterator to the first element greater than the given key.  _(NYI)_
 
 ## Observers
 
-    value_comp (A* self)
+    int (*cmp)(T*,T*) value_comp (A* self)
 
-Returns the function that compares keys in objects of type value_type T.  _(NYI)_
+Returns the function that compares keys in objects of type T.  _(NYI)_
 
 ## Non-member functions
 
@@ -215,7 +227,7 @@ Returns the function that compares keys in objects of type value_type T.  _(NYI)
 
 specializes the swap algorithm
 
-    remove_if (A* self, int T_match(T*))
+    remove_if (A* self, int match(T*))
 
 Removes all elements satisfying specific criteria.
 
@@ -223,10 +235,10 @@ Removes all elements satisfying specific criteria.
 
 erases all elements satisfying specific criteria (C++20)
 
-    intersection (A* self, A* other)
-    union (A* self, A* other)
-    difference (A* self, A* other)
-    symmetric_difference (A* self, A* other)
+    A intersection (A* self, A* other)
+    A union (A* self, A* other)
+    A difference (A* self, A* other)
+    A symmetric_difference (A* self, A* other)
 
 
 See [algorithm](algorithm.md) for more.

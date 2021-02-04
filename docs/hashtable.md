@@ -101,13 +101,24 @@ returns a copy of the container.
 
 ## Iterators
 
-[begin](htbl/begin.md) `(A* self)`
+    I begin (A* self)
 
-returns an iterator to the beginning
+Constructs an iterator to the begin.
 
-[end](htbl/end.md) `(A* self)`
+    I end (A* self)
 
-returns an iterator to the end
+constructs an iterator to the end.
+
+    I* next (I* iter)
+
+Advances the iterator by 1 forwards. There's no prev yet.
+
+    I* advance (I* iter, long i)
+
+All our variants accepts negative `i` to move back. The return value may be ignored.
+
+
+See [iterators](iterators.md) for more.
 
 ## Capacity
 

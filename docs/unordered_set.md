@@ -81,13 +81,16 @@ returns a copy of the container.
 
 ## Iterators
 
-    B* begin (A* self)
+    I begin (A* self)
 
-returns an iterator to the beginning.
+constructs an iterator to the beginning
 
-    B* end (A* self)
+    I end (A* self)
 
-returns an iterator to the end, which is the NULL pointer.
+constructs an iterator to the end
+
+`unordered_set` does not support ranges, as this does not make sense.
+Our iterator just supports `foreach` and `foreach_n`.
 
 ## Capacity
 
@@ -117,27 +120,27 @@ clears the contents
 
 inserts the element. (C++17)
 
-    insert_found (A* self, T value, int* foundp)
+    I insert_found (A* self, T value, *foundp)
 
-inserts the element and sets foundp if it already existed.
+inserts the element and set *foundp if it already existed.
 
     I emplace (A* self, T *value)
 
-constructs elements in-place. _(NYI)_
+constructs elements in-place. _(NY)_
 
-    I emplace_hint (A* self, I* pos, T *value)
+    I emplace_hint (I* pos, T *value)
 
-constructs elements in-place at position. _(NYI)_
+constructs elements in-place at position. _(NY)_
 
-    I emplace_found (A* self, T *value, int* foundp)
+    B* emplace_found (A* self, T *value, int* foundp)
 
-constructs elements in-place and sets foundp if it already existed. _(NYI)_
+constructs elements in-place and sets foundp if it already existed. _(NY)_
 
     erase (A* self, T key)
 
 erases the element by key
 
-    size_t erase_if (A* self, int (*_match)(T*))
+    size_t erase_if (A* self, int match(T*))
 
 erases the element by match.
 
@@ -151,7 +154,7 @@ swaps the contents
 
     extract (A* self, T key)
 
-extracts a node from the container. NYI
+extracts a node from the container. _(NYI)_
 
     merge (A* self, A* other)
 
@@ -174,28 +177,24 @@ equal method `int (*equal)(T*, T*)
 returns the number of elements matching specific key. It will always be 1,
 unless your equal method is broken.
 
-    B* find (A* self, T key)
+    I find (A* self, T key)
+    B* find_node (A* self, T key)
 
-finds bucket with specific key
+finds bucket with specific key.
 
     bool contains (A* self, T key)
 
 checks if the container contains element with specific key. (C++20)
 
     int equal (A* self, A* other)
-    int equal_range (A* self, I* first, I* last)
+    
+if all elements are equal.
+
+    bool equal_range (A* self, I* first, I* last, T key)
 
 if range of elements match a specific key. _(range NYI)_
 
 ## Bucket interface
-
-    I* begin (B* bucket)
-
-returns an iterator to the beginning of the specified bucket _(NYI)_
-
-    I* end (B* bucket)
-
-returns an iterator to the end of the specified bucket _(NYI)_
 
     size_t bucket_count (A* self)
 
@@ -273,28 +272,30 @@ This might regenerate the hash table, but not the buckets.
 
 specializes the swap algorithm
 
-    size_t remove_if (A* self, int T_match(T*))
+    size_t remove_if (A* self, int match(T*))
 
 Removes all elements satisfying specific criteria.
 
-    B* find_if (A* self, int _match(T*))
+    I find_if (A* self, int match(T*))
 
 finds element by predicate
 
-    B* find_if_not (A* self, int _match(T*))
+    I find_if_not (A* self, int match(T*))
 
 finds element by predicate
 
-    A intersection (A* self, A* other)
-    A union (A* self, A* other)
-    A difference (A* self, A* other) (NYI)
-    A symmetric_difference (A* self, A* other) (NYI)
+    A intersection (A* self, A* other) (NY)
+    A union (A* self, A* other) (NY)
+    A difference (A* self, A* other) (NY)
+    A symmetric_difference (A* self, A* other) (NY)
 
-    bool all_of (A* self, int _match(T*))
-    bool any_of (A* self, int _match(T*))
-    bool none_of (A* self, int _match(T*))
-    bool all_of_range (A* self, I* first, I* last, int _match(T*))
-    bool any_of_range (A* self, I* first, I* last, int _match(T*))
-    bool none_of_range (A* self, I* first, I* last, int _match(T*))
+Those specialized algorithm variants do not work yet.
+
+    bool all_of (A* self, int match(T*))
+    bool any_of (A* self, int match(T*))
+    bool none_of (A* self, int match(T*))
+    bool all_of_range (A* self, I* first, I* last, int match(T*))
+    bool any_of_range (A* self, I* first, I* last, int match(T*))
+    bool none_of_range (A* self, I* first, I* last, int match(T*))
 
 See [algorithm](algorithm.md) for more.

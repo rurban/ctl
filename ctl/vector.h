@@ -3,16 +3,18 @@
 
 // TODO emplace, emplace_back
 // TODO end of empty vec follows NULL value
+// TODO redesigned iters
 
 #ifndef T
-#error "Template type T undefined for <ctl/vector.h>"
+# error "Template type T undefined for <ctl/vector.h>"
 #endif
-
-#include <ctl/ctl.h>
 
 #define CTL_VEC
 #define A JOIN(vec, T)
 #define I JOIN(A, it)
+
+#include <ctl/ctl.h>
+#include <ctl/bits/iterators.h>
 
 // only for short strings, not vec_uint8_t
 #ifndef MUST_ALIGN_16
@@ -37,7 +39,9 @@ typedef int (*JOIN(A, compare_fn))(T*, T*);
 
 typedef struct I
 {
-    CTL_T_ITER_FIELDS;
+    T* ref;
+    T* end;
+    A* container;
 } I;
 
 static inline size_t
@@ -49,9 +53,7 @@ JOIN(A, capacity)(A* self)
 static inline T*
 JOIN(A, at)(A* self, size_t index)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert (index < self->size || !"out of range");
-#endif
+    ASSERT (index < self->size || !"out of range");
     return index < self->size ? &self->vector[index] : NULL;
 }
 
@@ -67,47 +69,84 @@ JOIN(A, back)(A* self)
     return self->size ? JOIN(A, at)(self, self->size - 1) : NULL;
 }
 
-static inline T*
-JOIN(A, begin)(A* self)
+static inline I
+JOIN(I, iter)(A* self, size_t index)
 {
-    return JOIN(A, front)(self);
-}
-
-static inline T*
-JOIN(A, end)(A* self)
-{
-    return self->size ? JOIN(A, back)(self) + 1 : NULL;
-}
-
-static inline void
-JOIN(I, step)(I* self)
-{
-    if(self->next >= self->end)
-        self->done = 1;
-    else
-    {
-        self->ref = self->next;
-        self->next++;
-    }
+    static I zero;
+    I iter = zero;
+    iter.ref = &self->vector[index];
+    iter.end = &self->vector[self->size];
+    iter.container = self;
+    return iter;
 }
 
 static inline I
-JOIN(I, range)(A* container, T* begin, T* end)
+JOIN(A, begin)(A* self)
 {
-    (void) container;
-    static I zero;
-    I self = zero;
-    if(begin && end)
-    {
-        self.step = JOIN(I, step);
-        self.end = end;
-        self.next = begin + 1;
-        self.ref = begin;
-    }
-    else
-        self.done = 1;
-    return self;
+    return JOIN(I, iter)(self, 0);
 }
+
+static inline I
+JOIN(A, end)(A* self)
+{
+    return JOIN(I, iter)(self, self->size);
+}
+
+static inline T*
+JOIN(I, ref)(I* iter)
+{
+    return iter->ref;
+}
+
+static inline size_t
+JOIN(I, index)(I* iter)
+{
+    return (iter->ref - JOIN(A, front)(iter->container)) / sizeof (T);
+}
+
+static inline int
+JOIN(I, is_end)(I* iter, I* last)
+{
+    return iter->ref == last->ref;
+}
+
+static inline int
+JOIN(I, done)(I* iter)
+{
+    return iter->ref == iter->end;
+}
+
+static inline void
+JOIN(I, next)(I* iter)
+{
+    iter->ref++;
+}
+
+static inline void
+JOIN(I, range)(I* first, I* last)
+{
+    last->end = first->end = last->ref;
+}
+
+static inline I*
+JOIN(I, advance)(I* iter, long i)
+{
+    // error case: overflow => end or NULL?
+    if(iter->ref + i > iter->end ||
+       iter->ref + i < JOIN(A, front)(iter->container))
+        iter->ref = iter->end;
+    else
+        iter->ref += i;
+    return iter;
+}
+
+static inline long
+JOIN(I, distance)(I* iter, I* other)
+{
+    return other->ref - iter->ref;
+}
+
+static inline A JOIN(A, copy)(A* self);
 
 #include <ctl/bits/container.h>
 
@@ -143,10 +182,8 @@ static inline void
 JOIN(A, set)(A* self, size_t index, T value)
 {
     T* ref = &self->vector[index];
-#ifndef POD
     if(self->free)
         self->free(ref);
-#endif
     *ref = value;
 }
 
@@ -162,9 +199,7 @@ static inline void
 JOIN(A, fit)(A* self, size_t capacity)
 {
     size_t overall = capacity;
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert (capacity < JOIN(A, max_size)() || !"max_size overflow");
-#endif
+    ASSERT (capacity < JOIN(A, max_size)() || !"max_size overflow");
     if(MUST_ALIGN_16(T)) // reserve terminating \0 for strings
         overall++;
     if (self->vector)
@@ -226,9 +261,7 @@ JOIN(A, reserve)(A* self, const size_t n)
     const size_t max_size = JOIN(A, max_size)();
     if(n > max_size)
     {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-        assert (n < max_size || !"max_size overflow");
-#endif
+        ASSERT (n < max_size || !"max_size overflow");
         return;
     }
 #ifdef CTL_STR
@@ -284,13 +317,10 @@ JOIN(A, push_back)(A* self, T value)
 }
 
 static inline void
-JOIN(A, emplace)(A* self, T* value)
+JOIN(A, emplace)(I* pos, T* value)
 {
-    if(self->size == self->capacity)
-        JOIN(A, reserve)(self,
-            self->capacity == 0 ? INIT_SIZE : 2 * self->capacity);
-    self->size++;
-    *JOIN(A, at)(self, self->size - 1) = *value;
+    if (!JOIN(I, done)(pos))
+        *pos->ref = *value;
 }
 
 static inline void
@@ -322,10 +352,8 @@ JOIN(A, resize)(A* self, size_t size, T value)
         for(size_t i = 0; self->size < size; i++)
             JOIN(A, push_back)(self, self->copy(&value));
     }
-#ifndef POD
     if(self->free)
         self->free(&value);
-#endif
 }
 
 static inline void
@@ -334,10 +362,8 @@ JOIN(A, assign)(A* self, size_t count, T value)
     JOIN(A, resize)(self, count, self->copy(&value));
     for(size_t i = 0; i < count; i++)
         JOIN(A, set)(self, i, self->copy(&value));
-#ifndef POD
     if(self->free)
         self->free(&value);
-#endif
 }
 
 static inline void
@@ -345,9 +371,8 @@ JOIN(A, assign_range)(A* self, T* from, T* last)
 {
     size_t count = last - from;
     JOIN(A, resize)(self, count, self->copy(self->vector)); // TODO
-    JOIN(A, it) it = JOIN(I, range)(self, from, last);
-    for(size_t i=0; !it.done; it.step(&it), i++)
-        JOIN(A, set)(self, i, *it.ref);
+    for(size_t i = 0; i < self->size; i++)
+        JOIN(A, set)(self, i, *JOIN(A, at)(self, i));
 }
 
 static inline void
@@ -398,46 +423,70 @@ JOIN(A, insert)(A* self, size_t index, T value)
         JOIN(A, push_back)(self, value);
 }
 
-static inline T*
-JOIN(A, erase)(A* self, size_t index)
+static inline I
+JOIN(A, erase_index)(A* self, size_t index)
 {
     static T zero;
+#if 1
+    if(self->free)
+        self->free(&self->vector[index]);
+    if (index < self->size - 1)
+        memmove(&self->vector[index], &self->vector[index] + 1,
+                (self->size - index - 1) * sizeof (T));
+    self->vector[self->size - 1] = zero;
+#else
     JOIN(A, set)(self, index, zero);
-    // TODO memmove
     for(size_t i = index; i < self->size - 1; i++)
     {
         self->vector[i] = self->vector[i + 1];
         self->vector[i + 1] = zero;
     }
+#endif
     self->size--;
-    return index >= self->size ? NULL : &self->vector[index];
+    return JOIN(I, iter)(self, index);
 }
 
-static inline T*
-JOIN(A, erase_range)(A* self, T* from, T* to)
+static inline I
+JOIN(A, erase_range)(I* from, I* to)
 {
+    if (from->ref >= to->ref)
+        return *to;
     static T zero;
-    if (from >= to)
-        return to;
+    A* self = from->container;
     T* end = &self->vector[self->size];
-    // TODO memmove
-    *from = zero;
-    for(T* pos = from; pos < to - 1; pos++)
+#if 1
+    size_t size = (to->ref - from->ref) / sizeof(T);
+# ifndef POD
+    if(self->free)
+        for(T* ref = from->ref; ref < to->ref - 1; ref++)
+            self->free(ref);
+# endif
+    if (to->ref != end)
+    {
+        memmove(from->ref, to->ref, (end - to->ref) * sizeof (T));
+        JOIN(A, set)(self, self->size - size, zero);
+    }
+    self->size -= size;
+#else
+    *from->ref = zero;
+    for(T* pos = from->ref; pos < to->ref - 1; pos++)
     {
         *pos = *(pos + 1);
         *(pos + 1) = zero;
         self->size--;
     }
-    if (to < end)
-        return to + 1;
+#endif
+    if (to->ref < end)
+        return JOIN(A, end)(from->container);
     else
-        return to;
+        return *to;
 }
 
-static inline T*
-JOIN(A, erase_it)(A* self, T* pos)
+static inline I
+JOIN(A, erase)(I* pos)
 {
-    return JOIN(A, erase_range)(self, pos, JOIN(A, end)(self));
+    A* self = pos->container;
+    return JOIN(A, erase_index)(self, pos->ref - &self->vector[0]);
 }
 
 static inline void
@@ -503,16 +552,17 @@ static inline size_t
 JOIN(A, remove_if)(A* self, int (*_match)(T*))
 {
     size_t erases = 0;
-    foreach(A, self, it)
+    if (!self->size)
+        return 0;
+    for(size_t i = 0; i < self->size; )
     {
-        if(_match(it.ref))
+        if(_match(&self->vector[i]))
         {
-            size_t index = it.ref - JOIN(A, begin)(self);
-            JOIN(A, erase)(self, index);
-            it.end = JOIN(A, end)(self);
-            it.next = it.ref;
+            JOIN(A, erase_index)(self, i);
             erases++;
         }
+        else
+            i++;
     }
     return erases;
 }
@@ -524,13 +574,13 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
 }
 
 #ifndef CTL_STR
-static inline T*
+static inline I
 JOIN(A, find)(A* self, T key)
 {
-    foreach(A, self, it)
-        if (JOIN(A, _equal)(self, it.ref, &key))
-            return it.ref;
-    return NULL;
+    vec_foreach(T, self, ref)
+        if (JOIN(A, _equal)(self, ref, &key))
+            return JOIN(I, iter)(self, ref - &self->vector[0]);
+    return JOIN(A, end(self));
 }
 #endif
 
@@ -547,8 +597,10 @@ JOIN(A, find)(A* self, T key)
 // Hold preserves `T` if other containers
 // (eg. `priority_queue.h`) wish to extend `vector.h`.
 #ifdef HOLD
+//#pragma message "vector HOLD"
 #undef HOLD
 #else
+#undef C
 #undef T
 #undef POD
 #undef NOT_INTEGRAL

@@ -11,7 +11,7 @@ deriving from [vector](vector.md).
 
     str_int a = str_int_init ();
 
-    str_digi_resize(&a, 1000, 0);
+    str_digi_resize(&a, 1000, '\0');
     for (i=0; i<1000; i++)
       str_int_push_back(&a, i);
     for (i=0; i<20; i++)
@@ -91,13 +91,25 @@ access the underlying array
 
 ## Iterators
 
-    char* begin (str* self)
+    I begin (str* self)
 
 returns an iterator to the beginning
 
-    char* end (str* self)
+    I end (str* self)
 
-returns an iterator to the end
+constructs an iterator to the end (one past the last char,
+i.e. pointing to the '\0')
+
+    I* next (I* iter)
+
+Advances the iterator by 1 forwards. There's no prev yet.
+
+    I* advance (I* iter, long i)
+
+All our variants accepts negative `i` to move back. The return value may be ignored.
+
+
+See [iterators](iterators.md) for more.
 
 ## Capacity
 

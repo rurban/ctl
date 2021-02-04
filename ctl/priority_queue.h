@@ -56,9 +56,7 @@ JOIN(A, init)(int _compare(T*, T*))
 static inline void
 JOIN(A, up)(A* self, size_t n)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare || !"compare undefined");
-#endif
+    ASSERT(self->compare || !"compare undefined");
     if(n > 0)
     {
         size_t p = (n - 1) / 2;
@@ -75,9 +73,7 @@ JOIN(A, up)(A* self, size_t n)
 static inline void
 JOIN(A, down)(A* self, size_t n)
 {
-#if defined(_ASSERT_H) && !defined(NDEBUG)
-    assert(self->compare || !"compare undefined");
-#endif
+    ASSERT(self->compare || !"compare undefined");
     size_t min = 2;
     if(self->size < min)
         return;
@@ -125,8 +121,11 @@ JOIN(A, pop)(A* self)
 static inline void
 JOIN(A, emplace)(A* self, T* value)
 {
-    JOIN(A, __EMPLACE)(self, value);
+    JOIN(A, push_back)(self, *value);
     JOIN(A, up)(self, self->size - 1);
+    //JOIN(A, it) pos = JOIN(A, begin)(self);
+    //JOIN(A, __EMPLACE)(&pos, value);
+    //JOIN(A, up)(self, self->size - 1);
 }
 
 #undef front

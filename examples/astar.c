@@ -126,12 +126,12 @@ astar(str* maze, int width)
         {
             point delta = deltas[i];
             point next = point_init(current.x + delta.x, current.y + delta.y, width);
-            int new_cost = set_pi_find(&costs, (pi) {.p = current})->key.i;
+            int new_cost = set_pi_find(&costs, (pi) {.p = current}).ref->i;
             if(maze->vector[point_index(&next)] != '#')
             {
-                set_pi_node* cost = set_pi_find(&costs, (pi) {.p = next});
-                if(cost == set_pi_end(&costs)
-                || new_cost < cost->key.i)
+                set_pi_it cost = set_pi_find(&costs, (pi) {.p = next});
+                if(set_pi_it_done(&cost)
+                || new_cost < cost.ref->i)
                 {
                     set_pi_insert(&costs, (pi) {next, new_cost});
                     next.priorty = new_cost + abs(goal.x - next.x) + abs(goal.y - next.y);
@@ -146,7 +146,7 @@ astar(str* maze, int width)
     while(!point_equal(&current, &start))
     {
         deq_point_push_front(&path, current);
-        current = set_pp_find(&from, (pp) {.a = current})->key.b;
+        current = set_pp_find(&from, (pp) {.a = current}).ref->b;
     }
     deq_point_push_front(&path, start);
     pqu_point_free(&front);

@@ -5,6 +5,11 @@
 #include <stack>
 #include <vector>
 #include <string>
+#include <array>
+#include <unordered_set>
+#include <algorithm>
+
+#define N 1024
 
 void
 A()
@@ -17,16 +22,24 @@ A()
     std::stack<int> f;
     std::string g;
     std::priority_queue<int> i;
+    std::array<int,N> j;
+    std::unordered_set<int> k;
 
-    a.push_back(1);
-    a.push_front(1);
-    b.push_back(1);
-    c.push_back(1);
-    c.push_front(1);
-    d.push(1);
-    e.insert(1);
-    f.push(1);
-    i.push(1);
+    for (int el=0; el<N; el++)
+    {
+        a.push_back(el);
+        a.push_front(el);
+        b.push_back(el);
+        c.push_back(el);
+        c.push_front(el);
+        d.push(el);
+        e.insert(el);
+        f.push(el);
+        g.push_back('A' + el);
+        i.push(el);
+        j[el] = el;
+        k.insert(el);
+    }
 
     a.pop_back();
     a.pop_front();
@@ -36,7 +49,23 @@ A()
     d.pop();
     e.erase(1);
     f.pop();
+    g.pop_back();
     i.pop();
+    j[0] = 0;
+    k.erase(1);
+
+    sort(a.begin(), a.end());
+    std::count(a.begin(), a.end(), 0);
+    sort(b.begin(), b.end());
+    std::count(b.begin(), b.end(), 0);
+    c.sort();
+    std::count(c.begin(), c.end(), 0);
+    std::count(e.begin(), e.end(), 0);
+    std::sort(g.begin(), g.end());
+    std::count(g.begin(), g.end(), 'A');
+    std::sort(j.begin(), j.end());
+    std::count(j.begin(), j.end(), 0);
+    std::count(k.begin(), k.end(), 0);
 }
 
 void

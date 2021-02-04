@@ -209,7 +209,7 @@ main(void)
         deq_int a = deq_int_init();
         for(size_t i = 0; i < size; i++) deq_int_push_back(&a, i);
         for(size_t i = 0; i < size; i++) deq_int_push_front(&a, i);
-        deq_int_insert(&a, 1, 99);
+        deq_int_insert_index(&a, 1, 99);
         deq_int_sort(&a);
         deq_int_free(&a);
     }
@@ -304,10 +304,10 @@ main(void)
         }
         foreach(map_charint, &a, it) { strcpy (c_char, it.ref->key); }
         printf("last key \"%s\", ", c_char);
-        map_charint_node *b = map_charint_begin(&a);
-        printf("min {\"%s\", %d} ", b->key.key, b->key.value);
-        b = map_charint_node_max(b);
-        printf("max {\"%s\", %d}\n", b->key.key, b->key.value);
+        map_charint_it it = map_charint_begin(&a);
+        printf("min {\"%s\", %d} ", it.ref->key, it.ref->value);
+        map_charint_node* b = map_charint_node_max(it.node);
+        printf("max {\"%s\", %d}\n", b->value.key, b->value.value);
         map_charint_free(&a);
     }
     TEST_PASS(__FILE__);

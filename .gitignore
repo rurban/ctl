@@ -11,6 +11,7 @@ a.out
 /tests/func/test_deque
 /tests/func/test_double_array
 /tests/func/test_forward_list
+/tests/func/test_int_vector
 /tests/func/test_integral
 /tests/func/test_integral_c11
 /tests/func/test_list

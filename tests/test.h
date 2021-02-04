@@ -56,12 +56,15 @@ TEST_TIME(void)
 
 #ifdef SRAND
 #  ifdef SEED
-#    define INIT_SRAND srand(SEED); printf("-DSEED=%u ", (unsigned)SEED)
+#    define INIT_SRAND                       \
+       srand(SEED);                          \
+       printf("-DSEED=%u ", (unsigned)SEED); \
+       fflush(stdout)
 #  else
-#    define INIT_SRAND                                               \
-       unsigned int seed = rand()*clock()*getpid();                  \
-       srand(seed);                                                  \
-       printf("SEED=%u ", seed);                                     \
+#    define INIT_SRAND                               \
+       unsigned int seed = rand()^clock()^getpid();  \
+       srand(seed);                                  \
+       printf("SEED=%u ", seed);                     \
        fflush(stdout)
 #  endif
 #else

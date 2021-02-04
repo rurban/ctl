@@ -30,17 +30,18 @@ parent for [map](map.md).
 
 ## DESCRIPTION
 
-set is a sorted associative container that contains key-value pairs with unique
-keys. Keys are sorted by using the custom comparison function. Search, removal,
-and insertion operations have logarithmic complexity. set is implemented as red-black tree.
+**set** is a sorted associative container that contains unique values.
+Values are sorted by using the custom comparison function `compare`. Search, removal,
+and insertion operations have logarithmic complexity. set is implemented as **red-black tree**.
 
 The function names are composed of the prefix **set_**, the user-defined type
 **T** and the method name. E.g `set_int` with `#define T int`.
 
 Everywhere the CTL uses the Compare requirements, uniqueness is
-determined by using the equivalence relation. In imprecise terms, two objects a
-and b are considered equivalent (not unique) if neither compares less than the
-other: `!compare(a, b) && !compare(b, a)`.
+determined by using the equivalence relation. In imprecise terms, two objects
+`a` and `b` are considered equivalent (not unique) if neither compares less than the
+other: `!compare(a, b) && !compare(b, a)`. _(Which obviously fails with double nan)_
+
 Note that **find** does not use this double comparison, rather a single compare
 call. And if that's `0` it optionally calls the equal method.
 For simple integral types this always works, as the default equal method is
@@ -57,8 +58,6 @@ you need to set a proper equal method by yourself.
 `B` being `set_T_node`  node type
 
 `I` being `set_T_it`    iterator type
-
-`IT` being `B*`, the generic type of iterators.
 
 ## Member functions
 
@@ -86,13 +85,24 @@ access specified element with bounds checking
 
 ## Iterators
 
-    B* begin (A* self)
+    I begin (A* self)
 
-returns an iterator to the beginning
+constructs an iterator to the beginning
 
-    B* end (A* self)
+    I end (A* self)
 
-returns an iterator to the end
+constructs an iterator to the end.
+
+    I* next (I* iter)
+
+Advances the iterator by 1 forwards. There's no prev yet.
+
+    I* advance (I* iter, long i)
+
+All our variants accepts negative `i` to move back. The return value may be ignored.
+
+
+See [iterators](iterators.md) for more.
 
 ## Capacity
 
@@ -130,11 +140,11 @@ constructs elements in-place at position. _(NYI)_
 
 erases the element by value.
 
-    erase_it (A* self, I* pos)
+    erase_it (I* pos)
 
 erases the element at pos.
 
-    erase_range (A* self, I* first, I* last)
+    erase_range (I* first, I* last)
 
 erases elements.
 
@@ -146,13 +156,13 @@ swaps the contents
 
 extracts a node from the container. _(NYI)_
 
-    extract_it (A* self, I* pos)
+    extract_it (I* pos)
 
 extracts nodes from the container. _(NYI)_
 
     merge (A* self)
 
-splices nodes from another container
+splices nodes from another container _(NYI)_
 
 ## Lookup
 
@@ -160,30 +170,31 @@ splices nodes from another container
 
 returns the number of elements matching specific key.
 
-    B* find (A* self, T key)
+    I find (A* self, T key)
+    B* find_node (A* self, T key)
 
 finds element with specific key. does not consume/delete the key.
 see above the problem with a simple 2-way compare method.
 
-    int contains (A* self, T key)
+    bool contains (A* self, T key)
 
-checks if the container contains element with specific key. (C++20)
+checks if the container contains an element with specific key. (C++20)
 
-    equal_range ??
+    bool equal_range (I* first, I* last, T value)
 
-returns range of elements matching a specific key. _(NYI)_
+if range of elements match a specific key. _(NYI)_
 
-    B* lower_bound (A* self, T key)
+    I lower_bound (A* self, T key)
 
 returns an iterator to the first element not less than the given key. _(NYI)_
 
-    B* upper_bound (A* self, T key)
+    I upper_bound (A* self, T key)
 
 returns an iterator to the first element greater than the given key. _(NYI)_
 
 ## Observers
 
-    value_comp (A* self)
+    FN value_comp (A* self)
 
 Returns the function that compares keys in objects of type value_type T. _(NYI)_
 
@@ -197,9 +208,9 @@ specializes the swap algorithm
 
 Removes all elements satisfying specific criteria.
 
-    erase_if (A* self, int match(T*))
+    size_t erase_if (A* self, int match(T*))
 
-erases all elements satisfying specific criteria. (C++20)
+erases all elements satisfying specific criteria. (C++20) _(NYI)_
 
     A intersection (A* self, A* other)
     A union (A* self, A* other)
@@ -209,9 +220,9 @@ erases all elements satisfying specific criteria. (C++20)
     bool all_of (A* self, int _match(T*)) (C++11)
     bool any_of `(A* self, int _match(T*)) (C++11)
     bool none_of (A* self, int _match(T*)) (C++11)
-    bool all_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
-    bool any_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
-    bool none_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
+    bool all_of_range (I* first, I* last, int _match(T*)) (C++20)
+    bool any_of_range (I* first, I* last, int _match(T*)) (C++20)
+    bool none_of_range (I* first, I* last, int _match(T*)) (C++20)
 
     foreach (A, self, iter) {...}
     foreach_range (A, iter, first, last) {...} (C++20)
@@ -224,9 +235,9 @@ erases all elements satisfying specific criteria. (C++20)
     find (A* self, T key)
     find_if (A* self, int _match(T*))
     find_if_not (A* self, int _match(T*)) (C++11)
-    find_range (A* self, IT first, IT last, T key) (C++20)
-    find_if_range (IT first, IT last, int _match(T*)) (C++20)
-    find_if_not_range (IT first, IT last, int _match(T*)) (C++20)
+    find_range (I* first, I* last, T key) (C++20)
+    find_if_range (I* first, I* last, int _match(T*)) (C++20)
+    find_if_not_range (I* first, I* last, int _match(T*)) (C++20)
 
     remove (A* self, T key)                        _(NYI)_
     size_t remove_if (A* self, int match(T*))

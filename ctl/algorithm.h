@@ -3,9 +3,8 @@
 // SPDX-License-Identifier: MIT
 //
 // Might only be included once. By the child. not the parent.
-#ifndef __CTL_ALGORITHM_H__
-#define __CTL_ALGORITHM_H__
-#define CTL_ALGORITHM
+//#ifndef __CTL_ALGORITHM_H__
+//#define __CTL_ALGORITHM_H__
 
 #if !defined CTL_LIST && \
     !defined CTL_SET && \
@@ -13,32 +12,35 @@
     !defined CTL_VEC && \
     !defined CTL_ARR && \
     !defined CTL_DEQ && \
-    /* plus all children also. we dont include it for parents */ \
+    /* plus all children also. we don't include it for parents */ \
+    !defined CTL_STACK && \
+    !defined CTL_QUEUE && \
+    !defined CTL_PQU && \
     !defined CTL_MAP && \
     !defined CTL_UMAP
 # error "No CTL container defined for <ctl/algorithm.h>"
 #endif
+#undef CTL_ALGORITHM
+#define CTL_ALGORITHM
 
 // Generic algorithms with ranges
 
-#include <ctl/bits/iterators.h>
-
-static inline IT*
+static inline I
 JOIN(A, find_if)(A* self, int _match(T*))
 {
-    foreach(A, self, it)
-        if(_match(it.ref))
-            return iter_IT(it);
+    foreach(A, self, i)
+        if(_match(i.ref))
+            return i;
     return JOIN(A, end)(self);
 }
 
 // C++11
-static inline IT*
+static inline I
 JOIN(A, find_if_not)(A* self, int _match(T*))
 {
-    foreach(A, self, it)
-        if(!_match(it.ref))
-            return iter_IT(it);
+    foreach(A, self, i)
+        if(!_match(i.ref))
+            return i;
     return JOIN(A, end)(self);
 }
 
@@ -46,69 +48,121 @@ JOIN(A, find_if_not)(A* self, int _match(T*))
 static inline bool
 JOIN(A, all_of)(A* self, int _match(T*))
 {
-    return JOIN(A, find_if_not)(self, _match) == JOIN(A, end)(self);
+    I pos = JOIN(A, find_if_not)(self, _match);
+    return JOIN(I, done)(&pos);
 }
 
 // C++11
 static inline bool
 JOIN(A, any_of)(A* self, int _match(T*))
 {
-    return JOIN(A, find_if)(self, _match) != JOIN(A, end)(self);
+    I pos = JOIN(A, find_if)(self, _match);
+    return !JOIN(I, done)(&pos);
 }
 
 static inline bool
 JOIN(A, none_of)(A* self, int _match(T*))
 {
-    return JOIN(A, find_if)(self, _match) == JOIN(A, end)(self);
+    I pos = JOIN(A, find_if)(self, _match);
+    return JOIN(I, done)(&pos);
 }
+
+#ifdef DEBUG
+// TODO not for value but matching range
+static inline I
+JOIN(A, find_end)(A* self, T value)
+{
+    I* ret = NULL;
+    foreach(A, self, i)
+        if(JOIN(A, _equal)(self, i.ref, &value))
+            ret = &i;
+    return ret ? *ret : JOIN(A, end)(self);
+}
+
+static inline I
+JOIN(A, find_end_if)(A* self, int _match(T*))
+{
+    I* ret = NULL;
+    foreach(A, self, i)
+        if(_match(i.ref))
+            ret = &i;
+    return ret ? *ret : JOIN(A, end)(self);
+}
+#endif
 
 #include <stdbool.h>
 
-// i.e. for LIST, SET, USET with B*
-//      and VEC, DEQ with T*
-// leaks T value, as with find
-static inline IT*
+#ifndef CTL_USET // no ranges
+
+static inline I
 JOIN(A, find_range)(I* first, I* last, T value)
 {
-    if (!first->container)
-        return iter_IT_endp(last);
-    foreach_range(A, it, first, last)
-        if(JOIN(A, _equal)(first->container, it.ref, &value))
-            return iter_IT(it);
-    return iter_IT_endp(last);
+    A* self = first->container;
+    foreach_range(A, i, first, last)
+        if(JOIN(A, _equal)(self, i.ref, &value))
+            return i;
+    return *last;
 }
 
-static inline IT*
+#if 0
+// args
+static inline I
+JOIN(A, find_end_range)(I* first, I* last, T value)
+{
+    I* ret = NULL;
+    A* self = first->container;
+    foreach_range(A, i, first, last)
+        if(JOIN(A, _equal)(self, i.ref, &value))
+            ret = &i;
+    return ret ? *ret : *last;
+}
+
+static inline I
+JOIN(A, find_end_if_range)(I* first, I* last, int _match(T*))
+{
+    I* ret = NULL;
+    foreach_range(A, i, first, last)
+        if(_match(i.ref))
+            ret = &i;
+    return ret ? *ret : *last;
+}
+#endif // 0
+
+static inline I
 JOIN(A, find_if_range)(I* first, I* last, int _match(T*))
 {
-    foreach_range(A, it, first, last)
-        if(_match(it.ref))
-            return iter_IT(it);
-    return iter_IT_endp(last);
+    foreach_range(A, i, first, last)
+        if(_match(i.ref))
+            return i;
+    return *last;
 }
 
-static inline IT*
+static inline I
 JOIN(A, find_if_not_range)(I* first, I* last, int _match(T*))
 {
-    foreach_range(A, it, first, last)
-        if(!_match(it.ref))
-            return iter_IT(it);
-    return iter_IT_endp(last);
+    foreach_range(A, i, first, last)
+        if(!_match(i.ref))
+            return i;
+    return *last;
 }
 
 // C++20
 static inline bool
 JOIN(A, all_of_range)(I* first, I* last, int _match(T*))
 {
-    IT* n = JOIN(A, find_if_not_range)(first, last, _match);
-    return n == iter_IT_endp(last);
+    I pos = JOIN(A, find_if_not_range)(first, last, _match);
+    if (JOIN(I, done)(first))
+        return true;
+    return JOIN(I, done)(&pos);
 }
 // C++20
 static inline bool
 JOIN(A, none_of_range)(I* first, I* last, int _match(T*))
 {
-    IT* n = JOIN(A, find_if_range)(first, last, _match);
-    return n == iter_IT_endp(last);
+    I pos = JOIN(A, find_if_range)(first, last, _match);
+    if (JOIN(I, done)(first))
+        return true;
+    return JOIN(I, done)(&pos);
 }
 // C++20
 static inline bool
@@ -117,33 +171,202 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
     return !JOIN(A, none_of_range)(first, last, _match);
 }
 
-#if !defined(CTL_USET) && !defined(CTL_STR)
-// C++20
-// uset has cached_hash optims
+#endif // USET (ranges)
+
+// generate and transform have no inserter support yet,
+// so we cannot yet use it for set nor uset. we want to call insert on them.
+// for list and vector we just set/replace the elements.
+#if !defined(CTL_USET) && !defined(CTL_SET)
+
+static inline void
+JOIN(A, generate)(A* self, T _gen(void))
+{
+    foreach(A, self, i)
+    {
+#ifndef POD
+        if (self->free)
+            self->free(i.ref);
+#endif
+        *i.ref = _gen();
+    }
+}
+
+static inline void
+JOIN(A, generate_range)(I* first, I* last, T _gen(void))
+{
+#ifndef POD
+    A* self = first->container;
+#endif
+    foreach_range(A, i, first, last)
+    {
+#ifndef POD
+        if (self->free)
+            self->free(i.ref);
+#endif
+        *i.ref = _gen();
+    }
+}
+
+static inline A
+JOIN(A, transform)(A* self, T _unop(T*))
+{
+    A other = JOIN(A, copy)(self);
+    foreach(A, &other, i)
+    {
+#ifndef POD
+        T tmp = _unop(i.ref);
+        if (self->free)
+            self->free(i.ref);
+        *i.ref = tmp;
+#else
+        *i.ref = _unop(i.ref);
+#endif
+    }
+    return other;
+}
+
+#if defined CTL_STR || defined DEBUG
+static inline A
+JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
+{
+    A other = JOIN(A, copy)(self);
+    foreach(A, &other, i)
+    {
+        if (JOIN(I, done)(pos))
+            break;
+#ifndef POD
+        T tmp = _binop(i.ref, pos->ref);
+        if (self->free)
+            self->free(i.ref);
+        *i.ref = tmp;
+#else
+        *i.ref = _binop(i.ref, pos->ref);
+#endif
+        JOIN(JOIN(A, it), next)(pos);
+    }
+    return other;
+}
+#endif // STR/DEBUG
+
+#ifdef DEBUG
+
+static inline void
+JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
+{
+#ifndef POD
+    A* self = first->container;
+#endif
+    foreach_n_range(A, first, i, count)
+    {
+#ifndef POD
+        if (self->free)
+            self->free(i.ref);
+#endif
+        *i.ref = _gen();
+    }
+}
+
+static inline void
+JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
+{
+    foreach_n(A, self, i, count)
+    {
+#ifndef POD
+        if (self->free)
+            self->free(i.ref);
+#endif
+        *i.ref = _gen();
+    }
+}
+
+static inline I
+JOIN(A, transform_range)(I* first1, I* last1, I dest, T _unop(T*))
+{
+#ifndef POD
+    A *self = first1->container;
+#endif
+    foreach_range(A, i, first1, last1)
+    {
+        if (JOIN(I, done)(&dest))
+            break;
+#ifndef POD
+        T tmp = _unop(i.ref);
+        if (self->free)
+            self->free(i.ref);
+        *dest.ref = tmp;
+#else
+        *dest.ref = _unop(i.ref);
+#endif
+        JOIN(JOIN(A, it), next)(&dest);
+    }
+    return dest;
+}
+
+static inline I
+JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*))
+{
+#ifndef POD
+    A *self = first1->container;
+#endif
+    foreach_range(A, i, first1, last1)
+    {
+        if (JOIN(I, done)(pos) || JOIN(I, done)(&dest))
+            break;
+#ifndef POD
+        T tmp = _binop(i.ref, pos->ref);
+        if (self->free)
+            self->free(i.ref);
+        *dest.ref = tmp;
+#else
+        *dest.ref = _binop(i.ref, pos->ref);
+#endif
+        JOIN(JOIN(A, it), next)(pos);
+        JOIN(JOIN(A, it), next)(&dest);
+    }
+    return dest;
+}
+#endif //DEBUG
+
+#endif // USET/SET inserter
+
+#if !defined(CTL_USET)
+/// uset has cached_hash optims
 static inline size_t
 JOIN(A, count_range)(I* first, I* last, T value)
 {
     A* self = first->container;
-    if (!self)
-        return 0; // leak!
     size_t count = 0;
-    foreach_range(A, it, first, last)
-        if(JOIN(A, _equal)(self, it.ref, &value))
+    foreach_range(A, i, first, last)
+        if(JOIN(A, _equal)(self, i.ref, &value))
             count++;
     if (self->free)
         self->free(&value);
     return count;
 }
-#endif //USET/STR
+#if !defined(CTL_SET) && !defined(CTL_STR)
+// str has its own variant via faster find. set/uset do not need it.
+static inline size_t
+JOIN(A, count)(A* self, T value)
+{
+    size_t count = 0;
+    foreach(A, self, i)
+        if(JOIN(A, _equal)(self, i.ref, &value))
+            count++;
+    if(self->free)
+        self->free(&value);
+    return count;
+}
+#endif // SET/STR
+#endif // USET
 
-#if !defined(CTL_STR)
+//#if !defined(CTL_STR)
 // C++20
 static inline size_t
 JOIN(A, count_if_range)(I* first, I* last, int _match(T*))
 {
     size_t count = 0;
-    foreach_range(A, it, first, last)
-        if(_match(it.ref))
+    foreach_range(A, i, first, last)
+        if(_match(i.ref))
             count++;
     return count;
 }
@@ -152,37 +375,22 @@ static inline size_t
 JOIN(A, count_if)(A* self, int _match(T*))
 {
     size_t count = 0;
-    foreach(A, self, it)
-        if(_match(it.ref))
+    foreach(A, self, i)
+        if(_match(i.ref))
             count++;
     return count;
 }
-
-#if !defined(CTL_SET) && !defined(CTL_USET)
-static inline size_t
-JOIN(A, count)(A* self, T value)
-{
-    size_t count = 0;
-    foreach(A, self, it)
-        if(JOIN(A, _equal)(self, it.ref, &value))
-            count++;
-    if(self->free)
-        self->free(&value);
-    return count;
-}
-#endif // SET/USET
-#endif // STR
+//#endif // STR
 
 #ifdef DEBUG
 #if !defined(CTL_USET) && !defined(CTL_STR)
 // API? 3rd arg should be an iter, not a value
 static inline bool
-JOIN(A, equal_range)(I* first, I* last, T value)
+JOIN(A, equal_range)(A* self, I* first, I* last, T value)
 {
-    A* self = first->container;
     bool result = true;
-    foreach_range(A, it, first, last)
-        if(!JOIN(A, _equal)(self, it.ref, &value))
+    foreach_range(A, i, first, last)
+        if(!JOIN(A, _equal)(self, i.ref, &value))
         {
             result = false;
             break;
@@ -192,15 +400,105 @@ JOIN(A, equal_range)(I* first, I* last, T value)
     return result;
 }
 #endif // USET+STR
+
+#ifndef CTL_USET
+
+static inline I
+JOIN(A, lower_bound)(A* self, T value)
+{
+    ASSERT(self->compare || !"compare undefined");
+    JOIN(A, it) it = JOIN(A, begin)(self);
+    size_t count = JOIN(A, size)(self);
+    while (count > 0)
+    {
+        size_t step = count / 2;
+        JOIN(I, advance)(&it, step);
+        if (self->compare(it.ref, &value))
+        {
+            JOIN(I, next)(&it);
+            count -= step + 1;
+        } else
+            count = step;
+    }
+    if(self->free)
+        self->free(&value);
+    return it;
+}
+
+static inline I
+JOIN(A, upper_bound)(A* self, T value)
+{
+    ASSERT(self->compare || !"compare undefined");
+    JOIN(A, it) it = JOIN(A, begin)(self);
+    size_t count = JOIN(A, size)(self);
+    while (count > 0)
+    {
+        size_t step = count / 2;
+        JOIN(I, advance)(&it, step);
+        if (!self->compare(&value, it.ref))
+        {
+            JOIN(I, next)(&it);
+            count -= step + 1;
+        } else
+            count = step;
+    }
+    if(self->free)
+        self->free(&value);
+    return it;
+}
+
+static inline I
+JOIN(A, lower_bound_range)(I* first, I* last, T value)
+{
+    A* self = first->container;
+    ASSERT(self->compare || !"compare undefined");
+    JOIN(A, it) it = *first;
+    size_t count = JOIN(I, distance)(first, last);
+    while (count > 0)
+    {
+        size_t step = count / 2;
+        JOIN(I, advance)(&it, step);
+        if (self->compare(it.ref, &value))
+        {
+            JOIN(I, next)(&it);
+            count -= step + 1;
+        } else
+            count = step;
+    }
+    if(self->free)
+        self->free(&value);
+    return it;
+}
+static inline I
+JOIN(A, upper_bound_range)(I* first, I* last, T value)
+{
+    A* self = first->container;
+    ASSERT(self->compare || !"compare undefined");
+    JOIN(A, it) it = *first;
+    size_t count = JOIN(I, distance)(first, last);
+    while (count > 0)
+    {
+        size_t step = count / 2;
+        JOIN(I, advance)(&it, step);
+        if (!self->compare(&value, it.ref))
+        {
+            JOIN(I, next)(&it);
+            count -= step + 1;
+        } else
+            count = step;
+    }
+    if(self->free)
+        self->free(&value);
+    return it;
+}
+
+#endif // USET
+
 #endif // DEBUG
 
 // TODO:
-// foreach_n C++17
-// foreach_n_range C++20
 // mismatch
 // mismatch_range C++20
-// find_end
-// find_end_range C++20
 // find_first_of
 // find_first_of_range C++20
 // adjacent_find
@@ -220,14 +518,5 @@ JOIN(A, equal_range)(I* first, I* last, T value)
 // move_range
 // move_backward C++11
 // move_backward_range C++20
-// fill
-// fill_range C++20
-// fill_n
-// fill_n_range C++20
-// transform
-// transform_range C++20
-// generate
-// generate_range C++20
 
-#undef IT
-#endif
+//#endif // only once

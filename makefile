@@ -101,6 +101,7 @@ TESTS = \
 	tests/func/test_array \
 	tests/func/test_double_array \
 	tests/func/test_vector \
+	tests/func/test_int_vector \
 	tests/func/test_vec_capacity \
 	tests/func/test_str_capacity
 .ifdef DEBUG
@@ -117,7 +118,7 @@ EXAMPLES = \
 	examples/6502
 
 # was GNU ${foreach bin,${TESTS},./${bin} &&}
-all: ${TESTS} docs/index.md
+check: ${TESTS} docs/index.md
 .for t in ${TESTS}
 	./${t}
 .endfor
@@ -126,7 +127,8 @@ all: ${TESTS} docs/index.md
 	@${CXX} --version | head -n2
 	@echo ${CXX} ${CXXFLAGS}
 
-check: all
+all: check perf examples #verify
+
 .cflags: ALWAYS
 	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
 images:
@@ -146,6 +148,7 @@ ${wildcard tests/perf/pqu/perf*.cc?} : ${COMMON_H} ctl/priority_queue.h
 ${wildcard tests/perf/vec/perf*.cc?} : ${COMMON_H} ctl/vector.h
 ${wildcard tests/perf/uset/perf*.cc?}: ${COMMON_H} ctl/unordered_set.h
 ${wildcard tests/perf/arr/gen*.cc?}: ${COMMON_H} ctl/unordered_set.h
+${wildcard tests/perf/str/perf*.cc?} : ${COMMON_H} ctl/vector.h ctl/string.h
 
 examples: ${EXAMPLES}
 
@@ -213,6 +216,30 @@ ${srccc} : ${srccc}.cc .cflags ${H}
 	${CXX} ${CFLAGS} -o $@ $@.cc
 .endfor
 
+VERIFY = ${subst .c,, ${wildcard tests/verify/*.c}}
+
+tests/verify/set-erase tests/verify/set-find : tests/verify/set-erase.c \
+	                                       tests/verify/set-find.c .cflags ${H}
+	${CC} ${CFLAGS} -o $@ $@.c && ./$@
+	-cbmc --unwind 6 -I. $@.c
+
+.for srcc1 in ${subst .c,, ${wildcard tests/verify/*-1.c}}
+${srcc1} : ${srcc1}.c .cflags ${H}
+	${CC} ${CFLAGS} -o $@ $@.c && ./$@
+	-cbmc --unwind 4 -I. $@.c
+.endfor
+.for srcc2 in ${subst .c,, ${wildcard tests/verify/*-2.c}}
+${srcc2} : ${srcc2}.c .cflags ${H}
+	${CC} ${CFLAGS} -o $@ $@.c && ./$@
+	-cbmc --unwind 6 -I. $@.c
+	-for c in `satabs --show-claims -I. $@.c | \
+                   perl -lne'/Claim (main.\d+):/ && print $$1'`; do \
+             timeout 5m satabs --concurrency --max-threads 4 --iterations 24 --claim $$c -I. $@.c; \
+         done
+.endfor
+
+verify: ${VERIFY}
+
 #tests/func/%: tests/func/%.cc .cflags ${H}
 #	${CXX} ${CFLAGS} -o $@ $@.cc
 #tests/func/test_integral_c11: .cflags ${H} tests/func/test_integral_c11.c
@@ -272,6 +299,9 @@ tests/func/test_array:   .cflags ${COMMON_H} ctl/array.h \
 	${CXX} ${CFLAGS} -o $@ $@.cc
 tests/func/test_double_array:   .cflags ${COMMON_H} ctl/array.h \
                           tests/func/test_double_array.cc
+	${CXX} ${CFLAGS} -o $@ $@.cc
+tests/func/test_int_vector: .cflags ${COMMON_H} ctl/vector.h \
+                          tests/func/test_int_vector.cc
 	${CXX} ${CFLAGS} -o $@ $@.cc
 
 asan:

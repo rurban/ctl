@@ -2,7 +2,7 @@
    SPDX-License-Identifier: MIT */
 
 #ifndef T
-#error "Template type T undefined for <ctl/queue.h>"
+# error "Template type T undefined for <ctl/queue.h>"
 #endif
 
 // TODO emplace

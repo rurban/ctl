@@ -50,8 +50,6 @@ The complexity (efficiency) of common operations on a `vector` is as follows:
 
 `I` being `vec_T_it`    internal iterator type for loops
 
-`IT` being `T*`, the generic type of iterators.
-
 There is no `B` node type.
 
 ## Member functions
@@ -96,15 +94,31 @@ access the underlying array
 
 ## Iterators
 
-Note: `begin` and `end` return `T*` pointers, not iterators yet.
+    I begin (A* self)
 
-    T* begin (A* self)
+constructs an iterator to the beginning.
 
-returns an iterator to the beginning
+    I end (A* self)
 
-    T* end (A* self)
+constructs an iterator to the end (one past the last element).
 
-returns an iterator to the end (one past the last element).
+    I* next (I* iter)
+
+Advances the iterator by 1 forwards. There's no prev yet.
+
+    I* advance (I* iter, long i)
+
+All our variants accepts negative `i` to move back. The return value may be ignored.
+
+    I iter (A* self, size_t index)
+
+Constructs an iterator to an element.
+
+    size_t index (I* iter)
+
+Returns the index of the iterator, which is just a `T* ref`.
+
+See [iterators](iterators.md) for more.
 
 ## Capacity
 
@@ -142,7 +156,7 @@ clears the contents
 
 inserts the element, free'ing value. (C++17)
 
-    emplace (A* self, I* pos, T* value)
+    emplace (I* pos, T* value)
 
 constructs elements in-place. _(NYI)_
 
@@ -150,17 +164,17 @@ constructs elements in-place. _(NYI)_
 
 appends new element at the back. _(NYI)_
 
-    T* erase (A* self, size_t index)
+    I erase_index (A* self, size_t index)
 
 erases the element by index, and returns the position following the last removed element.
 
-    T* erase_it (A* self, I* pos)
+    I erase (I* pos)
 
-erases the element at position
+erases the element at position.
 
-    T* erase_range (A* self, I* first, I* last)
+    I erase_range (I* first, I* last)
 
-erases elements from to
+erases elements from - to. _(NY)_
 
     swap (A* self, A* other)
 
@@ -170,7 +184,7 @@ swaps the contents
 
 extracts a value from the container. _(NYI)_
 
-    extract_it (A* self, I* pos)
+    extract_it (I* pos)
 
 extracts a node from the container. _(NYI)_
 
@@ -184,19 +198,21 @@ splices nodes from another container _(NYI)_
 
 returns the number of elements matching specific key.
 
-    T* find (A* self, T value)
+    I find (A* self, T value)
 
-finds element with specific key
+returns an iterator to element with specific key.
 
     bool equal_range (A* self)
 
 returns range of elements matching a specific key. _(NYI)_
 
-    T* lower_bound (A* self)
+    I lower_bound (A* self, T key)
+    I lower_bound_range (I* first, I* last, T key)
 
 returns an iterator to the first element not less than the given key. _(NYI)_
 
-    T* upper_bound (A* self)
+    I upper_bound (A* self, T key)
+    I upper_bound_range (I* first, I* last, T key)
 
 returns an iterator to the first element greater than the given key. _(NYI)_
 

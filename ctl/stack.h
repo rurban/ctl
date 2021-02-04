@@ -2,7 +2,7 @@
    SPDX-License-Identifier: MIT */
 
 #ifndef T
-#error "Template type T undefined for <ctl/stack.h>"
+# error "Template type T undefined for <ctl/stack.h>"
 #endif
 
 #define push_back   push
@@ -30,7 +30,9 @@
 // with either `vec` or `list`, depending on your use case.
 #define CTL_STACK
 #define deq stack
+#define _deq _stack
 #include <ctl/deque.h>
+#undef _deq
 #undef deq
 #undef CTL_STACK
 
