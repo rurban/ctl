@@ -1,13 +1,13 @@
-/* Abstract IT (T* value, B* node or size_t index)
+/* Abstract iterators: T* value, B* node or size_t index
    foreach, foreach_range.
 
    We have two kinds of iterators:
    - returning B* nodes (list, set, uset)
    - returning T* valuerefs directly (vector, deque).
-     deq has it's own special variant incuding the index.
+     deque has it's own special variant incuding the index.
 
    An iterator should be simply incremented:
-     IT it; it++ for vectors, it = it->next for lists.
+     it++ for vectors, it = it->next for lists.
 
    Copyright 2021 Reini Urban
    See MIT LICENSE
@@ -21,8 +21,8 @@
     defined CTL_USET || defined CTL_UMAP
 
 # define CTL_B_ITER
-# undef IT
-# define IT B*
+//# undef IT
+//# define IT B*
 /* return B* it node. end is NULL */
 
 # define list_foreach(A, self, pos)                     \
@@ -51,8 +51,8 @@
 
 # define CTL_T_ITER
 
-# undef IT
-# define IT T*
+//# undef IT
+//# define IT T*
 /* array of T*. end() = size+1 */
 
 #ifndef CTL_DEQ

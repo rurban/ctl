@@ -156,5 +156,4 @@ JOIN(A, emplace)(A* self, T* value)
 #undef POD
 #undef NOT_INTEGRAL
 #undef A
-#undef C
 #define CTL_PQU

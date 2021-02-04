@@ -252,7 +252,6 @@ str_equal(str* self, str* other)
 #undef POD
 #undef vec_char
 #undef T
-#undef IT
 #else
 #undef HOLD
 #endif

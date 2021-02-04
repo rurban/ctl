@@ -3,9 +3,8 @@
 // SPDX-License-Identifier: MIT
 //
 // Might only be included once. By the child. not the parent.
-#ifndef __CTL_ALGORITHM_H__
-#define __CTL_ALGORITHM_H__
-#define CTL_ALGORITHM
+//#ifndef __CTL_ALGORITHM_H__
+//#define __CTL_ALGORITHM_H__
 
 #if !defined CTL_LIST && \
     !defined CTL_SET && \
@@ -21,10 +20,8 @@
     !defined CTL_UMAP
 # error "No CTL container defined for <ctl/algorithm.h>"
 #endif
-
-#ifndef IT
-# error "Iterator type IT undefined for <ctl/algorithm.h>"
-#endif
+#undef CTL_ALGORITHM
+#define CTL_ALGORITHM
 
 // Generic algorithms with ranges
 
@@ -347,7 +344,7 @@ JOIN(A, count_range)(I* first, I* last, T value)
     return count;
 }
 #if !defined(CTL_SET) && !defined(CTL_STR)
-// has its own variant via faster find
+// str has its own variant via faster find. set/uset do not need it.
 static inline size_t
 JOIN(A, count)(A* self, T value)
 {
@@ -522,4 +519,4 @@ JOIN(A, upper_bound_range)(I* first, I* last, T value)
 // move_backward C++11
 // move_backward_range C++20
 
-#endif // only once
+//#endif // only once

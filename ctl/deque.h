@@ -642,9 +642,7 @@ JOIN(A, swap)(A* self, A* other)
 #undef T
 #undef A
 #undef B
-#undef C
 #undef I
-#undef IT
 #undef POD
 #undef NOT_INTEGRAL
 #undef CTL_DEQ

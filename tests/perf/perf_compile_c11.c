@@ -29,6 +29,15 @@
 #include <ctl/string.h>
 
 #define POD
+#define T int
+#define N 1024
+#include <ctl/array.h>
+
+#define POD
+#define T int
+#include <ctl/unordered_set.h>
+
+#define POD
 #define T short
 #include <ctl/deque.h>
 
@@ -130,6 +139,12 @@ compare_int(int* a, int* b)
     return *a < *b;
 }
 
+static size_t
+hash_int(int* a) { return *a; }
+
+static int
+equal_int(int* a, int* b) { return *a == *b; }
+
 static int
 compare_key_short(short* a, short* b)
 {
@@ -166,6 +181,8 @@ compare_double(double* a, double* b)
     return *a < *b;
 }
 
+#define N 1024
+
 void
 A(void)
 {
@@ -177,16 +194,23 @@ A(void)
     stack_int f = stack_int_init();
     str g = str_init("test");
     pqu_int i = pqu_int_init(compare_int);
+    arr1024_int j = arr1024_int_init();
+    uset_int k = uset_int_init(hash_int, equal_int);
 
-    deq_int_push_back(&a, 1);
-    deq_int_push_front(&a, 1);
-    vec_int_push_back(&b, 1);
-    list_int_push_back(&c, 1);
-    list_int_push_front(&c, 1);
-    queue_int_push(&d, 1);
-    set_int_insert(&e, 1);
-    stack_int_push(&f, 1);
-    pqu_int_push(&i, 1);
+    for (int el=0; el<N; el++)
+    {
+        deq_int_push_back(&a, el);
+        deq_int_push_front(&a, el);
+        vec_int_push_back(&b, el);
+        list_int_push_back(&c, el);
+        list_int_push_front(&c, el);
+        queue_int_push(&d, el);
+        set_int_insert(&e, el);
+        stack_int_push(&f, el);
+        pqu_int_push(&i, el);
+        arr1024_int_set(&j, el, el);
+        uset_int_insert(&k, el);
+    }
 
     deq_int_pop_back(&a);
     deq_int_pop_front(&a);
@@ -197,6 +221,21 @@ A(void)
     set_int_erase(&e, 1);
     stack_int_pop(&f);
     pqu_int_pop(&i);
+    arr1024_int_set(&j, 0, 0);
+    uset_int_erase(&k, 1);
+
+    deq_int_sort(&a);
+    deq_int_count(&a, 0);
+    vec_int_sort(&b);
+    vec_int_count(&b, 0);
+    list_int_sort(&c);
+    list_int_count(&c, 0);
+    set_int_count(&e, 0);
+    str_sort(&g);
+    str_count(&g, 'A');
+    arr1024_int_sort(&j);
+    arr1024_int_count(&j, 0);
+    uset_int_count(&k, 0);
 
     deq_int_free(&a);
     list_int_free(&c);
@@ -206,6 +245,8 @@ A(void)
     stack_int_free(&f);
     str_free(&g);
     pqu_int_free(&i);
+    arr1024_int_free(&j);
+    uset_int_free(&k);
 }
 
 void
@@ -256,9 +297,9 @@ C(void)
     deq_float a = deq_float_init();
     vec_float b = vec_float_init();
     list_float c = list_float_init();
-   queue_float d = queue_float_init();
+    queue_float d = queue_float_init();
     set_float e = set_float_init(compare_key_float);
-   stack_float f = stack_float_init();
+    stack_float f = stack_float_init();
     str g = str_init("test");
     pqu_float i = pqu_float_init(compare_float);
 

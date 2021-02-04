@@ -116,5 +116,4 @@ JOIN(A, insert_or_assign_found)(A* self, T value, int *foundp)
 #undef T
 #undef A
 #undef B
-#undef C
 #undef I

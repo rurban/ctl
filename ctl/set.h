@@ -992,7 +992,6 @@ JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*
 #undef T
 #undef A
 #undef B
-#undef C
 #undef I
 #else
 #undef HOLD

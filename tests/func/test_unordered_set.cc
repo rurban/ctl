@@ -4,7 +4,6 @@
 #define USE_INTERNAL_VERIFY
 #define T digi
 #include <ctl/unordered_set.h>
-#include <ctl/algorithm.h>
 
 #include <inttypes.h>
 #include <unordered_set>

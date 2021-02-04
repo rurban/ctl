@@ -123,6 +123,5 @@ JOIN(A, insert_or_assign_found)(A* self, T key, int* foundp)
 #undef T
 #undef A
 #undef B
-#undef C
 #undef I
 #undef CTL_MAP

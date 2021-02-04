@@ -101,19 +101,25 @@ JOIN(A, _equal)(A* self, T* a, T* b)
 // ignore str: u8str, u8id for now.
 #undef _IS_PARENT_CHILD_FOLLOWS
 #if defined CTL_VEC && (defined CTL_PQU || defined CTL_STR  || defined CTL_U8STR)
+//#pragma message "vec child"
 #define _IS_PARENT_CHILD_FOLLOWS
 #endif
 #if defined CTL_DEQ && (defined CTL_QUEUE || defined CTL_STACK)
+//#pragma message "deq child"
 #define _IS_PARENT_CHILD_FOLLOWS
 #endif
 #if defined CTL_SET && defined CTL_MAP
+//#pragma message "set child"
 #define _IS_PARENT_CHILD_FOLLOWS
 #endif
 #if defined CTL_USET && defined CTL_UMAP
+//#pragma message "uset child"
 #define _IS_PARENT_CHILD_FOLLOWS
 #endif
 
 #ifndef _IS_PARENT_CHILD_FOLLOWS
 # include <ctl/algorithm.h>
+//#else
+//# pragma message "_IS_PARENT_CHILD_FOLLOWS defined"
 #endif
 #undef _IS_PARENT_CHILD_FOLLOWS

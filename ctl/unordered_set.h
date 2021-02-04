@@ -1043,7 +1043,6 @@ JOIN(A, swap)(A* self, A* other)
 #ifndef HOLD
 #undef A
 #undef B
-#undef C
 #undef I
 #undef T
 #else

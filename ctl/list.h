@@ -651,6 +651,5 @@ JOIN(A, find)(A* self, T key)
 #undef T
 #undef A
 #undef B
-#undef C
 #undef I
 #undef CTL_LIST
