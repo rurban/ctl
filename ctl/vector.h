@@ -12,11 +12,6 @@
 #define CTL_VEC
 #define A JOIN(vec, T)
 #define I JOIN(A, it)
-//#ifndef C
-//# define C vec
-//#endif
-//#undef IT
-//#define IT T*
 
 #include <ctl/ctl.h>
 #include <ctl/bits/iterators.h>
@@ -187,7 +182,8 @@ static inline void
 JOIN(A, set)(A* self, size_t index, T value)
 {
     T* ref = &self->vector[index];
-    FREE_VALUE(self, *ref);
+    if(self->free)
+        self->free(ref);
     *ref = value;
 }
 
@@ -356,7 +352,8 @@ JOIN(A, resize)(A* self, size_t size, T value)
         for(size_t i = 0; self->size < size; i++)
             JOIN(A, push_back)(self, self->copy(&value));
     }
-    FREE_VALUE(self, value);
+    if(self->free)
+        self->free(&value);
 }
 
 static inline void
@@ -365,7 +362,8 @@ JOIN(A, assign)(A* self, size_t count, T value)
     JOIN(A, resize)(self, count, self->copy(&value));
     for(size_t i = 0; i < count; i++)
         JOIN(A, set)(self, i, self->copy(&value));
-    FREE_VALUE(self, value);
+    if(self->free)
+        self->free(&value);
 }
 
 static inline void
@@ -599,6 +597,7 @@ JOIN(A, find)(A* self, T key)
 // Hold preserves `T` if other containers
 // (eg. `priority_queue.h`) wish to extend `vector.h`.
 #ifdef HOLD
+//#pragma message "vector HOLD"
 #undef HOLD
 #else
 #undef C
