@@ -115,6 +115,7 @@ main(void)
 #define FOREACH_METH(TEST) \
         TEST(SELF) \
         TEST(INSERT) \
+        TEST(INSERT_FOUND) \
         TEST(ERASE_IF) \
         TEST(CONTAINS) \
         TEST(ERASE) \
@@ -134,11 +135,10 @@ main(void)
         TEST(COUNT_IF) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(UNION) /* 19*/ \
+        TEST(UNION) /* 19 */ \
         TEST(SYMMETRIC_DIFFERENCE) \
         TEST(INTERSECTION) \
         TEST(DIFFERENCE) \
-        TEST(INSERT_FOUND) \
         TEST(EMPLACE) \
         TEST(EMPLACE_FOUND) \
         TEST(EMPLACE_HINT) \
@@ -198,6 +198,28 @@ main(void)
                 const int vb = TEST_RAND(TEST_MAX_VALUE);
                 uset_digi_insert(&a, digi_init(vb));
                 b.insert(DIGI{vb});
+                break;
+            }
+            case TEST_INSERT_FOUND:
+            {
+                uset_digi_it first = uset_digi_begin(&a);
+                const int vb = TEST_RAND(2)
+                    ? TEST_RAND(TEST_MAX_VALUE)
+                    : first.ref
+                      ? *first.ref->value : 0;
+                int a_found;
+                uset_digi_it it = uset_digi_insert_found(&a, digi_init(vb), &a_found);
+#if __cplusplus >= 201100L
+                // C++11
+                std::pair<std::unordered_set<DIGI>::iterator, bool> pair;
+                pair = b.insert(DIGI{vb});
+                // STL returns true if not found, and freshly inserted
+                assert(!a_found == (int)pair.second);
+                CHECK_ITER(it, b, pair.first);
+#else
+                auto iter = b.insert(DIGI{vb});
+                CHECK_ITER(it, b, iter);
+#endif
                 break;
             }
             case TEST_ERASE_IF:
@@ -310,7 +332,10 @@ main(void)
             }
             case TEST_FIND:
             {
-                int vb = TEST_RAND(TEST_MAX_VALUE);
+                uset_digi_it first = uset_digi_begin(&a);
+                const int vb = TEST_RAND(2)
+                    ? TEST_RAND(TEST_MAX_VALUE)
+                    : *first.ref->value;
                 digi key = digi_init(vb);
                 // find is special, it doesnt free the key
                 uset_digi_it aa = uset_digi_find(&a, key);
@@ -410,16 +435,34 @@ main(void)
                 uset_digi_free(&aaa);
                 break;
             }
-            case TEST_INSERT_FOUND:
+        case TEST_EMPLACE: // 24
             {
-                const int vb = TEST_RAND(TEST_MAX_VALUE);
+                uset_digi_it first = uset_digi_begin(&a);
+                const int vb = TEST_RAND(2)
+                    ? TEST_RAND(TEST_MAX_VALUE)
+                    : first.ref
+                      ? *first.ref->value : 0;
+                digi key = digi_init(vb);
+                uset_digi_emplace(&a, &key);
+                b.emplace(DIGI{vb});
+                break;
+            }
+            case TEST_EMPLACE_FOUND:
+            {
+                uset_digi_it first = uset_digi_begin(&a);
+                const int vb = TEST_RAND(2)
+                    ? TEST_RAND(TEST_MAX_VALUE)
+                    : first.ref
+                      ? *first.ref->value : 0;
+                digi key = digi_init(vb);
                 int a_found;
-                uset_digi_it it = uset_digi_insert_found(&a, digi_init(vb), &a_found);
+                uset_digi_it it = uset_digi_emplace_found(&a, &key, &a_found);
 #if __cplusplus >= 201100L
                 // C++11
                 std::pair<std::unordered_set<DIGI>::iterator, bool> pair;
-                pair = b.insert(DIGI{vb});
-                assert(a_found == (int)pair.second);
+                pair = b.emplace(DIGI{vb});
+                // STL returns true if not found, and freshly inserted
+                assert(!a_found == (int)pair.second);
                 CHECK_ITER(it, b, pair.first);
 #else
                 auto iter = b.insert(DIGI{vb});
@@ -427,11 +470,27 @@ main(void)
 #endif
                 break;
             }
-            case TEST_EMPLACE:
-            case TEST_EMPLACE_FOUND:
             case TEST_EMPLACE_HINT:
-                printf("nyi\n");
+            {
+                // makes not much sense for uset, only set
+                uset_digi_it first = uset_digi_begin(&a);
+                const int vb = TEST_RAND(2)
+                    ? TEST_RAND(TEST_MAX_VALUE)
+                    : first.ref
+                      ? *first.ref->value : 0;
+                digi key = digi_init(vb);
+                uset_digi_it pos = uset_digi_find(&a, key);
+                uset_digi_it it = uset_digi_emplace_hint(&pos, &key);
+#if __cplusplus >= 301100L
+                // C++11
+                auto iter = b.emplace_hint(it, DIGI{vb});
+                CHECK_ITER(it, b, iter);
+#else
+                auto iter = b.insert(DIGI{vb});
+                CHECK_ITER(it, b, iter.first);
+#endif
                 break;
+            }
 #endif
 #if 0
             case TEST_EXTRACT:

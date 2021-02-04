@@ -665,6 +665,30 @@ JOIN(A, push_cached)(A* self, T* value)
     return buckets;
 }
 
+// the various growth polices before insert
+static inline void
+JOIN(A, _pre_insert_grow)(A* self)
+{
+    if(!self->bucket_count)
+        JOIN(A, rehash)(self, 8);
+    if (self->size + 1 > self->max_bucket_count)
+    {
+#ifdef CTL_USET_GROWTH_POWER2
+        const size_t bucket_count = 2 * self->bucket_count;
+        //LOG ("rehash from %lu to %lu, load %f\n", self->size, self->bucket_count,
+        //     JOIN(A, load_factor)(self));
+        JOIN(A, _rehash)(self, bucket_count);
+#else
+        // The natural growth factor is the golden ratio. libstc++ v3 and
+        // libc++ use 2.0 here.
+        //size_t const bucket_count = (size_t)((double)self->bucket_count * 1.618033);
+        size_t const bucket_count = 1.618 * (double)self->bucket_count;
+        JOIN(A, rehash)(self, bucket_count);
+#endif
+    }
+}
+
+
 static inline void
 JOIN(A, insert)(A* self, T value)
 {
@@ -674,28 +698,10 @@ JOIN(A, insert)(A* self, T value)
     }
     else
     {
-        if(!self->bucket_count)
-            JOIN(A, rehash)(self, 8);
-        if (self->size + 1 > self->max_bucket_count)
-        {
-#ifdef CTL_USET_GROWTH_POWER2
-            const size_t bucket_count = 2 * self->bucket_count;
-            //LOG ("rehash from %lu to %lu, load %f\n", self->size, self->bucket_count,
-            //     JOIN(A, load_factor)(self));
-            JOIN(A, _rehash)(self, bucket_count);
-#else
-            // The natural growth factor is the golden ratio. libstc++ v3 and
-            // libc++ use 2.0 here.
-            //size_t const bucket_count = (size_t)((double)self->bucket_count * 1.618033);
-            size_t const bucket_count = 1.618 * (double)self->bucket_count;
-            JOIN(A, rehash)(self, bucket_count);
-#endif
-        }
+        JOIN(A, _pre_insert_grow)(self);
         JOIN(A, push_cached)(self, &value);
     }
 }
-
-#ifdef DEBUG
 
 static inline I
 JOIN(A, insert_found)(A* self, T value, int* foundp)
@@ -707,15 +713,13 @@ JOIN(A, insert_found)(A* self, T value, int* foundp)
         *foundp = 1;
         return JOIN(I, iter)(self, node);
     }
-    if(JOIN(A, empty)(self))
-        JOIN(A, rehash)(self, 12);
-    node = *JOIN(A, push_cached)(self, &value);
-    //LOG ("insert_found: add bucket[%zu]\n", JOIN(B, bucket_size)(*bucket));
-    if (JOIN(A, load_factor)(self) > self->max_load_factor)
-        JOIN(A, rehash)(self, 2 * self->bucket_count);
     *foundp = 0;
+    JOIN(A, _pre_insert_grow)(self);
+    node = *JOIN(A, push_cached)(self, &value);
     return JOIN(I, iter)(self, node);
 }
+
+#ifdef DEBUG
 
 static inline I
 JOIN(A, emplace)(A* self, T* value)
@@ -724,13 +728,12 @@ JOIN(A, emplace)(A* self, T* value)
     if ((node = JOIN(A, find_node)(self, *value)))
         return JOIN(I, iter)(self, node);
 
-    B** buckets = JOIN(A, push_cached)(self, value);
-    if (JOIN(A, load_factor)(self) > self->max_load_factor)
-        JOIN(A, rehash)(self, 2 * self->bucket_count);
-    return JOIN(I, iter)(self, *buckets);
+    JOIN(A, _pre_insert_grow)(self);
+    node = *JOIN(A, push_cached)(self, value);
+    return JOIN(I, iter)(self, node);
 }
 
-static inline B*
+static inline I
 JOIN(A, emplace_found)(A* self, T* value, int* foundp)
 {
     B* node;
@@ -747,14 +750,13 @@ JOIN(A, emplace_found)(A* self, T* value, int* foundp)
             JOIN(A, rehash)(self, new_size);
         }
         *foundp = 1;
-        return node;
+        return JOIN(I, iter)(self, node);
     }
 
-    B** buckets = JOIN(A, push_cached)(self, value);
-    if (JOIN(A, load_factor)(self) > self->max_load_factor)
-        JOIN(A, rehash)(self, 2 * self->bucket_count);
+    JOIN(A, _pre_insert_grow)(self);
     *foundp = 0;
-    return *buckets;
+    node = *JOIN(A, push_cached)(self, value);
+    return JOIN(I, iter)(self, node);
 }
 
 static inline I
@@ -792,10 +794,9 @@ JOIN(A, emplace_hint)(I* pos, T* value)
     }
     else
     {
-        B** buckets = JOIN(A, push_cached)(self, value);
-        if (JOIN(A, load_factor)(self) > self->max_load_factor)
-            JOIN(A, rehash)(self, 2 * self->bucket_count);
-        return JOIN(I, iter)(self, *buckets);
+        JOIN(A, _pre_insert_grow)(self);
+        B* node = *JOIN(A, push_cached)(self, value);
+        return JOIN(I, iter)(self, node);
     }
 }
 

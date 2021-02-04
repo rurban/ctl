@@ -130,11 +130,11 @@ constructs elements in-place. _(NY)_
 
     I emplace_hint (I* pos, T *value)
 
-constructs elements in-place at position. _(NY)_
+constructs elements in-place, hopefully at position. _(NY)_
 
-    B* emplace_found (A* self, T *value, int* foundp)
+    I emplace_found (A* self, T *value, int* foundp)
 
-constructs elements in-place and sets foundp if it already existed. _(NY)_
+constructs elements in-place and sets *foundp if it already existed. _(NY)_
 
     erase (A* self, T key)
 
