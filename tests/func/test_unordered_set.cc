@@ -127,7 +127,6 @@ main(void)
         TEST(EQUAL) \
         TEST(REHASH) \
         TEST(RESERVE) \
-        TEST(SYMMETRIC_DIFFERENCE) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
         TEST(ALL_OF) \
@@ -136,17 +135,21 @@ main(void)
         TEST(COUNT_IF) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(INTERSECTION) /* 20 */ \
-        TEST(UNION) \
+        TEST(UNION) /* 19*/ \
+        TEST(SYMMETRIC_DIFFERENCE) \
+        TEST(INTERSECTION) \
         TEST(DIFFERENCE) \
         TEST(INSERT_FOUND) \
         TEST(EMPLACE) \
         TEST(EMPLACE_FOUND) \
         TEST(EMPLACE_HINT) \
-        /* TEST(EXTRACT) */ \
-        /* TEST(MERGE) */ \
-        /* TEST(REMOVE_IF) */ \
-
+        TEST(EXTRACT) \
+        TEST(MERGE) \
+        TEST(REMOVE_IF) \
+        TEST(LOWER_BOUND) \
+        TEST(UPPER_BOUND) \
+        TEST(GENERATE) \
+        TEST(TRANSFORM) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -408,13 +411,6 @@ main(void)
                 uset_digi_free(&aaa);
                 break;
             }
-            case TEST_ANY_OF:
-            {
-                bool is_a = uset_digi_any_of(&a, digi_is_odd);
-                bool is_b = std::any_of(b.begin(), b.end(), DIGIc_is_odd);
-                assert(is_a == is_b);
-                break;
-            }
             case TEST_INSERT_FOUND:
             {
                 const int vb = TEST_RAND(TEST_MAX_VALUE);
@@ -470,6 +466,13 @@ main(void)
             {
                 bool is_a = uset_digi_all_of(&a, digi_is_odd);
                 bool is_b = std::all_of(b.begin(), b.end(), DIGIc_is_odd);
+                assert(is_a == is_b);
+                break;
+            }
+            case TEST_ANY_OF:
+            {
+                bool is_a = uset_digi_any_of(&a, digi_is_odd);
+                bool is_b = std::any_of(b.begin(), b.end(), DIGIc_is_odd);
                 assert(is_a == is_b);
                 break;
             }

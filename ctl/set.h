@@ -862,6 +862,126 @@ JOIN(A, symmetric_difference)(A* a, A* b)
     return self;
 }
 
+#ifdef DEBUG
+
+static inline bool
+JOIN(A, inserter)(A* self, I* it, T value)
+{
+    if(!JOIN(A, _equal)(self, it->ref, &value))
+    {
+        B* next = JOIN(B, next)(it->node);
+        JOIN(A, erase_node)(self, it->node);
+        JOIN(A, insert)(self, value);
+        it->node = next;
+        return true;
+    }
+    else
+    {
+        if (self->free)
+            self->free(&value);
+        return false;
+    }
+}
+
+// specialize, using our inserter
+static inline void
+JOIN(A, generate)(A* self, T _gen(void))
+{
+    foreach(A, self, i)
+    {
+        T tmp = _gen();
+        JOIN(A, inserter)(self, &i, tmp);
+    }
+}
+
+static inline void
+JOIN(A, generate_range)(I* first, I* last, T _gen(void))
+{
+    foreach_range(A, i, first, last)
+    {
+        T tmp = _gen();
+        JOIN(A, inserter)(first->container, &i, tmp);
+    }
+}
+
+static inline void
+JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
+{
+    foreach_n(A, self, i, count)
+    {
+        T tmp = _gen();
+        JOIN(A, inserter)(self, &i, tmp);
+    }
+}
+
+static inline void
+JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
+{
+    foreach_n_range(A, first, i, count)
+    {
+        T tmp = _gen();
+        JOIN(A, inserter)(first->container, &i, tmp);
+    }
+}
+
+static inline A
+JOIN(A, transform)(A* self, T _unop(T*))
+{
+    A other = JOIN(A, copy)(self);
+    foreach(A, &other, i)
+    {
+        T tmp = _unop(i.ref);
+        JOIN(A, inserter)(&other, &i, tmp);
+    }
+    return other;
+}
+
+static inline A
+JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
+{
+    A other = JOIN(A, copy)(self);
+    foreach(A, &other, i)
+    {
+        if (JOIN(I, done)(pos))
+            break;
+        T tmp = _binop(i.ref, pos->ref);
+        JOIN(A, inserter)(&other, &i, tmp);
+        JOIN(I, next)(pos);
+    }
+    return other;
+}
+
+static inline I
+JOIN(A, transform_range)(I* first1, I* last1, I dest, T _unop(T*))
+{
+    foreach_range(A, i, first1, last1)
+    {
+        if (JOIN(I, done)(&dest))
+            break;
+        T tmp = _unop(i.ref);
+        JOIN(A, inserter)(dest.container, &i, tmp);
+        JOIN(I, next)(&dest);
+    }
+    return dest;
+}
+
+static inline I
+JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*))
+{
+    foreach_range(A, i, first1, last1)
+    {
+        if (JOIN(I, done)(pos) || JOIN(I, done)(&dest))
+            break;
+        T tmp = _binop(i.ref, pos->ref);
+        JOIN(A, inserter)(dest.container, &i, tmp);
+        JOIN(I, next)(pos);
+        JOIN(I, next)(&dest);
+    }
+    return dest;
+}
+
+#endif //DEBUG
+
 #if defined(CTL_MAP)
 # include <ctl/algorithm.h>
 #endif

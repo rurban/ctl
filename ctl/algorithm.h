@@ -177,7 +177,8 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
 #endif // USET (ranges)
 
 // generate and transform have no inserter support yet,
-// so we cannot yet use it for set nor uset.
+// so we cannot yet use it for set nor uset. we want to call insert on them.
+// for list and vector we just set/replace the elements.
 #if !defined(CTL_USET) && !defined(CTL_SET)
 
 static inline void

@@ -144,7 +144,7 @@ main(void)
 {
     int errors = 0;
     INIT_SRAND;
-    INIT_TEST_LOOPS(10);
+    INIT_TEST_LOOPS(20);
     for(size_t loop = 0; loop < loops; loop++)
     {
         set_digi a;
@@ -186,7 +186,7 @@ main(void)
         TEST(ERASE_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) \
+        TEST(EMPLACE) /* 32*/ \
         TEST(EXTRACT) \
         TEST(MERGE) \
         TEST(EQUAL_RANGE) \
@@ -199,7 +199,7 @@ main(void)
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
-        TEST(GENERATE) \
+        TEST(GENERATE) /* 45*/ \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
         TEST(GENERATE_N) \
@@ -676,17 +676,19 @@ main(void)
                     }
                 break;
             }
-#ifdef DEBUG // algorithm and ranges
+#ifdef DEBUG
             case TEST_EQUAL_RANGE:
                 printf("nyi\n");
                 break;
-#if 0
-            case TEST_GENERATE:
+#if 0 // need some C++ help here
+            case TEST_GENERATE: // 45
             {
                 digi_generate_reset();
                 set_digi_generate(&a, digi_generate);
                 digi_generate_reset();
-                std::generate(std::inserter(b, b.begin()), std::inserter(b, b.end()), DIGI_generate);
+                std::generate(b.begin(), b.end(), DIGI_generate);
+                //std::set<DIGI> bb;
+                //std::generate(std::inserter(b, b.begin()), std::inserter(b, b.end()), DIGI_generate);
                 CHECK(a, b);
                 break;
             }
