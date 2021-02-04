@@ -290,6 +290,8 @@ JOIN(A, insert)(I* pos, T value)
 {
     B* node = JOIN(B, init)(value);
     JOIN(A, connect_before)(pos->container, pos->node, node);
+    pos->node = node;
+    pos->ref = &node->value;
     return pos;
 }
 
@@ -447,17 +449,23 @@ JOIN(A, emplace_back)(A* self, T* value) {
 static inline I*
 JOIN(A, insert_count)(I* pos, size_t count, T value)
 {
-    if (!count)
-        return pos;
     A* self = pos->container;
-    B* node;
+    B* node = NULL;
     for (size_t i=0; i < count; i++)
     {
         node = JOIN(B, init)(self->copy(&value));
-        JOIN(A, connect_before)(self, pos->node, node);
+        if (pos->node)
+            JOIN(A, connect_before)(self, pos->node, node);
+        else
+            JOIN(A, connect_after)(self, self->tail, node);
     }
     if(self->free)
         self->free(&value);
+    if (LIKELY(count && node))
+    {
+        pos->node = node;
+        pos->ref = &node->value;
+    }
     return pos;
 }
 

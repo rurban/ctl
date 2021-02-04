@@ -184,7 +184,7 @@ main(void)
         TEST(POP_BACK) \
         TEST(POP_FRONT) \
         TEST(ERASE) \
-        TEST(INSERT) \
+        TEST(INSERT) /* 5 */ \
         TEST(CLEAR) \
         TEST(RESIZE) \
         TEST(ASSIGN) \
@@ -220,11 +220,10 @@ main(void)
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
-        TEST(INSERT_COUNT) \
+        TEST(INSERT_COUNT) /* 41 */ \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(INSERT_RANGE) \
-        TEST(MERGE) \
         TEST(EQUAL_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
@@ -331,8 +330,11 @@ main(void)
                 list_digi_it_advance (&it, index);
                 list_digi_it *aa = list_digi_insert(&it, digi_init(value));
                 std::list<DIGI>::iterator bb = b.insert(iter, DIGI{value});
-                // insert libstc++ seems to violate the specs, as insert_range
-                LOG_ITER(aa, b, bb, __LINE__);
+                // insert libstc++ seems to violate the specs, as insert_count
+                // LOG("inserted %d at %zu\n", value, index);
+                // print_lst(&a);
+                // print_list(b);
+                CHECK_ITER(aa, b, bb);
                 CHECK(a, b);
                 break;
             }
@@ -715,19 +717,19 @@ main(void)
             case TEST_INSERT_COUNT:
             {
                 size_t index = TEST_RAND(a.size);
-                size_t count = TEST_RAND(a.size - 4) + 1;
+                size_t count = TEST_RAND(10);
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 std::list<DIGI>::iterator iter = b.begin();
                 std::advance(iter, index);
                 list_digi_it it = list_digi_begin(&a);
                 list_digi_it_advance (&it, index);
-                LOG("insert %zu x %d at %zu\n", count, value, index);
+                LOG("insert %d (%zux) at %zu\n", value, count, index);
                 list_digi_it *aa = list_digi_insert_count(&it, count, digi_init(value));
-                // libstc++ violates the docs
+                // does libstc++ violate its docs?
                 std::list<DIGI>::iterator bb = b.insert(iter, count, DIGI{value});
-                LOG_ITER(aa, b, bb, __LINE__);
-                print_lst(&a);
-                print_list(b);
+                //print_lst(&a);
+                //print_list(b);
+                CHECK_ITER(aa, b, bb);
                 CHECK(a, b);
                 break;
             }
