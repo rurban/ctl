@@ -38,6 +38,12 @@ Some iterators advance on linked nodes (_"B iters"_), some others on value
 refs (_"T iters"_). The deque additionally holds the index, the unordered_set
 the `next` pointer and `bucket_index`.
 
+We don't support **output iterators**, like `back_inserter` or `inserter` yet.
+They are currently only defined for `transform_range` and `transform_it_range`,
+which are not enabled yet, and problematic for `set`.
+
+Also we don't support `reverse_iterator` via `I prev` yet.
+
 ## Iterators
 
     I begin (A* self)

@@ -129,7 +129,7 @@ JOIN(A, find_end_if_range)(I* first, I* last, int _match(T*))
             ret = &i;
     return ret ? *ret : *last;
 }
-#endif
+#endif // 0
 
 static inline I
 JOIN(A, find_if_range)(I* first, I* last, int _match(T*))
@@ -174,6 +174,25 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
     return !JOIN(A, none_of_range)(first, last, _match);
 }
 
+#endif // USET (ranges)
+
+// generate and transform have no inserter support yet,
+// so we cannot yet use it for set nor uset.
+#if !defined(CTL_USET) && !defined(CTL_SET)
+
+static inline void
+JOIN(A, generate)(A* self, T _gen(void))
+{
+    foreach(A, self, i)
+    {
+#ifndef POD
+        if (self->free)
+            self->free(i.ref);
+#endif
+        *i.ref = _gen();
+    }
+}
+
 static inline void
 JOIN(A, generate_range)(I* first, I* last, T _gen(void))
 {
@@ -181,37 +200,6 @@ JOIN(A, generate_range)(I* first, I* last, T _gen(void))
     A* self = first->container;
 #endif
     foreach_range(A, i, first, last)
-    {
-#ifndef POD
-        if (self->free)
-            self->free(i.ref);
-#endif
-        *i.ref = _gen();
-    }
-}
-
-static inline void
-JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
-{
-#ifndef POD
-    A* self = first->container;
-#endif
-    foreach_n_range(A, first, i, count)
-    {
-#ifndef POD
-        if (self->free)
-            self->free(i.ref);
-#endif
-        *i.ref = _gen();
-    }
-}
-
-#endif
-
-static inline void
-JOIN(A, generate)(A* self, T _gen(void))
-{
-    foreach(A, self, i)
     {
 #ifndef POD
         if (self->free)
@@ -239,6 +227,7 @@ JOIN(A, transform)(A* self, T _unop(T*))
     return other;
 }
 
+#if defined CTL_STR || defined DEBUG
 static inline A
 JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
 {
@@ -259,8 +248,25 @@ JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
     }
     return other;
 }
+#endif // STR/DEBUG
 
-#if !defined(CTL_USET)
+#ifdef DEBUG
+
+static inline void
+JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
+{
+#ifndef POD
+    A* self = first->container;
+#endif
+    foreach_n_range(A, first, i, count)
+    {
+#ifndef POD
+        if (self->free)
+            self->free(i.ref);
+#endif
+        *i.ref = _gen();
+    }
+}
 
 static inline void
 JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
@@ -321,7 +327,9 @@ JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*
     }
     return dest;
 }
-#endif
+#endif //DEBUG
+
+#endif // USET/SET inserter
 
 #if !defined(CTL_USET)
 /// uset has cached_hash optims
@@ -350,8 +358,8 @@ JOIN(A, count)(A* self, T value)
         self->free(&value);
     return count;
 }
-#endif //SET/STR
-#endif //USET
+#endif // SET/STR
+#endif // USET
 
 //#if !defined(CTL_STR)
 // C++20

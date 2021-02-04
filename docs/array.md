@@ -46,8 +46,6 @@ The function names are composed of the prefix **arrN_**, the user-defined type
 
 `I` being `arrN_T_it`    internal iterator type for loops
 
-`IT` being `T*`, the generic type of iterators.
-
 There is no `B` node type.
 
 ## Member functions

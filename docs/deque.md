@@ -62,9 +62,7 @@ The complexity (efficiency) of common operations on a `deque` is as follows:
 
 `I` being `deq_T_it`    iterator type
 
-`IT` iterators are currently specialized (on `index`).
-
-There is a `B` node type, but iterators use the `I*` type.
+There is a `B` node type, but iterators use the `I` type.
 
 ## Member fields
 

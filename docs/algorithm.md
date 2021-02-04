@@ -1,6 +1,6 @@
 # algorithm - CTL - C Container Template library
 
-Defined in header **<ctl/algorithm.h>**, which is always included for all containers.
+Defined in header **<ctl/algorithm.h>**, which is currently always included for all containers.
 
 ## SYNOPSIS
 
@@ -33,6 +33,9 @@ There are no execution policies yet, but I am planning a **pctl**,
 i.e. `parallel_policy` and `parallel_unsequenced_policy`
 for various backends like openmp or TBB.
 
+unordered_set does not support ranges, nor count functions ending with `_n`.
+Such iterators on `unordered_set` make not much sense, as the order is random.
+
 ## Member types
 
 `T`                      value type
@@ -41,18 +44,17 @@ for various backends like openmp or TBB.
 
 `B` being `list_T_node`  node type
 
-`I` being `list_T_it`    iterator type for `begin()` and `end()`
+`I` being `list_T_it`    iterator type
 
-`IT` being either `T*` or `B*`, the return type of iterators.
 
 ## Non-modifying sequence operations
 
     bool all_of (A* self, int _match(T*)) (C++11)
     bool any_of `(A* self, int _match(T*)) (C++11)
     bool none_of (A* self, int _match(T*)) (C++11)
-    bool all_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
-    bool any_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
-    bool none_of_range (A* self, IT first, IT last, int _match(T*)) (C++20)
+    bool all_of_range (I* first, I* last, int _match(T*)) (C++20)
+    bool any_of_range (I* first, I* last, int _match(T*)) (C++20)
+    bool none_of_range (I* first, I* last, int _match(T*)) (C++20)
 
 checks if a predicate is true for all, any or none of the elements in a range
 
@@ -61,8 +63,8 @@ checks if a predicate is true for all, any or none of the elements in a range
 
 applies a block to a range of elements with iter.
  
-    foreach_n (A, T, IT, self, n, void func(T*)) {...} (C++17)
-    foreach_n_range (A, T, IT, first, n, void func(T*)) {...} (C++20)
+    foreach_n (A, self, n) {...} (C++17)
+    foreach_n_range (A, first, n) {...} (C++20)
 
 applies a block with iter to the first n elements of a sequence.
 
@@ -81,9 +83,9 @@ finds the first position where two ranges differ. _(NYI)_
     I find (A* self, T* value)
     I find_if (A* self, int _match(T*))
     I find_if_not (A* self, int _match(T*)) (C++11)
-    I find_range (A* self, IT first, IT last, T value) (C++20)
-    I find_if_range (IT first, IT last, int _match(T*)) (C++20)
-    I find_if_not_range (IT first, IT last, int _match(T*)) (C++20)
+    I find_range (I* first, I* last, T value) (C++20)
+    I find_if_range (I* first, I* last, int _match(T*)) (C++20)
+    I find_if_not_range (I* first, I* last, int _match(T*)) (C++20)
  
 finds the first element satisfying specific criteria. Returns a fresh iterator
 I. Does not consume/free the T key.
@@ -154,27 +156,30 @@ copy-assigns the given value to N elements in a range. _(NYI)_
 assigns a value to a number of elements
 
     A transform (A* self, T unop(T*))
-    A transform_it (A* self, I* pos, T _binop(T*, T*))
-    I transform_range (I* first1, I* last1, I dest, T _unop(T*))
+    A transform_it (A* self, I* pos, T _binop(T*, T*))           (only string yet)
+    I transform_range (I* first1, I* last1, I dest, T _unop(T*)) (NY)
     I transform_it_range (I* first1, I* last1, I* pos, I dest,
-                          T _binop(T*, T*))
+                          T _binop(T*, T*))                      (NY)
 
 applies a function to a range of elements. Returning results in a copy, or for
 the range variants in an output iterator `dest`.  unop takes the iterator
 element, binop takes as 2nd argument the 2nd iterator `pos`.
+The output iterator `dest` is not yet supported.
 
     generate (A* self, T _gen(void))
     generate_range (I* first, I* last, T _gen(void)) (C++20)
  
-assigns the results of successive function calls to every element in a range.
+assigns the results of successive function calls to every element in a
+range. Not for ordered containers.
 
     generate_n (A* self, size_t count, T _gen(void))
     generate_n_range (I* first, size_t count, T _gen(void))   (C++20)
  
-assigns the results of successive function calls to N elements in a range.
+assigns the results of successive function calls to N elements in a range. Not
+for ordered containers (set, map) nor unordered_set.
 
-    remove
-    remove_if
+    size_t remove (A* self, T value)
+    size_t remove_if (A* self, int _match(T*)
     remove_range (C++20)
     remove_if_range (C++20)
  
@@ -201,7 +206,7 @@ replaces all values satisfying specific criteria with another value. _(NYI)_
  
 copies a range, replacing elements satisfying specific criteria with another value. _(NYI)_
 
-    swap
+    swap (A* self, A* other)
  
 swaps the values of two objects.
 
@@ -213,7 +218,7 @@ swaps two ranges of elements. _(NYI)_
  
 swaps the elements pointed to by two iterators. _(NYI)_
 
-    reverse
+    reverse (A* self)
     reverse_range (C++20)
 
 reverses the order of elements in a range. _(range NYI)_
@@ -249,7 +254,7 @@ randomly re-orders elements in a range. _(NYI)_
  
 selects n random elements from a sequence. _(NYI)_
 
-    unique
+    unique (A* self)
     unique_range (C++20)
  
 removes consecutive duplicate elements in a range. _(range NYI)_
@@ -325,13 +330,13 @@ partially sorts the given range making sure that it is partitioned by the given 
 
 ## Binary search operations (on sorted ranges)
 
-    I lower_bound
-    I lower_bound_range (C++20)
+    I lower_bound (A* self, T value)
+    I lower_bound_range (I* first, I* last, T value) (C++20)
   
 returns an iterator to the first element not less than the given value. _(NYI)_
 
-    I upper_bound
-    I upper_bound_range (C++20)
+    I upper_bound (A* self, T value)
+    I upper_bound_range (I* first, I* last, T value) (C++20)
 
 returns an iterator to the first element greater than a certain value. _(NYI)_
 
@@ -347,7 +352,7 @@ returns range of elements matching a specific key. _(NYI)_
 
 ## Other operations on sorted ranges
 
-    merge
+    A merge (A* self, A* other)
     merge_range (C++20)
  
 merges two sorted ranges. _(range NYI)_
