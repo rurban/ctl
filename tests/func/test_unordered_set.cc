@@ -211,7 +211,7 @@ main(void)
                 uset_digi_it it = uset_digi_insert_found(&a, digi_init(vb), &a_found);
 #if __cplusplus >= 201100L
                 // C++11
-                std::pair<std::unordered_set<DIGI>::iterator, bool> pair;
+                std::pair<std::unordered_set<DIGI,DIGI_hash>::iterator, bool> pair;
                 pair = b.insert(DIGI{vb});
                 // STL returns true if not found, and freshly inserted
                 assert(!a_found == (int)pair.second);
@@ -459,7 +459,7 @@ main(void)
                 uset_digi_it it = uset_digi_emplace_found(&a, &key, &a_found);
 #if __cplusplus >= 201100L
                 // C++11
-                std::pair<std::unordered_set<DIGI>::iterator, bool> pair;
+                std::pair<std::unordered_set<DIGI,DIGI_hash>::iterator, bool> pair;
                 pair = b.emplace(DIGI{vb});
                 // STL returns true if not found, and freshly inserted
                 assert(!a_found == (int)pair.second);
