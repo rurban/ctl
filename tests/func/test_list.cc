@@ -75,14 +75,15 @@ int random_element(list_digi* a)
     }                                                             \
 }
 
-#define LOG_ITER(_it, b, _iter)                                   \
+#define LOG_ITER(_it, b, _iter, line)                             \
     if ((_it)->node != NULL)                                      \
     {                                                             \
         if (_iter == b.end())                                     \
-            printf("STL iter at end FAIL\n");                     \
-        if (*(_it)->ref->value != *(*_iter).value)                \
-            printf("iter %d vs %d FAIL\n", *(_it)->ref->value,    \
-                *(*_iter).value);                                 \
+            printf("STL iter at end, line %u FAIL\n", line);      \
+        if (*((_it)->ref->value) != *(*_iter).value)              \
+            printf("iter %d vs %d, line %u FAIL\n",               \
+                   *((_it)->ref->value),                          \
+                   *(*_iter).value, line);                        \
     } else                                                        \
         assert (_iter == b.end())
 #define CHECK_ITER(_it, b, _iter)                                 \
@@ -331,7 +332,7 @@ main(void)
                 list_digi_it *aa = list_digi_insert(&it, digi_init(value));
                 std::list<DIGI>::iterator bb = b.insert(iter, DIGI{value});
                 // insert libstc++ seems to violate the specs, as insert_range
-                LOG_ITER(aa, b, bb);
+                LOG_ITER(aa, b, bb, __LINE__);
                 CHECK(a, b);
                 break;
             }
@@ -724,7 +725,7 @@ main(void)
                 list_digi_it *aa = list_digi_insert_count(&it, count, digi_init(value));
                 // libstc++ violates the docs
                 std::list<DIGI>::iterator bb = b.insert(iter, count, DIGI{value});
-                LOG_ITER(aa, b, bb);
+                LOG_ITER(aa, b, bb, __LINE__);
                 print_lst(&a);
                 print_list(b);
                 CHECK(a, b);
