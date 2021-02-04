@@ -47,12 +47,7 @@ position to the top in each access, such as find and contains, not only insert.
 #define CTL_USET
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
-#ifndef C
-# define C uset
-#endif
 #define I JOIN(A, it)
-#undef IT
-#define IT B*
 
 #include <ctl/ctl.h>
 #include <ctl/bits/iterators.h>

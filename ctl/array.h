@@ -13,7 +13,7 @@
 
 #include <ctl/ctl.h>
 
-// stack allocated if N < 2048, else heap
+// stack allocated if N < 2048, else heap. FIXME: 4k / sizeof(T)
 #define CUTOFF 2047
 #define CTL_ARR
 #define C PASTE(arr, N)

@@ -29,13 +29,11 @@
 // Replace the three instances of `deq` below
 // with either `vec` or `list`, depending on your use case.
 #define CTL_STACK
-#define C stack
 #define deq stack
 #define _deq _stack
 #include <ctl/deque.h>
 #undef _deq
 #undef deq
-#undef C
 #undef CTL_STACK
 
 #undef push_back

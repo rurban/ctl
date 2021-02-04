@@ -10,12 +10,7 @@
 #define CTL_SET
 #define A JOIN(set, T)
 #define B JOIN(A, node)
-#ifndef C
-# define C set
-#endif
 #define I JOIN(A, it)
-#undef IT
-#define IT B*
 
 #include <ctl/ctl.h>
 #include <ctl/bits/iterators.h>

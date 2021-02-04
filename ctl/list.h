@@ -10,11 +10,6 @@
 #define A JOIN(list, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
-//#ifndef C
-//# define C list
-//#endif
-//#undef IT
-//#define IT B*
 
 #include <ctl/ctl.h>
 

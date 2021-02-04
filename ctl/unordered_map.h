@@ -14,7 +14,6 @@
 
 #define CTL_UMAP
 #define HOLD
-#define C umap
 #define uset umap
 #include <ctl/unordered_set.h>
 

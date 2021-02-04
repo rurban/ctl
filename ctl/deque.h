@@ -12,11 +12,6 @@
 #define A JOIN(deq, T)
 #define B JOIN(A, bucket)
 #define I JOIN(A, it)
-//#ifndef C
-//# define C deq
-//#endif
-//#undef IT
-//#define IT T*
 
 #include <ctl/ctl.h>
 #include <ctl/bits/iterators.h>

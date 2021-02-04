@@ -32,7 +32,6 @@
 #define remove_if     __REMOVE_IF
 
 #define CTL_PQU
-#define C pqu
 #define vec pqu
 #define HOLD
 #define init __INIT
