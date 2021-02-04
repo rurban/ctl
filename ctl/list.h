@@ -233,13 +233,12 @@ JOIN(A, connect_before)(A* self, B* position, B* node)
             self->head = node;
         self->size++;
     }
-    /* error handling? silent ignore or stderr or assert or customizable.
+    /* error handling? silent ignore or stderr or assert or customizable. */
     else
     {
-        ASSERT (0 || "list size exceeded");
-        fprintf (stderr, "list size exceeded");
+        ASSERT (!"list max_size exceeded");
+        //fprintf (stderr, "list max_size exceeded");
     }
-    */
 }
 
 static inline void
@@ -332,13 +331,12 @@ JOIN(A, connect_after)(A* self, B* position, B* node)
             self->tail = node;
         self->size += 1;
     }
-    /* error handling? silent ignore or stderr or assert or customizable.
+    /* error handling? silent ignore or stderr or assert or customizable. */
     else
     {
-        ASSERT (0 || "list size exceeded");
-        fprintf (stderr, "list size exceeded");
+        ASSERT (!"list max_size exceeded");
+        // fprintf (stderr, "list max_size exceeded");
     }
-    */
 }
 
 static inline void
