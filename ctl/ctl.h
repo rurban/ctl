@@ -61,6 +61,10 @@
 #endif
 #endif
 
+#ifndef MAX
+# define MAX(a, b) a >= b ? a : b
+#endif
+
 /* Three types of iterators. deque with index, see there */
 #define CTL_T_ITER_FIELDS  \
     T* ref;                \

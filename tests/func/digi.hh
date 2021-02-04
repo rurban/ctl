@@ -118,7 +118,7 @@ struct DIGI
     }
     size_t hash(const DIGI& a) const
     {
-        return (size_t)*a.value;
+        return (size_t)int_hash_func(*a.value);
     }
 };
 
@@ -126,7 +126,7 @@ class DIGI_hash {
 public:
     size_t operator()(const DIGI& a) const
     {
-        return (size_t)*a.value;
+        return (size_t)int_hash_func(*a.value);
     }
 };
 

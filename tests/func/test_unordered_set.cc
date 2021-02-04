@@ -25,7 +25,7 @@
         for(auto x : _y)                                               \
         {                                                              \
             digi d = digi_init(*x.value);                              \
-            assert(uset_digi_find_node(&a, d));                        \
+            assert(uset_digi_find_node(&_x, d));                       \
             digi_free(&d);                                             \
             b_found++;                                                 \
         }                                                              \
@@ -133,14 +133,14 @@ main(void)
         TEST(ANY_OF) \
         TEST(NONE_OF) \
         TEST(COUNT_IF) \
-
-#define FOREACH_DEBUG(TEST) \
-        TEST(UNION) /* 19 */ \
-        TEST(SYMMETRIC_DIFFERENCE) \
+        TEST(UNION) /* 20 */ \
         TEST(INTERSECTION) \
         TEST(DIFFERENCE) \
+        TEST(SYMMETRIC_DIFFERENCE) \
         TEST(EMPLACE) \
-        TEST(EMPLACE_FOUND) \
+
+#define FOREACH_DEBUG(TEST) \
+        TEST(EMPLACE_FOUND) /* 25 */ \
         TEST(EMPLACE_HINT) \
         TEST(EXTRACT) \
         TEST(MERGE) \
@@ -373,7 +373,6 @@ main(void)
                 uset_digi_free(&aa);
                 break;
             }
-#ifdef DEBUG
             case TEST_UNION:
             {
                 uset_digi aa;
@@ -381,25 +380,22 @@ main(void)
                 setup_sets(&aa, bb);
                 uset_digi aaa = uset_digi_union(&a, &aa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
+#if 0           // If the STL would be actually usable
                 std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
-                               std::inserter(bbb, bbb.begin()));
+                               std::inserter(bbb, std::next(bbb.begin())));
+#else
+                std::copy(b.begin(), b.end(),
+                          std::inserter(bbb, bbb.end()));
+                for (const auto& elem : bb) {
+                    bbb.insert(elem);
+                }
+#endif
+                print_uset(&aa);
+                print_unordered_set(bb);
                 CHECK(aa, bb);
+                print_uset(&aaa);
+                print_unordered_set(bbb);
                 CHECK(aaa, bbb);
-                uset_digi_free(&aa);
-                uset_digi_free(&aaa);
-                break;
-            }
-            case TEST_SYMMETRIC_DIFFERENCE:
-            {
-                uset_digi aa;
-                std::unordered_set<DIGI,DIGI_hash> bb;
-                setup_sets(&aa, bb);
-                uset_digi aaa = uset_digi_symmetric_difference(&a, &aa);
-                std::unordered_set<DIGI,DIGI_hash> bbb;
-                std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
-                                              std::inserter(bbb, bbb.begin()));
-                CHECK(aa, bb);
-                CHECK(aaa, bbb); //fails
                 uset_digi_free(&aa);
                 uset_digi_free(&aaa);
                 break;
@@ -411,11 +407,18 @@ main(void)
                 setup_sets(&aa, bb);
                 uset_digi aaa = uset_digi_intersection(&a, &aa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
+#if 0           // If the STL would be actually usable
                 std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
-                                      std::inserter(bbb, bbb.begin()));
+                                      std::inserter(bbb, std::next(bbb.begin())));
+#else
+                for (const auto& elem : b) {
+                    if (bb.find(DIGI(*elem.value)) != bb.end())
+                        bbb.insert(elem);
+                }
+#endif
                 CHECK(aa, bb);
-                CHECK(aaa, bbb); // TODO size error
                 uset_digi_free(&aa);
+                CHECK(aaa, bbb);
                 uset_digi_free(&aaa);
                 break;
             }
@@ -424,15 +427,63 @@ main(void)
                 uset_digi aa;
                 std::unordered_set<DIGI,DIGI_hash> bb;
                 setup_sets(&aa, bb);
+                LOG("uset a\n");
+                print_uset(&a);
                 uset_digi aaa = uset_digi_difference(&a, &aa);
+                std::unordered_set<DIGI,DIGI_hash> bbb;
+#if 0
+                // Note: the STL cannot do this simple task, because it requires
+                // both sets to be ordered.
+                std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                    std::inserter(bbb, std::next(bbb.begin())));
+#else
+                std::copy(b.begin(), b.end(),
+                          std::inserter(bbb, bbb.end()));
+                for (const auto& elem : bb) {
+                    bbb.erase(elem);
+                }
+#endif
+                LOG("uset b\n");
+                print_uset(&aa);
+                print_unordered_set(bb);
+                CHECK(aa, bb);
+                uset_digi_free(&aa);
+                LOG("uset difference (a-b)\n");
+                print_uset(&aaa);
+                print_unordered_set(bbb);
+                CHECK(aaa, bbb);
+                uset_digi_free(&aaa);
+                break;
+            }
+            case TEST_SYMMETRIC_DIFFERENCE:
+            {
+                uset_digi aa;
+                std::unordered_set<DIGI,DIGI_hash> bb;
+                setup_sets(&aa, bb);
+                uset_digi aaa = uset_digi_symmetric_difference(&a, &aa);
                 print_uset(&aaa);
                 std::unordered_set<DIGI,DIGI_hash> bbb;
-                std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
-                                    std::inserter(bbb, bbb.begin()));
-                CHECK(aa, bb);
+#if 0           // If the STL would be actually usable
+                std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                              std::inserter(bbb, std::next(bbb.begin())));
+#else
+                // union: b + bb
+                std::copy(b.begin(), b.end(),
+                          std::inserter(bbb, bbb.end()));
+                for (const auto& elem : bb) {
+                    bbb.insert(elem);
+                }
                 print_unordered_set(bbb);
-                CHECK(aaa, bbb); // fails
+                // intersection: b - bb
+                for (const auto& elem : b) {
+                    if (bb.find(DIGI(*elem.value)) != bb.end())
+                        bbb.erase(elem);
+                }
+                print_unordered_set(bbb);
+#endif
+                CHECK(aa, bb);
                 uset_digi_free(&aa);
+                CHECK(aaa, bbb); //fails
                 uset_digi_free(&aaa);
                 break;
             }
@@ -448,6 +499,7 @@ main(void)
                 b.emplace(DIGI{vb});
                 break;
             }
+#ifdef DEBUG
             case TEST_EMPLACE_FOUND:
             {
                 uset_digi_it first = uset_digi_begin(&a);

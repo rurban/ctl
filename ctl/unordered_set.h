@@ -37,7 +37,7 @@ position to the top in each access, such as find and contains, not only insert.
 # undef CTL_USET_GROWTH_PRIMED
 #endif
 
-// TODO emplace, extract, merge, equal_range
+// TODO extract, merge, equal_range
 
 #include <stdbool.h>
 #if !defined(__GNUC__) && defined(CTL_USET_GROWTH_POWER2)
@@ -512,8 +512,9 @@ JOIN(A, _reserve)(A* self, const size_t new_size)
     {
         //LOG("_reserve %zu realloc => %zu\n", self->bucket_count, new_size);
         self->buckets = (B**) realloc(self->buckets, new_size * sizeof(B*));
-        memset(&self->buckets[self->bucket_count], 0,
-               (new_size - self->bucket_count) * sizeof(B*));
+        if (new_size > self->bucket_count)
+            memset(&self->buckets[self->bucket_count], 0,
+                   (new_size - self->bucket_count) * sizeof(B*));
     }
     else
     {
@@ -719,8 +720,6 @@ JOIN(A, insert_found)(A* self, T value, int* foundp)
     return JOIN(I, iter)(self, node);
 }
 
-#ifdef DEBUG
-
 static inline I
 JOIN(A, emplace)(A* self, T* value)
 {
@@ -732,6 +731,8 @@ JOIN(A, emplace)(A* self, T* value)
     node = *JOIN(A, push_cached)(self, value);
     return JOIN(I, iter)(self, node);
 }
+
+#ifdef DEBUG
 
 static inline I
 JOIN(A, emplace_found)(A* self, T* value, int* foundp)
@@ -949,51 +950,40 @@ JOIN(A, copy)(A* self)
     return other;
 }
 
-#ifdef DEBUG
+static inline A
+JOIN(A, union)(A* a, A* b)
+{
+    A self = JOIN(A, init)(a->hash, a->equal);
+    JOIN(A, _reserve)(&self, MAX(a->bucket_count, b->bucket_count));
+    foreach(A, a, it1)
+        JOIN(A, insert)(&self, self.copy(it1.ref));
+    foreach(A, b, it2)
+        JOIN(A, insert)(&self, self.copy(it2.ref));
+    return self;
+}
+
 static inline A
 JOIN(A, intersection)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
     foreach(A, a, it)
         if(JOIN(A, find_node)(b, *it.ref))
-        {
-            B* next = it.next;
             JOIN(A, insert)(&self, self.copy(it.ref));
-            it.next = next;
-        }
     return self;
 }
 
-static inline A
-JOIN(A, union)(A* a, A* b)
-{
-    A self = JOIN(A, init)(a->hash, a->equal);
-    foreach(A, a, it1)
-    {
-        B* next = it1.next;
-        JOIN(A, insert)(&self, self.copy(it1.ref));
-        it1.next = next;
-    }
-    foreach(A, b, it2)
-    {
-        B* next = it2.next;
-        JOIN(A, insert)(&self, self.copy(it2.ref));
-        it2.next = next;
-    }
-    return self;
-}
-
-// FIXME
 static inline A
 JOIN(A, difference)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
+    foreach(A, a, it)
+        if(!JOIN(A, find_node)(b, *it.ref))
+            JOIN(A, insert)(&self, self.copy(it.ref));
+    /*
+    A self = JOIN(A, copy)(a);
     foreach(A, b, it)
-    {
-        B* next = it.next;
         JOIN(A, erase)(&self, *it.ref);
-        it.next = next;
-    }
+    */
     return self;
 }
 
@@ -1001,17 +991,11 @@ static inline A
 JOIN(A, symmetric_difference)(A* a, A* b)
 {
     A self = JOIN(A, union)(a, b);
-    A intersection = JOIN(A, intersection)(a, b);
-    foreach(A, &intersection, it)
-    {
-        B* next = it.next;
-        JOIN(A, erase)(&self, *it.ref);
-        it.next = next;
-    }
-    JOIN(A, free)(&intersection);
+    foreach(A, a, it)
+        if(JOIN(A, find_node)(b, *it.ref))
+            JOIN(A, erase)(&self, *it.ref);
     return self;
 }
-#endif
 
 // different to the shared equal
 static inline int

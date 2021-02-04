@@ -470,6 +470,10 @@ return the iterator and set a `int *foundp` value. Eg.
 
 Many algorithms and C++20 methods are still missing or are in work.
 
+**set** algorithms such as `set_union`, `set_difference`, `set_intersection`, `set_symmetric_difference`
+do not work with `unordered_set`, because the specs require them to be ordered.
+The CTL set algorithms do work properly on `unordered_set`.
+
 hashmaps will not rely on chained lists with buckets, and can be either changed
 to open addressing or a better modern layout, such as Swiss tables (flat or
 node variants), the stanford hash or even the currently fastest
