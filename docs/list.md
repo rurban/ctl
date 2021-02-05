@@ -129,11 +129,11 @@ inserts count copies of value before the element.
 
     I* insert_range (I* pos, I* first, I* last)
 
-inserts values before pos from first to last. _(NYI)_
+inserts copies of values from first to last before pos.
 
     I* emplace (I* pos, T* value)
 
-Insert a copy of the value into the container before pos.
+Insert the value into the container before pos.
 
     erase_node (A* self, B* node)
     erase (I* pos)

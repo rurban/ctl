@@ -477,22 +477,24 @@ JOIN(A, insert_count)(I* pos, size_t count, T value)
     return pos;
 }
 
-#ifdef DEBUG
-
 static inline I*
 JOIN(A, insert_range)(I* pos, I* first, I* last)
 {
-    B* node = NULL;
+    B* node = first->node;
     A* self = pos->container;
-    for(JOIN(A, it) it = *first; it.node != last->node; JOIN(I, next)(&it))
+    while (node != last->node)
     {
-        node = JOIN(B, init)(*it.ref);
-        JOIN(A, connect_before)(self, pos->node, node);
+        JOIN(A, connect_before)(self, pos->node,
+            JOIN(B, init)(self->copy(&node->value)));
+        node = node->next;
+    }
+    if (node)
+    {
+        pos->node = node;
+        pos->ref = &node->value;
     }
     return pos;
 }
-
-#endif
 
 static inline size_t
 JOIN(A, remove_if)(A* self, int _match(T*))

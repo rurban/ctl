@@ -221,9 +221,9 @@ main(void)
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
         TEST(INSERT_COUNT) /* 41 */ \
+        TEST(INSERT_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(INSERT_RANGE) /* 42*/ \
         TEST(EQUAL_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
@@ -838,11 +838,38 @@ main(void)
                 list_digi_free(&aa);
                 break;
             }
-#ifdef DEBUG
             // algorithms + ranges
             case TEST_INSERT_RANGE:
-                printf("nyi\n");
+                if (a.size > 2)
+                {
+                    print_lst(&a);
+                    size_t size2 = TEST_RAND(TEST_MAX_SIZE);
+                    list_digi aa = list_digi_init_from(&a);
+                    std::list<DIGI> bb;
+                    list_digi_it first_a, last_a;
+                    std::list<DIGI>::iterator first_b, last_b;
+                    for(size_t pushes = 0; pushes < size2; pushes++)
+                    {
+                        const int value = TEST_RAND(TEST_MAX_VALUE);
+                        list_digi_push_back(&aa, digi_init(value));
+                        bb.push_back(DIGI{value});
+                    }
+                    print_lst(&aa);
+                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    const size_t index = TEST_RAND(a.size);
+                    list_digi_it pos = list_digi_begin(&a);
+                    list_digi_it_advance(&pos, index);
+                    auto it = b.begin();
+                    advance(it, index);
+                    b.insert(it, first_b, last_b);
+                    list_digi_insert_range(&pos, &first_a, &last_a);
+                    print_lst(&a);
+                    print_list(b);
+                    CHECK(a, b);
+                    list_digi_free(&aa);
+                }
                 break;
+#ifdef DEBUG
             case TEST_EQUAL_RANGE:
             {
                 /*
