@@ -411,14 +411,20 @@ static inline size_t
 JOIN(A, remove)(A* self, T value)
 {
     size_t erased = 0;
-    list_foreach_ref(A, self, it)
-        if(JOIN(A, _equal)(self, it.ref, &value))
+    if (self->size)
+    {
+        B* node = self->head;
+        while(node)
         {
-            B* next = it.node->next;
-            JOIN(A, erase_node)(self, it.node);
-            it.node = next;
-            erased += 1;
+            B* next = node->next;
+            if(JOIN(A, _equal)(self, &node->value, &value))
+            {
+                JOIN(A, erase_node)(self, node);
+                erased++;
+            }
+            node = next;
         }
+    }
     FREE_VALUE(self, value);
     return erased;
 }
@@ -472,6 +478,7 @@ JOIN(A, insert_count)(I* pos, size_t count, T value)
 }
 
 #ifdef DEBUG
+
 static inline I*
 JOIN(A, insert_range)(I* pos, I* first, I* last)
 {

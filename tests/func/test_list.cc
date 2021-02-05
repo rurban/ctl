@@ -223,7 +223,7 @@ main(void)
         TEST(INSERT_COUNT) /* 41 */ \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(INSERT_RANGE) \
+        TEST(INSERT_RANGE) /* 42*/ \
         TEST(EQUAL_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
@@ -404,14 +404,14 @@ main(void)
                     int vb = *value->value;
                     LOG("before remove %d\n", vb);
                     print_lst(&a);
-#if __cpp_lib_erase_if > 202002L
+#if __cpp_lib_erase_if >= 202002L
                     size_t erased_a = list_digi_remove(&a, digi_init(vb));
                     LOG("removed %zu\n", erased_a);
 #else
                     list_digi_remove(&a, digi_init(vb));
 #endif
                     print_lst(&a);
-#if __cpp_lib_erase_if > 202002L
+#if __cpp_lib_erase_if >= 202002L
                     size_t erased_b = b.remove(DIGI{vb});
                     assert(erased_a == erased_b);
 #else
