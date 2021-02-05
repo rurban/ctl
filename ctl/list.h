@@ -411,19 +411,16 @@ static inline size_t
 JOIN(A, remove)(A* self, T value)
 {
     size_t erased = 0;
-    if (self->size)
+    B* node = self->head;
+    while(node)
     {
-        B* node = self->head;
-        while(node)
+        B* next = node->next;
+        if(JOIN(A, _equal)(self, &node->value, &value))
         {
-            B* next = node->next;
-            if(JOIN(A, _equal)(self, &node->value, &value))
-            {
-                JOIN(A, erase_node)(self, node);
-                erased++;
-            }
-            node = next;
+            JOIN(A, erase_node)(self, node);
+            erased++;
         }
+        node = next;
     }
     FREE_VALUE(self, value);
     return erased;
