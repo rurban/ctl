@@ -523,6 +523,19 @@ JOIN(A, erase_if)(A* self, int _match(T*))
 }
 
 static inline void
+JOIN(A, erase_range)(I* first, I* last)
+{
+    B* node = first->node;
+    A* self = first->container;
+    while (node != last->node)
+    {
+        B* next = node->next;
+        JOIN(A, erase_node)(self, node);
+        node = next;
+    }
+}
+
+static inline void
 JOIN(A, swap)(A* self, A* other)
 {
     A temp = *self;

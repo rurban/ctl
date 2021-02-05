@@ -222,6 +222,7 @@ main(void)
         TEST(FIND_IF_NOT_RANGE) \
         TEST(INSERT_COUNT) /* 41 */ \
         TEST(INSERT_RANGE) \
+        TEST(ERASE_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) \
@@ -867,6 +868,25 @@ main(void)
                     print_list(b);
                     CHECK(a, b);
                     list_digi_free(&aa);
+                }
+                break;
+            case TEST_ERASE_RANGE:
+                if (a.size)
+                {
+                    print_lst(&a);
+                    list_digi_it first_a, last_a;
+                    std::list<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    const size_t index = TEST_RAND(a.size);
+                    list_digi_it pos = list_digi_begin(&a);
+                    list_digi_it_advance(&pos, index);
+                    auto it = b.begin();
+                    advance(it, index);
+                    b.erase(first_b, last_b);
+                    list_digi_erase_range(&first_a, &last_a);
+                    print_lst(&a);
+                    print_list(b);
+                    CHECK(a, b);
                 }
                 break;
 #ifdef DEBUG

@@ -142,7 +142,7 @@ erases the element.
 
     erase_range (I* first, I* last)
 
-erases elements _(NYI)_
+erases elements.
 
     push_front (A* self, T value)
 
