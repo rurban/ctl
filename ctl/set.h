@@ -187,6 +187,7 @@ JOIN(I, range)(I* iter, I* last)
     last->end = iter->end = last->node;
 }
 
+static inline A JOIN(A, init_from)(A* copy);
 static inline A JOIN(A, copy)(A* self);
 
 #include <ctl/bits/container.h>
@@ -204,6 +205,22 @@ JOIN(A, init)(int _compare(T*, T*))
     self.free = JOIN(T, free);
     self.copy = JOIN(T, copy);
 #endif
+    return self;
+}
+
+static inline A
+JOIN(A, init_from)(A* copy)
+{
+    static A zero;
+    A self = zero;
+#ifdef POD
+    self.copy = JOIN(A, implicit_copy);
+#else
+    self.free = JOIN(T, free);
+    self.copy = JOIN(T, copy);
+#endif
+    self.compare = copy->compare;
+    self.equal = copy->equal;
     return self;
 }
 

@@ -274,6 +274,10 @@ unordered_map.h:    unordered_set.h (without pair convenience yet)
 
                     vec  str  arr  deq  list set  map  pqu  que  stk  uset umap
 +----------------------------------------------------------------------------+
+init                x    x    x    x    x    x    x    x    x    x    x    x
+init_from           x    x    x    x    x    x    x    x    x    x    x    x
+free                x    x    x    x    x    x    x    x    x    x    x    x
+copy                x    x    x    x    x    x    x                   x    x
 size                x    x    x    x    x    x    x    x    x    x    x    x
 max_size            x    x    x    x    x    x    x    x    x    x    x    x
 empty               x    x    x    x    x    x    x    x    x    x    x    x
@@ -296,39 +300,13 @@ emplace_back        x    x         x    x
 emplace_hint                                                          x    x
 rehash                                                                x    x
 reserve             x         x                                       x    x
-init                x    x    x    x    x    x    x    x    x    x    x    x
-free                x    x    x    x    x    x    x    x    x    x    x    x
-step                x    x    x    x    x    x    x                   x    x
 range               x    x    x    x    x    x    x                   x    x
 find                x    x    x    x    x    x    x                   x    x
 erase               x    x    x    x    x    x    x                   x    x
 erase_if            x    x         x    x    x    x                   x    x
 erase_index         x    x         x
 erase_node                              x    x    x
-erase_range         x              x         x    x
-copy                x    x    x    x    x    x    x                   x    x
-begin               x    x    x    x    x    x    x                   x    x
-end                 x    x    x    x    x    x    x                   x    x
-intersection        x    x    x    x    x    x    x                   x    x
-union               x    x    x    x    x    x    x                   x    x
-difference          x    x    x    x    x    x    x                   x    x
-symmetric_difference x   x    x    x    x    x    x                   x    x
-contains                                     x    x                   x    x
-find_if             x    x    x    x    x    x    x                   x    x
-find_if_not         x    x    x    x    x    x    x                   x    x
-all_of              x    x    x    x    x    x    x                   x    x
-any_of              x    x    x    x    x    x    x                   x    x
-none_of             x    x    x    x    x    x    x                   x    x
-find_range          x         x    x    x    x    x                   x    x
-find_if_range       x         x    x    x    x    x                   x    x
-find_if_not_range   x         x    x    x    x    x                   x    x
-all_of_range        x         x    x    x    x    x                   x    x
-any_of_range        x         x    x    x    x    x                   x    x
-none_of_range       x         x    x    x    x    x                   x    x
-count               x    x    x    x    x    x    x                   x    x
-count_if            x    x    x    x    x    x    x                   x    x
-count_if_range      x         x    x    x    x    x                   x    x
-count_range         x         x    x    x    x    x                   x    x
+erase_range         x              x    x    x    x
 top                                                    x         x
 push                                                   x    x    x
 pop                                                    x    x    x
@@ -355,6 +333,33 @@ remove_if           x    x    x    x    x    x
 splice                                  x
 splice_it                               x
 splice_range                            x
+
+begin               x    x    x    x    x    x    x                   x    x
+end                 x    x    x    x    x    x    x                   x    x
+next                x    x    x    x    x    x    x
+advance             x    x    x    x    x    x    x
+distance            x    x    x    x    x    x    x
+
+intersection        x    x    x    x    x    x    x                   x    x
+union               x    x    x    x    x    x    x                   x    x
+difference          x    x    x    x    x    x    x                   x    x
+symmetric_difference x   x    x    x    x    x    x                   x    x
+contains                                     x    x                   x    x
+find_if             x    x    x    x    x    x    x                   x    x
+find_if_not         x    x    x    x    x    x    x                   x    x
+all_of              x    x    x    x    x    x    x                   x    x
+any_of              x    x    x    x    x    x    x                   x    x
+none_of             x    x    x    x    x    x    x                   x    x
+find_range          x         x    x    x    x    x                   x    x
+find_if_range       x         x    x    x    x    x                   x    x
+find_if_not_range   x         x    x    x    x    x                   x    x
+all_of_range        x         x    x    x    x    x                   x    x
+any_of_range        x         x    x    x    x    x                   x    x
+none_of_range       x         x    x    x    x    x                   x    x
+count               x    x    x    x    x    x    x                   x    x
+count_if            x    x    x    x    x    x    x                   x    x
+count_if_range      x         x    x    x    x    x                   x    x
+count_range         x         x    x    x    x    x                   x    x
 merge                                   x
 unique                                  x
 fill                          x

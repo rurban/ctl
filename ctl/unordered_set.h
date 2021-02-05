@@ -311,6 +311,7 @@ JOIN(A, _equal)(A* self, T* a, T* b)
     return self->equal(a, b);
 }
 
+static inline A JOIN(A, init_from)(A* copy);
 static inline A JOIN(A, copy)(A* self);
 
 #include <ctl/bits/container.h>
@@ -564,6 +565,22 @@ JOIN(A, init)(size_t (*_hash)(T*), int (*_equal)(T*, T*))
 #endif
     JOIN(A, max_load_factor)(&self, 1.0f); // better would be 0.95
     JOIN(A, _reserve)(&self, 8);
+    return self;
+}
+
+static inline A
+JOIN(A, init_from)(A* copy)
+{
+    static A zero;
+    A self = zero;
+#ifdef POD
+    self.copy = JOIN(A, implicit_copy);
+#else
+    self.free = JOIN(T, free);
+    self.copy = JOIN(T, copy);
+#endif
+    self.hash = copy->hash;
+    self.equal = copy->equal;
     return self;
 }
 
