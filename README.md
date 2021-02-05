@@ -408,7 +408,7 @@ Methods working on iterators don't need the container arg `(A* self)`.
     set: erase_node, erase_range
     map: insert_or_assign
     umap: insert_or_assign, insert_or_assign_found
-    uset: clear, insert_found
+    uset: clear, equal, insert_found, union, difference, intersection, symmetric_difference
 
 vector `swap` does `shrink_to_fit` as in the STL.
 

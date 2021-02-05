@@ -849,16 +849,23 @@ JOIN(A, difference)(A* a, A* b)
 static inline A
 JOIN(A, symmetric_difference)(A* a, A* b)
 {
-    A self = JOIN(A, union)(a, b);
-    A intersection = JOIN(A, intersection)(a, b);
-    B* node = JOIN(A, first)(&intersection);
+    A self = JOIN(A, init)(a->compare);
+    B* node = JOIN(A, first)(a);
     while (node)
     {
         B* next = JOIN(B, next)(node);
-        JOIN(A, erase)(&self, node->value);
+        if(!JOIN(A, find_node)(b, node->value))
+            JOIN(A, insert)(&self, self.copy(&node->value));
         node = next;
     }
-    JOIN(A, free)(&intersection);
+    node = JOIN(A, first)(b);
+    while (node)
+    {
+        B* next = JOIN(B, next)(node);
+        if(!JOIN(A, find_node)(a, node->value))
+            JOIN(A, insert)(&self, self.copy(&node->value));
+        node = next;
+    }
     return self;
 }
 
