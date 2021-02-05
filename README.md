@@ -288,6 +288,10 @@ insert_count                       x    x
 insert_found                                                          x
 insert_or_assign                                                           x
 insert_or_assign_found                                                     x
+emplace             x              x    x         x    x              x    x
+emplace_front                      x    x
+emplace_back        x              x    x
+emplace_hint                                                          x    x
 rehash                                                                x    x
 reserve             x         x                                       x    x
 init                x    x    x    x    x    x    x    x    x    x    x    x
@@ -403,17 +407,18 @@ Methods working on iterators don't need the container arg `(A* self)`.
 
     deque: insert_range, insert_count, erase_range,
            emplace, emplace_back, emplace_front, sort_range
-    vector: assign_range, erase_range
+    vector: assign_range, erase_range, emplace, emplace_back
     list: remove, emplace, emplace_front, insert_range, insert_count
     set: erase_node, erase_range
     map: insert_or_assign
     umap: insert_or_assign, insert_or_assign_found
-    uset: clear, equal, insert_found, union, difference, intersection, symmetric_difference
+    uset: clear, equal, insert_found, union, difference, intersection,
+          symmetric_difference, emplace, emplace_found, emplace_hint
 
 vector `swap` does `shrink_to_fit` as in the STL.
 
 Redesigned iterators and better range support. Much closer to the STL, and
-much faster. Full generic iterator support is in `bits/iterator.h`, `algorithms.h`, the 
+much faster. Full generic iterator support is in `bits/iterator.h`, `algorithm.h`, the
 extended `range` methods, and `foreach_range`, `foreach_n`, `foreach_n_range` macros.
 
 Reproducible tests with `SEED=n`,

@@ -138,11 +138,11 @@ main(void)
         TEST(DIFFERENCE) \
         TEST(SYMMETRIC_DIFFERENCE) \
         TEST(EMPLACE) \
+        TEST(EMPLACE_FOUND) \
+        TEST(EMPLACE_HINT) /* 26 */ \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE_FOUND) /* 25 */ \
-        TEST(EMPLACE_HINT) \
-        TEST(EXTRACT) \
+        TEST(EXTRACT) /* 27 */ \
         TEST(MERGE) \
         TEST(REMOVE_IF) \
         TEST(LOWER_BOUND) \
@@ -214,7 +214,7 @@ main(void)
                 std::pair<std::unordered_set<DIGI,DIGI_hash>::iterator, bool> pair;
                 pair = b.insert(DIGI{vb});
                 // STL returns true if not found, and freshly inserted
-                assert(!a_found == (int)pair.second);
+                assert((!a_found) == (int)pair.second);
                 CHECK_ITER(it, b, pair.first);
 #else
                 auto iter = b.insert(DIGI{vb});
@@ -499,7 +499,6 @@ main(void)
                 b.emplace(DIGI{vb});
                 break;
             }
-#ifdef DEBUG
             case TEST_EMPLACE_FOUND:
             {
                 uset_digi_it first = uset_digi_begin(&a);
@@ -515,7 +514,7 @@ main(void)
                 std::pair<std::unordered_set<DIGI,DIGI_hash>::iterator, bool> pair;
                 pair = b.emplace(DIGI{vb});
                 // STL returns true if not found, and freshly inserted
-                assert(!a_found == (int)pair.second);
+                assert((!a_found) == (int)pair.second);
                 CHECK_ITER(it, b, pair.first);
 #else
                 auto iter = b.insert(DIGI{vb});
@@ -544,14 +543,6 @@ main(void)
 #endif
                 break;
             }
-#endif
-#if 0
-            case TEST_EXTRACT:
-            case TEST_MERGE:
-            case TEST_REMOVE_IF:
-            case TEST_EQUAL_RANGE:
-                break;
-#endif
             // algorithm
             case TEST_FIND_IF:
             {
@@ -601,6 +592,18 @@ main(void)
                 assert(count_a == count_b);
                 break;
             }
+#if 0
+            case TEST_EXTRACT:
+            case TEST_MERGE:
+            case TEST_REMOVE_IF:
+            case TEST_EQUAL_RANGE:
+            case TEST_LOWER_BOUND:
+            case TEST_UPPER_BOUND:
+            case TEST_GENERATE:
+            case TEST_TRANSFORM:
+                printf("nyi\n");
+                break;
+#endif
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);

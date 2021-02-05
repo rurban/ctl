@@ -725,14 +725,15 @@ JOIN(A, emplace)(A* self, T* value)
 {
     B* node;
     if ((node = JOIN(A, find_node)(self, *value)))
+    {
+        FREE_VALUE(self, *value);
         return JOIN(I, iter)(self, node);
+    }
 
     JOIN(A, _pre_insert_grow)(self);
     node = *JOIN(A, push_cached)(self, value);
     return JOIN(I, iter)(self, node);
 }
-
-#ifdef DEBUG
 
 static inline I
 JOIN(A, emplace_found)(A* self, T* value, int* foundp)
@@ -740,17 +741,8 @@ JOIN(A, emplace_found)(A* self, T* value, int* foundp)
     B* node;
     if ((node = JOIN(A, find_node)(self, *value)))
     {
-        if(!self->bucket_count)
-            JOIN(A, rehash)(self, 12);
-        // new value, need to recalc hash
-        JOIN(A, push_cached)(self, value);
-        if (self->size > self->max_bucket_count)
-        {
-            size_t max_bucket_count = JOIN(A, max_bucket_count)(self);
-            size_t new_size = JOIN(A, __next_prime)(max_bucket_count);
-            JOIN(A, rehash)(self, new_size);
-        }
         *foundp = 1;
+        FREE_VALUE(self, *value);
         return JOIN(I, iter)(self, node);
     }
 
@@ -766,13 +758,10 @@ JOIN(A, emplace_hint)(I* pos, T* value)
     A* self = pos->container;
     if (!JOIN(I, done)(pos))
     {
-        // TODO: equal check if already exists
 #ifdef CTL_USET_CACHED_HASH
         size_t hash = self->hash(value);
-        B* node = JOIN(B, init_cached)(*value, hash);
         B** buckets = JOIN(A, _bucket_hash)(self, hash);
 #else
-        B* node = JOIN(B, init)(*value);
         B** buckets = JOIN(A, _bucket)(self, *value);
 #endif
         for(B* n = *buckets; n; n = n->next)
@@ -782,10 +771,15 @@ JOIN(A, emplace_hint)(I* pos, T* value)
                 continue;
 #endif
             if(self->equal(value, &n->value))
+            {
+                FREE_VALUE(self, *value);
                 // TODO move-to-front
                 return JOIN(I, iter)(self, n);
+            }
         }
         // not found
+        B* node = JOIN(B, init)(*value);
+        FREE_VALUE(self, *value);
         JOIN(B, push)(buckets, node);
         pos->container->size++;
         pos->node = node;
@@ -800,8 +794,6 @@ JOIN(A, emplace_hint)(I* pos, T* value)
         return JOIN(I, iter)(self, node);
     }
 }
-
-#endif
 
 static inline void
 JOIN(A, clear)(A* self)
