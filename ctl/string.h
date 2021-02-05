@@ -105,7 +105,7 @@ str_insert_str(str* self, size_t index, const char* s)
     while(len != 0)
     {
         len--;
-        str_insert(self, index, s[len]);
+        str_insert_index(self, index, s[len]);
     }
 }
 

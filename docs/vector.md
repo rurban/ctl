@@ -55,8 +55,9 @@ There is no `B` node type.
 ## Member functions
 
     A init ()
+    A init_from (A* other)
 
-constructs the vector.
+constructs the object. init_from just takes the methods from other, not the vector.
 
     free (A* self)
 
@@ -152,17 +153,20 @@ reduces memory usage by freeing unused memory
 
 clears the contents
 
-    insert (A* self, T value)
+    insert_index (A* self, size_t index, T value)
+    insert (I* pos, T value)
+    insert_count (I* pos, size_t count, T value)
+    insert_range (I* pos, I* first2, I* last2)
 
-inserts the element, free'ing value. (C++17)
+inserts the element(s). (C++17)
 
     emplace (I* pos, T* value)
 
-constructs elements in-place. _(NYI)_
+constructs elements in-place before pos. _(NY, still leaks)_
 
     emplace_back (A* self, T* value)
 
-appends new element at the back. _(NYI)_
+appends new element at the back.
 
     I erase_index (A* self, size_t index)
 

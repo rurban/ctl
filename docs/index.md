@@ -283,14 +283,16 @@ load_factor                                                           x    x
 max_load_factor                                                       x    x
 max_bucket_count                                                      x    x
 bucket_size                                                           x    x
-insert              x         x    x    x    x    x                   x    x
-insert_count                       x    x
+insert              x    x    x    x    x    x    x                   x    x
+insert_index        x    x    x    x    x
+insert_count        x    x    x    x    x
+insert_range        x    x    x    x    x
 insert_found                                                          x
 insert_or_assign                                                           x
 insert_or_assign_found                                                     x
-emplace             x              x    x         x    x              x    x
+emplace                            x    x         x    x              x    x
 emplace_front                      x    x
-emplace_back        x              x    x
+emplace_back        x    x         x    x
 emplace_hint                                                          x    x
 rehash                                                                x    x
 reserve             x         x                                       x    x
@@ -405,15 +407,16 @@ Added many `_it` and `_range` method variants to accept iterators, `_found` to
 return found or not.
 Methods working on iterators don't need the container arg `(A* self)`.
 
-    deque: insert_range, insert_count, erase_range,
-           emplace, emplace_back, emplace_front, sort_range
-    vector: assign_range, erase_range, emplace, emplace_back
-    list: remove, emplace, emplace_front, insert_range, insert_count
-    set: erase_node, erase_range
-    map: insert_or_assign
-    umap: insert_or_assign, insert_or_assign_found
-    uset: clear, equal, insert_found, union, difference, intersection,
-          symmetric_difference, emplace, emplace_found, emplace_hint
+    deque:  insert_range, insert_count, erase_range,
+            emplace, emplace_back, emplace_front, sort_range
+    vector: assign_range, erase_index, erase_range, insert_range, insert_count,
+            emplace, emplace_back
+    list:   remove, emplace, emplace_front, insert_range, insert_count
+    set:    erase_node, erase_range
+    map:    insert_or_assign
+    umap:   insert_or_assign, insert_or_assign_found
+    uset:   clear, equal, insert_found, union, difference, intersection,
+            symmetric_difference, emplace, emplace_found, emplace_hint
 
 vector `swap` does `shrink_to_fit` as in the STL.
 

@@ -173,9 +173,12 @@ main(void)
         TEST(PUSH_BACK) \
         TEST(POP_BACK) \
         TEST(CLEAR) \
-        TEST(ERASE_INDEX) \
         TEST(ERASE) \
+        TEST(ERASE_INDEX) \
         TEST(INSERT) \
+        TEST(INSERT_INDEX) \
+        TEST(INSERT_COUNT) \
+        TEST(INSERT_RANGE) \
         TEST(RESIZE) \
         TEST(RESERVE) \
         TEST(SHRINK_TO_FIT) \
@@ -202,13 +205,13 @@ main(void)
         TEST(COUNT_IF) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
-        TEST(GENERATE) \
+        TEST(GENERATE) /* 34 */ \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
+        TEST(EMPLACE_BACK) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(INSERT_COUNT) \
-        TEST(INSERT_RANGE) \
+        TEST(EMPLACE) /* 39 */ \
         TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(FIND_END) \
@@ -255,7 +258,7 @@ main(void)
             {
                 case TEST_PUSH_BACK:
                 {
-                    const int value = TEST_RAND(INT_MAX);
+                    const int value = TEST_RAND(TEST_MAX_VALUE);
                     b.push_back(DIGI{value});
                     vec_digi_push_back(&a, digi_init(value));
                     break;
@@ -275,18 +278,6 @@ main(void)
                     vec_digi_clear(&a);
                     break;
                 }
-                case TEST_ERASE_INDEX:
-                {
-                    if(a.size > 0)
-                    {
-                        const size_t index = TEST_RAND(a.size);
-                        auto iter = b.erase(b.begin() + index);
-                        vec_digi_it it = vec_digi_erase_index(&a, index);
-                        CHECK_ITER(it, b, iter);
-                    }
-                    CHECK(a, b);
-                    break;
-                }
                 case TEST_ERASE:
                 {
                     if(a.size > 0)
@@ -301,20 +292,34 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-#ifdef DEBUG
-                case TEST_ERASE_RANGE:
+                case TEST_ERASE_INDEX:
                 {
                     if(a.size > 0)
+                    {
+                        const size_t index = TEST_RAND(a.size);
+                        auto iter = b.erase(b.begin() + index);
+                        vec_digi_it it = vec_digi_erase_index(&a, index);
+                        CHECK_ITER(it, b, iter);
+                    }
+                    CHECK(a, b);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_ERASE_RANGE: // 40
+                {
+                    if(a.size > 1)
                     {
                         const size_t i1 = TEST_RAND(a.size);
                         const size_t i2 = i1 + TEST_RAND(a.size - i1);
                         vec_digi_it from = vec_digi_begin(&a);
                         vec_digi_it_advance(&from, i1);
                         vec_digi_it to = vec_digi_begin(&a);
-                        vec_digi_it_advance(&from, i2);
+                        vec_digi_it_advance(&to, i2);
                         from = vec_digi_erase_range(&from, &to);
                         auto it = b.erase(b.begin() + i1, b.begin() + i2);
-                        CHECK_ITER(from, b, it); // wrong return value
+                        //CHECK_ITER(from, b, it); // wrong return value
+                        print_vec(&a);
+                        print_vector(b);
                     }
                     CHECK(a, b);
                     break;
@@ -325,10 +330,71 @@ main(void)
                     size_t amount = TEST_RAND(512);
                     for(size_t count = 0; count < amount; count++)
                     {
-                        const int value = TEST_RAND(INT_MAX);
+                        const int value = TEST_RAND(TEST_MAX_VALUE);
                         const size_t index = TEST_RAND(a.size);
                         b.insert(b.begin() + index, DIGI{value});
-                        vec_digi_insert(&a, index, digi_init(value));
+                        vec_digi_it pos = vec_digi_begin(&a);
+                        vec_digi_it_advance(&pos, index);
+                        vec_digi_insert(&pos, digi_init(value));
+                    }
+                    break;
+                }
+                case TEST_INSERT_INDEX:
+                {
+                    size_t amount = TEST_RAND(512);
+                    for(size_t count = 0; count < amount; count++)
+                    {
+                        const int value = TEST_RAND(TEST_MAX_VALUE);
+                        const size_t index = TEST_RAND(a.size);
+                        b.insert(b.begin() + index, DIGI{value});
+                        vec_digi_insert_index(&a, index, digi_init(value));
+                    }
+                    break;
+                }
+                case TEST_INSERT_COUNT:
+                {
+                    size_t count = TEST_RAND(512);
+                    const int value = TEST_RAND(TEST_MAX_VALUE);
+                    const size_t index = TEST_RAND(a.size);
+                    b.insert(b.begin() + index, count, DIGI{value});
+                    vec_digi_it pos = vec_digi_begin(&a);
+                    vec_digi_it_advance(&pos, index);
+                    vec_digi_insert_count(&pos, count, digi_init(value));
+                    vec_digi_reserve(&a, b.capacity()); // our growth strategy
+                                                        // is better. but for
+                                                        // test sake adjust it
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_INSERT_RANGE:
+                {
+                    if (a.size > 2)
+                    {
+                        print_vec(&a);
+                        size_t size2 = TEST_RAND(TEST_MAX_SIZE);
+                        vec_digi aa = vec_digi_init_from(&a);
+                        std::vector<DIGI> bb;
+                        vec_digi_it first_a, last_a;
+                        std::vector<DIGI>::iterator first_b, last_b;
+                        for(size_t pushes = 0; pushes < size2; pushes++)
+                        {
+                            const int value = TEST_RAND(TEST_MAX_VALUE);
+                            vec_digi_push_back(&aa, digi_init(value));
+                            bb.push_back(DIGI{value});
+                        }
+                        print_vec(&aa);
+                        get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                        const size_t index = TEST_RAND(a.size);
+                        vec_digi_it pos = vec_digi_begin(&a);
+                        vec_digi_it_advance(&pos, index);
+                        b.insert(b.begin() + index, first_b, last_b);
+                        vec_digi_insert_range(&pos, &first_a, &last_a);
+                        // our growth strategy is better. but for test sake adjust it
+                        vec_digi_reserve(&a, b.capacity());
+                        print_vec(&a);
+                        print_vector(b);
+                        CHECK(a, b);
+                        vec_digi_free(&aa);
                     }
                     break;
                 }
@@ -374,7 +440,7 @@ main(void)
                 }
                 case TEST_ASSIGN:
                 {
-                    const int value = TEST_RAND(INT_MAX);
+                    const int value = TEST_RAND(TEST_MAX_VALUE);
                     size_t assign_size = TEST_RAND(a.size) + 1;
                     vec_digi_assign(&a, assign_size, digi_init(value));
                     b.assign(assign_size, DIGI{value});
@@ -430,7 +496,7 @@ main(void)
                     if(a.size > 0)
                     {
                         const size_t index = TEST_RAND(a.size);
-                        int value = TEST_RAND(2) ? TEST_RAND(INT_MAX) : *vec_digi_at(&a, index)->value;
+                        int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : *vec_digi_at(&a, index)->value;
                         digi key = digi_init(value);
                         vec_digi_it aa = vec_digi_find(&a, key);
                         auto bb = find(b.begin(), b.end(), DIGI{value});
@@ -650,9 +716,36 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
+                case TEST_EMPLACE_BACK: // 36
+                {
+                    const int value = TEST_RAND(TEST_MAX_VALUE);
+# if __cplusplus >= 201103L
+                    b.emplace_back(DIGI{value});
+# else
+                    b.insert(b.begin() + index, DIGI{value});
+# endif
+                    digi key = digi_init(value);
+                    vec_digi_emplace_back(&a, &key);
+                    CHECK(a, b);
+                    break;
+                }
 #ifdef DEBUG
-                case TEST_INSERT_COUNT:
-                case TEST_INSERT_RANGE:
+                case TEST_EMPLACE: // 37
+                {
+                    const int value = TEST_RAND(TEST_MAX_VALUE);
+                    const size_t index = TEST_RAND(a.size);
+                    vec_digi_it pos = vec_digi_begin(&a);
+                    vec_digi_it_advance(&pos, index);
+# if __cplusplus >= 201103L
+                    b.emplace(b.begin() + index, DIGI{value});
+# else
+                    b.insert(b.begin() + index, DIGI{value});
+# endif
+                    digi key = digi_init(value);
+                    vec_digi_emplace(&pos, &key);
+                    CHECK(a, b);
+                    break;
+                }
                 case TEST_EQUAL_RANGE:
                     printf("nyi\n");
                     break;

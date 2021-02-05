@@ -215,6 +215,7 @@ main(void)
             TEST(COPY) \
             TEST(SWAP) \
             TEST(INSERT) \
+            TEST(INSERT_INDEX) \
             TEST(ASSIGN) \
             TEST(REPLACE) \
             TEST(FIND) \
@@ -426,6 +427,18 @@ main(void)
                     str_erase_index(&a, index);
                     break;
                 }
+                case TEST_INSERT_INDEX:
+                {
+                    size_t letters = TEST_RAND(512);
+                    for(size_t count = 0; count < letters; count++)
+                    {
+                        const char value = RAND_ALPHA;
+                        const size_t index = TEST_RAND(a.size);
+                        b.insert(b.begin() + index, value);
+                        str_insert_index(&a, index, value);
+                    }
+                    break;
+                }
                 case TEST_INSERT:
                 {
                     size_t letters = TEST_RAND(512);
@@ -434,7 +447,9 @@ main(void)
                         const char value = RAND_ALPHA;
                         const size_t index = TEST_RAND(a.size);
                         b.insert(b.begin() + index, value);
-                        str_insert(&a, index, value);
+                        str_it pos = str_it_begin(&a);
+                        str_it_advance(&pos, index);
+                        str_insert(&pos, value);
                     }
                     break;
                 }

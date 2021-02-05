@@ -1,9 +1,7 @@
 /* Arrays that can change in size.
    SPDX-License-Identifier: MIT */
 
-// TODO emplace, emplace_back
 // TODO end of empty vec follows NULL value
-// TODO redesigned iters
 
 #ifndef T
 # error "Template type T undefined for <ctl/vector.h>"
@@ -317,10 +315,29 @@ JOIN(A, push_back)(A* self, T value)
 }
 
 static inline void
+JOIN(A, emplace_back)(A* self, T* value)
+{
+    if(self->size == self->capacity)
+        JOIN(A, reserve)(self,
+            self->capacity == 0 ? INIT_SIZE : 2 * self->capacity);
+    self->size++;
+    *JOIN(A, at)(self, self->size - 1) = *value;
+}
+
+static inline void
 JOIN(A, emplace)(I* pos, T* value)
 {
+    A* self = pos->container;
     if (!JOIN(I, done)(pos))
-        *pos->ref = *value;
+    {
+        size_t index = pos->ref - self->vector;
+        JOIN(A, emplace_back)(self, JOIN(A, back)(self));
+        for(size_t i = self->size - 2; i > index; i--)
+            self->vector[i] = self->vector[i - 1];
+        self->vector[index] = *value;
+    }
+    else
+        JOIN(A, emplace_back)(self, value);
 }
 
 static inline void
@@ -410,11 +427,12 @@ JOIN(A, data)(A* self)
 }
 
 static inline void
-JOIN(A, insert)(A* self, size_t index, T value)
+JOIN(A, insert_index)(A* self, size_t index, T value)
 {
     if(self->size > 0)
     {
         JOIN(A, push_back)(self, *JOIN(A, back)(self));
+        // TODO memmove with POD
         for(size_t i = self->size - 2; i > index; i--)
             self->vector[i] = self->vector[i - 1];
         self->vector[index] = value;
@@ -446,6 +464,7 @@ JOIN(A, erase_index)(A* self, size_t index)
     return JOIN(I, iter)(self, index);
 }
 
+#ifdef DEBUG
 static inline I
 JOIN(A, erase_range)(I* from, I* to)
 {
@@ -454,8 +473,8 @@ JOIN(A, erase_range)(I* from, I* to)
     static T zero;
     A* self = from->container;
     T* end = &self->vector[self->size];
-#if 1
-    size_t size = (to->ref - from->ref) / sizeof(T);
+#if 0
+    size_t size = (to->ref - from->ref);
 # ifndef POD
     if(self->free)
         for(T* ref = from->ref; ref < to->ref - 1; ref++)
@@ -464,7 +483,8 @@ JOIN(A, erase_range)(I* from, I* to)
     if (to->ref != end)
     {
         memmove(from->ref, to->ref, (end - to->ref) * sizeof (T));
-        JOIN(A, set)(self, self->size - size, zero);
+        for(T* ref = to->ref; ref < end; ref++)
+            *ref = zero;
     }
     self->size -= size;
 #else
@@ -480,6 +500,72 @@ JOIN(A, erase_range)(I* from, I* to)
         return JOIN(A, end)(from->container);
     else
         return *to;
+}
+#endif
+
+static inline void
+JOIN(A, insert)(I* pos, T value)
+{
+    A* self = pos->container;
+    if(!JOIN(I, done)(pos))
+    {
+        size_t index = pos->ref - self->vector;
+        // TODO memmove with POD
+        JOIN(A, push_back)(self, *JOIN(A, back)(self));
+        for(size_t i = self->size - 2; i > index; i--)
+            self->vector[i] = self->vector[i - 1];
+        self->vector[index] = value;
+    }
+    else
+        JOIN(A, push_back)(self, value);
+}
+
+static inline void
+JOIN(A, insert_count)(I* pos, size_t count, T value)
+{
+    A* self = pos->container;
+    size_t index = pos->ref - self->vector;
+    JOIN(A, reserve)(self, self->size + count);
+    if(!JOIN(I, done)(pos))
+    {
+        for (size_t i=0; i < count; i++)
+            JOIN(A, insert_index)(self, index++, self->copy(&value));
+    }
+    else
+        for (size_t i=0; i < count; i++)
+            JOIN(A, push_back)(self, self->copy(&value));
+    FREE_VALUE(self, value);
+}
+
+static inline void
+JOIN(A, insert_range)(I* pos, I* first2, I* last2)
+{
+    A* self = pos->container;
+    size_t index = pos->ref - self->vector;
+    size_t f2 = first2->ref - first2->container->vector;
+    size_t l2 = last2->ref - first2->container->vector;
+    // only if not overlapping, and resize does no realloc
+    if (f2 < l2)
+    {
+        JOIN(A, reserve)(self, self->size + (l2 - f2));
+        if (self == first2->container)
+        {
+            first2->ref = &first2->container->vector[f2];
+            first2->end = last2->ref = &first2->container->vector[l2];
+        }
+    }
+    if(!JOIN(I, done)(pos))
+    {
+        foreach_range(A, it, first2, last2)
+            if (it.ref)
+                JOIN(A, insert_index)(self, index++, self->copy(it.ref));
+    }
+    else
+    {
+        foreach_range(A, it, first2, last2)
+            if (it.ref)
+                JOIN(A, push_back)(self, self->copy(it.ref));
+    }
 }
 
 static inline I
