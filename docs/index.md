@@ -394,12 +394,12 @@ fill                          x
 fill_range
 fill_n                        x
 fill_n_range
-transform           x    x    x
+transform           x    x    x         x
 transform_it             x
 transform_range
 transform_it_range
-generate            x    x    x
-generate_range      x    x    x
+generate            x    x    x         x
+generate_range      x    x    x         x
 generate_n
 generate_n_range
 remove                                  x
