@@ -282,11 +282,6 @@ size                x    x    x    x    x    x    x    x    x    x    x    x
 max_size            x    x    x    x    x    x    x    x    x    x    x    x
 empty               x    x    x    x    x    x    x    x    x    x    x    x
 equal               x    x    x    x    x    x    x    x    x    x    x    x
-swap                x    x    x    x    x    x    x    x    x    x    x    x
-load_factor                                                           x    x
-max_load_factor                                                       x    x
-max_bucket_count                                                      x    x
-bucket_size                                                           x    x
 insert              x    x    x    x    x    x    x                   x    x
 insert_index        x    x    x    x    x
 insert_count        x    x    x    x    x
@@ -294,13 +289,16 @@ insert_range        x    x    x    x    x
 insert_found                                                          x
 insert_or_assign                                                           x
 insert_or_assign_found                                                     x
+load_factor                                                           x    x
+max_load_factor                                                       x    x
+max_bucket_count                                                      x    x
+bucket_size                                                           x    x
+rehash                                                                x    x
 emplace                            x    x         x    x              x    x
 emplace_front                      x    x
 emplace_back        x    x         x    x
 emplace_hint                                                          x    x
-rehash                                                                x    x
 reserve             x         x                                       x    x
-range               x    x    x    x    x    x    x                   x    x
 find                x    x    x    x    x    x    x                   x    x
 erase               x    x    x    x    x    x    x                   x    x
 erase_if            x    x         x    x    x    x                   x    x
@@ -324,59 +322,167 @@ disconnect                              x
 connect                                 x
 assign              x    x    x    x    x
 resize              x    x    x    x    x
-reverse                                 x
 shrink_to_fit       x    x    x
 data                x    x    x
-sort                x    x    x    x    x
-remove                                  x
-remove_if           x    x    x    x    x    x
 splice                                  x
 splice_it                               x
 splice_range                            x
-
-begin               x    x    x    x    x    x    x                   x    x
-end                 x    x    x    x    x    x    x                   x    x
-next                x    x    x    x    x    x    x
-advance             x    x    x    x    x    x    x
-distance            x    x    x    x    x    x    x
-
-intersection        x    x    x    x    x    x    x                   x    x
-union               x    x    x    x    x    x    x                   x    x
-difference          x    x    x    x    x    x    x                   x    x
-symmetric_difference x   x    x    x    x    x    x                   x    x
 contains                                     x    x                   x    x
-find_if             x    x    x    x    x    x    x                   x    x
-find_if_not         x    x    x    x    x    x    x                   x    x
-all_of              x    x    x    x    x    x    x                   x    x
-any_of              x    x    x    x    x    x    x                   x    x
-none_of             x    x    x    x    x    x    x                   x    x
-find_range          x         x    x    x    x    x                   x    x
-find_if_range       x         x    x    x    x    x                   x    x
-find_if_not_range   x         x    x    x    x    x                   x    x
-all_of_range        x         x    x    x    x    x                   x    x
-any_of_range        x         x    x    x    x    x                   x    x
-none_of_range       x         x    x    x    x    x                   x    x
-count               x    x    x    x    x    x    x                   x    x
-count_if            x    x    x    x    x    x    x                   x    x
-count_if_range      x         x    x    x    x    x                   x    x
-count_range         x         x    x    x    x    x                   x    x
-merge                                   x
-unique                                  x
-fill                          x
-fill_n                        x
 append                   x
 insert_str               x
 replace                  x                   x
 c_str                    x
 find                     x
 rfind                    x
-find_first_of            x
 find_last_of             x
 find_first_not_of        x
 find_last_not_of         x
 substr                   x
 compare                  x
 key_compare              x
+
+begin               x    x    x    x    x    x    x                   x    x
+end                 x    x    x    x    x    x    x                   x    x
+next                x    x    x    x    x    x    x                   x    x
+advance             x    x    x    x    x    x    x
+distance            x    x    x    x    x    x    x
+range               x    x    x    x    x    x    x
+
+all_of              x    x    x    x    x    x    x                   x    x
+any_of              x    x    x    x    x    x    x                   x    x
+none_of             x    x    x    x    x    x    x                   x    x
+all_of_range        x    x    x    x    x    x    x                   x    x
+any_of_range        x    x    x    x    x    x    x                   x    x
+none_of_range       x    x    x    x    x    x    x                   x    x
+foreach             x    x    x    x    x    x    x                   x    x
+foreach_range       x    x    x    x    x    x    x
+foreach_n           x    x    x    x    x    x    x
+foreach_n_range     x    x    x    x    x    x    x
+count               x    x    x    x    x    x    x                   x    x
+count_range         x    x    x    x    x    x    x                   x    x
+count_if            x    x    x    x    x    x    x                   x    x
+count_if_range      x    x    x    x    x    x    x                   x    x
+mismatch
+mismatch_range
+find_if             x    x    x    x    x    x    x                   x    x
+find_if_not         x    x    x    x    x    x    x                   x    x
+find_range          x    x    x    x    x    x    x                   x    x
+find_if_range       x    x    x    x    x    x    x                   x    x
+find_if_not_range   x    x    x    x    x    x    x                   x    x
+find_end
+find_end_range
+find_first_of            x
+find_first_of_range 
+adjacent_find
+adjacent_find_range
+search
+search_range
+search_n
+search_n_range
+copy_if
+copy_range
+copy_if_range
+copy_n
+copy_n_range
+copy_backward
+copy_backward_range
+move
+move_range
+move_backward
+move_backward_range
+fill                          x
+fill_range
+fill_n                        x
+fill_n_range
+transform           x    x    x
+transform_it             x
+transform_range
+transform_it_range
+generate            x    x    x
+generate_range      x    x    x
+generate_n
+generate_n_range
+remove                                  x
+remove_if           x    x    x    x    x    x
+remove_copy
+remove_copy_if
+remove_copy_range
+remove_copy_if_range
+replace
+replace_if
+replace_range
+replace_if_range
+replace_copy
+replace_copy_if
+replace_copy_range
+replace_copy_if_range
+swap                x    x    x    x    x    x    x    x    x    x    x    x
+swap_ranges
+iter_swap
+reverse                                 x
+reverse_range
+reverse_copy
+reverse_copy_range
+rotate
+rotate_range
+rotate_copy
+rotate_copy_range
+shift_left
+shift_right
+shuffle
+shuffle_range
+sample
+sample_range
+unique                                  x
+unique_range
+unique_copy
+unique_copy_range
+is_partitioned
+is_partitioned_range
+partition
+partition_range
+partition_copy
+partition_copy_range
+stable_partition
+stable_partition_range
+partition_point
+partition_point_range
+is_sorted
+is_sorted_range
+is_sorted_until
+is_sorted_until_range
+sort                x    x    x    x    x
+sort_range
+partial_sort
+partial_sort_range
+partial_sort_copy
+partial_sort_copy_range
+stable_sort
+stable_sort_range
+nth_element
+nth_element_range
+lower_bound
+lower_bound_range
+upper_bound
+upper_bound_range
+binary_search
+binary_search_range
+equal_range
+equal_range_range
+merge                                   x
+merge_range
+inplace_merge
+inplace_merge_range
+includes
+includes_range
+difference          x    x    x    x    x    x    x                   x    x
+set_difference_range
+intersection        x    x    x    x    x    x    x                   x    x
+set_intersection_range
+symmetric_difference x   x    x    x    x    x    x                   x    x
+set_symmetric_difference_range
+union               x    x    x    x    x    x    x                   x    x
+set_union_range
 ```
 
 ## Differences
@@ -451,8 +557,8 @@ Implemented correct string and vector capacity policies, as in gcc libstdc++ and
 llvm libc++.  Tested also against the libc++ from llvm and the Windows MSVC STL,
 not just the GNU libstdc++ v3.
 
-Work is ongoing for all `algorithm.h`, `iterators` and `ranges`, with better
-iterators. `btree_set`, `string_view` and `span` (i.e. vector\_view) not yet.
+Work is ongoing for all `algorithm.h`, `iterators` and `ranges` with proper
+iterators. `hashmap`, `btree_set`, `string_view` and `span` (i.e. _vector\_view_) not yet.
 
 On errors, like `size > max_size` return silently. This avoids DDOS attacks.
 When assert is used, throw them. (when assert.h included, no NDEBUG. This is
@@ -523,33 +629,6 @@ Reject violations, optionally warn about confusables.
 No exceptions or errors. Just ignore or return NULL. If assert is included, use
 it, with a proper error message.
 No bloat and not many indirect calls (only compare and equal).
-
-Not yet implemented:
-
-    mismatch
-    mismatch_range C++20
-    find_end
-    find_end_range C++20
-    find_first_of
-    find_first_of_range C++20
-    adjacent_find
-    adjacent_find_range C++20
-    search
-    search_range C++20
-    search_n
-    search_n_range C++20
-    transform_range C++20
-    copy_range C++20
-    copy_if C++11
-    copy_if_range C++20
-    copy_n C++11
-    copy_n_range C++20
-    copy_backward
-    copy_backward_range C++20
-    move C++11
-    move_range
-    move_backward C++11
-    move_backward_range C++20
 
 ## Acknowledgements
 
