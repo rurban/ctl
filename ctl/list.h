@@ -170,7 +170,11 @@ JOIN(A, disconnect)(A* self, B* node)
     self->size--;
 }
 
+// forwards for algorithm
 static inline A JOIN(A, copy)(A* self);
+static inline A JOIN(A, init_from)(A* copy);
+static inline void JOIN(A, push_back)(A* self, T value);
+static inline I JOIN(A, find)(A* self, T key);
 
 #include <ctl/bits/container.h>
 

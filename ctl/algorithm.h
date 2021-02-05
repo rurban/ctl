@@ -173,6 +173,67 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
 
 #endif // USET (ranges)
 
+// set/uset have optimized implementation
+// these require now sorted containers
+#if defined(CTL_LIST) || \
+    defined(CTL_VECTOR) || \
+    defined(CTL_ARRAY) || \
+    defined(CTL_STRING) || \
+    defined(CTL_DEQUE)
+
+static inline A
+JOIN(A, union)(A* a, A* b)
+{
+    A self = JOIN(A, init_from)(a);
+    foreach(A, a, it1)
+        JOIN(A, push_back)(&self, self.copy(it1.ref));
+    foreach(A, b, it2)
+        JOIN(A, push_back)(&self, self.copy(it2.ref));
+    return self;
+}
+
+static inline int
+JOIN(A, _found)(A* a, T* ref)
+{
+    JOIN(A, it) iter = JOIN(A, find)(a, *ref);
+    return !JOIN(I, done)(&iter);
+}
+
+static inline A
+JOIN(A, intersection)(A* a, A* b)
+{
+    A self = JOIN(A, init_from)(a);
+    foreach(A, a, it)
+        if(JOIN(A, _found)(b, it.ref))
+            JOIN(A, push_back)(&self, self.copy(it.ref));
+    return self;
+}
+
+static inline A
+JOIN(A, difference)(A* a, A* b)
+{
+    A self = JOIN(A, init_from)(a);
+    foreach(A, a, it)
+        if(!JOIN(A, _found)(b, it.ref))
+            JOIN(A, push_back)(&self, self.copy(it.ref));
+    return self;
+}
+
+static inline A
+JOIN(A, symmetric_difference)(A* a, A* b)
+{
+    A self = JOIN(A, init_from)(a);
+    foreach(A, a, it1)
+        if(!JOIN(A, _found)(b, it1.ref))
+            JOIN(A, push_back)(&self, self.copy(it1.ref));
+    foreach(A, b, it2)
+        if(!JOIN(A, _found)(a, it2.ref))
+            JOIN(A, push_back)(&self, self.copy(it2.ref));
+    return self;
+}
+
+#endif // !USET/SET
+
 // generate and transform have no inserter support yet,
 // so we cannot yet use it for set nor uset. we want to call insert on them.
 // for list and vector we just set/replace the elements.

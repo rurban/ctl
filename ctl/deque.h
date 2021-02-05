@@ -203,7 +203,18 @@ JOIN(I, distance)(I* iter, I* other)
     return other->index - iter->index;
 }
 
+// forwards for algorithm
 static inline A JOIN(A, copy)(A* self);
+static inline A JOIN(A, init)(void);
+static inline I JOIN(A, find)(A* self, T key);
+static inline void JOIN(A, push_back)(A* self, T value);
+
+static inline A
+JOIN(A, init_from)(A* copy)
+{
+    (void)copy;
+    return JOIN(A, init)();
+}
 
 #include <ctl/bits/container.h>
 

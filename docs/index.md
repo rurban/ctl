@@ -269,8 +269,8 @@ list.h:             doubly linked list
 forward_list.h:     single linked list
 set.h:              red black tree
 map.h:              set.h
-unordered_set.h:    hashed forward linked lists (will change)
-unordered_map.h:    unordered_set.h
+unordered_set.h:    hashed forward linked lists
+unordered_map.h:    unordered_set.h (without pair convenience yet)
 
                     vec  str  arr  deq  list set  map  pqu  que  stk  uset umap
 +----------------------------------------------------------------------------+
@@ -303,10 +303,10 @@ erase_range         x              x         x    x
 copy                x    x    x    x    x    x    x                   x    x
 begin               x    x    x    x    x    x    x                   x    x
 end                 x    x    x    x    x    x    x                   x    x
-intersection                                 x    x                   x    x
-union                                        x    x                   x    x
-difference                                   x    x                   x    x
-symmetric_difference                         x    x                   x    x
+intersection        x    x    x    x    x    x    x                   x    x
+union               x    x    x    x    x    x    x                   x    x
+difference          x    x    x    x    x    x    x                   x    x
+symmetric_difference x   x    x    x    x    x    x                   x    x
 contains                                     x    x                   x    x
 find_if             x    x    x    x    x    x    x                   x    x
 find_if_not         x    x    x    x    x    x    x                   x    x
