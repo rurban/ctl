@@ -335,7 +335,8 @@ main(void)
                 uset_digi_it first = uset_digi_begin(&a);
                 const int vb = TEST_RAND(2)
                     ? TEST_RAND(TEST_MAX_VALUE)
-                    : *first.ref->value;
+                    : first.ref
+                      ? *first.ref->value : 0;
                 digi key = digi_init(vb);
                 // find is special, it doesnt free the key
                 uset_digi_it aa = uset_digi_find(&a, key);
