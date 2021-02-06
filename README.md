@@ -272,45 +272,48 @@ map.h:              set.h
 unordered_set.h:    hashed forward linked lists
 unordered_map.h:    unordered_set.h (without pair convenience yet)
 
-                    vec  str  arr  deq  list set  map  pqu  que  stk  uset umap
-+----------------------------------------------------------------------------+
+x  stable and tested
+.  implemented, but broken or untested
+
+                    vec  str  arr  deq  list set  map  uset umap pqu  que  stk
++-----------------------------------------------------------------------------+
 init                x    x    x    x    x    x    x    x    x    x    x    x
 init_from           x    x    x    x    x    x    x    x    x    x    x    x
 free                x    x    x    x    x    x    x    x    x    x    x    x
-copy                x    x    x    x    x    x    x                   x    x
+copy                x    x    x    x    x    x    x    x    .
 size                x    x    x    x    x    x    x    x    x    x    x    x
 max_size            x    x    x    x    x    x    x    x    x    x    x    x
 empty               x    x    x    x    x    x    x    x    x    x    x    x
 equal               x    x    x    x    x    x    x    x    x    x    x    x
-insert              x    x    x    x    x    x    x                   x    x
-insert_index        x    x    x    x    x
-insert_count        x    x    x    x    x
-insert_range        x    x    x    x    x
-insert_found                                                          x
-insert_or_assign                                                           x
-insert_or_assign_found                                                     x
-load_factor                                                           x    x
-max_load_factor                                                       x    x
-max_bucket_count                                                      x    x
-bucket_size                                                           x    x
-rehash                                                                x    x
-emplace                            x    x         x    x              x    x
+insert              x    x         x    x    x    x    x    x
+insert_index        x    x         x    x
+insert_count        x    .         x    x
+insert_range        x    .         .    x    .
+insert_found                                           x    .
+insert_or_assign                                  x         x
+insert_or_assign_found                                      x
+load_factor                                            x    x
+max_load_factor                                        x    x
+max_bucket_count                                       x    x
+bucket_size                                            x    x
+rehash                                                 x    x
+emplace                            x    x         x    x    x    x
 emplace_front                      x    x
 emplace_back        x    x         x    x
-emplace_hint                                                          x    x
-reserve             x         x                                       x    x
-find                x    x    x    x    x    x    x                   x    x
-erase               x    x    x    x    x    x    x                   x    x
-erase_if            x    x         x    x    x    x                   x    x
+emplace_hint                                           x    x
+reserve             x         x                        x    x
+find                x    x    x    x    x    x    x    x    x
+erase               x    x    x    x    x    x    x    x    x
+erase_if            x    x         x    x    x    x    x    x
 erase_index         x    x         x
 erase_node                              x    x    x
 erase_range         x              x    x    x    x
-top                                                    x         x
-push                                                   x    x    x
-pop                                                    x    x    x
+top                                                              x         x
+push                                                             x    x    x
+pop                                                              x    x    x
 at                  x    x    x    x
-front               x    x    x    x    x              x
-back                x    x    x    x    x              x
+front               x    x    x    x    x                        x
+back                x    x    x    x    x                        x
 set                 x    x    x    x
 pop_back            x    x    x    x    x
 pop_front                          x    x
@@ -327,7 +330,7 @@ data                x    x    x
 splice                                  x
 splice_it                               x
 splice_range                            x
-contains                                     x    x                   x    x
+contains                                     x    x    x    x
 append                   x
 insert_str               x
 replace                  x                   x
@@ -340,39 +343,44 @@ find_last_not_of         x
 substr                   x
 compare                  x
 key_compare              x
-
-begin               x    x    x    x    x    x    x                   x    x
-end                 x    x    x    x    x    x    x                   x    x
-next                x    x    x    x    x    x    x                   x    x
++-----------------------------------------------------------------------------+
+                    vec  str  arr  deq  list set  map  uset umap pqu  que  stk
++-----------------------------------------------------------------------------+
+begin               x    x    x    x    x    x    x    x    x
+end                 x    x    x    x    x    x    x    x    x
+next                x    x    x    x    x    x    x    x    x
 advance             x    x    x    x    x    x    x
 distance            x    x    x    x    x    x    x
+ref                 x    x    x    x    x    x    x
 range               x    x    x    x    x    x    x
-
-all_of              x    x    x    x    x    x    x                   x    x
-any_of              x    x    x    x    x    x    x                   x    x
-none_of             x    x    x    x    x    x    x                   x    x
-all_of_range        x    x    x    x    x    x    x                   x    x
-any_of_range        x    x    x    x    x    x    x                   x    x
-none_of_range       x    x    x    x    x    x    x                   x    x
-foreach             x    x    x    x    x    x    x                   x    x
++-----------------------------------------------------------------------------+
+                    vec  str  arr  deq  list set  map  uset umap pqu  que  stk
++-----------------------------------------------------------------------------+
+all_of              x    x    x    x    x    x    x    x    x
+any_of              x    x    x    x    x    x    x    x    x
+none_of             x    x    x    x    x    x    x    x    x
+all_of_range        x    x    x    x    x    x    x    x    x
+any_of_range        x    x    x    x    x    x    x    x    x
+none_of_range       x    x    x    x    x    x    x    x    x
+foreach             x    x    x    x    x    x    x    x    x
 foreach_range       x    x    x    x    x    x    x
 foreach_n           x    x    x    x    x    x    x
 foreach_n_range     x    x    x    x    x    x    x
-count               x    x    x    x    x    x    x                   x    x
-count_range         x    x    x    x    x    x    x                   x    x
-count_if            x    x    x    x    x    x    x                   x    x
-count_if_range      x    x    x    x    x    x    x                   x    x
+count               x    x    x    x    x    x    x    x    x
+count_range         x    x    x    x    x    x    x    x    x
+count_if            x    x    x    x    x    x    x    x    x
+count_if_range      x    x    x    x    x    x    x    x    x
 mismatch
 mismatch_range
-find_if             x    x    x    x    x    x    x                   x    x
-find_if_not         x    x    x    x    x    x    x                   x    x
-find_range          x    x    x    x    x    x    x                   x    x
-find_if_range       x    x    x    x    x    x    x                   x    x
-find_if_not_range   x    x    x    x    x    x    x                   x    x
+find_if             x    x    x    x    x    x    x    x    x
+find_if_not         x    x    x    x    x    x    x    x    x
+find_range          x    x    x    x    x    x    x    x    x
+find_if_range       x    x    x    x    x    x    x    x    x
+find_if_not_range   x    x    x    x    x    x    x    x    x
 find_end
 find_end_range
 find_first_of            x
-find_first_of_range 
+find_first_of_range
 adjacent_find
 adjacent_find_range
 search
@@ -475,14 +483,16 @@ inplace_merge
 inplace_merge_range
 includes
 includes_range
-difference          x    x    x    x    x    x    x                   x    x
+difference          x    x    x    x    x    x    x    x    x
 set_difference_range
-intersection        x    x    x    x    x    x    x                   x    x
+intersection        x    x    x    x    x    x    x    x    x
 set_intersection_range
-symmetric_difference x   x    x    x    x    x    x                   x    x
+symmetric_difference x   x    x    x    x    x    x    x    x
 set_symmetric_difference_range
-union               x    x    x    x    x    x    x                   x    x
-set_union_range
+union               x    x    x    x    x    x    x    x    x
+set_union_range                                             .
++-----------------------------------------------------------------------------+
+                    vec  str  arr  deq  list set  map  uset umap pqu  que  stk
 ```
 
 ## Differences
@@ -507,7 +517,7 @@ Added **array**, **map** and **unordered_map**.
 Added docs and manpages.
 
 Added builtin default `compare` and `equal` methods for the simple integral types T:
-`int`, `long`, `bool`, `char`, `short`, `float`, `double`, `char8_t`, 
+`int`, `long`, `bool`, `char`, `short`, `float`, `double`, `char8_t`,
 `long double`, `long long`, `unsigned int`, `unsigned long`, `unsigned char`.
 Only with structs a compare and optionally and equal method must be set.
 Removed the compare and equal args from `equal`, `sort`, `sort_range`, `find`,
