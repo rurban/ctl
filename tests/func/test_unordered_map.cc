@@ -20,16 +20,16 @@
         foreach(umap_strint, &_x, _it)                                 \
         {                                                              \
             str *_key = &_it.ref->key;                                 \
-            auto found = _y.find(str_c_str(_key));                     \
-            assert(found != _y.end());                                 \
+            auto _found = _y.find(str_c_str(_key));                    \
+            assert(_found != _y.end());                                \
             a_found++;                                                 \
         }                                                              \
         for(auto x : _y)                                               \
         {                                                              \
             const char *_key = x.first.c_str();                        \
             strint d = strint_init(str_init(_key), x.second);          \
-            umap_strint_it found = umap_strint_find(&_x, d);           \
-            assert(!umap_strint_it_done(&found));                      \
+            umap_strint_it _found = umap_strint_find(&_x, d);          \
+            assert(!umap_strint_it_done(&_found));                     \
             strint_free(&d);                                           \
             b_found++;                                                 \
         }                                                              \
@@ -41,6 +41,8 @@
         */                                                              \
     }                                                                  \
 }
+
+#define CHECK_ITER(_it, b, _iter)
 
 static char *
 new_rand_str() {
@@ -59,8 +61,9 @@ setup_sets(umap_strint* a, std::unordered_map<std::string,int>& b)
         char *key = new_rand_str();
         const int vb = TEST_RAND(TEST_MAX_SIZE);
         STRINT bb = STRINT{key,vb};
-        umap_strint_insert(a, strint_init(str_init(key),vb));
+        umap_strint_insert_or_assign(a, strint_init(str_init(key),vb));
         b.insert(bb);
+        free (key);
     }
 }
 
@@ -76,10 +79,14 @@ main(void)
         setup_sets(&a, b);
 #define FOREACH_METH(TEST) \
         TEST(INSERT) \
+        TEST(INSERT_FOUND) \
         TEST(INSERT_OR_ASSIGN) \
+        TEST(INSERT_OR_ASSIGN_FOUND) \
         TEST(ERASE) \
+        TEST(ERASE_IF) \
         TEST(CLEAR) \
         TEST(COUNT) \
+        TEST(CONTAINS) \
         TEST(FIND) \
         TEST(EQUAL) \
         TEST(REHASH) \
@@ -90,13 +97,10 @@ main(void)
         TEST(DIFFERENCE)
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(INSERT_FOUND) \
         /* TEST(EMPLACE) */ \
         /* TEST(EXTRACT) */ \
         /* TEST(MERGE) */ \
-        TEST(CONTAINS) \
         /* TEST(EQUAL_RANGE) */ \
-        TEST(ERASE_IF) \
         TEST(SWAP) \
         TEST(COPY) \
         TEST(FIND_IF) \
@@ -142,8 +146,31 @@ main(void)
             {
                 char *key = new_rand_str();
                 const int vb = TEST_RAND(TEST_MAX_SIZE);
-                umap_strint_insert(&a, strint_init(str_init(key),vb));
+                umap_strint_insert(&a, strint_init(str_init(key), vb));
+                free (key);
                 b.insert(STRINT{key,vb});
+                CHECK(a, b);
+                break;
+            }
+            case TEST_INSERT_FOUND:
+            {
+                char *key = new_rand_str();
+                const int vb = TEST_RAND(TEST_MAX_SIZE);
+                int found;
+                umap_strint_it it = umap_strint_insert_found(&a,
+                    strint_init(str_init(key), vb), &found);
+                free (key);
+#if __cplusplus >= 201103L
+                // C++11
+                std::pair<std::unordered_map<std::string,int>::iterator, bool> pair;
+                pair = b.insert(STRINT{key,vb});
+                // STL returns true if not found, and freshly inserted
+                assert((!found) == (int)pair.second);
+                CHECK_ITER(it, b, pair.first);
+#else
+                auto iter = b.insert(STRINT{key,vb});
+                CHECK_ITER(it, b, iter);
+#endif
                 CHECK(a, b);
                 break;
             }
@@ -152,7 +179,30 @@ main(void)
                 char *key = new_rand_str();
                 const int vb = TEST_RAND(TEST_MAX_SIZE);
                 umap_strint_insert_or_assign(&a, strint_init(str_init(key),vb));
+                free (key);
                 b.insert_or_assign(key, vb);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_INSERT_OR_ASSIGN_FOUND:
+            {
+                char *key = new_rand_str();
+                const int vb = TEST_RAND(TEST_MAX_SIZE);
+                int found;
+                umap_strint_it it = umap_strint_insert_or_assign_found(&a,
+                    strint_init(str_init(key),vb), &found);
+                free (key);
+#if __cplusplus >= 201103L
+                // C++11
+                std::pair<std::unordered_map<std::string,int>::iterator, bool> pair;
+                pair = b.insert_or_assign(key, vb);
+                // STL returns true if not found, and freshly inserted
+                assert((!found) == (int)pair.second);
+                CHECK_ITER(it, b, pair.first);
+#else
+                auto iter = b.insert_or_assign(key, vb);
+                CHECK_ITER(it, b, iter);
+#endif
                 CHECK(a, b);
                 break;
             }
@@ -165,6 +215,7 @@ main(void)
                         char *key = new_rand_str();
                         const int value = TEST_RAND(TEST_MAX_SIZE);
                         strint kd = strint_init(str_init(key),value);
+                        free (key);
                         umap_strint_erase(&a, kd);
                         b.erase(key);
                         CHECK(a, b);
@@ -228,6 +279,7 @@ main(void)
                 char *key = new_rand_str();
                 int value = TEST_RAND(TEST_MAX_SIZE);
                 strint kd = strint_init(str_init(key), value);
+                free (key);
                 int aa = umap_strint_count(&a, kd);
                 int bb = b.count(key);
                 assert(aa == bb);
@@ -240,6 +292,7 @@ main(void)
                 char *key = new_rand_str();
                 const int value = TEST_RAND(TEST_MAX_SIZE);
                 strint kd = strint_init(str_init(key), value);
+                free (key);
                 umap_strint_it aa = umap_strint_find(&a, kd);
                 auto bb = b.find(key);
                 if(bb == b.end())
@@ -257,26 +310,6 @@ main(void)
                 CHECK(a, b);
                 break;
             }
-#ifdef DEBUG
-            case TEST_CONTAINS: // C++20.
-            {
-                char *key = new_rand_str();
-                const int value = TEST_RAND(TEST_MAX_SIZE);
-                strint kd = strint_init(str_init(key), value);
-                int aa = umap_strint_contains(&a, kd);
-#if __cpp_lib_erase_if >= 202002L
-                int bb = b.contains(key);
-#else
-                int bb = b.count(key) == 1 ? 1 : 0;
-#endif
-                assert(aa == bb);
-                CHECK(a, b);
-                break;
-            }
-            //case TEST_EMPLACE:
-            //case TEST_EXTRACT:
-            //case TEST_MERGE:
-            //case TEST_EQUAL_RANGE:
             case TEST_ERASE_IF:
             {
                 size_t a_erases = umap_strint_erase_if(&a, strint_isupper);
@@ -288,7 +321,6 @@ main(void)
 #endif
                 break;
             }
-#endif
             case TEST_EQUAL:
             {
                 umap_strint aa = umap_strint_copy(&a);
@@ -363,6 +395,36 @@ main(void)
                 umap_strint_free(&aaa);
                 break;
             }
+            case TEST_CONTAINS: // C++20.
+            {
+                char *key = new_rand_str();
+                const int value = TEST_RAND(TEST_MAX_SIZE);
+                strint kd = strint_init(str_init(key), value);
+                free (key);
+                int aa = umap_strint_contains(&a, kd);
+#if __cpp_lib_erase_if >= 202002L
+                int bb = b.contains(key);
+#else
+                int bb = b.count(key) == 1 ? 1 : 0;
+#endif
+                assert(aa == bb);
+                CHECK(a, b);
+                strint_free(&kd);
+                break;
+            }
+#ifdef DEBUG
+            //case TEST_EMPLACE:
+            //case TEST_EXTRACT:
+            //case TEST_MERGE:
+            //case TEST_EQUAL_RANGE:
+#endif
+            default:
+#ifdef DEBUG
+                printf("unhandled testcase %d %s\n", which, test_names[which]);
+#else
+                printf("unhandled testcase %d\n", which);
+#endif
+                break;
         }
         CHECK(a, b);
         umap_strint_free(&a);
