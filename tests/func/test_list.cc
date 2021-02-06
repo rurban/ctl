@@ -87,10 +87,10 @@ int random_element(list_digi* a)
     } else                                                        \
         assert (_iter == b.end())
 #define CHECK_ITER(_it, b, _iter)                                 \
-    if ((_it)->node != NULL)                                      \
+    if ((_it).node != NULL)                                       \
     {                                                             \
         assert (_iter != b.end());                                \
-        assert(*(_it)->ref->value == *(*_iter).value);            \
+        assert(*(_it).ref->value == *(*_iter).value);             \
     } else                                                        \
         assert (_iter == b.end())
 
@@ -335,7 +335,7 @@ main(void)
                 // LOG("inserted %d at %zu\n", value, index);
                 // print_lst(&a);
                 // print_list(b);
-                CHECK_ITER(aa, b, bb);
+                CHECK_ITER(*aa, b, bb);
                 CHECK(a, b);
                 break;
             }
@@ -445,7 +445,7 @@ main(void)
                 LOG("CTL emplace head->next %d\n", *aa.value);
                 //print_lst(&a);
                 auto iter = b.begin();
-#if __cplusplus >= 201100
+#if __cplusplus >= 201103L
                 b.emplace(++iter, DIGI{value});
 #else
                 b.insert(++iter, DIGI{value});
@@ -461,7 +461,7 @@ main(void)
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 digi aa = digi_init(value);
                 list_digi_emplace_front(&a, &aa);
-#if __cplusplus >= 201100
+#if __cplusplus >= 201103L
                 b.emplace_front(DIGI{value});
 #else
                 b.push_front(DIGI{value});
@@ -475,7 +475,7 @@ main(void)
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 digi aa = digi_init(value);
                 list_digi_emplace_back(&a, &aa);
-#if __cplusplus >= 201100
+#if __cplusplus >= 201103L
                 b.emplace_back(DIGI{value});
 #else
                 b.push_back(DIGI{value});
@@ -577,7 +577,7 @@ main(void)
                 digi key = digi_init(value);
                 list_digi_it aa = list_digi_find(&a, key);
                 auto bb = find(b.begin(), b.end(), DIGI{value});
-                CHECK_ITER(&aa, b, bb);
+                CHECK_ITER(aa, b, bb);
                 digi_free (&key); // special
                 CHECK(a, b);
                 break;
@@ -626,7 +626,7 @@ main(void)
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_it aa = list_digi_find_range(&first_a, &last_a, key);
                 auto bb = find(first_b, last_b, vb);
-                CHECK_ITER(&aa, b, bb);
+                CHECK_ITER(aa, b, bb);
                 digi_free (&key); // special
                 CHECK(a, b);
                 break;
@@ -683,14 +683,14 @@ main(void)
             {
                 list_digi_it aa = list_digi_find_if(&a, digi_is_odd);
                 auto bb = find_if(b.begin(), b.end(), DIGI_is_odd);
-                CHECK_ITER(&aa, b, bb);
+                CHECK_ITER(aa, b, bb);
                 break;
             }
             case TEST_FIND_IF_NOT:
             {
                 list_digi_it aa = list_digi_find_if_not(&a, digi_is_odd);
                 auto bb = find_if_not(b.begin(), b.end(), DIGI_is_odd);
-                CHECK_ITER(&aa, b, bb);
+                CHECK_ITER(aa, b, bb);
                 break;
             }
             case TEST_FIND_IF_RANGE:
@@ -702,7 +702,7 @@ main(void)
                 auto bb = find_if(first_b, last_b, DIGI_is_odd);
                 print_lst(&a);
                 print_list(b);
-                CHECK_ITER(&aa, b, bb);
+                CHECK_ITER(aa, b, bb);
                 break;
             }
             case TEST_FIND_IF_NOT_RANGE:
@@ -712,7 +712,7 @@ main(void)
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_it aa = list_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
                 auto bb = find_if_not(first_b, last_b, DIGI_is_odd);
-                CHECK_ITER(&aa, b, bb);
+                CHECK_ITER(aa, b, bb);
                 break;
             }
             case TEST_INSERT_COUNT:
@@ -730,7 +730,7 @@ main(void)
                 std::list<DIGI>::iterator bb = b.insert(iter, count, DIGI{value});
                 //print_lst(&a);
                 //print_list(b);
-                CHECK_ITER(aa, b, bb);
+                CHECK_ITER(*aa, b, bb);
                 CHECK(a, b);
                 break;
             }
@@ -986,7 +986,7 @@ main(void)
                     std::list<DIGI> bb;
                     bb.resize(dist);
                     auto iter = std::transform(first_b, last_b, b.begin()++, bb.begin(), DIGI_bintrans);
-                    //CHECK_ITER(it, bb, iter);
+                    CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
                     // heap use-after-free
                     CHECK(a, b);

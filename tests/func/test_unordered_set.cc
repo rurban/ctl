@@ -209,7 +209,7 @@ main(void)
                       ? *first.ref->value : 0;
                 int a_found;
                 uset_digi_it it = uset_digi_insert_found(&a, digi_init(vb), &a_found);
-#if __cplusplus >= 201100L
+#if __cplusplus >= 201103L
                 // C++11
                 std::pair<std::unordered_set<DIGI,DIGI_hash>::iterator, bool> pair;
                 pair = b.insert(DIGI{vb});
@@ -509,7 +509,7 @@ main(void)
                 digi key = digi_init(vb);
                 int a_found;
                 uset_digi_it it = uset_digi_emplace_found(&a, &key, &a_found);
-#if __cplusplus >= 201100L
+#if __cplusplus >= 201103L
                 // C++11
                 std::pair<std::unordered_set<DIGI,DIGI_hash>::iterator, bool> pair;
                 pair = b.emplace(DIGI{vb});
@@ -533,7 +533,7 @@ main(void)
                 digi key = digi_init(vb);
                 uset_digi_it pos = uset_digi_find(&a, key);
                 uset_digi_it it = uset_digi_emplace_hint(&pos, &key);
-#if __cplusplus >= 301100L
+#if __cplusplus >= 201103L
                 // C++11
                 auto iter = b.emplace_hint(it, DIGI{vb});
                 CHECK_ITER(it, b, iter);

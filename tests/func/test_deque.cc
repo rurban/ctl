@@ -272,7 +272,12 @@ main(void)
             TEST(CLEAR) \
             TEST(ERASE) \
             TEST(ERASE_INDEX) \
+            TEST(ERASE_IF) \
+            TEST(REMOVE_IF) \
+            TEST(INSERT) \
+            TEST(INSERT_INDEX) \
             TEST(INSERT_COUNT) \
+            TEST(EMPLACE) \
             TEST(EMPLACE_FRONT) \
             TEST(EMPLACE_BACK) \
             TEST(RESIZE) \
@@ -282,20 +287,48 @@ main(void)
             TEST(SORT_RANGE) \
             TEST(COPY) \
             TEST(SWAP) \
-            TEST(INSERT) \
-            TEST(INSERT_INDEX) \
             TEST(ASSIGN) \
-            TEST(REMOVE_IF) \
-            TEST(ERASE_IF) \
             TEST(EQUAL) \
             TEST(FIND) \
-            TEST(EMPLACE)
 
 #define FOREACH_DEBUG(TEST) \
             TEST(ERASE_RANGE) \
-            TEST(INSERT_RANGE) /* STL problems, not CTL*/ \
-            /* TEST(COUNT) */ \
-            /* TEST(EQUAL_RANGE) */
+            TEST(INSERT_RANGE) \
+            TEST(FIND_IF) \
+            TEST(FIND_IF_NOT) \
+            TEST(FIND_RANGE) \
+            TEST(FIND_IF_RANGE) \
+            TEST(FIND_IF_NOT_RANGE) \
+            TEST(ALL_OF) \
+            TEST(ANY_OF) \
+            TEST(NONE_OF) \
+            TEST(ALL_OF_RANGE) \
+            TEST(ANY_OF_RANGE) \
+            TEST(NONE_OF_RANGE) \
+            TEST(COUNT) \
+            TEST(COUNT_IF) \
+            TEST(COUNT_IF_RANGE) \
+            TEST(COUNT_RANGE) \
+            TEST(EQUAL_RANGE) \
+            TEST(FIND_END) \
+            TEST(FIND_END_IF) \
+            TEST(FIND_END_RANGE) \
+            TEST(FIND_END_IF_RANGE) \
+            TEST(LOWER_BOUND) \
+            TEST(UPPER_BOUND) \
+            TEST(LOWER_BOUND_RANGE) \
+            TEST(UPPER_BOUND_RANGE) \
+            TEST(UNION) \
+            TEST(DIFFERENCE) \
+            TEST(SYMETRIC_DIFFERENCE) \
+            TEST(INTERSECTION) \
+            TEST(GENERATE) /* 34 */ \
+            TEST(GENERATE_RANGE) \
+            TEST(TRANSFORM) \
+            TEST(GENERATE_N) \
+            TEST(GENERATE_N_RANGE) \
+            TEST(TRANSFORM_IT) \
+            TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -554,12 +587,12 @@ main(void)
                         print_deq (&a);
 
                         // The STL cannot insert from its own, needs a copy
-#if __cplusplus > 201100
+#if __cplusplus >= 201103L
                         std::deque<DIGI>::iterator iter =
 #endif
                             b.insert(b.begin() + i1, bb.begin() + i2, bb.begin() + i3);
                         LOG ("STL insert at %ld:\n", i1);
-#if __cplusplus > 201100
+#if __cplusplus >= 201103L
                         CHECK_ITER (it, b, iter);
 #endif
                         print_deque (b);
