@@ -105,7 +105,7 @@ main(void)
             {
                 const int value = TEST_RAND(INT_MAX);
                 digi bb = digi_init(value);
-#if __cpp_lib_erase_if > 202002L
+#if __cpp_lib_erase_if >= 202002L
                 b.emplace(DIGI{value});
 #else
                 b.push(DIGI{value});

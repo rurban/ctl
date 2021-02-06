@@ -718,9 +718,9 @@ main(void)
                 }
                 case TEST_ERASE_IF:
                 {
-#if __cpp_lib_erase_if > 202002L
+#if __cpp_lib_erase_if >= 202002L
                     size_t num_a = deq_digi_erase_if(&a, digi_is_odd);
-                    size_t num_b = std::erase_if(b.begin(), b.end(), DIGI_is_odd);
+                    size_t num_b = std::erase_if(b, DIGI_is_odd);
                     assert (num_a == num_b);
 #else
                     deq_digi_erase_if(&a, digi_is_odd);

@@ -90,14 +90,30 @@ main(void)
         TEST(DIFFERENCE)
 
 #define FOREACH_DEBUG(TEST) \
+        TEST(INSERT_FOUND) \
         /* TEST(EMPLACE) */ \
         /* TEST(EXTRACT) */ \
         /* TEST(MERGE) */ \
-        /* TEST(CONTAINS) */ \
+        TEST(CONTAINS) \
         /* TEST(EQUAL_RANGE) */ \
-        /* TEST(ERASE_IF) */ \
+        TEST(ERASE_IF) \
         TEST(SWAP) \
-        TEST(COPY)
+        TEST(COPY) \
+        TEST(FIND_IF) \
+        TEST(FIND_IF_NOT) \
+        TEST(ALL_OF) \
+        TEST(ANY_OF) \
+        TEST(NONE_OF) \
+        TEST(COUNT_IF) \
+        TEST(EMPLACE) \
+        TEST(EMPLACE_FOUND) \
+        TEST(EMPLACE_HINT) \
+        TEST(MERGE) \
+        TEST(REMOVE_IF) \
+        TEST(LOWER_BOUND) \
+        TEST(UPPER_BOUND) \
+        TEST(GENERATE) \
+        TEST(TRANSFORM) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -241,32 +257,37 @@ main(void)
                 CHECK(a, b);
                 break;
             }
-#if 0
+#ifdef DEBUG
             case TEST_CONTAINS: // C++20.
             {
                 char *key = new_rand_str();
                 const int value = TEST_RAND(TEST_MAX_SIZE);
                 strint kd = strint_init(str_init(key), value);
                 int aa = umap_strint_contains(&a, kd);
-                int bb = b.contains(STRINT{key,value});
+#if __cpp_lib_erase_if >= 202002L
+                int bb = b.contains(key);
+#else
+                int bb = b.count(key) == 1 ? 1 : 0;
+#endif
                 assert(aa == bb);
                 CHECK(a, b);
                 break;
             }
-            case TEST_EMPLACE:
-            case TEST_EXTRACT:
-            case TEST_MERGE:
-            case TEST_CONTAINS:
+            //case TEST_EMPLACE:
+            //case TEST_EXTRACT:
+            //case TEST_MERGE:
+            //case TEST_EQUAL_RANGE:
             case TEST_ERASE_IF:
             {
-                size_t a_erases = umap_strint_erase_if(&a, strint_is_odd);
-                size_t b_erases = b.erase_if(STRINT_is_odd);
+                size_t a_erases = umap_strint_erase_if(&a, strint_isupper);
+#if __cpp_lib_erase_if >= 202002L
+                //C++20
+                size_t b_erases = std::erase_if(b, STRINT_isupper);
                 assert(a_erases == b_erases);
                 CHECK(a, b);
+#endif
                 break;
             }
-            case TEST_EQUAL_RANGE:
-                break;
 #endif
             case TEST_EQUAL:
             {

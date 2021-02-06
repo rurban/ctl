@@ -3,6 +3,8 @@
 
 #include "ctl/string.h"
 #include <stdlib.h>
+#include <ctype.h>
+
 #include <string>
 
 // THESE STRINT STRUCTS BEHAVE IDENTICALLY AND ARE USED AS THE BASIS
@@ -64,15 +66,21 @@ strint_copy(strint* self)
 }
 
 static inline int
-strint_is_odd(strint* d)
+strint_isupper(strint* d)
 {
-    return d->value % 2;
+    return isupper(d->key.vector[0]);
 }
 
 static inline int
-STRINT_is_odd(STRINT &d)
+STRINT_isupper(STRINT d)
 {
-    return d.second % 2;
+    return isupper(*d.first.c_str());
+}
+
+static inline int
+char_isupper(char* k)
+{
+    return isupper(*k);
 }
 
 static inline int
