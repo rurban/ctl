@@ -535,7 +535,8 @@ main(void)
                 uset_digi_it it = uset_digi_emplace_hint(&pos, &key);
 #if __cplusplus >= 201103L
                 // C++11
-                auto iter = b.emplace_hint(it, DIGI{vb});
+                auto hint = b.find(DIGI{vb});
+                auto iter = b.emplace_hint(hint, DIGI{vb});
                 CHECK_ITER(it, b, iter);
 #else
                 auto iter = b.insert(DIGI{vb});
