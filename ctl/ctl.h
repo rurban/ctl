@@ -3,7 +3,7 @@
 #ifndef __CTL_H__
 #define __CTL_H__
 
-#define CTL_VERSION 202101L
+#define CTL_VERSION 202101
 
 #include <stdlib.h>
 #include <stdint.h>

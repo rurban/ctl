@@ -6,6 +6,8 @@
 PREFIX ?= /usr/local
 CC ?= gcc
 CXX ?= g++
+VERSION!=(grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
+VERSION ?= 202101
 
 # probe for -std=c++20, 17 or 11
 TRY_CXX20!=(${CXX} -std=c++20 -I. tests/func/test_deque.cc -o /dev/null && echo -std=c++20) || true
@@ -332,6 +334,21 @@ test-icc:
 	for std in 17 14 11 0x; do $(MAKE) CXX="icc -static-intel -std=c++$$std"; done
 test-pgc++:
 	for std in 20 2a 17 14 11 03 98; do $(MAKE) CXX="pgc++ -std=c++$$std"; done
+
+# we skip some git files per default: .github/ docs/subdirs
+dist:
+	rm -rf ctl-${VERSION}
+	mkdir ctl-${VERSION}
+	mkdir -p ctl-${VERSION}/ctl/bits
+	mkdir -p ctl-${VERSION}/docs/images
+	mkdir -p ctl-${VERSION}/examples
+	mkdir -p ctl-${VERSION}/tests/{func,perf,verify}
+	mkdir -p ctl-${VERSION}/tests/perf/{arr,deq,lst,pqu,set,str,uset,vec}
+	for f in `git ls-tree -r --full-tree master|cut -c54-`; do \
+          cp -p "$$f" "ctl-${VERSION}/$$f"; done
+	tar cfz ctl-${VERSION}.tar.gz ctl-${VERSION}
+	tar cfJ ctl-${VERSION}.tar.xz ctl-${VERSION}
+	rm -rf ctl-${VERSION}
 
 ALWAYS:
 

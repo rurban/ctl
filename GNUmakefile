@@ -1,6 +1,8 @@
 PREFIX = /usr/local
 CC ?= gcc
 CXX ?= g++
+VERSION := $(shell grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
+VERSION ?= 202101
 
 .SUFFIXES: .cc .c .i .o .md .3
 .PHONY: all man install clean doc images perf examples verify asan debug stress stress-long ALWAYS
@@ -352,6 +354,21 @@ test-pgc++:
 define expand
 	@$(CC) $(CFLAGS) $(1).h -E $(2) | clang-format -style=webkit
 endef
+
+# we skip some git files per default: .github/ docs/subdirs
+dist:
+	rm -rf ctl-${VERSION}
+	mkdir ctl-${VERSION}
+	mkdir -p ctl-${VERSION}/ctl/bits
+	mkdir -p ctl-${VERSION}/docs/images
+	mkdir -p ctl-${VERSION}/examples
+	mkdir -p ctl-${VERSION}/tests/{func,perf,verify}
+	mkdir -p ctl-${VERSION}/tests/perf/{arr,deq,lst,pqu,set,str,uset,vec}
+	for f in `git ls-tree -r --full-tree master|cut -c54-`; do \
+          cp -p "$$f" "ctl-${VERSION}/$$f"; done
+	tar cfz ctl-${VERSION}.tar.gz ctl-${VERSION}
+	tar cfJ ctl-${VERSION}.tar.xz ctl-${VERSION}
+	rm -rf ctl-${VERSION}
 
 # emacs flymake-mode
 check-syntax:
