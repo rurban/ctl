@@ -73,9 +73,11 @@ main(void)
                 LOG("ctl growth   %zu vs %zu\n", a.size, b.size());
                 if (TEST_RAND(10) < 3)
                 {
+#if __cplusplus >= 201103L
                     b.shrink_to_fit();
                     str_shrink_to_fit(&a);
                     LOG("ctl shrink_to_fit cap %zu vs %zu\n", a.capacity, b.capacity());
+#endif
                 }
             }
             ASSERT_EQUAL_SIZE (a, b);

@@ -1,4 +1,9 @@
 #include "../test.h"
+#if __cplusplus < 201103L
+#pragma warning "Can only test against C++11 compilers"
+OLD_MAIN
+#else
+
 #include "strint.hh"
 
 #define USE_INTERNAL_VERIFY
@@ -446,3 +451,5 @@ main(void)
     }
     TEST_PASS(__FILE__);
 }
+
+#endif // C++11

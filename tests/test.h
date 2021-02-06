@@ -89,3 +89,5 @@ TEST_TIME(void)
 # define MIN(a,b) (a) < (b) ? (a) : (b)
 # define MAX(a,b) (a) > (b) ? (a) : (b)
 #endif
+
+#define OLD_MAIN int main(void) { TEST_FAIL(__FILE__); }

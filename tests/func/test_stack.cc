@@ -1,4 +1,9 @@
 #include "../test.h"
+#if __cplusplus < 201103L
+#pragma warning "Can only test against C++11 compilers"
+OLD_MAIN
+#else
+
 #include "digi.hh"
 
 #define T digi
@@ -93,3 +98,5 @@ main(void)
     }
     TEST_PASS(__FILE__);
 }
+
+#endif // C++11

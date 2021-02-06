@@ -92,6 +92,7 @@ struct DIGI
         *value = *a.value;
         return *this;
     }
+#if __cplusplus >= 201103L
     DIGI& operator=(DIGI&& a)
     {
         delete value;
@@ -104,6 +105,7 @@ struct DIGI
         value = a.value;
         a.value = nullptr;
     }
+#endif
     bool operator<(const DIGI& a) const
     {
         return *value < *a.value;

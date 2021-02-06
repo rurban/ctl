@@ -1,4 +1,8 @@
 #include "../test.h"
+#if __cplusplus < 201103L
+#pragma warning "Can only test against C++11 compilers"
+OLD_MAIN
+#else
 
 #include <ctl/string.h>
 
@@ -752,3 +756,5 @@ main(void)
     else
         TEST_PASS(__FILE__);
 }
+
+#endif // C++11
