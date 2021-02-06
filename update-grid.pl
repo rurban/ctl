@@ -4,7 +4,6 @@
 # broken (.).
 
 use strict;
-#use Algorithm::Diff qw(diff);
 
 open my $in, '<', 'README.md' or die "$! README.md";
 my @c = qw(vec str arr deq list set map uset umap pqu que stk);
@@ -23,7 +22,7 @@ my %long = (
   stk => 'stack',
 );
 my $m = {};
-my ($found, @m, @l, %seen);
+my ($found, @m, @l, @n);
 while (<$in>) {
   if (/^\+----+\+/) {
     $found++; next;
@@ -43,7 +42,7 @@ close $in;
 sub status {
   my ($c,$f) = @_;
   open my $in, '<', $f or die "$! $f";
-  my ($status);
+  my ($status, %seen);
   while (<$in>) {
     if (/^#define FOREACH_METH/) {
       $status = 'x';
@@ -64,12 +63,12 @@ sub status {
     }
   }
   close $in;
-  foreach (keys %{$m->{$c}}) {
+  my @keys = keys %{$m->{$c}};
+  foreach (@keys) {
     # check if the test case is defined or not
     next if $m->{$c}->{$_} eq 'x';
     if (!exists $seen{$_}) {
-      #warn "$c.$_ unhandled\n";
-      delete $m->{$c}->{$_};
+      $m->{$c}->{$_} = '';
     }
   }
 }
@@ -110,11 +109,19 @@ sub line {
   # 30 + 5x @c
   my $x = $M + 5 * @c - 3;
   printf "+%s+\n", '-' x $x;
+  push @n, sprintf("+%s+\n", '-' x $x);
 }
 sub hdr {
   printf "%-${M}s", '';
   printf "%-5s", $_ for @c;
   printf "\n";
+  my @x;
+  push @x, sprintf("%-${M}s", '');
+  for (@c) {
+    push @x, sprintf("%-5s", $_);
+  }
+  push @x, "\n";
+  push @n, join('', @x);
 }
 
 # print grid
@@ -122,11 +129,18 @@ hdr();
 line();
 for (@m) {
   printf "%-${M}s", $_;
+  my @x;
+  push @x, sprintf("%-${M}s", $_);
   # sort methods in $m->{$c} by order in @c
   for my $c (@c) {
-    printf "%-5s", $m->{$c}->{$_};
+    my $x = $m->{$c}->{$_};
+    $x = '' unless $x;
+    printf "%-5s", $x;
+    push @x, sprintf("%-5s", $x);
   }
   printf "\n";
+  push @x, "\n";
+  push @n, join('', @x);
   if (/^(key_compare|range)$/) {
     line();
     hdr();
@@ -136,10 +150,33 @@ for (@m) {
 line();
 hdr();
 
-#close $out;
-#if (system "diff $outfn $outfn.tmp") {
-#  system "mv $outfn.tmp $outfn";
-#} else {
-#  system "rm $outfn.tmp";
-#}
+sub update {
+  open my $in, '<', 'README.md' or die "$! README.md";
+  open my $out, '>', 'README.md.tmp' or die "$! README.md.tmp";
+  $found = 0;
+  while (<$in>) {
+    if (!$found and /^       \s+vec\s+str\s+/) {
+      $found++;
+    }
+    $found = 0 if /^```/;
+    $found = 0 if /^## /;
+    if ($found) {
+      for (@n) {
+        s/ +$//;
+        print $out $_ ;
+      }
+      @n = ();
+    } else {
+      print $out $_;
+    }
+  }
+  close $in;
+  close $out;
+  system("mv README.md.tmp README.md");
+  system("./update-index.pl");
+}
 
+if (eval "require Algorithm::Diff;") {
+  my $diff = Algorithm::Diff::diff(\@l, \@n);
+  update() if $diff;
+}

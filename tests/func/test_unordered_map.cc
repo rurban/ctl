@@ -417,6 +417,21 @@ main(void)
             //case TEST_EXTRACT:
             //case TEST_MERGE:
             //case TEST_EQUAL_RANGE:
+            //case TEST_FIND_IF:
+            //case TEST_FIND_IF_NOT:
+            //case TEST_ALL_OF:
+            //case TEST_ANY_OF:
+            //case TEST_NONE_OF:
+            //case TEST_COUNT_IF:
+            //case TEST_EMPLACE:
+            //case TEST_EMPLACE_FOUND:
+            //case TEST_EMPLACE_HINT:
+            //case TEST_MERGE:
+            //case TEST_REMOVE_IF:
+            //case TEST_LOWER_BOUND:
+            //case TEST_UPPER_BOUND:
+            //case TEST_GENERATE:
+            //case TEST_TRANSFORM:
 #endif
             default:
 #ifdef DEBUG

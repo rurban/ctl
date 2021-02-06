@@ -198,6 +198,9 @@ verify: $(VERIFY)
 
 MANPAGES = $(patsubst docs/%.md,docs/man/%.h.3, $(wildcard docs/*.md))
 
+README.md: $(wildcard tests/func/test_*.cc)
+	./update-grid.pl
+
 docs/index.md : README.md
 	./update-index.pl
 

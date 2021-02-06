@@ -677,9 +677,6 @@ main(void)
                 break;
             }
 #ifdef DEBUG
-            case TEST_EQUAL_RANGE:
-                printf("nyi\n");
-                break;
 #if 0 // need some C++ help here
             case TEST_GENERATE: // 45
             {
