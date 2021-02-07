@@ -276,6 +276,7 @@ x  stable and tested
 .  implemented, but broken or untested
 ```
 
+```
 |                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |`init`                           | x  | x  | x  | x  | x  | x  | x  | x  | x  | x  | x  | x  |
@@ -344,6 +345,9 @@ x  stable and tested
 |`substr`                         |    | x  |    |    |    |    |    |    |    |    |    |    |
 |`compare`                        |    | x  |    |    |    |    |    |    |    |    |    |    |
 |`key_compare`                    |    |    |    |    |    |    |    |    |    |    |    |    |
+|---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
+|                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
+|---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |`begin`                          | x  | x  | x  | x  | x  | x  | x  | x  | x  |    |    |    |
 |`end`                            | x  | x  | x  | x  | x  | x  | x  | x  | x  |    |    |    |
 |`next`                           | x  | x  | x  | x  | x  | x  | x  | x  | x  |    |    |    |
@@ -351,6 +355,9 @@ x  stable and tested
 |`distance`                       | x  | x  | x  | x  | x  | x  | x  |    |    |    |    |    |
 |`ref`                            | x  | x  | x  | x  | x  | x  | x  |    |    |    |    |    |
 |`range`                          | x  | x  | x  | x  | x  | x  | x  |    |    |    |    |    |
+|---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
+|                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
+|---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |`all_of`                         | x  | x  | x  | x  | x  | x  | .  | x  |    |    |    |    |
 |`any_of`                         | x  | x  | x  | x  | x  | x  | .  | x  |    |    |    |    |
 |`none_of`                        | x  | x  | x  | x  | x  | x  | .  | x  |    |    |    |    |
@@ -488,6 +495,7 @@ x  stable and tested
 |`set_union_range`                |    |    |    |    |    |    |    |    |    |    |    |    |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
+```
 ## Differences
 
 ### Differences to the original https://github.com/glouw/ctl

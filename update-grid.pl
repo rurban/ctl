@@ -160,7 +160,7 @@ for (@m) {
   #push @x, "|\n";
   printf $s;
   push @n, $s;
-  if (/^\|`(key_compare|range)\s/) {
+  if (/^(key_compare|range)$/) {
     line();
     hdr();
     line();
