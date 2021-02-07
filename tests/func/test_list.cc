@@ -939,7 +939,7 @@ main(void)
                 list_digi aaa = list_digi_union(&a, &aa);
                 std::list<DIGI> bbb;
                 std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
-                               std::inserter(bbb, bbb.begin()));
+                               std::back_inserter(bbb));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
                 list_digi_free(&aaa);
@@ -958,7 +958,7 @@ main(void)
                 list_digi aaa = list_digi_intersection(&a, &aa);
                 std::list<DIGI> bbb;
                 std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
-                                      std::inserter(bbb, bbb.begin()));
+                                      std::back_inserter(bbb));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
                 list_digi_free(&aaa);
@@ -977,7 +977,7 @@ main(void)
                 list_digi aaa = list_digi_symmetric_difference(&a, &aa);
                 std::list<DIGI> bbb;
                 std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
-                                              std::inserter(bbb, bbb.begin()));
+                                              std::back_inserter(bbb));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
                 list_digi_free(&aaa);
@@ -997,7 +997,7 @@ main(void)
                 list_digi aaa = list_digi_difference(&a, &aa);
                 std::list<DIGI> bbb;
                 std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
-                                    std::inserter(bbb, bbb.begin()));
+                                    std::back_inserter(bbb));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
                 list_digi_free(&aaa);

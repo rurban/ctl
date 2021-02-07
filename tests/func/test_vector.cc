@@ -776,7 +776,7 @@ main(void)
                     vec_digi aaa = vec_digi_union(&a, &aa);
                     std::vector<DIGI> bbb;
                     std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
-                                   std::inserter(bbb, bbb.begin()));
+                                   std::back_inserter(bbb));
                     CHECK(aa, bb);
                     vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);
@@ -796,7 +796,7 @@ main(void)
                     vec_digi aaa = vec_digi_intersection(&a, &aa);
                     std::vector<DIGI> bbb;
                     std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
-                                          std::inserter(bbb, bbb.begin()));
+                                          std::back_inserter(bbb));
                     CHECK(aa, bb);
                     vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);
@@ -816,7 +816,7 @@ main(void)
                     vec_digi aaa = vec_digi_symmetric_difference(&a, &aa);
                     std::vector<DIGI> bbb;
                     std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
-                                                  std::inserter(bbb, bbb.begin()));
+                                                  std::back_inserter(bbb));
                     CHECK(aa, bb);
                     vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);
@@ -837,7 +837,7 @@ main(void)
                     vec_digi aaa = vec_digi_difference(&a, &aa);
                     std::vector<DIGI> bbb;
                     std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
-                                        std::inserter(bbb, bbb.begin()));
+                                        std::back_inserter(bbb));
                     CHECK(aa, bb);
                     vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);

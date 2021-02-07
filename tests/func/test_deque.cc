@@ -1024,11 +1024,13 @@ main(void)
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
                     deq_digi aaa = deq_digi_union(&a, &aa);
+#ifndef _MSC_VER
                     std::deque<DIGI> bbb;
                     std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
-                                   std::inserter(bbb, bbb.begin()));
-                    CHECK(aa, bb);
+                                   std::back_inserter(bbb));
                     CHECK(aaa, bbb);
+#endif
+                    CHECK(aa, bb);
                     deq_digi_free(&aaa);
                     deq_digi_free(&aa);
                     break;
@@ -1044,11 +1046,13 @@ main(void)
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
                     deq_digi aaa = deq_digi_intersection(&a, &aa);
+#ifndef _MSC_VER
                     std::deque<DIGI> bbb;
                     std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
-                                          std::inserter(bbb, bbb.begin()));
-                    CHECK(aa, bb);
+                                          std::back_inserter(bbb));
                     CHECK(aaa, bbb);
+# endif
+                    CHECK(aa, bb);
                     deq_digi_free(&aaa);
                     deq_digi_free(&aa);
                     break;
@@ -1064,11 +1068,13 @@ main(void)
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
                     deq_digi aaa = deq_digi_symmetric_difference(&a, &aa);
+# ifndef _MSC_VER
                     std::deque<DIGI> bbb;
                     std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
-                                                  std::inserter(bbb, bbb.begin()));
-                    CHECK(aa, bb);
+                                                  std::back_inserter(bbb));
                     CHECK(aaa, bbb);
+# endif
+                    CHECK(aa, bb);
                     deq_digi_free(&aaa);
                     deq_digi_free(&aa);
                     break;
@@ -1085,11 +1091,13 @@ main(void)
                     std::sort(bb.begin(), bb.end());
                     print_deq(&a);
                     deq_digi aaa = deq_digi_difference(&a, &aa);
+#ifndef _MSC_VER
                     std::deque<DIGI> bbb;
                     std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
-                                        std::inserter(bbb, bbb.begin()));
-                    CHECK(aa, bb);
+                                        std::back_inserter(bbb));
                     CHECK(aaa, bbb);
+# endif
+                    CHECK(aa, bb);
                     deq_digi_free(&aaa);
                     deq_digi_free(&aa);
                     break;
