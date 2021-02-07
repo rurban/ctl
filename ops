@@ -1,1 +1,1 @@
-{"version":1,"ops":[{"type":1,"author":{"id":"67acf4ce3a9e0b675b41dc633e984435404c2f17"},"timestamp":1612736299,"metadata":{"github-id":"MDU6SXNzdWU4MDMwNzQ5MDM=","github-url":"https://github.com/rurban/ctl/issues/16","origin":"github"},"title":"Change the default compare to 2-way operator\u003c","message":"Not `\u003e`","files":null}]}
+{"version":1,"ops":[{"type":5,"author":{"id":"67acf4ce3a9e0b675b41dc633e984435404c2f17"},"timestamp":1612736311,"metadata":{"github-id":"MDEyOkxhYmVsZWRFdmVudDQzMDA3NDc2OTk="},"added":["bug"],"removed":[]}]}
