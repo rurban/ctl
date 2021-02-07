@@ -130,7 +130,8 @@ JOIN(A, end)(A* self)
 {
     static I zero;
     I iter = zero;
-    iter.ref = JOIN(A, back)(self);
+    if (self->size)
+        iter.ref = JOIN(A, back)(self);
     iter.index = self->size;
     iter.end = self->size;
     iter.container = self;

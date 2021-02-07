@@ -55,7 +55,7 @@ void print_deque(std::deque<DIGI> &b)
     }                                                             \
     std::deque<DIGI>::iterator _iter = _y.begin();                \
     foreach(deq_digi, &_x, _it) {                                 \
-        /* The STL may be corrupt */                              \
+        /* libstdc++ may be corrupt. libc++ not */                \
         if (_iter->value)                                         \
             assert(*_it.ref->value == *_iter->value);             \
         _iter++;                                                  \
@@ -630,36 +630,35 @@ main(void)
                     break;
 #ifdef DEBUG
                 case TEST_INSERT_RANGE: // 26
-                    if (a.size > 2)
+                {
+                    size_t size2 = TEST_RAND(TEST_MAX_SIZE);
+                    deq_digi aa = deq_digi_init_from(&a);
+                    std::deque<DIGI> bb;
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    for(int i = 0; i < (int)size2; i++)
                     {
-                        size_t size2 = TEST_RAND(TEST_MAX_SIZE);
-                        deq_digi aa = deq_digi_init_from(&a);
-                        std::deque<DIGI> bb;
-                        deq_digi_it first_a, last_a;
-                        std::deque<DIGI>::iterator first_b, last_b;
-                        for(size_t pushes = 0; pushes < size2; pushes++)
-                        {
-                            const int value = TEST_RAND(TEST_MAX_VALUE);
-                            deq_digi_push_back(&aa, digi_init(value));
-                            bb.push_back(DIGI{value});
-                        }
-                        print_deq(&a);
-                        get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
-                        print_deq(&aa);
-                        const size_t index = TEST_RAND(a.size);
-                        deq_digi_it pos = deq_digi_begin(&a);
-                        deq_digi_it_advance(&pos, index);
-                        LOG ("insert_range at %zu:\n", index);
-                        b.insert(b.begin() + index, first_b, last_b);
-                        deq_digi_insert_range(&pos, &first_a, &last_a);
-                        print_deq(&a);
-                        print_deque(b);
-                        if (a.size != b.size())
-                            fail++;
-                        CHECK(a, b);
-                        deq_digi_free(&aa);
+                        deq_digi_push_back(&aa, digi_init(i));
+                        bb.push_back(DIGI{i});
                     }
+                    print_deq(&a);
+                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    print_deq(&aa);
+                    const size_t index = TEST_RAND(a.size);
+                    deq_digi_it pos = deq_digi_begin(&a);
+                    deq_digi_it_advance(&pos, index);
+                    LOG ("insert_range at %zu:\n", index);
+                    // libstdc++  fails on empty (uninitialized) front or back values
+                    b.insert(b.begin() + index, first_b, last_b);
+                    deq_digi_insert_range(&pos, &first_a, &last_a);
+                    print_deq(&a);
+                    print_deque(b);
+                    if (a.size != b.size())
+                        fail++;
+                    CHECK(a, b);
+                    deq_digi_free(&aa);
                     break;
+                }
                 case TEST_ERASE_RANGE:
                 {
                     int value = TEST_RAND(TEST_MAX_VALUE);
