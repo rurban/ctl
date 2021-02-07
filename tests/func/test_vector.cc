@@ -91,6 +91,19 @@ int random_element(vec_digi* a)
         assert(*(_ref->value) == *(*_iter).value)
 
 static void
+gen_vectors(vec_digi* a, std::vector<DIGI>& b, size_t size)
+{
+    *a = vec_digi_init();
+    a->compare = digi_compare;
+    a->equal = digi_equal;
+    for(int i = 0; i < (int)size; i++)
+    {
+        vec_digi_push_back(a, digi_init(i));
+        b.push_back(DIGI{i});
+    }
+}
+
+static void
 get_random_iters (vec_digi *a, vec_digi_it* first_a, vec_digi_it* last_a,
                   std::vector<DIGI>& b, std::vector<DIGI>::iterator &first_b,
                   std::vector<DIGI>::iterator &last_b)
@@ -217,6 +230,10 @@ main(void)
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EMPLACE) /* 39 */ \
+        TEST(UNION) \
+        TEST(DIFFERENCE) \
+        TEST(SYMMETRIC_DIFFERENCE) \
+        TEST(INTERSECTION) \
         TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(FIND_END) \
@@ -227,10 +244,6 @@ main(void)
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
-        TEST(UNION) \
-        TEST(DIFFERENCE) \
-        TEST(SYMETRIC_DIFFERENCE) \
-        TEST(INTERSECTION) \
         TEST(GENERATE_N) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_IT) \
@@ -321,7 +334,7 @@ main(void)
                         vec_digi_it to = vec_digi_begin(&a);
                         vec_digi_it_advance(&to, i2);
                         from = vec_digi_erase_range(&from, &to);
-                        auto it = b.erase(b.begin() + i1, b.begin() + i2);
+                        /*auto it =*/ b.erase(b.begin() + i1, b.begin() + i2);
                         //CHECK_ITER(from, b, it); // wrong return value
                         print_vec(&a);
                         print_vector(b);
@@ -751,9 +764,87 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-                case TEST_EQUAL_RANGE:
-                    printf("nyi\n");
+                case TEST_UNION:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_sort(&a);
+                    vec_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    vec_digi aaa = vec_digi_union(&a, &aa);
+                    std::vector<DIGI> bbb;
+                    std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
+                                   std::inserter(bbb, bbb.begin()));
+                    CHECK(aa, bb);
+                    vec_digi_reserve(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+                    vec_digi_free(&aaa);
+                    vec_digi_free(&aa);
                     break;
+                }
+                case TEST_INTERSECTION:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_sort(&a);
+                    vec_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    vec_digi aaa = vec_digi_intersection(&a, &aa);
+                    std::vector<DIGI> bbb;
+                    std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
+                                          std::inserter(bbb, bbb.begin()));
+                    CHECK(aa, bb);
+                    vec_digi_reserve(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+                    vec_digi_free(&aaa);
+                    vec_digi_free(&aa);
+                    break;
+                }
+                case TEST_SYMMETRIC_DIFFERENCE:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_sort(&a);
+                    vec_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    vec_digi aaa = vec_digi_symmetric_difference(&a, &aa);
+                    std::vector<DIGI> bbb;
+                    std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                                  std::inserter(bbb, bbb.begin()));
+                    CHECK(aa, bb);
+                    vec_digi_reserve(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+                    vec_digi_free(&aaa);
+                    vec_digi_free(&aa);
+                    break;
+                }
+                case TEST_DIFFERENCE:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_sort(&a);
+                    vec_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    print_vec(&a);
+                    vec_digi aaa = vec_digi_difference(&a, &aa);
+                    std::vector<DIGI> bbb;
+                    std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                        std::inserter(bbb, bbb.begin()));
+                    CHECK(aa, bb);
+                    vec_digi_reserve(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+                    vec_digi_free(&aaa);
+                    vec_digi_free(&aa);
+                    break;
+                }
                 case TEST_GENERATE_N: // TEST=40
                 {
                     size_t count = TEST_RAND(20);
@@ -856,6 +947,7 @@ main(void)
                 }
 #endif // 0
             default:
+                fail++;
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);
 #else

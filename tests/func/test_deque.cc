@@ -281,6 +281,21 @@ test_random_work_load(void)
     deq_digi_free(&a);
 }
 
+static void
+setup_deque(deq_digi* a, std::deque<DIGI>& b)
+{
+    size_t iters = TEST_RAND(TEST_MAX_SIZE);
+    *a = deq_digi_init();
+    a->compare = digi_compare;
+    a->equal = digi_equal;
+    for(size_t inserts = 0; inserts < iters; inserts++)
+    {
+        const int vb = TEST_RAND(TEST_MAX_VALUE);
+        deq_digi_push_back(a, digi_init(vb));
+        b.push_back(DIGI{vb});
+    }
+}
+
 int
 main(void)
 {
@@ -365,26 +380,26 @@ main(void)
             TEST(COUNT_IF) \
             TEST(COUNT_IF_RANGE) \
             TEST(COUNT_RANGE) \
+            TEST(DIFFERENCE) \
+            TEST(INTERSECTION) \
             TEST(GENERATE) \
             TEST(GENERATE_RANGE) \
             TEST(TRANSFORM) \
 
 #define FOREACH_DEBUG(TEST) \
             TEST(ERASE_RANGE) \
-            TEST(INSERT_RANGE) /* 26*/ \
+            TEST(INSERT_RANGE) /* 46 */ \
             TEST(EQUAL_RANGE) \
+            TEST(UNION) \
+            TEST(SYMMETRIC_DIFFERENCE) \
             TEST(FIND_END) \
             TEST(FIND_END_IF) \
-            TEST(FIND_END_RANGE) /* 45*/    \
+            TEST(FIND_END_RANGE) \
             TEST(FIND_END_IF_RANGE) \
             TEST(LOWER_BOUND) \
             TEST(UPPER_BOUND) \
             TEST(LOWER_BOUND_RANGE) \
             TEST(UPPER_BOUND_RANGE) \
-            TEST(UNION) \
-            TEST(DIFFERENCE) \
-            TEST(SYMETRIC_DIFFERENCE) \
-            TEST(INTERSECTION) \
             TEST(GENERATE_N) \
             TEST(GENERATE_N_RANGE) \
             TEST(TRANSFORM_IT) \
@@ -996,6 +1011,87 @@ main(void)
                     size_t numa = deq_digi_count_range(&first_a, &last_a, digi_init(v));
                     size_t numb = count(first_b, last_b, DIGI{v});
                     assert(numa == numb);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_UNION:
+                {
+                    deq_digi aa;
+                    std::deque<DIGI> bb;
+                    setup_deque(&aa, bb);
+                    deq_digi_sort(&a);
+                    deq_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    deq_digi aaa = deq_digi_union(&a, &aa);
+                    std::deque<DIGI> bbb;
+                    std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
+                                   std::inserter(bbb, bbb.begin()));
+                    CHECK(aa, bb);
+                    CHECK(aaa, bbb);
+                    deq_digi_free(&aaa);
+                    deq_digi_free(&aa);
+                    break;
+                }
+#endif
+                case TEST_INTERSECTION:
+                {
+                    deq_digi aa;
+                    std::deque<DIGI> bb;
+                    setup_deque(&aa, bb);
+                    deq_digi_sort(&a);
+                    deq_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    deq_digi aaa = deq_digi_intersection(&a, &aa);
+                    std::deque<DIGI> bbb;
+                    std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
+                                          std::inserter(bbb, bbb.begin()));
+                    CHECK(aa, bb);
+                    CHECK(aaa, bbb);
+                    deq_digi_free(&aaa);
+                    deq_digi_free(&aa);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_SYMMETRIC_DIFFERENCE:
+                {
+                    deq_digi aa;
+                    std::deque<DIGI> bb;
+                    setup_deque(&aa, bb);
+                    deq_digi_sort(&a);
+                    deq_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    deq_digi aaa = deq_digi_symmetric_difference(&a, &aa);
+                    std::deque<DIGI> bbb;
+                    std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                                  std::inserter(bbb, bbb.begin()));
+                    CHECK(aa, bb);
+                    CHECK(aaa, bbb);
+                    deq_digi_free(&aaa);
+                    deq_digi_free(&aa);
+                    break;
+                }
+#endif
+                case TEST_DIFFERENCE:
+                {
+                    deq_digi aa;
+                    std::deque<DIGI> bb;
+                    setup_deque(&aa, bb);
+                    deq_digi_sort(&a);
+                    deq_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    print_deq(&a);
+                    deq_digi aaa = deq_digi_difference(&a, &aa);
+                    std::deque<DIGI> bbb;
+                    std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                        std::inserter(bbb, bbb.begin()));
+                    CHECK(aa, bb);
+                    CHECK(aaa, bbb);
+                    deq_digi_free(&aaa);
+                    deq_digi_free(&aa);
                     break;
                 }
                 case TEST_GENERATE:

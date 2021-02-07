@@ -475,7 +475,7 @@ upper_bound                                                       .
 upper_bound_range
 binary_search
 binary_search_range
-equal_range                    .    .    .         .         .
+equal_range                         .    .                   .
 equal_range_range
 merge                                              x              .
 merge_range
@@ -483,13 +483,13 @@ inplace_merge
 inplace_merge_range
 includes
 includes_range
-difference                               .              x    x    x    x
+difference                     .         .    x    .    x    x    x    x
 set_difference_range
-intersection                             .              x    x    x    x
+intersection                   .         .    x    .    x    x    x    x
 set_intersection_range
-symmetric_difference                                    x    x    x    x
+symmetric_difference           .              .    .    x    x    x    x
 set_symmetric_difference_range
-union                                                   x    x    x    x
+union                          .              .    .    x    x    x    x
 set_union_range
 +----------------------------------------------------------------------------------------+
                                vec  str  arr  deq  list set  map  uset umap pqu  que  stk

@@ -144,7 +144,12 @@ JOIN(I, distance)(I* iter, I* other)
     return other->ref - iter->ref;
 }
 
+static inline A JOIN(A, init_from)(A* copy);
 static inline A JOIN(A, copy)(A* self);
+static inline void JOIN(A, push_back)(A* self, T value);
+#ifndef CTL_STR
+static inline I JOIN(A, find)(A* self, T key);
+#endif
 
 #include <ctl/bits/container.h>
 

@@ -173,14 +173,14 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
 
 #endif // USET (ranges)
 
-// set/uset have optimized implementation
-// these require now sorted containers
+// set/uset have optimized implementations.
+// these require now sorted containers.
 #if defined(CTL_LIST) || \
-    defined(CTL_VECTOR) || \
-    defined(CTL_ARRAY) || \
-    defined(CTL_STRING) || \
-    defined(CTL_DEQUE)
+    defined(CTL_VEC) || \
+    defined(CTL_STR) || \
+    defined(CTL_DEQ)
 
+// FIXME
 static inline A
 JOIN(A, union)(A* a, A* b)
 {
@@ -195,8 +195,12 @@ JOIN(A, union)(A* a, A* b)
 static inline int
 JOIN(A, _found)(A* a, T* ref)
 {
+#ifdef CTL_STR
+    return strchr(a->vector, *ref) ? 1 : 0;
+#else
     JOIN(A, it) iter = JOIN(A, find)(a, *ref);
     return !JOIN(I, done)(&iter);
+#endif
 }
 
 static inline A
@@ -219,6 +223,7 @@ JOIN(A, difference)(A* a, A* b)
     return self;
 }
 
+// FIXME
 static inline A
 JOIN(A, symmetric_difference)(A* a, A* b)
 {

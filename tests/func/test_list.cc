@@ -234,6 +234,10 @@ main(void)
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) /* 47 */ \
+        TEST(UNION) \
+        TEST(DIFFERENCE) \
+        TEST(SYMMETRIC_DIFFERENCE) \
+        TEST(INTERSECTION) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
@@ -242,10 +246,6 @@ main(void)
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
-        TEST(UNION) \
-        TEST(DIFFERENCE) \
-        TEST(SYMETRIC_DIFFERENCE) \
-        TEST(INTERSECTION) \
         TEST(GENERATE_N) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_IT) \
@@ -927,7 +927,85 @@ main(void)
                 break;
             }
 #ifdef DEBUG
-            case TEST_EQUAL_RANGE:
+            case TEST_UNION:
+            {
+                list_digi aa;
+                std::list<DIGI> bb;
+                setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                list_digi_sort(&a);
+                list_digi_sort(&aa);
+                b.sort();
+                bb.sort();
+                list_digi aaa = list_digi_union(&a, &aa);
+                std::list<DIGI> bbb;
+                std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
+                               std::inserter(bbb, bbb.begin()));
+                CHECK(aa, bb);
+                CHECK(aaa, bbb);
+                list_digi_free(&aaa);
+                list_digi_free(&aa);
+                break;
+            }
+            case TEST_INTERSECTION:
+            {
+                list_digi aa;
+                std::list<DIGI> bb;
+                setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                list_digi_sort(&a);
+                list_digi_sort(&aa);
+                b.sort();
+                bb.sort();
+                list_digi aaa = list_digi_intersection(&a, &aa);
+                std::list<DIGI> bbb;
+                std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
+                                      std::inserter(bbb, bbb.begin()));
+                CHECK(aa, bb);
+                CHECK(aaa, bbb);
+                list_digi_free(&aaa);
+                list_digi_free(&aa);
+                break;
+            }
+            case TEST_SYMMETRIC_DIFFERENCE:
+            {
+                list_digi aa;
+                std::list<DIGI> bb;
+                setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                list_digi_sort(&a);
+                list_digi_sort(&aa);
+                b.sort();
+                bb.sort();
+                list_digi aaa = list_digi_symmetric_difference(&a, &aa);
+                std::list<DIGI> bbb;
+                std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                              std::inserter(bbb, bbb.begin()));
+                CHECK(aa, bb);
+                CHECK(aaa, bbb);
+                list_digi_free(&aaa);
+                list_digi_free(&aa);
+                break;
+            }
+            case TEST_DIFFERENCE:
+            {
+                list_digi aa;
+                std::list<DIGI> bb;
+                setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                list_digi_sort(&a);
+                list_digi_sort(&aa);
+                b.sort();
+                bb.sort();
+                print_lst(&a);
+                list_digi aaa = list_digi_difference(&a, &aa);
+                std::list<DIGI> bbb;
+                std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                    std::inserter(bbb, bbb.begin()));
+                CHECK(aa, bb);
+                CHECK(aaa, bbb);
+                list_digi_free(&aaa);
+                list_digi_free(&aa);
+                break;
+            }
+#if 0
+            /*case TEST_EQUAL_RANGE:*/
             {
                 /*
                 int vb = TEST_RAND(TEST_MAX_VALUE);
@@ -941,6 +1019,7 @@ main(void)
                 */
                 break;
             }
+#endif
                 case TEST_GENERATE_N: // TEST=40
                 {
                     size_t count = TEST_RAND(20);
