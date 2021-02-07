@@ -90,6 +90,8 @@ for my $c (@c) {
     $m->{$c}->{$_} = 'x';
   }
 }
+$m->{list}->{erase_node} = 'x';
+$m->{set}->{erase_node} = 'x';
 for my $c (qw(vec str arr deq list set map uset umap)) {
   for (qw(begin end next foreach)) {
     $m->{$c}->{$_} = 'x';
