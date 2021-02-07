@@ -24,13 +24,18 @@ my %long = (
 my $m = {};
 my ($found, @m, @l, @n);
 while (<$in>) {
-  if (/^\+----+\+/) {
+  if (/^\|--------------------+\|/) {
     $found++; next;
   }
-  next if /^\s+vec/;
-  $found = 0 if /^```/;
+  next if /^\|\s+\|vec/;
+  #$found = 0 if /^```/;
   $found = 0 if /^## /;
-  if ($found and /^(\w+)/) {
+  if ($found and /^\|`(\w+)`/) {
+    push @m, $1;
+    push @l, $_; # for diff
+    $m->{$1} = {};
+  }
+  if ($found and /^\|(\w+)/) { # older format
     push @m, $1;
     push @l, $_; # for diff
     $m->{$1} = {};
@@ -107,41 +112,53 @@ my $M = 31; # longest method name
 
 sub line {
   # 30 + 5x @c
-  my $x = $M + 5 * @c - 3;
-  printf "+%s+\n", '-' x $x;
-  push @n, sprintf("+%s+\n", '-' x $x);
-}
-sub hdr {
-  printf "%-${M}s", '';
-  printf "%-5s", $_ for @c;
-  printf "\n";
-  my @x;
-  push @x, sprintf("%-${M}s", '');
+  # my $x = $M + 5 * @c - 3;
+  # printf "+%s+\n", '-' x $x;
+  # push @n, sprintf("+%s+\n", '-' x $x);
+  #printf "|" . $M x '-';
+  #printf '|-----' for @c;
+  #printf "|\n";
+  my $s = "|" . '-' x ($M + 2);
   for (@c) {
-    push @x, sprintf("%-5s", $_);
+    $s .= "|----";
   }
-  push @x, "\n";
-  push @n, join('', @x);
+  $s .= "|\n";
+  printf $s;
+  push @n, $s;
+}
+
+sub hdr {
+  #printf "|%-${M}s", '';
+  #printf "|%-5s", $_ for @c;
+  #printf "|\n";
+  #my @x;
+  my $s = "|" . ' ' x ($M + 2);
+  for (@c) {
+    $s .= sprintf("|%-4s", $_);
+  }
+  $s .= "|\n";
+  printf $s;
+  push @n, $s;
 }
 
 # print grid
 hdr();
 line();
 for (@m) {
-  printf "%-${M}s", $_;
-  my @x;
-  push @x, sprintf("%-${M}s", $_);
+  my $L = $M - length($_);
+  my $s = sprintf("|`%s`%s", $_, ' ' x $L);
   # sort methods in $m->{$c} by order in @c
   for my $c (@c) {
     my $x = $m->{$c}->{$_};
     $x = '' unless $x;
-    printf "%-5s", $x;
-    push @x, sprintf("%-5s", $x);
+    $s .= sprintf "| %-3s", $x;
+    #push @x, sprintf("| %-3s", $x);
   }
-  printf "\n";
-  push @x, "\n";
-  push @n, join('', @x);
-  if (/^(key_compare|range)$/) {
+  $s .= "|\n";
+  #push @x, "|\n";
+  printf $s;
+  push @n, $s;
+  if (/^\|`(key_compare|range)\s/) {
     line();
     hdr();
     line();
@@ -155,10 +172,10 @@ sub update {
   open my $out, '>', 'README.md.tmp' or die "$! README.md.tmp";
   $found = 0;
   while (<$in>) {
-    if (!$found and /^       \s+vec\s+str\s+/) {
+    if (!$found and /^\|       \s+\|vec\s+\|str\s+/) {
       $found++;
     }
-    $found = 0 if /^```/;
+    #$found = 0 if /^```/;
     $found = 0 if /^## /;
     if ($found) {
       for (@n) {
