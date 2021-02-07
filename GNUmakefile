@@ -358,11 +358,16 @@ define expand
 endef
 
 # we skip some git files per default: .github/ docs/subdirs
-dist:
+dist: man
+	-rm docs/man/index.h.3
+	-rm docs/man/memory.h.3
+	-rm docs/man/numeric.h.3
 	rm -rf ctl-${VERSION}
 	mkdir ctl-${VERSION}
 	mkdir -p ctl-${VERSION}/ctl/bits
 	mkdir -p ctl-${VERSION}/docs/images
+	mkdir -p ctl-${VERSION}/docs/man
+	cp docs/man/*.3 ctl-${VERSION}/docs/man/
 	mkdir -p ctl-${VERSION}/examples
 	mkdir -p ctl-${VERSION}/tests/{func,perf,verify}
 	mkdir -p ctl-${VERSION}/tests/perf/{arr,deq,lst,pqu,set,str,uset,vec}
