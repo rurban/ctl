@@ -36,7 +36,7 @@ typedef struct A
     size_t size;
     void (*free)(T*);
     T (*copy)(T*);
-    int (*compare)(T*, T*);
+    int (*compare)(T*, T*); // 2-way operator<
     int (*equal)(T*, T*);
 } A;
 
@@ -601,7 +601,7 @@ JOIN(A, _ranged_sort)(A* self, size_t from, size_t to, int _compare(T*, T*))
     // check overflow of a + 1
     if (LIKELY(from + 1 > from))
         for(size_t i = from + 1; i <= to; i++)
-            if(_compare(JOIN(A, at)(self, from), JOIN(A, at)(self, i)))
+            if(!_compare(JOIN(A, at)(self, from), JOIN(A, at)(self, i)))
             {
                 z++;
                 SWAP(T, JOIN(A, at)(self, z), JOIN(A, at)(self, i));

@@ -526,7 +526,8 @@ main(void)
                     if(a.size > 0)
                     {
                         const size_t index = TEST_RAND(a.size);
-                        int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : *vec_digi_at(&a, index)->value;
+                        int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
+                            : *vec_digi_at(&a, index)->value;
                         digi key = digi_init(value);
                         vec_digi_it aa = vec_digi_find(&a, key);
                         auto bb = find(b.begin(), b.end(), DIGI{value});

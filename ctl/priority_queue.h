@@ -62,7 +62,7 @@ JOIN(A, up)(A* self, size_t n)
         size_t p = (n - 1) / 2;
         T* x = &self->vector[n];
         T* y = &self->vector[p];
-        if(self->compare(x, y))
+        if(self->compare(y, x))
         {
             SWAP(T, x, y);
             JOIN(A, up)(self, p);
@@ -82,7 +82,7 @@ JOIN(A, down)(A* self, size_t n)
     {
         T* a = &self->vector[0];
         T* b = &self->vector[1];
-        if(!self->compare(a, b))
+        if(self->compare(a, b))
             SWAP(T, a, b);
     }
     else
@@ -91,10 +91,10 @@ JOIN(A, down)(A* self, size_t n)
         size_t r = 2 * n + 2;
         if(r < self->size)
         {
-            size_t index = self->compare(&self->vector[r], &self->vector[l]) ? r : l;
+            size_t index = self->compare(&self->vector[r], &self->vector[l]) ? l : r;
             T* x = &self->vector[index];
             T* y = &self->vector[n];
-            if(self->compare(x, y))
+            if(self->compare(y, x))
             {
                 SWAP(T, x, y);
                 JOIN(A, down)(self, index);

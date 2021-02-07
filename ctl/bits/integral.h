@@ -6,7 +6,8 @@
 /*
 #define _define_integral_compare(T)                                  \
     static inline int _##T##_compare(T* a, T* b) { return *a < *b; } \
-    static inline int _##T##_equal(T* a, T* b)   { return _##T##_compare(a, b) == 0; }
+    static inline int _##T##_equal(T* a, T* b) {                     \
+       return !_##T##_compare(a, b) && !_##T##_compare(b, a); }
 
 _define_integral_compare(int)
 _define_integral_compare(long)
@@ -23,7 +24,7 @@ _JOIN(A, _default_integral_compare3)(T* a, T* b)
 static inline int
 _JOIN(A, _default_integral_compare)(T* a, T* b)
 {
-    return *a > *b;
+    return *a < *b;
 }
 
 static inline int

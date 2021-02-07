@@ -79,7 +79,7 @@ create_test_string(size_t size)
 static int
 char_compare(char* a, char* b)
 {
-    return *a > *b;
+    return *a < *b;
 }
 
 int is_upper(char* a) {

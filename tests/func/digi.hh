@@ -30,7 +30,7 @@ digi_free(digi* self)
 static inline int
 digi_compare(digi* a, digi* b)
 {
-    return *b->value < *a->value;
+    return *a->value < *b->value;
 }
 
 static inline digi

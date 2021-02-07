@@ -1,5 +1,5 @@
 /* 
-  cbmc --trace --function main -I. tests/verify/set-find.c
+  cbmc --compact-trace --depth 6 --unwind 6 --function main -I. tests/verify/set-find.c
 */
 //#define USE_INTERNAL_VERIFY
 #include <assert.h>

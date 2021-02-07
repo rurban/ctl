@@ -27,7 +27,7 @@ typedef struct A
     T* vector;
     void (*free)(T*);
     T (*copy)(T*);
-    int (*compare)(T*, T*);
+    int (*compare)(T*, T*); // 2-way operator<
     int (*equal)(T*, T*); // optional
     size_t size;
     size_t capacity;
@@ -619,7 +619,7 @@ JOIN(A, _ranged_sort)(A* self, size_t a, size_t b, int _compare(T*, T*))
     // check overflow of a + 1
     if (LIKELY(a + 1 > a))
         for(size_t i = a + 1; i <= b; i++)
-            if(_compare(&self->vector[a], &self->vector[i]))
+            if(_compare(&self->vector[i], &self->vector[a]))
             {
                 z++;
                 SWAP(T, &self->vector[z], &self->vector[i]);

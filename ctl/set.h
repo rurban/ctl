@@ -30,7 +30,7 @@ typedef struct A
     size_t size;
     void (*free)(T*);
     T (*copy)(T*);
-    int (*compare)(T*, T*);
+    int (*compare)(T*, T*); // 2-way operator<
     int (*equal)(T*, T*);
 } A;
 

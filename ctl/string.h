@@ -58,7 +58,7 @@ str_end(str* self)
 static inline int
 str_char_compare(char* a, char* b)
 {
-    return *a > *b;
+    return *a < *b;
 }
 
 static inline int

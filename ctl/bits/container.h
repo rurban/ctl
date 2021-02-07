@@ -69,8 +69,8 @@ JOIN(A, equal)(A* self, A* other)
         }
         else
         {
-            if(self->compare(r1, r2) ||
-               self->compare(r2, r1))
+            // this works with 2-way and 3-way compare
+            if(self->compare(r1, r2) || self->compare(r2, r1))
                 return 0;
         }
         JOIN(I, next)(&i1);
@@ -91,8 +91,7 @@ JOIN(A, _equal)(A* self, T* a, T* b)
     if(self->equal)
         return self->equal(a, b);
     else
-        return !self->compare(a, b) &&
-               !self->compare(b, a);
+        return !self->compare(a, b) && !self->compare(b, a);
 }
 #endif
 

@@ -27,7 +27,7 @@ typedef struct A
     size_t size;
     void (*free)(T*);
     T (*copy)(T*);
-    int (*compare)(T*, T*);
+    int (*compare)(T*, T*); // 2-way operator<
     int (*equal)(T*, T*);
 } A;
 
@@ -613,7 +613,7 @@ JOIN(A, merge)(A* self, A* other)
     else
     {
         for(B* node = self->head; node; node = node->next)
-            while(!JOIN(A, empty)(other) && self->compare(&node->value, &other->head->value))
+            while(!JOIN(A, empty)(other) && !self->compare(&node->value, &other->head->value))
                 JOIN(A, transfer_before)(self, other, node, other->head);
         // Remainder.
         while(!JOIN(A, empty)(other))

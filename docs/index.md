@@ -542,6 +542,8 @@ Methods working on iterators don't need the container arg `(A* self)`.
 
 vector `swap` does `shrink_to_fit` as in the STL.
 
+The compare method is two-way `operator<` as in the STL, not `operator>` as in glouw/ctl.
+
 Redesigned iterators and better range support. Much closer to the STL, and
 much faster. Full generic iterator support is in `bits/iterator.h`, `algorithm.h`, the
 extended `range` methods, and `foreach_range`, `foreach_n`, `foreach_n_range` macros.
@@ -576,7 +578,7 @@ When assert is used, throw them. (when assert.h included, no NDEBUG. This is
 simlar to the no-exception abseil)
 glouw/ctl does not treat errors at all. There cannot be any.
 
-Added formal verification tests for many functions, via `cbmc`, and even caught
+Added formal verification tests for many functions, via `cbmc`, which even caught
 a set.find error not caught by review, nor random testing nor sanitizers.
 
 Support not only GNU make, but also BSD make and MSVC nmake.
