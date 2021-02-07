@@ -940,6 +940,9 @@ main(void)
                 std::list<DIGI> bbb;
                 std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
                                std::back_inserter(bbb));
+                print_list(b);
+                print_list(bb);
+                print_list(bbb);
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
                 list_digi_free(&aaa);

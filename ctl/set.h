@@ -189,7 +189,8 @@ JOIN(I, range)(I* iter, I* last)
 
 static inline A JOIN(A, init_from)(A* copy);
 static inline A JOIN(A, copy)(A* self);
-
+static inline B* JOIN(A, insert)(A* self, T key);
+    
 #include <ctl/bits/container.h>
 
 static inline A

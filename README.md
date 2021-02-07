@@ -389,7 +389,7 @@ x  stable and tested
 |`search_n`                       |    |    |    |    |    |    |    |    |    |    |    |    |
 |`search_n_range`                 |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_if`                        |    |    |    |    |    |    |    |    |    |    |    |    |
-|`copy_range`                     |    |    |    |    |    |    |    |    |    |    |    |    |
+|`copy_range`                     | .  |    |    | .  | .  |    |    |    |    |    |    |    |
 |`copy_if_range`                  |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_n`                         |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_n_range`                   |    |    |    |    |    |    |    |    |    |    |    |    |

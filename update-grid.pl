@@ -85,6 +85,7 @@ for (keys %long) {
 }
 
 # add common methods, untested per se
+# @c: vec str arr deq list set map uset umap pqu que stk
 for my $c (@c) {
   for (qw(init init_from free equal size max_size empty)) {
     $m->{$c}->{$_} = 'x';
@@ -100,6 +101,10 @@ for my $c (qw(vec str arr deq list set map uset umap)) {
 for my $c (qw(vec str arr deq list set map)) {
   for (qw(advance distance ref range foreach_range foreach_n foreach_n_range)) {
     $m->{$c}->{$_} = 'x';
+  }
+  # union tests copy_range
+  if ($c ne 'set' and $c ne 'map') {
+    $m->{$c}->{copy_range} = $m->{$c}->{union};
   }
 }
 for my $c (qw(uset umap)) {

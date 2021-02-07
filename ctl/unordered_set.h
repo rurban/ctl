@@ -313,6 +313,7 @@ JOIN(A, _equal)(A* self, T* a, T* b)
 
 static inline A JOIN(A, init_from)(A* copy);
 static inline A JOIN(A, copy)(A* self);
+static inline void JOIN(A, insert)(A* self, T value);
 
 #include <ctl/bits/container.h>
 

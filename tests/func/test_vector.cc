@@ -177,6 +177,16 @@ main(void)
                 LOG("mode direct\n");
                 vec_digi_resize(&a, size, digi_init(0));
                 b.resize(size);
+                for(int i = 0; i < (int)size; i++)
+                {
+#ifdef DEBUG
+                    const int vb = i;
+#else
+                    const int vb = TEST_RAND(TEST_MAX_VALUE);
+#endif
+                    vec_digi_set(&a, i, digi_init(vb));
+                    b[i] = DIGI{vb};
+                }
             }
             if(mode == MODE_GROWTH)
             {
@@ -779,8 +789,16 @@ main(void)
                     std::vector<DIGI> bbb;
                     std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
                                    std::back_inserter(bbb));
+                    LOG("STL b + bb => bbb\n");
+                    print_vector(b);
+                    print_vector(bb);
+                    print_vector(bbb);
+                    LOG("STL a + aaa => aaa\n");
                     CHECK(aa, bb);
-                    vec_digi_reserve(&aaa, bbb.capacity());
+                    //vec_digi_reserve(&aaa, bbb.capacity());
+                    print_vec(&a);
+                    print_vec(&aa);
+                    print_vec(&aaa);
                     CHECK(aaa, bbb);
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);

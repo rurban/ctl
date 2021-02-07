@@ -173,6 +173,7 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
 
 #endif // USET (ranges)
 
+
 // set/uset have optimized implementations.
 // these require now sorted containers.
 #if defined(CTL_LIST) || \
@@ -180,16 +181,15 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
     defined(CTL_STR) || \
     defined(CTL_DEQ)
 
-// FIXME
-static inline A
-JOIN(A, union)(A* a, A* b)
+static inline A*
+JOIN(A, copy_range)(I* range, A* out)
 {
-    A self = JOIN(A, init_from)(a);
-    foreach(A, a, it1)
-        JOIN(A, push_back)(&self, self.copy(it1.ref));
-    foreach(A, b, it2)
-        JOIN(A, push_back)(&self, self.copy(it2.ref));
-    return self;
+    while(!JOIN(I, done)(range))
+    {
+        JOIN(A, push_back)(out, out->copy(range->ref));
+        JOIN(I, next)(range);
+    }
+    return out;
 }
 
 static inline int
@@ -201,6 +201,33 @@ JOIN(A, _found)(A* a, T* ref)
     JOIN(A, it) iter = JOIN(A, find)(a, *ref);
     return !JOIN(I, done)(&iter);
 #endif
+}
+
+// FIXME
+static inline A
+JOIN(A, union)(A* a, A* b)
+{
+    A self = JOIN(A, init_from)(a);
+    JOIN(A, it) it1 = JOIN(A, begin)(a);
+    JOIN(A, it) it2 = JOIN(A, begin)(b);
+    while(!JOIN(I, done)(&it1))
+    {
+        if (JOIN(I, done)(&it2))
+            return *JOIN(A, copy_range)(&it1, &self);
+        if (self.compare(it2.ref, it1.ref))
+        {
+            JOIN(A, push_back)(&self, self.copy(it2.ref));
+            JOIN(I, next)(&it2);
+        }
+        else
+        {
+            JOIN(A, push_back)(&self, self.copy(it1.ref));
+            if (!self.compare(it1.ref, it2.ref))
+                JOIN(I, next)(&it2);
+            JOIN(I, next)(&it1);
+        }
+    }
+    return *JOIN(A, copy_range)(&it2, &self);
 }
 
 static inline A
@@ -393,6 +420,18 @@ JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*
 }
 #endif //DEBUG
 
+#else // USET/SET
+// no push_back, but insert
+static inline A*
+JOIN(A, copy_range)(I* range, A* out)
+{
+    while(!JOIN(I, done)(range))
+    {
+        JOIN(A, insert)(out, out->copy(range->ref));
+        JOIN(I, next)(range);
+    }
+    return out;
+}
 #endif // USET/SET inserter
 
 #if !defined(CTL_USET)
