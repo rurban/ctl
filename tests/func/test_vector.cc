@@ -90,6 +90,7 @@ int random_element(vec_digi* a)
     if (_iter != b.end())                                         \
         assert(*(_ref->value) == *(*_iter).value)
 
+#ifdef DEBUG
 static void
 gen_vectors(vec_digi* a, std::vector<DIGI>& b, size_t size)
 {
@@ -102,6 +103,7 @@ gen_vectors(vec_digi* a, std::vector<DIGI>& b, size_t size)
         b.push_back(DIGI{i});
     }
 }
+#endif
 
 static void
 get_random_iters (vec_digi *a, vec_digi_it* first_a, vec_digi_it* last_a,
