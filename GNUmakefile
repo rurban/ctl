@@ -184,13 +184,10 @@ examples: $(EXAMPLES)
 VERIFY = $(patsubst %.c,%, $(wildcard tests/verify/*.c))
 tests/verify/% : tests/verify/%.c $(H)
 	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
-	-cbmc --unwind 6 -I. $@.c
-tests/verify/uset-1 : tests/verify/uset-1.c $(H)
-	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
-	-cbmc --unwind 4 -I. $@.c
+	-cbmc --compact-trace --depth 6 --unwind 6 -I. $@.c
 tests/verify/%-2 : tests/verify/%-2.c $(H)
 	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
-	-cbmc --unwind 6 -I. $@.c
+	-cbmc --compact-trace --depth 6 --unwind 6 -I. $@.c
 	-for c in `satabs --show-claims -I. $@.c | \
                    perl -lne'/Claim (main.\d+):/ && print $$1'`; do \
              timeout 5m satabs --concurrency --max-threads 4 --iterations 24 --claim $$c -I. $@.c; \
