@@ -72,8 +72,23 @@ JOIN(I, iter)(A* self, size_t index)
 {
     static I zero;
     I iter = zero;
+//#ifndef DISALLOW_OVERFLOW
     iter.ref = &self->vector[index];
     iter.end = &self->vector[self->size];
+/*
+#else
+    // breaks distance, index, advance
+    if (index < self->size)
+    {
+        iter.ref = &self->vector[index];
+        iter.end = &self->vector[self->size];
+    }
+    else
+    {
+        iter.ref = iter.end = NULL;
+    }
+#endif
+*/
     iter.container = self;
     return iter;
 }
