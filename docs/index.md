@@ -356,29 +356,29 @@ range                          x    x    x    x    x    x    x
 +----------------------------------------------------------------------------------------+
                                vec  str  arr  deq  list set  map  uset umap pqu  que  stk
 +----------------------------------------------------------------------------------------+
-all_of                         x    x    x         x    x    .    x
-any_of                         x    x    x         x    x    .    x
-none_of                        x    x    x         x    x    .    x
-all_of_range                   x    x    x         x    x    .
-any_of_range                   x    x    x         x    x    .
-none_of_range                  x    x    x         x    x    .
+all_of                         x    x    x    x    x    x    .    x
+any_of                         x    x    x    x    x    x    .    x
+none_of                        x    x    x    x    x    x    .    x
+all_of_range                   x    x    x    x    x    x    .
+any_of_range                   x    x    x    x    x    x    .
+none_of_range                  x    x    x    x    x    x    .
 foreach                        x    x    x    x    x    x    x    x    x
 foreach_range                  x    x    x    x    x    x    x
 foreach_n                      x    x    x    x    x    x    x
 foreach_n_range                x    x    x    x    x    x    x
-count                          x    x    x         x    x    x    x    x
-count_range                    x    x    x         x    x    .
-count_if                       x    x    x         x    x    .    x
-count_if_range                 x    x    x         x    x    .
+count                          x    x    x    x    x    x    x    x    x
+count_range                    x    x    x    x    x    x    .
+count_if                       x    x    x    x    x    x    .    x
+count_if_range                 x    x    x    x    x    x    .
 mismatch
 mismatch_range
-find_if                        x         x         x    x    .    x
-find_if_not                    x         x         x    x    .    x
-find_range                     x    x    x         x    x    .
-find_if_range                  x    x    x         x    x    .
-find_if_not_range              x    x    x         x    x    .
-find_end                       .                   .    .
-find_end_range                 .                   .    .
+find_if                        x         x    x    x    x    .    x
+find_if_not                    x         x    x    x    x    .    x
+find_range                     x    x    x    x    x    x    .
+find_if_range                  x    x    x    x    x    x    .
+find_if_not_range              x    x    x    x    x    x    .
+find_end                       .              .    .    .
+find_end_range                 .              .    .    .
 find_first_of                       x
 find_first_of_range
 adjacent_find
@@ -402,14 +402,14 @@ fill                                     x
 fill_range
 fill_n                                   x
 fill_n_range
-transform                      x    x    x         x    .         .
-transform_it                   .    x    .         .    .
-transform_range                .    .    .         .    .
+transform                      x    x    x    x    x    .         .
+transform_it                   .    x    .    .    .    .
+transform_range                .    .    .    .    .    .
 transform_it_range
-generate                       x    x    x         x    .         .
-generate_range                 x    x    x         x    .
-generate_n                     .    .    .         .    .
-generate_n_range               .    .    .         .    .
+generate                       x    x    x    x    x    .         .
+generate_range                 x    x    x    x    x    .
+generate_n                     .    .    .    .    .    .
+generate_n_range               .    .    .    .    .    .
 remove                                             x
 remove_if                      x              x    x    x         .
 remove_copy

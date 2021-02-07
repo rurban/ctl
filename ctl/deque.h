@@ -89,6 +89,17 @@ JOIN(A, at)(A* self, size_t index)
     }
 }
 
+static inline void
+JOIN(A, shrink_to_fit)(A* self)
+{
+    if (self->capacity > self->size)
+    {
+        LOG("TODO shrink_to_fit %zu to %zu\n", self->capacity, self->size);
+    }
+    // Not needed. pop_back and pop_front are self-shrinking
+    return;
+}
+
 static inline T*
 JOIN(A, front)(A* self)
 {
@@ -516,14 +527,31 @@ JOIN(A, emplace_back)(A* self, T* value)
     JOIN(A, push_back)(self, *value);
 }
 
-static inline I*
+static inline void /* I* */
 JOIN(A, insert_range)(I* pos, I* first, I* last)
 {
     A* self = pos->container;
-    foreach_range(A, iter, first, last)
-        if (iter.ref)
-            JOIN(A, insert_index)(self, iter.index, self->copy(iter.ref));
+    size_t index = pos->index;
+    // safe against realloc within same container: relative indices only.
+    // The STL cannot do that.
+    if(!JOIN(I, done)(pos))
+    {
+        foreach_range(A, iter, first, last)
+            if (iter.ref)
+                JOIN(A, insert_index)(self, index++, self->copy(iter.ref));
+    }
+    else
+    {
+        foreach_range(A, iter, first, last)
+            if (iter.ref)
+                JOIN(A, push_back)(self, self->copy(iter.ref));
+    }
+    /*
+    if (pos->index)
+        pos->index--;
+    pos->ref = JOIN(A, at)(self, pos->index); // bounds-checked (not at end)
     return pos;
+    */
 }
 
 static inline I*

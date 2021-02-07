@@ -166,9 +166,9 @@ inserts value before pos.
 
 inserts count values before pos.
 
-    I* insert_range (I* pos, I* first, I* last)
+    insert_range (I* pos, I* first, I* last)
 
-inserts values from range [first, last) before pos. _(in work)_
+inserts values from range [first, last) before pos.
 
     emplace (I* pos, T* value)
 

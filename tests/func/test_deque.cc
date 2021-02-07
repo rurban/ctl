@@ -34,6 +34,7 @@ void print_deque(std::deque<DIGI> &b)
 }
 
 #ifdef DEBUG
+#define TEST_MAX_SIZE 15
 #define TEST_MAX_VALUE 1000
 #else
 #define TEST_MAX_VALUE INT_MAX
@@ -69,9 +70,9 @@ void print_deque(std::deque<DIGI> &b)
         assert(*_y.at(_i).value == *deq_digi_at(&_x, _i)->value); \
 }
 #define CHECK_ITER(cit,_y,iter)                                   \
-    assert(cit->index == std::distance(_y.begin(), iter))
+    assert((long)(cit).index == std::distance(_y.begin(), iter))
 
-#else
+#else // DEBUG
 
 #define CHECK(_x, _y) {                                           \
     assert(_x.size == _y.size());                                 \
@@ -105,15 +106,69 @@ void print_deque(std::deque<DIGI> &b)
         assert(*_y.at(_i).value == *deq_digi_at(&_x, _i)->value); \
 }
 #define CHECK_ITER(cit,_y,iter) {                                 \
-    size_t _dist = std::distance(_y.begin(), iter);               \
-    if ((cit)->index != _dist)                                    \
-        fprintf(stderr, "CTL iter %zu vs STL %zu\n",              \
-                (cit)->index,_dist);                              \
-    assert((cit)->index == _dist);                                \
+    long _dist = std::distance(_y.begin(), iter);                 \
+    if ((long)(cit).index != _dist)                               \
+        fprintf(stderr, "CTL index %zu vs STL %zu\n",             \
+                (cit).index,_dist);                               \
+    assert((long)(cit).index == _dist);                           \
 }
 
 #endif
 
+int random_element(deq_digi* a)
+{
+    const size_t index = TEST_RAND(a->size);
+    if (!a->size)
+        return 0;
+    digi *vp = deq_digi_at(a, index);
+    return *vp->value;
+}
+
+static void
+get_random_iters (deq_digi *a, deq_digi_it* first_a, deq_digi_it* last_a,
+                  std::deque<DIGI>& b, std::deque<DIGI>::iterator &first_b,
+                  std::deque<DIGI>::iterator &last_b)
+{
+    size_t r1 = TEST_RAND(a->size / 2);
+    const size_t rnd = TEST_RAND(a->size / 2);
+    size_t r2 = MIN(r1 + rnd, a->size);
+    LOG("iters %zu, %zu of %zu\n", r1, r2, a->size);
+    if (a->size)
+    {
+        deq_digi_it it1 = deq_digi_begin(a);
+        first_b = b.begin();
+        deq_digi_it_advance(&it1, r1);
+        first_b += r1;
+        *first_a = it1;
+
+        if (r1 == r2)
+        {
+            *last_a = it1;
+            last_b = first_b;
+        }
+        else if (r2 == a->size)
+        {
+            *last_a = deq_digi_end(a);
+            last_b = b.end();
+        }
+        else
+        {
+            deq_digi_it it2 = deq_digi_begin(a);
+            last_b = b.begin();
+            deq_digi_it_advance(&it2, r2);
+            last_b += r2;
+            *last_a = it2;
+        }
+    }
+    else
+    {
+        deq_digi_it end = deq_digi_end(a);
+        *first_a = end;
+        *last_a = end;
+        first_b = b.begin();
+        last_b = b.end();
+    }
+}
 
 // TESTS DEQ STABILITY WITH SELF CLEANUP.
 // EDGE CASE:
@@ -255,13 +310,13 @@ main(void)
             std::deque<DIGI> b;
             if(mode == MODE_DIRECT)
             {
-                LOG("mode DIRECT\n");
+                LOG("mode direct\n");
                 deq_digi_resize(&a, size, digi_init(0));
                 b.resize(size);
             }
             if(mode == MODE_GROWTH)
             {
-                LOG("mode GROWTH\n");
+                LOG("mode growth\n");
                 for(size_t pushes = 0; pushes < size; pushes++)
                 {
                     const int value = TEST_RAND(TEST_MAX_VALUE);
@@ -295,10 +350,6 @@ main(void)
             TEST(ASSIGN) \
             TEST(EQUAL) \
             TEST(FIND) \
-
-#define FOREACH_DEBUG(TEST) \
-            TEST(ERASE_RANGE) \
-            TEST(INSERT_RANGE) \
             TEST(FIND_IF) \
             TEST(FIND_IF_NOT) \
             TEST(FIND_RANGE) \
@@ -314,10 +365,17 @@ main(void)
             TEST(COUNT_IF) \
             TEST(COUNT_IF_RANGE) \
             TEST(COUNT_RANGE) \
+            TEST(GENERATE) \
+            TEST(GENERATE_RANGE) \
+            TEST(TRANSFORM) \
+
+#define FOREACH_DEBUG(TEST) \
+            TEST(ERASE_RANGE) \
+            TEST(INSERT_RANGE) /* 26*/ \
             TEST(EQUAL_RANGE) \
             TEST(FIND_END) \
             TEST(FIND_END_IF) \
-            TEST(FIND_END_RANGE) \
+            TEST(FIND_END_RANGE) /* 45*/    \
             TEST(FIND_END_IF_RANGE) \
             TEST(LOWER_BOUND) \
             TEST(UPPER_BOUND) \
@@ -327,13 +385,10 @@ main(void)
             TEST(DIFFERENCE) \
             TEST(SYMETRIC_DIFFERENCE) \
             TEST(INTERSECTION) \
-            TEST(GENERATE) /* 34 */ \
-            TEST(GENERATE_RANGE) \
-            TEST(TRANSFORM) \
             TEST(GENERATE_N) \
             TEST(GENERATE_N_RANGE) \
             TEST(TRANSFORM_IT) \
-            TEST(TRANSFORM_RANGE) \
+            TEST(TRANSFORM_RANGE) /* 61 */ \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -420,6 +475,12 @@ main(void)
                     b.resize(resize);
                     deq_digi_resize(&a, resize, digi_init(0));
                     CHECK(a, b);
+                    break;
+                }
+                case TEST_SHRINK_TO_FIT:
+                {
+                    deq_digi_shrink_to_fit(&a);
+                    b.shrink_to_fit();
                     break;
                 }
                 case TEST_SORT:
@@ -556,7 +617,7 @@ main(void)
                     }
                     break;
                 }
-                case TEST_ERASE_INDEX:
+                case TEST_ERASE_INDEX: // 25
                     if(a.size > 0)
                     {
                         const size_t index = TEST_RAND(a.size);
@@ -568,46 +629,37 @@ main(void)
                     CHECK(a, b);
                     break;
 #ifdef DEBUG
-                case TEST_INSERT_RANGE:
-                    // FIXME fails in C++ (gnu libstdc++, and llvm libc++)
-                    // break;
-                {
-                    const size_t i1 = TEST_RAND(a.size - 2);
-                    const size_t i2 = i1 + TEST_RAND(a.size - 3);
-                    const long i3 =  i2 + TEST_RAND(a.size - i2);
-
-                    if (a.size > 2 && i2 < a.size && (size_t)i3 <= a.size)
+                case TEST_INSERT_RANGE: // 26
+                    if (a.size > 2)
                     {
-                        deq_digi aa = deq_digi_copy(&a);
-                        std::deque<DIGI> bb = b;
-                        deq_digi_it *it;
-                        deq_digi_it pos   = deq_digi_begin(&a);
-                        deq_digi_it first = deq_digi_begin(&a);
-                        deq_digi_it last  = deq_digi_begin(&a);
-                        deq_digi_it_advance(&pos, i1);
-                        deq_digi_it_advance(&first, i2);
-                        deq_digi_it_advance(&last, i3);
-                        it = deq_digi_insert_range(&pos, &first, &last);
-                        LOG ("CTL insert_range at %zu, [%zu - %ld):\n", i1, i2, i3);
-                        print_deq (&a);
-
-                        // The STL cannot insert from its own, needs a copy
-#if __cplusplus >= 201103L
-                        std::deque<DIGI>::iterator iter =
-#endif
-                            b.insert(b.begin() + i1, bb.begin() + i2, bb.begin() + i3);
-                        LOG ("STL insert at %ld:\n", i1);
-#if __cplusplus >= 201103L
-                        CHECK_ITER (it, b, iter);
-#endif
-                        print_deque (b);
+                        size_t size2 = TEST_RAND(TEST_MAX_SIZE);
+                        deq_digi aa = deq_digi_init_from(&a);
+                        std::deque<DIGI> bb;
+                        deq_digi_it first_a, last_a;
+                        std::deque<DIGI>::iterator first_b, last_b;
+                        for(size_t pushes = 0; pushes < size2; pushes++)
+                        {
+                            const int value = TEST_RAND(TEST_MAX_VALUE);
+                            deq_digi_push_back(&aa, digi_init(value));
+                            bb.push_back(DIGI{value});
+                        }
+                        print_deq(&a);
+                        get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                        print_deq(&aa);
+                        const size_t index = TEST_RAND(a.size);
+                        deq_digi_it pos = deq_digi_begin(&a);
+                        deq_digi_it_advance(&pos, index);
+                        LOG ("insert_range at %zu:\n", index);
+                        b.insert(b.begin() + index, first_b, last_b);
+                        deq_digi_insert_range(&pos, &first_a, &last_a);
+                        print_deq(&a);
+                        print_deque(b);
                         if (a.size != b.size())
                             fail++;
-                        //CHECK(a, b);
+                        CHECK(a, b);
                         deq_digi_free(&aa);
                     }
                     break;
-                }
                 case TEST_ERASE_RANGE:
                 {
                     int value = TEST_RAND(TEST_MAX_VALUE);
@@ -632,11 +684,11 @@ main(void)
                     std::deque<DIGI>::iterator iter =
                         b.erase(b.begin() + index, b.end() - iend);
                     LOG ("STL erase [%ld, %ld):\n", std::distance(b.begin(), iter), iend);
-                    CHECK_ITER (pos, b, iter);
+                    CHECK_ITER (*pos, b, iter);
                     print_deque (b);
                     if (a.size != b.size())
                         fail++;
-                    //CHECK(a, b);
+                    CHECK(a, b);
                     break;
                 }
 #endif
@@ -772,6 +824,326 @@ main(void)
                     }
                     break;
                 }
+                case TEST_FIND_IF:
+                {
+                    deq_digi_it it = deq_digi_find_if(&a, digi_is_odd);
+                    auto bb = std::find_if(b.begin(), b.end(), DIGI_is_odd);
+                    if(bb == b.end())
+                        assert(deq_digi_it_done(&it));
+                    else
+                        assert(*(it.ref->value) == *bb->value);
+                    break;
+                }
+                case TEST_FIND_IF_NOT:
+                {
+                    deq_digi_it aa = deq_digi_find_if_not(&a, digi_is_odd);
+                    auto bb = std::find_if_not(b.begin(), b.end(), DIGI_is_odd);
+                    print_deq(&a);
+                    print_deque(b);
+                    CHECK_ITER(aa, b, bb);
+                    if(bb == b.end())
+                        assert(deq_digi_it_done(&aa));
+                    else
+                        assert(*(aa.ref->value) == *bb->value);
+                    break;
+                }
+                case TEST_ALL_OF:
+                {
+                    bool is_a = deq_digi_all_of(&a, digi_is_odd);
+                    bool is_b = std::all_of(b.begin(), b.end(), DIGI_is_odd);
+                    assert(is_a == is_b);
+                    break;
+                }
+                case TEST_ANY_OF:
+                {
+                    bool is_a = deq_digi_any_of(&a, digi_is_odd);
+                    bool is_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
+                    assert(is_a == is_b);
+                    break;
+                }
+                case TEST_NONE_OF:
+                {
+                    bool is_a = deq_digi_none_of(&a, digi_is_odd);
+                    bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
+                    assert(is_a == is_b);
+                    break;
+                }
+                case TEST_COUNT:
+                {
+                    int key = TEST_RAND(TEST_MAX_SIZE);
+                    int aa = deq_digi_count(&a, digi_init(key));
+                    int bb = std::count(b.begin(), b.end(), DIGI{key});
+                    assert(aa == bb);
+                    break;
+                }
+                case TEST_COUNT_IF:
+                {
+                    size_t count_a = deq_digi_count_if(&a, digi_is_odd);
+                    size_t count_b = std::count_if(b.begin(), b.end(), DIGI_is_odd);
+                    assert(count_a == count_b);
+                    break;
+                }
+                case TEST_FIND_RANGE:
+                {
+                    int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
+                        : random_element(&a);
+                    digi key = digi_init(vb);
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    first_a = deq_digi_find_range(&first_a, &last_a, key);
+                    auto it = find(first_b, last_b, vb);
+                    CHECK_ITER(first_a, b, it);
+                    digi_free (&key); // special
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_FIND_IF_RANGE:
+                {
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    first_a = deq_digi_find_if_range(&first_a, &last_a, digi_is_odd);
+                    auto it = find_if(first_b, last_b, DIGI_is_odd);
+                    print_deq(&a);
+                    print_deque(b);
+                    CHECK_ITER(first_a, b, it);
+                    break;
+                }
+                case TEST_FIND_IF_NOT_RANGE:
+                {
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    first_a = deq_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
+                    auto it = find_if_not(first_b, last_b, DIGI_is_odd);
+                    CHECK_ITER(first_a, b, it);
+                    break;
+                }
+                case TEST_ALL_OF_RANGE:
+                {
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    bool aa = deq_digi_all_of_range(&first_a, &last_a, digi_is_odd);
+                    bool bb = std::all_of(first_b, last_b, DIGI_is_odd);
+                    if (aa != bb)
+                    {
+                        print_deq(&a);
+                        print_deque(b);
+                        printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                    }
+                    assert(aa == bb);
+                    break;
+                }
+                case TEST_ANY_OF_RANGE:
+                {
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    bool aa = deq_digi_any_of_range(&first_a, &last_a, digi_is_odd);
+                    bool bb = std::any_of(first_b, last_b, DIGI_is_odd);
+                    if (aa != bb)
+                    {
+                        print_deq(&a);
+                        print_deque(b);
+                        printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                    }
+                    assert(aa == bb);
+                    break;
+                }
+                case TEST_NONE_OF_RANGE:
+                {
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    bool aa = deq_digi_none_of_range(&first_a, &last_a, digi_is_odd);
+                    bool bb = none_of(first_b, last_b, DIGI_is_odd);
+                    if (aa != bb)
+                    {
+                        print_deq(&a);
+                        print_deque(b);
+                        printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                    }
+                    assert(aa == bb);
+                    break;
+                }
+                case TEST_COUNT_IF_RANGE:
+                {
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    size_t numa = deq_digi_count_if_range(&first_a, &last_a, digi_is_odd);
+                    size_t numb = count_if(first_b, last_b, DIGI_is_odd);
+                    if (numa != numb)
+                    {
+                        print_deq(&a);
+                        print_deque(b);
+                        printf ("%d != %d FAIL\n", (int)numa, (int)numb);
+                        fail++;
+                    }
+                    assert(numa == numb); //fails. off by one, counts one too much
+                    break;
+                }
+                case TEST_COUNT_RANGE:
+                {
+                    int test_value = 0;
+                    int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
+                        : test_value;
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    // used to fail with 0,0 of 0
+                    size_t numa = deq_digi_count_range(&first_a, &last_a, digi_init(v));
+                    size_t numb = count(first_b, last_b, DIGI{v});
+                    assert(numa == numb);
+                    break;
+                }
+                case TEST_GENERATE:
+                {
+                    digi_generate_reset();
+                    deq_digi_generate(&a, digi_generate);
+                    digi_generate_reset();
+                    std::generate(b.begin(), b.end(), DIGI_generate);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_GENERATE_RANGE:
+                {
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    digi_generate_reset();
+                    deq_digi_generate_range(&first_a, &last_a, digi_generate);
+                    digi_generate_reset();
+                    std::generate(first_b, last_b, DIGI_generate);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_TRANSFORM:
+                {
+                    deq_digi aa = deq_digi_transform(&a, digi_untrans);
+                    std::deque<DIGI> bb;
+                    bb.resize(b.size());
+                    std::transform(b.begin(), b.end(), bb.begin(), DIGI_untrans);
+                    CHECK(aa, bb);
+                    CHECK(a, b);
+                    deq_digi_free(&aa);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_GENERATE_N: // TEST=
+                {
+                    size_t count = TEST_RAND(20);
+                    digi_generate_reset();
+                    deq_digi_generate_n(&a, count, digi_generate);
+                    digi_generate_reset();
+                    std::generate_n(b.begin(), count, DIGI_generate);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_GENERATE_N_RANGE:
+                {
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    size_t off = first_b - b.begin();
+                    size_t count = TEST_RAND(20 - off);
+                    digi_generate_reset();
+                    deq_digi_generate_n_range(&first_a, count, digi_generate);
+                    digi_generate_reset();
+                    std::generate_n(first_b, count, DIGI_generate);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_TRANSFORM_IT:
+                {
+                    deq_digi_it pos = deq_digi_begin(&a);
+                    deq_digi_it_advance(&pos, 1);
+                    deq_digi aa = deq_digi_transform_it(&a, &pos, digi_bintrans);
+                    std::deque<DIGI> bb;
+                    bb.resize(b.size());
+                    std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), DIGI_bintrans);
+                    CHECK(aa, bb);
+                    CHECK(a, b);
+                    deq_digi_free(&aa);
+                    break;
+                }
+                case TEST_TRANSFORM_RANGE:
+                {
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    deq_digi aa = deq_digi_init();
+                    deq_digi_resize(&aa, last_b - first_b, digi_init(0));
+                    deq_digi_it dest = deq_digi_begin(&aa);
+                    deq_digi_it it = deq_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
+                    std::deque<DIGI> bb;
+                    bb.resize(last_b - first_b);
+                    auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(), DIGI_bintrans);
+                    CHECK_ITER(it, bb, iter);
+                    CHECK(aa, bb);
+                    // heap use-after-free
+                    CHECK(a, b);
+                    deq_digi_free(&aa);
+                    break;
+                }
+#if 0
+                case TEST_FIND_END:
+                {
+                    if(a.size > 0)
+                    {
+                        deq_digi_it first_a, last_a;
+                        deq_digi_it s_first, s_last;
+                        deq_digi_it aa = deq_digi_find_end(&a, &s_first, &s_last);
+                        auto bb = find_end(b.begin(), b.end(), ...);
+                        bool found_a = !deq_digi_it_done(&aa);
+                        bool found_b = bb != b.end();
+                        assert(found_a == found_b);
+                        if(found_a && found_b)
+                            assert(*(aa->value) == *bb->value);
+                    }
+                    break;
+                }
+                case TEST_FIND_END_RANGE:
+                {
+                    deq_digi_it first_a, last_a, s_first_a, s_last_a;
+                    std::deque<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+# if __cpp_lib_erase_if >= 202002L
+                    first_a = deq_digi_find_end_range(&first_a, &last_a, &s_first_a, &s_last_a);
+                    auto it = find_end(first_b, last_b, vb);
+                    CHECK_ITER(first_a, b, it);
+                    CHECK(a, b);
+# endif
+                    break;
+                }
+                case TEST_FIND_END_IF_RANGE:
+                {
+                    deq_digi_it first_a, last_a, s_first, s_last;
+                    std::deque<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+# if __cpp_lib_erase_if >= 202002L
+                    first_a = deq_digi_find_end_if_range(&first_a, &last_a, &s_first,
+                                                         &s_last, digi_is_odd);
+                    auto it = find_end(first_b, last_b, s_first_b, s_last_b, DIGI_is_odd);
+                    CHECK_ITER(first_a, b, it);
+                    digi_free (&key); // special
+                    CHECK(a, b);
+# endif
+                    break;
+                }
+#endif // FIND_END 0
+
+#endif // DEBUG
+
+                default:
+#ifdef DEBUG
+                    printf("unhandled testcase %d %s\n", which, test_names[which]);
+#else
+                    printf("unhandled testcase %d\n", which);
+#endif
+                    break;
             }
 #ifdef DEBUG
             if (which < TEST_ERASE_RANGE)
