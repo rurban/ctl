@@ -817,7 +817,7 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-#endif
+#endif // DEBUG
                 case TEST_UNION:
                 {
                     vec_digi aa;
@@ -919,7 +919,7 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#endif
+#endif // DEBUG
                 case TEST_UNION_RANGE:
                 {
                     vec_digi aa;
@@ -1003,6 +1003,88 @@ main(void)
                     break;
                 }
 #ifdef DEBUG
+                case TEST_DIFFERENCE_RANGE:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_sort(&a);
+                    vec_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    vec_digi_it first_a1, last_a1;
+                    std::vector<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    vec_digi_it first_a2, last_a2;
+                    std::vector<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    print_vec_range(first_a1);
+                    print_vec_range(first_a2);
+                    vec_digi aaa = vec_digi_difference_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    print_vec(&aaa);
+
+                    std::vector<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_vector(b);
+                    print_vector(bb);
+# ifndef _MSC_VER
+                    std::set_difference(first_b1, last_b1, first_b2, last_b2,
+                                          std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    print_vector(bbb);
+                    CHECK(aa, bb);
+                    // cheating
+                    //vec_digi_reserve(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+# endif
+                    vec_digi_free(&aaa);
+                    vec_digi_free(&aa);
+                    break;
+                }
+                case TEST_SYMMETRIC_DIFFERENCE_RANGE:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_sort(&a);
+                    vec_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    vec_digi_it first_a1, last_a1;
+                    std::vector<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    vec_digi_it first_a2, last_a2;
+                    std::vector<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    print_vec_range(first_a1);
+                    print_vec_range(first_a2);
+                    vec_digi aaa = vec_digi_symmetric_difference_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    print_vec(&aaa);
+
+                    std::vector<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_vector(b);
+                    print_vector(bb);
+# ifndef _MSC_VER
+                    std::set_symmetric_difference(first_b1, last_b1, first_b2, last_b2,
+                                          std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    print_vector(bbb);
+                    CHECK(aa, bb);
+                    // cheating
+                    //vec_digi_reserve(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+# endif
+                    vec_digi_free(&aaa);
+                    vec_digi_free(&aa);
+                    break;
+                }
                 case TEST_GENERATE_N:
                 {
                     size_t count = TEST_RAND(20);
@@ -1034,7 +1116,8 @@ main(void)
                     vec_digi aa = vec_digi_transform_it(&a, &pos, digi_bintrans);
                     std::vector<DIGI> bb;
                     bb.resize(b.size());
-                    std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), DIGI_bintrans);
+                    std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(),
+                                   DIGI_bintrans);
                     CHECK(aa, bb);
                     CHECK(a, b);
                     vec_digi_free(&aa);
@@ -1048,10 +1131,12 @@ main(void)
                     vec_digi aa = vec_digi_init();
                     vec_digi_resize(&aa, last_b - first_b, digi_init(0));
                     vec_digi_it dest = vec_digi_begin(&aa);
-                    vec_digi_it it = vec_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
+                    vec_digi_it it = vec_digi_transform_range(&first_a, &last_a, dest,
+                                                              digi_untrans);
                     std::vector<DIGI> bb;
                     bb.resize(last_b - first_b);
-                    auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(), DIGI_bintrans);
+                    auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(),
+                                               DIGI_bintrans);
                     CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
                     // heap use-after-free

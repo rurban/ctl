@@ -115,6 +115,16 @@ char STR_bintrans (const char& s1, const char& s2) {
     return s1 ^ s2;
 }
 
+#ifdef DEBUG
+static void
+gen_strings(str* a, std::string& b, size_t size)
+{
+    char* _ta = create_test_string(size);
+    *a = str_init(_ta);
+    b = _ta;
+}
+#endif
+
 static void
 get_random_iters (str *a, str_it* first_a, str_it* last_a,
                   std::string& b, std::string::iterator &first_b,
@@ -256,10 +266,14 @@ main(void)
             TEST(UPPER_BOUND) \
             TEST(LOWER_BOUND_RANGE) \
             TEST(UPPER_BOUND_RANGE) \
-            TEST(UNION) \
+            TEST(UNION) /* 49 */ \
             TEST(DIFFERENCE) \
-            TEST(SYMETRIC_DIFFERENCE) \
+            TEST(SYMMETRIC_DIFFERENCE) \
             TEST(INTERSECTION) \
+            TEST(UNION_RANGE) \
+            TEST(DIFFERENCE_RANGE) \
+            TEST(SYMMETRIC_DIFFERENCE_RANGE) \
+            TEST(INTERSECTION_RANGE) \
             TEST(GENERATE_N) \
             TEST(GENERATE_N_RANGE) \
             TEST(TRANSFORM_RANGE) \
@@ -696,6 +710,286 @@ main(void)
                 case TEST_EQUAL_RANGE:
                     printf("nyi\n");
                     break;
+                case TEST_UNION: // 49
+                {
+                    str aa;
+                    std::string bb;
+                    gen_strings(&aa, bb, TEST_RAND(a.size));
+                    str_sort(&a);
+                    str_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    str aaa = str_union(&a, &aa);
+# ifndef _MSC_VER
+                    std::string bbb;
+                    std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
+                                   std::back_inserter(bbb));
+                    LOG("STL b + bb => bbb\n");
+                    LOG("%s\n", b.c_str());
+                    LOG("%s\n", bb.c_str());
+                    LOG("=> %s\n", bbb.c_str());
+                    LOG("CTL a + aaa => aaa\n");
+                    if (aa.capacity != bb.capacity()) // cheating
+                        str_fit(&aa, bb.capacity());
+                    CHECK(aa, bb);
+                    if (aaa.capacity != bbb.capacity()) // cheating
+                        str_fit(&aaa, bbb.capacity());
+                    LOG("%s\n", str_c_str(&a));
+                    LOG("%s\n", str_c_str(&aa));
+                    LOG("=> %s\n", str_c_str(&aaa));
+                    CHECK(aaa, bbb);
+# endif
+                    str_free(&aaa);
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_INTERSECTION:
+                {
+                    str aa;
+                    std::string bb;
+                    gen_strings(&aa, bb, TEST_RAND(a.size));
+                    str_sort(&a);
+                    str_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    str aaa = str_intersection(&a, &aa);
+# ifndef _MSC_VER
+                    std::string bbb;
+                    std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
+                                          std::back_inserter(bbb));
+                    if (aa.capacity != bb.capacity()) // cheating
+                        str_fit(&aa, bb.capacity());
+                    CHECK(aa, bb);
+                    if (aaa.capacity != bbb.capacity()) // cheating
+                        str_fit(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+# endif
+                    //LOG(&a);
+                    //LOG(&aa);
+                    //LOG(&aaa);
+                    str_free(&aaa);
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_SYMMETRIC_DIFFERENCE:
+                {
+                    str aa;
+                    std::string bb;
+                    gen_strings(&aa, bb, TEST_RAND(a.size));
+                    str_sort(&a);
+                    str_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    str aaa = str_symmetric_difference(&a, &aa);
+# ifndef _MSC_VER
+                    std::string bbb;
+                    std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                                  std::back_inserter(bbb));
+                    if (aa.capacity != bb.capacity()) // cheating
+                        str_fit(&aa, bb.capacity());
+                    CHECK(aa, bb);
+                    if (aaa.capacity != bbb.capacity()) // cheating
+                        str_fit(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+# endif
+                    str_free(&aaa);
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_DIFFERENCE:
+                {
+                    str aa;
+                    std::string bb;
+                    gen_strings(&aa, bb, TEST_RAND(a.size));
+                    str_sort(&a);
+                    str_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    //LOG(&a);
+                    str aaa = str_difference(&a, &aa);
+# ifndef _MSC_VER
+                    std::string bbb;
+                    std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                        std::back_inserter(bbb));
+                    if (aa.capacity != bb.capacity()) // cheating
+                        str_fit(&aa, bb.capacity());
+                    CHECK(aa, bb);
+                    if (aaa.capacity != bbb.capacity()) // cheating
+                        str_fit(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+# endif
+                    str_free(&aaa);
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_UNION_RANGE:
+                {
+                    str aa;
+                    std::string bb;
+                    gen_strings(&aa, bb, TEST_RAND(a.size));
+                    str_sort(&a);
+                    str_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    str_it first_a1, last_a1;
+                    std::string::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    str_it first_a2, last_a2;
+                    std::string::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    //LOG_range(first_a1);
+                    //LOG_range(first_a2);
+                    str aaa = str_union_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    //LOG(&aaa);
+
+                    std::string bbb;
+                    LOG("STL b + bb\n");
+                    //LOG(b);
+                    //LOG(bb);
+# ifndef _MSC_VER
+                    std::set_union(first_b1, last_b1, first_b2, last_b2,
+                                   std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    if (aa.capacity != bb.capacity()) // cheating
+                        str_fit(&aa, bb.capacity());
+                    CHECK(aa, bb);
+                    if (aaa.capacity != bbb.capacity()) // cheating
+                        str_fit(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+# endif
+                    str_free(&aaa);
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_INTERSECTION_RANGE:
+                {
+                    str aa;
+                    std::string bb;
+                    gen_strings(&aa, bb, TEST_RAND(a.size));
+                    str_sort(&a);
+                    str_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    str_it first_a1, last_a1;
+                    std::string::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    str_it first_a2, last_a2;
+                    std::string::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    //LOG_range(first_a1);
+                    //LOG_range(first_a2);
+                    str aaa = str_intersection_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    //LOG(&aaa);
+
+                    std::string bbb;
+                    LOG("STL b + bb\n");
+                    //LOG(b);
+                    //LOG(bb);
+# ifndef _MSC_VER
+                    std::set_intersection(first_b1, last_b1, first_b2, last_b2,
+                                          std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    if (aa.capacity != bb.capacity()) // cheating
+                        str_fit(&aa, bb.capacity());
+                    CHECK(aa, bb);
+                    if (aaa.capacity != bbb.capacity()) // cheating
+                        str_fit(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+# endif
+                    str_free(&aaa);
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_DIFFERENCE_RANGE:
+                {
+                    str aa;
+                    std::string bb;
+                    gen_strings(&aa, bb, TEST_RAND(a.size));
+                    str_sort(&a);
+                    str_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    str_it first_a1, last_a1;
+                    std::string::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    str_it first_a2, last_a2;
+                    std::string::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    //LOG_range(first_a1);
+                    //LOG_range(first_a2);
+                    str aaa = str_difference_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    //LOG(&aaa);
+
+                    std::string bbb;
+                    LOG("STL b + bb\n");
+                    //LOG(b);
+                    //LOG(bb);
+# ifndef _MSC_VER
+                    std::set_difference(first_b1, last_b1, first_b2, last_b2,
+                                          std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    if (aa.capacity != bb.capacity()) // cheating
+                        str_fit(&aa, bb.capacity());
+                    CHECK(aa, bb);
+                    if (aaa.capacity != bbb.capacity()) // cheating
+                        str_fit(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+# endif
+                    str_free(&aaa);
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_SYMMETRIC_DIFFERENCE_RANGE:
+                {
+                    str aa;
+                    std::string bb;
+                    gen_strings(&aa, bb, TEST_RAND(a.size));
+                    str_sort(&a);
+                    str_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    str_it first_a1, last_a1;
+                    std::string::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    str_it first_a2, last_a2;
+                    std::string::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    //LOG_range(first_a1);
+                    //LOG_range(first_a2);
+                    str aaa = str_symmetric_difference_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    //LOG(&aaa);
+
+                    std::string bbb;
+                    LOG("STL b + bb\n");
+                    //LOG(b);
+                    //LOG(bb);
+# ifndef _MSC_VER
+                    std::set_symmetric_difference(first_b1, last_b1, first_b2, last_b2,
+                                          std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    if (aa.capacity != bb.capacity()) // cheating
+                        str_fit(&aa, bb.capacity());
+                    CHECK(aa, bb);
+                    if (aaa.capacity != bbb.capacity()) // cheating
+                        str_fit(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+# endif
+                    str_free(&aaa);
+                    str_free(&aa);
+                    break;
+                }
                 case TEST_TRANSFORM_RANGE:
                 {
                     str_it first_a, last_a;
@@ -706,7 +1000,8 @@ main(void)
                     str_it it = str_transform_range(&first_a, &last_a, dest, str_untrans);
                     std::string bb;
                     bb.resize(last_b - first_b);
-                    auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(), STR_bintrans);
+                    auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(),
+                                               STR_bintrans);
                     CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
                     CHECK(a, b);

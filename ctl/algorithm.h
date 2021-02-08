@@ -299,6 +299,13 @@ JOIN(A, intersection)(A* a, A* b)
 }
 
 static inline A
+JOIN(A, difference_range)(I* r1, I* r2)
+{
+    (void)r2;
+    return *r1->container; //FIXME
+}
+
+static inline A
 JOIN(A, difference)(A* a, A* b)
 {
     A self = JOIN(A, init_from)(a);
@@ -306,6 +313,13 @@ JOIN(A, difference)(A* a, A* b)
         if(!JOIN(A, _found)(b, it.ref))
             JOIN(A, push_back)(&self, self.copy(it.ref));
     return self;
+}
+
+static inline A
+JOIN(A, symmetric_difference_range)(I* r1, I* r2)
+{
+    (void)r2;
+    return *r1->container; //FIXME
 }
 
 // FIXME

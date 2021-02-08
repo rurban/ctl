@@ -390,7 +390,7 @@ x  stable and tested
 |`search_n`                       |    |    |    |    |    |    |    |    |    |    |    |    |
 |`search_n_range`                 |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_if`                        |    |    |    |    |    |    |    |    |    |    |    |    |
-|`copy_range`                     | x  |    |    | .  | .  |    |    |    |    |    |    |    |
+|`copy_range`                     | x  | .  |    | .  | .  |    |    |    |    |    |    |    |
 |`copy_if_range`                  |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_n`                         |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_n_range`                   |    |    |    |    |    |    |    |    |    |    |    |    |
@@ -485,14 +485,14 @@ x  stable and tested
 |`inplace_merge_range`            |    |    |    |    |    |    |    |    |    |    |    |    |
 |`includes`                       |    |    |    |    |    |    |    |    |    |    |    |    |
 |`includes_range`                 |    |    |    |    |    |    |    |    |    |    |    |    |
-|`difference`                     | .  |    | .  | x  | .  | x  | x  | x  | x  |    |    |    |
-|`difference_range`               |    |    |    |    |    |    |    |    |    |    |    |    |
-|`intersection`                   | x  |    | .  | x  | .  | x  | x  | x  | x  |    |    |    |
-|`intersection_range`             | x  |    |    |    |    |    |    |    |    |    |    |    |
-|`symmetric_difference`           | .  |    |    | .  | .  | x  | x  | x  | x  |    |    |    |
-|`symmetric_difference_range`     |    |    |    |    |    |    |    |    |    |    |    |    |
-|`union`                          | x  |    |    | .  | .  | x  | x  | x  | x  |    |    |    |
-|`union_range`                    | x  |    |    |    |    |    |    |    |    |    |    |    |
+|`difference`                     | .  | .  | .  | x  | .  | x  | x  | x  | x  |    |    |    |
+|`difference_range`               | .  | .  |    |    |    |    |    |    |    |    |    |    |
+|`intersection`                   | x  | .  | .  | x  | .  | x  | x  | x  | x  |    |    |    |
+|`intersection_range`             | x  | .  |    |    |    |    |    |    |    |    |    |    |
+|`symmetric_difference`           | .  | .  |    | .  | .  | x  | x  | x  | x  |    |    |    |
+|`symmetric_difference_range`     | .  | .  |    |    |    |    |    |    |    |    |    |    |
+|`union`                          | x  | .  |    | .  | .  | x  | x  | x  | x  |    |    |    |
+|`union_range`                    | x  | .  |    |    |    |    |    |    |    |    |    |    |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
 ```
