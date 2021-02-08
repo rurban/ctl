@@ -372,22 +372,22 @@ returns true if one sequence is a subsequence of another. _(NYI)_
     A difference (A* self, A* other)
     A difference_range (I* range1, I* range2) (C++20)
  
-computes the difference between two sets. _(range NYI)_
+computes the difference between two ordered ranges.
 
     A intersection (A* self, A* other)
     A intersection_range (I* range1, I* range2) (C++20)
  
-computes the intersection of two sets.
+computes the intersection of two ordered ranges.
  
     A symmetric_difference (A* self, A* other)
     A symmetric_difference_range (I* range1, I* range2) (C++20)
  
-computes the symmetric difference between two sets. _(range NYI)_
+computes the symmetric difference between two ordered ranges.
 
     A union (A* self, A* other)
     A union_range (I* range1, I* range2)  (C++20)
  
-computes the union of two sets or sorted containers.
+computes the union of two sets or ordered ranges.
  
 ## Heap operations
 

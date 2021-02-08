@@ -345,14 +345,37 @@ JOIN(A, difference)(A* a, A* b)
 static inline A
 JOIN(A, symmetric_difference_range)(I* r1, I* r2)
 {
-    (void)r2;
-    return *r1->container; //FIXME
+    A self = JOIN(A, init_from)(r1->container);
+    while(!JOIN(I, done)(r1))
+    {
+        if (JOIN(I, done)(r2))
+            return *JOIN(A, copy_range)(r1, &self);
+
+        if (self.compare(r1->ref, r2->ref))
+        {
+            JOIN(A, push_back)(&self, self.copy(r1->ref));
+            JOIN(I, next)(r1);
+        }
+        else
+        {
+            if (self.compare(r2->ref, r1->ref))
+                JOIN(A, push_back)(&self, self.copy(r2->ref));
+            else
+                JOIN(I, next)(r1);
+            JOIN(I, next)(r2);
+        }
+    }
+    JOIN(A, copy_range)(r2, &self);
+#ifdef CTL_VEC
+    //JOIN(A, shrink_to_fit)(&self);
+#endif
+    return self;
 }
 
-// FIXME
 static inline A
 JOIN(A, symmetric_difference)(A* a, A* b)
 {
+#if 0
     A self = JOIN(A, init_from)(a);
     foreach(A, a, it1)
         if(!JOIN(A, _found)(b, it1.ref))
@@ -361,6 +384,11 @@ JOIN(A, symmetric_difference)(A* a, A* b)
         if(!JOIN(A, _found)(a, it2.ref))
             JOIN(A, push_back)(&self, self.copy(it2.ref));
     return self;
+#else
+    JOIN(A, it) r1 = JOIN(A, begin)(a);
+    JOIN(A, it) r2 = JOIN(A, begin)(b);
+    return JOIN(A, symmetric_difference_range)(&r1, &r2);
+#endif
 }
 
 #endif // !USET/SET

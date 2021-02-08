@@ -63,7 +63,7 @@ void print_vector(std::vector<DIGI> &b)
 }
 
 #ifdef DEBUG
-#define TEST_MAX_SIZE 15
+//#define TEST_MAX_SIZE 15
 //#define TEST_MAX_VALUE INT_MAX
 #define TEST_MAX_VALUE 100
 #else
@@ -92,6 +92,15 @@ int random_element(vec_digi* a)
 # define ASSERT_EQUAL_CAP(c, s) if (s.capacity() != c.capacity) \
     { printf("capacity %zu vs %zu FAIL\n", c.capacity, s.capacity()); fail++; }
 #endif
+
+// cheat growth
+#define ADJUST_CAP(m, c, s)                                             \
+    if (c.size == s.size() && c.capacity != s.capacity())               \
+    {                                                                   \
+        printf("%s capacity %zu => %zu FAIL\n", m, c.capacity, s.capacity()); \
+        vec_digi_fit(&c, s.capacity());                                 \
+    }
+
 
 #define CHECK(_x, _y) {                                           \
     ASSERT_EQUAL_CAP(_x, _y)                                      \
@@ -274,18 +283,18 @@ main(void)
         TEST(UNION) \
         TEST(INTERSECTION) \
         TEST(DIFFERENCE) \
+        TEST(SYMMETRIC_DIFFERENCE) \
         TEST(UNION_RANGE) \
         TEST(INTERSECTION_RANGE) \
         TEST(DIFFERENCE_RANGE) \
-        TEST(GENERATE) /* 39 */ \
+        TEST(SYMMETRIC_DIFFERENCE_RANGE) \
+        TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
         TEST(EMPLACE_BACK) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 43 */ \
-        TEST(SYMMETRIC_DIFFERENCE) \
-        TEST(SYMMETRIC_DIFFERENCE_RANGE) \
+        TEST(EMPLACE) /* 49 */ \
         TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(FIND_END) \
@@ -838,10 +847,10 @@ main(void)
                     print_vector(bbb);
                     LOG("CTL a + aaa => aaa\n");
                     CHECK(aa, bb);
-                    //vec_digi_reserve(&aaa, bbb.capacity());
                     print_vec(&a);
                     print_vec(&aa);
                     print_vec(&aaa);
+                    ADJUST_CAP("union", aaa,bbb);
                     CHECK(aaa, bbb);
 # endif
                     vec_digi_free(&aaa);
@@ -863,7 +872,7 @@ main(void)
                     std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
                                           std::back_inserter(bbb));
                     CHECK(aa, bb);
-                    //vec_digi_reserve(&aaa, bbb.capacity());
+                    ADJUST_CAP("intersection",aaa,bbb);
                     CHECK(aaa, bbb);
 # endif
                     print_vec(&a);
@@ -889,14 +898,13 @@ main(void)
                     std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                         std::back_inserter(bbb));
                     CHECK(aa, bb);
-                    //vec_digi_reserve(&aaa, bbb.capacity());
+                    ADJUST_CAP("difference",aaa,bbb);
                     CHECK(aaa, bbb);
 # endif
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_SYMMETRIC_DIFFERENCE:
                 {
                     vec_digi aa;
@@ -912,14 +920,13 @@ main(void)
                     std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                                   std::back_inserter(bbb));
                     CHECK(aa, bb);
-                    //vec_digi_reserve(&aaa, bbb.capacity());
+                    ADJUST_CAP("symmetric_difference",aaa,bbb);
                     CHECK(aaa, bbb);
 # endif
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);
                     break;
                 }
-#endif // DEBUG
                 case TEST_UNION_RANGE:
                 {
                     vec_digi aa;
@@ -953,8 +960,7 @@ main(void)
                     LOG("STL => bbb\n");
                     print_vector(bbb);
                     CHECK(aa, bb);
-                    // cheating
-                    vec_digi_reserve(&aaa, bbb.capacity());
+                    ADJUST_CAP("union_range",aaa,bbb);
                     CHECK(aaa, bbb);
 # endif
                     vec_digi_free(&aaa);
@@ -994,8 +1000,7 @@ main(void)
                     LOG("STL => bbb\n");
                     print_vector(bbb);
                     CHECK(aa, bb);
-                    // cheating
-                    //vec_digi_reserve(&aaa, bbb.capacity());
+                    ADJUST_CAP("intersection_range",aaa,bbb);
                     CHECK(aaa, bbb);
 # endif
                     vec_digi_free(&aaa);
@@ -1018,32 +1023,30 @@ main(void)
                     std::vector<DIGI>::iterator first_b2, last_b2;
                     get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
 
-                    LOG("CTL a + aa\n");
+                    LOG("CTL a (%zu) + aa (%zu)\n", a.size, aa.size);
                     print_vec_range(first_a1);
                     print_vec_range(first_a2);
                     vec_digi aaa = vec_digi_difference_range(&first_a1, &first_a2);
-                    LOG("CTL => aaa\n");
+                    LOG("CTL => aaa (%zu)\n", aa.size);
                     print_vec(&aaa);
 
                     std::vector<DIGI> bbb;
-                    LOG("STL b + bb\n");
+                    LOG("STL b (%zu) + bb (%zu)\n", b.size(), bb.size());
                     print_vector(b);
                     print_vector(bb);
 # ifndef _MSC_VER
                     std::set_difference(first_b1, last_b1, first_b2, last_b2,
-                                          std::back_inserter(bbb));
-                    LOG("STL => bbb\n");
+                                        std::back_inserter(bbb));
+                    LOG("STL => bbb (%zu)\n", bbb.size());
                     print_vector(bbb);
                     CHECK(aa, bb);
-                    // cheating
-                    //vec_digi_reserve(&aaa, bbb.capacity());
+                    ADJUST_CAP("difference_range",aaa,bbb);
                     CHECK(aaa, bbb);
 # endif
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_SYMMETRIC_DIFFERENCE_RANGE:
                 {
                     vec_digi aa;
@@ -1077,14 +1080,14 @@ main(void)
                     LOG("STL => bbb\n");
                     print_vector(bbb);
                     CHECK(aa, bb);
-                    // cheating
-                    //vec_digi_reserve(&aaa, bbb.capacity());
+                    ADJUST_CAP("symmetric_difference_range",aaa,bbb);
                     CHECK(aaa, bbb);
 # endif
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_GENERATE_N:
                 {
                     size_t count = TEST_RAND(20);

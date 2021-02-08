@@ -234,16 +234,16 @@ main(void)
         TEST(INTERSECTION) \
         TEST(UNION_RANGE) \
         TEST(INTERSECTION_RANGE) \
+        TEST(SYMMETRIC_DIFFERENCE_RANGE) \
         TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EQUAL_RANGE) /* 51 */ \
+        TEST(EQUAL_RANGE) /* 52 */ \
         TEST(DIFFERENCE) \
         TEST(SYMMETRIC_DIFFERENCE) \
         TEST(DIFFERENCE_RANGE) \
-        TEST(SYMMETRIC_DIFFERENCE_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
@@ -1140,6 +1140,7 @@ main(void)
                     list_digi_free(&aa);
                     break;
                 }
+#endif // DEBUG
                 case TEST_SYMMETRIC_DIFFERENCE_RANGE:
                 {
                     list_digi aa;
@@ -1179,6 +1180,7 @@ main(void)
                     list_digi_free(&aa);
                     break;
                 }
+#ifdef DEBUG
 #if 0
             /*case TEST_EQUAL_RANGE:*/
             {
