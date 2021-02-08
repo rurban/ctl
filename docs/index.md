@@ -487,8 +487,8 @@ x  stable and tested
 |`includes_range`                 |    |    |    |    |    |    |    |    |    |    |    |    |
 |`difference`                     | .  |    | .  | x  | .  | x  | x  | x  | x  |    |    |    |
 |`difference_range`               |    |    |    |    |    |    |    |    |    |    |    |    |
-|`intersection`                   | .  |    | .  | x  | .  | x  | x  | x  | x  |    |    |    |
-|`intersection_range`             |    |    |    |    |    |    |    |    |    |    |    |    |
+|`intersection`                   | x  |    | .  | x  | .  | x  | x  | x  | x  |    |    |    |
+|`intersection_range`             | x  |    |    |    |    |    |    |    |    |    |    |    |
 |`symmetric_difference`           | .  |    |    | .  | .  | x  | x  | x  | x  |    |    |    |
 |`symmetric_difference_range`     |    |    |    |    |    |    |    |    |    |    |    |    |
 |`union`                          | x  |    |    | .  | .  | x  | x  | x  | x  |    |    |    |

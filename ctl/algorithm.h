@@ -265,13 +265,37 @@ JOIN(A, union)(A* a, A* b)
 }
 
 static inline A
+JOIN(A, intersection_range)(I* r1, I* r2)
+{
+    A self = JOIN(A, init_from)(r1->container);
+    while(!JOIN(I, done)(r1) && !JOIN(I, done)(r2))
+    {
+        if (self.compare(r1->ref, r2->ref))
+            JOIN(I, next)(r1);
+        else
+        {
+            if (!self.compare(r2->ref, r1->ref))
+                JOIN(A, push_back)(&self, self.copy(r1->ref));
+            JOIN(I, next)(r2);
+        }
+    }
+    return self;
+}
+
+static inline A
 JOIN(A, intersection)(A* a, A* b)
 {
+#if 0
     A self = JOIN(A, init_from)(a);
     foreach(A, a, it)
         if(JOIN(A, _found)(b, it.ref))
             JOIN(A, push_back)(&self, self.copy(it.ref));
     return self;
+#else
+    JOIN(A, it) r1 = JOIN(A, begin)(a);
+    JOIN(A, it) r2 = JOIN(A, begin)(b);
+    return JOIN(A, intersection_range)(&r1, &r2);
+#endif
 }
 
 static inline A

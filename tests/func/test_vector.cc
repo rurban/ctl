@@ -41,7 +41,7 @@ void print_vec_range(vec_digi_it it)
         printf ("%d ", *it.ref->value);
         vec_digi_it_next(&it);
     }
-    printf (")");
+    printf (") ");
     if (i2)
     {
         begin.ref = it.ref;
@@ -272,8 +272,10 @@ main(void)
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
         TEST(UNION) \
+        TEST(INTERSECTION) \
         TEST(UNION_RANGE) \
-        TEST(GENERATE) /* 36 */ \
+        TEST(INTERSECTION_RANGE) \
+        TEST(GENERATE) /* 38 */ \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
         TEST(EMPLACE_BACK) \
@@ -282,7 +284,8 @@ main(void)
         TEST(EMPLACE) /* 41 */ \
         TEST(DIFFERENCE) \
         TEST(SYMMETRIC_DIFFERENCE) \
-        TEST(INTERSECTION) \
+        TEST(DIFFERENCE_RANGE) \
+        TEST(SYMMETRIC_DIFFERENCE_RANGE) \
         TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(FIND_END) \
@@ -843,7 +846,6 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_INTERSECTION:
                 {
                     vec_digi aa;
@@ -858,12 +860,16 @@ main(void)
                     std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
                                           std::back_inserter(bbb));
                     CHECK(aa, bb);
-                    vec_digi_reserve(&aaa, bbb.capacity());
+                    //vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);
+                    print_vec(&a);
+                    print_vec(&aa);
+                    print_vec(&aaa);
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_SYMMETRIC_DIFFERENCE:
                 {
                     vec_digi aa;
@@ -940,6 +946,45 @@ main(void)
                     CHECK(aa, bb);
                     // cheating
                     vec_digi_reserve(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+                    vec_digi_free(&aaa);
+                    vec_digi_free(&aa);
+                    break;
+                }
+                case TEST_INTERSECTION_RANGE:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_sort(&a);
+                    vec_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    vec_digi_it first_a1, last_a1;
+                    std::vector<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    vec_digi_it first_a2, last_a2;
+                    std::vector<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    print_vec_range(first_a1);
+                    print_vec_range(first_a2);
+                    vec_digi aaa = vec_digi_intersection_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    print_vec(&aaa);
+
+                    std::vector<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_vector(b);
+                    print_vector(bb);
+                    std::set_intersection(first_b1, last_b1, first_b2, last_b2,
+                                          std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    print_vector(bbb);
+                    CHECK(aa, bb);
+                    // cheating
+                    //vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);
