@@ -204,6 +204,7 @@ JOIN(A, _found)(A* a, T* ref)
 }
 
 // requires sorted containers (via operator<) and push_back
+/*
 static inline A
 JOIN(A, union)(A* a, A* b)
 {
@@ -229,6 +230,7 @@ JOIN(A, union)(A* a, A* b)
     }
     return *JOIN(A, copy_range)(&it2, &self);
 }
+*/
 
 static inline A
 JOIN(A, union_range)(I* r1, I* r2)
@@ -252,6 +254,14 @@ JOIN(A, union_range)(I* r1, I* r2)
         }
     }
     return *JOIN(A, copy_range)(r2, &self);
+}
+
+static inline A
+JOIN(A, union)(A* a, A* b)
+{
+    JOIN(A, it) r1 = JOIN(A, begin)(a);
+    JOIN(A, it) r2 = JOIN(A, begin)(b);
+    return JOIN(A, union_range)(&r1, &r2);
 }
 
 static inline A
