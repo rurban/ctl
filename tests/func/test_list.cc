@@ -234,8 +234,11 @@ main(void)
         TEST(INCLUDES_RANGE) \
         TEST(UNION) \
         TEST(INTERSECTION) \
+        TEST(DIFFERENCE) \
+        TEST(SYMMETRIC_DIFFERENCE) \
         TEST(UNION_RANGE) \
         TEST(INTERSECTION_RANGE) \
+        TEST(DIFFERENCE_RANGE) \
         TEST(SYMMETRIC_DIFFERENCE_RANGE) \
         TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
@@ -243,9 +246,6 @@ main(void)
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) /* 54 */ \
-        TEST(DIFFERENCE) \
-        TEST(SYMMETRIC_DIFFERENCE) \
-        TEST(DIFFERENCE_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
@@ -1026,7 +1026,6 @@ main(void)
                 list_digi_free(&aa);
                 break;
             }
-#ifdef DEBUG
             case TEST_SYMMETRIC_DIFFERENCE:
             {
                 list_digi aa;
@@ -1070,8 +1069,7 @@ main(void)
                 list_digi_free(&aa);
                 break;
             }
-#endif // DEBUG
-                case TEST_UNION_RANGE:
+            case TEST_UNION_RANGE:
                 {
                     list_digi aa;
                     std::list<DIGI> bb;
@@ -1149,7 +1147,6 @@ main(void)
                     list_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_DIFFERENCE_RANGE:
                 {
                     list_digi aa;
@@ -1189,7 +1186,6 @@ main(void)
                     list_digi_free(&aa);
                     break;
                 }
-#endif // DEBUG
                 case TEST_SYMMETRIC_DIFFERENCE_RANGE:
                 {
                     list_digi aa;
