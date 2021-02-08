@@ -90,7 +90,6 @@ int random_element(vec_digi* a)
     if (_iter != b.end())                                         \
         assert(*(_ref->value) == *(*_iter).value)
 
-#ifdef DEBUG
 static void
 gen_vectors(vec_digi* a, std::vector<DIGI>& b, size_t size)
 {
@@ -103,7 +102,6 @@ gen_vectors(vec_digi* a, std::vector<DIGI>& b, size_t size)
         b.push_back(DIGI{i});
     }
 }
-#endif
 
 static void
 get_random_iters (vec_digi *a, vec_digi_it* first_a, vec_digi_it* last_a,
@@ -235,14 +233,14 @@ main(void)
         TEST(COUNT_IF) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
-        TEST(GENERATE) /* 34 */ \
+        TEST(UNION) \
+        TEST(GENERATE) /* 35 */ \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
         TEST(EMPLACE_BACK) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 39 */ \
-        TEST(UNION) \
+        TEST(EMPLACE) /* 40 */ \
         TEST(DIFFERENCE) \
         TEST(SYMMETRIC_DIFFERENCE) \
         TEST(INTERSECTION) \
@@ -777,6 +775,7 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
+#endif
                 case TEST_UNION:
                 {
                     vec_digi aa;
@@ -805,6 +804,7 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_INTERSECTION:
                 {
                     vec_digi aa;

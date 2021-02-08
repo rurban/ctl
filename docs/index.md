@@ -390,7 +390,7 @@ x  stable and tested
 |`search_n`                       |    |    |    |    |    |    |    |    |    |    |    |    |
 |`search_n_range`                 |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_if`                        |    |    |    |    |    |    |    |    |    |    |    |    |
-|`copy_range`                     | .  |    |    | .  | .  |    |    |    |    |    |    |    |
+|`copy_range`                     | x  |    |    | .  | .  |    |    |    |    |    |    |    |
 |`copy_if_range`                  |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_n`                         |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_n_range`                   |    |    |    |    |    |    |    |    |    |    |    |    |
@@ -491,7 +491,7 @@ x  stable and tested
 |`set_intersection_range`         |    |    |    |    |    |    |    |    |    |    |    |    |
 |`symmetric_difference`           | .  |    |    | .  | .  | x  | x  | x  | x  |    |    |    |
 |`set_symmetric_difference_range` |    |    |    |    |    |    |    |    |    |    |    |    |
-|`union`                          | .  |    |    | .  | .  | x  | x  | x  | x  |    |    |    |
+|`union`                          | x  |    |    | .  | .  | x  | x  | x  | x  |    |    |    |
 |`set_union_range`                |    |    |    |    |    |    |    |    |    |    |    |    |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
