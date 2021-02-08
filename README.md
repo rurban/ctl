@@ -483,15 +483,15 @@ x  stable and tested
 |`inplace_merge`                  |    |    |    |    |    |    |    |    |    |    |    |    |
 |`inplace_merge_range`            |    |    |    |    |    |    |    |    |    |    |    |    |
 |`includes`                       | x  |    |    | x  | x  |    |    |    |    |    |    |    |
-|`includes_range`                 | x  |    |    | .  | x  |    |    |    |    |    |    |    |
+|`includes_range`                 | x  |    |    | x  | x  |    |    |    |    |    |    |    |
 |`difference`                     | x  | .  | .  | x  | x  | x  | x  | x  | x  |    |    |    |
-|`difference_range`               | x  | .  |    |    | x  |    |    |    |    |    |    |    |
+|`difference_range`               | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
 |`intersection`                   | x  | .  | .  | x  | x  | x  | x  | x  | x  |    |    |    |
-|`intersection_range`             | x  | .  |    |    | x  |    |    |    |    |    |    |    |
+|`intersection_range`             | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
 |`symmetric_difference`           | x  | .  |    | x  | x  | x  | x  | x  | x  |    |    |    |
-|`symmetric_difference_range`     | x  | .  |    |    | x  |    |    |    |    |    |    |    |
+|`symmetric_difference_range`     | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
 |`union`                          | x  | .  |    | x  | x  | x  | x  | x  | x  |    |    |    |
-|`union_range`                    | x  | .  |    |    | x  |    |    |    |    |    |    |    |
+|`union_range`                    | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
 ## Differences

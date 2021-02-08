@@ -12,6 +12,7 @@ OLD_MAIN
 #include <deque>
 #include <algorithm>
 
+#define ADJUST_CAP(m,a,b)
 void print_deq(deq_digi *a)
 {
     for(size_t i = 0; i < a->size; i++)
@@ -40,6 +41,7 @@ void print_deque(std::deque<DIGI> &b)
 #define TEST_MAX_VALUE INT_MAX
 #endif
 
+#define print_deq_range(x) print_deq(x.container)
 #ifndef DEBUG
 #define print_deq(x)
 #define print_deque(x)
@@ -168,6 +170,7 @@ get_random_iters (deq_digi *a, deq_digi_it* first_a, deq_digi_it* last_a,
         first_b = b.begin();
         last_b = b.end();
     }
+    first_a->end = last_a->index;
 }
 
 // TESTS DEQ STABILITY WITH SELF CLEANUP.
@@ -381,19 +384,23 @@ main(void)
             TEST(COUNT_IF_RANGE) \
             TEST(COUNT_RANGE) \
             TEST(INCLUDES) \
+            TEST(INCLUDES_RANGE) \
             TEST(UNION) \
             TEST(INTERSECTION) \
             TEST(DIFFERENCE) \
             TEST(SYMMETRIC_DIFFERENCE) \
+            TEST(UNION_RANGE) \
+            TEST(INTERSECTION_RANGE) \
+            TEST(DIFFERENCE_RANGE) \
+            TEST(SYMMETRIC_DIFFERENCE_RANGE) \
             TEST(GENERATE) \
             TEST(GENERATE_RANGE) \
             TEST(TRANSFORM) \
 
 #define FOREACH_DEBUG(TEST) \
             TEST(ERASE_RANGE) \
-            TEST(INSERT_RANGE) /* 47 */ \
+            TEST(INSERT_RANGE) /* 54 */ \
             TEST(EQUAL_RANGE) \
-            TEST(INCLUDES_RANGE) \
             TEST(FIND_END) \
             TEST(FIND_END_IF) \
             TEST(FIND_END_RANGE) \
@@ -1031,7 +1038,6 @@ main(void)
                     deq_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_INCLUDES_RANGE: // 51
                 {
                     deq_digi aa;
@@ -1058,7 +1064,6 @@ main(void)
                     deq_digi_free(&aa);
                     break;
                 }
-#endif // DEBUG
                 case TEST_UNION:
                 {
                     deq_digi aa;
@@ -1140,6 +1145,166 @@ main(void)
                     CHECK(aaa, bbb);
 # endif
                     CHECK(aa, bb);
+                    deq_digi_free(&aaa);
+                    deq_digi_free(&aa);
+                    break;
+                }
+                case TEST_UNION_RANGE:
+                {
+                    deq_digi aa;
+                    std::deque<DIGI> bb;
+                    setup_deque(&aa, bb);
+                    deq_digi_sort(&a);
+                    deq_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    deq_digi_it first_a1, last_a1;
+                    std::deque<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    deq_digi_it first_a2, last_a2;
+                    std::deque<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    print_deq_range(first_a1);
+                    print_deq_range(first_a2);
+                    deq_digi aaa = deq_digi_union_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    print_deq(&aaa);
+
+                    std::deque<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_deque(b);
+                    print_deque(bb);
+# ifndef _MSC_VER
+                    std::set_union(first_b1, last_b1, first_b2, last_b2,
+                                   std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    print_deque(bbb);
+                    CHECK(aa, bb);
+                    ADJUST_CAP("union_range",aaa,bbb);
+                    CHECK(aaa, bbb);
+# endif
+                    deq_digi_free(&aaa);
+                    deq_digi_free(&aa);
+                    break;
+                }
+                case TEST_INTERSECTION_RANGE:
+                {
+                    deq_digi aa;
+                    std::deque<DIGI> bb;
+                    setup_deque(&aa, bb);
+                    deq_digi_sort(&a);
+                    deq_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    deq_digi_it first_a1, last_a1;
+                    std::deque<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    deq_digi_it first_a2, last_a2;
+                    std::deque<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    print_deq_range(first_a1);
+                    print_deq_range(first_a2);
+                    deq_digi aaa = deq_digi_intersection_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    print_deq(&aaa);
+
+                    std::deque<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_deque(b);
+                    print_deque(bb);
+# ifndef _MSC_VER
+                    std::set_intersection(first_b1, last_b1, first_b2, last_b2,
+                                          std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    print_deque(bbb);
+                    CHECK(aa, bb);
+                    ADJUST_CAP("intersection_range",aaa,bbb);
+                    CHECK(aaa, bbb);
+# endif
+                    deq_digi_free(&aaa);
+                    deq_digi_free(&aa);
+                    break;
+                }
+                case TEST_DIFFERENCE_RANGE:
+                {
+                    deq_digi aa;
+                    std::deque<DIGI> bb;
+                    setup_deque(&aa, bb);
+                    deq_digi_sort(&a);
+                    deq_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    deq_digi_it first_a1, last_a1;
+                    std::deque<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    deq_digi_it first_a2, last_a2;
+                    std::deque<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a (%zu) + aa (%zu)\n", a.size, aa.size);
+                    print_deq_range(first_a1);
+                    print_deq_range(first_a2);
+                    deq_digi aaa = deq_digi_difference_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa (%zu)\n", aa.size);
+                    print_deq(&aaa);
+
+                    std::deque<DIGI> bbb;
+                    LOG("STL b (%zu) + bb (%zu)\n", b.size(), bb.size());
+                    print_deque(b);
+                    print_deque(bb);
+# ifndef _MSC_VER
+                    std::set_difference(first_b1, last_b1, first_b2, last_b2,
+                                        std::back_inserter(bbb));
+                    LOG("STL => bbb (%zu)\n", bbb.size());
+                    print_deque(bbb);
+                    CHECK(aa, bb);
+                    ADJUST_CAP("difference_range",aaa,bbb);
+                    CHECK(aaa, bbb);
+# endif
+                    deq_digi_free(&aaa);
+                    deq_digi_free(&aa);
+                    break;
+                }
+                case TEST_SYMMETRIC_DIFFERENCE_RANGE:
+                {
+                    deq_digi aa;
+                    std::deque<DIGI> bb;
+                    setup_deque(&aa, bb);
+                    deq_digi_sort(&a);
+                    deq_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    deq_digi_it first_a1, last_a1;
+                    std::deque<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    deq_digi_it first_a2, last_a2;
+                    std::deque<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    print_deq_range(first_a1);
+                    print_deq_range(first_a2);
+                    deq_digi aaa = deq_digi_symmetric_difference_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    print_deq(&aaa);
+
+                    std::deque<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_deque(b);
+                    print_deque(bb);
+# ifndef _MSC_VER
+                    std::set_symmetric_difference(first_b1, last_b1, first_b2, last_b2,
+                                          std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    print_deque(bbb);
+                    CHECK(aa, bb);
+                    ADJUST_CAP("symmetric_difference_range",aaa,bbb);
+                    CHECK(aaa, bbb);
+# endif
                     deq_digi_free(&aaa);
                     deq_digi_free(&aa);
                     break;
