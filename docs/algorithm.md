@@ -370,17 +370,17 @@ merges two ordered ranges in-place. _(NYI)_
 returns true if one sequence is a subsequence of another. _(NYI)_
 
     A difference (A* self, A* other)
-    difference_range (C++20)
+    A difference_range (I* range1, I* range2) (C++20)
  
 computes the difference between two sets. _(range NYI)_
 
     A intersection (A* self, A* other)
-    intersection_range (C++20)
+    A intersection_range (I* range1, I* range2) (C++20)
  
-computes the intersection of two sets. _(range NYI)_
+computes the intersection of two sets.
  
     A symmetric_difference (A* self, A* other)
-    symmetric_difference_range (C++20)
+    A symmetric_difference_range (I* range1, I* range2) (C++20)
  
 computes the symmetric difference between two sets. _(range NYI)_
 

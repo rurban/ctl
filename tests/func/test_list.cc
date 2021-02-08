@@ -30,6 +30,7 @@ void print_list(std::list<DIGI> &b)
     printf ("----\n");
 }
 
+#define print_lst_range(x)
 #ifdef DEBUG
 #define TEST_MAX_VALUE 15
 #undef TEST_MAX_SIZE
@@ -167,6 +168,7 @@ get_random_iters (list_digi *a, list_digi_it *first_a, list_digi_it *last_a,
         first_b = b.begin();
         last_b = b.end();
     }
+    first_a->end = last_a->node;
 }
 
 int
@@ -228,16 +230,20 @@ main(void)
         TEST(INSERT_COUNT) /* 41 */ \
         TEST(INSERT_RANGE) \
         TEST(ERASE_RANGE) \
+        TEST(UNION) \
+        TEST(INTERSECTION) \
+        TEST(UNION_RANGE) \
+        TEST(INTERSECTION_RANGE) \
         TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) /* 47 */ \
-        TEST(UNION) \
         TEST(DIFFERENCE) \
         TEST(SYMMETRIC_DIFFERENCE) \
-        TEST(INTERSECTION) \
+        TEST(DIFFERENCE_RANGE) \
+        TEST(SYMMETRIC_DIFFERENCE_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
@@ -926,8 +932,7 @@ main(void)
                 list_digi_free(&aa);
                 break;
             }
-#ifdef DEBUG
-            case TEST_UNION:
+            case TEST_UNION: // 48
             {
                 list_digi aa;
                 std::list<DIGI> bb;
@@ -937,6 +942,7 @@ main(void)
                 b.sort();
                 bb.sort();
                 list_digi aaa = list_digi_union(&a, &aa);
+# ifndef _MSC_VER
                 std::list<DIGI> bbb;
                 std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
                                std::back_inserter(bbb));
@@ -945,6 +951,7 @@ main(void)
                 print_list(bbb);
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
+# endif
                 list_digi_free(&aaa);
                 list_digi_free(&aa);
                 break;
@@ -959,15 +966,18 @@ main(void)
                 b.sort();
                 bb.sort();
                 list_digi aaa = list_digi_intersection(&a, &aa);
+# ifndef _MSC_VER
                 std::list<DIGI> bbb;
                 std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
                                       std::back_inserter(bbb));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
+# endif
                 list_digi_free(&aaa);
                 list_digi_free(&aa);
                 break;
             }
+#ifdef DEBUG
             case TEST_SYMMETRIC_DIFFERENCE:
             {
                 list_digi aa;
@@ -978,11 +988,13 @@ main(void)
                 b.sort();
                 bb.sort();
                 list_digi aaa = list_digi_symmetric_difference(&a, &aa);
+# ifndef _MSC_VER
                 std::list<DIGI> bbb;
                 std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                               std::back_inserter(bbb));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
+# endif
                 list_digi_free(&aaa);
                 list_digi_free(&aa);
                 break;
@@ -998,15 +1010,175 @@ main(void)
                 bb.sort();
                 print_lst(&a);
                 list_digi aaa = list_digi_difference(&a, &aa);
+# ifndef _MSC_VER
                 std::list<DIGI> bbb;
                 std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                     std::back_inserter(bbb));
                 CHECK(aa, bb);
                 CHECK(aaa, bbb);
+# endif
                 list_digi_free(&aaa);
                 list_digi_free(&aa);
                 break;
             }
+#endif // DEBUG
+                case TEST_UNION_RANGE:
+                {
+                    list_digi aa;
+                    std::list<DIGI> bb;
+                    setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                    list_digi_sort(&a);
+                    list_digi_sort(&aa);
+                    b.sort();
+                    bb.sort();
+                    list_digi_it first_a1, last_a1;
+                    std::list<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    list_digi_it first_a2, last_a2;
+                    std::list<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    print_lst_range(first_a1);
+                    print_lst_range(first_a2);
+                    list_digi aaa = list_digi_union_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    print_lst(&aaa);
+
+                    std::list<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_list(b);
+                    print_list(bb);
+# ifndef _MSC_VER
+                    std::set_union(first_b1, last_b1, first_b2, last_b2,
+                                   std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    print_list(bbb);
+                    CHECK(aa, bb);
+                    CHECK(aaa, bbb);
+# endif
+                    list_digi_free(&aaa);
+                    list_digi_free(&aa);
+                    break;
+                }
+                case TEST_INTERSECTION_RANGE:
+                {
+                    list_digi aa;
+                    std::list<DIGI> bb;
+                    setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                    list_digi_sort(&a);
+                    list_digi_sort(&aa);
+                    b.sort();
+                    bb.sort();
+                    list_digi_it first_a1, last_a1;
+                    std::list<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    list_digi_it first_a2, last_a2;
+                    std::list<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    print_lst_range(first_a1);
+                    print_lst_range(first_a2);
+                    list_digi aaa = list_digi_intersection_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    print_lst(&aaa);
+
+                    std::list<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_list(b);
+                    print_list(bb);
+# ifndef _MSC_VER
+                    std::set_intersection(first_b1, last_b1, first_b2, last_b2,
+                                          std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    print_list(bbb);
+                    CHECK(aa, bb);
+                    CHECK(aaa, bbb);
+# endif
+                    list_digi_free(&aaa);
+                    list_digi_free(&aa);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_DIFFERENCE_RANGE:
+                {
+                    list_digi aa;
+                    std::list<DIGI> bb;
+                    setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                    list_digi_sort(&a);
+                    list_digi_sort(&aa);
+                    b.sort();
+                    bb.sort();
+                    list_digi_it first_a1, last_a1;
+                    std::list<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    list_digi_it first_a2, last_a2;
+                    std::list<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    print_lst_range(first_a1);
+                    print_lst_range(first_a2);
+                    list_digi aaa = list_digi_difference_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    print_lst(&aaa);
+
+                    std::list<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_list(b);
+                    print_list(bb);
+# ifndef _MSC_VER
+                    std::set_difference(first_b1, last_b1, first_b2, last_b2,
+                                          std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    print_list(bbb);
+                    CHECK(aa, bb);
+                    CHECK(aaa, bbb);
+# endif
+                    list_digi_free(&aaa);
+                    list_digi_free(&aa);
+                    break;
+                }
+                case TEST_SYMMETRIC_DIFFERENCE_RANGE:
+                {
+                    list_digi aa;
+                    std::list<DIGI> bb;
+                    setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                    list_digi_sort(&a);
+                    list_digi_sort(&aa);
+                    b.sort();
+                    bb.sort();
+                    list_digi_it first_a1, last_a1;
+                    std::list<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    list_digi_it first_a2, last_a2;
+                    std::list<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    print_lst_range(first_a1);
+                    print_lst_range(first_a2);
+                    list_digi aaa = list_digi_symmetric_difference_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    print_lst(&aaa);
+
+                    std::list<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_list(b);
+                    print_list(bb);
+# ifndef _MSC_VER
+                    std::set_symmetric_difference(first_b1, last_b1, first_b2, last_b2,
+                                          std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    print_list(bbb);
+                    CHECK(aa, bb);
+                    CHECK(aaa, bbb);
+# endif
+                    list_digi_free(&aaa);
+                    list_digi_free(&aa);
+                    break;
+                }
 #if 0
             /*case TEST_EQUAL_RANGE:*/
             {
