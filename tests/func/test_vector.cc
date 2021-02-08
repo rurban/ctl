@@ -828,6 +828,7 @@ main(void)
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
                     vec_digi aaa = vec_digi_union(&a, &aa);
+# ifndef _MSC_VER
                     std::vector<DIGI> bbb;
                     std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
                                    std::back_inserter(bbb));
@@ -842,6 +843,7 @@ main(void)
                     print_vec(&aa);
                     print_vec(&aaa);
                     CHECK(aaa, bbb);
+# endif
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);
                     break;
@@ -856,12 +858,14 @@ main(void)
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
                     vec_digi aaa = vec_digi_intersection(&a, &aa);
+# ifndef _MSC_VER
                     std::vector<DIGI> bbb;
                     std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
                                           std::back_inserter(bbb));
                     CHECK(aa, bb);
                     //vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);
+# endif
                     print_vec(&a);
                     print_vec(&aa);
                     print_vec(&aaa);
@@ -880,12 +884,14 @@ main(void)
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
                     vec_digi aaa = vec_digi_symmetric_difference(&a, &aa);
+# ifndef _MSC_VER
                     std::vector<DIGI> bbb;
                     std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                                   std::back_inserter(bbb));
                     CHECK(aa, bb);
                     vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);
+# endif
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);
                     break;
@@ -901,12 +907,14 @@ main(void)
                     std::sort(bb.begin(), bb.end());
                     print_vec(&a);
                     vec_digi aaa = vec_digi_difference(&a, &aa);
+# ifndef _MSC_VER
                     std::vector<DIGI> bbb;
                     std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                         std::back_inserter(bbb));
                     CHECK(aa, bb);
                     vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);
+# endif
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);
                     break;
@@ -939,6 +947,7 @@ main(void)
                     LOG("STL b + bb\n");
                     print_vector(b);
                     print_vector(bb);
+# ifndef _MSC_VER
                     std::set_union(first_b1, last_b1, first_b2, last_b2,
                                    std::back_inserter(bbb));
                     LOG("STL => bbb\n");
@@ -947,6 +956,7 @@ main(void)
                     // cheating
                     vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);
+# endif
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);
                     break;
@@ -978,6 +988,7 @@ main(void)
                     LOG("STL b + bb\n");
                     print_vector(b);
                     print_vector(bb);
+# ifndef _MSC_VER
                     std::set_intersection(first_b1, last_b1, first_b2, last_b2,
                                           std::back_inserter(bbb));
                     LOG("STL => bbb\n");
@@ -986,6 +997,7 @@ main(void)
                     // cheating
                     //vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);
+# endif
                     vec_digi_free(&aaa);
                     vec_digi_free(&aa);
                     break;
