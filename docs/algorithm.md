@@ -364,10 +364,10 @@ merges two ordered ranges in-place. _(NYI)_
 
 ## Set operations (on sorted ranges)
 
-    includes
-    includes_range (C++20)
+    bool includes (A* self, A* subseq)
+    bool includes_range (I* range1, I* subrange) (C++20)
  
-returns true if one sequence is a subsequence of another. _(NYI)_
+returns true if one sorted sequence is a sorted subsequence of another.
 
     A difference (A* self, A* other)
     A difference_range (I* range1, I* range2) (C++20)

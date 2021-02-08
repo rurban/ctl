@@ -380,6 +380,7 @@ main(void)
             TEST(COUNT_IF) \
             TEST(COUNT_IF_RANGE) \
             TEST(COUNT_RANGE) \
+            TEST(INCLUDES) \
             TEST(INTERSECTION) \
             TEST(DIFFERENCE) \
             TEST(GENERATE) \
@@ -390,6 +391,7 @@ main(void)
             TEST(ERASE_RANGE) \
             TEST(INSERT_RANGE) /* 46 */ \
             TEST(EQUAL_RANGE) \
+            TEST(INCLUDES_RANGE) \
             TEST(UNION) \
             TEST(SYMMETRIC_DIFFERENCE) \
             TEST(FIND_END) \
@@ -1013,7 +1015,49 @@ main(void)
                     assert(numa == numb);
                     break;
                 }
+                case TEST_INCLUDES:
+                {
+                    deq_digi aa;
+                    std::deque<DIGI> bb;
+                    setup_deque(&aa, bb);
+                    deq_digi_sort(&a);
+                    deq_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    bool a_found = deq_digi_includes(&a, &aa);
+                    bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
+                    assert(a_found == b_found);
+                    CHECK(aa, bb);
+                    deq_digi_free(&aa);
+                    break;
+                }
 #ifdef DEBUG
+                case TEST_INCLUDES_RANGE: // 51
+                {
+                    deq_digi aa;
+                    std::deque<DIGI> bb;
+                    setup_deque(&aa, bb);
+                    deq_digi_sort(&a);
+                    deq_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    deq_digi_it first_a1, last_a1;
+                    std::deque<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    deq_digi_it first_a2, last_a2;
+                    std::deque<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    print_deq(&a);
+                    print_deq(&aa);
+
+                    // deviates with aa: 0,0 of 1
+                    bool a_found = deq_digi_includes_range(&first_a1, &first_a2);
+                    bool b_found = std::includes(first_b1, last_b1, first_b2, last_b2);
+                    assert(a_found == b_found);
+                    CHECK(aa, bb);
+                    deq_digi_free(&aa);
+                    break;
+                }
                 case TEST_UNION:
                 {
                     deq_digi aa;
@@ -1024,12 +1068,12 @@ main(void)
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
                     deq_digi aaa = deq_digi_union(&a, &aa);
-#ifndef _MSC_VER
+# ifndef _MSC_VER
                     std::deque<DIGI> bbb;
                     std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
                                    std::back_inserter(bbb));
                     CHECK(aaa, bbb);
-#endif
+# endif
                     CHECK(aa, bb);
                     deq_digi_free(&aaa);
                     deq_digi_free(&aa);

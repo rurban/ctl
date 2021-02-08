@@ -391,6 +391,29 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 #endif
 }
 
+static inline bool
+JOIN(A, includes_range)(I* r1, I* r2)
+{
+    A* self = r1->container;
+    while(!JOIN(I, done)(r2))
+    {
+        if (JOIN(I, done)(r1) || self->compare(r2->ref, r1->ref))
+            return false;
+        if (!self->compare(r1->ref, r2->ref))
+            JOIN(I, next)(r2);
+        JOIN(I, next)(r1);
+    }
+    return true;
+}
+
+static inline bool
+JOIN(A, includes)(A* a, A* b)
+{
+    JOIN(A, it) r1 = JOIN(A, begin)(a);
+    JOIN(A, it) r2 = JOIN(A, begin)(b);
+    return JOIN(A, includes_range)(&r1, &r2);
+}
+
 #endif // !USET/SET
 
 // generate and transform have no inserter support yet,

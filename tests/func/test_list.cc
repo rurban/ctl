@@ -230,6 +230,8 @@ main(void)
         TEST(INSERT_COUNT) /* 41 */ \
         TEST(INSERT_RANGE) \
         TEST(ERASE_RANGE) \
+        TEST(INCLUDES) \
+        TEST(INCLUDES_RANGE) \
         TEST(UNION) \
         TEST(INTERSECTION) \
         TEST(UNION_RANGE) \
@@ -240,7 +242,7 @@ main(void)
         TEST(TRANSFORM) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EQUAL_RANGE) /* 52 */ \
+        TEST(EQUAL_RANGE) /* 54 */ \
         TEST(DIFFERENCE) \
         TEST(SYMMETRIC_DIFFERENCE) \
         TEST(DIFFERENCE_RANGE) \
@@ -929,6 +931,53 @@ main(void)
                 std::transform(b.begin(), b.end(), bb.begin(), DIGI_untrans);
                 CHECK(aa, bb);
                 CHECK(a, b);
+                list_digi_free(&aa);
+                break;
+            }
+            case TEST_INCLUDES:
+            {
+                list_digi aa;
+                std::list<DIGI> bb;
+                setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                list_digi_sort(&a);
+                list_digi_sort(&aa);
+                b.sort();
+                bb.sort();
+                bool a_found = list_digi_includes(&a, &aa);
+                bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
+                assert (a_found == b_found);
+                print_list(b);
+                print_list(bb);
+                CHECK(aa, bb);
+                list_digi_free(&aa);
+                break;
+            }
+            case TEST_INCLUDES_RANGE:
+            {
+                list_digi aa;
+                std::list<DIGI> bb;
+                setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                list_digi_sort(&a);
+                list_digi_sort(&aa);
+                b.sort();
+                bb.sort();
+                list_digi_it first_a1, last_a1;
+                std::list<DIGI>::iterator first_b1, last_b1;
+                get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                list_digi_it first_a2, last_a2;
+                std::list<DIGI>::iterator first_b2, last_b2;
+                get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                LOG("CTL a includes aa\n");
+                print_lst_range(first_a1);
+                print_lst_range(first_a2);
+                bool a_found = list_digi_includes_range(&first_a1, &first_a2);
+                LOG("STL b - bb\n");
+                print_list(b);
+                print_list(bb);
+                bool b_found = std::includes(first_b1, last_b1, first_b2, last_b2);
+                assert (a_found == b_found);
+                CHECK(aa, bb);
                 list_digi_free(&aa);
                 break;
             }

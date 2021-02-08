@@ -280,6 +280,8 @@ main(void)
         TEST(COUNT_IF) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
+        TEST(INCLUDES) \
+        TEST(INCLUDES_RANGE) \
         TEST(UNION) \
         TEST(INTERSECTION) \
         TEST(DIFFERENCE) \
@@ -827,6 +829,52 @@ main(void)
                     break;
                 }
 #endif // DEBUG
+                case TEST_INCLUDES:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_sort(&a);
+                    vec_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    bool a_found = vec_digi_includes(&a, &aa);
+                    bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
+                    assert (a_found == b_found);
+                    CHECK(aa, bb);
+                    vec_digi_free(&aa);
+                    break;
+                }
+                case TEST_INCLUDES_RANGE:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_sort(&a);
+                    vec_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    vec_digi_it first_a1, last_a1;
+                    std::vector<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    vec_digi_it first_a2, last_a2;
+                    std::vector<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a - aa\n");
+                    print_vec_range(first_a1);
+                    print_vec_range(first_a2);
+                    bool a_found = vec_digi_includes_range(&first_a1, &first_a2);
+                    std::vector<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_vector(b);
+                    print_vector(bb);
+                    bool b_found = std::includes(first_b1, last_b1, first_b2, last_b2);
+                    assert(a_found == b_found);
+                    CHECK(aa, bb);
+                    vec_digi_free(&aa);
+                    break;
+                }
                 case TEST_UNION:
                 {
                     vec_digi aa;
