@@ -20,6 +20,12 @@ make -j9 LONG=1 Os=1 SANITIZE=0
 make -j9 LONG=1 Ofast=1 SANITIZE=0
 make -j9 CC=gcc\ -std=c99
 make -j9 CC=gcc\ -std=c11
+make -j9 CXX='clang++ -stdlib=libc++'
+make -j9 CXX='clang++ -std=c++11 -stdlib=libc++'
+make -j9 CXX='clang++ -std=c++17 -stdlib=libc++'
+make -j9 CXX='clang++ -std=c++20 -stdlib=libc++'
+make -j9 CC=clang CXX='clang++ -std=c++11'
+make -j9 CC=clang CXX='clang++ -std=c++17'
+make -j9 CC=clang CXX='clang++ -std=c++20'
 make examples SANITIZE=1
 make examples SANITIZE=0
-make -j9 CC=clang CXX=clang++
