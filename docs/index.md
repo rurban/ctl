@@ -525,8 +525,8 @@ Removed the compare and equal args from `equal`, `sort`, `sort_range`, `find`,
 `merge`, `unique`
 Added compare and equal fields to all.
 
-Added many `_it` and `_range` method variants to accept iterators, `_found` to
-return found or not.
+Added many `_it` and `_range` method variants to accept iterator pairs or single
+ranges, `_found` to return found or not.
 Methods working on iterators don't need the container arg `(A* self)`.
 
     deque:  insert_range, insert_count, erase_range,
@@ -602,9 +602,10 @@ return the iterator and set a `int *foundp` value. Eg.
 
 Many algorithms and C++20 methods are still missing or are in work.
 
-**set** algorithms such as `set_union`, `set_difference`, `set_intersection`, `set_symmetric_difference`
-do not work with `unordered_set`, because the specs require them to be ordered.
-The CTL set algorithms do work properly on `unordered_set`.
+**set** algorithms such as `set_union`, `set_difference`, `set_intersection`,
+`set_symmetric_difference` do not work with `unordered_set`, because the specs
+require them to be ordered.  The CTL set algorithms do work properly on
+`unordered_set`.
 
 hashmaps will not rely on chained lists with buckets, and can be either changed
 to open addressing or a better modern layout, such as Swiss tables (flat or
