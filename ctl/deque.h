@@ -224,8 +224,13 @@ static inline void JOIN(A, push_back)(A* self, T value);
 static inline A
 JOIN(A, init_from)(A* copy)
 {
-    (void)copy;
-    return JOIN(A, init)();
+    static A zero;
+    A self = zero;
+    self.free = copy->free;
+    self.copy = copy->copy;
+    self.compare = copy->compare;
+    self.equal = copy->equal;
+    return self;
 }
 
 #include <ctl/bits/container.h>
