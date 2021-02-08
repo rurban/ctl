@@ -175,7 +175,7 @@ JOIN(A, any_of_range)(I* first, I* last, int _match(T*))
 
 
 // set/uset have optimized implementations.
-// these require now sorted containers.
+// These require now sorted containers via operator< and push_back.
 #if defined(CTL_LIST) || \
     defined(CTL_VEC) || \
     defined(CTL_STR) || \
@@ -203,7 +203,7 @@ JOIN(A, _found)(A* a, T* ref)
 #endif
 }
 
-// FIXME
+// requires sorted containers (via operator<) and push_back
 static inline A
 JOIN(A, union)(A* a, A* b)
 {
@@ -228,6 +228,30 @@ JOIN(A, union)(A* a, A* b)
         }
     }
     return *JOIN(A, copy_range)(&it2, &self);
+}
+
+static inline A
+JOIN(A, union_range)(I* r1, I* r2)
+{
+    A self = JOIN(A, init_from)(r1->container);
+    while(!JOIN(I, done)(r1))
+    {
+        if (JOIN(I, done)(r2))
+            return *JOIN(A, copy_range)(r1, &self);
+        if (self.compare(r2->ref, r1->ref))
+        {
+            JOIN(A, push_back)(&self, self.copy(r2->ref));
+            JOIN(I, next)(r2);
+        }
+        else
+        {
+            JOIN(A, push_back)(&self, self.copy(r1->ref));
+            if (!self.compare(r1->ref, r2->ref))
+                JOIN(I, next)(r2);
+            JOIN(I, next)(r1);
+        }
+    }
+    return *JOIN(A, copy_range)(r2, &self);
 }
 
 static inline A

@@ -19,6 +19,42 @@ void print_vec(vec_digi *a)
     printf ("\n");
 }
 
+void print_vec_range(vec_digi_it it)
+{
+    if (vec_digi_empty(it.container))
+        return;
+    vec_digi_it begin = vec_digi_begin(it.container);
+    digi* ref = it.ref;
+    long i1 = it.ref - begin.ref;
+    long i2 = begin.end - it.ref;
+    if (i1)
+    {
+        while(begin.ref != it.ref)
+        {
+            printf ("%d ", *begin.ref->value);
+            begin.ref++;
+        }
+    }
+    printf ("[");
+    while(!vec_digi_it_done(&it))
+    {
+        printf ("%d ", *it.ref->value);
+        vec_digi_it_next(&it);
+    }
+    printf (")");
+    if (i2)
+    {
+        begin.ref = it.ref;
+        while(begin.ref != begin.end)
+        {
+            printf ("%d ", *begin.ref->value);
+            begin.ref++;
+        }
+    }
+    it.ref = ref;
+    printf ("\n");
+}
+
 void print_vector(std::vector<DIGI> &b)
 {
     for(auto& d: b)
@@ -33,6 +69,7 @@ void print_vector(std::vector<DIGI> &b)
 #else
 #define print_vec(x)
 #define print_vector(x)
+#define print_vec_range(x)
 #define TEST_MAX_VALUE INT_MAX
 #endif
 
@@ -147,6 +184,7 @@ get_random_iters (vec_digi *a, vec_digi_it* first_a, vec_digi_it* last_a,
         first_b = b.begin();
         last_b = b.end();
     }
+    first_a->end = last_a->ref;
 }
 
 int
@@ -234,13 +272,14 @@ main(void)
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
         TEST(UNION) \
-        TEST(GENERATE) /* 35 */ \
+        TEST(UNION_RANGE) \
+        TEST(GENERATE) /* 36 */ \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
         TEST(EMPLACE_BACK) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 40 */ \
+        TEST(EMPLACE) /* 41 */ \
         TEST(DIFFERENCE) \
         TEST(SYMMETRIC_DIFFERENCE) \
         TEST(INTERSECTION) \
@@ -793,7 +832,7 @@ main(void)
                     print_vector(b);
                     print_vector(bb);
                     print_vector(bbb);
-                    LOG("STL a + aaa => aaa\n");
+                    LOG("CTL a + aaa => aaa\n");
                     CHECK(aa, bb);
                     //vec_digi_reserve(&aaa, bbb.capacity());
                     print_vec(&a);
@@ -866,7 +905,48 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-                case TEST_GENERATE_N: // TEST=40
+#endif
+                case TEST_UNION_RANGE:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_sort(&a);
+                    vec_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    vec_digi_it first_a1, last_a1;
+                    std::vector<DIGI>::iterator first_b1, last_b1;
+                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
+                    vec_digi_it first_a2, last_a2;
+                    std::vector<DIGI>::iterator first_b2, last_b2;
+                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+
+                    LOG("CTL a + aa\n");
+                    print_vec_range(first_a1);
+                    print_vec_range(first_a2);
+                    vec_digi aaa = vec_digi_union_range(&first_a1, &first_a2);
+                    LOG("CTL => aaa\n");
+                    print_vec(&aaa);
+
+                    std::vector<DIGI> bbb;
+                    LOG("STL b + bb\n");
+                    print_vector(b);
+                    print_vector(bb);
+                    std::set_union(first_b1, last_b1, first_b2, last_b2,
+                                   std::back_inserter(bbb));
+                    LOG("STL => bbb\n");
+                    print_vector(bbb);
+                    CHECK(aa, bb);
+                    // cheating
+                    vec_digi_reserve(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+                    vec_digi_free(&aaa);
+                    vec_digi_free(&aa);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_GENERATE_N:
                 {
                     size_t count = TEST_RAND(20);
                     digi_generate_reset();

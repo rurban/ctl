@@ -385,9 +385,9 @@ computes the intersection of two sets. _(range NYI)_
 computes the symmetric difference between two sets. _(range NYI)_
 
     A union (A* self, A* other)
-    union_range (C++20)
+    A union_range (I* range1, I* range2)  (C++20)
  
-computes the union of two sets. _(range NYI)_
+computes the union of two sets or sorted containers.
  
 ## Heap operations
 

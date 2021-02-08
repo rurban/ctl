@@ -486,13 +486,13 @@ x  stable and tested
 |`includes`                       |    |    |    |    |    |    |    |    |    |    |    |    |
 |`includes_range`                 |    |    |    |    |    |    |    |    |    |    |    |    |
 |`difference`                     | .  |    | .  | x  | .  | x  | x  | x  | x  |    |    |    |
-|`set_difference_range`           |    |    |    |    |    |    |    |    |    |    |    |    |
+|`difference_range`               |    |    |    |    |    |    |    |    |    |    |    |    |
 |`intersection`                   | .  |    | .  | x  | .  | x  | x  | x  | x  |    |    |    |
-|`set_intersection_range`         |    |    |    |    |    |    |    |    |    |    |    |    |
+|`intersection_range`             |    |    |    |    |    |    |    |    |    |    |    |    |
 |`symmetric_difference`           | .  |    |    | .  | .  | x  | x  | x  | x  |    |    |    |
-|`set_symmetric_difference_range` |    |    |    |    |    |    |    |    |    |    |    |    |
+|`symmetric_difference_range`     |    |    |    |    |    |    |    |    |    |    |    |    |
 |`union`                          | x  |    |    | .  | .  | x  | x  | x  | x  |    |    |    |
-|`set_union_range`                |    |    |    |    |    |    |    |    |    |    |    |    |
+|`union_range`                    | x  |    |    |    |    |    |    |    |    |    |    |    |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
 ```
