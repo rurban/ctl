@@ -157,7 +157,8 @@ JOIN(I, advance)(I* iter, long i)
     }
     for(long j = 0; iter->node != NULL && j < i; j++)
         iter->node = JOIN(B, next)(iter->node);
-    iter->ref = &iter->node->value;
+    if (iter->node)
+        iter->ref = &iter->node->value;
     return iter;
 }
 
@@ -467,24 +468,40 @@ JOIN(A, insert_5)(A*, B*);
 static inline B*
 JOIN(A, insert)(A* self, T key)
 {
-    B* insert = JOIN(B, init)(key, 0);
+    B* insert = NULL;
     if(self->root)
     {
         B* node = self->root;
         while(1)
         {
-            int diff = self->compare(&key, &node->value);
-            if(diff == 0) // equal: replace
+            int diff;
+            if (self->equal)
             {
-                JOIN(A, free_node)(self, insert);
-                return node;
+                if (self->equal(&key, &node->value))
+                {
+                    if (self->free)
+                        self->free(&key);
+                    return node;
+                }
+                diff = self->compare(&key, &node->value);
             }
-            else if(diff < 0) // lower
+            else
+            {
+                diff = self->compare(&key, &node->value);
+                if(diff == 0 && !self->compare(&node->value, &key))
+                {   // equal
+                    if (self->free)
+                        self->free(&key);
+                    return node;
+                }
+            }
+            if(diff < 0) // lower
             {
                 if(node->l)
                     node = node->l;
                 else
                 {
+                    insert = JOIN(B, init)(key, 0);
                     node->l = insert;
                     break;
                 }
@@ -495,6 +512,7 @@ JOIN(A, insert)(A* self, T key)
                     node = node->r;
                 else
                 {
+                    insert = JOIN(B, init)(key, 0);
                     node->r = insert;
                     break;
                 }
@@ -503,7 +521,10 @@ JOIN(A, insert)(A* self, T key)
         insert->p = node;
     }
     else
+    {
+        insert = JOIN(B, init)(key, 0);
         self->root = insert;
+    }
     JOIN(A, insert_1)(self, insert);
     self->size++;
 #ifdef USE_INTERNAL_VERIFY
@@ -890,32 +911,32 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 #ifdef DEBUG
 
 static inline bool
-JOIN(A, inserter)(A* self, I* it, T value)
+JOIN(A, inserter)(A* self, B* node, T *value)
 {
-    if(!JOIN(A, _equal)(self, it->ref, &value))
+    if(JOIN(A, find_node)(self, *value))
     {
-        B* next = JOIN(B, next)(it->node);
-        JOIN(A, erase_node)(self, it->node);
-        JOIN(A, insert)(self, value);
-        it->node = next;
-        return true;
+        // already exists: keep
+        if (self->free)
+            self->free(value);
+        return false;
     }
     else
     {
-        if (self->free)
-            self->free(&value);
-        return false;
+        JOIN(A, erase_node)(self, node);
+        JOIN(A, insert)(self, *value);
+        return true;
     }
 }
 
-// specialize, using our inserter
+// specialize, using our inserter.
+// change in place.
 static inline void
 JOIN(A, generate)(A* self, T _gen(void))
 {
     foreach(A, self, i)
     {
         T tmp = _gen();
-        JOIN(A, inserter)(self, &i, tmp);
+        JOIN(A, inserter)(self, i.node, &tmp);
     }
 }
 
@@ -925,7 +946,7 @@ JOIN(A, generate_range)(I* first, I* last, T _gen(void))
     foreach_range(A, i, first, last)
     {
         T tmp = _gen();
-        JOIN(A, inserter)(first->container, &i, tmp);
+        JOIN(A, inserter)(first->container, i.node, &tmp);
     }
 }
 
@@ -935,7 +956,7 @@ JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
     foreach_n(A, self, i, count)
     {
         T tmp = _gen();
-        JOIN(A, inserter)(self, &i, tmp);
+        JOIN(A, inserter)(self, i.node, &tmp);
     }
 }
 
@@ -945,18 +966,27 @@ JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
     foreach_n_range(A, first, i, count)
     {
         T tmp = _gen();
-        JOIN(A, inserter)(first->container, &i, tmp);
+        JOIN(A, inserter)(first->container, i.node, &tmp);
     }
 }
 
+#endif // DEBUG
+
+// non-destructive, returns a copy
 static inline A
 JOIN(A, transform)(A* self, T _unop(T*))
 {
-    A other = JOIN(A, copy)(self);
-    foreach(A, &other, i)
+    A other = JOIN(A, init_from)(self);
+    B* node = JOIN(A, first)(self);
+    while (node)
     {
-        T tmp = _unop(i.ref);
-        JOIN(A, inserter)(&other, &i, tmp);
+        T copy = self->copy(&node->value);
+        B* next = JOIN(B, next)(node);
+        T tmp = _unop(&copy);
+        JOIN(A, insert)(&other, tmp);
+        if (self->free)
+            self->free(&copy);
+        node = next;
     }
     return other;
 }
@@ -964,27 +994,37 @@ JOIN(A, transform)(A* self, T _unop(T*))
 static inline A
 JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
 {
-    A other = JOIN(A, copy)(self);
-    foreach(A, &other, i)
+    A other = JOIN(A, init_from)(self);
+    B* node = JOIN(A, first)(self);
+    while (node)
     {
         if (JOIN(I, done)(pos))
             break;
-        T tmp = _binop(i.ref, pos->ref);
-        JOIN(A, inserter)(&other, &i, tmp);
+        T copy = self->copy(&node->value);
+        B* next = JOIN(B, next)(node);
+        T tmp = _binop(&copy, pos->ref);
+        JOIN(A, insert)(&other, tmp);
+        if (self->free)
+            self->free(&copy);
         JOIN(I, next)(pos);
+        node = next;
     }
     return other;
 }
 
+#ifdef DEBUG
+
 static inline I
 JOIN(A, transform_range)(I* first1, I* last1, I dest, T _unop(T*))
 {
+    A* self = first1->container;
     foreach_range(A, i, first1, last1)
     {
         if (JOIN(I, done)(&dest))
             break;
-        T tmp = _unop(i.ref);
-        JOIN(A, inserter)(dest.container, &i, tmp);
+        T tmp = self->copy(i.ref);
+        tmp = _unop(&tmp);
+        JOIN(A, inserter)(dest.container, i.node, &tmp);
         JOIN(I, next)(&dest);
     }
     return dest;
@@ -993,12 +1033,14 @@ JOIN(A, transform_range)(I* first1, I* last1, I dest, T _unop(T*))
 static inline I
 JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*))
 {
+    A* self = first1->container;
     foreach_range(A, i, first1, last1)
     {
         if (JOIN(I, done)(pos) || JOIN(I, done)(&dest))
             break;
-        T tmp = _binop(i.ref, pos->ref);
-        JOIN(A, inserter)(dest.container, &i, tmp);
+        T tmp = self->copy(i.ref);
+        tmp = _binop(&tmp, pos->ref);
+        JOIN(A, inserter)(dest.container, i.node, &tmp);
         JOIN(I, next)(pos);
         JOIN(I, next)(&dest);
     }

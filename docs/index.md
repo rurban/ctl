@@ -404,8 +404,8 @@ x  stable and tested
 |`fill_range`                     |    |    |    |    |    |    |    |    |    |    |    |    |
 |`fill_n`                         |    |    | x  |    |    |    |    |    |    |    |    |    |
 |`fill_n_range`                   |    |    |    |    |    |    |    |    |    |    |    |    |
-|`transform`                      | x  | x  | x  | x  | x  | .  |    | .  |    |    |    |    |
-|`transform_it`                   | .  | x  | .  | .  | .  | .  |    |    |    |    |    |    |
+|`transform`                      | x  | x  | x  | x  | x  | x  |    | .  |    |    |    |    |
+|`transform_it`                   | .  | x  | .  | .  | .  | x  |    |    |    |    |    |    |
 |`transform_range`                | .  | .  | .  | .  | .  | .  |    |    |    |    |    |    |
 |`transform_it_range`             |    |    |    |    |    |    |    |    |    |    |    |    |
 |`generate`                       | x  | x  | x  | x  | x  | .  |    | .  |    |    |    |    |

@@ -189,9 +189,11 @@ main(void)
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
         TEST(ERASE_RANGE) \
+        TEST(TRANSFORM) \
+        TEST(TRANSFORM_IT) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 32*/ \
+        TEST(EMPLACE) /* 33*/ \
         TEST(EXTRACT) \
         TEST(MERGE) \
         TEST(EQUAL_RANGE) \
@@ -204,12 +206,10 @@ main(void)
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
-        TEST(GENERATE) /* 45*/ \
+        TEST(GENERATE) /* 46 */ \
         TEST(GENERATE_RANGE) \
-        TEST(TRANSFORM) \
         TEST(GENERATE_N) \
         TEST(GENERATE_N_RANGE) \
-        TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
@@ -681,17 +681,18 @@ main(void)
                     }
                 break;
             }
-#ifdef DEBUG
 #if 0 // need some C++ help here
             case TEST_GENERATE: // 45
             {
                 digi_generate_reset();
                 set_digi_generate(&a, digi_generate);
                 digi_generate_reset();
-                std::generate(b.begin(), b.end(), DIGI_generate);
-                //std::set<DIGI> bb;
-                //std::generate(std::inserter(b, b.begin()), std::inserter(b, b.end()), DIGI_generate);
-                CHECK(a, b);
+                //std::generate(b.begin(), b.end(), DIGIc_generate);
+                std::set<DIGI> bb;
+                // FIXME: need operator!= for insert_operator<set<DIGI>>
+                std::generate(std::inserter(b, b.begin()), std::inserter(bb, bb.begin()),
+                              DIGI_generate);
+                CHECK(a, bb);
                 break;
             }
             case TEST_GENERATE_RANGE:
@@ -707,24 +708,50 @@ main(void)
                 break;
             }
 #endif
-            case TEST_TRANSFORM:
+            case TEST_TRANSFORM: // 47
             {
+                print_set(&a);
                 set_digi aa = set_digi_transform(&a, digi_untrans);
                 std::set<DIGI> bb;
-                std::transform(b.begin(), b.end(), std::inserter(bb, bb.begin()),
+                std::transform(b.begin(), b.end(), std::inserter(bb, bb.end()),
                                DIGI_untrans);
+                print_set(&aa);
+                print_setpp(bb);
                 CHECK(aa, bb);
                 CHECK(a, b);
                 set_digi_free(&aa);
                 break;
             }
+            case TEST_TRANSFORM_IT: // 50
+            {
+                print_set(&a);
+                if (a.size < 2)
+                    break;
+                set_digi_it pos = set_digi_begin(&a);
+                set_digi_it_advance(&pos, 1);
+                set_digi aa = set_digi_transform_it(&a, &pos, digi_bintrans);
+                print_set(&aa);
+                std::set<DIGI> bb;
+                auto it = b.begin();
+                advance(it, 1);
+                auto end = b.end();
+                advance(end, -1);
+                std::transform(b.begin(), end, it, std::inserter(bb, bb.begin()),
+                               DIGI_bintrans);
+                print_setpp(bb);
+                CHECK(aa, bb);
+                CHECK(a, b);
+                set_digi_free(&aa);
+                break;
+            }
+#ifdef DEBUG
             case TEST_GENERATE_N:
             {
                 size_t count = TEST_RAND(20);
                 digi_generate_reset();
                 set_digi_generate_n(&a, count, digi_generate);
                 digi_generate_reset();
-                std::generate_n(std::inserter(b, b.begin()), count, DIGI_generate);
+                std::generate_n(std::inserter(b, b.end()), count, DIGI_generate);
                 CHECK(a, b);
                 break;
             }
@@ -740,20 +767,6 @@ main(void)
                 digi_generate_reset();
                 std::generate_n(std::inserter(b, first_b), count, DIGI_generate);
                 CHECK(a, b);
-                break;
-            }
-            case TEST_TRANSFORM_IT:
-            {
-                set_digi_it pos = set_digi_begin(&a);
-                set_digi_it_advance(&pos, 1);
-                set_digi aa = set_digi_transform_it(&a, &pos, digi_bintrans);
-                std::set<DIGI> bb;
-                auto it = b.begin();
-                advance(it, 1);
-                std::transform(b.begin(), b.end(), it, std::inserter(bb, bb.begin()), DIGI_bintrans);
-                CHECK(aa, bb);
-                CHECK(a, b);
-                set_digi_free(&aa);
                 break;
             }
             case TEST_TRANSFORM_RANGE:

@@ -143,6 +143,12 @@ DIGI_generate(void)
 {
     return DIGI{++_generator_state};
 }
+static inline const DIGI
+DIGIc_generate(void)
+{
+    ++_generator_state;
+    return DIGI{_generator_state};
+}
 
 static inline void
 digi_generate_reset()
