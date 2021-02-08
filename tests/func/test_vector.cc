@@ -273,18 +273,18 @@ main(void)
         TEST(COUNT_RANGE) \
         TEST(UNION) \
         TEST(INTERSECTION) \
+        TEST(DIFFERENCE) \
         TEST(UNION_RANGE) \
         TEST(INTERSECTION_RANGE) \
-        TEST(GENERATE) /* 38 */ \
+        TEST(DIFFERENCE_RANGE) \
+        TEST(GENERATE) /* 39 */ \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
         TEST(EMPLACE_BACK) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 41 */ \
-        TEST(DIFFERENCE) \
+        TEST(EMPLACE) /* 43 */ \
         TEST(SYMMETRIC_DIFFERENCE) \
-        TEST(DIFFERENCE_RANGE) \
         TEST(SYMMETRIC_DIFFERENCE_RANGE) \
         TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
@@ -873,29 +873,6 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
-                case TEST_SYMMETRIC_DIFFERENCE:
-                {
-                    vec_digi aa;
-                    std::vector<DIGI> bb;
-                    gen_vectors(&aa, bb, TEST_RAND(a.size));
-                    vec_digi_sort(&a);
-                    vec_digi_sort(&aa);
-                    std::sort(b.begin(), b.end());
-                    std::sort(bb.begin(), bb.end());
-                    vec_digi aaa = vec_digi_symmetric_difference(&a, &aa);
-# ifndef _MSC_VER
-                    std::vector<DIGI> bbb;
-                    std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
-                                                  std::back_inserter(bbb));
-                    CHECK(aa, bb);
-                    vec_digi_reserve(&aaa, bbb.capacity());
-                    CHECK(aaa, bbb);
-# endif
-                    vec_digi_free(&aaa);
-                    vec_digi_free(&aa);
-                    break;
-                }
                 case TEST_DIFFERENCE:
                 {
                     vec_digi aa;
@@ -912,7 +889,30 @@ main(void)
                     std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                         std::back_inserter(bbb));
                     CHECK(aa, bb);
-                    vec_digi_reserve(&aaa, bbb.capacity());
+                    //vec_digi_reserve(&aaa, bbb.capacity());
+                    CHECK(aaa, bbb);
+# endif
+                    vec_digi_free(&aaa);
+                    vec_digi_free(&aa);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_SYMMETRIC_DIFFERENCE:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_sort(&a);
+                    vec_digi_sort(&aa);
+                    std::sort(b.begin(), b.end());
+                    std::sort(bb.begin(), bb.end());
+                    vec_digi aaa = vec_digi_symmetric_difference(&a, &aa);
+# ifndef _MSC_VER
+                    std::vector<DIGI> bbb;
+                    std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                                  std::back_inserter(bbb));
+                    CHECK(aa, bb);
+                    //vec_digi_reserve(&aaa, bbb.capacity());
                     CHECK(aaa, bbb);
 # endif
                     vec_digi_free(&aaa);
@@ -1002,7 +1002,6 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_DIFFERENCE_RANGE:
                 {
                     vec_digi aa;
@@ -1044,6 +1043,7 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_SYMMETRIC_DIFFERENCE_RANGE:
                 {
                     vec_digi aa;

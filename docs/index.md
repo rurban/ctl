@@ -485,8 +485,8 @@ x  stable and tested
 |`inplace_merge_range`            |    |    |    |    |    |    |    |    |    |    |    |    |
 |`includes`                       |    |    |    |    |    |    |    |    |    |    |    |    |
 |`includes_range`                 |    |    |    |    |    |    |    |    |    |    |    |    |
-|`difference`                     | .  | .  | .  | x  | .  | x  | x  | x  | x  |    |    |    |
-|`difference_range`               | .  | .  |    |    | .  |    |    |    |    |    |    |    |
+|`difference`                     | x  | .  | .  | x  | .  | x  | x  | x  | x  |    |    |    |
+|`difference_range`               | x  | .  |    |    | .  |    |    |    |    |    |    |    |
 |`intersection`                   | x  | .  | .  | x  | x  | x  | x  | x  | x  |    |    |    |
 |`intersection_range`             | x  | .  |    |    | x  |    |    |    |    |    |    |    |
 |`symmetric_difference`           | .  | .  |    | .  | .  | x  | x  | x  | x  |    |    |    |

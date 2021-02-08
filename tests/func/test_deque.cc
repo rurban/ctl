@@ -380,8 +380,8 @@ main(void)
             TEST(COUNT_IF) \
             TEST(COUNT_IF_RANGE) \
             TEST(COUNT_RANGE) \
-            TEST(DIFFERENCE) \
             TEST(INTERSECTION) \
+            TEST(DIFFERENCE) \
             TEST(GENERATE) \
             TEST(GENERATE_RANGE) \
             TEST(TRANSFORM) \
@@ -1079,7 +1079,7 @@ main(void)
                     deq_digi_free(&aa);
                     break;
                 }
-#endif
+#endif // DEBUG
                 case TEST_DIFFERENCE:
                 {
                     deq_digi aa;

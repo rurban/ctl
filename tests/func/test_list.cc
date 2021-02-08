@@ -239,7 +239,7 @@ main(void)
         TEST(TRANSFORM) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EQUAL_RANGE) /* 47 */ \
+        TEST(EQUAL_RANGE) /* 51 */ \
         TEST(DIFFERENCE) \
         TEST(SYMMETRIC_DIFFERENCE) \
         TEST(DIFFERENCE_RANGE) \
@@ -1014,9 +1014,9 @@ main(void)
                 std::list<DIGI> bbb;
                 std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                     std::back_inserter(bbb));
-                CHECK(aa, bb);
                 CHECK(aaa, bbb);
 # endif
+                CHECK(aa, bb);
                 list_digi_free(&aaa);
                 list_digi_free(&aa);
                 break;

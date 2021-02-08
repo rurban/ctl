@@ -162,6 +162,7 @@ JOIN(I, distance)(I* iter, I* other)
 static inline A JOIN(A, init_from)(A* copy);
 static inline A JOIN(A, copy)(A* self);
 static inline void JOIN(A, push_back)(A* self, T value);
+static inline void JOIN(A, shrink_to_fit)(A* self);
 #ifndef CTL_STR
 static inline I JOIN(A, find)(A* self, T key);
 #endif
