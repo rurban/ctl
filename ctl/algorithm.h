@@ -417,7 +417,7 @@ JOIN(A, includes)(A* a, A* b)
 #endif // !USET/SET
 
 // generate and transform have no inserter support yet,
-// so we cannot yet use it for set nor uset. we want to call insert on them.
+// so we cannot yet use it for set nor uset. we want to call insert/push_back on them.
 // for list and vector we just set/replace the elements.
 #if !defined(CTL_USET) && !defined(CTL_SET)
 
@@ -468,28 +468,26 @@ JOIN(A, transform)(A* self, T _unop(T*))
     return other;
 }
 
-#if defined CTL_STR || defined DEBUG
 static inline A
 JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
 {
-    A other = JOIN(A, copy)(self);
-    foreach(A, &other, i)
+    A other = JOIN(A, init_from)(self);
+#ifdef CTL_VEC
+    JOIN(A, fit)(&other, self->size - 1);
+#endif
+    foreach(A, self, i)
     {
         if (JOIN(I, done)(pos))
             break;
-#ifndef POD
         T tmp = _binop(i.ref, pos->ref);
-        if (self->free)
-            self->free(i.ref);
-        *i.ref = tmp;
-#else
-        *i.ref = _binop(i.ref, pos->ref);
-#endif
-        JOIN(JOIN(A, it), next)(pos);
+        JOIN(A, push_back)(&other, tmp);
+        JOIN(I, next)(pos);
     }
+#ifdef CTL_VEC
+    JOIN(A, shrink_to_fit)(&other);
+#endif
     return other;
 }
-#endif // STR/DEBUG
 
 #ifdef DEBUG
 

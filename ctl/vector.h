@@ -165,6 +165,7 @@ static inline void JOIN(A, push_back)(A* self, T value);
 static inline void JOIN(A, shrink_to_fit)(A* self);
 #ifndef CTL_STR
 static inline I JOIN(A, find)(A* self, T key);
+static inline void JOIN(A, fit)(A* self, size_t capacity);
 #endif
 
 #include <ctl/bits/container.h>

@@ -1288,10 +1288,12 @@ main(void)
                     size_t dist = std::distance(first_b, last_b);
                     list_digi_resize(&aa, dist, digi_init(0));
                     list_digi_it dest = list_digi_begin(&aa);
-                    list_digi_it it = list_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
+                    list_digi_it it = list_digi_transform_range(&first_a, &last_a,
+                                                                dest, digi_untrans);
                     std::list<DIGI> bb;
                     bb.resize(dist);
-                    auto iter = std::transform(first_b, last_b, b.begin()++, bb.begin(), DIGI_bintrans);
+                    auto iter = std::transform(first_b, last_b, b.begin()++, bb.begin(),
+                                               DIGI_bintrans);
                     CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
                     // heap use-after-free

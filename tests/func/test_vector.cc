@@ -63,7 +63,7 @@ void print_vector(std::vector<DIGI> &b)
 }
 
 #ifdef DEBUG
-//#define TEST_MAX_SIZE 15
+#define TEST_MAX_SIZE 15
 //#define TEST_MAX_VALUE INT_MAX
 #define TEST_MAX_VALUE 100
 #else
@@ -293,12 +293,17 @@ main(void)
         TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
+        TEST(TRANSFORM_IT) \
         TEST(EMPLACE_BACK) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EMPLACE) /* 49 */ \
         TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
+        TEST(GENERATE_N) \
+        TEST(GENERATE_N_RANGE) \
+        TEST(TRANSFORM_RANGE) \
+        TEST(TRANSFORM_IT_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
@@ -307,10 +312,6 @@ main(void)
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
-        TEST(GENERATE_N) \
-        TEST(GENERATE_N_RANGE) \
-        TEST(TRANSFORM_IT) \
-        TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -1160,24 +1161,35 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
+#endif // DEBUG
                 case TEST_TRANSFORM_IT:
                 {
+                    print_vec(&a);
                     if (a.size < 2)
                         break;
                     vec_digi_it pos = vec_digi_begin(&a);
                     vec_digi_it_advance(&pos, 1);
                     vec_digi aa = vec_digi_transform_it(&a, &pos, digi_bintrans);
+                    print_vec(&aa);
+# ifndef _MSC_VER
                     std::vector<DIGI> bb;
-                    bb.resize(b.size());
-                    std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(),
-                                   DIGI_bintrans);
+                    bb.reserve(b.size()-1);
+                    std::transform(b.begin(), b.end()-1, b.begin()+1,
+                                   std::back_inserter(bb), DIGI_bintrans);
+                    print_vector(bb);
+                    ADJUST_CAP("transform_it", aa, bb);
                     CHECK(aa, bb);
+# endif
                     CHECK(a, b);
                     vec_digi_free(&aa);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_TRANSFORM_RANGE:
                 {
+                    print_vec(&a);
+                    if (a.size < 2)
+                        break;
                     vec_digi_it first_a, last_a;
                     std::vector<DIGI>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
@@ -1186,12 +1198,15 @@ main(void)
                     vec_digi_it dest = vec_digi_begin(&aa);
                     vec_digi_it it = vec_digi_transform_range(&first_a, &last_a, dest,
                                                               digi_untrans);
+# ifndef _MSC_VER
                     std::vector<DIGI> bb;
-                    bb.resize(last_b - first_b);
-                    auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(),
+                    bb.reserve(last_b - first_b);
+                    auto iter = std::transform(first_b, last_b, std::back_inserter(bb),
                                                DIGI_untrans);
-                    CHECK_ITER(it, bb, iter);
+                    ADJUST_CAP("transform_range", aa, bb);
+                    //CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
+# endif
                     // heap use-after-free
                     CHECK(a, b);
                     vec_digi_free(&aa);
@@ -1199,24 +1214,29 @@ main(void)
                 }
                 case TEST_TRANSFORM_IT_RANGE:
                 {
+                    if (a.size < 2)
+                        break;
                     vec_digi_it first_a, last_a;
                     std::vector<DIGI>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    vec_digi_it pos = set_digi_begin(&a);
+                    vec_digi_it pos = vec_digi_begin(&a);
                     vec_digi_it_advance(&pos, 1);
                     vec_digi aa = vec_digi_init();
                     vec_digi_resize(&aa, last_b - first_b, digi_init(0));
                     vec_digi_it dest = vec_digi_begin(&aa);
-                    vec_digi_it it = vec_digi_transform_it_range(&first_a, &last_a, &pos, dest,
-                                                                 digi_bintrans);
+                    vec_digi_it it = vec_digi_transform_it_range(&first_a, &last_a,
+                                                                 &pos, dest, digi_bintrans);
                     auto it2 = b.begin();
                     std::advance(it2, 1);
+# ifndef _MSC_VER
                     std::vector<DIGI> bb;
-                    bb.resize(last_b - first_b);
+                    bb.reserve(last_b - first_b - 1);
                     auto iter = std::transform(first_b, last_b, it2,
-                                               std::inserter(bb, bb.begin()), DIGI_bintrans);
-                    CHECK_ITER(it, bb, iter);
+                                               std::back_inserter(bb), DIGI_bintrans);
+                    ADJUST_CAP("transform_it_range", aa, bb);
+                    //CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
+# endif
                     // heap use-after-free
                     CHECK(a, b);
                     vec_digi_free(&aa);
