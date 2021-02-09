@@ -400,6 +400,7 @@ main(void)
             TEST(GENERATE_N) \
             TEST(GENERATE_N_RANGE) \
             TEST(TRANSFORM) \
+            TEST(MISMATCH) \
 
 #define FOREACH_DEBUG(TEST) \
             TEST(ERASE_RANGE) /* 56*/ \
@@ -1430,6 +1431,31 @@ main(void)
                     CHECK(aa, bb);
                     // heap use-after-free
                     CHECK(a, b);
+                    deq_digi_free(&aa);
+                    break;
+                }
+                case TEST_MISMATCH:
+                {
+                    if(a.size < 2)
+                        break;
+                    deq_digi aa;
+                    std::deque<DIGI> bb;
+                    setup_deque(&aa, bb);
+                    deq_digi_it b1, b2;
+                    b1 = deq_digi_begin(&a);
+                    b2 = deq_digi_begin(&aa);
+                    deq_digi_it r1a, last1_a, r2a, last2_a;
+                    std::deque<DIGI>::iterator r1b, last1_b, r2b, last2_b;
+                    get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
+                    get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
+                    /*bool found_a = */deq_digi_mismatch(&r1a, &r2a);
+                    auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
+                    int d1a = deq_digi_it_distance(&b1, &r1a);
+                    int d2a = deq_digi_it_distance(&b2, &r2a);
+                    LOG("iter1 %d, iter2 %d\n", d1a, d2a);
+                    //TODO check found_a against iter results
+                    assert(d1a == distance(b.begin(), pair.first));
+                    assert(d2a == distance(bb.begin(), pair.second));
                     deq_digi_free(&aa);
                     break;
                 }

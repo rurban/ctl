@@ -243,9 +243,14 @@ main(void)
         TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
+        TEST(MISMATCH) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EQUAL_RANGE) /* 54 */ \
+        TEST(EQUAL_RANGE) /* 58 */ \
+        TEST(GENERATE_N) \
+        TEST(GENERATE_N_RANGE) \
+        TEST(TRANSFORM_IT) \
+        TEST(TRANSFORM_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
@@ -254,10 +259,6 @@ main(void)
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
-        TEST(GENERATE_N) \
-        TEST(GENERATE_N_RANGE) \
-        TEST(TRANSFORM_IT) \
-        TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -1272,7 +1273,7 @@ main(void)
                     list_digi_it_advance(&pos, 1);
                     list_digi aa = list_digi_transform_it(&a, &pos, digi_bintrans);
                     std::list<DIGI> bb;
-                    bb.resize(b.size());
+                    //bb.resize(b.size());
                     std::transform(b.begin(), b.end(), b.begin()++, bb.begin(), DIGI_bintrans);
                     CHECK(aa, bb);
                     CHECK(a, b);
@@ -1291,7 +1292,7 @@ main(void)
                     list_digi_it it = list_digi_transform_range(&first_a, &last_a,
                                                                 dest, digi_untrans);
                     std::list<DIGI> bb;
-                    bb.resize(dist);
+                    //bb.resize(dist);
                     auto iter = std::transform(first_b, last_b, b.begin()++, bb.begin(),
                                                DIGI_bintrans);
                     CHECK_ITER(it, bb, iter);
@@ -1302,6 +1303,31 @@ main(void)
                     break;
                 }
 #endif // DEBUG
+                case TEST_MISMATCH:
+                {
+                    if(a.size < 2)
+                        break;
+                    list_digi aa;
+                    std::list<DIGI> bb;
+                    setup_lists(&aa, bb, TEST_RAND(a.size), NULL);
+                    list_digi_it b1, b2;
+                    b1 = list_digi_begin(&a);
+                    b2 = list_digi_begin(&aa);
+                    list_digi_it r1a, last1_a, r2a, last2_a;
+                    std::list<DIGI>::iterator r1b, last1_b, r2b, last2_b;
+                    get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
+                    get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
+                    /*bool found_a = */list_digi_mismatch(&r1a, &r2a);
+                    auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
+                    int d1a = list_digi_it_distance(&b1, &r1a);
+                    int d2a = list_digi_it_distance(&b2, &r2a);
+                    LOG("iter1 %d, iter2 %d\n", d1a, d2a);
+                    //TODO check found_a against iter results
+                    assert(d1a == distance(b.begin(), pair.first));
+                    assert(d2a == distance(bb.begin(), pair.second));
+                    list_digi_free(&aa);
+                    break;
+                }
 #if 0
                 case TEST_FIND_END:
                 {

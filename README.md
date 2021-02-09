@@ -368,8 +368,7 @@ x  stable and tested
 |`count_range`                    | x  | x  | x  | x  | x  | x  | .  |    |    |    |    |    |
 |`count_if`                       | x  | x  | x  | x  | x  | x  | .  | x  |    |    |    |    |
 |`count_if_range`                 | x  | x  | x  | x  | x  | x  | .  |    |    |    |    |    |
-|`mismatch`                       |    |    |    |    |    |    |    |    |    |    |    |    |
-|`mismatch_range`                 |    |    |    |    |    |    |    |    |    |    |    |    |
+|`mismatch`                       | x  | x  | x  | x  | x  | x  |    |    |    |    |    |    |
 |`find_if`                        | x  |    | x  | x  | x  | x  | .  | x  |    |    |    |    |
 |`find_if_not`                    | x  |    | x  | x  | x  | x  | .  | x  |    |    |    |    |
 |`find_range`                     | x  | x  | x  | x  | x  | x  | .  |    |    |    |    |    |
@@ -479,7 +478,7 @@ x  stable and tested
 |`upper_bound_range`              |    |    |    |    |    |    |    |    |    |    |    |    |
 |`binary_search`                  |    |    |    |    |    |    |    |    |    |    |    |    |
 |`binary_search_range`            |    |    |    |    |    |    |    |    |    |    |    |    |
-|`equal_range`                    |    |    | .  |    |    |    | .  |    |    |    |    |    |
+|`equal_range`                    |    |    |    |    |    |    | .  |    |    |    |    |    |
 |`equal_range_range`              |    |    |    |    |    |    |    |    |    |    |    |    |
 |`merge`                          |    |    |    |    | x  |    |    | .  |    |    |    |    |
 |`merge_range`                    |    |    |    |    |    |    |    |    |    |    |    |    |
@@ -487,9 +486,9 @@ x  stable and tested
 |`inplace_merge_range`            |    |    |    |    |    |    |    |    |    |    |    |    |
 |`includes`                       | x  |    |    | x  | x  |    |    |    |    |    |    |    |
 |`includes_range`                 | x  |    |    | x  | x  |    |    |    |    |    |    |    |
-|`difference`                     | x  | x  | .  | x  | x  | x  | x  | x  | x  |    |    |    |
+|`difference`                     | x  | x  |    | x  | x  | x  | x  | x  | x  |    |    |    |
 |`difference_range`               | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
-|`intersection`                   | x  | .  | .  | x  | x  | x  | x  | x  | x  |    |    |    |
+|`intersection`                   | x  | .  |    | x  | x  | x  | x  | x  | x  |    |    |    |
 |`intersection_range`             | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
 |`symmetric_difference`           | x  | x  |    | x  | x  | x  | x  | x  | x  |    |    |    |
 |`symmetric_difference_range`     | x  | .  |    | x  | x  |    |    |    |    |    |    |    |

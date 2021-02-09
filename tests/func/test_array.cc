@@ -168,6 +168,7 @@ main(void)
         TEST(COUNT_IF) \
         TEST(COUNT_IF_RANGE) \
         TEST(COUNT_RANGE) \
+        TEST(MISMATCH) \
         TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
         TEST(GENERATE_N) \
@@ -180,7 +181,7 @@ main(void)
         TEST(SYMETRIC_DIFFERENCE) \
         TEST(INTERSECTION) \
         TEST(GENERATE_N_RANGE) \
-        TEST(TRANSFORM_RANGE) \
+        TEST(TRANSFORM_RANGE) /* 35*/ \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
@@ -272,7 +273,7 @@ main(void)
             case TEST_SWAP:
             {
                 arr100_digi aa = arr100_digi_copy(&a);
-                arr100_digi aaa = arr100_digi_init();
+                arr100_digi aaa = arr100_digi_init_from(&a);
                 std::array<DIGI,100> bb = b;
                 std::array<DIGI,100> bbb;
                 arr100_digi_swap(&aaa, &aa);
@@ -564,7 +565,7 @@ main(void)
                 arr100_digi_it first_a, last_a;
                 std::array<DIGI,100>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                arr100_digi aa = arr100_digi_init();
+                arr100_digi aa = arr100_digi_init_from(&a);
                 arr100_digi_it dest = arr100_digi_begin(&aa);
                 arr100_digi_it it = arr100_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
                 std::array<DIGI,100> bb;
@@ -576,14 +577,35 @@ main(void)
                 arr100_digi_free(&aa);
                 break;
             }
-            /*
-            case TEST_EQUAL_RANGE:
-            case TEST_INTERSECTION:
-            case TEST_DIFFERENCE:
-                printf("nyi\n");
+#endif // DEBUG
+            case TEST_MISMATCH:
+            {
+                arr100_digi aa = arr100_digi_init_from(&a);
+                std::array<DIGI,100> bb;
+                for (int i=0; i<N; i++)
+                {
+                    int value = TEST_RAND(TEST_MAX_VALUE);
+                    bb[i] = DIGI{value};
+                    aa.vector[i] = digi_init(value);
+                }
+                arr100_digi_it b1, b2;
+                b1 = arr100_digi_begin(&a);
+                b2 = arr100_digi_begin(&aa);
+                arr100_digi_it r1a, last1_a, r2a, last2_a;
+                std::array<DIGI,100>::iterator r1b, last1_b, r2b, last2_b;
+                get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
+                get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
+                /*bool found_a = */arr100_digi_mismatch(&r1a, &r2a);
+                auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
+                int d1a = arr100_digi_it_distance(&b1, &r1a);
+                int d2a = arr100_digi_it_distance(&b2, &r2a);
+                LOG("iter1 %d, iter2 %d\n", d1a, d2a);
+                //TODO check found_a against iter results
+                assert(d1a == std::distance(b.begin(), pair.first));
+                assert(d2a == std::distance(bb.begin(), pair.second));
+                arr100_digi_free(&aa);
                 break;
-            */
-#endif
+            }
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);

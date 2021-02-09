@@ -197,6 +197,7 @@ main(void)
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
         TEST(TRANSFORM_IT_RANGE) \
+        TEST(MISMATCH) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EMPLACE) /* 40 */ \
@@ -849,6 +850,33 @@ main(void)
                 //CHECK_ITER(it, bb, iter);
                 CHECK(aa, bb);
                 CHECK(a, b);
+                set_digi_free(&aa);
+                break;
+            }
+            case TEST_MISMATCH:
+            {
+                print_set(&a);
+                if(a.size < 2)
+                    break;
+                set_digi aa;
+                std::set<DIGI> bb;
+                setup_sets(&aa, bb);
+                print_set(&aa);
+                set_digi_it b1, b2;
+                b1 = set_digi_begin(&a);
+                b2 = set_digi_begin(&aa);
+                set_digi_it r1a, last1_a, r2a, last2_a;
+                std::set<DIGI>::iterator r1b, last1_b, r2b, last2_b;
+                get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
+                get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
+                /*bool found_a = */set_digi_mismatch(&r1a, &r2a);
+                auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
+                int d1a = set_digi_it_distance(&b1, &r1a);
+                int d2a = set_digi_it_distance(&b2, &r2a);
+                LOG("iter1 %d, iter2 %d\n", d1a, d2a);
+                //TODO check found_a against iter results
+                assert(d1a == distance(b.begin(), pair.first));
+                assert(d2a == distance(bb.begin(), pair.second));
                 set_digi_free(&aa);
                 break;
             }

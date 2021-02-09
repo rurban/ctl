@@ -296,6 +296,7 @@ main(void)
         TEST(TRANSFORM) \
         TEST(TRANSFORM_IT) \
         TEST(EMPLACE_BACK) \
+        TEST(MISMATCH) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EMPLACE) /* 51 */ \
@@ -1251,6 +1252,31 @@ main(void)
                     break;
                 }
 #endif // DEBUG
+                case TEST_MISMATCH:
+                {
+                    if(a.size < 2)
+                        break;
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(a.size));
+                    vec_digi_it b1, b2;
+                    b1 = vec_digi_begin(&a);
+                    b2 = vec_digi_begin(&aa);
+                    vec_digi_it r1a, last1_a, r2a, last2_a;
+                    std::vector<DIGI>::iterator r1b, last1_b, r2b, last2_b;
+                    get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
+                    get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
+                    /*bool found_a = */vec_digi_mismatch(&r1a, &r2a);
+                    auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
+                    int d1a = vec_digi_it_distance(&b1, &r1a);
+                    int d2a = vec_digi_it_distance(&b2, &r2a);
+                    LOG("iter1 %d, iter2 %d\n", d1a, d2a);
+                    //TODO check found_a against iter results
+                    assert(d1a == distance(b.begin(), pair.first));
+                    assert(d2a == distance(bb.begin(), pair.second));
+                    vec_digi_free(&aa);
+                    break;
+                }
 #if 0
                 case TEST_FIND_END:
                 {

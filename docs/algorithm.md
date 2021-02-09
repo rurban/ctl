@@ -75,10 +75,9 @@ applies a block with iter to the first n elements of a sequence.
  
 returns the number of elements satisfying specific criteria.
 
-    I mismatch (I* first1, I *last1, I* first2)
-    I mismatch_range (I* first1, I *last1, I* first2, I* last2) (C++20)
+    bool mismatch (I* range1, I* range2)
  
-finds the first position where two ranges differ. _(NYI)_
+finds if and the first position where two ranges differ.
 
     I find (A* self, T* value)
     I find_if (A* self, int _match(T*))

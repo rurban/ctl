@@ -260,17 +260,18 @@ main(void)
             TEST(NONE_OF_RANGE) \
             TEST(COUNT_IF_RANGE) \
             TEST(COUNT_RANGE) \
-            TEST(UNION) /* 45 */ \
+            TEST(MISMATCH) \
+            TEST(UNION) \
             TEST(DIFFERENCE) \
             TEST(SYMMETRIC_DIFFERENCE) \
             TEST(GENERATE) \
             TEST(GENERATE_RANGE) \
             TEST(GENERATE_N) \
-            TEST(TRANSFORM) /* 40*/ \
+            TEST(TRANSFORM) \
             TEST(TRANSFORM_IT) \
 
 #define FOREACH_DEBUG(TEST) \
-            TEST(INSERT_COUNT) \
+            TEST(INSERT_COUNT) /* 47 */ \
             TEST(INSERT_RANGE) \
             TEST(EQUAL_RANGE) \
             TEST(INTERSECTION) \
@@ -1030,6 +1031,31 @@ main(void)
                     break;
                 }
 #endif // DEBUG
+                case TEST_MISMATCH: // 56
+                {
+                    if(a.size < 2)
+                        break;
+                    str aa;
+                    std::string bb;
+                    gen_strings(&aa, bb, TEST_RAND(a.size));
+                    str_it b1, b2;
+                    b1 = str_it_begin(&a);
+                    b2 = str_it_begin(&aa);
+                    str_it r1a, last1_a, r2a, last2_a;
+                    std::string::iterator r1b, last1_b, r2b, last2_b;
+                    get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
+                    get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
+                    /*bool found_a = */str_mismatch(&r1a, &r2a);
+                    auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
+                    int d1a = str_it_distance(&b1, &r1a);
+                    int d2a = str_it_distance(&b2, &r2a);
+                    LOG("iter1 %d, iter2 %d\n", d1a, d2a);
+                    //TODO check found_a against iter results
+                    assert(d1a == distance(b.begin(), pair.first));
+                    assert(d2a == distance(bb.begin(), pair.second));
+                    str_free(&aa);
+                    break;
+                }
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);

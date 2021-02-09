@@ -614,6 +614,27 @@ JOIN(A, count)(A* self, T value)
     return count;
 }
 #endif // SET/STR
+
+static inline bool
+JOIN(A, mismatch)(I* range1, I* range2)
+{
+    A* self = range1->container;
+    CTL_ASSERT_EQUAL
+    int done = JOIN(I, done)(range1);
+    if (!JOIN(I, done)(range2))
+        while(!done && JOIN(A, _equal)(self, range1->ref, range2->ref))
+        {
+            JOIN(I, next)(range1);
+            JOIN(I, next)(range2);
+            done = JOIN(I, done)(range1);
+            if (JOIN(I, done)(range2))
+            {
+                done = 1;
+                break;
+            }
+        }
+    return done ? false : true;
+}
 #endif // USET
 
 //#if !defined(CTL_STR)
@@ -663,7 +684,7 @@ JOIN(A, equal_range)(A* self, I* first, I* last, T value)
 static inline I
 JOIN(A, lower_bound)(A* self, T value)
 {
-    ASSERT(self->compare || !"compare undefined");
+    CTL_ASSERT_COMPARE
     JOIN(A, it) it = JOIN(A, begin)(self);
     size_t count = JOIN(A, size)(self);
     while (count > 0)
@@ -685,7 +706,7 @@ JOIN(A, lower_bound)(A* self, T value)
 static inline I
 JOIN(A, upper_bound)(A* self, T value)
 {
-    ASSERT(self->compare || !"compare undefined");
+    CTL_ASSERT_COMPARE
     JOIN(A, it) it = JOIN(A, begin)(self);
     size_t count = JOIN(A, size)(self);
     while (count > 0)
@@ -708,7 +729,7 @@ static inline I
 JOIN(A, lower_bound_range)(I* first, I* last, T value)
 {
     A* self = first->container;
-    ASSERT(self->compare || !"compare undefined");
+    CTL_ASSERT_COMPARE
     JOIN(A, it) it = *first;
     size_t count = JOIN(I, distance)(first, last);
     while (count > 0)
@@ -730,7 +751,7 @@ static inline I
 JOIN(A, upper_bound_range)(I* first, I* last, T value)
 {
     A* self = first->container;
-    ASSERT(self->compare || !"compare undefined");
+    CTL_ASSERT_COMPARE
     JOIN(A, it) it = *first;
     size_t count = JOIN(I, distance)(first, last);
     while (count > 0)
@@ -754,8 +775,6 @@ JOIN(A, upper_bound_range)(I* first, I* last, T value)
 #endif // DEBUG
 
 // TODO:
-// mismatch
-// mismatch_range C++20
 // find_first_of
 // find_first_of_range C++20
 // adjacent_find
@@ -764,7 +783,6 @@ JOIN(A, upper_bound_range)(I* first, I* last, T value)
 // search_range C++20
 // search_n
 // search_n_range C++20
-// copy_range C++20
 // copy_if C++11
 // copy_if_range C++20
 // copy_n C++11
