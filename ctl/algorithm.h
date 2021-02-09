@@ -484,7 +484,7 @@ JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
         JOIN(A, push_back)(&other, tmp);
         JOIN(I, next)(pos);
     }
-#ifdef CTL_VEC
+#if defined(CTL_VEC) && !defined(CTL_STR)
     JOIN(A, shrink_to_fit)(&other);
 #endif
     return other;
