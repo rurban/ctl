@@ -169,6 +169,7 @@ JOIN(I, distance)(I* iter, I* other)
     return other->ref - iter->ref;
 }
 
+static inline A JOIN(A, init_from)(A* copy);
 static inline A JOIN(A, copy)(A* self);
 
 #include <ctl/bits/container.h>
@@ -394,6 +395,30 @@ JOIN(A, find)(A* self, T key)
         if (JOIN(A, _equal)(self, it.ref, &key))
             return it.ref;
     return NULL;
+}
+
+static inline A
+JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
+{
+    A other = JOIN(A, init)();
+    size_t i = 0;
+    foreach(A, self, it)
+    {
+        if (pos->ref == pos->end)
+            break;
+#ifdef POD
+        JOIN(A, set)(&other, i, _binop(it.ref, pos->ref));
+#else
+        T copy = self->copy(it.ref);
+        T tmp = _binop(&copy, pos->ref);
+        JOIN(A, set)(&other, i, tmp);
+        if (self->free)
+            self->free(&copy);
+#endif
+        i++;
+        pos->ref++;
+    }
+    return other;
 }
 
 #undef A

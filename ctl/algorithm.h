@@ -468,6 +468,7 @@ JOIN(A, transform)(A* self, T _unop(T*))
     return other;
 }
 
+#ifndef CTL_ARR
 static inline A
 JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
 {
@@ -488,6 +489,20 @@ JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
 #endif
     return other;
 }
+#endif // ARR
+
+static inline void
+JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
+{
+    foreach_n(A, self, i, count)
+    {
+#ifndef POD
+        if (self->free)
+            self->free(i.ref);
+#endif
+        *i.ref = _gen();
+    }
+}
 
 #ifdef DEBUG
 
@@ -498,19 +513,6 @@ JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
     A* self = first->container;
 #endif
     foreach_n_range(A, first, i, count)
-    {
-#ifndef POD
-        if (self->free)
-            self->free(i.ref);
-#endif
-        *i.ref = _gen();
-    }
-}
-
-static inline void
-JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
-{
-    foreach_n(A, self, i, count)
     {
 #ifndef POD
         if (self->free)

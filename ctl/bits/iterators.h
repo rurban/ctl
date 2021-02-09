@@ -89,7 +89,7 @@
     {                                                               \
         JOIN(A, it) JOIN(pos,__LINE__) = JOIN(A, begin)(self);      \
         JOIN(JOIN(A, it), advance)(&JOIN(pos,__LINE__), n);         \
-        pos.end = JOIN(pos,__LINE__).end;                           \
+        JOIN(JOIN(A, it), range)(&pos, &JOIN(pos,__LINE__));        \
     }                                                               \
     for(;                                                           \
         !JOIN(JOIN(A, it), done)(&pos);                             \
@@ -99,7 +99,7 @@
     {                                                               \
         JOIN(A, it) JOIN(pos,__LINE__) = *first;                    \
         JOIN(JOIN(A, it), advance)(&JOIN(pos,__LINE__), n);         \
-        pos.end = JOIN(pos,__LINE__).end;                           \
+        JOIN(JOIN(A, it), range)(&pos, &JOIN(pos,__LINE__));        \
     }                                                               \
     for(;                                                           \
         !JOIN(JOIN(A, it), done)(&pos);                             \
