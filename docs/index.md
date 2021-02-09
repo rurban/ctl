@@ -290,7 +290,7 @@ x  stable and tested
 |`insert`                         | x  | x  |    | x  | x  | x  | x  | x  | x  |    |    |    |
 |`insert_index`                   | x  | x  |    | x  |    |    |    |    |    |    |    |    |
 |`insert_count`                   | x  |    |    | x  | x  |    |    |    |    |    |    |    |
-|`insert_range`                   | x  |    |    | .  | x  |    |    |    |    |    |    |    |
+|`insert_range`                   | x  |    |    | x  | x  |    |    |    |    |    |    |    |
 |`insert_found`                   |    |    |    |    |    |    |    | x  | x  |    |    |    |
 |`insert_or_assign`               |    |    |    |    |    |    | x  |    | x  |    |    |    |
 |`insert_or_assign_found`         |    |    |    |    |    |    |    |    | x  |    |    |    |
@@ -407,14 +407,14 @@ x  stable and tested
 |`transform_it_range`             | .  |    |    |    |    | x  |    |    |    |    |    |    |
 |`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
 |`generate_range`                 | x  | x  | x  | x  | x  | .  |    |    |    |    |    |    |
-|`generate_n`                     | .  | x  | x  | .  | .  | x  |    | x  |    |    |    |    |
+|`generate_n`                     | .  | x  | x  | x  | .  | x  |    | x  |    |    |    |    |
 |`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
 |`generate_range`                 | x  | x  | x  | x  | x  | .  |    |    |    |    |    |    |
-|`generate_n`                     | .  | x  | x  | .  | .  | x  |    | x  |    |    |    |    |
+|`generate_n`                     | .  | x  | x  | x  | .  | x  |    | x  |    |    |    |    |
 |`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
 |`generate_range`                 | x  | x  | x  | x  | x  | .  |    |    |    |    |    |    |
-|`generate_n`                     | .  | x  | x  | .  | .  | x  |    | x  |    |    |    |    |
-|`generate_n_range`               | .  | .  | .  | .  | .  | x  |    |    |    |    |    |    |
+|`generate_n`                     | .  | x  | x  | x  | .  | x  |    | x  |    |    |    |    |
+|`generate_n_range`               | .  | .  | .  | x  | .  | x  |    |    |    |    |    |    |
 |`remove`                         |    |    |    |    | x  |    |    |    |    |    |    |    |
 |`remove_if`                      | x  |    |    | x  | x  | x  |    | .  |    |    |    |    |
 |`remove_copy`                    |    |    |    |    |    |    |    |    |    |    |    |    |

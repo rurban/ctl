@@ -491,6 +491,7 @@ JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
 }
 #endif // ARR
 
+// std::deque has a different idea
 static inline void
 JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
 {
@@ -504,8 +505,7 @@ JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
     }
 }
 
-#ifdef DEBUG
-
+// And here std::deque is a travesty. Or right.
 static inline void
 JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
 {
@@ -521,6 +521,8 @@ JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
         *i.ref = _gen();
     }
 }
+
+#ifdef DEBUG
 
 static inline I
 JOIN(A, transform_range)(I* first1, I* last1, I dest, T _unop(T*))
