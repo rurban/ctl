@@ -52,6 +52,7 @@ OLD_MAIN
         assert (_iter == b.end())
 
 #ifdef DEBUG
+
 void print_uset(uset_digi* a)
 {
     int i = 0;
@@ -142,18 +143,19 @@ main(void)
         TEST(INTERSECTION) \
         TEST(DIFFERENCE) \
         TEST(SYMMETRIC_DIFFERENCE) \
+        TEST(GENERATE) \
+        TEST(GENERATE_N) \
+        TEST(TRANSFORM) \
         TEST(EMPLACE) \
         TEST(EMPLACE_FOUND) \
-        TEST(EMPLACE_HINT) /* 26 */ \
+        TEST(EMPLACE_HINT) /* 29 */ \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EXTRACT) /* 27 */ \
+        TEST(EXTRACT) /* 30 */ \
         TEST(MERGE) \
         TEST(REMOVE_IF) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
-        TEST(GENERATE) \
-        TEST(TRANSFORM) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -598,6 +600,67 @@ main(void)
                 assert(count_a == count_b);
                 break;
             }
+            /* Need some C++ help here.
+               I don't think std::generate can be made usable for set, we dont care
+               for the insert hint, and we have no operator!= for the STL inserter.
+               However our CTL generate for set works fine, just a bit expensive. */
+            case TEST_GENERATE:
+            {
+                print_uset(&a);
+                digi_generate_reset();
+                uset_digi_generate(&a, digi_generate);
+                LOG("=>\n");
+                print_uset(&a);
+                digi_generate_reset();
+                // std::generate(b.begin(), b.end(), DIGIc_generate);
+                std::unordered_set<DIGI, DIGI_hash> bb;
+                // FIXME: need operator!= for insert_operator<set<DIGI>>
+                // std::generate(std::inserter(b, b.begin()), std::inserter(bb, bb.begin()),
+                //              DIGI_generate);
+                //LOG("b\n");
+                //print_unordered_set(b);
+                size_t n = b.size();
+                b.clear();
+                for (size_t i=0; i<n; i++)
+                    b.insert(DIGI_generate());
+                LOG("=>\n");
+                print_unordered_set(b);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_GENERATE_N:
+            {
+                print_uset(&a);
+                print_unordered_set(b);
+                size_t count = TEST_RAND(20);
+                LOG("=> %zu\n", count);
+                digi_generate_reset();
+                uset_digi_generate_n(&a, count, digi_generate);
+                print_uset(&a);
+                digi_generate_reset();
+                // This is a joke
+                //std::generate_n(std::inserter(b, b.begin()), count, DIGI_generate);
+                b.clear();
+                for (size_t i=0; i<count; i++)
+                    b.insert(DIGI_generate());
+                print_unordered_set(b);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_TRANSFORM:
+            {
+                print_uset(&a);
+                uset_digi aa = uset_digi_transform(&a, digi_untrans);
+                std::unordered_set<DIGI, DIGI_hash> bb;
+                std::transform(b.begin(), b.end(), std::inserter(bb, bb.end()),
+                               DIGI_untrans);
+                print_uset(&aa);
+                print_unordered_set(bb);
+                CHECK(aa, bb);
+                CHECK(a, b);
+                uset_digi_free(&aa);
+                break;
+            }
 #if 0
             case TEST_EXTRACT:
             case TEST_MERGE:
@@ -605,8 +668,6 @@ main(void)
             case TEST_EQUAL_RANGE:
             case TEST_LOWER_BOUND:
             case TEST_UPPER_BOUND:
-            case TEST_GENERATE:
-            case TEST_TRANSFORM:
                 printf("nyi\n");
                 break;
 #endif

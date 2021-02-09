@@ -1030,6 +1030,70 @@ JOIN(A, swap)(A* self, A* other)
     *other = temp;
 }
 
+static inline bool
+JOIN(A, inserter)(A* self, T *value)
+{
+    if(JOIN(A, find_node)(self, *value))
+    {
+        // already exists: keep
+        if (self->free)
+            self->free(value);
+        return false;
+    }
+    else
+    {
+        JOIN(A, erase)(self, *value);
+        JOIN(A, insert)(self, *value);
+        return true;
+    }
+}
+
+// specialize, using our inserter (i.e. replace if different)
+// This one changes in place.
+static inline void
+JOIN(A, generate)(A* self, T _gen(void))
+{
+    size_t size = self->size;
+    JOIN(A, clear)(self);
+    for (size_t i = 0; i < size; i++)
+    {
+        T tmp = _gen();
+        JOIN(A, inserter)(self, &tmp);
+    }
+}
+
+// These just insert in-place.
+// The STL can be considered broken here, as it relies on the random iteration
+// order to keep the rest. We shrink to n.
+static inline void
+JOIN(A, generate_n)(A* self, size_t n, T _gen(void))
+{
+    JOIN(A, clear)(self);
+    for (size_t i = 0; i < n; i++)
+    {
+        T tmp = _gen();
+        JOIN(A, insert)(self, tmp);
+    }
+}
+
+// non-destructive, returns a copy
+static inline A
+JOIN(A, transform)(A* self, T _unop(T*))
+{
+    A other = JOIN(A, init_from)(self);
+    foreach(A, self, it)
+    {
+        T copy = self->copy(it.ref);
+        T tmp = _unop(&copy);
+        JOIN(A, insert)(&other, tmp);
+        if (self->free)
+            self->free(&copy);
+    }
+    return other;
+}
+
+// transform_it with binop makes no sense with random ordering.
+
 #if defined(CTL_UMAP)
 # include <ctl/algorithm.h>
 #endif

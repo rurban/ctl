@@ -268,6 +268,9 @@ This might regenerate the hash table, but not the buckets.
 
 ## Non-member functions
 
+Note that we support no `_range` variants here. ranges make no sense
+with random order.
+
     swap (A* self)
 
 specializes the swap algorithm
@@ -284,18 +287,21 @@ finds element by predicate
 
 finds element by predicate
 
-    A intersection (A* self, A* other) (NY)
-    A union (A* self, A* other) (NY)
-    A difference (A* self, A* other) (NY)
-    A symmetric_difference (A* self, A* other) (NY)
+    A intersection (A* self, A* other)
+    A union (A* self, A* other)
+    A difference (A* self, A* other)
+    A symmetric_difference (A* self, A* other)
 
-Those specialized algorithm variants do not work yet.
+Specialized set algorithm variants which do work here, unlike with the STL.
 
     bool all_of (A* self, int match(T*))
     bool any_of (A* self, int match(T*))
     bool none_of (A* self, int match(T*))
-    bool all_of_range (A* self, I* first, I* last, int match(T*))
-    bool any_of_range (A* self, I* first, I* last, int match(T*))
-    bool none_of_range (A* self, I* first, I* last, int match(T*))
+
+    generate (A* self, T _gen(void))
+    generate_n (A* self, size_t n, T _gen(void))
+    A transform (A* self, T unop(T*))
+
+Unlike with the STL, `generate_n` shrinks to n elements.
 
 See [algorithm](algorithm.md) for more.
