@@ -1162,6 +1162,8 @@ main(void)
                 }
                 case TEST_TRANSFORM_IT:
                 {
+                    if (a.size < 2)
+                        break;
                     vec_digi_it pos = vec_digi_begin(&a);
                     vec_digi_it_advance(&pos, 1);
                     vec_digi aa = vec_digi_transform_it(&a, &pos, digi_bintrans);
@@ -1187,7 +1189,32 @@ main(void)
                     std::vector<DIGI> bb;
                     bb.resize(last_b - first_b);
                     auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(),
-                                               DIGI_bintrans);
+                                               DIGI_untrans);
+                    CHECK_ITER(it, bb, iter);
+                    CHECK(aa, bb);
+                    // heap use-after-free
+                    CHECK(a, b);
+                    vec_digi_free(&aa);
+                    break;
+                }
+                case TEST_TRANSFORM_IT_RANGE:
+                {
+                    vec_digi_it first_a, last_a;
+                    std::vector<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    vec_digi_it pos = set_digi_begin(&a);
+                    vec_digi_it_advance(&pos, 1);
+                    vec_digi aa = vec_digi_init();
+                    vec_digi_resize(&aa, last_b - first_b, digi_init(0));
+                    vec_digi_it dest = vec_digi_begin(&aa);
+                    vec_digi_it it = vec_digi_transform_it_range(&first_a, &last_a, &pos, dest,
+                                                                 digi_bintrans);
+                    auto it2 = b.begin();
+                    std::advance(it2, 1);
+                    std::vector<DIGI> bb;
+                    bb.resize(last_b - first_b);
+                    auto iter = std::transform(first_b, last_b, it2,
+                                               std::inserter(bb, bb.begin()), DIGI_bintrans);
                     CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
                     // heap use-after-free

@@ -191,6 +191,8 @@ main(void)
         TEST(ERASE_RANGE) \
         TEST(TRANSFORM) \
         TEST(TRANSFORM_IT) \
+        TEST(TRANSFORM_RANGE) \
+        TEST(TRANSFORM_IT_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EMPLACE) /* 33*/ \
@@ -210,7 +212,6 @@ main(void)
         TEST(GENERATE_RANGE) \
         TEST(GENERATE_N) \
         TEST(GENERATE_N_RANGE) \
-        TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -764,32 +765,62 @@ main(void)
                 size_t count = TEST_RAND(20 - off);
                 digi_generate_reset();
                 set_digi_generate_n_range(&first_a, count, digi_generate);
+                print_set(&a);
                 digi_generate_reset();
                 std::generate_n(std::inserter(b, first_b), count, DIGI_generate);
                 CHECK(a, b);
                 break;
             }
+#endif // DEBUG
             case TEST_TRANSFORM_RANGE:
             {
+                print_set(&a);
                 set_digi_it first_a, last_a;
                 std::set<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 set_digi aa = set_digi_init(digi_key_compare);
                 set_digi_it dest = set_digi_begin(&aa);
+                /*set_digi_it it = */
                 set_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
+                print_set(&aa);
+                std::set<DIGI> bb;
+                /*auto iter =*/
+                std::transform(first_b, last_b, std::inserter(bb, bb.begin()),
+                               DIGI_untrans);
+                print_setpp(bb);
+                //CHECK_ITER(it, bb, iter);
+                CHECK(aa, bb);
+                CHECK(a, b);
+                set_digi_free(&aa);
+                break;
+            }
+            case TEST_TRANSFORM_IT_RANGE:
+            {
+                print_set(&a);
+                if (a.size < 2) // ctl does fine, but STL goes into an endless
+                                // loop on size=0
+                    break;
+                set_digi_it first_a, last_a;
+                std::set<DIGI>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                set_digi_it pos = set_digi_begin(&a);
+                set_digi_it_advance(&pos, 1);
+                set_digi aa = set_digi_init(digi_key_compare);
+                set_digi_it dest = set_digi_begin(&aa);
+                set_digi_transform_it_range(&first_a, &last_a, &pos, dest, digi_bintrans);
+                print_set(&aa);
                 std::set<DIGI> bb;
                 auto it2 = b.begin();
                 std::advance(it2, 1);
                 std::transform(first_b, last_b, it2,
                                std::inserter(bb, bb.begin()), DIGI_bintrans);
+                print_setpp(bb);
                 //CHECK_ITER(it, bb, iter);
                 CHECK(aa, bb);
-                // heap use-after-free
                 CHECK(a, b);
                 set_digi_free(&aa);
                 break;
             }
-#endif // DEBUG
 #if 0
             case TEST_FIND_END:
             {

@@ -1012,20 +1012,19 @@ JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
     return other;
 }
 
-#ifdef DEBUG
-
 static inline I
 JOIN(A, transform_range)(I* first1, I* last1, I dest, T _unop(T*))
 {
     A* self = first1->container;
     foreach_range(A, i, first1, last1)
     {
-        if (JOIN(I, done)(&dest))
+        if (dest.node && JOIN(I, done)(&dest)) // allow empty dest
             break;
-        T tmp = self->copy(i.ref);
-        tmp = _unop(&tmp);
-        JOIN(A, inserter)(dest.container, i.node, &tmp);
-        JOIN(I, next)(&dest);
+        T copy = self->copy(i.ref);
+        JOIN(A, insert)(dest.container, _unop(&copy));
+        if (self->free)
+            self->free(&copy);
+        //JOIN(I, next)(&dest);
     }
     return dest;
 }
@@ -1036,18 +1035,18 @@ JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*
     A* self = first1->container;
     foreach_range(A, i, first1, last1)
     {
-        if (JOIN(I, done)(pos) || JOIN(I, done)(&dest))
+        if (JOIN(I, done)(pos) ||
+            (dest.node && JOIN(I, done)(&dest))) // allow empty dest
             break;
-        T tmp = self->copy(i.ref);
-        tmp = _binop(&tmp, pos->ref);
-        JOIN(A, inserter)(dest.container, i.node, &tmp);
+        T copy = self->copy(i.ref);
+        JOIN(A, insert)(dest.container, _binop(&copy, pos->ref));
+        if (self->free)
+            self->free(&copy);
         JOIN(I, next)(pos);
-        JOIN(I, next)(&dest);
+        //JOIN(I, next)(&dest);
     }
     return dest;
 }
-
-#endif //DEBUG
 
 #if defined(CTL_MAP)
 # include <ctl/algorithm.h>
