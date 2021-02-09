@@ -408,10 +408,10 @@ x  stable and tested
 |`transform_it`                   | .  | x  | .  | .  | .  | x  |    |    |    |    |    |    |
 |`transform_range`                | .  | .  | .  | .  | .  | x  |    |    |    |    |    |    |
 |`transform_it_range`             |    |    |    |    |    | x  |    |    |    |    |    |    |
-|`generate`                       | x  | x  | x  | x  | x  | .  |    | .  |    |    |    |    |
+|`generate`                       | x  | x  | x  | x  | x  | x  |    | .  |    |    |    |    |
 |`generate_range`                 | x  | x  | x  | x  | x  | .  |    |    |    |    |    |    |
-|`generate_n`                     | .  | .  | .  | .  | .  | .  |    |    |    |    |    |    |
-|`generate_n_range`               | .  | .  | .  | .  | .  | .  |    |    |    |    |    |    |
+|`generate_n`                     | .  | .  | .  | .  | .  | x  |    |    |    |    |    |    |
+|`generate_n_range`               | .  | .  | .  | .  | .  | x  |    |    |    |    |    |    |
 |`remove`                         |    |    |    |    | x  |    |    |    |    |    |    |    |
 |`remove_if`                      | x  |    |    | x  | x  | x  |    | .  |    |    |    |    |
 |`remove_copy`                    |    |    |    |    |    |    |    |    |    |    |    |    |

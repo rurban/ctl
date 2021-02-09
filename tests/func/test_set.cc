@@ -189,17 +189,21 @@ main(void)
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
         TEST(ERASE_RANGE) \
+        TEST(GENERATE) \
+        TEST(GENERATE_N) \
+        TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM) \
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
         TEST(TRANSFORM_IT_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 33*/ \
+        TEST(EMPLACE) /* 40 */ \
         TEST(EXTRACT) \
         TEST(MERGE) \
         TEST(EQUAL_RANGE) \
         TEST(INSERT_RANGE) \
+        TEST(GENERATE_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
@@ -208,10 +212,6 @@ main(void)
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
-        TEST(GENERATE) /* 46 */ \
-        TEST(GENERATE_RANGE) \
-        TEST(GENERATE_N) \
-        TEST(GENERATE_N_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -682,33 +682,90 @@ main(void)
                     }
                 break;
             }
-#if 0 // need some C++ help here
-            case TEST_GENERATE: // 45
+            /* Need some C++ help here.
+               I don't think std::generate can be made usable for set, we dont care
+               for the insert hint, and we have no operator!= for the STL inserter.
+               However our CTL generate for set works fine, just a bit expensive. */
+            case TEST_GENERATE: // 49
             {
+                print_set(&a);
                 digi_generate_reset();
                 set_digi_generate(&a, digi_generate);
+                LOG("=>\n");
+                print_set(&a);
                 digi_generate_reset();
-                //std::generate(b.begin(), b.end(), DIGIc_generate);
+                // std::generate(b.begin(), b.end(), DIGIc_generate);
                 std::set<DIGI> bb;
                 // FIXME: need operator!= for insert_operator<set<DIGI>>
-                std::generate(std::inserter(b, b.begin()), std::inserter(bb, bb.begin()),
-                              DIGI_generate);
-                CHECK(a, bb);
+                // std::generate(std::inserter(b, b.begin()), std::inserter(bb, bb.begin()),
+                //              DIGI_generate);
+                //LOG("b\n");
+                //print_setpp(b);
+                size_t n = b.size();
+                b.clear();
+                for (size_t i=0; i<n; i++)
+                    b.insert(DIGI_generate());
+                LOG("=>\n");
+                print_setpp(b);
+                CHECK(a, b);
                 break;
             }
+#ifdef DEBUG
             case TEST_GENERATE_RANGE:
             {
+                print_set(&a);
                 set_digi_it first_a, last_a;
                 std::set<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 digi_generate_reset();
+                // FIXME static state problem!
                 set_digi_generate_range(&first_a, &last_a, digi_generate);
+                LOG("=>\n");
+                print_set(&a);
                 digi_generate_reset();
-                std::generate(std::inserter(b, first_b), std::inserter(b, last_b), DIGI_generate);
+                std::set<DIGI> bb;
+                //std::generate(std::inserter(b, first_b), std::inserter(b,
+                //              last_b), DIGI_generate);
+                size_t n = distance(first_b, last_b);
+                b.erase(first_b, last_b);
+                for (size_t i=0; i<n; i++)
+                    b.insert(DIGI_generate());
+                LOG("=> b\n");
+                print_setpp(b);
                 CHECK(a, b);
                 break;
             }
 #endif
+            case TEST_GENERATE_N:
+            {
+                print_set(&a);
+                print_setpp(b);
+                size_t count = TEST_RAND(20);
+                LOG("=> %zu\n", count);
+                digi_generate_reset();
+                set_digi_generate_n(&a, count, digi_generate);
+                print_set(&a);
+                digi_generate_reset();
+                std::generate_n(std::inserter(b, b.begin()), count, DIGI_generate);
+                print_setpp(b);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_GENERATE_N_RANGE:
+            {
+                set_digi_it first_a, last_a;
+                std::set<DIGI>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                size_t off = std::distance(b.begin(), first_b);
+                size_t count = TEST_RAND(20 - off);
+                digi_generate_reset();
+                set_digi_generate_n_range(&first_a, count, digi_generate);
+                print_set(&a);
+                digi_generate_reset();
+                std::generate_n(std::inserter(b, first_b), count, DIGI_generate);
+                CHECK(a, b);
+                break;
+            }
             case TEST_TRANSFORM: // 47
             {
                 print_set(&a);
@@ -745,33 +802,6 @@ main(void)
                 set_digi_free(&aa);
                 break;
             }
-#ifdef DEBUG
-            case TEST_GENERATE_N:
-            {
-                size_t count = TEST_RAND(20);
-                digi_generate_reset();
-                set_digi_generate_n(&a, count, digi_generate);
-                digi_generate_reset();
-                std::generate_n(std::inserter(b, b.end()), count, DIGI_generate);
-                CHECK(a, b);
-                break;
-            }
-            case TEST_GENERATE_N_RANGE:
-            {
-                set_digi_it first_a, last_a;
-                std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                size_t off = std::distance(b.begin(), first_b);
-                size_t count = TEST_RAND(20 - off);
-                digi_generate_reset();
-                set_digi_generate_n_range(&first_a, count, digi_generate);
-                print_set(&a);
-                digi_generate_reset();
-                std::generate_n(std::inserter(b, first_b), count, DIGI_generate);
-                CHECK(a, b);
-                break;
-            }
-#endif // DEBUG
             case TEST_TRANSFORM_RANGE:
             {
                 print_set(&a);

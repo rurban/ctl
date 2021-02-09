@@ -156,27 +156,25 @@ copy-assigns the given value to N elements in a range. _(NYI)_
 assigns a value to a number of elements
 
     A transform (A* self, T unop(T*))
-    A transform_it (A* self, I* pos, T _binop(T*, T*))           (only string yet)
-    I transform_range (I* first1, I* last1, I dest, T _unop(T*)) (NY)
+    A transform_it (A* self, I* pos, T _binop(T*, T*))
+    I transform_range (I* first1, I* last1, I dest, T _unop(T*))
     I transform_it_range (I* first1, I* last1, I* pos, I dest,
-                          T _binop(T*, T*))                      (NY)
+                          T _binop(T*, T*))
 
 applies a function to a range of elements. Returning results in a copy, or for
 the range variants in an output iterator `dest`.  unop takes the iterator
 element, binop takes as 2nd argument the 2nd iterator `pos`.
-The output iterator `dest` is not yet supported.
 
     generate (A* self, T _gen(void))
     generate_range (I* first, I* last, T _gen(void)) (C++20)
  
 assigns the results of successive function calls to every element in a
-range. Not for ordered containers.
+range.
 
     generate_n (A* self, size_t count, T _gen(void))
-    generate_n_range (I* first, size_t count, T _gen(void))   (C++20)
+    generate_n_range (I* first, size_t n, T _gen(void))   (C++20)
  
-assigns the results of successive function calls to N elements in a range. Not
-for ordered containers (set, map) nor unordered_set.
+assigns the results of successive function calls to N elements in a range.
 
     size_t remove (A* self, T value)
     size_t remove_if (A* self, int _match(T*)

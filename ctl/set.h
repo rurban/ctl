@@ -908,8 +908,6 @@ JOIN(A, symmetric_difference)(A* a, A* b)
     return self;
 }
 
-#ifdef DEBUG
-
 static inline bool
 JOIN(A, inserter)(A* self, B* node, T *value)
 {
@@ -928,49 +926,53 @@ JOIN(A, inserter)(A* self, B* node, T *value)
     }
 }
 
-// specialize, using our inserter.
-// change in place.
+// specialize, using our inserter (i.e. replace if different)
+// This one changes in place.
 static inline void
 JOIN(A, generate)(A* self, T _gen(void))
 {
-    foreach(A, self, i)
+    B* node = JOIN(A, first)(self);
+    while (node)
     {
+        B* next = JOIN(B, next)(node);
         T tmp = _gen();
-        JOIN(A, inserter)(self, i.node, &tmp);
+        JOIN(A, inserter)(self, node, &tmp);
+        node = next;
     }
 }
 
+#ifdef DEBUG
 static inline void
 JOIN(A, generate_range)(I* first, I* last, T _gen(void))
 {
-    foreach_range(A, i, first, last)
+    A* self = first->container;
+    B* node = first->node;
+    while (node != last->node)
     {
+        B* next = JOIN(B, next)(node);
         T tmp = _gen();
-        JOIN(A, inserter)(first->container, i.node, &tmp);
+        JOIN(A, inserter)(self, node, &tmp);
+        node = next;
     }
 }
+#endif
 
+// These just insert in-place
 static inline void
 JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
 {
-    foreach_n(A, self, i, count)
+    for (size_t i = 0; i < count; i++)
     {
         T tmp = _gen();
-        JOIN(A, inserter)(self, i.node, &tmp);
+        JOIN(A, insert)(self, tmp);
     }
 }
 
 static inline void
 JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
 {
-    foreach_n_range(A, first, i, count)
-    {
-        T tmp = _gen();
-        JOIN(A, inserter)(first->container, i.node, &tmp);
-    }
+    JOIN(A, generate_n)(first->container, count, _gen);
 }
-
-#endif // DEBUG
 
 // non-destructive, returns a copy
 static inline A
