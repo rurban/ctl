@@ -322,9 +322,6 @@ x  stable and tested
 |`clear`                          | x  | x  |    | x  | x  | x  | x  | x  | x  |    |    |    |
 |`push_back`                      | x  | x  |    | x  | x  |    |    |    |    |    |    |    |
 |`push_front`                     |    |    |    | x  | x  |    |    |    |    |    |    |    |
-|`transfer`                       |    |    |    |    |    |    |    |    |    |    |    |    |
-|`disconnect`                     |    |    |    |    |    |    |    |    |    |    |    |    |
-|`connect`                        |    |    |    |    |    |    |    |    |    |    |    |    |
 |`assign`                         | x  | x  | x  | x  | x  |    |    |    |    |    |    |    |
 |`resize`                         | x  | x  |    | x  | x  |    |    |    |    |    |    |    |
 |`shrink_to_fit`                  | x  | x  |    | x  |    |    |    |    |    |    |    |    |
@@ -594,11 +591,17 @@ clang with libc++), and Windows MSVC (default CL 19).
 
 ### Differences to the STL
 
-Safer fat iterators with end range. We work towards C++20 ranges (single arg
-iterator), not begin/end pairs.  Not as safe as glouw/ctl iterators, but also
-not as slow. We need 2 assignments (currently. will be fixed), the STL needs one
-assignment, glouw/ctl needs three assignments. glouw/ctl is safe for destructive
-operations (i.e. insert, erase) in a foreach loop, we and the STL is not.
+Our iterators are currently not as generic as the STL ones. We can only loop
+over the same container type and call the container-specific function. E.g. we
+cannot insert a vector into a deque of the same type. We will need to add a
+small vtable to iterators for the ref, next and done functions.
+
+But our iterators are safe and fat with an end range. We work towards C++20
+ranges (single arg iterator), not begin/end pairs.  Not as safe as glouw/ctl
+iterators, but also not as slow. We need 2 assignments (currently. will be
+fixed), the STL needs one assignment, glouw/ctl needs three
+assignments. glouw/ctl is safe for destructive operations (i.e. insert, erase)
+in a foreach loop, we and the STL are not.
 
 STL multiset and multimap variants will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
@@ -611,7 +614,7 @@ return the iterator and set a `int *foundp` value. Eg.
     int found;
     map_T_insert_assign_found (self, key, &found);
 
-Many algorithms and C++20 methods are still missing or are in work.
+Some algorithms and C++20 methods are still missing or are in work.
 
 **set** algorithms such as `set_union`, `set_difference`, `set_intersection`,
 `set_symmetric_difference` do not work with `unordered_set`, because the specs

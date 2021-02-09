@@ -10,6 +10,7 @@ OLD_MAIN
 #include <ctl/deque.h>
 
 #include <deque>
+#include <vector>
 #include <algorithm>
 
 #define ADJUST_CAP(m,a,b)
@@ -653,7 +654,7 @@ main(void)
                     CHECK(a, b);
                     break;
 #ifdef DEBUG
-                case TEST_INSERT_RANGE: // 26
+                case TEST_INSERT_RANGE: // 54
                 {
                     size_t size2 = TEST_RAND(TEST_MAX_SIZE);
                     deq_digi aa = deq_digi_init_from(&a);
@@ -672,10 +673,21 @@ main(void)
                     deq_digi_it pos = deq_digi_begin(&a);
                     deq_digi_it_advance(&pos, index);
                     LOG ("insert_range at %zu:\n", index);
-                    // libstdc++  fails on empty (uninitialized) front or back values
-                    b.insert(b.begin() + index, first_b, last_b);
                     deq_digi_insert_range(&pos, &first_a, &last_a);
+                    // libstdc++  fails on empty (uninitialized) front or back
+                    // values
+                    b.insert(b.begin() + index, first_b, last_b);
+#if 0
+                    std::vector<DIGI> cc;
+                    LOG("add vector (%zu)\n", size2);
+                    for(int i = 0; i < (int)size2; i++)
+                        cc.push_back(DIGI{i});
+                    b.insert(b.begin() + index, cc.begin(), cc.end());
+#endif
+
+                    LOG("CTL =>\n");
                     print_deq(&a);
+                    LOG("STL =>\n");
                     print_deque(b);
                     if (a.size != b.size())
                         fail++;
