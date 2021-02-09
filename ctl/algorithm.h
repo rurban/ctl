@@ -280,7 +280,7 @@ JOIN(A, intersection_range)(I* r1, I* r2)
             JOIN(I, next)(r2);
         }
     }
-#ifdef CTL_VEC
+#if defined(CTL_VEC) && !defined(CTL_STR)
     JOIN(A, shrink_to_fit)(&self);
 #endif
     return self;

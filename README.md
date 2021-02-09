@@ -288,8 +288,8 @@ x  stable and tested
 |`equal`                          | x  | x  | x  | x  | x  | x  | x  | x  | x  | x  | x  | x  |
 |`insert`                         | x  | x  |    | x  | x  | x  | x  | x  | x  |    |    |    |
 |`insert_index`                   | x  | x  |    | x  |    |    |    |    |    |    |    |    |
-|`insert_count`                   | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
-|`insert_range`                   | x  | .  |    | .  | x  |    |    |    |    |    |    |    |
+|`insert_count`                   | x  |    |    | x  | x  |    |    |    |    |    |    |    |
+|`insert_range`                   | x  |    |    | .  | x  |    |    |    |    |    |    |    |
 |`insert_found`                   |    |    |    |    |    |    |    | x  | x  |    |    |    |
 |`insert_or_assign`               |    |    |    |    |    |    | x  |    | x  |    |    |    |
 |`insert_or_assign_found`         |    |    |    |    |    |    |    |    | x  |    |    |    |
@@ -389,7 +389,7 @@ x  stable and tested
 |`search_n`                       |    |    |    |    |    |    |    |    |    |    |    |    |
 |`search_n_range`                 |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_if`                        |    |    |    |    |    |    |    |    |    |    |    |    |
-|`copy_range`                     | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
+|`copy_range`                     | x  | x  |    | x  | x  |    |    |    |    |    |    |    |
 |`copy_if_range`                  |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_n`                         |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_n_range`                   |    |    |    |    |    |    |    |    |    |    |    |    |
@@ -409,13 +409,13 @@ x  stable and tested
 |`transform_it_range`             | .  |    |    |    |    | x  |    |    |    |    |    |    |
 |`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
 |`generate_range`                 | x  | x  | x  | x  | x  | x  |    |    |    |    |    |    |
-|`generate_n`                     | .  | .  | x  | .  | .  | x  |    | x  |    |    |    |    |
+|`generate_n`                     | .  | x  | x  | .  | .  | x  |    | x  |    |    |    |    |
 |`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
 |`generate_range`                 | x  | x  | x  | x  | x  | x  |    |    |    |    |    |    |
-|`generate_n`                     | .  | .  | x  | .  | .  | x  |    | x  |    |    |    |    |
+|`generate_n`                     | .  | x  | x  | .  | .  | x  |    | x  |    |    |    |    |
 |`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
 |`generate_range`                 | x  | x  | x  | x  | x  | x  |    |    |    |    |    |    |
-|`generate_n`                     | .  | .  | x  | .  | .  | x  |    | x  |    |    |    |    |
+|`generate_n`                     | .  | x  | x  | .  | .  | x  |    | x  |    |    |    |    |
 |`generate_n_range`               | .  | .  | .  | .  | .  | x  |    |    |    |    |    |    |
 |`remove`                         |    |    |    |    | x  |    |    |    |    |    |    |    |
 |`remove_if`                      | x  |    |    | x  | x  | x  |    | .  |    |    |    |    |
@@ -482,7 +482,7 @@ x  stable and tested
 |`upper_bound_range`              |    |    |    |    |    |    |    |    |    |    |    |    |
 |`binary_search`                  |    |    |    |    |    |    |    |    |    |    |    |    |
 |`binary_search_range`            |    |    |    |    |    |    |    |    |    |    |    |    |
-|`equal_range`                    |    | .  | .  |    |    |    | .  |    |    |    |    |    |
+|`equal_range`                    |    |    | .  |    |    |    | .  |    |    |    |    |    |
 |`equal_range_range`              |    |    |    |    |    |    |    |    |    |    |    |    |
 |`merge`                          |    |    |    |    | x  |    |    | .  |    |    |    |    |
 |`merge_range`                    |    |    |    |    |    |    |    |    |    |    |    |    |
@@ -490,13 +490,13 @@ x  stable and tested
 |`inplace_merge_range`            |    |    |    |    |    |    |    |    |    |    |    |    |
 |`includes`                       | x  |    |    | x  | x  |    |    |    |    |    |    |    |
 |`includes_range`                 | x  |    |    | x  | x  |    |    |    |    |    |    |    |
-|`difference`                     | x  | .  | .  | x  | x  | x  | x  | x  | x  |    |    |    |
+|`difference`                     | x  | x  | .  | x  | x  | x  | x  | x  | x  |    |    |    |
 |`difference_range`               | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
 |`intersection`                   | x  | .  | .  | x  | x  | x  | x  | x  | x  |    |    |    |
 |`intersection_range`             | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
-|`symmetric_difference`           | x  | .  |    | x  | x  | x  | x  | x  | x  |    |    |    |
+|`symmetric_difference`           | x  | x  |    | x  | x  | x  | x  | x  | x  |    |    |    |
 |`symmetric_difference_range`     | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
-|`union`                          | x  | .  |    | x  | x  | x  | x  | x  | x  |    |    |    |
+|`union`                          | x  | x  |    | x  | x  | x  | x  | x  | x  |    |    |    |
 |`union_range`                    | x  | .  |    | x  | x  |    |    |    |    |    |    |    |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
