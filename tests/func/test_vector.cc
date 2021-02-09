@@ -292,15 +292,15 @@ main(void)
         TEST(SYMMETRIC_DIFFERENCE_RANGE) \
         TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
+        TEST(GENERATE_N) \
         TEST(TRANSFORM) \
         TEST(TRANSFORM_IT) \
         TEST(EMPLACE_BACK) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 49 */ \
+        TEST(EMPLACE) /* 51 */ \
         TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
-        TEST(GENERATE_N) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_RANGE) \
         TEST(TRANSFORM_IT_RANGE) \
@@ -1136,17 +1136,25 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_GENERATE_N:
                 {
                     size_t count = TEST_RAND(20);
+                    LOG("generate_n %zu\n", count);                    
+# ifndef _MSC_VER                    
                     digi_generate_reset();
                     vec_digi_generate_n(&a, count, digi_generate);
+                    print_vec(&a);
                     digi_generate_reset();
-                    std::generate_n(b.begin(), count, DIGI_generate);
+                    // FIXME The STL is arguably broken here.
+                    int n = MIN(count, b.size());
+                    b.erase(b.begin(), b.begin()+n);
+                    std::generate_n(std::inserter(b, b.begin()), n, DIGI_generate);
+                    print_vector(b);
                     CHECK(a, b);
+#endif
                     break;
                 }
+#ifdef DEBUG
                 case TEST_GENERATE_N_RANGE:
                 {
                     vec_digi_it first_a, last_a;
