@@ -20,14 +20,15 @@ digi_key_compare(digi* a, digi* b)
 #include <algorithm>
 #include <iterator>
 
-#ifndef DEBUG
-# define print_set(a)
-# define print_setpp(a)
-# define TEST_MAX_VALUE INT_MAX
-#else
 # undef TEST_MAX_SIZE
 # define TEST_MAX_SIZE 15
 # define TEST_MAX_VALUE 50
+
+#ifndef DEBUG
+# define print_set(a)
+# define print_setpp(a)
+//# define TEST_MAX_VALUE INT_MAX
+#else
 void print_set(set_digi* a) {
     int i = 0;
     list_foreach_ref(set_digi, a, it)
@@ -190,6 +191,7 @@ main(void)
         TEST(FIND_IF_NOT_RANGE) \
         TEST(ERASE_RANGE) \
         TEST(GENERATE) \
+        TEST(GENERATE_RANGE) \
         TEST(GENERATE_N) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM) \
@@ -203,7 +205,6 @@ main(void)
         TEST(MERGE) \
         TEST(EQUAL_RANGE) \
         TEST(INSERT_RANGE) \
-        TEST(GENERATE_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
@@ -710,7 +711,7 @@ main(void)
                 CHECK(a, b);
                 break;
             }
-#ifdef DEBUG
+//#ifdef DEBUG
             case TEST_GENERATE_RANGE:
             {
                 print_set(&a);
@@ -735,7 +736,7 @@ main(void)
                 CHECK(a, b);
                 break;
             }
-#endif
+//#endif
             case TEST_GENERATE_N:
             {
                 print_set(&a);

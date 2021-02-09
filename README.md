@@ -408,13 +408,13 @@ x  stable and tested
 |`transform_range`                | .  | .  | .  | .  | .  | x  |    |    |    |    |    |    |
 |`transform_it_range`             |    |    |    |    |    | x  |    |    |    |    |    |    |
 |`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
-|`generate_range`                 | x  | x  | x  | x  | x  | .  |    |    |    |    |    |    |
+|`generate_range`                 | x  | x  | x  | x  | x  | x  |    |    |    |    |    |    |
 |`generate_n`                     | .  | .  | .  | .  | .  | x  |    | x  |    |    |    |    |
 |`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
-|`generate_range`                 | x  | x  | x  | x  | x  | .  |    |    |    |    |    |    |
+|`generate_range`                 | x  | x  | x  | x  | x  | x  |    |    |    |    |    |    |
 |`generate_n`                     | .  | .  | .  | .  | .  | x  |    | x  |    |    |    |    |
 |`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
-|`generate_range`                 | x  | x  | x  | x  | x  | .  |    |    |    |    |    |    |
+|`generate_range`                 | x  | x  | x  | x  | x  | x  |    |    |    |    |    |    |
 |`generate_n`                     | .  | .  | .  | .  | .  | x  |    | x  |    |    |    |    |
 |`generate_n_range`               | .  | .  | .  | .  | .  | x  |    |    |    |    |    |    |
 |`remove`                         |    |    |    |    | x  |    |    |    |    |    |    |    |
@@ -546,7 +546,9 @@ Methods working on iterators don't need the container arg `(A* self)`.
 
 vector `swap` does `shrink_to_fit` as in the STL.
 
-The compare method is two-way `operator<` as in the STL, not `operator>` as in glouw/ctl.
+The compare method is two-way `operator<` as in the STL, not `operator>` as in
+glouw/ctl. We support two-way and three-way compare for set, which needs more
+comparisons, but is safer.
 
 Redesigned iterators and better range support. Much closer to the STL, and
 much faster. Full generic iterator support is in `bits/iterator.h`, `algorithm.h`, the
@@ -554,9 +556,6 @@ extended `range` methods, and `foreach_range`, `foreach_n`, `foreach_n_range` ma
 
 Reproducible tests with `SEED=n`,
 Optimized test dependencies, time went from 25s to 3s even with ccache.
-
-Many performance improvements. e.g. set.clear is much faster, even than in the
-STL.
 
 Optimized hashmaps with two growth policies, about faster with the policy
 `CTL_USET_GROWTH_POWER2`, instead of the default `CTL_USET_GROWTH_PRIMED`.
@@ -592,6 +591,12 @@ Tested also on macOS (default apple clang++ with libc++), FreeBSD (default
 clang with libc++), and Windows MSVC (default CL 19).
 
 ### Differences to the STL
+
+Safer fat iterators with end range. We work towards C++20 ranges (single arg
+iterator), not begin/end pairs.  Not as safe as glouw/ctl iterators, but also
+not as slow. We need 2 assignments (currently. will be fixed), the STL needs one
+assignment, glouw/ctl needs three assignments. glouw/ctl is safe for destructive
+operations (i.e. insert, erase) in a foreach loop, we and the STL is not.
 
 STL multiset and multimap variants will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.

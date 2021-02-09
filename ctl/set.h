@@ -294,23 +294,25 @@ JOIN(A, find_node)(A* self, T key)
     while(node)
     {
         int diff = self->compare(&key, &node->value);
-        // Don't rely on a valid 3-way compare. can be just a simple >
-        if(diff == 0)
+        // Don't rely on a valid 3-way compare. can be just a simple 2way <
+        if(diff == 0) // 2way greater or 3way same
         {
             if (self->equal)
             {
                 if (self->equal(&key, &node->value))
-                    return node;
+                    return node;    // 3way same
                 else
-                    node = node->r;
+                    node = node->r; // 2way greater
             }
-            else
-                return node;
+            else if (!self->compare(&node->value, &key))
+                return node; // generic same
         }
-        else if(diff < 0)
+        else if(diff < 0) // 3-way lower
             node = node->l;
+        else if (self->compare(&node->value, &key) < 0)
+            node = node->r; // 3way greater
         else
-            node = node->r;
+            node = node->l; // 2way lower
     }
     return NULL;
 }
@@ -495,7 +497,8 @@ JOIN(A, insert)(A* self, T key)
                     return node;
                 }
             }
-            if(diff < 0) // lower
+            if (diff < 0 // 3way lower
+                || !self->compare(&node->value, &key)) // or 2way lower
             {
                 if(node->l)
                     node = node->l;
@@ -506,7 +509,7 @@ JOIN(A, insert)(A* self, T key)
                     break;
                 }
             }
-            else // greater
+            else // 2way or 2way greater
             {
                 if(node->r)
                     node = node->r;
@@ -911,7 +914,7 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 static inline bool
 JOIN(A, inserter)(A* self, B* node, T *value)
 {
-    if(JOIN(A, find_node)(self, *value))
+    if(JOIN(A, _equal)(self, &node->value, value))
     {
         // already exists: keep
         if (self->free)
@@ -931,17 +934,14 @@ JOIN(A, inserter)(A* self, B* node, T *value)
 static inline void
 JOIN(A, generate)(A* self, T _gen(void))
 {
-    B* node = JOIN(A, first)(self);
-    while (node)
+    size_t count  = self->size;
+    JOIN(A, clear)(self);
+    for (size_t i=0; i<count; i++)
     {
-        B* next = JOIN(B, next)(node);
-        T tmp = _gen();
-        JOIN(A, inserter)(self, node, &tmp);
-        node = next;
+        JOIN(A, insert)(self, _gen());
     }
 }
 
-#ifdef DEBUG
 static inline void
 JOIN(A, generate_range)(I* first, I* last, T _gen(void))
 {
@@ -955,7 +955,6 @@ JOIN(A, generate_range)(I* first, I* last, T _gen(void))
         node = next;
     }
 }
-#endif
 
 // These just insert in-place
 static inline void

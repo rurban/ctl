@@ -136,7 +136,7 @@ static int _generator_state = 0;
 static inline digi
 digi_generate(void)
 {
-    _generator_state++;
+    ++_generator_state;
     return digi_init(_generator_state);
 }
 static inline DIGI
