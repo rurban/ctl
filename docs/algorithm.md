@@ -99,17 +99,20 @@ finds the last sequence of elements in a certain range. _(NYI)_
  
 searches for any one of a set of elements. _(NYI)_
 
-    I adjacent_find
-    I adjacent_find_range (C++20)
+    I  adjacent_find (A* self)
+    I* adjacent_find_range (I* range) (C++20)
  
-finds the first two adjacent items that are equal (or satisfy a given predicate). _(NYI)_
+finds the first two adjacent items that are equal.
 
     I search (A* self, I* first2, I last2)
     bool search_range (I* range1, I *range2)  (C++20)
+    I bm_search (A* self, I* first2, I last2)  (C++17) (NYI)
+    bool bm_search_range (I* range1, I *range2)  (C++17) (NYI)
  
-naively searches for a range of elements. cost `range1` * `range2`.
+searches for a range of elements. naive cost `range1` * `range2`.
 `search_range` sets `range1` (the haystack) to the found pointer if found.
 `search` returns an iterator to the pointer if found, or end.
+planned are also boyer-moore, boyer-moore-horspool, kmp and rabin-karp.
 
     I search_n
  

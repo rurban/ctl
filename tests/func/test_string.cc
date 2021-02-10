@@ -62,10 +62,10 @@ OLD_MAIN
 }
 
 #define CHECK_ITER(aa,b,bb)                          \
-    if (aa.ref != &aa.container->vector[aa.container->size]) \
+    if ((aa).ref != &(aa).container->vector[(aa).container->size])  \
     {                                                \
         assert (bb != b.end());                      \
-        assert(*aa.ref == *bb);                      \
+        assert(*(aa).ref == *bb);                    \
     } else                                           \
         assert (bb == b.end())
 
@@ -270,6 +270,8 @@ main(void)
             TEST(GENERATE_N) \
             TEST(TRANSFORM) \
             TEST(TRANSFORM_IT) \
+            TEST(ADJACENT_FIND) \
+            TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
             TEST(INSERT_COUNT) /* 47 */ \
@@ -1059,6 +1061,53 @@ main(void)
                     str_free(&aa);
                     break;
                 }
+                case TEST_ADJACENT_FIND:
+                {
+                    LOG("%s\n", str_c_str(&a));
+                    str_it aa = str_adjacent_find(&a);
+                    auto bb = adjacent_find(b.begin(), b.end());
+                    CHECK_ITER(aa, b, bb);
+                    LOG("found %s\n", str_it_done(&aa) ? "no" : "yes");
+                    break;
+                }
+                case TEST_ADJACENT_FIND_RANGE:
+                {
+                    str_it range, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &range, &last_a, b, first_b, last_b);
+                    LOG("%s\n", str_c_str(&a));
+                    str_it *aa = str_adjacent_find_range(&range);
+                    auto bb = adjacent_find(first_b, last_b);
+                    CHECK_ITER(*aa, b, bb);
+                    LOG("found %s\n", str_it_done(aa) ? "no" : "yes");
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_LOWER_BOUND: // 64
+                {
+                    char median = *str_at(&a, a.size / 2);
+                    str_it aa = str_lower_bound(&a, median);
+                    auto bb = lower_bound(b.begin(), b.end(), median);
+                    CHECK_ITER(aa, b, bb);
+                    break;
+                }
+                case TEST_UPPER_BOUND:
+                {
+                    char median = *str_at(&a, a.size / 2);
+                    str_it aa = str_upper_bound(&a, median);
+                    auto bb = upper_bound(b.begin(), b.end(), median);
+                    CHECK_ITER(aa, b, bb);
+                    break;
+                }
+                /**/case TEST_LOWER_BOUND_RANGE:
+                {
+                    break;
+                }
+                /**/case TEST_UPPER_BOUND_RANGE:
+                {
+                    break;
+                }
+#endif // DEBUG
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);

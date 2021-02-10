@@ -64,10 +64,10 @@ int random_element(arr100_digi* a)
 }
 
 #define CHECK_ITER(_it, b, _iter)                                 \
-    if (_it.ref && _it.ref != &_it.container->vector[N])          \
+    if ((_it).ref && (_it).ref != &(_it).container->vector[N])    \
     {                                                             \
         assert (_iter != b.end());                                \
-        assert(*(_it.ref->value) == *(*_iter).value);             \
+        assert(*((_it).ref->value) == *(*_iter).value);           \
     } else                                                        \
         assert (_iter == b.end())
 
@@ -174,6 +174,10 @@ main(void)
         TEST(GENERATE_N) \
         TEST(TRANSFORM) \
         TEST(TRANSFORM_IT) \
+        TEST(SEARCH) \
+        TEST(SEARCH_RANGE) \
+        TEST(ADJACENT_FIND) \
+        TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) \
@@ -606,6 +610,100 @@ main(void)
                 arr100_digi_free(&aa);
                 break;
             }
+            case TEST_ADJACENT_FIND:
+            {
+                print_arr100(&a);
+                arr100_digi_it aa = arr100_digi_adjacent_find(&a);
+                auto bb = std::adjacent_find(b.begin(), b.end());
+                CHECK_ITER(aa, b, bb);
+                LOG("found %s\n", arr100_digi_it_done(&aa) ? "no" : "yes");
+                break;
+            }
+            case TEST_ADJACENT_FIND_RANGE:
+            {
+                arr100_digi_it range, last_a;
+                std::array<DIGI,100>::iterator first_b, last_b;
+                get_random_iters (&a, &range, &last_a, b, first_b, last_b);
+                print_arr100(&a);
+                arr100_digi_it *aa = arr100_digi_adjacent_find_range(&range);
+                auto bb = std::adjacent_find(first_b, last_b);
+                CHECK_ITER(*aa, b, bb);
+                LOG("found %s\n", arr100_digi_it_done(aa) ? "no" : "yes");
+                break;
+            }
+            case TEST_SEARCH: // 42
+            {
+                print_arr100(&a);
+                arr100_digi aa = arr100_digi_copy(&a);
+                std::array<DIGI,100> bb = b;
+                arr100_digi_it first_a, last_a;
+                std::array<DIGI,100>::iterator first_b, last_b;
+                get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                if (TEST_RAND(2)) { // 50% unsuccessful
+                    size_t i = first_b - bb.begin();
+                    arr100_digi_set(&aa, i, digi_init(0));
+                    bb[i] = DIGI{0};
+                }
+                //print_arr100(aa);
+                arr100_digi_it found_a = arr100_digi_search(&a, &first_a, &last_a);
+                auto found_b = std::search(b.begin(), b.end(), first_b, last_b);
+                LOG("found a: %s\n", arr100_digi_it_done(&found_a) ? "no" : "yes");
+                LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
+                CHECK_ITER(found_a, b, found_b);
+                arr100_digi_free(&aa);
+                break;
+            }
+            case TEST_SEARCH_RANGE:
+            {
+                arr100_digi aa = arr100_digi_copy(&a);
+                std::array<DIGI,100> bb = b;
+                arr100_digi_it needle, last_a, range;
+                std::array<DIGI,100>::iterator first_b, last_b;
+                get_random_iters (&aa, &needle, &last_a, bb, first_b, last_b);
+                if (TEST_RAND(2)) { // 50% unsuccessful
+                    size_t i = first_b - bb.begin();
+                    arr100_digi_set(&aa, i, digi_init(0));
+                    bb[i] = DIGI{0};
+                }
+                //print_arr100_range(needle);
+                range = arr100_digi_begin(&a);
+                bool found = arr100_digi_search_range(&range, &needle);
+                auto iter = std::search(b.begin(), b.end(), first_b, last_b);
+                LOG("found a: %s\n", found ? "yes" : "no");
+                LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
+                assert(found == !arr100_digi_it_done(&range));
+                CHECK_ITER(range, b, iter);
+                arr100_digi_free(&aa);
+                break;
+            }
+#ifdef DEBUG
+            case TEST_LOWER_BOUND:
+            {
+                int median = *arr100_digi_at(&a, N / 2)->value;
+                print_arr100(&a);
+                arr100_digi_it aa = arr100_digi_lower_bound(&a, digi_init(median));
+                auto bb = std::lower_bound(b.begin(), b.end(), DIGI{median});
+                CHECK_ITER(aa, b, bb);
+                break;
+            }
+            case TEST_UPPER_BOUND:
+            {
+                int median = *arr100_digi_at(&a, N / 2)->value;
+                print_arr100(&a);
+                arr100_digi_it aa = arr100_digi_upper_bound(&a, digi_init(median));
+                auto bb = std::upper_bound(b.begin(), b.end(), DIGI{median});
+                CHECK_ITER(aa, b, bb);
+                break;
+            }
+            /**/case TEST_LOWER_BOUND_RANGE:
+            {
+                break;
+            }
+            /**/case TEST_UPPER_BOUND_RANGE:
+            {
+                break;
+            }
+#endif
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);

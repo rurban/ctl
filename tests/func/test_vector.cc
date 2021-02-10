@@ -63,6 +63,7 @@ void print_vector(std::vector<DIGI> &b)
 }
 
 #ifdef DEBUG
+#undef TEST_MAX_SIZE
 #define TEST_MAX_SIZE 15
 //#define TEST_MAX_VALUE INT_MAX
 #define TEST_MAX_VALUE 100
@@ -125,10 +126,10 @@ int random_element(vec_digi* a)
 }
 
 #define CHECK_ITER(_it, b, _iter)                                 \
-    if (_it.ref != &_it.container->vector[_it.container->size])   \
+    if ((_it).ref != &(_it).container->vector[(_it).container->size]) \
     {                                                             \
         assert (_iter != b.end());                                \
-        assert(*(_it.ref->value) == *(*_iter).value);             \
+        assert(*((_it).ref->value) == *(*_iter).value);           \
     } else                                                        \
         assert (_iter == b.end())
 
@@ -299,9 +300,11 @@ main(void)
         TEST(MISMATCH) \
         TEST(SEARCH) \
         TEST(SEARCH_RANGE) \
+        TEST(ADJACENT_FIND) \
+        TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 53 */ \
+        TEST(EMPLACE) /* 56 */ \
         TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(GENERATE_N_RANGE) \
@@ -822,6 +825,27 @@ main(void)
                     assert(found == !vec_digi_it_done(&range));
                     CHECK_ITER(range, b, iter);
                     vec_digi_free(&aa);
+                    break;
+                }
+                case TEST_ADJACENT_FIND:
+                {
+                    print_vec(&a);
+                    vec_digi_it aa = vec_digi_adjacent_find(&a);
+                    auto bb = adjacent_find(b.begin(), b.end());
+                    CHECK_ITER(aa, b, bb);
+                    LOG("found %s\n", vec_digi_it_done(&aa) ? "no" : "yes");
+                    break;
+                }
+                case TEST_ADJACENT_FIND_RANGE:
+                {
+                    vec_digi_it range, last_a;
+                    std::vector<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &range, &last_a, b, first_b, last_b);
+                    print_vec_range(range);
+                    vec_digi_it *aa = vec_digi_adjacent_find_range(&range);
+                    auto bb = adjacent_find(first_b, last_b);
+                    CHECK_ITER(*aa, b, bb);
+                    LOG("found %s\n", vec_digi_it_done(aa) ? "no" : "yes");
                     break;
                 }
 #ifdef DEBUG

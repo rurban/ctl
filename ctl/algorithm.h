@@ -624,8 +624,12 @@ JOIN(A, count_if)(A* self, int _match(T*))
 }
 //#endif // STR
 
+// use strstr or provide a better SIMD optimized variant.
+// strstr is easily beatable. see http://0x80.pl/articles/simd-strfind.html
+#if !defined(CTL_STR)
+
 // Sets range1 (the haystack) to the found pointer if found.
-// Naive r1*r2 cost, not Boyer-Moore yet.
+// Naive r1*r2 cost, no Boyer-Moore yet.
 static inline bool
 JOIN(A, search_range)(I *range1, I* range2)
 {
@@ -664,6 +668,35 @@ JOIN(A, search)(A* self, I* first2, I* last2)
         return begin;
     else
         return JOIN(A, end)(self);
+}
+#endif // STR
+
+static inline I*
+JOIN(A, adjacent_find_range)(I *range)
+{
+
+    if (JOIN(I, done)(range))
+        return range;
+    A* self = range->container;
+    I next = *range;
+    JOIN(I, next)(&next);
+    for (; !JOIN(I, done)(&next); *range = next, JOIN(I, next)(&next))
+    {
+        if (JOIN(A, _equal)(self, range->ref, next.ref))
+            return range;
+    }
+    *range = next;
+    return range;
+}
+
+static inline I
+JOIN(A, adjacent_find)(A *self)
+{
+
+    if (JOIN(A, size)(self) < 2)
+        return JOIN(A, end)(self);
+    I range = JOIN(A, begin)(self);
+    return *JOIN(A, adjacent_find_range)(&range);
 }
 
 #ifdef DEBUG

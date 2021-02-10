@@ -244,6 +244,10 @@ main(void)
         TEST(GENERATE_RANGE) \
         TEST(TRANSFORM) \
         TEST(MISMATCH) \
+        TEST(SEARCH) \
+        TEST(SEARCH_RANGE) \
+        TEST(ADJACENT_FIND) \
+        TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) /* 58 */ \
@@ -1328,6 +1332,108 @@ main(void)
                     list_digi_free(&aa);
                     break;
                 }
+                case TEST_SEARCH: // 57
+                {
+                    print_lst(&a);
+                    list_digi aa = list_digi_copy(&a);
+                    std::list<DIGI> bb = b;
+                    list_digi_it first_a, last_a;
+                    std::list<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
+                        if (first_a.node)
+                        {
+                            digi_free(first_a.ref);
+                            first_a.node->value = digi_init(0);
+                        }
+                        *first_b = DIGI{0};
+                    }
+                    //print_vec_range(first_a);
+                    list_digi_it found_a = list_digi_search(&a, &first_a, &last_a);
+                    auto found_b = search(b.begin(), b.end(), first_b, last_b);
+                    LOG("found a: %s\n", list_digi_it_done(&found_a) ? "no" : "yes");
+                    LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
+                    CHECK_ITER(found_a, b, found_b);
+                    list_digi_free(&aa);
+                    break;
+                }
+                case TEST_SEARCH_RANGE:
+                {
+                    list_digi aa = list_digi_copy(&a);
+                    std::list<DIGI> bb = b;
+                    list_digi_it needle, last_a, range;
+                    std::list<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&aa, &needle, &last_a, bb, first_b, last_b);
+                    if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
+                        if (needle.node)
+                        {
+                            digi_free(needle.ref);
+                            needle.node->value = digi_init(0);
+                        }
+                        *first_b = DIGI{0};
+                    }
+                    //print_vec_range(needle);
+                    range = list_digi_begin(&a);
+                    bool found = list_digi_search_range(&range, &needle);
+                    auto iter = search(b.begin(), b.end(), first_b, last_b);
+                    LOG("found a: %s\n", found ? "yes" : "no");
+                    LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
+                    assert(found == !list_digi_it_done(&range));
+                    CHECK_ITER(range, b, iter);
+                    list_digi_free(&aa);
+                    break;
+                }
+                case TEST_ADJACENT_FIND:
+                {
+                    print_lst(&a);
+                    list_digi_it aa = list_digi_adjacent_find(&a);
+                    auto bb = adjacent_find(b.begin(), b.end());
+                    CHECK_ITER(aa, b, bb);
+                    LOG("found %s\n", list_digi_it_done(&aa) ? "no" : "yes");
+                    break;
+                }
+                case TEST_ADJACENT_FIND_RANGE:
+                {
+                    list_digi_it range, last_a;
+                    std::list<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &range, &last_a, b, first_b, last_b);
+                    //print_vec_range(range);
+                    list_digi_it *aa = list_digi_adjacent_find_range(&range);
+                    auto bb = adjacent_find(first_b, last_b);
+                    CHECK_ITER(*aa, b, bb);
+                    LOG("found %s\n", list_digi_it_done(aa) ? "no" : "yes");
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_LOWER_BOUND: // 64
+                {
+                    list_digi_it it = list_digi_begin(&a);
+                    list_digi_it_advance(&it, a.size / 2);
+                    int median = *it.ref->value;
+                    list_digi_it aa = list_digi_lower_bound(&a, digi_init(median));
+                    auto bb = lower_bound(b.begin(), b.end(), DIGI{median});
+                    CHECK_ITER(aa, b, bb);
+                    break;
+                }
+                case TEST_UPPER_BOUND:
+                {
+                    list_digi_it it = list_digi_begin(&a);
+                    list_digi_it_advance(&it, a.size / 2);
+                    int median = *it.ref->value;
+                    list_digi_it aa = list_digi_upper_bound(&a, digi_init(median));
+                    auto bb = upper_bound(b.begin(), b.end(), DIGI{median});
+                    CHECK_ITER(aa, b, bb);
+                    break;
+                }
+                /**/case TEST_LOWER_BOUND_RANGE:
+                {
+                    break;
+                }
+                /**/case TEST_UPPER_BOUND_RANGE:
+                {
+                    break;
+                }
+#endif // DEBUG
 #if 0
                 case TEST_FIND_END:
                 {
