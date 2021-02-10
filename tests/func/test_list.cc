@@ -242,6 +242,7 @@ main(void)
         TEST(SYMMETRIC_DIFFERENCE_RANGE) \
         TEST(GENERATE) \
         TEST(GENERATE_RANGE) \
+        TEST(GENERATE_N) \
         TEST(TRANSFORM) \
         TEST(MISMATCH) \
         TEST(SEARCH) \
@@ -250,8 +251,7 @@ main(void)
         TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EQUAL_RANGE) /* 58 */ \
-        TEST(GENERATE_N) \
+        TEST(EQUAL_RANGE) /* 63 */ \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
@@ -1230,7 +1230,6 @@ main(void)
                     list_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
 #if 0
             /*case TEST_EQUAL_RANGE:*/
             {
@@ -1247,28 +1246,53 @@ main(void)
                 break;
             }
 #endif
-                case TEST_GENERATE_N: // TEST=40
+                case TEST_GENERATE_N: // TEST=63
                 {
                     size_t count = TEST_RAND(20);
+# ifndef _MSC_VER
                     digi_generate_reset();
                     list_digi_generate_n(&a, count, digi_generate);
                     digi_generate_reset();
+                    /*
                     std::generate_n(b.begin(), count, DIGI_generate);
+                    */
+                    // FIXME The STL is arguably broken here. Or we should use a
+                    // different generate_n.
+                    int n = MIN(count, b.size());
+                    auto end = b.begin();
+                    std::advance(end, n);
+                    b.erase(b.begin(), end);
+                    std::generate_n(std::inserter(b, b.begin()), n, DIGI_generate);
+                    print_list(b);
                     CHECK(a, b);
+# endif
                     break;
                 }
+#ifdef DEBUG
                 case TEST_GENERATE_N_RANGE:
                 {
                     list_digi_it first_a, last_a;
                     std::list<DIGI>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                     size_t off = std::distance(b.begin(), first_b);
+                    size_t len = std::distance(first_b, last_b);
                     size_t count = TEST_RAND(20 - off);
+                    LOG("generate_n_range %zu\n", count);
+# ifndef _MSC_VER
                     digi_generate_reset();
                     list_digi_generate_n_range(&first_a, count, digi_generate);
+                    print_lst(&a);
                     digi_generate_reset();
-                    std::generate_n(first_b, count, DIGI_generate);
+                    int n = MIN(MIN(count, b.size()), len);
+                    last_b = first_b;
+                    std::advance(last_b, n);
+                    b.erase(first_b, last_b);
+                    first_b = b.begin();
+                    std::advance(first_b, off);
+                    std::generate_n(std::inserter(b, first_b), n, DIGI_generate);
+                    print_list(b);
                     CHECK(a, b);
+# endif
                     break;
                 }
                 case TEST_TRANSFORM_IT:

@@ -1367,7 +1367,7 @@ main(void)
                 {
                     size_t count = TEST_RAND(20);
                     LOG("generate_n %zu\n", count);
-# ifndef _MSC_VER                    
+# ifndef _MSC_VER
                     digi_generate_reset();
                     deq_digi_generate_n(&a, count, digi_generate);
                     print_deq(&a);

@@ -405,13 +405,7 @@ x  stable and tested
 |`transform_it_range`             | .  |    |    | x  |    | x  |    |    |    |    |    |    |
 |`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
 |`generate_range`                 | x  | x  | x  | x  | x  | .  |    |    |    |    |    |    |
-|`generate_n`                     | x  | x  | x  | x  | .  | x  |    | x  |    |    |    |    |
-|`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
-|`generate_range`                 | x  | x  | x  | x  | x  | .  |    |    |    |    |    |    |
-|`generate_n`                     | x  | x  | x  | x  | .  | x  |    | x  |    |    |    |    |
-|`generate`                       | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
-|`generate_range`                 | x  | x  | x  | x  | x  | .  |    |    |    |    |    |    |
-|`generate_n`                     | x  | x  | x  | x  | .  | x  |    | x  |    |    |    |    |
+|`generate_n`                     | x  | x  | x  | x  | x  | x  |    | x  |    |    |    |    |
 |`generate_n_range`               | .  | .  | .  | x  | .  | x  |    |    |    |    |    |    |
 |`remove`                         |    |    |    |    | x  |    |    |    |    |    |    |    |
 |`remove_if`                      | x  |    |    | x  | x  | x  |    | .  |    |    |    |    |
