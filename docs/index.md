@@ -309,7 +309,7 @@ x  stable and tested
 |`erase_if`                       | x  |    |    | x  | x  | x  | .  | x  | x  |    |    |    |
 |`erase_index`                    | x  | x  |    | x  |    |    |    |    |    |    |    |    |
 |`erase_node`                     |    |    |    |    | x  | x  |    |    |    |    |    |    |
-|`erase_range`                    | .  |    |    | .  | x  | x  |    |    |    |    |    |    |
+|`erase_range`                    | .  |    |    | x  | x  | x  |    |    |    |    |    |    |
 |`top`                            |    |    |    |    |    |    |    |    |    | x  |    | x  |
 |`push`                           |    |    |    |    |    |    |    |    |    | x  | x  | x  |
 |`pop`                            |    |    |    |    |    |    |    |    |    | x  | x  | x  |

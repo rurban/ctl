@@ -184,7 +184,7 @@ erases the element at pos.
 
     I* erase_range (I* first, I* last)
 
-erases elements _(in work)_
+erases elements.
 
     push_front (A* self, T value)
 

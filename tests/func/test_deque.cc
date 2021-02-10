@@ -352,6 +352,7 @@ main(void)
             TEST(ERASE) \
             TEST(ERASE_INDEX) \
             TEST(ERASE_IF) \
+            TEST(ERASE_RANGE) \
             TEST(REMOVE_IF) \
             TEST(INSERT) \
             TEST(INSERT_INDEX) \
@@ -403,8 +404,7 @@ main(void)
             TEST(MISMATCH) \
 
 #define FOREACH_DEBUG(TEST) \
-            TEST(ERASE_RANGE) /* 56*/ \
-            TEST(EQUAL_RANGE) \
+            TEST(EQUAL_RANGE) /* 58 */ \
             TEST(TRANSFORM_IT) \
             TEST(TRANSFORM_RANGE) \
             TEST(FIND_END) \
@@ -701,7 +701,6 @@ main(void)
                     deq_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_ERASE_RANGE:
                 {
                     int value = TEST_RAND(TEST_MAX_VALUE);
@@ -724,7 +723,7 @@ main(void)
                     print_deq (&a);
 
                     std::deque<DIGI>::iterator iter =
-                        b.erase(b.begin() + index, b.end() - iend);
+                        b.erase(b.begin() + index, b.begin() + iend);
                     LOG ("STL erase [%ld, %ld):\n", std::distance(b.begin(), iter), iend);
                     CHECK_ITER (*pos, b, iter);
                     print_deque (b);
@@ -733,7 +732,6 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-#endif
                 case TEST_EMPLACE:
                 {
                     int value = TEST_RAND(TEST_MAX_VALUE);
@@ -1434,6 +1432,7 @@ main(void)
                     deq_digi_free(&aa);
                     break;
                 }
+#endif // DEBUG
                 case TEST_MISMATCH:
                 {
                     if(a.size < 2)
@@ -1505,8 +1504,6 @@ main(void)
                     break;
                 }
 #endif // FIND_END 0
-
-#endif // DEBUG
 
                 default:
 #ifdef DEBUG
