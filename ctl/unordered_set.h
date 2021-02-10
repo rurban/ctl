@@ -810,22 +810,25 @@ JOIN(A, emplace_hint)(I* pos, T* value)
 static inline void
 JOIN(A, clear)(A* self)
 {
-    for(size_t i = 0; i < self->bucket_count; i++)
+    if (LIKELY(self->bucket_count))
     {
-        B* next;
-        B* n = self->buckets[i];
-        if (!n)
-            continue;
-        while ((next = n->next))
+        for(size_t i = 0; i < self->bucket_count; i++)
         {
+            B* next;
+            B* n = self->buckets[i];
+            if (!n)
+                continue;
+            while ((next = n->next))
+            {
+                JOIN(A, _free_node)(self, n);
+                n = next;
+            }
             JOIN(A, _free_node)(self, n);
-            n = next;
         }
-        JOIN(A, _free_node)(self, n);
+        memset(self->buckets, 0, self->bucket_count * sizeof(B*));
+        /* for(size_t i = 0; i < self->bucket_count; i++)
+           self->buckets[i] = NULL; */
     }
-    memset(self->buckets, 0, self->bucket_count * sizeof(B*));
-    /* for(size_t i = 0; i < self->bucket_count; i++)
-        self->buckets[i] = NULL; */
     self->size = 0;
     //self->max_bucket_count = 0;
 }
