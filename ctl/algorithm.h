@@ -522,55 +522,42 @@ JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
     }
 }
 
-#ifdef DEBUG
-
+// not inserted, dest container with size must exist
 static inline I
 JOIN(A, transform_range)(I* first1, I* last1, I dest, T _unop(T*))
 {
-#ifndef POD
-    A *self = first1->container;
-#endif
     foreach_range(A, i, first1, last1)
     {
         if (JOIN(I, done)(&dest))
             break;
 #ifndef POD
-        T tmp = _unop(i.ref);
-        if (self->free)
-            self->free(i.ref);
-        *dest.ref = tmp;
-#else
-        *dest.ref = _unop(i.ref);
+        if (dest.container->free)
+            dest.container->free(dest.ref);
 #endif
-        JOIN(JOIN(A, it), next)(&dest);
+        *dest.ref = _unop(i.ref);
+        JOIN(I, next)(&dest);
     }
     return dest;
 }
 
+// not inserted, dest container with size must exist
 static inline I
 JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*))
 {
-#ifndef POD
-    A *self = first1->container;
-#endif
     foreach_range(A, i, first1, last1)
     {
         if (JOIN(I, done)(pos) || JOIN(I, done)(&dest))
             break;
 #ifndef POD
-        T tmp = _binop(i.ref, pos->ref);
-        if (self->free)
-            self->free(i.ref);
-        *dest.ref = tmp;
-#else
-        *dest.ref = _binop(i.ref, pos->ref);
+        if (dest.container->free)
+            dest.container->free(dest.ref);
 #endif
+        *dest.ref = _binop(i.ref, pos->ref);
         JOIN(JOIN(A, it), next)(pos);
         JOIN(JOIN(A, it), next)(&dest);
     }
     return dest;
 }
-#endif //DEBUG
 
 #else // USET/SET
 // no push_back, but insert

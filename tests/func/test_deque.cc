@@ -402,12 +402,12 @@ main(void)
             TEST(GENERATE_N_RANGE) \
             TEST(TRANSFORM) \
             TEST(TRANSFORM_IT) \
+            TEST(TRANSFORM_RANGE) \
+            TEST(TRANSFORM_IT_RANGE) \
             TEST(MISMATCH) \
 
 #define FOREACH_DEBUG(TEST) \
-            TEST(EQUAL_RANGE) /* 58 */ \
-            TEST(TRANSFORM_RANGE) \
-            TEST(TRANSFORM_IT_RANGE) \
+            TEST(EQUAL_RANGE) /* 61 */ \
             TEST(FIND_END) \
             TEST(FIND_END_IF) \
             TEST(FIND_END_RANGE) \
@@ -1420,27 +1420,52 @@ main(void)
                     deq_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_TRANSFORM_RANGE:
                 {
+                    print_deq(&a);
                     deq_digi_it first_a, last_a;
                     std::deque<DIGI>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                     deq_digi aa = deq_digi_init();
                     deq_digi_resize(&aa, last_b - first_b, digi_init(0));
                     deq_digi_it dest = deq_digi_begin(&aa);
-                    deq_digi_it it = deq_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
+                    deq_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
+                    print_deq(&aa);
+#ifndef _MSC_VER
                     std::deque<DIGI> bb;
-                    bb.resize(last_b - first_b);
-                    auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(), DIGI_bintrans);
-                    CHECK_ITER(it, bb, iter);
+                    std::transform(first_b, last_b, std::back_inserter(bb), DIGI_untrans);
+                    print_deque(bb);
                     CHECK(aa, bb);
-                    // heap use-after-free
+#endif
                     CHECK(a, b);
                     deq_digi_free(&aa);
                     break;
                 }
-#endif // DEBUG
+                case TEST_TRANSFORM_IT_RANGE:
+                {
+                    print_deq(&a);
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    deq_digi_it pos = deq_digi_begin(&a);
+                    deq_digi_it_advance(&pos, 1);
+                    deq_digi aa = deq_digi_init();
+                    deq_digi_resize(&aa, last_b - first_b, digi_init(0));
+                    deq_digi_it dest = deq_digi_begin(&aa);
+                    deq_digi_transform_it_range(&first_a, &last_a, &pos, dest,
+                                                digi_bintrans);
+                    print_deq(&aa);
+#ifndef _MSC_VER
+                    std::deque<DIGI> bb;
+                    std::transform(first_b, last_b, b.begin()+1, std::back_inserter(bb),
+                                   DIGI_bintrans);
+                    print_deque(bb);
+                    CHECK(aa, bb);
+#endif
+                    CHECK(a, b);
+                    deq_digi_free(&aa);
+                    break;
+                }
                 case TEST_MISMATCH:
                 {
                     if(a.size < 2)
