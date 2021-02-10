@@ -401,12 +401,13 @@ main(void)
             TEST(GENERATE_N) \
             TEST(GENERATE_N_RANGE) \
             TEST(TRANSFORM) \
+            TEST(TRANSFORM_IT) \
             TEST(MISMATCH) \
 
 #define FOREACH_DEBUG(TEST) \
             TEST(EQUAL_RANGE) /* 58 */ \
-            TEST(TRANSFORM_IT) \
             TEST(TRANSFORM_RANGE) \
+            TEST(TRANSFORM_IT_RANGE) \
             TEST(FIND_END) \
             TEST(FIND_END_IF) \
             TEST(FIND_END_RANGE) \
@@ -1399,20 +1400,27 @@ main(void)
 # endif
                     break;
                 }
-#ifdef DEBUG
                 case TEST_TRANSFORM_IT:
                 {
+                    if (a.size < 2)
+                        break;
                     deq_digi_it pos = deq_digi_begin(&a);
                     deq_digi_it_advance(&pos, 1);
+                    print_deq(&a);
                     deq_digi aa = deq_digi_transform_it(&a, &pos, digi_bintrans);
+                    print_deq(&aa);
+#ifndef _MSC_VER
                     std::deque<DIGI> bb;
-                    bb.resize(b.size());
-                    std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), DIGI_bintrans);
+                    std::transform(b.begin(), b.end()-1, b.begin()+1, std::back_inserter(bb),
+                                   DIGI_bintrans);
+                    print_deque(bb);
                     CHECK(aa, bb);
+#endif
                     CHECK(a, b);
                     deq_digi_free(&aa);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_TRANSFORM_RANGE:
                 {
                     deq_digi_it first_a, last_a;
