@@ -405,9 +405,13 @@ main(void)
             TEST(TRANSFORM_RANGE) \
             TEST(TRANSFORM_IT_RANGE) \
             TEST(MISMATCH) \
+            TEST(SEARCH) \
+            TEST(SEARCH_RANGE) \
+            TEST(ADJACENT_FIND) \
+            TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-            TEST(EQUAL_RANGE) /* 61 */ \
+            TEST(EQUAL_RANGE) /* 65 */ \
             TEST(FIND_END) \
             TEST(FIND_END_IF) \
             TEST(FIND_END_RANGE) \
@@ -1491,6 +1495,98 @@ main(void)
                     deq_digi_free(&aa);
                     break;
                 }
+                case TEST_SEARCH: // 51
+                {
+                    print_deq(&a);
+                    deq_digi aa = deq_digi_copy(&a);
+                    std::deque<DIGI> bb = b;
+                    deq_digi_it first_a, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
+                        size_t i = std::distance(bb.begin(), first_b);
+                        deq_digi_set(&aa, i, digi_init(0));
+                        bb[i] = DIGI{0};
+                    }
+                    print_deq_range(first_a);
+                    deq_digi_it found_a = deq_digi_search(&a, &first_a, &last_a);
+                    auto found_b = search(b.begin(), b.end(), first_b, last_b);
+                    LOG("found a: %s\n", deq_digi_it_done(&found_a) ? "no" : "yes");
+                    LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
+                    CHECK_ITER(found_a, b, found_b);
+                    deq_digi_free(&aa);
+                    break;
+                }
+                case TEST_SEARCH_RANGE:
+                {
+                    deq_digi aa = deq_digi_copy(&a);
+                    std::deque<DIGI> bb = b;
+                    deq_digi_it needle, last_a, range;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&aa, &needle, &last_a, bb, first_b, last_b);
+                    if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
+                        size_t i = std::distance(bb.begin(), first_b);
+                        deq_digi_set(&aa, i, digi_init(0));
+                        bb[i] = DIGI{0};
+                    }
+                    print_deq_range(needle);
+                    range = deq_digi_begin(&a);
+                    bool found = deq_digi_search_range(&range, &needle);
+                    auto iter = search(b.begin(), b.end(), first_b, last_b);
+                    LOG("found a: %s\n", found ? "yes" : "no");
+                    LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
+                    assert(found == !deq_digi_it_done(&range));
+                    CHECK_ITER(range, b, iter);
+                    deq_digi_free(&aa);
+                    break;
+                }
+                case TEST_ADJACENT_FIND:
+                {
+                    print_deq(&a);
+                    deq_digi_it aa = deq_digi_adjacent_find(&a);
+                    auto bb = adjacent_find(b.begin(), b.end());
+                    CHECK_ITER(aa, b, bb);
+                    LOG("found %s\n", deq_digi_it_done(&aa) ? "no" : "yes");
+                    break;
+                }
+                case TEST_ADJACENT_FIND_RANGE:
+                {
+                    deq_digi_it range, last_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &range, &last_a, b, first_b, last_b);
+                    print_deq_range(range);
+                    deq_digi_it *aa = deq_digi_adjacent_find_range(&range);
+                    auto bb = adjacent_find(first_b, last_b);
+                    CHECK_ITER(*aa, b, bb);
+                    LOG("found %s\n", deq_digi_it_done(aa) ? "no" : "yes");
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_LOWER_BOUND: // 64
+                {
+                    int median = *deq_digi_at(&a, a.size / 2)->value;
+                    deq_digi_it aa = deq_digi_lower_bound(&a, digi_init(median));
+                    auto bb = lower_bound(b.begin(), b.end(), DIGI{median});
+                    CHECK_ITER(aa, b, bb);
+                    break;
+                }
+                case TEST_UPPER_BOUND:
+                {
+                    int median = *deq_digi_at(&a, a.size / 2)->value;
+                    deq_digi_it aa = deq_digi_upper_bound(&a, digi_init(median));
+                    auto bb = upper_bound(b.begin(), b.end(), DIGI{median});
+                    CHECK_ITER(aa, b, bb);
+                    break;
+                }
+                /**/case TEST_LOWER_BOUND_RANGE:
+                {
+                    break;
+                }
+                /**/case TEST_UPPER_BOUND_RANGE:
+                {
+                    break;
+                }
+#endif
 #if 0
                 case TEST_FIND_END:
                 {
