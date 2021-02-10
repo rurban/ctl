@@ -381,8 +381,8 @@ x  stable and tested
 |`find_first_of_range`            |    |    |    |    |    |    |    |    |    |    |    |    |
 |`adjacent_find`                  |    |    |    |    |    |    |    |    |    |    |    |    |
 |`adjacent_find_range`            |    |    |    |    |    |    |    |    |    |    |    |    |
-|`search`                         |    |    |    |    |    |    |    |    |    |    |    |    |
-|`search_range`                   |    |    |    |    |    |    |    |    |    |    |    |    |
+|`search`                         | x  |    |    |    |    |    |    |    |    |    |    |    |
+|`search_range`                   | x  |    |    |    |    |    |    |    |    |    |    |    |
 |`search_n`                       |    |    |    |    |    |    |    |    |    |    |    |    |
 |`search_n_range`                 |    |    |    |    |    |    |    |    |    |    |    |    |
 |`copy_if`                        |    |    |    |    |    |    |    |    |    |    |    |    |
@@ -473,9 +473,9 @@ x  stable and tested
 |`stable_sort_range`              |    |    |    |    |    |    |    |    |    |    |    |    |
 |`nth_element`                    |    |    |    |    |    |    |    |    |    |    |    |    |
 |`nth_element_range`              |    |    |    |    |    |    |    |    |    |    |    |    |
-|`lower_bound`                    |    |    |    |    |    |    |    | .  |    |    |    |    |
+|`lower_bound`                    | .  |    |    |    |    |    |    | .  |    |    |    |    |
 |`lower_bound_range`              |    |    |    |    |    |    |    |    |    |    |    |    |
-|`upper_bound`                    |    |    |    |    |    |    |    | .  |    |    |    |    |
+|`upper_bound`                    | .  |    |    |    |    |    |    | .  |    |    |    |    |
 |`upper_bound_range`              |    |    |    |    |    |    |    |    |    |    |    |    |
 |`binary_search`                  |    |    |    |    |    |    |    |    |    |    |    |    |
 |`binary_search_range`            |    |    |    |    |    |    |    |    |    |    |    |    |

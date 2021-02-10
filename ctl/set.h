@@ -130,12 +130,6 @@ JOIN(I, done)(I* iter)
     return iter->node == iter->end;
 }
 
-static inline int
-JOIN(I, is_end)(I* iter, I* last)
-{
-    return iter->node == last->node;
-}
-
 static inline I*
 JOIN(I, next)(I* iter)
 {
@@ -143,6 +137,14 @@ JOIN(I, next)(I* iter)
     iter->ref = iter->node ? &iter->node->value : NULL;
     return iter;
 }
+
+/* seems to be pretty costly, or?
+static inline I*
+JOIN(I, prev)(I* node)
+{
+    ; // TODO
+}
+*/
 
 static inline I*
 JOIN(I, advance)(I* iter, long i)
@@ -160,6 +162,16 @@ JOIN(I, advance)(I* iter, long i)
     if (iter->node)
         iter->ref = &iter->node->value;
     return iter;
+}
+
+// advances end node of range, n from current.
+static inline void
+JOIN(I, advance_end)(I* iter, long n)
+{
+    B* node = iter->node;
+    for(long j = 0; node != NULL && j < n; j++)
+        node = JOIN(B, next)(node);
+    iter->end = node;
 }
 
 static inline long
@@ -1048,6 +1060,10 @@ JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*
     }
     return dest;
 }
+
+// TODO join (aka bulk insert)
+//      and split (aka bulk erase)
+//      lower_bound, upper_bound
 
 #if defined(CTL_MAP)
 # include <ctl/algorithm.h>

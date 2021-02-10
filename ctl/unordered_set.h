@@ -163,12 +163,6 @@ JOIN(I, done)(I* iter)
 {
     return iter->node == NULL; /* iter->end */
 }
-// unused
-static inline int
-JOIN(I, is_end)(I* iter, I* last)
-{
-    return iter->node == NULL || iter->node == last->node;
-}
 
 static inline void
 JOIN(I, update)(I* iter)

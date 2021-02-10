@@ -104,10 +104,12 @@ searches for any one of a set of elements. _(NYI)_
  
 finds the first two adjacent items that are equal (or satisfy a given predicate). _(NYI)_
 
-    I search
-    I search_range (C++20)
+    I search (A* self, I* first2, I last2)
+    bool search_range (I* range1, I *range2)  (C++20)
  
-searches for a range of elements. _(NYI)_
+naively searches for a range of elements. cost `range1` * `range2`.
+`search_range` sets `range1` (the haystack) to the found pointer if found.
+`search` returns an iterator to the pointer if found, or end.
 
     I search_n
  

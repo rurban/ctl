@@ -37,20 +37,15 @@
 # define ASSERT(x)
 #endif
 
-#if defined(_ASSERT_H) && !defined(NDEBUG)
 #ifdef CTL_USET
 # define CTL_ASSERT_EQUAL \
-    assert(self->equal || !"equal undefined");
+    ASSERT(self->equal || !"equal undefined");
 #else
 # define CTL_ASSERT_EQUAL \
-    assert(self->equal || self->compare || !"equal or compare undefined");
+    ASSERT(self->equal || self->compare || !"equal or compare undefined");
 #endif
 #define CTL_ASSERT_COMPARE \
-    assert(self->compare || !"compare undefined");
-#else
-#define CTL_ASSERT_EQUAL
-#define CTL_ASSERT_COMPARE
-#endif
+    ASSERT(self->compare || !"compare undefined");
 
 #if __GNUC__ >= 3
 #define LIKELY(x) __builtin_expect((long)(x) != 0, 1)

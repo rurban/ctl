@@ -128,12 +128,6 @@ JOIN(I, index)(I* iter)
 }
 
 static inline int
-JOIN(I, is_end)(I* iter, I* last)
-{
-    return iter->ref == last->ref;
-}
-
-static inline int
 JOIN(I, done)(I* iter)
 {
     return iter->ref == iter->end;

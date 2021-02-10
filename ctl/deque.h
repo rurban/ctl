@@ -164,12 +164,6 @@ JOIN(I, index)(I* iter)
 }
 
 static inline int
-JOIN(I, is_end)(I* iter, I* last)
-{
-    return iter->index == last->index;
-}
-
-static inline int
 JOIN(I, done)(I* iter)
 {
     return iter->index == iter->end;
@@ -206,6 +200,18 @@ JOIN(I, advance)(I* iter, long i)
         iter->ref = JOIN(A, at)(iter->container, iter->index);
     }
     return iter;
+}
+
+static inline void
+JOIN(I, advance_end)(I* iter, long i)
+{
+    // error case: overflow => end or NULL?
+    if(!(iter->index + i >= iter->end ||
+         iter->index + i >= iter->container->size ||
+         (long)iter->index + i < 0))
+    {
+        iter->end += i;
+    }
 }
 
 static inline long

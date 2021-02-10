@@ -297,9 +297,11 @@ main(void)
         TEST(TRANSFORM_IT) \
         TEST(EMPLACE_BACK) \
         TEST(MISMATCH) \
+        TEST(SEARCH) \
+        TEST(SEARCH_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 51 */ \
+        TEST(EMPLACE) /* 53 */ \
         TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(GENERATE_N_RANGE) \
@@ -777,6 +779,77 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
+                case TEST_SEARCH: // 51
+                {
+                    print_vec(&a);
+                    vec_digi aa = vec_digi_copy(&a);
+                    std::vector<DIGI> bb = b;
+                    vec_digi_it first_a, last_a;
+                    std::vector<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
+                        size_t i = first_b - bb.begin();
+                        vec_digi_set(&aa, i, digi_init(0));
+                        bb[i] = DIGI{0};
+                    }
+                    print_vec_range(first_a);                    
+                    vec_digi_it found_a = vec_digi_search(&a, &first_a, &last_a);
+                    auto found_b = search(b.begin(), b.end(), first_b, last_b);
+                    LOG("found a: %s\n", vec_digi_it_done(&found_a) ? "no" : "yes");
+                    LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
+                    CHECK_ITER(found_a, b, found_b);
+                    vec_digi_free(&aa);
+                    break;
+                }
+                case TEST_SEARCH_RANGE:
+                {
+                    vec_digi aa = vec_digi_copy(&a);
+                    std::vector<DIGI> bb = b;
+                    vec_digi_it needle, last_a, range;
+                    std::vector<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&aa, &needle, &last_a, bb, first_b, last_b);
+                    if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
+                        size_t i = first_b - bb.begin();
+                        vec_digi_set(&aa, i, digi_init(0));
+                        bb[i] = DIGI{0};
+                    }
+                    print_vec_range(needle);
+                    range = vec_digi_begin(&a);
+                    bool found = vec_digi_search_range(&range, &needle);
+                    auto iter = search(b.begin(), b.end(), first_b, last_b);
+                    LOG("found a: %s\n", found ? "yes" : "no");
+                    LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
+                    assert(found == !vec_digi_it_done(&range));
+                    CHECK_ITER(range, b, iter);
+                    vec_digi_free(&aa);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_LOWER_BOUND: // 64
+                {
+                    int median = *vec_digi_at(&a, a.size / 2)->value;
+                    vec_digi_it aa = vec_digi_lower_bound(&a, digi_init(median));
+                    auto bb = lower_bound(b.begin(), b.end(), DIGI{median});
+                    CHECK_ITER(aa, b, bb);
+                    break;
+                }
+                case TEST_UPPER_BOUND:
+                {
+                    int median = *vec_digi_at(&a, a.size / 2)->value;
+                    vec_digi_it aa = vec_digi_upper_bound(&a, digi_init(median));
+                    auto bb = upper_bound(b.begin(), b.end(), DIGI{median});
+                    CHECK_ITER(aa, b, bb);
+                    break;
+                }
+                /**/case TEST_LOWER_BOUND_RANGE:
+                {
+                    break;
+                }
+                /**/case TEST_UPPER_BOUND_RANGE:
+                {
+                    break;
+                }
+#endif
                 case TEST_GENERATE_RANGE:
                 {
                     vec_digi_it first_a, last_a;

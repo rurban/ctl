@@ -67,29 +67,6 @@ JOIN(A, none_of)(A* self, int _match(T*))
     return JOIN(I, done)(&pos);
 }
 
-#ifdef DEBUG
-// TODO not for value but matching range
-static inline I
-JOIN(A, find_end)(A* self, T value)
-{
-    I* ret = NULL;
-    foreach(A, self, i)
-        if(JOIN(A, _equal)(self, i.ref, &value))
-            ret = &i;
-    return ret ? *ret : JOIN(A, end)(self);
-}
-
-static inline I
-JOIN(A, find_end_if)(A* self, int _match(T*))
-{
-    I* ret = NULL;
-    foreach(A, self, i)
-        if(_match(i.ref))
-            ret = &i;
-    return ret ? *ret : JOIN(A, end)(self);
-}
-#endif
-
 #include <stdbool.h>
 
 #ifndef CTL_USET // no ranges
@@ -647,7 +624,71 @@ JOIN(A, count_if)(A* self, int _match(T*))
 }
 //#endif // STR
 
+// Sets range1 (the haystack) to the found pointer if found.
+// Naive r1*r2 cost, not Boyer-Moore yet.
+static inline bool
+JOIN(A, search_range)(I *range1, I* range2)
+{
+
+    if (JOIN(I, done)(range1))
+        return false;
+    if (JOIN(I, done)(range2))
+        return true;
+    A* self = range1->container;
+    for (; ; JOIN(I, next)(range1))
+    {
+        I it = *range1;
+        I s_it = *range2;
+        for (;;)
+        {
+            if (JOIN(I, done)(&s_it))
+                return true;
+            if (JOIN(I, done)(&it))
+                return false;
+            if (!JOIN(A, _equal)(self, it.ref, s_it.ref))
+                break;
+            JOIN(I, next)(&it);
+            JOIN(I, next)(&s_it);
+        }
+    }
+    return false;
+}
+
+// Returns iterator to the found pointer or end
+static inline I
+JOIN(A, search)(A* self, I* first2, I* last2)
+{
+    I begin = JOIN(A, begin)(self);
+    JOIN(I, range)(first2, last2);
+    if (JOIN(A, search_range)(&begin, first2))
+        return begin;
+    else
+        return JOIN(A, end)(self);
+}
+
 #ifdef DEBUG
+
+// TODO not for value but matching range
+static inline I
+JOIN(A, find_end)(A* self, T value)
+{
+    I ret = JOIN(A, end)(self);
+    foreach(A, self, i)
+        if(JOIN(A, _equal)(self, i.ref, &value))
+            ret = i;
+    return ret;
+}
+
+static inline I
+JOIN(A, find_end_if)(A* self, int _match(T*))
+{
+    I ret = JOIN(A, end)(self);
+    foreach(A, self, i)
+        if(_match(i.ref))
+            ret = i;
+    return ret;
+}
+
 #if !defined(CTL_USET) && !defined(CTL_STR)
 // API? 3rd arg should be an iter, not a value
 static inline bool

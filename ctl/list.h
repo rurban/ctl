@@ -86,12 +86,6 @@ JOIN(I, done)(I* iter)
     return iter->node == iter->end;
 }
 
-static inline int
-JOIN(I, is_end)(I* iter, I* last)
-{
-    return iter->node == last->node;
-}
-
 static inline B*
 JOIN(B, next)(B* node)
 {
@@ -141,6 +135,16 @@ JOIN(I, advance)(I* iter, long i)
     if (LIKELY(node))
         iter->ref = &node->value;
     return iter;
+}
+
+// set end node
+static inline void
+JOIN(I, advance_end)(I* iter, long n)
+{
+    B* node = iter->node;
+    for (long i=0; i < n && iter->node != iter->end; i++)
+        node = node->next;
+    iter->end = iter->node;
 }
 
 static inline long
