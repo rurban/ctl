@@ -176,6 +176,7 @@ get_random_iters (str *a, str_it* first_a, str_it* last_a,
         first_b = b.begin();
         last_b = b.end();
     }
+    first_a->end = last_a->ref;
 }
 
 int
@@ -1004,11 +1005,13 @@ main(void)
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                     str aa = str_init(a.vector);
                     str_it dest = str_it_begin(&aa);
-                    str_it it = str_transform_range(&first_a, &last_a, dest, str_untrans);
+                    /*str_it it = */
+                    str_transform_range(&first_a, &last_a, dest, str_untrans);
                     std::string bb;
                     bb.resize(last_b - first_b);
-                    auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(),
-                                               STR_bintrans);
+                    /*auto iter = */
+                    std::transform(first_b, last_b, b.begin()+1, bb.begin(),
+                                   STR_bintrans);
                     ADJUST_CAP("transform_range", aa, bb);
                     //CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
@@ -1031,7 +1034,7 @@ main(void)
                     break;
                 }
 #endif // DEBUG
-                case TEST_MISMATCH: // 56
+                case TEST_MISMATCH: // 38
                 {
                     if(a.size < 2)
                         break;
