@@ -7,6 +7,10 @@
 #error "No CTL container defined for <ctl/bits/container.h>"
 #endif
 
+static const struct JOIN(T, it_vtable)
+JOIN(I, vtable) =
+  { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+
 #include <stdbool.h>
 
 #ifndef CTL_ARR

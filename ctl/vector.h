@@ -11,7 +11,6 @@
 #define A JOIN(vec, T)
 #define I JOIN(A, it)
 
-#include <ctl/bits/iterators.h>
 #include <ctl/ctl.h>
 
 // only for short strings, not vec_uint8_t
@@ -35,12 +34,16 @@ typedef struct A
 
 typedef int (*JOIN(A, compare_fn))(T *, T *);
 
+struct JOIN(T, it_vtable);
 typedef struct I
 {
     T *ref;
     T *end;
     A *container;
+    JOIN(T, it_vtable) *vtable;
 } I;
+
+#include <ctl/bits/iterators.h>
 
 static inline size_t JOIN(A, capacity)(A *self)
 {

@@ -12,7 +12,6 @@
 #define B JOIN(A, node)
 #define I JOIN(A, it)
 
-#include <ctl/bits/iterators.h>
 #include <ctl/ctl.h>
 #include <stdbool.h>
 
@@ -35,13 +34,17 @@ typedef struct A
     int (*equal)(T *, T *);
 } A;
 
+struct JOIN(T, it_vtable);
 typedef struct I
 {
     B *node;
     T *ref;
     B *end;
     A *container;
+    JOIN(T, it_vtable) *vtable;
 } I;
+
+#include <ctl/bits/iterators.h>
 
 static inline I JOIN(I, iter)(A *self, B *node)
 {

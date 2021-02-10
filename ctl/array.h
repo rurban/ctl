@@ -20,8 +20,6 @@
 #define A JOIN(C, T)
 #define I JOIN(A, it)
 
-#include <ctl/bits/iterators.h>
-
 typedef struct A
 {
 #if N > CUTOFF
@@ -37,10 +35,13 @@ typedef struct A
 
 typedef int (*JOIN(A, compare_fn))(T *, T *);
 
+struct JOIN(T, it_vtable);
 typedef struct I
 {
     CTL_T_ITER_FIELDS;
 } I;
+
+#include <ctl/bits/iterators.h>
 
 static inline size_t JOIN(A, size)(A *self)
 {

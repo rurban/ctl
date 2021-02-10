@@ -13,7 +13,6 @@
 #define B JOIN(A, bucket)
 #define I JOIN(A, it)
 
-#include <ctl/bits/iterators.h>
 #include <ctl/ctl.h>
 
 #ifndef DEQ_BUCKET_SIZE
@@ -40,13 +39,17 @@ typedef struct A
     int (*equal)(T *, T *);
 } A;
 
+struct JOIN(T, it_vtable);
 typedef struct I
 {
     T *ref;
     size_t index;
     size_t end;
     A *container;
+    struct JOIN(T, it_vtable) *vtable;
 } I;
+
+#include <ctl/bits/iterators.h>
 
 static inline B **JOIN(A, first)(A *self)
 {

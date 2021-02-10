@@ -31,17 +31,19 @@ typedef struct A
     int (*equal)(T *, T *);
 } A;
 
+struct JOIN(T, it_vtable);
 typedef struct I
 {
     B *node;
     T *ref;
     B *end;
     A *container;
+    struct JOIN(T, it_vtable) *vtable;
 } I;
 
-typedef int (*JOIN(A, compare_fn))(T *, T *);
-
 #include <ctl/bits/iterators.h>
+
+typedef int (*JOIN(A, compare_fn))(T *, T *);
 
 static inline T *JOIN(A, front)(A *self)
 {

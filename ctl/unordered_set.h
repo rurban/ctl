@@ -96,7 +96,6 @@ position to the top in each access, such as find and contains, not only insert.
 #define B JOIN(A, node)
 #define I JOIN(A, it)
 
-#include <ctl/bits/iterators.h>
 #include <ctl/ctl.h>
 
 typedef struct B
@@ -127,6 +126,7 @@ typedef struct A
 #endif
 } A;
 
+struct JOIN(T, it_vtable);
 typedef struct I
 {
     B *node; // the bucket
@@ -135,7 +135,10 @@ typedef struct I
     // B* end; // if ranges were added to usets
     A *container;
     B **buckets; // the chain
+    struct JOIN(T, it_vtable) *vtable;
 } I;
+
+#include <ctl/bits/iterators.h>
 
 static inline size_t JOIN(I, index)(A *self, T value)
 {
