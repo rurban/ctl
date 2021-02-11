@@ -238,6 +238,8 @@ main(void)
             TEST(SWAP) \
             TEST(INSERT) \
             TEST(INSERT_INDEX) \
+            TEST(INSERT_COUNT) \
+            TEST(INSERT_RANGE) \
             TEST(ASSIGN) \
             TEST(REPLACE) \
             TEST(FIND) \
@@ -265,6 +267,9 @@ main(void)
             TEST(UNION) \
             TEST(DIFFERENCE) \
             TEST(SYMMETRIC_DIFFERENCE) \
+            TEST(UNION_RANGE) \
+            TEST(DIFFERENCE_RANGE) \
+            TEST(SYMMETRIC_DIFFERENCE_RANGE) \
             TEST(GENERATE) \
             TEST(GENERATE_RANGE) \
             TEST(GENERATE_N) \
@@ -274,13 +279,8 @@ main(void)
             TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-            TEST(INSERT_COUNT) /* 47 */ \
-            TEST(INSERT_RANGE) \
-            TEST(EQUAL_RANGE) \
+            TEST(EQUAL_RANGE) /* 51 */ \
             TEST(INTERSECTION) \
-            TEST(UNION_RANGE) \
-            TEST(DIFFERENCE_RANGE) \
-            TEST(SYMMETRIC_DIFFERENCE_RANGE) \
             TEST(INTERSECTION_RANGE) \
             TEST(GENERATE_N_RANGE) \
             TEST(TRANSFORM_RANGE) \
@@ -480,6 +480,41 @@ main(void)
                         str_it_advance(&pos, index);
                         str_insert(&pos, value);
                     }
+                    break;
+                }
+                case TEST_INSERT_COUNT:
+                {
+                    size_t count = TEST_RAND(24);
+                    const char value = RAND_ALPHA;
+                    const size_t index = TEST_RAND(a.size);
+                    LOG("insert_count %zu x '%c' at %zu\n", count, value, index);
+                    // note: different order of args to vector!
+                    b.insert(b.begin() + index, count, value);
+                    LOG("STL \"%s\" (%zu)\n", b.c_str(), b.size());
+                    str_it pos = str_it_begin(&a);
+                    str_it_advance(&pos, index);
+                    str_insert_count(&pos, count, value);
+                    LOG("CTL \"%s\" (%zu)\n", str_c_str(&a), a.size);
+                    ADJUST_CAP("insert_count", a, b);
+                    CHECK(a, b);
+                    break;
+                }
+                case TEST_INSERT_RANGE:
+                {
+                    const size_t index = TEST_RAND(a.size);
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    str aa;
+                    std::string bb;
+                    gen_strings(&aa, bb, TEST_RAND(a.size));
+                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    b.insert(b.begin() + index, first_b, last_b);
+                    str_it pos = str_it_begin(&a);
+                    str_it_advance(&pos, index);
+                    str_insert_range(&pos, &first_a, &last_a);
+                    ADJUST_CAP("insert_range", a, b);
+                    CHECK(a, b);
+                    str_free(&aa);
                     break;
                 }
                 case TEST_RESIZE:
@@ -837,7 +872,6 @@ main(void)
                     str_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_UNION_RANGE:
                 {
                     str aa;
@@ -878,6 +912,7 @@ main(void)
                     str_free(&aa);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_INTERSECTION_RANGE:
                 {
                     str aa;
@@ -894,7 +929,7 @@ main(void)
                     std::string::iterator first_b2, last_b2;
                     get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
 
-                    LOG("CTL a + aa\n");
+                    LOG("CTL a - aa\n");
                     //LOG_range(first_a1);
                     //LOG_range(first_a2);
                     str aaa = str_intersection_range(&first_a1, &first_a2);
@@ -902,7 +937,7 @@ main(void)
                     //LOG(&aaa);
 
                     std::string bbb;
-                    LOG("STL b + bb\n");
+                    LOG("STL b - bb\n");
                     //LOG(b);
                     //LOG(bb);
 # ifndef _MSC_VER
@@ -918,6 +953,7 @@ main(void)
                     str_free(&aa);
                     break;
                 }
+#endif // DEBUG
                 case TEST_DIFFERENCE_RANGE:
                 {
                     str aa;
@@ -998,6 +1034,7 @@ main(void)
                     str_free(&aa);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_TRANSFORM_RANGE:
                 {
                     if (a.size < 2)

@@ -563,8 +563,13 @@ JOIN(A, insert_count)(I* pos, size_t count, T value)
             JOIN(A, insert_index)(self, index++, self->copy(&value));
     }
     else
+    {
         for (size_t i=0; i < count; i++)
             JOIN(A, push_back)(self, self->copy(&value));
+#ifdef CTL_STR
+        self->vector[self->size] = '\0';
+#endif
+    }
     FREE_VALUE(self, value);
 }
 

@@ -142,6 +142,10 @@ JOIN(A, copy_range)(I* range, A* out)
         JOIN(A, push_back)(out, out->copy(range->ref));
         JOIN(I, next)(range);
     }
+#ifdef CTL_STR
+    if (out->vector)
+        out->vector[out->size] = '\0';
+#endif
     return out;
 }
 
@@ -218,6 +222,7 @@ JOIN(A, union)(A* a, A* b)
     return JOIN(A, union_range)(&r1, &r2);
 }
 
+// FIXME str
 static inline A
 JOIN(A, intersection_range)(I* r1, I* r2)
 {
@@ -235,6 +240,10 @@ JOIN(A, intersection_range)(I* r1, I* r2)
     }
 #if defined(CTL_VEC) && !defined(CTL_STR)
     JOIN(A, shrink_to_fit)(&self);
+#endif
+#ifdef CTL_STR
+    if (LIKELY(self.size))
+        self.vector[self.size] = '\0';
 #endif
     return self;
 }
@@ -276,6 +285,9 @@ JOIN(A, difference_range)(I* r1, I* r2)
             JOIN(I, next)(r2);
         }
     }
+#ifdef CTL_STR
+    self.vector[self.size] = '\0';
+#endif
     return self;
 }
 
@@ -319,9 +331,6 @@ JOIN(A, symmetric_difference_range)(I* r1, I* r2)
         }
     }
     JOIN(A, copy_range)(r2, &self);
-#ifdef CTL_VEC
-    //JOIN(A, shrink_to_fit)(&self);
-#endif
     return self;
 }
 

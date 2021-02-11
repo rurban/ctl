@@ -291,8 +291,8 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`equal`                          | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |
 |`insert`                         | ✓  | ✓  | -  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`insert_index`                   | ✓  | ✓  | -  | ✓  | -  |    |    | -  | -  | -  | -  | -  |
-|`insert_count`                   | ✓  | x  | -  | ✓  | ✓  |    |    |    |    | -  | -  | -  |
-|`insert_range`                   | ✓  | x  | -  | ✓  | ✓  | x  |    | -  | -  | -  | -  | -  |
+|`insert_count`                   | ✓  | ✓  | -  | ✓  | ✓  |    |    |    |    | -  | -  | -  |
+|`insert_range`                   | ✓  | ✓  | -  | ✓  | ✓  | x  |    | -  | -  | -  | -  | -  |
 |`insert_found`                   | -  | -  | -  | -  | -  |    |    | ✓  | ✓  | -  | -  | -  |
 |`insert_or_assign`               | -  | -  | -  | -  | -  | -  | ✓  | -  | ✓  | -  | -  | -  |
 |`insert_or_assign_found`         | -  | -  | -  | -  | -  | -  |    | -  | ✓  | -  | -  | -  |
