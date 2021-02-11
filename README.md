@@ -504,10 +504,11 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 2020 (starting with `202101L`),
 the old ctl is lower than 2020, starting with `1.0`.
 
-Added lots of missing methods, like `max_size`, `size`, `capacity`, ...
-We have 593 methods, 124 of them unique. glouw has 196 methods, 63 of them unique.
+Added lots of missing methods. We have 593 methods, 124 of them unique.
+glouw has 196 methods, 63 of them unique.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.
+Fallback to c++2a, c++17 or c++11.
 
 Added **array**, **map** and **unordered_map** containers.
 
