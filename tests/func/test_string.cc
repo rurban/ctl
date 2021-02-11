@@ -29,11 +29,12 @@ OLD_MAIN
     { printf("capacity %zu vs %zu FAIL\n", c.capacity, s.capacity()); fail++; }
 #endif
 
-// cheat growth
+// cheat growth. the STL often has wrong and slow growth policies for algos.
+// we rather reserve before, and then dont overallocate later.
 #define ADJUST_CAP(m, c, s)                                             \
     if (c.size == s.size() && c.capacity != s.capacity())               \
     {                                                                   \
-        printf("%s capacity %zu => %zu FAIL\n", m, c.capacity, s.capacity()); \
+        printf("%s capacity %zu => %zu\n", m, c.capacity, s.capacity()); \
         str_fit(&c, s.capacity());                                      \
     }
 

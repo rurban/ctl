@@ -601,6 +601,12 @@ fixed), the STL needs one assignment, glouw/ctl needs three
 assignments. glouw/ctl is safe for destructive operations (i.e. insert, erase)
 in a foreach loop, we and the STL are not.
 
+Our vector and string growth policies for multiple insertions are much better.
+E.g. in the set algos or insert_count.
+We reserve space at front, the STL piecewise in push_back/insert and this often
+leads to massive overallocation, hitting `* 2`. We try to mimic the upstream
+growth policies, but not its mistakes.
+
 STL multiset and multimap variants will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 
@@ -617,7 +623,8 @@ Some algorithms and C++20 methods are still missing or are in work.
 **set** algorithms such as `set_union`, `set_difference`, `set_intersection`,
 `set_symmetric_difference` do not work with `unordered_set`, because the specs
 require them to be ordered.  The CTL set algorithms do work properly on
-`unordered_set`.
+`unordered_set`. Likewise we don't define any range iterators on unordered_set,
+as this is unordered by default.
 
 hashmaps will not rely on chained lists with buckets, and can be either changed
 to open addressing or a better modern layout, such as Swiss tables (flat or
