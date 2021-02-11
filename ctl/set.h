@@ -548,6 +548,78 @@ JOIN(A, insert)(A* self, T key)
     return insert;
 }
 
+static inline B*
+JOIN(A, insert_found)(A* self, T key, int *foundp)
+{
+    *foundp = 0;
+    B* insert = NULL;
+    if(self->root)
+    {
+        B* node = self->root;
+        while(1)
+        {
+            int diff;
+            if (self->equal)
+            {
+                if (self->equal(&key, &node->value))
+                {
+                    *foundp = 1;
+                    if (self->free)
+                        self->free(&key);
+                    return node;
+                }
+                diff = self->compare(&key, &node->value);
+            }
+            else
+            {
+                diff = self->compare(&key, &node->value);
+                if(diff == 0 && !self->compare(&node->value, &key))
+                {   // equal
+                    *foundp = 1;
+                    if (self->free)
+                        self->free(&key);
+                    return node;
+                }
+            }
+            if (diff < 0 // 3way lower
+                || !self->compare(&node->value, &key)) // or 2way lower
+            {
+                if(node->l)
+                    node = node->l;
+                else
+                {
+                    insert = JOIN(B, init)(key, 0);
+                    node->l = insert;
+                    break;
+                }
+            }
+            else // 2way or 2way greater
+            {
+                if(node->r)
+                    node = node->r;
+                else
+                {
+                    insert = JOIN(B, init)(key, 0);
+                    node->r = insert;
+                    break;
+                }
+            }
+        }
+        insert->p = node;
+    }
+    else
+    {
+        insert = JOIN(B, init)(key, 0);
+        self->root = insert;
+    }
+    JOIN(A, insert_1)(self, insert);
+    self->size++;
+#ifdef USE_INTERNAL_VERIFY
+    JOIN(A, verify)(self);
+#endif
+    return insert;
+}
+
 static inline void
 JOIN(A, insert_1)(A* self, B* node)
 {

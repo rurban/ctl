@@ -160,6 +160,7 @@ main(void)
 #define FOREACH_METH(TEST) \
         TEST(SELF) \
         TEST(INSERT) \
+        TEST(INSERT_FOUND) \
         TEST(ERASE) \
         TEST(REMOVE_IF) \
         TEST(ERASE_IF) \
@@ -205,10 +206,10 @@ main(void)
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EMPLACE) /* 44 */ \
+        TEST(INSERT_RANGE) \
         TEST(EXTRACT) \
         TEST(MERGE) \
         TEST(EQUAL_RANGE) \
-        TEST(INSERT_RANGE) \
         TEST(GENERATE_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
@@ -264,6 +265,28 @@ main(void)
                 b.insert(DIGI{vb});
                 break;
             }
+            case TEST_INSERT_FOUND:
+            {
+                const int vb = TEST_RAND(TEST_MAX_SIZE);
+                int found;
+                LOG("insert_found %d into\n", vb);
+                print_set(&a);
+                set_digi_node* node = set_digi_insert_found(&a, digi_init(vb), &found);
+                std::pair<std::set<DIGI>::iterator,bool> pair = b.insert(DIGI{vb});
+                LOG("a found %d, b found %d\n", found, (int)pair.second);
+                assert(found == (pair.second ? 0 : 1));
+                assert(*node->value.value == *pair.first->value);
+                break;
+            }
+#ifdef DEBUG
+            case TEST_INSERT_RANGE:
+            {
+                const int vb = TEST_RAND(TEST_MAX_SIZE);
+                //set_digi_insert_range(&a, digi_init(vb));
+                b.insert(DIGI{vb});
+                break;
+            }
+#endif
             case TEST_ERASE:
             {
                 const size_t erases = TEST_RAND(TEST_MAX_SIZE) / 4;
