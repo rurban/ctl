@@ -282,7 +282,7 @@ main(void)
             TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-            TEST(EQUAL_RANGE) /* 51 */ \
+            TEST(EQUAL_RANGE) /* 56 */ \
             TEST(INTERSECTION) \
             TEST(INTERSECTION_RANGE) \
             TEST(GENERATE_N_RANGE) \
@@ -1075,7 +1075,7 @@ main(void)
                     break;
                 }
 #endif // DEBUG
-                case TEST_MISMATCH: // 38
+                case TEST_MISMATCH: // 40
                 {
                     if(a.size < 2)
                         break;
@@ -1090,6 +1090,8 @@ main(void)
                     get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
                     get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
                     /*bool found_a = */str_mismatch(&r1a, &r2a);
+#if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
+                    // requires c++14
                     auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
                     int d1a = str_it_distance(&b1, &r1a);
                     int d2a = str_it_distance(&b2, &r2a);
@@ -1097,10 +1099,13 @@ main(void)
                     //TODO check found_a against iter results
                     assert(d1a == distance(b.begin(), pair.first));
                     assert(d2a == distance(bb.begin(), pair.second));
+#else
+                    printf("std::mismatch requires C++14 with robust_nonmodifying_seq_ops\n");
+#endif
                     str_free(&aa);
                     break;
                 }
-                case TEST_SEARCH: // using strstr
+                case TEST_SEARCH: // 52, using strstr
                 {
                     str aa = str_copy(&a);
                     std::string bb = b;
