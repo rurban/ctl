@@ -67,6 +67,13 @@ void print_setpp(std::set<DIGI>& b) {
 
 int random_element(set_digi* a)
 {
+#if 1
+    if (!a->size)
+        return 0;
+    set_digi_it it = set_digi_begin(a);
+    set_digi_it_advance(&it, TEST_RAND(a->size));
+    return *it.ref->value;
+#else
     const size_t index = TEST_RAND(a->size);
     int test_value = 0;
     size_t current = 0;
@@ -80,6 +87,7 @@ int random_element(set_digi* a)
         current++;
     }
     return test_value;
+#endif
 }
 
 static void
@@ -102,7 +110,6 @@ get_random_iters (set_digi *a, set_digi_it *first_a, set_digi_it *last_a,
         {
             *last_a = it1;
             last_b = first_b;
-            first_a->end = last_a->node;
         }
         else if (r2 == a->size)
         {
@@ -117,7 +124,6 @@ get_random_iters (set_digi *a, set_digi_it *first_a, set_digi_it *last_a,
             last_b = b.begin();
             advance(last_b, r2);
         }
-        first_a->end = last_a->node;
     }
     else
     {
@@ -127,6 +133,7 @@ get_random_iters (set_digi *a, set_digi_it *first_a, set_digi_it *last_a,
         first_b = b.begin();
         last_b = b.end();
     }
+    first_a->end = last_a->node;
 }
 
 static void
@@ -205,7 +212,7 @@ main(void)
         TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 44 */ \
+        TEST(EMPLACE) /* 45 */ \
         TEST(INSERT_RANGE) \
         TEST(EXTRACT) \
         TEST(MERGE) \
@@ -281,9 +288,24 @@ main(void)
 #ifdef DEBUG
             case TEST_INSERT_RANGE:
             {
-                const int vb = TEST_RAND(TEST_MAX_SIZE);
-                //set_digi_insert_range(&a, digi_init(vb));
-                b.insert(DIGI{vb});
+                set_digi aa = set_digi_init_from(&a);
+                std::set<DIGI> bb;
+                for (int i=0; i < TEST_RAND(25); i++)
+                {
+                    set_digi_insert(&aa, digi_init(i));
+                    bb.insert(DIGI{i});
+                }
+                print_set(&aa);
+                set_digi_it first_a, last_a;
+                std::set<DIGI>::iterator first_b, last_b;
+                get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+
+                set_digi_insert_range(&a, &first_a, &last_a);
+                b.insert(first_b, last_b);
+                print_set(&a);
+                print_setpp(b);
+                set_digi_free(&aa);
+                CHECK(a, b);
                 break;
             }
 #endif
@@ -545,7 +567,7 @@ main(void)
                     printf ("%d != %d FAIL\n", (int)numa, (int)numb);
                     errors++;
                 }
-                assert(numa == numb); // off by one, counts one too much
+                assert(numa == numb); // off by one, counted one too much
                 break;
             }
             case TEST_ALL_OF:

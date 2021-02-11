@@ -1013,6 +1013,18 @@ JOIN(A, inserter)(A* self, B* node, T *value)
     }
 }
 
+static inline void
+JOIN(A, insert_range)(A* self, I* first, I* last)
+{
+    B* node = first->node;
+    while (node != last->node)
+    {
+        B* next = JOIN(B, next)(node);
+        JOIN(A, insert)(self, node->value);
+        node = next;
+    }
+}
+
 // specialize, using our inserter (i.e. replace if different)
 // This one changes in place.
 static inline void
