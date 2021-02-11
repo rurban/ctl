@@ -5,12 +5,13 @@ my $outfn = 'docs/index.md';
 open my $out, '>', "$outfn.tmp" or die "$! $outfn.tmp";
 my $prev = '';
 while (<$in>) {
-  if ($prev eq "\n" and /^\|  +\|vec/) {
-    print $out "```\n";
-  }
+  # links
   s {docs/images/} {images/};
   s {\(docs/} {\(};
-  if ($prev =~ /^\|  +\|vec/ and /^## /) {
+  # grid
+  if ($prev eq "\n" and /^\|  +\|vec/) {
+    print $out "```\n";
+  } elsif ($prev =~ /^\|  +\|vec/ and $_ eq "\n") {
     print $out "```\n";
   }
   print $out $_;

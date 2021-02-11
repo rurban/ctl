@@ -4,8 +4,11 @@
 # broken (.).
 
 use strict;
+use utf8;
+use feature 'unicode_strings';
+binmode(STDOUT, ":utf8");
 
-open my $in, '<', 'README.md' or die "$! README.md";
+open my $in, '<:utf8', 'README.md' or die "$! README.md";
 my @c = qw(vec str arr deq list set map uset umap pqu que stk);
 my %long = (
   vec => 'vector',
@@ -28,18 +31,32 @@ while (<$in>) {
     $found++; next;
   }
   next if /^\|\s+\|vec/;
-  #$found = 0 if /^```/;
-  $found = 0 if /^## /;
+  # $found = 0 if /^```/;
+  $found = 0 unless /^\|/;
+  # $found = 0 if /^## /;
   if ($found and /^\|`(\w+)`/) {
-    push @m, $1;
+    my $n = $1;
+    push @m, $n;
     push @l, $_; # for diff
-    $m->{$1} = {};
+    # TODO status per col
+    my @s = split / \| /;
+    shift @s;
+    my ($i, %hash);
+    for (@s) {
+      s/\|//g;
+      s/\s*//g;
+    }
+    %hash = map { $_ => $s[$i++] } @c;
+    if (scalar @s != scalar @c) {
+      warn "$n ",scalar @s," fields, expected ", scalar @c;
+    }
+    $m->{$n} = \%hash;
   }
-  if ($found and /^\|(\w+)/) { # older format
-    push @m, $1;
-    push @l, $_; # for diff
-    $m->{$1} = {};
-  }
+  #if ($found and /^\|(\w+)/) { # older format
+  #  push @m, $1;
+  #  push @l, $_; # for diff
+  #  $m->{$1} = {};
+  #}
 }
 close $in;
 
@@ -50,30 +67,37 @@ sub status {
   my ($status, %seen);
   while (<$in>) {
     if (/^#define FOREACH_METH/) {
-      $status = 'x';
+      $status = '✓';
     }
     elsif (/^#define FOREACH_DEBUG/) {
-      $status = '.';
+      $status = 'x';
     }
     #elsif (/^#define GENERATE_ENUM/) {
     #  close $in;
     #  return;
     #}
     elsif (/^\s+TEST\((\w+)\)/) {
-      next if $1 eq 'SELF';
-      $m->{$c}->{lc $1} = $status;
+      my $n = $1;
+      my $l = lc $n;
+      next if $n eq 'SELF';
+      warn "overwrite undefined $c.$l -" if $m->{$l}->{$c} eq '-';
+      $m->{$l}->{$c} = $status;
     }
     elsif (/^\s+case TEST_(\w+):/) {
-      $seen{lc $1}++;
+      my $l = lc $1;
+      warn "seen undefined $c.$l -" if $m->{$l}->{$c} eq '-';
+      $seen{$l}++;
     }
   }
   close $in;
   my @keys = keys %{$m->{$c}};
   foreach (@keys) {
     # check if the test case is defined or not
-    next if $m->{$c}->{$_} eq 'x';
+    next if $m->{$_}->{$c} eq '✓';
+    next if $m->{$_}->{$c} eq '-';
     if (!exists $seen{$_}) {
-      $m->{$c}->{$_} = '';
+      warn "No test yet for $c.$_ \n" if $m->{$_}->{$c} eq 'x';
+      $m->{$_}->{$c} = '';
     }
   }
 }
@@ -88,28 +112,35 @@ for (keys %long) {
 # @c: vec str arr deq list set map uset umap pqu que stk
 for my $c (@c) {
   for (qw(init init_from free equal size max_size empty)) {
-    $m->{$c}->{$_} = 'x';
+    $m->{$_}->{$c} = '✓';
   }
 }
-$m->{list}->{erase_node} = 'x';
-$m->{set}->{erase_node} = 'x';
+$m->{erase_node}->{list} = '✓';
+$m->{erase_node}->{set} = '✓';
 for my $c (qw(vec str arr deq list set map uset umap)) {
   for (qw(begin end next foreach)) {
-    $m->{$c}->{$_} = 'x';
+    $m->{$_}->{$c} = '✓';
   }
 }
 for my $c (qw(vec str arr deq list set map)) {
   for (qw(advance distance ref range foreach_range foreach_n foreach_n_range)) {
-    $m->{$c}->{$_} = 'x';
+    $m->{$_}->{$c} = '✓';
   }
   # union tests copy_range
   if ($c ne 'set' and $c ne 'map') {
-    $m->{$c}->{copy_range} = $m->{$c}->{union};
+    $m->{copy_range}->{$c} = $m->{union}->{$c};
   }
 }
 for my $c (qw(uset umap)) {
   for (qw(load_factor max_load_factor max_bucket_count bucket_size)) {
-    $m->{$c}->{$_} = 'x';
+    $m->{$_}->{$c} = '✓';
+  }
+  # undefined iter methods
+  for (qw(advance distance range foreach_range foreach_n foreach_n_range)) {
+    $m->{$_}->{$c} = '-';
+  }
+  for (@m) { # and undefined range methods
+    $m->{$_}->{$c} = '-' if /_range$/;
   }
 }
 
@@ -156,7 +187,7 @@ for (@m) {
   my $s = sprintf("|`%s`%s", $_, ' ' x $L);
   # sort methods in $m->{$c} by order in @c
   for my $c (@c) {
-    my $x = $m->{$c}->{$_};
+    my $x = $m->{$_}->{$c};
     $x = '' unless $x;
     $s .= sprintf "| %-3s", $x;
     #push @x, sprintf("| %-3s", $x);
@@ -175,15 +206,15 @@ line();
 hdr();
 
 sub update {
-  open my $in, '<', 'README.md' or die "$! README.md";
-  open my $out, '>', 'README.md.tmp' or die "$! README.md.tmp";
+  open my $in, '<:utf8', 'README.md' or die "$! README.md";
+  open my $out, '>:utf8', 'README.md.tmp' or die "$! README.md.tmp";
   $found = 0;
   while (<$in>) {
     if (!$found and /^\|       \s+\|vec\s+\|str\s+/) {
       $found++;
     }
-    #$found = 0 if /^```/;
-    $found = 0 if /^## /;
+    $found = 0 unless /^\|/;
+    # $found = 0 if /^## /;
     if ($found) {
       for (@n) {
         s/ +$//;
