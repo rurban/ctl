@@ -451,7 +451,8 @@ JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
 {
     A other = JOIN(A, init_from)(self);
 #ifdef CTL_VEC
-    JOIN(A, fit)(&other, self->size - 1);
+    if (self->size > 1)
+        JOIN(A, fit)(&other, self->size - 1);
 #endif
     foreach(A, self, i)
     {
