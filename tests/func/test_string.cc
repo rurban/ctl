@@ -933,8 +933,7 @@ main(void)
                     //LOG_range(first_a1);
                     //LOG_range(first_a2);
                     str aaa = str_intersection_range(&first_a1, &first_a2);
-                    LOG("CTL => aaa\n");
-                    //LOG(&aaa);
+                    LOG("CTL => aaa (%zu)\n", aaa.size);
 
                     std::string bbb;
                     LOG("STL b - bb\n");
@@ -943,7 +942,7 @@ main(void)
 # ifndef _MSC_VER
                     std::set_intersection(first_b1, last_b1, first_b2, last_b2,
                                           std::back_inserter(bbb));
-                    LOG("STL => bbb\n");
+                    LOG("STL => bbb (%zu)\n", bbb.size());
                     ADJUST_CAP("intersection_range", aa, bb);
                     CHECK(aa, bb);
                     ADJUST_CAP("intersection_range", aaa, bbb);

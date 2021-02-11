@@ -340,9 +340,9 @@ JOIN(A, push_back)(A* self, T value)
             self->capacity == 0 ? INIT_SIZE : 2 * self->capacity);
     self->size++;
     *JOIN(A, at)(self, self->size - 1) = value;
-//#ifdef CTL_STR
-//    self->vector[self->size] = '\0';
-//#endif
+#ifdef CTL_STR
+    self->vector[self->size] = '\0';
+#endif
 }
 
 static inline void
@@ -566,10 +566,10 @@ JOIN(A, insert_count)(I* pos, size_t count, T value)
     {
         for (size_t i=0; i < count; i++)
             JOIN(A, push_back)(self, self->copy(&value));
-#ifdef CTL_STR
-        self->vector[self->size] = '\0';
-#endif
     }
+#if defined CTL_STR
+    JOIN(A, reserve)(self, self->size);
+#endif
     FREE_VALUE(self, value);
 }
 
@@ -602,6 +602,9 @@ JOIN(A, insert_range)(I* pos, I* first2, I* last2)
             if (it.ref)
                 JOIN(A, push_back)(self, self->copy(it.ref));
     }
+#if defined CTL_STR
+    JOIN(A, reserve)(self, self->size);
+#endif
 }
 
 static inline I

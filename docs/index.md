@@ -487,10 +487,10 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`intersection`                   | ✓  | x  | x  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`symmetric_difference`           | ✓  | ✓  |    | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`union`                          | ✓  | ✓  | -  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
-|`difference_range`               | ✓  | x  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
+|`difference_range`               | ✓  | ✓  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
 |`intersection_range`             | ✓  | x  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
-|`symmetric_difference_range`     | ✓  | x  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
-|`union_range`                    | ✓  | x  | -  | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
+|`symmetric_difference_range`     | ✓  | ✓  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
+|`union_range`                    | ✓  | ✓  | -  | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
 ```
