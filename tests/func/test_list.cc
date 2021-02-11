@@ -559,7 +559,7 @@ main(void)
                 }
                 b.merge(bb);
                 list_digi_merge(&a, &aa);
-                CHECK(a, b);
+                CHECK(a, b); // failed once on windows
                 break;
             }
             case TEST_EQUAL:

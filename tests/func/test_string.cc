@@ -276,6 +276,8 @@ main(void)
             TEST(GENERATE_N) \
             TEST(TRANSFORM) \
             TEST(TRANSFORM_IT) \
+            TEST(SEARCH) \
+            TEST(SEARCH_RANGE) \
             TEST(ADJACENT_FIND) \
             TEST(ADJACENT_FIND_RANGE) \
 
@@ -1095,6 +1097,52 @@ main(void)
                     //TODO check found_a against iter results
                     assert(d1a == distance(b.begin(), pair.first));
                     assert(d2a == distance(bb.begin(), pair.second));
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_SEARCH: // using strstr
+                {
+                    str aa = str_copy(&a);
+                    std::string bb = b;
+                    str_it first_a, last_a;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
+                        size_t i = first_b - bb.begin();
+                        str_set(&aa, i, ' ');
+                        bb[i] = ' ';
+                    }
+                    LOG("search \"%s\" in \"%s\" (%zu)\n", first_a.ref, a.vector, a.size);
+                    //print_str_range(first_a);
+                    str_it found_a = str_search(&a, &first_a, &last_a);
+                    auto found_b = search(b.begin(), b.end(), first_b, last_b);
+                    LOG("found a: %s\n", str_it_done(&found_a) ? "no" : "yes");
+                    LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
+                    CHECK_ITER(found_a, b, found_b);
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_SEARCH_RANGE:
+                {
+                    str aa = str_copy(&a);
+                    std::string bb = b;
+                    str_it needle, last_a, range;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&aa, &needle, &last_a, bb, first_b, last_b);
+                    if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
+                        size_t i = first_b - bb.begin();
+                        str_set(&aa, i, ' ');
+                        bb[i] = ' ';
+                    }
+                    LOG("search \"%s\" in \"%s\" (%zu)\n", needle.ref, a.vector, a.size);
+                    //print_str_range(needle);
+                    range = str_it_begin(&a);
+                    bool found = str_search_range(&range, &needle);
+                    auto iter = search(b.begin(), b.end(), first_b, last_b);
+                    LOG("found a: %s\n", found ? "yes" : "no");
+                    LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
+                    assert(found == !str_it_done(&range));
+                    CHECK_ITER(range, b, iter);
                     str_free(&aa);
                     break;
                 }
