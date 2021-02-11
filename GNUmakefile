@@ -189,14 +189,16 @@ CBMC_CHECKS=--bounds-check --pointer-check --memory-leak-check            \
 
 tests/verify/% : tests/verify/%.c $(H)
 	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
-	-cbmc $(CBMC_CHECKS) --compact-trace --depth 6 --unwind 6 -I. $@.c
+	if which cbmc; then cbmc $(CBMC_CHECKS) --compact-trace --depth 6 \
+	                    --unwind 6 -I. $@.c; else true; fi
 tests/verify/%-2 : tests/verify/%-2.c $(H)
 	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
-	-cbmc $(CBMC_CHECKS) --compact-trace --depth 6 --unwind 6 -I. $@.c
-	-for c in `satabs --show-claims -I. $@.c | \
+	if which cbmc; then cbmc $(CBMC_CHECKS) --compact-trace --depth 6 \
+	                    --unwind 6 -I. $@.c; else true; fi
+	if which satabs; then for c in `satabs --show-claims -I. $@.c | \
                    perl -lne'/Claim (main.\d+):/ && print $$1'`; do \
              timeout 5m satabs --concurrency --max-threads 4 --iterations 24 --claim $$c -I. $@.c; \
-         done
+         done; else true; fi
 
 verify: $(VERIFY)
 
