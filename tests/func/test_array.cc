@@ -187,9 +187,7 @@ main(void)
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_RANGE) /* 35*/ \
         TEST(FIND_END) \
-        TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
-        TEST(FIND_END_IF_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \

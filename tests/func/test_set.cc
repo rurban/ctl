@@ -211,9 +211,7 @@ main(void)
         TEST(INSERT_RANGE) \
         TEST(GENERATE_RANGE) \
         TEST(FIND_END) \
-        TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
-        TEST(FIND_END_IF_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -1003,20 +1001,6 @@ main(void)
                 first_a = set_digi_find_end_range(&first_a, &last_a, &s_first_a, &s_last_a);
                 auto it = std::find_end(first_b, last_b, vb);
                 CHECK_ITER(first_a, b, it);
-                CHECK(a, b);
-# endif
-                break;
-            }
-            case TEST_FIND_END_IF_RANGE:
-            {
-                set_digi_it first_a, last_a, s_first, s_last;
-                std::set<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-# if __cpp_lib_erase_if >= 202002L
-                first_a = set_digi_find_end_if_range(&first_a, &last_a, &s_first, &s_last, digi_is_odd);
-                auto it = std::find_end(first_b, last_b, s_first_b, s_last_b, DIGI_is_odd);
-                CHECK_ITER(first_a, b, it);
-                digi_free (&key); // special
                 CHECK(a, b);
 # endif
                 break;

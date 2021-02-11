@@ -81,30 +81,6 @@ JOIN(A, find_range)(I* first, I* last, T value)
     return *last;
 }
 
-#if 0
-// args
-static inline I
-JOIN(A, find_end_range)(I* first, I* last, T value)
-{
-    I* ret = NULL;
-    A* self = first->container;
-    foreach_range(A, i, first, last)
-        if(JOIN(A, _equal)(self, i.ref, &value))
-            ret = &i;
-    return ret ? *ret : *last;
-}
-
-static inline I
-JOIN(A, find_end_if_range)(I* first, I* last, int _match(T*))
-{
-    I* ret = NULL;
-    foreach_range(A, i, first, last)
-        if(_match(i.ref))
-            ret = &i;
-    return ret ? *ret : *last;
-}
-#endif // 0
-
 static inline I
 JOIN(A, find_if_range)(I* first, I* last, int _match(T*))
 {
@@ -670,6 +646,31 @@ JOIN(A, search)(A* self, I* first2, I* last2)
     else
         return JOIN(A, end)(self);
 }
+#if 0
+static inline I
+JOIN(A, find_end_range)(I* range1, I* range2)
+{
+    A* self = range1->container;
+    if (JOIN(I, done)(range2))
+    {
+        JOIN(I, set_end)(range1);
+        return *range1;
+    }
+    I result = *range1;
+    JOIN(I, set_end)(&result);
+    while (1)
+    {
+        if (JOIN(A, search_range)(range1, range2))
+        {
+            result = *range1;
+            JOIN(I, next)(range1);
+        }
+        else
+            break;
+    }
+    return result;
+}
+#endif // 0, need set_end
 #endif // STR
 
 static inline I*
@@ -709,16 +710,6 @@ JOIN(A, find_end)(A* self, T value)
     I ret = JOIN(A, end)(self);
     foreach(A, self, i)
         if(JOIN(A, _equal)(self, i.ref, &value))
-            ret = i;
-    return ret;
-}
-
-static inline I
-JOIN(A, find_end_if)(A* self, int _match(T*))
-{
-    I ret = JOIN(A, end)(self);
-    foreach(A, self, i)
-        if(_match(i.ref))
             ret = i;
     return ret;
 }

@@ -331,9 +331,7 @@ main(void)
         TEST(TRANSFORM_RANGE) \
         TEST(TRANSFORM_IT_RANGE) \
         TEST(FIND_END) \
-        TEST(FIND_END_IF) \
         TEST(FIND_END_RANGE) \
-        TEST(FIND_END_IF_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -1398,19 +1396,6 @@ main(void)
 # if __cpp_lib_erase_if >= 202002L
                     first_a = vec_int_find_end_range(&first_a, &last_a, &s_first_a, &s_last_a);
                     auto it = find_end(first_b, last_b, vb);
-                    CHECK_ITER(first_a, b, it);
-                    CHECK(a, b);
-# endif
-                    break;
-                }
-                case TEST_FIND_END_IF_RANGE:
-                {
-                    vec_int_it first_a, last_a, s_first, s_last;
-                    std::vector<int>::iterator first_b, last_b, s_first_b, s_last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-# if __cpp_lib_erase_if >= 202002L
-                    first_a = vec_int_find_end_if_range(&first_a, &last_a, &s_first, &s_last, is_odd);
-                    auto it = find_end(first_b, last_b, s_first_b, s_last_b, stl_is_odd);
                     CHECK_ITER(first_a, b, it);
                     CHECK(a, b);
 # endif
