@@ -115,15 +115,17 @@ for my $c (@c) {
     $m->{$_}->{$c} = '✓';
   }
 }
+$m->{compare}->{str} = '✓';
+$m->{key_compare}->{str} = '✓';
 $m->{erase_node}->{list} = '✓';
 $m->{erase_node}->{set} = '✓';
 for my $c (qw(vec str arr deq list set map uset umap)) {
-  for (qw(begin end next foreach)) {
+  for (qw(begin end next foreach ref)) {
     $m->{$_}->{$c} = '✓';
   }
 }
 for my $c (qw(vec str arr deq list set map)) {
-  for (qw(advance distance ref range foreach_range foreach_n foreach_n_range)) {
+  for (qw(advance distance range foreach_range foreach_n foreach_n_range)) {
     $m->{$_}->{$c} = '✓';
   }
   # union tests copy_range

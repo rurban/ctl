@@ -291,7 +291,7 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`equal`                          | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |
 |`insert`                         | ✓  | ✓  | -  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`insert_index`                   | ✓  | ✓  | -  | ✓  | -  |    |    | -  | -  | -  | -  | -  |
-|`insert_count`                   | ✓  | ✓  | -  | ✓  | ✓  |    |    |    |    | -  | -  | -  |
+|`insert_count`                   | ✓  | ✓  | -  | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
 |`insert_range`                   | ✓  | ✓  | -  | ✓  | ✓  | x  |    | -  | -  | -  | -  | -  |
 |`insert_found`                   | -  | -  | -  | -  | -  |    |    | ✓  | ✓  | -  | -  | -  |
 |`insert_or_assign`               | -  | -  | -  | -  | -  | -  | ✓  | -  | ✓  | -  | -  | -  |
@@ -302,8 +302,8 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`bucket_size`                    | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | -  | -  | -  |
 |`rehash`                         | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | -  | -  | -  |
 |`emplace`                        | x  |    |    | ✓  | ✓  | x  |    | ✓  | x  | ✓  | -  | -  |
-|`emplace_front`                  |    |    |    | ✓  | ✓  |    |    |    |    | -  | -  | -  |
-|`emplace_back`                   | ✓  |    |    | ✓  | ✓  |    |    |    |    | -  | -  | -  |
+|`emplace_front`                  |    |    |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
+|`emplace_back`                   | ✓  |    |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
 |`emplace_hint`                   | -  | -  | -  | -  |    |    |    | ✓  | x  | -  | -  | -  |
 |`reserve`                        | ✓  | ✓  | -  | -  | -  | -  | -  | ✓  | ✓  | -  | -  | -  |
 |`find`                           | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
@@ -328,8 +328,8 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`resize`                         | ✓  | ✓  | -  | ✓  | ✓  | -  | -  |    |    | -  | -  | -  |
 |`shrink_to_fit`                  | ✓  | ✓  | -  | ✓  | -  | -  | -  |    |    | -  | -  | -  |
 |`data`                           |    |    |    | -  | -  | -  | -  | -  | -  | -  | -  | -  |
-|`splice`                         |    |    | -  |    | ✓  |    |    |    |    | -  | -  | -  |
-|`splice_it`                      |    |    | -  |    | ✓  |    |    |    |    | -  | -  | -  |
+|`splice`                         |    |    | -  |    | ✓  |    |    | -  | -  | -  | -  | -  |
+|`splice_it`                      |    |    | -  |    | ✓  |    |    | -  | -  | -  | -  | -  |
 |`splice_range`                   |    |    | -  |    | ✓  |    |    | -  | -  | -  | -  | -  |
 |`contains`                       |    |    |    |    |    | ✓  | x  | ✓  | ✓  | -  | -  | -  |
 |`append`                         |    | ✓  | -  |    |    |    |    |    |    | -  | -  | -  |
@@ -337,13 +337,13 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`replace`                        |    | ✓  |    |    |    |    |    |    |    | -  | -  | -  |
 |`c_str`                          |    | ✓  | -  | -  | -  | -  | -  | -  | -  | -  | -  | -  |
 |`find`                           | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
-|`rfind`                          | -  | ✓  |    |    |    |    |    |    |    | -  | -  | -  |
-|`find_last_of`                   |    | ✓  |    |    |    |    |    |    |    | -  | -  | -  |
-|`find_first_not_of`              |    | ✓  |    |    |    |    |    |    |    | -  | -  | -  |
-|`find_last_not_of`               |    | ✓  |    |    |    |    |    |    |    | -  | -  | -  |
+|`rfind`                          | -  | ✓  |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`find_last_of`                   |    | ✓  |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`find_first_not_of`              |    | ✓  |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`find_last_not_of`               |    | ✓  |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`substr`                         | -  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  | -  | -  |
 |`compare`                        | -  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  | -  | -  |
-|`key_compare`                    | -  |    | -  | -  | -  | -  | -  | -  | -  | -  | -  | -  |
+|`key_compare`                    | -  | ✓  | -  | -  | -  | -  |    | -  |    | -  | -  | -  |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
@@ -377,7 +377,7 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`find_range`                     | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
 |`find_if_range`                  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
 |`find_if_not_range`              | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
-|`find_end`                       | x  |    | x  | x  | x  | x  |    |    |    | -  | -  | -  |
+|`find_end`                       | x  |    | x  | x  | x  | x  |    | -  | -  | -  | -  | -  |
 |`find_end_range`                 | x  |    | x  | x  | x  | x  |    | -  | -  | -  | -  | -  |
 |`find_first_of`                  |    | ✓  |    |    |    |    |    |    |    | -  | -  | -  |
 |`find_first_of_range`            |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
@@ -385,10 +385,10 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`adjacent_find_range`            | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`search`                         | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`search_range`                   | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
-|`search_n`                       |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`search_n`                       |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`search_n_range`                 |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`copy_if`                        |    |    |    |    |    |    |    |    |    | -  | -  | -  |
 |`copy_range`                     | ✓  | ✓  | -  | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
+|`copy_if`                        |    |    |    |    |    |    |    |    |    | -  | -  | -  |
 |`copy_if_range`                  |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`copy_n`                         |    |    |    |    |    |    |    |    |    | -  | -  | -  |
 |`copy_n_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
@@ -398,9 +398,9 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`move_range`                     |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`move_backward`                  |    |    |    |    |    |    |    |    |    | -  | -  | -  |
 |`move_backward_range`            |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`fill`                           |    |    | ✓  |    |    |    |    |    |    | -  | -  | -  |
+|`fill`                           |    |    | ✓  |    |    |    |    | -  | -  | -  | -  | -  |
 |`fill_range`                     |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`fill_n`                         |    |    | ✓  |    |    |    |    |    |    | -  | -  | -  |
+|`fill_n`                         |    |    | ✓  |    |    |    |    | -  | -  | -  | -  | -  |
 |`fill_n_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`transform`                      | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | ✓  | x  | -  | -  | -  |
 |`transform_it`                   | ✓  | ✓  | ✓  | ✓  | x  | ✓  |    |    |    | -  | -  | -  |
@@ -426,38 +426,38 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`replace_copy_if_range`          |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`swap`                           | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | ✓  | ✓  | ✓  |
 |`swap_ranges`                    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`iter_swap`                      |    |    |    |    |    |    |    |    |    | -  | -  | -  |
-|`reverse`                        |    |    |    |    | ✓  |    |    |    |    | -  | -  | -  |
+|`iter_swap`                      |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`reverse`                        |    |    |    |    | ✓  |    |    | -  | -  | -  | -  | -  |
 |`reverse_range`                  |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`reverse_copy`                   |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`reverse_copy`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`reverse_copy_range`             |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`rotate`                         |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`rotate`                         |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`rotate_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`rotate_copy`                    |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`rotate_copy`                    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`rotate_copy_range`              |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`shift_left`                     |    |    |    |    |    |    |    |    |    | -  | -  | -  |
-|`shift_right`                    |    |    |    |    |    |    |    |    |    | -  | -  | -  |
-|`shuffle`                        |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`shift_left`                     |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`shift_right`                    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`shuffle`                        |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`shuffle_range`                  |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`sample`                         |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`sample`                         |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`sample_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`unique`                         |    |    |    |    | ✓  |    |    |    |    | -  | -  | -  |
+|`unique`                         |    |    |    |    | ✓  |    |    | -  | -  | -  | -  | -  |
 |`unique_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`unique_copy`                    |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`unique_copy`                    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`unique_copy_range`              |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`is_partitioned`                 |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`is_partitioned`                 |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`is_partitioned_range`           |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`partition`                      |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`partition`                      |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`partition_range`                |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`partition_copy`                 |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`partition_copy`                 |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`partition_copy_range`           |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`stable_partition`               |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`stable_partition`               |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`stable_partition_range`         |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`partition_point`                |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`partition_point`                |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`partition_point_range`          |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`is_sorted`                      |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`is_sorted`                      |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`is_sorted_range`                |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`is_sorted_until`                |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`is_sorted_until`                |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`is_sorted_until_range`          |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`sort`                           | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
 |`sort_range`                     |    |    |    | ✓  |    | -  | -  | -  | -  | -  | -  | -  |
@@ -473,7 +473,7 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`lower_bound_range`              | x  | x  | x  | x  | x  | x  |    | -  | -  | -  | -  | -  |
 |`upper_bound`                    | x  | x  | x  | x  | x  | x  |    | x  | x  | -  | -  | -  |
 |`upper_bound_range`              | x  | x  | x  | x  | x  | x  |    | -  | -  | -  | -  | -  |
-|`binary_search`                  |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`binary_search`                  |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`binary_search_range`            |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`equal_range`                    | x  | x  | x  | x  | x  | x  | x  | -  | -  | -  | -  | -  |
 |`equal_range_range`              |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
