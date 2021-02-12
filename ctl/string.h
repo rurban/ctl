@@ -159,6 +159,49 @@ str_rfind(str* self, const char* s)
     return SIZE_MAX;
 }
 
+// i.e. strcspn, but returning the first found match
+static inline bool
+str_find_first_of_range(str_it *range1, str_it* range2)
+{
+
+    if (str_it_done(range1) || str_it_done(range2))
+        return false;
+    str* self = range1->container;
+    str* other = range2->container;
+    // temp. set \0 at range1->end and range2->end.
+    // this looks expensive, but glibc is much faster than naively as below.
+    // it splits range2 into 4 parallelizable tables.
+    char e1 = 0, e2 = 0;
+    size_t off;
+    if (range1->end != &self->vector[self->size])
+    {
+        e1 = *range1->end;
+        *range1->end = '\0';
+    }
+    if (UNLIKELY(range2->end != &other->vector[other->size]))
+    {
+        e2 = *range2->end;
+        *range2->end = '\0';
+    }
+    off = strcspn(range1->ref, range2->ref);
+    if (e1)
+        *range1->end = e1;
+    if (UNLIKELY(e2))
+        *range2->end = e2;
+    size_t start1 = range1->ref - self->vector;
+    off += start1;
+    if (&self->vector[off] < range1->end)
+    {
+        range1->ref = &self->vector[off];
+        return true;
+    }
+    else
+    {
+        str_it_set_done(range1);
+        return false;
+    }
+}
+
 // see algorithm.h for the range variant
 static inline size_t
 str_find_first_of(str* self, const char* s)

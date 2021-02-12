@@ -222,7 +222,8 @@ JOIN(I, index)(I* iter)
 static inline A JOIN(A, init_from)(A* copy);
 static inline A JOIN(A, copy)(A* self);
 static inline B* JOIN(A, insert)(A* self, T key);
-    
+static inline bool JOIN(A, find_first_of_range)(I *range1, I* range2);
+
 #include <ctl/bits/container.h>
 
 static inline A
@@ -1162,6 +1163,36 @@ JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*
         //JOIN(I, next)(&dest);
     }
     return dest;
+}
+
+// i.e. strcspn, but returning the first found match
+static inline bool
+JOIN(A, find_first_of_range)(I *range1, I* range2)
+{
+    if (JOIN(I, done)(range1) || JOIN(I, done)(range2))
+        return false;
+    A* self = range1->container;
+    I it = *range2;
+    while (1)
+    {
+        I found;
+        if (JOIN(I, done)(&it))
+            goto not_found;
+        // search in set and check its range
+        found = JOIN(A, find)(self, *it.ref);
+        if (JOIN(I, done)(&found) && !self->compare(range1->ref, found.ref))
+        {
+            if (!JOIN(I, done)(range1) &&
+                !self->compare(found.ref, &range1->end->value))
+                continue;
+            *range1 = found;
+            return true;
+        }
+        JOIN(I, next)(&it);
+    }
+ not_found:
+    JOIN(I, set_done)(range1);
+    return false;
 }
 
 // TODO join (aka bulk insert)
