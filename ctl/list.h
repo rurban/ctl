@@ -513,12 +513,22 @@ JOIN(A, insert_range)(I* pos, I* first, I* last)
 {
     B* node = first->node;
     A* self = pos->container;
-    while (node != last->node)
+    if (!pos->node)
     {
-        JOIN(A, connect_before)(self, pos->node,
-            JOIN(B, init)(self->copy(&node->value)));
-        node = node->next;
+        while (node != last->node)
+        {
+            JOIN(A, connect_after)(self, self->tail,
+                JOIN(B, init)(self->copy(&node->value)));
+            node = node->next;
+        }
     }
+    else
+        while (node != last->node)
+        {
+            JOIN(A, connect_before)(self, pos->node,
+                                    JOIN(B, init)(self->copy(&node->value)));
+            node = node->next;
+        }
     if (node)
     {
         pos->node = node;

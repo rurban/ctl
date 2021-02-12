@@ -58,12 +58,19 @@ void print_setpp(std::set<DIGI>& b) {
 }
 
 #define CHECK_ITER(_it, b, _iter)                  \
-    if ((_it).node)                                \
+    if (!set_digi_it_done(&_it))                   \
     {                                              \
         assert (_iter != b.end());                 \
         assert(*(_it).ref->value == *(*_iter).value); \
     } else                                         \
         assert (_iter == b.end())
+#define CHECK_RANGE(_it, _iter, b_end)             \
+    if (!set_digi_it_done(&_it))                   \
+    {                                              \
+        assert (_iter != b_end);                   \
+        assert(*(_it).ref->value == *(*_iter).value); \
+    } else                                         \
+        assert (_iter == b_end)
 
 int random_element(set_digi* a)
 {
@@ -1025,11 +1032,12 @@ main(void)
                 set_digi aa;
                 std::set<DIGI> bb;
                 setup_sets(&aa, bb);
-                print_set(&aa);
                 set_digi_it first_a, last_a, s_first, s_last;
                 std::set<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                print_set(&a);
                 get_random_iters (&aa, &s_first, &s_last, bb, s_first_b, s_last_b);
+                print_set(&aa);
 
                 bool found_a = set_digi_find_first_of_range(&first_a, &s_first);
                 auto it = std::find_first_of(first_b, last_b, s_first_b, s_last_b);
@@ -1039,7 +1047,7 @@ main(void)
                     set_digi_it_index(&first_a),
                     distance(b.begin(), it));
                 if (found_a)
-                    assert(it == first_b);
+                    assert(it != last_b);
                 else
                     assert(it == last_b);
                 set_digi_free(&aa);

@@ -93,12 +93,19 @@ int random_element(list_digi* a)
     } else                                                        \
         assert (_iter == b.end())
 #define CHECK_ITER(_it, b, _iter)                                 \
-    if ((_it).node != NULL)                                       \
+    if (!list_digi_it_done(&_it))                                 \
     {                                                             \
         assert (_iter != b.end());                                \
         assert(*(_it).ref->value == *(*_iter).value);             \
     } else                                                        \
         assert (_iter == b.end())
+#define CHECK_RANGE(_it, _iter, b_end)                            \
+    if (!list_digi_it_done(&_it))                                 \
+    {                                                             \
+        assert (_iter != b_end);                                  \
+        assert(*(_it).ref->value == *(*_iter).value);             \
+    } else                                                        \
+        assert (_iter == b_end)
 
 static void
 setup_lists(list_digi* a, std::list<DIGI>& b, size_t size, int* max_value)
@@ -644,7 +651,7 @@ main(void)
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_it aa = list_digi_find_range(&first_a, &last_a, key);
                 auto bb = find(first_b, last_b, vb);
-                CHECK_ITER(aa, b, bb);
+                CHECK_RANGE(aa, bb, last_b);
                 digi_free (&key); // special
                 CHECK(a, b);
                 break;
@@ -720,7 +727,7 @@ main(void)
                 auto bb = find_if(first_b, last_b, DIGI_is_odd);
                 print_lst(&a);
                 print_list(b);
-                CHECK_ITER(aa, b, bb);
+                CHECK_RANGE(aa, bb, last_b);
                 break;
             }
             case TEST_FIND_IF_NOT_RANGE:
@@ -730,7 +737,7 @@ main(void)
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 list_digi_it aa = list_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
                 auto bb = find_if_not(first_b, last_b, DIGI_is_odd);
-                CHECK_ITER(aa, b, bb);
+                CHECK_RANGE(aa, bb, last_b);
                 break;
             }
             case TEST_INSERT_COUNT:
@@ -859,35 +866,34 @@ main(void)
             }
             // algorithms + ranges
             case TEST_INSERT_RANGE:
-                if (a.size > 2)
+            {
+                print_lst(&a);
+                size_t size2 = TEST_RAND(TEST_MAX_SIZE);
+                list_digi aa = list_digi_init_from(&a);
+                std::list<DIGI> bb;
+                list_digi_it first_a, last_a;
+                std::list<DIGI>::iterator first_b, last_b;
+                for(size_t pushes = 0; pushes < size2; pushes++)
                 {
-                    print_lst(&a);
-                    size_t size2 = TEST_RAND(TEST_MAX_SIZE);
-                    list_digi aa = list_digi_init_from(&a);
-                    std::list<DIGI> bb;
-                    list_digi_it first_a, last_a;
-                    std::list<DIGI>::iterator first_b, last_b;
-                    for(size_t pushes = 0; pushes < size2; pushes++)
-                    {
-                        const int value = TEST_RAND(TEST_MAX_VALUE);
-                        list_digi_push_back(&aa, digi_init(value));
-                        bb.push_back(DIGI{value});
-                    }
-                    print_lst(&aa);
-                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
-                    const size_t index = TEST_RAND(a.size);
-                    list_digi_it pos = list_digi_begin(&a);
-                    list_digi_it_advance(&pos, index);
-                    auto it = b.begin();
-                    advance(it, index);
-                    b.insert(it, first_b, last_b);
-                    list_digi_insert_range(&pos, &first_a, &last_a);
-                    print_lst(&a);
-                    print_list(b);
-                    CHECK(a, b);
-                    list_digi_free(&aa);
+                    const int value = TEST_RAND(TEST_MAX_VALUE);
+                    list_digi_push_back(&aa, digi_init(value));
+                    bb.push_back(DIGI{value});
                 }
+                print_lst(&aa);
+                get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                const size_t index = TEST_RAND(a.size);
+                list_digi_it pos = list_digi_begin(&a);
+                list_digi_it_advance(&pos, index);
+                auto it = b.begin();
+                advance(it, index);
+                b.insert(it, first_b, last_b);
+                list_digi_insert_range(&pos, &first_a, &last_a);
+                print_lst(&a);
+                print_list(b);
+                CHECK(a, b);
+                list_digi_free(&aa);
                 break;
+            }
             case TEST_ERASE_RANGE:
                 if (a.size)
                 {
@@ -1323,7 +1329,7 @@ main(void)
                     //bb.resize(dist);
                     auto iter = std::transform(first_b, last_b, b.begin()++, bb.begin(),
                                                DIGI_bintrans);
-                    CHECK_ITER(it, bb, iter);
+                    CHECK_RANGE(it, iter, last_b);
                     CHECK(aa, bb);
                     // heap use-after-free
                     CHECK(a, b);
@@ -1372,12 +1378,12 @@ main(void)
                         }
                         *first_b = DIGI{0};
                     }
-                    //print_vec_range(first_a);
+                    //print_lst_range(first_a);
                     list_digi_it found_a = list_digi_search(&a, &first_a, &last_a);
                     auto found_b = search(b.begin(), b.end(), first_b, last_b);
                     LOG("found a: %s\n", list_digi_it_done(&found_a) ? "no" : "yes");
                     LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
-                    CHECK_ITER(found_a, b, found_b);
+                    CHECK_RANGE(found_a, found_b, b.end());
                     list_digi_free(&aa);
                     break;
                 }
@@ -1403,7 +1409,7 @@ main(void)
                     LOG("found a: %s\n", found ? "yes" : "no");
                     LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
                     assert(found == !list_digi_it_done(&range));
-                    CHECK_ITER(range, b, iter);
+                    CHECK_RANGE(range, iter, b.end());
                     list_digi_free(&aa);
                     break;
                 }
@@ -1424,12 +1430,12 @@ main(void)
                     //print_vec_range(range);
                     list_digi_it *aa = list_digi_adjacent_find_range(&range);
                     auto bb = adjacent_find(first_b, last_b);
-                    CHECK_ITER(*aa, b, bb);
+                    CHECK_RANGE(*aa, bb, last_b);
                     LOG("found %s\n", list_digi_it_done(aa) ? "no" : "yes");
                     break;
                 }
 #ifdef DEBUG
-                case TEST_FIND_FIRST_OF: // 67
+                case TEST_FIND_FIRST_OF: // 68
                 {
                     list_digi aa;
                     std::list<DIGI> bb;
@@ -1446,12 +1452,14 @@ main(void)
                     print_lst(&aa);
                     list_digi_it it = list_digi_find_first_of(&a, &range2);
                     auto iter = std::find_first_of(b.begin(), b.end(), bb.begin(), bb_last);
-                    LOG("=> %s/%s, %ld/%ld\n",
+                    LOG("=> %s/%s, %ld/%ld: %d/%d\n",
                         !list_digi_it_done(&it) ? "yes" : "no",
                         iter != b.end() ? "yes" : "no",
                         list_digi_it_index(&it),
-                        distance(b.begin(), iter));
-                    CHECK_ITER(it, b, iter);
+                        distance(b.begin(), iter),
+                        !list_digi_it_done(&it) ? *it.ref->value : -1,
+                        iter != b.end() ? *iter->value : -1);
+                    CHECK_RANGE(it, iter, b.end());
                     list_digi_free(&aa);
                     break;
                 }
@@ -1460,11 +1468,12 @@ main(void)
                     list_digi aa;
                     std::list<DIGI> bb;
                     setup_lists(&aa, bb, TEST_RAND(5), NULL);
-                    print_lst(&aa);
                     list_digi_it first_a, last_a, s_first, s_last;
                     std::list<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    print_lst(&a);
                     get_random_iters (&aa, &s_first, &s_last, bb, s_first_b, s_last_b);
+                    print_lst(&aa);
 
                     bool found_a = list_digi_find_first_of_range(&first_a, &s_first);
                     auto it = std::find_first_of(first_b, last_b, s_first_b, s_last_b);
@@ -1474,7 +1483,7 @@ main(void)
                         list_digi_it_index(&first_a),
                         distance(b.begin(), it));
                     if (found_a)
-                        assert(it == first_b);
+                        assert(it != last_b);
                     else
                         assert(it == last_b);
                     //CHECK_RANGE(first_a, it, last_b);
@@ -1510,7 +1519,7 @@ main(void)
 # if __cpp_lib_erase_if >= 202002L
                     first_a = list_digi_find_end_range(&first_a, &s_first);
                     auto it = std::find_end(first_b, last_b, bb.begin(), bb.end());
-                    CHECK_ITER(first_a, b, it);
+                    CHECK_RANGE(first_a, it, last_b);
 # endif
                     list_digi_free(&aa);
                     break;
@@ -1524,7 +1533,7 @@ main(void)
                     int median = *it.ref->value;
                     list_digi_it aa = list_digi_lower_bound(&a, digi_init(median));
                     auto bb = lower_bound(b.begin(), b.end(), DIGI{median});
-                    CHECK_ITER(aa, b, bb);
+                    CHECK_RANGE(aa, bb, b.end());
                     break;
                 }
                 case TEST_UPPER_BOUND:
@@ -1534,7 +1543,7 @@ main(void)
                     int median = *it.ref->value;
                     list_digi_it aa = list_digi_upper_bound(&a, digi_init(median));
                     auto bb = upper_bound(b.begin(), b.end(), DIGI{median});
-                    CHECK_ITER(aa, b, bb);
+                    CHECK_RANGE(aa, bb, b.end());
                     break;
                 }
                 /**/case TEST_LOWER_BOUND_RANGE:
