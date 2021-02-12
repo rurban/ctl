@@ -303,14 +303,16 @@ main(void)
         TEST(SEARCH_RANGE) \
         TEST(ADJACENT_FIND) \
         TEST(ADJACENT_FIND_RANGE) \
+        TEST(FIND_FIRST_OF_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 56 */ \
+        TEST(EMPLACE) /* 57 */ \
         TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_RANGE) \
         TEST(TRANSFORM_IT_RANGE) \
+        TEST(FIND_FIRST_OF) \
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
         TEST(LOWER_BOUND) \
@@ -1370,6 +1372,47 @@ main(void)
                     //TODO check found_a against iter results
                     assert(d1a == distance(b.begin(), pair.first));
                     assert(d2a == distance(bb.begin(), pair.second));
+                    vec_digi_free(&aa);
+                    break;
+                }
+#ifdef DEBUG
+                case TEST_FIND_FIRST_OF:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(15));
+                    vec_digi_it range2 = vec_digi_begin(&aa);
+                    vec_digi_it it = vec_digi_find_first_of(&a, &range2);
+                    auto iter = std::find_first_of(b.begin(), b.end(), bb.begin(), bb.end());
+                    print_vec(&a);
+                    print_vec(&aa);
+                    LOG("=> %zu vs %ld\n", vec_digi_it_index(&it), iter-b.begin());
+                    CHECK_ITER(it, b, iter);
+                    vec_digi_free(&aa);
+                    break;
+                }
+#endif // DEBUG
+                case TEST_FIND_FIRST_OF_RANGE:
+                {
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(15));
+                    vec_digi_it first_a, last_a, s_first, s_last;
+                    std::vector<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&aa, &s_first, &s_last, bb, s_first_b, s_last_b);
+
+                    bool found_a = vec_digi_find_first_of_range(&first_a, &s_first);
+                    auto it = std::find_first_of(first_b, last_b, s_first_b, s_last_b);
+                    LOG("=> %s/%s, %ld/%ld\n",
+                        found_a ? "yes" : "no",
+                        it != last_b ? "yes" : "no",
+                        first_a.ref - a.vector,
+                        it - b.begin());
+                    if (found_a)
+                        assert(it == first_b);
+                    else
+                        assert(it == last_b);
                     vec_digi_free(&aa);
                     break;
                 }

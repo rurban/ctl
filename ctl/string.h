@@ -159,23 +159,29 @@ str_rfind(str* self, const char* s)
     return SIZE_MAX;
 }
 
+// see algorithm.h for the range variant
 static inline size_t
 str_find_first_of(str* self, const char* s)
 {
+#if 1
+    size_t i = strcspn(self->vector, s);
+    return i >= self->size ? SIZE_MAX : i;
+#else
     for(size_t i = 0; i < self->size; i++)
-    for(const char* p = s; *p; p++)
-        if(self->vector[i] == *p)
-            return i;
+        for(const char* p = s; *p; p++)
+            if(self->vector[i] == *p)
+                return i;
     return SIZE_MAX;
+#endif
 }
 
 static inline size_t
 str_find_last_of(str* self, const char* s)
 {
     for(size_t i = self->size; i != SIZE_MAX; i--)
-    for(const char* p = s; *p; p++)
-        if(self->vector[i] == *p)
-            return i;
+        for(const char* p = s; *p; p++)
+            if(self->vector[i] == *p)
+                return i;
     return SIZE_MAX;
 }
 

@@ -192,7 +192,7 @@ main(void)
         if(str_size < MIN_STR_SIZE)
             str_size = MIN_STR_SIZE;
 #if defined(DEBUG) && !defined(LONG)
-        //str_size = 2; short strings for certain methods
+        str_size = 15; // short strings for certain methods
 #endif
         enum
         {
@@ -246,6 +246,7 @@ main(void)
             TEST(FIND) \
             TEST(RFIND) \
             TEST(FIND_FIRST_OF) \
+            TEST(FIND_FIRST_OF_RANGE) \
             TEST(FIND_LAST_OF) \
             TEST(FIND_FIRST_NOT_OF) \
             TEST(FIND_LAST_NOT_OF) \
@@ -282,7 +283,7 @@ main(void)
             TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-            TEST(EQUAL_RANGE) /* 56 */ \
+            TEST(EQUAL_RANGE) /* 57 */ \
             TEST(INTERSECTION) \
             TEST(INTERSECTION_RANGE) \
             TEST(GENERATE_N_RANGE) \
@@ -360,7 +361,7 @@ main(void)
                 }
                 case TEST_FIND:
                 {
-                    const size_t size = TEST_RAND(3);
+                    const size_t size = TEST_RAND(4);
                     char* temp = create_test_string(size);
                     assert(str_find(&a, temp) == b.find(temp));
                     free(temp);
@@ -375,10 +376,41 @@ main(void)
                 }
                 case TEST_FIND_FIRST_OF:
                 {
-                    const size_t size = TEST_RAND(3);
+                    const size_t size = TEST_RAND(4);
                     char* temp = create_test_string(size);
-                    assert(str_find_first_of(&a, temp) == b.find_first_of(temp));
+                    LOG("str_find_first_of(\"%s\", \"%s\')\n", a.vector, temp);
+                    size_t aa = str_find_first_of(&a, temp);
+                    size_t bb = b.find_first_of(temp);
+                    LOG("=> %zu vs %zu\n", aa, bb);
+                    assert(aa == bb);
                     free(temp);
+                    break;
+                }
+                case TEST_FIND_FIRST_OF_RANGE:
+                {
+                    const size_t size = TEST_RAND(4);
+                    char* temp = create_test_string(size);
+                    str_it first_a, last_a, range2;
+                    std::string bb = temp;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    str aa = str_init(temp);
+                    free(temp);
+                    range2 = str_it_begin(&aa);
+                    LOG("str_find_first_of_range(\"%.*s\", [%s])\n", (int)(last_b-first_b),
+                        first_a.ref, temp);
+                    bool found_a = str_find_first_of_range(&first_a, &range2);
+                    auto it = std::find_first_of(first_b, last_b, bb.begin(), bb.end());
+                    LOG("=> %s/%s, %ld/%ld\n",
+                        found_a ? "yes" : "no",
+                        it != last_b ? "yes" : "no",
+                        first_a.ref - a.vector,
+                        it - first_b);
+                    if (found_a)
+                        assert(*it == *first_a.ref);
+                    else
+                        assert(it == last_b);
+                    str_free(&aa);
                     break;
                 }
                 case TEST_FIND_LAST_OF:

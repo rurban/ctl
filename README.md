@@ -385,8 +385,8 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`find_if_not_range`              | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
 |`find_end`                       | x  |    | x  | x  | x  | x  |    | -  | -  | -  | -  | -  |
 |`find_end_range`                 | x  |    | x  | x  | x  | x  |    | -  | -  | -  | -  | -  |
-|`find_first_of`                  |    | ✓  |    |    |    |    |    |    |    | -  | -  | -  |
-|`find_first_of_range`            |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`find_first_of`                  | x  | ✓  |    |    |    |    |    |    |    | -  | -  | -  |
+|`find_first_of_range`            | ✓  | x  |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`adjacent_find`                  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`adjacent_find_range`            | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`search`                         | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |

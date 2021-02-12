@@ -608,6 +608,79 @@ JOIN(A, count_if)(A* self, int _match(T*))
 //#endif // STR
 
 
+// i.e. strcspn, but returning the first found match
+static inline bool
+JOIN(A, find_first_of_range)(I *range1, I* range2)
+{
+
+    if (JOIN(I, done)(range1) || JOIN(I, done)(range2))
+        return false;
+    A* self = range1->container;
+
+#ifdef CTL_STR // and if range2 is a CTL_STR
+    A* other = range2->container;
+    // temp. set \0 at range1->end and range2->end.
+    // this looks expensive, but glibc is much faster than naively as below.
+    // it splits range2 into 4 parallelizable tables.
+    char e1 = 0, e2 = 0;
+    size_t off;
+    if (range1->end != &self->vector[self->size])
+    {
+        e1 = *range1->end;
+        *range1->end = '\0';
+    }
+    if (UNLIKELY(range2->end != &other->vector[other->size]))
+    {
+        e2 = *range2->end;
+        *range2->end = '\0';
+    }
+    off = strcspn(range1->ref, range2->ref);
+    if (e1)
+        *range1->end = e1;
+    if (UNLIKELY(e2))
+        *range2->end = e2;
+    size_t start1 = range1->ref - self->vector;
+    off += start1;
+    if (&self->vector[off] < range1->end)
+    {
+        range1->ref = &self->vector[off];
+        return true;
+    }
+    else
+    {
+        JOIN(I, set_done)(range1);
+        return false;
+    }
+#else
+    for (; ; JOIN(I, next)(range1))
+    {
+        // TODO unroll it into slices of 4, as strcspn does
+        for (I it = *range2; ; JOIN(I, next)(&it))
+        {
+            if (JOIN(I, done)(&it))
+                goto not_found;
+            if (JOIN(A, _equal)(self, range1->ref, it.ref))
+                return true;
+        }
+    }
+ not_found:
+    JOIN(I, set_done)(range1);
+    return false;
+#endif
+}
+
+#ifndef CTL_STR
+static inline I
+JOIN(A, find_first_of)(A* self, I* range2)
+{
+    I begin = JOIN(A, begin)(self);
+    if (JOIN(A, find_first_of_range)(&begin, range2))
+        return begin;
+    else
+        return JOIN(A, end)(self);
+}
+#endif // STR
+
 // Sets range1 (the haystack) to the found pointer if found.
 // Naive r1*r2 cost, no Boyer-Moore yet.
 static inline bool
