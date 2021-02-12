@@ -1429,8 +1429,6 @@ main(void)
                     bool found_b = iter != b.end();
                     CHECK_ITER(it, b, iter);
                     assert(found_a == found_b);
-                    if(found_a && found_b)
-                        assert(*(it.ref->value) == *iter->value);
                     vec_digi_free(&aa);
                     break;
                 }
@@ -1451,7 +1449,7 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#endif // 0
+#endif // DEBUG
             default:
                 fail++;
 #ifdef DEBUG

@@ -182,10 +182,12 @@ main(void)
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) \
         TEST(DIFFERENCE) \
-        TEST(SYMETRIC_DIFFERENCE) \
+        TEST(SYMMETRIC_DIFFERENCE) /* 36*/ \
         TEST(INTERSECTION) \
         TEST(GENERATE_N_RANGE) \
-        TEST(TRANSFORM_RANGE) /* 35*/ \
+        TEST(TRANSFORM_RANGE) /* 39 */ \
+        TEST(FIND_FIRST_OF) \
+        TEST(FIND_FIRST_OF_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
         TEST(LOWER_BOUND) \
@@ -674,6 +676,61 @@ main(void)
                 arr100_digi_free(&aa);
                 break;
             }
+#ifdef DEBUG
+            case TEST_FIND_FIRST_OF:
+            {
+                print_arr100(&a);
+                arr100_digi aa;
+                std::array<DIGI,100> bb;
+                for (int i=0; i<N; i++)
+                {
+                    int value = TEST_RAND(TEST_MAX_VALUE);
+                    bb[i] = DIGI{value};
+                    aa.vector[i] = digi_init(value);
+                }
+                arr100_digi_it s_first, s_last;
+                std::array<DIGI,100>::iterator s_first_b, s_last_b;
+                get_random_iters (&aa, &s_first, &s_last, bb, s_first_b, s_last_b);
+                arr100_digi_it it = arr100_digi_find_first_of(&a, &s_first);
+                auto iter = std::find_first_of(b.begin(), b.end(), s_first_b, s_last_b);
+                print_arr100(&aa);
+                LOG("=> %zu vs %ld\n", arr100_digi_it_index(&it), iter-b.begin());
+                CHECK_ITER(it, b, iter);
+                arr100_digi_free(&aa);
+                break;
+            }
+            case TEST_FIND_FIRST_OF_RANGE:
+            {
+                arr100_digi aa;
+                std::array<DIGI,100> bb;
+                for (int i=0; i<N; i++)
+                {
+                    int value = TEST_RAND(TEST_MAX_VALUE);
+                    bb[i] = DIGI{value};
+                    aa.vector[i] = digi_init(value);
+                }
+                arr100_digi_it first_a, last_a, s_first, s_last;
+                std::array<DIGI,100>::iterator first_b, last_b, s_first_b, s_last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                print_arr100(&a);
+                get_random_iters (&aa, &s_first, &s_last, bb, s_first_b, s_last_b);
+                print_arr100(&aa);
+
+                bool found_a = arr100_digi_find_first_of_range(&first_a, &s_first);
+                auto it = std::find_first_of(first_b, last_b, s_first_b, s_last_b);
+                LOG("=> %s/%s, %ld/%ld\n",
+                    found_a ? "yes" : "no",
+                    it != last_b ? "yes" : "no",
+                    first_a.ref - a.vector,
+                    it - b.begin());
+                if (found_a)
+                    assert(it == first_b);
+                else
+                    assert(it == last_b);
+                arr100_digi_free(&aa);
+                break;
+            }
+#endif // DEBUG
 #ifdef DEBUG
             case TEST_LOWER_BOUND:
             {

@@ -251,10 +251,12 @@ main(void)
         TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EQUAL_RANGE) /* 63 */ \
+        TEST(EQUAL_RANGE) /* 64 */ \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
+        TEST(FIND_FIRST_OF) \
+        TEST(FIND_FIRST_OF_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
         TEST(LOWER_BOUND) \
@@ -1427,6 +1429,94 @@ main(void)
                     break;
                 }
 #ifdef DEBUG
+                case TEST_FIND_FIRST_OF: // 67
+                {
+                    list_digi aa;
+                    std::list<DIGI> bb;
+                    setup_lists(&aa, bb, TEST_RAND(5), NULL);
+                    std::list<DIGI>::iterator bb_last = bb.end();
+                    list_digi_it range2 = list_digi_begin(&aa);
+                    if (list_digi_it_index(&range2) + 5 < aa.size) {
+                        list_digi_it_advance_end(&range2, 5);
+                        bb_last = bb.begin();
+                        std::advance(bb_last, 5);
+                    }
+                    print_lst(&a);
+                    LOG("bb_last: %ld\n", std::distance(bb.begin(), bb_last));
+                    print_lst(&aa);
+                    list_digi_it it = list_digi_find_first_of(&a, &range2);
+                    auto iter = std::find_first_of(b.begin(), b.end(), bb.begin(), bb_last);
+                    LOG("=> %s/%s, %ld/%ld\n",
+                        !list_digi_it_done(&it) ? "yes" : "no",
+                        iter != b.end() ? "yes" : "no",
+                        list_digi_it_index(&it),
+                        distance(b.begin(), iter));
+                    CHECK_ITER(it, b, iter);
+                    list_digi_free(&aa);
+                    break;
+                }
+                case TEST_FIND_FIRST_OF_RANGE:
+                {
+                    list_digi aa;
+                    std::list<DIGI> bb;
+                    setup_lists(&aa, bb, TEST_RAND(5), NULL);
+                    print_lst(&aa);
+                    list_digi_it first_a, last_a, s_first, s_last;
+                    std::list<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&aa, &s_first, &s_last, bb, s_first_b, s_last_b);
+
+                    bool found_a = list_digi_find_first_of_range(&first_a, &s_first);
+                    auto it = std::find_first_of(first_b, last_b, s_first_b, s_last_b);
+                    LOG("=> %s/%s, %ld/%ld\n",
+                        found_a ? "yes" : "no",
+                        it != last_b ? "yes" : "no",
+                        list_digi_it_index(&first_a),
+                        distance(b.begin(), it));
+                    if (found_a)
+                        assert(it == first_b);
+                    else
+                        assert(it == last_b);
+                    //CHECK_RANGE(first_a, it, last_b);
+                    list_digi_free(&aa);
+                    break;
+                }
+                case TEST_FIND_END:
+                {
+                    list_digi aa;
+                    std::list<DIGI> bb;
+                    setup_lists(&aa, bb, TEST_RAND(5), NULL);
+                    print_lst(&aa);
+                    list_digi_it s_first = list_digi_begin(&aa);
+                    list_digi_it it = list_digi_find_end(&a, &s_first);
+                    auto iter = std::find_end(b.begin(), b.end(), bb.begin(), bb.end());
+                    bool found_a = !list_digi_it_done(&it);
+                    bool found_b = iter != b.end();
+                    CHECK_ITER(it, b, iter);
+                    assert(found_a == found_b);
+                    list_digi_free(&aa);
+                    break;
+                }
+                case TEST_FIND_END_RANGE:
+                {
+                    list_digi_it first_a, last_a, s_first;
+                    std::list<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    list_digi aa;
+                    std::list<DIGI> bb;
+                    setup_lists(&aa, bb, TEST_RAND(5), NULL);
+                    print_lst(&aa);
+                    s_first = list_digi_begin(&aa);
+# if __cpp_lib_erase_if >= 202002L
+                    first_a = list_digi_find_end_range(&first_a, &s_first);
+                    auto it = std::find_end(first_b, last_b, bb.begin(), bb.end());
+                    CHECK_ITER(first_a, b, it);
+# endif
+                    list_digi_free(&aa);
+                    break;
+                }
+#endif // DEBUG
+#ifdef DEBUG
                 case TEST_LOWER_BOUND: // 64
                 {
                     list_digi_it it = list_digi_begin(&a);
@@ -1456,36 +1546,6 @@ main(void)
                     break;
                 }
 #endif // DEBUG
-#if 0
-                case TEST_FIND_END:
-                {
-                    if(a.size > 0)
-                    {
-                        list_digi_it first_a, last_a;
-                        list_digi_it aa = list_digi_find_end(&a, &s_first, &s_last);
-                        auto bb = find_end(b.begin(), b.end(), ...);
-                        bool found_a = !list_digi_it_done(&aa);
-                        bool found_b = bb != b.end();
-                        assert(found_a == found_b);
-                        if(found_a && found_b)
-                            assert(*(aa->value) == *bb->value);
-                    }
-                    break;
-                }
-                case TEST_FIND_END_RANGE:
-                {
-                    list_digi_it first_a, last_a, s_first, s_last;
-                    std::list<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-# if __cpp_lib_erase_if >= 202002L
-                    first_a = list_digi_find_end_range(&first_a, &last_a, &s_first_a, &s_last_a);
-                    auto it = find_end(first_b, last_b, vb);
-                    CHECK_ITER(first_a, b, it);
-                    CHECK(a, b);
-# endif
-                    break;
-                }
-#endif // 0
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);
