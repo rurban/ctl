@@ -675,12 +675,7 @@ main(void)
                 LOG("%d\n", aa.node == last_a.node ? -1 : *aa.ref->value);
                 print_setpp(b);
                 LOG("vs %d\n", bb == last_b ? -1 : *bb->value);
-                if (set_digi_it_done(&aa))
-                {
-                    assert(bb == last_b);
-                }
-                else
-                    CHECK_ITER(aa, b, bb);
+                CHECK_RANGE(aa, bb, last_b);
                 digi_free (&key); // special
                 CHECK(a, b);
                 break;
@@ -695,14 +690,12 @@ main(void)
                 print_set(&a);
                 print_setpp(b);
                 if (set_digi_it_done(&aa))
-                {
                     assert(bb == last_b);
-                }
                 else
                 {
                     LOG("%d\n", *aa.ref->value);
                     LOG("vs %d\n", *bb->value);
-                    CHECK_ITER(aa, b, bb);
+                    CHECK_RANGE(aa, bb, last_b);
                 }
                 break;
             }
@@ -714,11 +707,9 @@ main(void)
                 set_digi_it aa = set_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
                 auto bb = find_if_not(first_b, last_b, DIGIc_is_odd);
                 if (set_digi_it_done(&aa))
-                {
                     assert(bb == last_b);
-                }
                 else
-                    CHECK_ITER(aa, b, bb);
+                    CHECK_RANGE(aa, bb, last_b);
                 break;
             }
             case TEST_ERASE_RANGE:
@@ -872,11 +863,11 @@ main(void)
                 set_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
                 print_set(&aa);
                 std::set<DIGI> bb;
-                /*auto iter =*/
+                /*auto iter = */
                 std::transform(first_b, last_b, std::inserter(bb, bb.begin()),
                                DIGI_untrans);
                 print_setpp(bb);
-                //CHECK_ITER(it, bb, iter);
+                //CHECK_RANGE(it, iter, last_b);
                 CHECK(aa, bb);
                 CHECK(a, b);
                 set_digi_free(&aa);
@@ -903,7 +894,7 @@ main(void)
                 std::transform(first_b, last_b, it2,
                                std::inserter(bb, bb.begin()), DIGI_bintrans);
                 print_setpp(bb);
-                //CHECK_ITER(it, bb, iter);
+                //CHECK_RANGE(it, iter, last_b);
                 CHECK(aa, bb);
                 CHECK(a, b);
                 set_digi_free(&aa);
@@ -996,7 +987,7 @@ main(void)
                 get_random_iters (&a, &range, &last_a, b, first_b, last_b);
                 set_digi_it *aa = set_digi_adjacent_find_range(&range);
                 auto bb = adjacent_find(first_b, last_b);
-                CHECK_ITER(*aa, b, bb);
+                CHECK_RANGE(*aa, bb, last_b);
                 LOG("found %s\n", set_digi_it_done(aa) ? "no" : "yes");
                 break;
             }
@@ -1084,7 +1075,7 @@ main(void)
 # if __cpp_lib_erase_if >= 202002L
                 first_a = set_digi_find_end_range(&first_a, &s_first);
                 auto it = find_end(first_b, last_b, bb.begin(), bb.end());
-                CHECK_ITER(first_a, b, it);
+                CHECK_RANGE(first_a, it, last_b);
 # endif
                 set_digi_free(&aa);
                 break;
