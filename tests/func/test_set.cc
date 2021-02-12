@@ -6,8 +6,10 @@ OLD_MAIN
 
 #include "digi.hh"
 
+// see if 3-way compare can disrupt us
+// diable for now, breaks find_range, and is much slower than lower_than compare
 static inline int
-digi_key_compare(digi* a, digi* b)
+digi_3way_compare(digi* a, digi* b)
 {
     return (*a->value == *b->value) ? 0 : (*a->value < *b->value) ? -1 : 1;
 }
@@ -72,7 +74,7 @@ void print_setpp(std::set<DIGI>& b) {
     } else                                         \
         assert (_iter == b_end)
 
-int random_element(set_digi* a)
+int pick_element(set_digi* a)
 {
 #if 1
     if (!a->size)
@@ -147,7 +149,7 @@ static void
 setup_sets(set_digi* a, std::set<DIGI>& b)
 {
     size_t iters = TEST_RAND(TEST_MAX_SIZE);
-    *a = set_digi_init(digi_key_compare);
+    *a = set_digi_init(digi_compare);
     a->equal = digi_equal;
     for(size_t inserts = 0; inserts < iters; inserts++)
     {
@@ -228,7 +230,7 @@ main(void)
         TEST(FIND_FIRST_OF) \
         TEST(FIND_FIRST_OF_RANGE) \
         TEST(FIND_END) \
-        TEST(FIND_END_RANGE) \
+        TEST(FIND_END_RANGE) /* 54 looks ok*/   \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -404,7 +406,7 @@ main(void)
             case TEST_SWAP:
             {
                 set_digi aa = set_digi_copy(&a);
-                set_digi aaa = set_digi_init(digi_key_compare);
+                set_digi aaa = set_digi_init(digi_compare);
                 std::set<DIGI> bb = b;
                 std::set<DIGI> bbb;
                 set_digi_swap(&aaa, &aa);
@@ -660,22 +662,26 @@ main(void)
                 CHECK_ITER(aa, b, bb);
                 break;
             }
-            case TEST_FIND_RANGE:
+            case TEST_FIND_RANGE: // 29
             {
                 int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
-                                      : random_element(&a);
+                                      : pick_element(&a);
                 digi key = digi_init(vb);
                 set_digi_it first_a, last_a;
                 std::set<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                LOG("find %d\n", vb);
-                set_digi_it aa = set_digi_find_range(&first_a, &last_a, key);
-                auto bb = find(first_b, last_b, vb);
+                LOG("find_range %d\n", vb);
                 print_set(&a);
-                LOG("%d\n", aa.node == last_a.node ? -1 : *aa.ref->value);
-                print_setpp(b);
+                bool found_a = set_digi_find_range(&first_a, key);
+                auto bb = find(first_b, last_b, vb);
+                LOG("%d\n", first_a.node == last_a.node ? -1 : *first_a.ref->value);
+                //print_setpp(b);
                 LOG("vs %d\n", bb == last_b ? -1 : *bb->value);
-                CHECK_RANGE(aa, bb, last_b);
+                if (found_a)
+                    assert(bb != last_b);
+                else
+                    assert(bb == last_b);
+                CHECK_RANGE(first_a, bb, last_b);
                 digi_free (&key); // special
                 CHECK(a, b);
                 break;
@@ -857,7 +863,7 @@ main(void)
                 set_digi_it first_a, last_a;
                 std::set<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                set_digi aa = set_digi_init(digi_key_compare);
+                set_digi aa = set_digi_init(digi_compare);
                 set_digi_it dest = set_digi_begin(&aa);
                 /*set_digi_it it = */
                 set_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
@@ -884,7 +890,7 @@ main(void)
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                 set_digi_it pos = set_digi_begin(&a);
                 set_digi_it_advance(&pos, 1);
-                set_digi aa = set_digi_init(digi_key_compare);
+                set_digi aa = set_digi_init(digi_compare);
                 set_digi_it dest = set_digi_begin(&aa);
                 set_digi_transform_it_range(&first_a, &last_a, &pos, dest, digi_bintrans);
                 print_set(&aa);

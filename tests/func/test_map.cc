@@ -240,12 +240,8 @@ main(void)
             case TEST_ERASE_IF:
             {
 #if __cpp_lib_erase_if >= 202002L
-                auto is_odd = [](auto const& d) {
-                    auto const& [k,v] = d;
-                    return v % 2;
-                };
-                size_t a_erases = map_strint_erase_if(&a, strint_is_odd);
-                size_t b_erases = std::erase_if(b, is_odd);
+                size_t a_erases = map_strint_erase_if(&a, strint_isupper);
+                size_t b_erases = std::erase_if(b, STRINT_isupper);
                 assert(a_erases == b_erases);
                 CHECK(a, b);
 #endif

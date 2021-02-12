@@ -69,6 +69,13 @@ OLD_MAIN
         assert(*(aa).ref == *bb);                    \
     } else                                           \
         assert (bb == b.end())
+#define CHECK_RANGE(_it, _iter, b_end)                            \
+    if (!str_it_done(&_it))                                       \
+    {                                                             \
+        assert (_iter != b_end);                                  \
+        assert(*(_it).ref == *_iter);                             \
+    } else                                                        \
+        assert (_iter == b_end)
 
 #define RAND_CHAR   ('0' + TEST_RAND('z' - '0'))
 #define RAND_ALPHA  ((TEST_RAND(2) ? 'a' : 'A') + TEST_RAND(ALPHA_LETTERS))
@@ -646,16 +653,19 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-                // wrong range end condition. ref == last is already too late.
                 case TEST_FIND_RANGE:
                 {
                     const char c = RAND_CHAR;
                     str_it first_a, last_a;
                     std::string::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    first_a = str_find_range(&first_a, &last_a, c);
+                    bool found_a = str_find_range(&first_a, c);
                     auto bb = std::find(first_b, last_b, c);
-                    CHECK_ITER(first_a, b, bb);
+                    if (found_a)
+                        assert(bb != last_b);
+                    else
+                        assert(bb == last_b);
+                    CHECK_RANGE(first_a, bb, last_b);
                     CHECK(a, b);
                     break;
                 }

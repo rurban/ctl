@@ -649,9 +649,13 @@ main(void)
                 list_digi_it first_a, last_a;
                 std::list<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                list_digi_it aa = list_digi_find_range(&first_a, &last_a, key);
-                auto bb = find(first_b, last_b, vb);
-                CHECK_RANGE(aa, bb, last_b);
+                bool found_a = list_digi_find_range(&first_a, key);
+                auto it = find(first_b, last_b, vb);
+                if (found_a)
+                    assert(it != last_b);
+                else
+                    assert(it == last_b);
+                CHECK_RANGE(first_a, it, last_b);
                 digi_free (&key); // special
                 CHECK(a, b);
                 break;

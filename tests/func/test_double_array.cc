@@ -97,6 +97,13 @@ int random_element(arr20_double* a)
         assert(*_it.ref == *_iter);                               \
     } else                                                        \
         assert (_iter == b.end())
+#define CHECK_RANGE(_it, _iter, b_end)                            \
+    if (!arr20_double_it_done(&_it))                              \
+    {                                                             \
+        assert (_iter != b_end);                                  \
+        assert(*(_it).ref == *_iter);                             \
+    } else                                                        \
+        assert (_iter == b_end)
 
 static void
 get_random_iters (arr20_double *a, arr20_double_it *first_a, arr20_double_it *last_a,
@@ -386,9 +393,13 @@ main(void)
                 arr20_double_it first_a, last_a;
                 std::array<double,20>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                arr20_double_it i = arr20_double_find_range(&first_a, &last_a, vb);
+                bool found_a = arr20_double_find_range(&first_a, vb);
                 auto it = std::find(first_b, last_b, vb);
-                CHECK_ITER(i, b, it);
+                if (found_a)
+                    assert(it != last_b);
+                else
+                    assert(it == last_b);
+                CHECK_RANGE(first_a, it, last_b);
                 CHECK(a, b);
                 break;
             }

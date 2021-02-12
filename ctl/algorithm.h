@@ -69,17 +69,24 @@ JOIN(A, none_of)(A* self, int _match(T*))
 
 #include <stdbool.h>
 
-#ifndef CTL_USET // no ranges
+#if !defined CTL_USET && !defined CTL_SET
 
-static inline I
-JOIN(A, find_range)(I* first, I* last, T value)
+static inline bool
+JOIN(A, find_range)(I* range, T value)
 {
-    A* self = first->container;
-    foreach_range(A, i, first, last)
+    A* self = range->container;
+    foreach_range_(A, i, range)
         if(JOIN(A, _equal)(self, i.ref, &value))
-            return i;
-    return *last;
+        {
+            *range = i;
+            return true;
+        }
+    JOIN(I, set_done)(range);
+    return false;
 }
+
+#endif // USET, SET
+#if !defined CTL_USET
 
 static inline I
 JOIN(A, find_if_range)(I* first, I* last, int _match(T*))
@@ -879,12 +886,6 @@ JOIN(A, upper_bound_range)(I* first, I* last, T value)
 #endif // DEBUG
 
 // TODO:
-// find_first_of
-// find_first_of_range C++20
-// adjacent_find
-// adjacent_find_range C++20
-// search
-// search_range C++20
 // search_n
 // search_n_range C++20
 // copy_if C++11

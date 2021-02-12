@@ -158,6 +158,13 @@ int random_element(vec_int* a)
         assert(*(_it).ref == *_iter);                             \
     } else                                                        \
         assert (_iter == b.end())
+#define CHECK_RANGE(_it, _iter, b_end)                            \
+    if (!vec_int_it_done(&_it))                                   \
+    {                                                             \
+        assert (_iter != b_end);                                  \
+        assert(*(_it).ref == *_iter);                             \
+    } else                                                        \
+        assert (_iter == b_end)
 
 static void
 gen_vectors(vec_int* a, std::vector<int>& b, size_t size)
@@ -680,9 +687,13 @@ main(void)
                     vec_int_it first_a, last_a;
                     std::vector<int>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    first_a = vec_int_find_range(&first_a, &last_a, vb);
+                    bool found_a = vec_int_find_range(&first_a, vb);
                     auto it = find(first_b, last_b, vb);
-                    CHECK_ITER(first_a, b, it);
+                    if (found_a)
+                        assert(it != last_b);
+                    else
+                        assert(it == last_b);
+                    CHECK_RANGE(first_a, it, last_b);
                     CHECK(a, b);
                     break;
                 }

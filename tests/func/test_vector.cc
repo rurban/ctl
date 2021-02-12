@@ -133,6 +133,13 @@ int random_element(vec_digi* a)
         assert(*((_it).ref->value) == *(*_iter).value);           \
     } else                                                        \
         assert (_iter == b.end())
+#define CHECK_RANGE(_it, _iter, b_end)                            \
+    if (!vec_digi_it_done(&(_it)))                                \
+    {                                                             \
+        assert (_iter != b_end);                                  \
+        assert(*((_it).ref->value) == *(*_iter).value);           \
+    } else                                                        \
+        assert (_iter == b_end)
 
 #define CHECK_REF(_ref, b, _iter)                                 \
     if (_iter != b.end())                                         \
@@ -666,9 +673,13 @@ main(void)
                     vec_digi_it first_a, last_a;
                     std::vector<DIGI>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    first_a = vec_digi_find_range(&first_a, &last_a, key);
+                    bool found_a = vec_digi_find_range(&first_a, key);
                     auto it = find(first_b, last_b, vb);
-                    CHECK_ITER(first_a, b, it);
+                    if (found_a)
+                        assert(it != last_b);
+                    else
+                        assert(it == last_b);
+                    CHECK_RANGE(first_a, it, last_b);
                     digi_free (&key); // special
                     CHECK(a, b);
                     break;

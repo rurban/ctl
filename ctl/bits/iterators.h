@@ -83,6 +83,10 @@
     JOIN(JOIN(A, it), range)(&pos, last);                           \
     for(; !JOIN(JOIN(A, it), done)(&pos);                           \
         JOIN(JOIN(A, it), next)(&pos))
+#define foreach_range_(A, pos, first)                               \
+    JOIN(A, it) pos = *first;                                       \
+    for(; !JOIN(JOIN(A, it), done)(&pos);                           \
+        JOIN(JOIN(A, it), next)(&pos))
 
 #define foreach_n(A, self, pos, n)                                  \
     JOIN(A, it) pos = JOIN(A, begin)(self);                         \

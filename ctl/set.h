@@ -12,6 +12,7 @@
 #define B JOIN(A, node)
 #define I JOIN(A, it)
 
+#include <stdbool.h>
 #include <ctl/ctl.h>
 #include <ctl/bits/iterators.h>
 
@@ -349,6 +350,7 @@ JOIN(A, find_node)(A* self, T key)
     return NULL;
 }
 
+// interestingly there's no find_range, even if we need one for find_first_of_range
 static inline I
 JOIN(A, find)(A* self, T key)
 {
@@ -357,6 +359,28 @@ JOIN(A, find)(A* self, T key)
         return JOIN(I, iter)(self, node);
     else
         return JOIN(A, end)(self);
+}
+
+static inline bool
+JOIN(A, find_range)(I* range, T key)
+{
+    A* self = range->container;
+    I found = JOIN(A, find)(self, key);
+    // found and range.begin <= found
+    if (!JOIN(I, done)(&found) && !self->compare(found.ref, range->ref))
+    {
+        // no, if not found < range.end
+        if (!self->compare(found.ref, &range->end->value))
+            goto not_found;
+        *range = found;
+        return true;
+    }
+    else
+    {
+    not_found:
+        JOIN(I, set_done)(range);
+        return false;
+    }
 }
 
 static inline int

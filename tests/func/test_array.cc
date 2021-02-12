@@ -70,6 +70,13 @@ int random_element(arr100_digi* a)
         assert(*((_it).ref->value) == *(*_iter).value);           \
     } else                                                        \
         assert (_iter == b.end())
+#define CHECK_RANGE(_it, _iter, b_end)                            \
+    if (!arr100_digi_it_done(&_it))                               \
+    {                                                             \
+        assert (_iter != b_end);                                  \
+        assert(*(_it).ref->value == *(*_iter).value);             \
+    } else                                                        \
+        assert (_iter == b_end)
 
 #define CHECK_REF(_ref, b, _iter)                                 \
     if (_iter != b.end())                                         \
@@ -318,10 +325,14 @@ main(void)
                 arr100_digi_it first_a, last_a;
                 std::array<DIGI,100>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                arr100_digi_it i = arr100_digi_find_range(&first_a, &last_a, key);
+                bool found_a = arr100_digi_find_range(&first_a, key);
                 auto it = std::find(first_b, last_b, vb);
-                LOG("%d at [%ld]\n", *i.ref->value, i.ref - a.vector);
-                CHECK_ITER(i, b, it); // broken
+                LOG("%d at [%ld]\n", *first_a.ref->value, first_a.ref - a.vector);
+                if (found_a)
+                    assert(it != last_b);
+                else
+                    assert(it == last_b);
+                CHECK_RANGE(first_a, it, last_b);
                 digi_free (&key); // special
                 CHECK(a, b);
                 break;
@@ -336,7 +347,7 @@ main(void)
                 print_arr100(&a);
                 print_array(b);
                 LOG("%d at [%ld]\n", *i.ref->value, i.ref - a.vector);
-                CHECK_ITER(i, b, it);
+                CHECK_RANGE(i, it, last_b);
                 break;
             }
             case TEST_FIND_IF_NOT_RANGE:
@@ -347,7 +358,7 @@ main(void)
                 arr100_digi_it i = arr100_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
                 auto it = std::find_if_not(first_b, last_b, DIGI_is_odd);
                 LOG("%d at [%ld]\n", *i.ref->value, i.ref - a.vector);
-                CHECK_ITER(i, b, it);
+                CHECK_RANGE(i, it, last_b);
                 break;
             }
             case TEST_ALL_OF_RANGE:
@@ -574,7 +585,8 @@ main(void)
                 arr100_digi_it it = arr100_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
                 std::array<DIGI,100> bb;
                 auto iter = std::transform(first_b, last_b, b.begin()+1, bb.begin(), DIGI_bintrans);
-                CHECK_ITER(it, bb, iter);
+                CHECK_RANGE(it, iter, last_b);
+                //CHECK_ITER(it, bb, iter);
                 CHECK(aa, bb);
                 // heap use-after-free
                 CHECK(a, b);
@@ -627,7 +639,8 @@ main(void)
                 print_arr100(&a);
                 arr100_digi_it *aa = arr100_digi_adjacent_find_range(&range);
                 auto bb = std::adjacent_find(first_b, last_b);
-                CHECK_ITER(*aa, b, bb);
+                CHECK_RANGE(*aa, bb, last_b);
+                //CHECK_ITER(*aa, b, bb);
                 LOG("found %s\n", arr100_digi_it_done(aa) ? "no" : "yes");
                 break;
             }
@@ -649,7 +662,7 @@ main(void)
                 auto found_b = std::search(b.begin(), b.end(), first_b, last_b);
                 LOG("found a: %s\n", arr100_digi_it_done(&found_a) ? "no" : "yes");
                 LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
-                CHECK_ITER(found_a, b, found_b);
+                CHECK_RANGE(found_a, found_b, b.end());
                 arr100_digi_free(&aa);
                 break;
             }
@@ -672,6 +685,10 @@ main(void)
                 LOG("found a: %s\n", found ? "yes" : "no");
                 LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
                 assert(found == !arr100_digi_it_done(&range));
+                if (found)
+                    assert(iter != b.end());
+                else
+                    assert(iter == b.end());
                 CHECK_ITER(range, b, iter);
                 arr100_digi_free(&aa);
                 break;
@@ -724,9 +741,10 @@ main(void)
                     first_a.ref - a.vector,
                     it - b.begin());
                 if (found_a)
-                    assert(it == first_b);
+                    assert(it != last_b);
                 else
                     assert(it == last_b);
+                CHECK_RANGE(first_a, it, last_b);
                 arr100_digi_free(&aa);
                 break;
             }

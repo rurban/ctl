@@ -176,6 +176,12 @@ returns the number of elements matching specific key.
 finds element with specific key. does not consume/delete the key.
 see above the problem with a simple 2-way compare method.
 
+    bool find_range (I* range, T key)
+
+finds element in range, and sets range to the found element or the end.
+it does not iterate over the range, but checks if the found element is within
+the range.
+
     bool contains (A* self, T key)
 
 checks if the container contains an element with specific key. (C++20)

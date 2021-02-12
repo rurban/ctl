@@ -82,22 +82,23 @@ finds if and the first position where two ranges differ.
     I find (A* self, T* value)
     I find_if (A* self, int _match(T*))
     I find_if_not (A* self, int _match(T*)) (C++11)
-    I find_range (I* first, I* last, T value) (C++20)
+    bool find_range (I* range, T value) (C++20)
     I find_if_range (I* first, I* last, int _match(T*)) (C++20)
     I find_if_not_range (I* first, I* last, int _match(T*)) (C++20)
  
-finds the first element satisfying specific criteria. Returns a fresh iterator
-I. Does not consume/free the T key.
+finds the first element satisfying specific criteria. 
+Many functions return a fresh iterator I, `find_range` sets range to the found element.
+Does not consume/free the T value.
 
     I find_end
     I find_end_range (C++20)
  
-finds the last sequence of elements in a certain range. _(NYI)_
+finds the last sequence of elements in a certain range.
 
-    I find_first_of
-    I find_first_of_range (C++20)
+    I find_first_of (A* self, I* range2)
+    bool find_first_of_range (I* range1, I* range2) (C++20)
  
-searches for any one of a set of elements. _(NYI)_
+searches for any one of a set of elements.
 
     I  adjacent_find (A* self)
     I* adjacent_find_range (I* range) (C++20)
