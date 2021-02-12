@@ -38,11 +38,11 @@ Some iterators advance on linked nodes (_"B iters"_), some others on value
 refs (_"T iters"_). The deque additionally holds the `index`, the unordered_set
 the `next` and `buckets` pointer.
 
-We don't support **output iterators**, like `back_inserter` or `inserter` yet.
+We don't fully support **output iterators**, like `back_inserter` or `inserter` yet.
 They are currently only defined for `transform_range` and `transform_it_range`,
 which are not enabled yet, and problematic for `set`.
 
-Also we don't support `reverse_iterator` via `I prev` yet.
+Also we don't fully support `reverse_iterator` via `I prev` yet.
 
 ## Iterators
 
@@ -81,7 +81,25 @@ algorithm iterators on ranges, as they make no sense for unordered containers.
 
 returns the value reference.
 
-TODO: prev
+    set_done (I* iter)
+
+sets the end so its done.
+
+    set_end (I* iter, I* last)
+
+sets the end field from the current position in last.
+
+    I* advance_end (I* iter, long i)
+
+Advance the end position.
+
+    I iter (I* iter, size_t index/B* node)
+
+Creates a new iterator at the initial position.
+
+    size_t index (I* iter)
+
+Returns the distance from begin.
 
 # Performance
 

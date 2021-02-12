@@ -222,6 +222,14 @@ JOIN(I, advance)(I* iter, long i)
     return iter;
 }
 
+// advance end only (*_n algos)
+static inline void
+JOIN(I, advance_end)(I* iter, long n)
+{
+    (void)iter; // ignore ranges
+    (void)n; // ignore ranges
+}
+
 static inline T*
 JOIN(B, ref)(B* node)
 {
@@ -234,6 +242,26 @@ JOIN(I, range)(I* begin, I* end)
 {
     (void) begin;
     (void) end;
+}
+
+static inline void
+JOIN(I, set_end)(I* iter, I* last)
+{
+    (void)iter; // ignore ranges
+    (void)last; // ignore ranges
+}
+
+static inline void
+JOIN(I, set_done)(I* iter)
+{
+    iter->node = NULL;
+}
+
+// ignore
+static inline void
+JOIN(I, prev)(I* iter)
+{
+    (void)iter;
 }
 
 /*

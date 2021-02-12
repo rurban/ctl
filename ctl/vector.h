@@ -124,6 +124,12 @@ JOIN(I, done)(I* iter)
 }
 
 static inline void
+JOIN(I, set_done)(I* iter)
+{
+    iter->ref = iter->end;
+}
+
+static inline void
 JOIN(I, next)(I* iter)
 {
     iter->ref++;
@@ -139,6 +145,12 @@ static inline void
 JOIN(I, range)(I* first, I* last)
 {
     last->end = first->end = last->ref;
+}
+
+static inline void
+JOIN(I, set_end)(I* iter, I* last)
+{
+    iter->end = last->ref;
 }
 
 static inline I*

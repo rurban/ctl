@@ -607,6 +607,7 @@ JOIN(A, count_if)(A* self, int _match(T*))
 }
 //#endif // STR
 
+
 // Sets range1 (the haystack) to the found pointer if found.
 // Naive r1*r2 cost, no Boyer-Moore yet.
 static inline bool
@@ -660,6 +661,7 @@ JOIN(A, search)(A* self, I* first2, I* last2)
     else
         return JOIN(A, end)(self);
 }
+
 #if 0
 static inline I
 JOIN(A, find_end_range)(I* range1, I* range2)

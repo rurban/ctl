@@ -104,9 +104,32 @@ JOIN(I, next)(I* iter)
 }
 
 static inline void
+JOIN(I, prev)(I* iter)
+{
+    if (LIKELY(iter->node))
+    {
+        iter->node = iter->node->prev;
+        if (iter->node)
+            iter->ref = &iter->node->value;
+    }
+}
+
+static inline void
 JOIN(I, range)(I* first, I* last)
 {
     last->end = first->end = last->node;
+}
+
+static inline void
+JOIN(I, set_done)(I* iter)
+{
+    iter->node = iter->end;
+}
+
+static inline void
+JOIN(I, set_end)(I* iter, I* last)
+{
+    iter->end = last->node;
 }
 
 static inline T*
@@ -160,6 +183,13 @@ JOIN(I, distance)(I* iter, I* other)
         return d;
     // other before self, negative result. in STL undefined
     return -1L;
+}
+
+static inline size_t
+JOIN(I, index)(I* iter)
+{
+    I begin = JOIN(A, begin)(iter->container);
+    return (size_t)JOIN(I, distance)(&begin, iter);
 }
 
 static inline void

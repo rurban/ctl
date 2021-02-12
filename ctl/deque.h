@@ -170,6 +170,12 @@ JOIN(I, done)(I* iter)
 }
 
 static inline void
+JOIN(I, set_done)(I* iter)
+{
+    iter->index = iter->end;
+}
+
+static inline void
 JOIN(I, next)(I* iter)
 {
     iter->index++;
@@ -178,9 +184,25 @@ JOIN(I, next)(I* iter)
 }
 
 static inline void
+JOIN(I, prev)(I* iter)
+{
+    if (iter->index)
+    {
+        iter->index--;
+        iter->ref = JOIN(A, at)(iter->container, iter->index);
+    }
+}
+
+static inline void
 JOIN(I, range)(I* first, I* last)
 {
     last->end = first->end = last->index;
+}
+
+static inline void
+JOIN(I, set_end)(I* iter, I* last)
+{
+    iter->end = last->index;
 }
 
 static inline I*

@@ -134,15 +134,33 @@ JOIN(I, done)(I* iter)
 }
 
 static inline void
+JOIN(I, set_done)(I* iter)
+{
+    iter->ref = iter->end;
+}
+
+static inline void
 JOIN(I, next)(I* iter)
 {
     iter->ref++;
 }
 
 static inline void
+JOIN(I, prev)(I* iter)
+{
+    iter->ref--;
+}
+
+static inline void
 JOIN(I, range)(I* first, I* last)
 {
     last->end = first->end = last->ref;
+}
+
+static inline void
+JOIN(I, set_end)(I* iter, I* last)
+{
+    iter->end = last->ref;
 }
 
 static inline I*
@@ -155,6 +173,15 @@ JOIN(I, advance)(I* iter, long i)
     else
         iter->ref += i;
     return iter;
+}
+
+// advance end only (*_n algos)
+static inline void
+JOIN(I, advance_end)(I* iter, long n)
+{
+    if(iter->ref + n <= iter->end &&
+       iter->ref + n >= JOIN(A, front)(iter->container))
+        iter->end += n;
 }
 
 static inline long
