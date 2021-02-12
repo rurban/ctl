@@ -38,7 +38,7 @@ while (<$in>) {
     my $n = $1;
     push @m, $n;
     push @l, $_; # for diff
-    # TODO status per col
+    # status per col
     my @s = split / \| /;
     shift @s;
     my ($i, %hash);

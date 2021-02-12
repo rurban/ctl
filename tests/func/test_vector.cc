@@ -1416,33 +1416,39 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#if 0
+#ifdef DEBUG
                 case TEST_FIND_END:
                 {
-                    if(a.size > 0)
-                    {
-                        vec_digi_it first_a, last_a;
-                        vec_digi_it aa = vec_digi_find_end(&a, &s_first, &s_last);
-                        auto bb = find_end(b.begin(), b.end(), ...);
-                        bool found_a = !vec_digi_it_done(&aa);
-                        bool found_b = bb != b.end();
-                        assert(found_a == found_b);
-                        if(found_a && found_b)
-                            assert(*(aa->value) == *bb->value);
-                    }
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(4));
+                    vec_digi_it s_first = vec_digi_begin(&aa);
+                    vec_digi_it it = vec_digi_find_end(&a, &s_first);
+                    auto iter = find_end(b.begin(), b.end(), bb.begin(), bb.end());
+                    bool found_a = !vec_digi_it_done(&it);
+                    bool found_b = iter != b.end();
+                    CHECK_ITER(it, b, iter);
+                    assert(found_a == found_b);
+                    if(found_a && found_b)
+                        assert(*(it.ref->value) == *iter->value);
+                    vec_digi_free(&aa);
                     break;
                 }
                 case TEST_FIND_END_RANGE:
                 {
-                    vec_digi_it first_a, last_a, s_first, s_last;
-                    std::vector<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
+                    vec_digi_it first_a, last_a, s_first;
+                    std::vector<DIGI>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    vec_digi aa;
+                    std::vector<DIGI> bb;
+                    gen_vectors(&aa, bb, TEST_RAND(4));
+                    s_first = vec_digi_begin(&aa);
 # if __cpp_lib_erase_if >= 202002L
-                    first_a = vec_digi_find_end_range(&first_a, &last_a, &s_first_a, &s_last_a);
-                    auto it = find_end(first_b, last_b, vb);
+                    first_a = vec_digi_find_end_range(&first_a, &s_first);
+                    auto it = find_end(first_b, last_b, bb.begin(), bb.end());
                     CHECK_ITER(first_a, b, it);
-                    CHECK(a, b);
 # endif
+                    vec_digi_free(&aa);
                     break;
                 }
 #endif // 0

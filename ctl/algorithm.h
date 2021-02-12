@@ -735,18 +735,17 @@ JOIN(A, search)(A* self, I* first2, I* last2)
         return JOIN(A, end)(self);
 }
 
-#if 0
+#ifdef DEBUG
 static inline I
 JOIN(A, find_end_range)(I* range1, I* range2)
 {
-    A* self = range1->container;
     if (JOIN(I, done)(range2))
     {
-        JOIN(I, set_end)(range1);
+        JOIN(I, set_done)(range1);
         return *range1;
     }
     I result = *range1;
-    JOIN(I, set_end)(&result);
+    JOIN(I, set_done)(&result);
     while (1)
     {
         if (JOIN(A, search_range)(range1, range2))
@@ -759,7 +758,17 @@ JOIN(A, find_end_range)(I* range1, I* range2)
     }
     return result;
 }
-#endif // 0, needs set_end
+
+static inline I
+JOIN(A, find_end)(A* self, I* s_range)
+{
+    I begin = JOIN(A, begin)(self);
+    if (JOIN(A, search_range)(&begin, s_range))
+        return begin;
+    else
+        return JOIN(A, end)(self);
+}
+#endif // DEBUG
 
 static inline I*
 JOIN(A, adjacent_find_range)(I *range)
@@ -790,17 +799,6 @@ JOIN(A, adjacent_find)(A *self)
 }
 
 #ifdef DEBUG
-
-// TODO not for value but matching range
-static inline I
-JOIN(A, find_end)(A* self, T value)
-{
-    I ret = JOIN(A, end)(self);
-    foreach(A, self, i)
-        if(JOIN(A, _equal)(self, i.ref, &value))
-            ret = i;
-    return ret;
-}
 
 #if !defined(CTL_USET) && !defined(CTL_STR)
 // API? 3rd arg should be an iter, not a value
