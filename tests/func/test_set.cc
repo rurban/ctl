@@ -177,10 +177,12 @@ main(void)
         TEST(SELF) \
         TEST(INSERT) \
         TEST(INSERT_FOUND) \
+        TEST(INSERT_RANGE) \
         TEST(ERASE) \
         TEST(REMOVE_IF) \
         TEST(ERASE_IF) \
         TEST(ERASE_IT) \
+        TEST(ERASE_RANGE) \
         TEST(CLEAR) \
         TEST(SWAP) \
         TEST(COUNT) \
@@ -206,7 +208,6 @@ main(void)
         TEST(FIND_RANGE) \
         TEST(FIND_IF_RANGE) \
         TEST(FIND_IF_NOT_RANGE) \
-        TEST(ERASE_RANGE) \
         TEST(GENERATE) \
         TEST(GENERATE_N) \
         TEST(GENERATE_N_RANGE) \
@@ -224,8 +225,7 @@ main(void)
         TEST(FIND_END_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 48 */ \
-        TEST(INSERT_RANGE) \
+        TEST(EMPLACE) /* 49 */ \
         TEST(EXTRACT) \
         TEST(MERGE) \
         TEST(EQUAL_RANGE) \
@@ -296,9 +296,9 @@ main(void)
                 assert(*node->value.value == *pair.first->value);
                 break;
             }
-#ifdef DEBUG
             case TEST_INSERT_RANGE:
             {
+                print_set(&a);
                 set_digi aa = set_digi_init_from(&a);
                 std::set<DIGI> bb;
                 for (int i=0; i < TEST_RAND(25); i++)
@@ -311,7 +311,7 @@ main(void)
                 std::set<DIGI>::iterator first_b, last_b;
                 get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
 
-                set_digi_insert_range(&a, &first_a, &last_a);
+                set_digi_insert_range(&a, &first_a);
                 b.insert(first_b, last_b);
                 print_set(&a);
                 print_setpp(b);
@@ -319,7 +319,6 @@ main(void)
                 CHECK(a, b);
                 break;
             }
-#endif
             case TEST_ERASE:
             {
                 const size_t erases = TEST_RAND(TEST_MAX_SIZE) / 4;

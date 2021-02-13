@@ -1071,13 +1071,15 @@ JOIN(A, inserter)(A* self, B* node, T *value)
 }
 
 static inline void
-JOIN(A, insert_range)(A* self, I* first, I* last)
+JOIN(A, insert_range)(A* self, I* range)
 {
-    B* node = first->node;
-    while (node != last->node)
+    B* node = range->node;
+    while (node != range->end)
     {
+        // we save next in case the range iterator is from the same container,
+        // even if then insert will never succeed.
         B* next = JOIN(B, next)(node);
-        JOIN(A, insert)(self, node->value);
+        JOIN(A, insert)(self, self->copy(&node->value));
         node = next;
     }
 }

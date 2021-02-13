@@ -128,8 +128,10 @@ returns the maximum possible number of elements, hard-coded to 2GB (32bit).
 clears the contents
 
     B* insert (A* self, T value)
+    B* insert_found (A* self, T value, int *foundp)
+    insert_range (A* self, I* range)
 
-inserts the element. (C++17)
+inserts the element(s). (C++17)
 
     emplace (A* self, T* value)
 
