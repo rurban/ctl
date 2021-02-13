@@ -106,10 +106,11 @@ int random_element(arr20_double* a)
         assert (_iter == b_end)
 
 static void
-get_random_iters (arr20_double *a, arr20_double_it *first_a, arr20_double_it *last_a,
+get_random_iters (arr20_double *a, arr20_double_it *first_a,
                   std::array<double,20>& b, std::array<double,20>::iterator &first_b,
                   std::array<double,20>::iterator &last_b)
 {
+    arr20_double_it last_a;
     size_t r1 = TEST_RAND(N / 2);
     const size_t rnd = TEST_RAND(N / 2);
     size_t r2 = MIN(r1 + rnd, N);
@@ -124,32 +125,33 @@ get_random_iters (arr20_double *a, arr20_double_it *first_a, arr20_double_it *la
 
         if (r1 == r2)
         {
-            *last_a = it1;
+            last_a = it1;
             last_b = first_b;
         }
         else if (r2 == N)
         {
-            *last_a = arr20_double_end(a);
+            last_a = arr20_double_end(a);
             last_b = b.end();
         }
         else
         {
             arr20_double_it it2 = arr20_double_begin(a);
             arr20_double_it_advance(&it2, r2);
-            *last_a = it2;
+            last_a = it2;
             last_b = b.begin();
             last_b += r2;
         }
-        first_a->end = last_a->ref;
+        first_a->end = last_a.ref;
     }
     else
     {
         arr20_double_it end = arr20_double_end (a);
         *first_a = end;
-        *last_a = end;
+        last_a = end;
         first_b = b.begin();
         last_b = b.end();
     }
+    first_a->end = last_a.ref;
 }
 
 int
@@ -390,9 +392,9 @@ main(void)
             case TEST_FIND_RANGE:
             {
                 int vb = TEST_RAND(2) ? rand() * 1.0 : random_element(&a);
-                arr20_double_it first_a, last_a;
+                arr20_double_it first_a;
                 std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 bool found_a = arr20_double_find_range(&first_a, vb);
                 auto it = std::find(first_b, last_b, vb);
                 if (found_a)
@@ -405,10 +407,10 @@ main(void)
             }
             case TEST_FIND_IF_RANGE:
             {
-                arr20_double_it first_a, last_a;
+                arr20_double_it first_a;
                 std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                arr20_double_it i = arr20_double_find_if_range(&first_a, &last_a, double_is_odd);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                arr20_double_it i = arr20_double_find_if_range(&first_a, double_is_odd);
                 auto it = std::find_if(first_b, last_b, DOUBLE_is_odd);
                 print_arr20(&a);
                 print_array(b);
@@ -417,10 +419,10 @@ main(void)
             }
             case TEST_FIND_IF_NOT_RANGE:
             {
-                arr20_double_it first_a, last_a;
+                arr20_double_it first_a;
                 std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                arr20_double_it i = arr20_double_find_if_not_range(&first_a, &last_a,
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                arr20_double_it i = arr20_double_find_if_not_range(&first_a,
                                                                          double_is_odd);
                 auto it = std::find_if_not(first_b, last_b, DOUBLE_is_odd);
                 CHECK_ITER(i, b, it);
@@ -428,10 +430,10 @@ main(void)
             }
             case TEST_ALL_OF_RANGE:
             {
-                arr20_double_it first_a, last_a;
+                arr20_double_it first_a;
                 std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = arr20_double_all_of_range(&first_a, &last_a,
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                bool aa = arr20_double_all_of_range(&first_a,
                                                        double_is_odd);
                 bool bb = std::all_of(first_b, last_b, DOUBLE_is_odd);
                 if (aa != bb)
@@ -445,10 +447,10 @@ main(void)
             }
             case TEST_NONE_OF_RANGE:
             {
-                arr20_double_it first_a, last_a;
+                arr20_double_it first_a;
                 std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = arr20_double_none_of_range(&first_a, &last_a,
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                bool aa = arr20_double_none_of_range(&first_a,
                                                         double_is_odd);
                 bool bb = std::none_of(first_b, last_b, DOUBLE_is_odd);
                 if (aa != bb)
@@ -462,10 +464,10 @@ main(void)
             }
             case TEST_COUNT_IF_RANGE:
             {
-                arr20_double_it first_a, last_a;
+                arr20_double_it first_a;
                 std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                size_t numa = arr20_double_count_if_range(&first_a, &last_a,
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                size_t numa = arr20_double_count_if_range(&first_a,
                                                          double_is_odd);
                 size_t numb = std::count_if(first_b, last_b, DOUBLE_is_odd);
                 if (numa != numb)
@@ -481,21 +483,21 @@ main(void)
             case TEST_COUNT_RANGE:
             {
                 double v = TEST_RAND(2) ? rand() * 1.0 : 0.0;
-                arr20_double_it first_a, last_a;
+                arr20_double_it first_a;
                 std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 // used to fail with 0,0 of 0
-                size_t numa = arr20_double_count_range(&first_a, &last_a, v);
+                size_t numa = arr20_double_count_range(&first_a, v);
                 size_t numb = std::count(first_b, last_b, double{v});
                 assert(numa == numb);
                 break;
             }
             case TEST_ANY_OF_RANGE:
             {
-                arr20_double_it first_a, last_a;
+                arr20_double_it first_a;
                 std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = arr20_double_any_of_range(&first_a, &last_a,
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                bool aa = arr20_double_any_of_range(&first_a,
                                                        double_is_odd);
                 bool bb = std::any_of(first_b, last_b, DOUBLE_is_odd);
                 if (aa != bb)
@@ -519,11 +521,11 @@ main(void)
             }
             case TEST_GENERATE_RANGE:
             {
-                arr20_double_it first_a, last_a;
+                arr20_double_it first_a;
                 std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 double_generate_reset();
-                arr20_double_generate_range(&first_a, &last_a, double_generate);
+                arr20_double_generate_range(&first_a, double_generate);
                 double_generate_reset();
                 std::generate(first_b, last_b, double_generate);
                 CHECK(a, b);
@@ -547,9 +549,9 @@ main(void)
             }
             case TEST_GENERATE_N_RANGE:
             {
-                arr20_double_it first_a, last_a;
+                arr20_double_it first_a;
                 std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 size_t off = first_b - b.begin();
                 size_t count = TEST_RAND(20 - off);
                 double_generate_reset();
@@ -573,12 +575,12 @@ main(void)
             }
             case TEST_TRANSFORM_RANGE:
             {
-                arr20_double_it first_a, last_a;
+                arr20_double_it first_a;
                 std::array<double,20>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 arr20_double aa = arr20_double_init();
                 arr20_double_it dest = arr20_double_begin(&aa);
-                arr20_double_it it = arr20_double_transform_range(&first_a, &last_a, dest, double_untrans);
+                arr20_double_it it = arr20_double_transform_range(&first_a, dest, double_untrans);
                 std::array<double,20> bb;
                 auto iter = std::transform(b.begin(), b.end(), b.begin()+1, bb.begin(), DOUBLE_bintrans);
                 CHECK_ITER(it, bb, iter);

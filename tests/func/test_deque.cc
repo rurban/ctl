@@ -36,6 +36,7 @@ void print_deque(std::deque<DIGI> &b)
 }
 
 #ifdef DEBUG
+#undef TEST_MAX_SIZE
 #define TEST_MAX_SIZE 15
 #define TEST_MAX_VALUE 1000
 #else
@@ -135,10 +136,11 @@ int random_element(deq_digi* a)
 }
 
 static void
-get_random_iters (deq_digi *a, deq_digi_it* first_a, deq_digi_it* last_a,
+get_random_iters (deq_digi *a, deq_digi_it* first_a,
                   std::deque<DIGI>& b, std::deque<DIGI>::iterator &first_b,
                   std::deque<DIGI>::iterator &last_b)
 {
+    deq_digi_it last_a;
     size_t r1 = TEST_RAND(a->size / 2);
     const size_t rnd = TEST_RAND(a->size / 2);
     size_t r2 = MIN(r1 + rnd, a->size);
@@ -153,12 +155,12 @@ get_random_iters (deq_digi *a, deq_digi_it* first_a, deq_digi_it* last_a,
 
         if (r1 == r2)
         {
-            *last_a = it1;
+            last_a = it1;
             last_b = first_b;
         }
         else if (r2 == a->size)
         {
-            *last_a = deq_digi_end(a);
+            last_a = deq_digi_end(a);
             last_b = b.end();
         }
         else
@@ -167,18 +169,18 @@ get_random_iters (deq_digi *a, deq_digi_it* first_a, deq_digi_it* last_a,
             last_b = b.begin();
             deq_digi_it_advance(&it2, r2);
             last_b += r2;
-            *last_a = it2;
+            last_a = it2;
         }
     }
     else
     {
         deq_digi_it end = deq_digi_end(a);
         *first_a = end;
-        *last_a = end;
+        last_a = end;
         first_b = b.begin();
         last_b = b.end();
     }
-    first_a->end = last_a->index;
+    first_a->end = last_a.index;
 }
 
 // TESTS DEQ STABILITY WITH SELF CLEANUP.
@@ -671,7 +673,7 @@ main(void)
                     size_t size2 = TEST_RAND(TEST_MAX_SIZE);
                     deq_digi aa = deq_digi_init_from(&a);
                     std::deque<DIGI> bb;
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
                     for(int i = 0; i < (int)size2; i++)
                     {
@@ -679,7 +681,7 @@ main(void)
                         bb.push_back(DIGI{i});
                     }
                     print_deq(&a);
-                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    get_random_iters (&aa, &first_a, bb, first_b, last_b);
                     // libstdc++  fails on empty (uninitialized) front or back
                     // values. It cannot deal with empty insert ranges,
                     // i.e. first_b == last_b. We can.
@@ -693,7 +695,7 @@ main(void)
                     deq_digi_it pos = deq_digi_begin(&a);
                     deq_digi_it_advance(&pos, index);
                     LOG ("insert_range 0-%zu at %zu:\n", size2-1, index);
-                    deq_digi_insert_range(&pos, &first_a, &last_a);
+                    deq_digi_insert_range(&pos, &first_a);
                     b.insert(b.begin() + index, first_b, last_b);
 #if 0
                     std::vector<DIGI> cc;
@@ -939,9 +941,9 @@ main(void)
                     int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                         : random_element(&a);
                     digi key = digi_init(vb);
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     bool found_a = deq_digi_find_range(&first_a, key);
                     auto it = find(first_b, last_b, vb);
                     if (found_a)
@@ -955,10 +957,10 @@ main(void)
                 }
                 case TEST_FIND_IF_RANGE:
                 {
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    first_a = deq_digi_find_if_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    first_a = deq_digi_find_if_range(&first_a, digi_is_odd);
                     auto it = find_if(first_b, last_b, DIGI_is_odd);
                     print_deq(&a);
                     print_deque(b);
@@ -967,20 +969,20 @@ main(void)
                 }
                 case TEST_FIND_IF_NOT_RANGE:
                 {
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    first_a = deq_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    first_a = deq_digi_find_if_not_range(&first_a, digi_is_odd);
                     auto it = find_if_not(first_b, last_b, DIGI_is_odd);
                     CHECK_ITER(first_a, b, it);
                     break;
                 }
                 case TEST_ALL_OF_RANGE:
                 {
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = deq_digi_all_of_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = deq_digi_all_of_range(&first_a, digi_is_odd);
                     bool bb = std::all_of(first_b, last_b, DIGI_is_odd);
                     if (aa != bb)
                     {
@@ -993,10 +995,10 @@ main(void)
                 }
                 case TEST_ANY_OF_RANGE:
                 {
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = deq_digi_any_of_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = deq_digi_any_of_range(&first_a, digi_is_odd);
                     bool bb = std::any_of(first_b, last_b, DIGI_is_odd);
                     if (aa != bb)
                     {
@@ -1009,10 +1011,10 @@ main(void)
                 }
                 case TEST_NONE_OF_RANGE:
                 {
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = deq_digi_none_of_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = deq_digi_none_of_range(&first_a, digi_is_odd);
                     bool bb = none_of(first_b, last_b, DIGI_is_odd);
                     if (aa != bb)
                     {
@@ -1025,10 +1027,10 @@ main(void)
                 }
                 case TEST_COUNT_IF_RANGE:
                 {
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    size_t numa = deq_digi_count_if_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    size_t numa = deq_digi_count_if_range(&first_a, digi_is_odd);
                     size_t numb = count_if(first_b, last_b, DIGI_is_odd);
                     if (numa != numb)
                     {
@@ -1045,11 +1047,11 @@ main(void)
                     int test_value = 0;
                     int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                         : test_value;
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     // used to fail with 0,0 of 0
-                    size_t numa = deq_digi_count_range(&first_a, &last_a, digi_init(v));
+                    size_t numa = deq_digi_count_range(&first_a, digi_init(v));
                     size_t numb = count(first_b, last_b, DIGI{v});
                     assert(numa == numb);
                     break;
@@ -1079,12 +1081,12 @@ main(void)
                     deq_digi_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    deq_digi_it first_a1, last_a1;
+                    deq_digi_it first_a1;
                     std::deque<DIGI>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    deq_digi_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    deq_digi_it first_a2;
                     std::deque<DIGI>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
                     print_deq(&a);
                     print_deq(&aa);
 
@@ -1190,12 +1192,12 @@ main(void)
                     deq_digi_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    deq_digi_it first_a1, last_a1;
+                    deq_digi_it first_a1;
                     std::deque<DIGI>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    deq_digi_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    deq_digi_it first_a2;
                     std::deque<DIGI>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     print_deq_range(first_a1);
@@ -1230,12 +1232,12 @@ main(void)
                     deq_digi_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    deq_digi_it first_a1, last_a1;
+                    deq_digi_it first_a1;
                     std::deque<DIGI>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    deq_digi_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    deq_digi_it first_a2;
                     std::deque<DIGI>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     print_deq_range(first_a1);
@@ -1270,12 +1272,12 @@ main(void)
                     deq_digi_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    deq_digi_it first_a1, last_a1;
+                    deq_digi_it first_a1;
                     std::deque<DIGI>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    deq_digi_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    deq_digi_it first_a2;
                     std::deque<DIGI>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a (%zu) + aa (%zu)\n", a.size, aa.size);
                     print_deq_range(first_a1);
@@ -1310,12 +1312,12 @@ main(void)
                     deq_digi_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    deq_digi_it first_a1, last_a1;
+                    deq_digi_it first_a1;
                     std::deque<DIGI>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    deq_digi_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    deq_digi_it first_a2;
                     std::deque<DIGI>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     print_deq_range(first_a1);
@@ -1352,11 +1354,11 @@ main(void)
                 }
                 case TEST_GENERATE_RANGE:
                 {
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     digi_generate_reset();
-                    deq_digi_generate_range(&first_a, &last_a, digi_generate);
+                    deq_digi_generate_range(&first_a, digi_generate);
                     digi_generate_reset();
                     std::generate(first_b, last_b, DIGI_generate);
                     CHECK(a, b);
@@ -1393,9 +1395,9 @@ main(void)
                 }
                 case TEST_GENERATE_N_RANGE:
                 {
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     size_t off = first_b - b.begin();
                     size_t len = last_b - first_b;
                     size_t count = TEST_RAND(20 - off);
@@ -1437,13 +1439,13 @@ main(void)
                 case TEST_TRANSFORM_RANGE:
                 {
                     print_deq(&a);
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     deq_digi aa = deq_digi_init();
                     deq_digi_resize(&aa, last_b - first_b, digi_init(0));
                     deq_digi_it dest = deq_digi_begin(&aa);
-                    deq_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
+                    deq_digi_transform_range(&first_a, dest, digi_untrans);
                     print_deq(&aa);
 #ifndef _MSC_VER
                     std::deque<DIGI> bb;
@@ -1458,15 +1460,15 @@ main(void)
                 case TEST_TRANSFORM_IT_RANGE:
                 {
                     print_deq(&a);
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     deq_digi_it pos = deq_digi_begin(&a);
                     deq_digi_it_advance(&pos, 1);
                     deq_digi aa = deq_digi_init();
                     deq_digi_resize(&aa, last_b - first_b, digi_init(0));
                     deq_digi_it dest = deq_digi_begin(&aa);
-                    deq_digi_transform_it_range(&first_a, &last_a, &pos, dest,
+                    deq_digi_transform_it_range(&first_a, &pos, dest,
                                                 digi_bintrans);
                     print_deq(&aa);
 #ifndef _MSC_VER
@@ -1490,10 +1492,10 @@ main(void)
                     deq_digi_it b1, b2;
                     b1 = deq_digi_begin(&a);
                     b2 = deq_digi_begin(&aa);
-                    deq_digi_it r1a, last1_a, r2a, last2_a;
+                    deq_digi_it r1a, r2a;
                     std::deque<DIGI>::iterator r1b, last1_b, r2b, last2_b;
-                    get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
-                    get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
+                    get_random_iters (&a, &r1a, b, r1b, last1_b);
+                    get_random_iters (&aa, &r2a, bb, r2b, last2_b);
                     /*bool found_a = */deq_digi_mismatch(&r1a, &r2a);
                     auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
                     int d1a = deq_digi_it_distance(&b1, &r1a);
@@ -1510,16 +1512,16 @@ main(void)
                     print_deq(&a);
                     deq_digi aa = deq_digi_copy(&a);
                     std::deque<DIGI> bb = b;
-                    deq_digi_it first_a, last_a;
+                    deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    get_random_iters (&aa, &first_a, bb, first_b, last_b);
                     if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
                         size_t i = std::distance(bb.begin(), first_b);
                         deq_digi_set(&aa, i, digi_init(0));
                         bb[i] = DIGI{0};
                     }
                     print_deq_range(first_a);
-                    deq_digi_it found_a = deq_digi_search(&a, &first_a, &last_a);
+                    deq_digi_it found_a = deq_digi_search(&a, &first_a);
                     auto found_b = search(b.begin(), b.end(), first_b, last_b);
                     LOG("found a: %s\n", deq_digi_it_done(&found_a) ? "no" : "yes");
                     LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
@@ -1531,9 +1533,9 @@ main(void)
                 {
                     deq_digi aa = deq_digi_copy(&a);
                     std::deque<DIGI> bb = b;
-                    deq_digi_it needle, last_a, range;
+                    deq_digi_it needle, range;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&aa, &needle, &last_a, bb, first_b, last_b);
+                    get_random_iters (&aa, &needle, bb, first_b, last_b);
                     if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
                         size_t i = std::distance(bb.begin(), first_b);
                         deq_digi_set(&aa, i, digi_init(0));
@@ -1561,9 +1563,9 @@ main(void)
                 }
                 case TEST_ADJACENT_FIND_RANGE:
                 {
-                    deq_digi_it range, last_a;
+                    deq_digi_it range;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &range, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &range, b, first_b, last_b);
                     print_deq_range(range);
                     deq_digi_it *aa = deq_digi_adjacent_find_range(&range);
                     auto bb = adjacent_find(first_b, last_b);
@@ -1596,10 +1598,10 @@ main(void)
                     deq_digi aa;
                     std::deque<DIGI> bb;
                     setup_deque(&aa, bb);
-                    deq_digi_it first_a, last_a, s_first, s_last;
+                    deq_digi_it first_a, s_first;
                     std::deque<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    get_random_iters (&aa, &s_first, &s_last, bb, s_first_b, s_last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    get_random_iters (&aa, &s_first, bb, s_first_b, s_last_b);
 
                     bool found_a = deq_digi_find_first_of_range(&first_a, &s_first);
                     auto it = std::find_first_of(first_b, last_b, s_first_b, s_last_b);
@@ -1641,9 +1643,9 @@ main(void)
                 }
                 case TEST_FIND_END_RANGE:
                 {
-                    deq_digi_it first_a, last_a, s_first;
+                    deq_digi_it first_a, s_first;
                     std::deque<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     deq_digi aa;
                     std::deque<DIGI> bb;
                     setup_deque(&aa, bb);

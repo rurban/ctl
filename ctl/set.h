@@ -220,6 +220,13 @@ JOIN(I, index)(I* iter)
     return (size_t)JOIN(I, distance)(&begin, iter);
 }
 
+static inline long
+JOIN(I, distance_range)(I* range)
+{
+    I end = JOIN(I, iter)(range->container, range->end);
+    return JOIN(I, index)(&end) - JOIN(I, index)(range);
+}
+
 static inline A JOIN(A, init_from)(A* copy);
 static inline A JOIN(A, copy)(A* self);
 static inline B* JOIN(A, insert)(A* self, T key);
@@ -1099,11 +1106,11 @@ JOIN(A, generate)(A* self, T _gen(void))
 }
 
 static inline void
-JOIN(A, generate_range)(I* first, I* last, T _gen(void))
+JOIN(A, generate_range)(I* range, T _gen(void))
 {
-    A* self = first->container;
-    B* node = first->node;
-    while (node != last->node)
+    A* self = range->container;
+    B* node = range->node;
+    while (node != range->end)
     {
         B* next = JOIN(B, next)(node);
         T tmp = _gen();
@@ -1124,9 +1131,9 @@ JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
 }
 
 static inline void
-JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
+JOIN(A, generate_n_range)(I* range, size_t count, T _gen(void))
 {
-    JOIN(A, generate_n)(first->container, count, _gen);
+    JOIN(A, generate_n)(range->container, count, _gen);
 }
 
 // non-destructive, returns a copy
@@ -1170,10 +1177,10 @@ JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
 }
 
 static inline I
-JOIN(A, transform_range)(I* first1, I* last1, I dest, T _unop(T*))
+JOIN(A, transform_range)(I* range1, I dest, T _unop(T*))
 {
-    A* self = first1->container;
-    foreach_range(A, i, first1, last1)
+    A* self = range1->container;
+    foreach_range_(A, i, range1)
     {
         if (dest.node && JOIN(I, done)(&dest)) // allow empty dest
             break;
@@ -1187,10 +1194,10 @@ JOIN(A, transform_range)(I* first1, I* last1, I dest, T _unop(T*))
 }
 
 static inline I
-JOIN(A, transform_it_range)(I* first1, I* last1, I* pos, I dest, T _binop(T*, T*))
+JOIN(A, transform_it_range)(I* range1, I* pos, I dest, T _binop(T*, T*))
 {
-    A* self = first1->container;
-    foreach_range(A, i, first1, last1)
+    A* self = range1->container;
+    foreach_range_(A, i, range1)
     {
         if (JOIN(I, done)(pos) ||
             (dest.node && JOIN(I, done)(&dest))) // allow empty dest

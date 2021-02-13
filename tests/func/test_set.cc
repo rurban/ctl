@@ -100,10 +100,11 @@ int pick_element(set_digi* a)
 }
 
 static void
-get_random_iters (set_digi *a, set_digi_it *first_a, set_digi_it *last_a,
+get_random_iters (set_digi *a, set_digi_it *first_a,
                   std::set<DIGI>& b, std::set<DIGI>::iterator& first_b,
                   std::set<DIGI>::iterator& last_b)
 {
+    set_digi_it last_a;
     size_t r1 = TEST_RAND(a->size / 2);
     const size_t rnd = TEST_RAND(a->size / 2);
     size_t r2 = MIN(r1 + rnd, a->size);
@@ -117,19 +118,19 @@ get_random_iters (set_digi *a, set_digi_it *first_a, set_digi_it *last_a,
         advance(first_b, r1);
         if (r1 == r2)
         {
-            *last_a = it1;
+            last_a = it1;
             last_b = first_b;
         }
         else if (r2 == a->size)
         {
-            *last_a = set_digi_end(a);
+            last_a = set_digi_end(a);
             last_b = b.end();
         }
         else
         {
             set_digi_it it2 = set_digi_begin(a);
             set_digi_it_advance(&it2, r2);
-            *last_a = it2;
+            last_a = it2;
             last_b = b.begin();
             advance(last_b, r2);
         }
@@ -138,11 +139,11 @@ get_random_iters (set_digi *a, set_digi_it *first_a, set_digi_it *last_a,
     {
         set_digi_it end = set_digi_end(a);
         *first_a = end;
-        *last_a = end;
+        last_a = end;
         first_b = b.begin();
         last_b = b.end();
     }
-    first_a->end = last_a->node;
+    first_a->end = last_a.node;
 }
 
 static void
@@ -307,9 +308,9 @@ main(void)
                     bb.insert(DIGI{i});
                 }
                 print_set(&aa);
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                get_random_iters (&aa, &first_a, bb, first_b, last_b);
 
                 set_digi_insert_range(&a, &first_a);
                 b.insert(first_b, last_b);
@@ -555,20 +556,20 @@ main(void)
                 int test_value = 0;
                 int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                                      : test_value;
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                size_t numa = set_digi_count_range(&first_a, &last_a, digi_init(v)); // leak?
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                size_t numa = set_digi_count_range(&first_a, digi_init(v)); // leak?
                 size_t numb = count(first_b, last_b, DIGI{v});
                 assert(numa == numb); // fails with SEED=2490491988
                 break;
             }
             case TEST_COUNT_IF_RANGE:
             {
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                size_t numa = set_digi_count_if_range(&first_a, &last_a,
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                size_t numa = set_digi_count_if_range(&first_a,
                                                         digi_is_odd);
                 size_t numb = count_if(first_b, last_b, DIGIc_is_odd);
                 if (numa != numb)
@@ -590,10 +591,10 @@ main(void)
             }
             case TEST_ALL_OF_RANGE:
             {
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = set_digi_all_of_range(&first_a, &last_a,
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                bool aa = set_digi_all_of_range(&first_a,
                                                  digi_is_odd);
                 bool bb = all_of(first_b, last_b, DIGIc_is_odd);
                 if (aa != bb)
@@ -615,10 +616,10 @@ main(void)
             }
             case TEST_ANY_OF_RANGE:
             {
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = set_digi_any_of_range(&first_a, &last_a,
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                bool aa = set_digi_any_of_range(&first_a,
                                                  digi_is_odd);
                 bool bb = any_of(first_b, last_b, DIGIc_is_odd);
                 if (aa != bb)
@@ -640,10 +641,10 @@ main(void)
             }
             case TEST_NONE_OF_RANGE:
             {
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                bool aa = set_digi_none_of_range(&first_a, &last_a, digi_is_odd);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                bool aa = set_digi_none_of_range(&first_a, digi_is_odd);
                 bool bb = none_of(first_b, last_b, DIGIc_is_odd);
                 if (aa != bb)
                 {
@@ -667,14 +668,14 @@ main(void)
                 int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                                       : pick_element(&a);
                 digi key = digi_init(vb);
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 LOG("find_range %d\n", vb);
                 print_set(&a);
                 bool found_a = set_digi_find_range(&first_a, key);
                 auto bb = find(first_b, last_b, vb);
-                LOG("%d\n", first_a.node == last_a.node ? -1 : *first_a.ref->value);
+                LOG("%d\n", first_a.node == first_a.end ? -1 : *first_a.ref->value);
                 //print_setpp(b);
                 LOG("vs %d\n", bb == last_b ? -1 : *bb->value);
                 if (found_a)
@@ -688,10 +689,10 @@ main(void)
             }
             case TEST_FIND_IF_RANGE:
             {
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                set_digi_it aa = set_digi_find_if_range(&first_a, &last_a, digi_is_odd);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                set_digi_it aa = set_digi_find_if_range(&first_a, digi_is_odd);
                 auto bb = find_if(first_b, last_b, DIGIc_is_odd);
                 print_set(&a);
                 print_setpp(b);
@@ -707,10 +708,10 @@ main(void)
             }
             case TEST_FIND_IF_NOT_RANGE:
             {
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                set_digi_it aa = set_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                set_digi_it aa = set_digi_find_if_not_range(&first_a, digi_is_odd);
                 auto bb = find_if_not(first_b, last_b, DIGIc_is_odd);
                 if (set_digi_it_done(&aa))
                     assert(bb == last_b);
@@ -768,11 +769,11 @@ main(void)
             case TEST_GENERATE_RANGE:
             {
                 print_set(&a);
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 digi_generate_reset();
-                set_digi_generate_range(&first_a, &last_a, digi_generate);
+                set_digi_generate_range(&first_a, digi_generate);
                 LOG("=>\n");
                 print_set(&a);
                 digi_generate_reset();
@@ -807,9 +808,9 @@ main(void)
             }
             case TEST_GENERATE_N_RANGE:
             {
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 size_t off = std::distance(b.begin(), first_b);
                 size_t count = TEST_RAND(20 - off);
                 digi_generate_reset();
@@ -859,13 +860,13 @@ main(void)
             case TEST_TRANSFORM_RANGE:
             {
                 print_set(&a);
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 set_digi aa = set_digi_init(digi_compare);
                 set_digi_it dest = set_digi_begin(&aa);
                 /*set_digi_it it = */
-                set_digi_transform_range(&first_a, &last_a, dest, digi_untrans);
+                set_digi_transform_range(&first_a, dest, digi_untrans);
                 print_set(&aa);
                 std::set<DIGI> bb;
                 /*auto iter = */
@@ -884,14 +885,14 @@ main(void)
                 if (a.size < 2) // ctl does fine, but STL goes into an endless
                                 // loop on size=0
                     break;
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 set_digi_it pos = set_digi_begin(&a);
                 set_digi_it_advance(&pos, 1);
                 set_digi aa = set_digi_init(digi_compare);
                 set_digi_it dest = set_digi_begin(&aa);
-                set_digi_transform_it_range(&first_a, &last_a, &pos, dest, digi_bintrans);
+                set_digi_transform_it_range(&first_a, &pos, dest, digi_bintrans);
                 print_set(&aa);
                 std::set<DIGI> bb;
                 auto it2 = b.begin();
@@ -917,10 +918,10 @@ main(void)
                 set_digi_it b1, b2;
                 b1 = set_digi_begin(&a);
                 b2 = set_digi_begin(&aa);
-                set_digi_it r1a, last1_a, r2a, last2_a;
+                set_digi_it r1a, r2a;
                 std::set<DIGI>::iterator r1b, last1_b, r2b, last2_b;
-                get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
-                get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
+                get_random_iters (&a, &r1a, b, r1b, last1_b);
+                get_random_iters (&aa, &r2a, bb, r2b, last2_b);
                 /*bool found_a = */set_digi_mismatch(&r1a, &r2a);
                 auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
                 int d1a = set_digi_it_distance(&b1, &r1a);
@@ -937,16 +938,16 @@ main(void)
                 print_set(&a);
                 set_digi aa = set_digi_copy(&a);
                 std::set<DIGI> bb = b;
-                set_digi_it first_a, last_a;
+                set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                get_random_iters (&aa, &first_a, bb, first_b, last_b);
                 if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
                     int vb = *first_b->value;
                     set_digi_insert(&aa, digi_init(vb+1));
                     bb.insert(DIGI{vb+1});
                 }
                 //print_vec_range(first_a);
-                set_digi_it found_a = set_digi_search(&a, &first_a, &last_a);
+                set_digi_it found_a = set_digi_search(&a, &first_a);
                 auto found_b = search(b.begin(), b.end(), first_b, last_b);
                 LOG("found a: %s\n", set_digi_it_done(&found_a) ? "no" : "yes");
                 LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
@@ -958,9 +959,9 @@ main(void)
             {
                 set_digi aa = set_digi_copy(&a);
                 std::set<DIGI> bb = b;
-                set_digi_it needle, last_a, range;
+                set_digi_it needle, range;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&aa, &needle, &last_a, bb, first_b, last_b);
+                get_random_iters (&aa, &needle, bb, first_b, last_b);
                 if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
                     int vb = *first_b->value;
                     set_digi_insert(&aa, digi_init(vb+1));
@@ -987,9 +988,9 @@ main(void)
             }
             case TEST_ADJACENT_FIND_RANGE:
             {
-                set_digi_it range, last_a;
+                set_digi_it range;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &range, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &range, b, first_b, last_b);
                 set_digi_it *aa = set_digi_adjacent_find_range(&range);
                 auto bb = adjacent_find(first_b, last_b);
                 CHECK_RANGE(*aa, bb, last_b);
@@ -1027,11 +1028,11 @@ main(void)
                 set_digi aa;
                 std::set<DIGI> bb;
                 setup_sets(&aa, bb);
-                set_digi_it first_a, last_a, s_first, s_last;
+                set_digi_it first_a, s_first;
                 std::set<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 print_set(&a);
-                get_random_iters (&aa, &s_first, &s_last, bb, s_first_b, s_last_b);
+                get_random_iters (&aa, &s_first, bb, s_first_b, s_last_b);
                 print_set(&aa);
 
                 bool found_a = set_digi_find_first_of_range(&first_a, &s_first);
@@ -1083,9 +1084,9 @@ main(void)
             }
             case TEST_FIND_END_RANGE:
             {
-                set_digi_it first_a, last_a, s_first;
+                set_digi_it first_a, s_first;
                 std::set<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                get_random_iters (&a, &first_a, b, first_b, last_b);
                 set_digi aa;
                 std::set<DIGI> bb;
                 setup_sets(&aa, bb);

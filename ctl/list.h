@@ -192,6 +192,13 @@ JOIN(I, index)(I* iter)
     return (size_t)JOIN(I, distance)(&begin, iter);
 }
 
+static inline long
+JOIN(I, distance_range)(I* range)
+{
+    I end = JOIN(I, iter)(range->container, range->end);
+    return JOIN(I, index)(&end) - JOIN(I, index)(range);
+}
+
 static inline void
 JOIN(A, disconnect)(A* self, B* node)
 {
@@ -509,13 +516,13 @@ JOIN(A, insert_count)(I* pos, size_t count, T value)
 }
 
 static inline I*
-JOIN(A, insert_range)(I* pos, I* first, I* last)
+JOIN(A, insert_range)(I* pos, I* range)
 {
-    B* node = first->node;
+    B* node = range->node;
     A* self = pos->container;
     if (!pos->node)
     {
-        while (node != last->node)
+        while (node != range->end)
         {
             JOIN(A, connect_after)(self, self->tail,
                 JOIN(B, init)(self->copy(&node->value)));
@@ -523,7 +530,7 @@ JOIN(A, insert_range)(I* pos, I* first, I* last)
         }
     }
     else
-        while (node != last->node)
+        while (node != range->end)
         {
             JOIN(A, connect_before)(self, pos->node,
                                     JOIN(B, init)(self->copy(&node->value)));
@@ -618,20 +625,20 @@ JOIN(A, splice_it)(I* pos, I* first2)
 }
 
 static inline void
-JOIN(A, splice_range)(I* pos, I* first2, I* last2)
+JOIN(A, splice_range)(I* pos, I* range2)
 {
     A* self = pos->container;
-    A* other = first2->container;
+    A* other = range2->container;
     if(UNLIKELY(self->size == 0 &&
                 pos->node == NULL &&
-                first2->node == other->head &&
-                last2->node == NULL))
+                range2->node == other->head &&
+                range2->end == NULL))
         JOIN(A, swap)(self, other);
     else if (other->size)
     {
-        B *node = first2->node;
+        B *node = range2->node;
         B *next;
-        while(node != last2->node)
+        while(node != range2->end)
         {
             next = node->next;
             JOIN(A, transfer_before)(self, other, pos->node, node);

@@ -159,10 +159,11 @@ gen_vectors(vec_digi* a, std::vector<DIGI>& b, size_t size)
 }
 
 static void
-get_random_iters (vec_digi *a, vec_digi_it* first_a, vec_digi_it* last_a,
+get_random_iters (vec_digi *a, vec_digi_it* first_a,
                   std::vector<DIGI>& b, std::vector<DIGI>::iterator &first_b,
                   std::vector<DIGI>::iterator &last_b)
 {
+    vec_digi_it last_a;
     size_t r1 = TEST_RAND(a->size / 2);
     const size_t rnd = TEST_RAND(a->size / 2);
     size_t r2 = MIN(r1 + rnd, a->size);
@@ -177,12 +178,12 @@ get_random_iters (vec_digi *a, vec_digi_it* first_a, vec_digi_it* last_a,
 
         if (r1 == r2)
         {
-            *last_a = it1;
+            last_a = it1;
             last_b = first_b;
         }
         else if (r2 == a->size)
         {
-            *last_a = vec_digi_end(a);
+            last_a = vec_digi_end(a);
             last_b = b.end();
         }
         else
@@ -191,18 +192,18 @@ get_random_iters (vec_digi *a, vec_digi_it* first_a, vec_digi_it* last_a,
             last_b = b.begin();
             vec_digi_it_advance(&it2, r2);
             last_b += r2;
-            *last_a = it2;
+            last_a = it2;
         }
     }
     else
     {
         vec_digi_it end = vec_digi_end(a);
         *first_a = end;
-        *last_a = end;
+        last_a = end;
         first_b = b.begin();
         last_b = b.end();
     }
-    first_a->end = last_a->ref;
+    first_a->end = last_a.ref;
 }
 
 int
@@ -404,9 +405,9 @@ main(void)
                 {
                     if(a.size > 1)
                     {
-                        vec_digi_it first_a, last_a;
+                        vec_digi_it first_a;
                         std::vector<DIGI>::iterator first_b, last_b;
-                        get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                        get_random_iters (&a, &first_a, b, first_b, last_b);
                         print_vec_range(first_a);
                         vec_digi_erase_range(&first_a);
                         auto it = b.erase(first_b, last_b);
@@ -466,7 +467,7 @@ main(void)
                         size_t size2 = TEST_RAND(TEST_MAX_SIZE);
                         vec_digi aa = vec_digi_init_from(&a);
                         std::vector<DIGI> bb;
-                        vec_digi_it first_a, last_a;
+                        vec_digi_it first_a;
                         std::vector<DIGI>::iterator first_b, last_b;
                         for(size_t pushes = 0; pushes < size2; pushes++)
                         {
@@ -475,12 +476,12 @@ main(void)
                             bb.push_back(DIGI{value});
                         }
                         print_vec(&aa);
-                        get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                        get_random_iters (&aa, &first_a, bb, first_b, last_b);
                         const size_t index = TEST_RAND(a.size);
                         vec_digi_it pos = vec_digi_begin(&a);
                         vec_digi_it_advance(&pos, index);
                         b.insert(b.begin() + index, first_b, last_b);
-                        vec_digi_insert_range(&pos, &first_a, &last_a);
+                        vec_digi_insert_range(&pos, &first_a);
                         // our growth strategy is better. but for test sake adjust it
                         vec_digi_reserve(&a, b.capacity());
                         print_vec(&a);
@@ -666,9 +667,9 @@ main(void)
                     int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                         : random_element(&a);
                     digi key = digi_init(vb);
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     bool found_a = vec_digi_find_range(&first_a, key);
                     auto it = find(first_b, last_b, vb);
                     if (found_a)
@@ -682,32 +683,32 @@ main(void)
                 }
                 case TEST_FIND_IF_RANGE:
                 {
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    first_a = vec_digi_find_if_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    first_a = vec_digi_find_if_range(&first_a, digi_is_odd);
                     auto it = find_if(first_b, last_b, DIGI_is_odd);
                     print_vec(&a);
                     print_vector(b);
-                    CHECK_ITER(first_a, b, it);
+                    CHECK_RANGE(first_a, it, last_b);
                     break;
                 }
                 case TEST_FIND_IF_NOT_RANGE:
                 {
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    first_a = vec_digi_find_if_not_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    first_a = vec_digi_find_if_not_range(&first_a, digi_is_odd);
                     auto it = find_if_not(first_b, last_b, DIGI_is_odd);
-                    CHECK_ITER(first_a, b, it);
+                    CHECK_RANGE(first_a, it, last_b);
                     break;
                 }
                 case TEST_ALL_OF_RANGE:
                 {
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = vec_digi_all_of_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = vec_digi_all_of_range(&first_a, digi_is_odd);
                     bool bb = all_of(first_b, last_b, DIGI_is_odd);
                     if (aa != bb)
                     {
@@ -720,10 +721,10 @@ main(void)
                 }
                 case TEST_ANY_OF_RANGE:
                 {
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = vec_digi_any_of_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = vec_digi_any_of_range(&first_a, digi_is_odd);
                     bool bb = any_of(first_b, last_b, DIGI_is_odd);
                     if (aa != bb)
                     {
@@ -736,10 +737,10 @@ main(void)
                 }
                 case TEST_NONE_OF_RANGE:
                 {
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = vec_digi_none_of_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = vec_digi_none_of_range(&first_a, digi_is_odd);
                     bool bb = none_of(first_b, last_b, DIGI_is_odd);
                     if (aa != bb)
                     {
@@ -752,10 +753,10 @@ main(void)
                 }
                 case TEST_COUNT_IF_RANGE:
                 {
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    size_t numa = vec_digi_count_if_range(&first_a, &last_a, digi_is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    size_t numa = vec_digi_count_if_range(&first_a, digi_is_odd);
                     size_t numb = count_if(first_b, last_b, DIGI_is_odd);
                     if (numa != numb)
                     {
@@ -772,11 +773,11 @@ main(void)
                     int test_value = 0;
                     int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                         : test_value;
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     // used to fail with 0,0 of 0
-                    size_t numa = vec_digi_count_range(&first_a, &last_a, digi_init(v));
+                    size_t numa = vec_digi_count_range(&first_a, digi_init(v));
                     size_t numb = count(first_b, last_b, DIGI{v});
                     assert(numa == numb);
                     break;
@@ -795,16 +796,16 @@ main(void)
                     print_vec(&a);
                     vec_digi aa = vec_digi_copy(&a);
                     std::vector<DIGI> bb = b;
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    get_random_iters (&aa, &first_a, bb, first_b, last_b);
                     if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
                         size_t i = first_b - bb.begin();
                         vec_digi_set(&aa, i, digi_init(0));
                         bb[i] = DIGI{0};
                     }
                     print_vec_range(first_a);                    
-                    vec_digi_it found_a = vec_digi_search(&a, &first_a, &last_a);
+                    vec_digi_it found_a = vec_digi_search(&a, &first_a);
                     auto found_b = search(b.begin(), b.end(), first_b, last_b);
                     LOG("found a: %s\n", vec_digi_it_done(&found_a) ? "no" : "yes");
                     LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
@@ -816,9 +817,9 @@ main(void)
                 {
                     vec_digi aa = vec_digi_copy(&a);
                     std::vector<DIGI> bb = b;
-                    vec_digi_it needle, last_a, range;
+                    vec_digi_it needle, range;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&aa, &needle, &last_a, bb, first_b, last_b);
+                    get_random_iters (&aa, &needle, bb, first_b, last_b);
                     if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
                         size_t i = first_b - bb.begin();
                         vec_digi_set(&aa, i, digi_init(0));
@@ -846,9 +847,9 @@ main(void)
                 }
                 case TEST_ADJACENT_FIND_RANGE:
                 {
-                    vec_digi_it range, last_a;
+                    vec_digi_it range;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &range, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &range, b, first_b, last_b);
                     print_vec_range(range);
                     vec_digi_it *aa = vec_digi_adjacent_find_range(&range);
                     auto bb = adjacent_find(first_b, last_b);
@@ -884,11 +885,11 @@ main(void)
 #endif
                 case TEST_GENERATE_RANGE:
                 {
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     digi_generate_reset();
-                    vec_digi_generate_range(&first_a, &last_a, digi_generate);
+                    vec_digi_generate_range(&first_a, digi_generate);
                     digi_generate_reset();
                     std::generate(first_b, last_b, DIGI_generate);
                     CHECK(a, b);
@@ -961,12 +962,12 @@ main(void)
                     vec_digi_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    vec_digi_it first_a1, last_a1;
+                    vec_digi_it first_a1;
                     std::vector<DIGI>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    vec_digi_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    vec_digi_it first_a2;
                     std::vector<DIGI>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a - aa\n");
                     print_vec_range(first_a1);
@@ -1091,12 +1092,12 @@ main(void)
                     vec_digi_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    vec_digi_it first_a1, last_a1;
+                    vec_digi_it first_a1;
                     std::vector<DIGI>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    vec_digi_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    vec_digi_it first_a2;
                     std::vector<DIGI>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     print_vec_range(first_a1);
@@ -1131,12 +1132,12 @@ main(void)
                     vec_digi_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    vec_digi_it first_a1, last_a1;
+                    vec_digi_it first_a1;
                     std::vector<DIGI>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    vec_digi_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    vec_digi_it first_a2;
                     std::vector<DIGI>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     print_vec_range(first_a1);
@@ -1171,12 +1172,12 @@ main(void)
                     vec_digi_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    vec_digi_it first_a1, last_a1;
+                    vec_digi_it first_a1;
                     std::vector<DIGI>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    vec_digi_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    vec_digi_it first_a2;
                     std::vector<DIGI>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a (%zu) + aa (%zu)\n", a.size, aa.size);
                     print_vec_range(first_a1);
@@ -1211,12 +1212,12 @@ main(void)
                     vec_digi_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    vec_digi_it first_a1, last_a1;
+                    vec_digi_it first_a1;
                     std::vector<DIGI>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    vec_digi_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    vec_digi_it first_a2;
                     std::vector<DIGI>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     print_vec_range(first_a1);
@@ -1263,9 +1264,9 @@ main(void)
 #ifdef DEBUG
                 case TEST_GENERATE_N_RANGE:
                 {
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     size_t off = first_b - b.begin();
                     size_t count = TEST_RAND(20 - off);
                     digi_generate_reset();
@@ -1304,21 +1305,18 @@ main(void)
                     print_vec(&a);
                     if (a.size < 2)
                         break;
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     vec_digi aa = vec_digi_init();
                     vec_digi_resize(&aa, last_b - first_b, digi_init(0));
                     vec_digi_it dest = vec_digi_begin(&aa);
-                    vec_digi_it it = vec_digi_transform_range(&first_a, &last_a, dest,
-                                                              digi_untrans);
+                    vec_digi_transform_range(&first_a, dest, digi_untrans);
 # ifndef _MSC_VER
                     std::vector<DIGI> bb;
                     bb.reserve(last_b - first_b);
-                    auto iter = std::transform(first_b, last_b, std::back_inserter(bb),
-                                               DIGI_untrans);
+                    std::transform(first_b, last_b, std::back_inserter(bb), DIGI_untrans);
                     ADJUST_CAP("transform_range", aa, bb);
-                    //CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
 # endif
                     // heap use-after-free
@@ -1330,28 +1328,25 @@ main(void)
                 {
                     if (a.size < 2)
                         break;
-                    vec_digi_it first_a, last_a;
+                    vec_digi_it first_a;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     vec_digi_it pos = vec_digi_begin(&a);
                     vec_digi_it_advance(&pos, 1);
                     vec_digi aa = vec_digi_init();
                     vec_digi_resize(&aa, last_b - first_b, digi_init(0));
                     vec_digi_it dest = vec_digi_begin(&aa);
-                    vec_digi_it it = vec_digi_transform_it_range(&first_a, &last_a,
-                                                                 &pos, dest, digi_bintrans);
+                    vec_digi_transform_it_range(&first_a, &pos, dest, digi_bintrans);
                     auto it2 = b.begin();
                     std::advance(it2, 1);
 # ifndef _MSC_VER
                     std::vector<DIGI> bb;
                     bb.reserve(last_b - first_b - 1);
-                    auto iter = std::transform(first_b, last_b, it2,
-                                               std::back_inserter(bb), DIGI_bintrans);
+                    std::transform(first_b, last_b, it2, std::back_inserter(bb), DIGI_bintrans);
                     ADJUST_CAP("transform_it_range", aa, bb);
-                    //CHECK_ITER(it, bb, iter);
                     CHECK(aa, bb);
 # endif
-                    // heap use-after-free
+                    // heap use-after-free?
                     CHECK(a, b);
                     vec_digi_free(&aa);
                     break;
@@ -1367,10 +1362,10 @@ main(void)
                     vec_digi_it b1, b2;
                     b1 = vec_digi_begin(&a);
                     b2 = vec_digi_begin(&aa);
-                    vec_digi_it r1a, last1_a, r2a, last2_a;
+                    vec_digi_it r1a, r2a;
                     std::vector<DIGI>::iterator r1b, last1_b, r2b, last2_b;
-                    get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
-                    get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
+                    get_random_iters (&a, &r1a, b, r1b, last1_b);
+                    get_random_iters (&aa, &r2a, bb, r2b, last2_b);
                     /*bool found_a = */vec_digi_mismatch(&r1a, &r2a);
                     auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
                     int d1a = vec_digi_it_distance(&b1, &r1a);
@@ -1402,10 +1397,10 @@ main(void)
                     vec_digi aa;
                     std::vector<DIGI> bb;
                     gen_vectors(&aa, bb, TEST_RAND(15));
-                    vec_digi_it first_a, last_a, s_first, s_last;
+                    vec_digi_it first_a, s_first;
                     std::vector<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    get_random_iters (&aa, &s_first, &s_last, bb, s_first_b, s_last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    get_random_iters (&aa, &s_first, bb, s_first_b, s_last_b);
 
                     bool found_a = vec_digi_find_first_of_range(&first_a, &s_first);
                     auto it = std::find_first_of(first_b, last_b, s_first_b, s_last_b);
@@ -1445,9 +1440,9 @@ main(void)
                 }
                 case TEST_FIND_END_RANGE:
                 {
-                    vec_digi_it first_a, last_a, s_first;
+                    vec_digi_it first_a, s_first;
                     std::vector<DIGI>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     vec_digi aa;
                     std::vector<DIGI> bb;
                     gen_vectors(&aa, bb, TEST_RAND(4));

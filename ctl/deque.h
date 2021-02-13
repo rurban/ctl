@@ -243,6 +243,12 @@ JOIN(I, distance)(I* iter, I* other)
     return other->index - iter->index;
 }
 
+static inline long
+JOIN(I, distance_range)(I* range)
+{
+    return range->end - range->index;
+}
+
 // forwards for algorithm
 static inline A JOIN(A, copy)(A* self);
 static inline A JOIN(A, init)(void);
@@ -563,7 +569,7 @@ JOIN(A, emplace_back)(A* self, T* value)
 }
 
 static inline void /* I* */
-JOIN(A, insert_range)(I* pos, I* first, I* last)
+JOIN(A, insert_range)(I* pos, I* range)
 {
     A* self = pos->container;
     size_t index = pos->index;
@@ -571,13 +577,13 @@ JOIN(A, insert_range)(I* pos, I* first, I* last)
     // The STL cannot do that.
     if(!JOIN(I, done)(pos))
     {
-        foreach_range(A, iter, first, last)
+        foreach_range_(A, iter, range)
             if (iter.ref)
                 JOIN(A, insert_index)(self, index++, self->copy(iter.ref));
     }
     else
     {
-        foreach_range(A, iter, first, last)
+        foreach_range_(A, iter, range)
             if (iter.ref)
                 JOIN(A, push_back)(self, self->copy(iter.ref));
     }

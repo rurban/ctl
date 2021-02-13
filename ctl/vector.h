@@ -180,6 +180,12 @@ JOIN(I, distance)(I* iter, I* other)
     return other->ref - iter->ref;
 }
 
+static inline long
+JOIN(I, distance_range)(I* range)
+{
+    return range->end - range->ref;
+}
+
 static inline A JOIN(A, init_from)(A* copy);
 static inline A JOIN(A, copy)(A* self);
 static inline void JOIN(A, push_back)(A* self, T value);
@@ -584,31 +590,31 @@ JOIN(A, insert_count)(I* pos, size_t count, T value)
 }
 
 static inline void
-JOIN(A, insert_range)(I* pos, I* first2, I* last2)
+JOIN(A, insert_range)(I* pos, I* range2)
 {
     A* self = pos->container;
     size_t index = pos->ref - self->vector;
-    size_t f2 = first2->ref - first2->container->vector;
-    size_t l2 = last2->ref - first2->container->vector;
+    size_t f2 = range2->ref - range2->container->vector;
+    size_t l2 = range2->end - range2->container->vector;
     // only if not overlapping, and resize does no realloc
     if (f2 < l2)
     {
         JOIN(A, reserve)(self, self->size + (l2 - f2));
-        if (self == first2->container)
+        if (self == range2->container)
         {
-            first2->ref = &first2->container->vector[f2];
-            first2->end = last2->ref = &first2->container->vector[l2];
+            range2->ref = &range2->container->vector[f2];
+            range2->end = &range2->container->vector[l2];
         }
     }
     if(!JOIN(I, done)(pos))
     {
-        foreach_range(A, it, first2, last2)
+        foreach_range_(A, it, range2)
             if (it.ref)
                 JOIN(A, insert_index)(self, index++, self->copy(it.ref));
     }
     else
     {
-        foreach_range(A, it, first2, last2)
+        foreach_range_(A, it, range2)
             if (it.ref)
                 JOIN(A, push_back)(self, self->copy(it.ref));
     }

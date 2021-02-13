@@ -190,6 +190,12 @@ JOIN(I, distance)(I* iter, I* other)
     return other->ref - iter->ref;
 }
 
+static inline long
+JOIN(I, distance_range)(I* range)
+{
+    return range->end - range->ref;
+}
+
 static inline A JOIN(A, init_from)(A* copy);
 static inline A JOIN(A, copy)(A* self);
 

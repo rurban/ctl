@@ -141,10 +141,11 @@ gen_strings(str* a, std::string& b, size_t size)
 }
 
 static void
-get_random_iters (str *a, str_it* first_a, str_it* last_a,
+get_random_iters (str *a, str_it* first_a,
                   std::string& b, std::string::iterator &first_b,
                   std::string::iterator &last_b)
 {
+    str_it last_a;
     size_t r1 = TEST_RAND(a->size / 2);
     const size_t rnd = TEST_RAND(a->size / 2);
     size_t r2 = MIN(r1 + rnd, a->size);
@@ -159,12 +160,12 @@ get_random_iters (str *a, str_it* first_a, str_it* last_a,
 
         if (r1 == r2)
         {
-            *last_a = it1;
+            last_a = it1;
             last_b = first_b;
         }
         else if (r2 == a->size)
         {
-            *last_a = str_it_end(a);
+            last_a = str_it_end(a);
             last_b = b.end();
         }
         else
@@ -173,18 +174,18 @@ get_random_iters (str *a, str_it* first_a, str_it* last_a,
             last_b = b.begin();
             str_it_advance(&it2, r2);
             last_b += r2;
-            *last_a = it2;
+            last_a = it2;
         }
     }
     else
     {
         str_it end = str_it_end(a);
         *first_a = end;
-        *last_a = end;
+        last_a = end;
         first_b = b.begin();
         last_b = b.end();
     }
-    first_a->end = last_a->ref;
+    first_a->end = last_a.ref;
 }
 
 int
@@ -397,10 +398,10 @@ main(void)
                 {
                     const size_t size = TEST_RAND(4);
                     char* temp = create_test_string(size);
-                    str_it first_a, last_a, range2;
+                    str_it first_a, range2;
                     std::string bb = temp;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     str aa = str_init(temp);
                     free(temp);
                     range2 = str_it_begin(&aa);
@@ -544,16 +545,16 @@ main(void)
                 case TEST_INSERT_RANGE:
                 {
                     const size_t index = TEST_RAND(a.size);
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
                     str aa;
                     std::string bb;
                     gen_strings(&aa, bb, TEST_RAND(a.size));
-                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    get_random_iters (&aa, &first_a, bb, first_b, last_b);
                     b.insert(b.begin() + index, first_b, last_b);
                     str_it pos = str_it_begin(&a);
                     str_it_advance(&pos, index);
-                    str_insert_range(&pos, &first_a, &last_a);
+                    str_insert_range(&pos, &first_a);
                     ADJUST_CAP("insert_range", a, b);
                     CHECK(a, b);
                     str_free(&aa);
@@ -656,9 +657,9 @@ main(void)
                 case TEST_FIND_RANGE:
                 {
                     const char c = RAND_CHAR;
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     bool found_a = str_find_range(&first_a, c);
                     auto bb = std::find(first_b, last_b, c);
                     if (found_a)
@@ -671,60 +672,60 @@ main(void)
                 }
                 case TEST_FIND_IF_RANGE:
                 {
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    first_a = str_find_if_range(&first_a, &last_a, is_upper);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    first_a = str_find_if_range(&first_a, is_upper);
                     auto bb = std::find_if(first_b, last_b, STL_is_upper);
                     CHECK_ITER(first_a, b, bb);
                     break;
                 }
                 case TEST_FIND_IF_NOT_RANGE:
                 {
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    first_a = str_find_if_not_range(&first_a, &last_a, is_upper);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    first_a = str_find_if_not_range(&first_a, is_upper);
                     auto bb = std::find_if_not(first_b, last_b, STL_is_upper);
                     CHECK_ITER(first_a, b, bb);
                     break;
                 }
                 case TEST_ALL_OF_RANGE:
                 {
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = str_all_of_range(&first_a, &last_a, is_upper);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = str_all_of_range(&first_a, is_upper);
                     bool bb = std::all_of(first_b, last_b, STL_is_upper);
                     assert(aa == bb);
                     break;
                 }
                 case TEST_ANY_OF_RANGE:
                 {
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = str_any_of_range(&first_a, &last_a, is_upper);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = str_any_of_range(&first_a, is_upper);
                     bool bb = std::any_of(first_b, last_b, STL_is_upper);
                     assert(aa == bb);
                     break;
                 }
                 case TEST_NONE_OF_RANGE:
                 {
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = str_none_of_range(&first_a, &last_a, is_upper);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = str_none_of_range(&first_a, is_upper);
                     bool bb = std::none_of(first_b, last_b, STL_is_upper);
                     assert(aa == bb);
                     break;
                 }
                 case TEST_COUNT_IF_RANGE:
                 {
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    size_t numa = str_count_if_range(&first_a, &last_a, is_upper);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    size_t numa = str_count_if_range(&first_a, is_upper);
                     size_t numb = std::count_if(first_b, last_b, STL_is_upper);
                     assert(numa == numb); //fails. off by one, counts one too much
                     break;
@@ -732,11 +733,11 @@ main(void)
                 case TEST_COUNT_RANGE:
                 {
                     char c = RAND_CHAR;
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     // used to fail with 0,0 of 0
-                    size_t numa = str_count_range(&first_a, &last_a, c);
+                    size_t numa = str_count_range(&first_a, c);
                     size_t numb = count(first_b, last_b, c);
                     assert(numa == numb);
                     break;
@@ -771,11 +772,11 @@ main(void)
                 }
                 case TEST_GENERATE_RANGE:
                 {
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     str_generate_reset();
-                    str_generate_range(&first_a, &last_a, str_generate);
+                    str_generate_range(&first_a, str_generate);
                     str_generate_reset();
                     std::generate(first_b, last_b, STR_generate);
                     CHECK(a, b);
@@ -925,12 +926,12 @@ main(void)
                     str_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    str_it first_a1, last_a1;
+                    str_it first_a1;
                     std::string::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    str_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    str_it first_a2;
                     std::string::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     //LOG_range(first_a1);
@@ -965,12 +966,12 @@ main(void)
                     str_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    str_it first_a1, last_a1;
+                    str_it first_a1;
                     std::string::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    str_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    str_it first_a2;
                     std::string::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a - aa\n");
                     //LOG_range(first_a1);
@@ -1004,12 +1005,12 @@ main(void)
                     str_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    str_it first_a1, last_a1;
+                    str_it first_a1;
                     std::string::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    str_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    str_it first_a2;
                     std::string::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     //LOG_range(first_a1);
@@ -1044,12 +1045,12 @@ main(void)
                     str_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    str_it first_a1, last_a1;
+                    str_it first_a1;
                     std::string::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    str_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    str_it first_a2;
                     std::string::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     //LOG_range(first_a1);
@@ -1080,13 +1081,13 @@ main(void)
                 {
                     if (a.size < 2)
                         break;
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     str aa = str_init(a.vector);
                     str_it dest = str_it_begin(&aa);
                     /*str_it it = */
-                    str_transform_range(&first_a, &last_a, dest, str_untrans);
+                    str_transform_range(&first_a, dest, str_untrans);
                     std::string bb;
                     bb.resize(last_b - first_b);
                     /*auto iter = */
@@ -1101,9 +1102,9 @@ main(void)
                 }
                 case TEST_GENERATE_N_RANGE:
                 {
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     size_t off = first_b - b.begin();
                     size_t count = TEST_RAND(20 - off);
                     str_generate_reset();
@@ -1124,10 +1125,10 @@ main(void)
                     str_it b1, b2;
                     b1 = str_it_begin(&a);
                     b2 = str_it_begin(&aa);
-                    str_it r1a, last1_a, r2a, last2_a;
+                    str_it r1a, r2a;
                     std::string::iterator r1b, last1_b, r2b, last2_b;
-                    get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
-                    get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
+                    get_random_iters (&a, &r1a, b, r1b, last1_b);
+                    get_random_iters (&aa, &r2a, bb, r2b, last2_b);
                     /*bool found_a = */str_mismatch(&r1a, &r2a);
 #if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
                     // requires c++14
@@ -1148,9 +1149,9 @@ main(void)
                 {
                     str aa = str_copy(&a);
                     std::string bb = b;
-                    str_it first_a, last_a;
+                    str_it first_a;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    get_random_iters (&aa, &first_a, bb, first_b, last_b);
                     if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
                         size_t i = first_b - bb.begin();
                         str_set(&aa, i, ' ');
@@ -1158,7 +1159,7 @@ main(void)
                     }
                     LOG("search \"%s\" in \"%s\" (%zu)\n", first_a.ref, a.vector, a.size);
                     //print_str_range(first_a);
-                    str_it found_a = str_search(&a, &first_a, &last_a);
+                    str_it found_a = str_search(&a, &first_a);
                     auto found_b = search(b.begin(), b.end(), first_b, last_b);
                     LOG("found a: %s\n", str_it_done(&found_a) ? "no" : "yes");
                     LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
@@ -1170,9 +1171,9 @@ main(void)
                 {
                     str aa = str_copy(&a);
                     std::string bb = b;
-                    str_it needle, last_a, range;
+                    str_it needle, range;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&aa, &needle, &last_a, bb, first_b, last_b);
+                    get_random_iters (&aa, &needle, bb, first_b, last_b);
                     if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
                         size_t i = first_b - bb.begin();
                         str_set(&aa, i, ' ');
@@ -1201,9 +1202,9 @@ main(void)
                 }
                 case TEST_ADJACENT_FIND_RANGE:
                 {
-                    str_it range, last_a;
+                    str_it range;
                     std::string::iterator first_b, last_b;
-                    get_random_iters (&a, &range, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &range, b, first_b, last_b);
                     LOG("%s\n", str_c_str(&a));
                     str_it *aa = str_adjacent_find_range(&range);
                     auto bb = adjacent_find(first_b, last_b);

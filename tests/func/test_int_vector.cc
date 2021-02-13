@@ -178,10 +178,11 @@ gen_vectors(vec_int* a, std::vector<int>& b, size_t size)
 }
 
 static void
-get_random_iters (vec_int *a, vec_int_it* first_a, vec_int_it* last_a,
+get_random_iters (vec_int *a, vec_int_it* first_a,
                   std::vector<int>& b, std::vector<int>::iterator &first_b,
                   std::vector<int>::iterator &last_b)
 {
+    vec_int_it last_a;
     size_t r1 = TEST_RAND(a->size / 2);
     const size_t rnd = TEST_RAND(a->size / 2);
     size_t r2 = MIN(r1 + rnd, a->size);
@@ -196,12 +197,12 @@ get_random_iters (vec_int *a, vec_int_it* first_a, vec_int_it* last_a,
 
         if (r1 == r2)
         {
-            *last_a = it1;
+            last_a = it1;
             last_b = first_b;
         }
         else if (r2 == a->size)
         {
-            *last_a = vec_int_end(a);
+            last_a = vec_int_end(a);
             last_b = b.end();
         }
         else
@@ -210,18 +211,18 @@ get_random_iters (vec_int *a, vec_int_it* first_a, vec_int_it* last_a,
             last_b = b.begin();
             vec_int_it_advance(&it2, r2);
             last_b += r2;
-            *last_a = it2;
+            last_a = it2;
         }
     }
     else
     {
         vec_int_it end = vec_int_end(a);
         *first_a = end;
-        *last_a = end;
+        last_a = end;
         first_b = b.begin();
         last_b = b.end();
     }
-    first_a->end = last_a->ref;
+    first_a->end = last_a.ref;
 }
 
 int
@@ -426,9 +427,9 @@ main(void)
                 {
                     if(a.size > 1)
                     {
-                        vec_int_it first_a, last_a;
+                        vec_int_it first_a;
                         std::vector<int>::iterator first_b, last_b;
-                        get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                        get_random_iters (&a, &first_a, b, first_b, last_b);
                         print_vec_range(first_a);
                         vec_int_erase_range(&first_a);
                         auto it = b.erase(first_b, last_b);
@@ -488,7 +489,7 @@ main(void)
                         size_t size2 = TEST_RAND(TEST_MAX_SIZE);
                         vec_int aa = vec_int_init_from(&a);
                         std::vector<int> bb;
-                        vec_int_it first_a, last_a;
+                        vec_int_it first_a;
                         std::vector<int>::iterator first_b, last_b;
                         for(size_t pushes = 0; pushes < size2; pushes++)
                         {
@@ -497,12 +498,12 @@ main(void)
                             bb.push_back(value);
                         }
                         print_vec(&aa);
-                        get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                        get_random_iters (&aa, &first_a, bb, first_b, last_b);
                         const size_t index = TEST_RAND(a.size);
                         vec_int_it pos = vec_int_begin(&a);
                         vec_int_it_advance(&pos, index);
                         b.insert(b.begin() + index, first_b, last_b);
-                        vec_int_insert_range(&pos, &first_a, &last_a);
+                        vec_int_insert_range(&pos, &first_a);
                         // our growth strategy is better. but for test sake adjust it
                         vec_int_reserve(&a, b.capacity());
                         print_vec(&a);
@@ -681,9 +682,9 @@ main(void)
                 {
                     int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                                           : random_element(&a);
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     bool found_a = vec_int_find_range(&first_a, vb);
                     auto it = find(first_b, last_b, vb);
                     if (found_a)
@@ -696,10 +697,10 @@ main(void)
                 }
                 case TEST_FIND_IF_RANGE:
                 {
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    first_a = vec_int_find_if_range(&first_a, &last_a, is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    first_a = vec_int_find_if_range(&first_a, is_odd);
                     auto it = find_if(first_b, last_b, stl_is_odd);
                     print_vec(&a);
                     print_vector(b);
@@ -708,20 +709,20 @@ main(void)
                 }
                 case TEST_FIND_IF_NOT_RANGE:
                 {
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    first_a = vec_int_find_if_not_range(&first_a, &last_a, is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    first_a = vec_int_find_if_not_range(&first_a, is_odd);
                     auto it = find_if_not(first_b, last_b, stl_is_odd);
                     CHECK_ITER(first_a, b, it);
                     break;
                 }
                 case TEST_ALL_OF_RANGE:
                 {
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = vec_int_all_of_range(&first_a, &last_a, is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = vec_int_all_of_range(&first_a, is_odd);
                     bool bb = all_of(first_b, last_b, stl_is_odd);
                     if (aa != bb)
                     {
@@ -734,10 +735,10 @@ main(void)
                 }
                 case TEST_ANY_OF_RANGE:
                 {
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = vec_int_any_of_range(&first_a, &last_a, is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = vec_int_any_of_range(&first_a, is_odd);
                     bool bb = any_of(first_b, last_b, stl_is_odd);
                     if (aa != bb)
                     {
@@ -750,10 +751,10 @@ main(void)
                 }
                 case TEST_NONE_OF_RANGE:
                 {
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    bool aa = vec_int_none_of_range(&first_a, &last_a, is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    bool aa = vec_int_none_of_range(&first_a, is_odd);
                     bool bb = none_of(first_b, last_b, stl_is_odd);
                     if (aa != bb)
                     {
@@ -766,10 +767,10 @@ main(void)
                 }
                 case TEST_COUNT_IF_RANGE:
                 {
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    size_t numa = vec_int_count_if_range(&first_a, &last_a, is_odd);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    size_t numa = vec_int_count_if_range(&first_a, is_odd);
                     size_t numb = count_if(first_b, last_b, stl_is_odd);
                     if (numa != numb)
                     {
@@ -786,11 +787,11 @@ main(void)
                     int test_value = 0;
                     int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
                         : test_value;
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     // used to fail with 0,0 of 0
-                    size_t numa = vec_int_count_range(&first_a, &last_a, v);
+                    size_t numa = vec_int_count_range(&first_a, v);
                     size_t numb = count(first_b, last_b, v);
                     assert(numa == numb);
                     break;
@@ -849,12 +850,12 @@ main(void)
                     vec_int_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    vec_int_it first_a1, last_a1;
+                    vec_int_it first_a1;
                     std::vector<int>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    vec_int_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    vec_int_it first_a2;
                     std::vector<int>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a - aa\n");
                     print_vec_range(first_a1);
@@ -979,12 +980,12 @@ main(void)
                     vec_int_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    vec_int_it first_a1, last_a1;
+                    vec_int_it first_a1;
                     std::vector<int>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    vec_int_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    vec_int_it first_a2;
                     std::vector<int>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     print_vec_range(first_a1);
@@ -1019,12 +1020,12 @@ main(void)
                     vec_int_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    vec_int_it first_a1, last_a1;
+                    vec_int_it first_a1;
                     std::vector<int>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    vec_int_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    vec_int_it first_a2;
                     std::vector<int>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     print_vec_range(first_a1);
@@ -1059,12 +1060,12 @@ main(void)
                     vec_int_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    vec_int_it first_a1, last_a1;
+                    vec_int_it first_a1;
                     std::vector<int>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    vec_int_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    vec_int_it first_a2;
                     std::vector<int>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a (%zu) + aa (%zu)\n", a.size, aa.size);
                     print_vec_range(first_a1);
@@ -1099,12 +1100,12 @@ main(void)
                     vec_int_sort(&aa);
                     std::sort(b.begin(), b.end());
                     std::sort(bb.begin(), bb.end());
-                    vec_int_it first_a1, last_a1;
+                    vec_int_it first_a1;
                     std::vector<int>::iterator first_b1, last_b1;
-                    get_random_iters (&a, &first_a1, &last_a1, b, first_b1, last_b1);
-                    vec_int_it first_a2, last_a2;
+                    get_random_iters (&a, &first_a1, b, first_b1, last_b1);
+                    vec_int_it first_a2;
                     std::vector<int>::iterator first_b2, last_b2;
-                    get_random_iters (&aa, &first_a2, &last_a2, bb, first_b2, last_b2);
+                    get_random_iters (&aa, &first_a2, bb, first_b2, last_b2);
 
                     LOG("CTL a + aa\n");
                     print_vec_range(first_a1);
@@ -1141,11 +1142,11 @@ main(void)
                 }
                 case TEST_GENERATE_RANGE:
                 {
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     int_generate_reset();
-                    vec_int_generate_range(&first_a, &last_a, int_generate);
+                    vec_int_generate_range(&first_a, int_generate);
                     int_generate_reset();
                     std::generate(first_b, last_b, int_generate);
                     CHECK(a, b);
@@ -1200,9 +1201,9 @@ main(void)
 #ifdef DEBUG
                 case TEST_GENERATE_N_RANGE: // 60
                 {
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     size_t off = first_b - b.begin();
                     size_t count = TEST_RAND(20 - off);
                     int_generate_reset();
@@ -1214,12 +1215,12 @@ main(void)
                 }
                 case TEST_TRANSFORM_RANGE: // 61
                 {
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     vec_int aa = vec_int_init();
                     vec_int_it dest = vec_int_begin(&aa);
-                    vec_int_it it = vec_int_transform_range(&first_a, &last_a, dest, int_untrans);
+                    vec_int_it it = vec_int_transform_range(&first_a, dest, int_untrans);
                     std::vector<int> bb;
                     bb.resize(last_b - first_b);
                     auto iter = std::transform(first_b, last_b-1, b.begin()+1, bb.begin(),
@@ -1234,16 +1235,16 @@ main(void)
                 {
                     if (a.size < 2)
                         break;
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
                     vec_int_it pos = vec_int_begin(&a);
                     vec_int_it_advance(&pos, 1);
                     vec_int aa = vec_int_init();
                     vec_int_resize(&aa, last_b - first_b, 0);
                     vec_int_it dest = vec_int_begin(&aa);
                     /* vec_int_it it = */
-                    vec_int_transform_it_range(&first_a, &last_a,
+                    vec_int_transform_it_range(&first_a,
                                                &pos, dest, int_bintrans);
                     auto it2 = b.begin();
                     std::advance(it2, 1);
@@ -1273,10 +1274,10 @@ main(void)
                     vec_int_it b1, b2;
                     b1 = vec_int_begin(&a);
                     b2 = vec_int_begin(&aa);
-                    vec_int_it r1a, last1_a, r2a, last2_a;
+                    vec_int_it r1a, r2a;
                     std::vector<int>::iterator r1b, last1_b, r2b, last2_b;
-                    get_random_iters (&a, &r1a, &last1_a, b, r1b, last1_b);
-                    get_random_iters (&aa, &r2a, &last2_a, bb, r2b, last2_b);
+                    get_random_iters (&a, &r1a, b, r1b, last1_b);
+                    get_random_iters (&aa, &r2a, bb, r2b, last2_b);
                     /*bool found_a = */vec_int_mismatch(&r1a, &r2a);
                     auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
                     int d1a = vec_int_it_distance(&b1, &r1a);
@@ -1293,16 +1294,16 @@ main(void)
                     print_vec(&a);
                     vec_int aa = vec_int_copy(&a);
                     std::vector<int> bb = b;
-                    vec_int_it first_a, last_a;
+                    vec_int_it first_a;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&aa, &first_a, &last_a, bb, first_b, last_b);
+                    get_random_iters (&aa, &first_a, bb, first_b, last_b);
                     if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
                         size_t i = first_b - bb.begin();
                         vec_int_set(&aa, i, 0);
                         bb[i] = 0;
                     }
                     print_vec_range(first_a);                    
-                    vec_int_it found_a = vec_int_search(&a, &first_a, &last_a);
+                    vec_int_it found_a = vec_int_search(&a, &first_a);
                     auto found_b = search(b.begin(), b.end(), first_b, last_b);
                     LOG("found a: %s\n", vec_int_it_done(&found_a) ? "no" : "yes");
                     LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
@@ -1314,9 +1315,9 @@ main(void)
                 {
                     vec_int aa = vec_int_copy(&a);
                     std::vector<int> bb = b;
-                    vec_int_it needle, last_a, range;
+                    vec_int_it needle, range;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&aa, &needle, &last_a, bb, first_b, last_b);
+                    get_random_iters (&aa, &needle, bb, first_b, last_b);
                     if (aa.size && TEST_RAND(2)) { // 50% unsuccessful
                         size_t i = first_b - bb.begin();
                         vec_int_set(&aa, i, 0);
@@ -1344,9 +1345,9 @@ main(void)
                 }
                 case TEST_ADJACENT_FIND_RANGE:
                 {
-                    vec_int_it range, last_a;
+                    vec_int_it range;
                     std::vector<int>::iterator first_b, last_b;
-                    get_random_iters (&a, &range, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &range, b, first_b, last_b);
                     print_vec_range(range);
                     vec_int_it *aa = vec_int_adjacent_find_range(&range);
                     auto bb = adjacent_find(first_b, last_b);
@@ -1385,7 +1386,7 @@ main(void)
                 {
                     if(a.size > 0)
                     {
-                        vec_int_it first_a, last_a;
+                        vec_int_it first_a;
                         vec_int_it aa = vec_int_find_end(&a, &s_first, &s_last);
                         auto bb = find_end(b.begin(), b.end(), ...);
                         bool found_a = !vec_int_it_done(&aa);
@@ -1398,11 +1399,11 @@ main(void)
                 }
                 case TEST_FIND_END_RANGE:
                 {
-                    vec_int_it first_a, last_a, s_first, s_last;
+                    vec_int_it first_a, s_first;
                     std::vector<int>::iterator first_b, last_b, s_first_b, s_last_b;
-                    get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
 # if __cpp_lib_erase_if >= 202002L
-                    first_a = vec_int_find_end_range(&first_a, &last_a, &s_first_a, &s_last_a);
+                    first_a = vec_int_find_end_range(&first_a, &s_first_a);
                     auto it = find_end(first_b, last_b, vb);
                     CHECK_ITER(first_a, b, it);
                     CHECK(a, b);
