@@ -219,18 +219,18 @@ main(void)
         TEST(SEARCH_RANGE) \
         TEST(ADJACENT_FIND) \
         TEST(ADJACENT_FIND_RANGE) \
+        TEST(FIND_FIRST_OF) \
+        TEST(FIND_FIRST_OF_RANGE) \
+        TEST(FIND_END_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 45 */ \
+        TEST(EMPLACE) /* 48 */ \
         TEST(INSERT_RANGE) \
         TEST(EXTRACT) \
         TEST(MERGE) \
         TEST(EQUAL_RANGE) \
         TEST(GENERATE_RANGE) \
-        TEST(FIND_FIRST_OF) \
-        TEST(FIND_FIRST_OF_RANGE) \
         TEST(FIND_END) \
-        TEST(FIND_END_RANGE) /* 54 looks ok*/   \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -997,8 +997,7 @@ main(void)
                 LOG("found %s\n", set_digi_it_done(aa) ? "no" : "yes");
                 break;
             }
-#ifdef DEBUG
-            case TEST_FIND_FIRST_OF: // 52
+            case TEST_FIND_FIRST_OF: // 51
             {
                 set_digi aa;
                 std::set<DIGI> bb;
@@ -1050,7 +1049,6 @@ main(void)
                 set_digi_free(&aa);
                 break;
             }
-#endif // DEBUG
 #ifdef DEBUG
             case TEST_FIND_END:
             {
@@ -1068,6 +1066,7 @@ main(void)
                 set_digi_free(&aa);
                 break;
             }
+#endif // DEBUG
             case TEST_FIND_END_RANGE:
             {
                 set_digi_it first_a, last_a, s_first;
@@ -1086,7 +1085,6 @@ main(void)
                 set_digi_free(&aa);
                 break;
             }
-#endif // DEBUG
 #ifdef DEBUG
             case TEST_LOWER_BOUND: // 64
             {

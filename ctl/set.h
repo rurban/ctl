@@ -361,6 +361,7 @@ JOIN(A, find)(A* self, T key)
         return JOIN(A, end)(self);
 }
 
+// FIXME requires 2-way compare
 static inline bool
 JOIN(A, find_range)(I* range, T key)
 {
@@ -370,7 +371,7 @@ JOIN(A, find_range)(I* range, T key)
     if (!JOIN(I, done)(&found) && !self->compare(found.ref, range->ref))
     {
         // no, if not found < range.end
-        if (!self->compare(found.ref, &range->end->value))
+        if (range->end && !self->compare(found.ref, &range->end->value))
             goto not_found;
         *range = found;
         return true;
@@ -378,7 +379,7 @@ JOIN(A, find_range)(I* range, T key)
     else
     {
     not_found:
-        JOIN(I, set_done)(range);
+        JOIN(I, set_done)(range); // FIXME needed?
         return false;
     }
 }
@@ -1195,21 +1196,16 @@ JOIN(A, find_first_of_range)(I *range1, I* range2)
 {
     if (JOIN(I, done)(range1) || JOIN(I, done)(range2))
         return false;
-    A* self = range1->container;
     I it = *range2;
     while (1)
     {
-        I found;
         if (JOIN(I, done)(&it))
             goto not_found;
-        // search in set and check its range
-        found = JOIN(A, find)(self, *it.ref);
-        if (JOIN(I, done)(&found) && !self->compare(range1->ref, found.ref))
+        // find_range changes the 1st arg. need a copy
+        I tmp = *range1;
+        if (JOIN(A, find_range)(&tmp, *it.ref))
         {
-            if (!JOIN(I, done)(range1) &&
-                !self->compare(found.ref, &range1->end->value))
-                continue;
-            *range1 = found;
+            *range1 = tmp;
             return true;
         }
         JOIN(I, next)(&it);

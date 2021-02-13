@@ -707,7 +707,6 @@ JOIN(A, search)(A* self, I* first2, I* last2)
         return JOIN(A, end)(self);
 }
 
-#ifdef DEBUG
 static inline I
 JOIN(A, find_end_range)(I* range1, I* range2)
 {
@@ -740,7 +739,6 @@ JOIN(A, find_end)(A* self, I* s_range)
     else
         return JOIN(A, end)(self);
 }
-#endif // DEBUG
 
 static inline I*
 JOIN(A, adjacent_find_range)(I *range)

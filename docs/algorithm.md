@@ -87,7 +87,7 @@ finds if and the first position where two ranges differ.
     I find_if_not_range (I* first, I* last, int _match(T*)) (C++20)
  
 finds the first element satisfying specific criteria. 
-Many functions return a fresh iterator I, `find_range` sets range to the found element.
+Either return a fresh iterator I, or return bool and set the range argument to the found element.
 Does not consume/free the T value.
 
     I find_end
