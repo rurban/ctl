@@ -507,44 +507,42 @@ JOIN(A, erase_index)(A* self, size_t index)
     return JOIN(I, iter)(self, index);
 }
 
-#ifdef DEBUG
-static inline I
-JOIN(A, erase_range)(I* from, I* to)
+static inline I*
+JOIN(A, erase_range)(I* range)
 {
-    if (from->ref >= to->ref)
-        return *to;
-    static T zero;
-    A* self = from->container;
+    if (JOIN(I, done)(range))
+        return range;
+    A* self = range->container;
     T* end = &self->vector[self->size];
-#if 0
-    size_t size = (to->ref - from->ref);
+#if 1
+    size_t size = (range->end - range->ref);
 # ifndef POD
     if(self->free)
-        for(T* ref = from->ref; ref < to->ref - 1; ref++)
+        for(T* ref = range->ref; ref < range->end; ref++)
             self->free(ref);
 # endif
-    if (to->ref != end)
+    if (range->end != end)
     {
-        memmove(from->ref, to->ref, (end - to->ref) * sizeof (T));
-        for(T* ref = to->ref; ref < end; ref++)
-            *ref = zero;
+        memmove(range->ref, range->end, (end - range->end) * sizeof (T));
+        memset(end - size, 0, size * sizeof (T)); // clear the rest?
     }
     self->size -= size;
 #else
-    *from->ref = zero;
-    for(T* pos = from->ref; pos < to->ref - 1; pos++)
+    static T zero;
+    *range->ref = zero;
+    T* pos = range->ref;
+    for(; pos < range->end - 1; pos++)
     {
         *pos = *(pos + 1);
         *(pos + 1) = zero;
         self->size--;
     }
+    self->size--;
+    if (range->end < end)
+        *pos = *(pos + 1);
 #endif
-    if (to->ref < end)
-        return JOIN(A, end)(from->container);
-    else
-        return *to;
+    return range;
 }
-#endif
 
 static inline void
 JOIN(A, insert)(I* pos, T value)

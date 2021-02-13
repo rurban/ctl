@@ -174,15 +174,15 @@ erases the element by index, and returns the position following the last removed
 
     I erase (I* pos)
 
-erases the element at position.
+erases a single element at position. Ignores `pos->end` range.
 
-    I erase_range (I* first, I* last)
+    I erase_range (I* range)
 
-erases elements from - to. _(NY)_
+erases elements from range.
 
     swap (A* self, A* other)
 
-swaps the contents
+swaps the contents.
 
     extract (A* self, T value)
 
@@ -192,7 +192,7 @@ extracts a value from the container. _(NYI)_
 
 extracts a node from the container. _(NYI)_
 
-    merge (A* self)
+    merge (A* self, A* other)
 
 splices nodes from another container _(NYI)_
 
