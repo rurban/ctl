@@ -1609,7 +1609,7 @@ main(void)
                         deq_digi_it_index(&first_a),
                         it - b.begin());
                     if (found_a)
-                        assert(it == first_b);
+                        assert(it != last_b);
                     else
                         assert(it == last_b);
                     deq_digi_free(&aa);

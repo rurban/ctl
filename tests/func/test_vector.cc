@@ -311,15 +311,15 @@ main(void)
         TEST(SEARCH_RANGE) \
         TEST(ADJACENT_FIND) \
         TEST(ADJACENT_FIND_RANGE) \
+        TEST(FIND_FIRST_OF) \
         TEST(FIND_FIRST_OF_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 57 */ \
+        TEST(EMPLACE) /* 59 */ \
         TEST(EQUAL_RANGE) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_RANGE) \
         TEST(TRANSFORM_IT_RANGE) \
-        TEST(FIND_FIRST_OF) \
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
         TEST(LOWER_BOUND) \
@@ -1382,7 +1382,6 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_FIND_FIRST_OF:
                 {
                     vec_digi aa;
@@ -1398,7 +1397,6 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#endif // DEBUG
                 case TEST_FIND_FIRST_OF_RANGE:
                 {
                     vec_digi aa;

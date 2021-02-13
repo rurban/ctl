@@ -625,18 +625,19 @@ JOIN(A, find_first_of_range)(I *range1, I* range2)
     if (JOIN(I, done)(range1) || JOIN(I, done)(range2))
         return false;
     A* self = range1->container;
-    for (; ; JOIN(I, next)(range1))
+    // TODO: sort range2 and binary_search
+    while (1)
     {
         // TODO unroll it into slices of 4, as strcspn does
-        for (I it = *range2; ; JOIN(I, next)(&it))
+        for (I it = *range2; !JOIN(I, done)(&it); JOIN(I, next)(&it))
         {
-            if (JOIN(I, done)(&it))
-                goto not_found;
             if (JOIN(A, _equal)(self, range1->ref, it.ref))
                 return true;
         }
+        JOIN(I, next)(range1);
+        if (JOIN(I, done)(range1))
+            break;
     }
- not_found:
     JOIN(I, set_done)(range1);
     return false;
 }

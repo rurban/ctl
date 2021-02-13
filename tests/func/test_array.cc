@@ -185,16 +185,16 @@ main(void)
         TEST(SEARCH_RANGE) \
         TEST(ADJACENT_FIND) \
         TEST(ADJACENT_FIND_RANGE) \
+        TEST(FIND_FIRST_OF) \
+        TEST(FIND_FIRST_OF_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) \
         TEST(DIFFERENCE) \
-        TEST(SYMMETRIC_DIFFERENCE) /* 36*/ \
+        TEST(SYMMETRIC_DIFFERENCE) /* 38*/ \
         TEST(INTERSECTION) \
         TEST(GENERATE_N_RANGE) \
-        TEST(TRANSFORM_RANGE) /* 39 */ \
-        TEST(FIND_FIRST_OF) \
-        TEST(FIND_FIRST_OF_RANGE) \
+        TEST(TRANSFORM_RANGE) /* 41 */ \
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
         TEST(LOWER_BOUND) \
@@ -693,11 +693,10 @@ main(void)
                 arr100_digi_free(&aa);
                 break;
             }
-#ifdef DEBUG
             case TEST_FIND_FIRST_OF:
             {
                 print_arr100(&a);
-                arr100_digi aa;
+                arr100_digi aa = arr100_digi_init_from(&a);
                 std::array<DIGI,100> bb;
                 for (int i=0; i<N; i++)
                 {
@@ -718,7 +717,7 @@ main(void)
             }
             case TEST_FIND_FIRST_OF_RANGE:
             {
-                arr100_digi aa;
+                arr100_digi aa = arr100_digi_init_from(&a);
                 std::array<DIGI,100> bb;
                 for (int i=0; i<N; i++)
                 {
@@ -744,11 +743,10 @@ main(void)
                     assert(it != last_b);
                 else
                     assert(it == last_b);
-                CHECK_RANGE(first_a, it, last_b);
+                //CHECK_RANGE(first_a, it, last_b);
                 arr100_digi_free(&aa);
                 break;
             }
-#endif // DEBUG
 #ifdef DEBUG
             case TEST_LOWER_BOUND:
             {

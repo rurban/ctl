@@ -256,14 +256,14 @@ main(void)
         TEST(SEARCH_RANGE) \
         TEST(ADJACENT_FIND) \
         TEST(ADJACENT_FIND_RANGE) \
+        TEST(FIND_FIRST_OF) \
+        TEST(FIND_FIRST_OF_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) /* 64 */ \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
-        TEST(FIND_FIRST_OF) \
-        TEST(FIND_FIRST_OF_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
         TEST(LOWER_BOUND) \
@@ -1435,8 +1435,7 @@ main(void)
                     LOG("found %s\n", list_digi_it_done(aa) ? "no" : "yes");
                     break;
                 }
-#ifdef DEBUG
-                case TEST_FIND_FIRST_OF: // 68
+                case TEST_FIND_FIRST_OF:
                 {
                     list_digi aa;
                     std::list<DIGI> bb;
@@ -1491,6 +1490,7 @@ main(void)
                     list_digi_free(&aa);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_FIND_END:
                 {
                     list_digi aa;
