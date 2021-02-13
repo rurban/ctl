@@ -162,7 +162,7 @@ assigns a value to a number of elements
 
     A transform (A* self, T unop(T*))
     A transform_it (A* self, I* pos, T _binop(T*, T*))
-    I transform_range (I* first1, I* last1, I dest, T _unop(T*))
+    I transform_range (I* first1, I* last1, I dest, T _unop(T*)) (NY)
     I transform_it_range (I* first1, I* last1, I* pos, I dest,
                           T _binop(T*, T*))
 
@@ -177,9 +177,10 @@ assigns the results of successive function calls to every element in a
 range.
 
     generate_n (A* self, size_t count, T _gen(void))
-    generate_n_range (I* first, size_t n, T _gen(void))   (C++20)
+    generate_n_range (I* first, size_t n, T _gen(void)) (C++20) (NY)
  
 assigns the results of successive function calls to N elements in a range.
+Note that the spec deviates sometimes from the STL.
 
     size_t remove (A* self, T value)
     size_t remove_if (A* self, int _match(T*)

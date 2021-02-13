@@ -240,7 +240,10 @@ JOIN(A, intersection_range)(I* r1, I* r2)
         else
         {
             if (!self.compare(r2->ref, r1->ref))
+            {
                 JOIN(A, push_back)(&self, self.copy(r1->ref));
+                JOIN(I, next)(r1);
+            }
             JOIN(I, next)(r2);
         }
     }

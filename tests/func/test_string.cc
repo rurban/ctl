@@ -274,9 +274,11 @@ main(void)
             TEST(COUNT_RANGE) \
             TEST(MISMATCH) \
             TEST(UNION) \
+            TEST(INTERSECTION) \
             TEST(DIFFERENCE) \
             TEST(SYMMETRIC_DIFFERENCE) \
             TEST(UNION_RANGE) \
+            TEST(INTERSECTION_RANGE) \
             TEST(DIFFERENCE_RANGE) \
             TEST(SYMMETRIC_DIFFERENCE_RANGE) \
             TEST(GENERATE) \
@@ -291,8 +293,6 @@ main(void)
 
 #define FOREACH_DEBUG(TEST) \
             TEST(EQUAL_RANGE) /* 57 */ \
-            TEST(INTERSECTION) \
-            TEST(INTERSECTION_RANGE) \
             TEST(GENERATE_N_RANGE) \
             TEST(TRANSFORM_RANGE) \
             TEST(LOWER_BOUND) \
@@ -842,8 +842,7 @@ main(void)
                     str_free(&aa);
                     break;
                 }
-#ifdef DEBUG
-                case TEST_INTERSECTION:
+            case TEST_INTERSECTION:
                 {
                     str aa;
                     std::string bb;
@@ -857,19 +856,19 @@ main(void)
                     std::string bbb;
                     std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
                                           std::back_inserter(bbb));
+                    LOG("%s (%zu)\n", str_c_str(&a), a.size);
+                    LOG("%s (%zu)\n", str_c_str(&aa), aa.size);
+                    LOG("=> %s (%zu) vs %s (%zu)\n", str_c_str(&aaa), aaa.size,
+                        bbb.c_str(), bbb.size());
                     ADJUST_CAP("intersection", aa, bb);
                     CHECK(aa, bb);
                     ADJUST_CAP("intersection", aaa, bbb);
                     CHECK(aaa, bbb);
 # endif
-                    //LOG(&a);
-                    //LOG(&aa);
-                    //LOG(&aaa);
                     str_free(&aaa);
                     str_free(&aa);
                     break;
                 }
-#endif // DEBUG
                 case TEST_SYMMETRIC_DIFFERENCE:
                 {
                     str aa;
@@ -957,7 +956,6 @@ main(void)
                     str_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_INTERSECTION_RANGE:
                 {
                     str aa;
@@ -997,7 +995,6 @@ main(void)
                     str_free(&aa);
                     break;
                 }
-#endif // DEBUG
                 case TEST_DIFFERENCE_RANGE:
                 {
                     str aa;

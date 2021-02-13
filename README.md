@@ -489,11 +489,11 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`includes`                       | ✓  |    |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
 |`includes_range`                 | ✓  |    |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
 |`difference`                     | ✓  | ✓  | x  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
-|`intersection`                   | ✓  | x  | x  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
+|`intersection`                   | ✓  | ✓  | x  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`symmetric_difference`           | ✓  | ✓  | x  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`union`                          | ✓  | ✓  | -  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`difference_range`               | ✓  | ✓  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
-|`intersection_range`             | ✓  | x  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
+|`intersection_range`             | ✓  | ✓  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
 |`symmetric_difference_range`     | ✓  | ✓  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
 |`union_range`                    | ✓  | ✓  | -  | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
