@@ -268,6 +268,7 @@ JOIN(A, intersection)(A* a, A* b)
 #endif
 }
 
+// Warning: fails with 3-way compare!
 static inline A
 JOIN(A, difference_range)(I* r1, I* r2)
 {
@@ -276,7 +277,7 @@ JOIN(A, difference_range)(I* r1, I* r2)
     {
         if (JOIN(I, done)(r2))
             return *JOIN(A, copy_range)(r1, &self);
-
+        // r1 < r2 (fails with 3-way compare)
         if (self.compare(r1->ref, r2->ref))
         {
             JOIN(A, push_back)(&self, self.copy(r1->ref));

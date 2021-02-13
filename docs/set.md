@@ -43,11 +43,14 @@ determined by using the equivalence relation. In imprecise terms, two objects
 other: `!compare(a, b) && !compare(b, a)`. _(Which obviously fails with double nan)_
 
 Note that **find** does not use this double comparison, rather a single compare
-call. And if that's `0` it optionally calls the equal method.
-For simple integral types this always works, as the default equal method is
-always set, but for non-POD types with only a simple 2-way compare method,
-(e.g. `*a > *b` instead of the proper 3-way `*a > *b ? 1 : (*a < *b ? -1 : 0))`
-you need to set a proper equal method by yourself.
+or optional equal call. For simple integral types this always works, as the
+default equal method is always set, but for non-POD types with the default 2-way
+compare method (`*a < *b`) you may want to set a proper equal method by yourself.
+
+**Three-way comparison** (`<=>`, i.e. `*a < *b ? -1 : *a == *b ? 0 : 1`) is
+permitted only with pure set functions (find, erase), but not with any generic
+algorithm methods. Supporting three-way comparison bedises the default two-way
+`operator<` comparison is too costly there.
 
 ## Member types
 

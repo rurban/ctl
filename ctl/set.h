@@ -327,8 +327,10 @@ JOIN(A, find_node)(A* self, T key)
     while(node)
     {
         int diff = self->compare(&key, &node->value);
+        // digi debugging only
+        //LOG("key < node: %d < %d = %d\n", *key.value, *node->value.value, diff);
         // Don't rely on a valid 3-way compare. can be just a simple 2way <
-        if(diff == 0) // 2way greater or 3way same
+        if(diff == 0) // 2way greater-or-equal or 3way equal
         {
             if (self->equal)
             {
@@ -337,8 +339,18 @@ JOIN(A, find_node)(A* self, T key)
                 else
                     node = node->r; // 2way greater
             }
-            else if (!self->compare(&node->value, &key))
-                return node; // generic same
+            else
+            {
+                int diff2 = self->compare(&node->value, &key);
+                if (diff2 > 0)
+                    node = node->r; // 2way greater
+                else if (diff2 == 0)
+                    return node; // generic same
+#if defined(_ASSERT_H) && !defined(NDEBUG)
+                else
+                    assert(!"set.find_node 3way < impossible");
+#endif
+            }
         }
         else if(diff < 0) // 3-way lower
             node = node->l;
