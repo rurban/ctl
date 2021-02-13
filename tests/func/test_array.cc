@@ -18,14 +18,20 @@ OLD_MAIN
 void print_arr100(arr100_digi *a)
 {
     foreach(arr100_digi, a, it)
+    {
+        if (!it.ref->value) break;
         printf ("%d ", *it.ref->value);
+    }
     printf ("\n");
 }
 
 void print_array(std::array<DIGI,100> &b)
 {
     for(auto& d: b)
+    {
+        if (!d.value) break;
         printf ("%d ", *d.value);
+    }
     printf ("\n");
 }
 
@@ -187,6 +193,8 @@ main(void)
         TEST(ADJACENT_FIND_RANGE) \
         TEST(FIND_FIRST_OF) \
         TEST(FIND_FIRST_OF_RANGE) \
+        TEST(FIND_END) \
+        TEST(FIND_END_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) \
@@ -195,8 +203,6 @@ main(void)
         TEST(INTERSECTION) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_RANGE) /* 41 */ \
-        TEST(FIND_END) \
-        TEST(FIND_END_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -744,6 +750,55 @@ main(void)
                 else
                     assert(it == last_b);
                 //CHECK_RANGE(first_a, it, last_b);
+                arr100_digi_free(&aa);
+                break;
+            }
+        case TEST_FIND_END:
+            {
+                arr100_digi aa = arr100_digi_init_from(&a);
+                std::array<DIGI,100> bb;
+                for (int i=0; i<4; i++)
+                {
+                    bb[i] = DIGI{i};
+                    aa.vector[i] = digi_init(i);
+                }
+                arr100_digi_it s_first = arr100_digi_begin(&aa);
+                print_arr100(&a);
+                print_arr100(&aa);
+                s_first.end = s_first.ref + 4;
+                arr100_digi_it it = arr100_digi_find_end(&a, &s_first);
+                auto iter = std::find_end(b.begin(), b.end(), bb.begin(), bb.begin()+34);
+                bool found_a = !arr100_digi_it_done(&it);
+                bool found_b = iter != b.end();
+                LOG("=> %s/%s, %ld/%ld\n",
+                    found_a ? "yes" : "no",
+                    found_b ? "yes" : "no",
+                    it.ref - a.vector,
+                    iter - b.begin());
+                CHECK_ITER(it, b, iter);
+                assert(found_a == found_b);
+                arr100_digi_free(&aa);
+                break;
+            }
+            case TEST_FIND_END_RANGE:
+            {
+                arr100_digi_it first_a, last_a, s_first;
+                std::array<DIGI,100>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                arr100_digi aa = arr100_digi_init_from(&a);
+                std::array<DIGI,100> bb;
+                for (int i=0; i<4; i++)
+                {
+                    bb[i] = DIGI{i};
+                    aa.vector[i] = digi_init(i);
+                }
+                s_first = arr100_digi_begin(&aa);
+                s_first.end = s_first.ref + 4;
+# if __cpp_lib_erase_if >= 202002L
+                first_a = arr100_digi_find_end_range(&first_a, &s_first);
+                auto it = std::find_end(first_b, last_b, bb.begin(), bb.begin()+4);
+                CHECK_ITER(first_a, b, it);
+# endif
                 arr100_digi_free(&aa);
                 break;
             }

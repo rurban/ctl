@@ -222,15 +222,15 @@ main(void)
         TEST(ADJACENT_FIND_RANGE) \
         TEST(FIND_FIRST_OF) \
         TEST(FIND_FIRST_OF_RANGE) \
+        TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 49 */ \
+        TEST(EMPLACE) /* 50 */ \
         TEST(EXTRACT) \
         TEST(MERGE) \
         TEST(EQUAL_RANGE) \
         TEST(GENERATE_RANGE) \
-        TEST(FIND_END) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -1048,24 +1048,39 @@ main(void)
                 set_digi_free(&aa);
                 break;
             }
-#ifdef DEBUG
             case TEST_FIND_END:
             {
+                print_set(&a);
                 set_digi aa;
                 std::set<DIGI> bb;
+                set_digi_it it;
                 setup_sets(&aa, bb);
+                if (aa.size > 4)
+                {
+                    int size2 = TEST_RAND(4);
+                    it = set_digi_begin(&aa);
+                    set_digi_it_advance(&it, size2);
+                    set_digi_erase_range(&it);
+                    auto itb = bb.begin();
+                    std::advance(itb, size2);
+                    bb.erase(itb, bb.end());
+                }
                 print_set(&aa);
                 set_digi_it s_first = set_digi_begin(&aa);
-                set_digi_it it = set_digi_find_end(&a, &s_first);
+                it = set_digi_find_end(&a, &s_first);
                 auto iter = find_end(b.begin(), b.end(), bb.begin(), bb.end());
                 bool found_a = !set_digi_it_done(&it);
                 bool found_b = iter != b.end();
+                LOG("=> %s/%s, %ld/%ld\n",
+                    found_a ? "yes" : "no",
+                    found_b ? "yes" : "no",
+                    set_digi_it_index(&it),
+                    std::distance(b.begin(), iter));
                 CHECK_ITER(it, b, iter);
                 assert(found_a == found_b);
                 set_digi_free(&aa);
                 break;
             }
-#endif // DEBUG
             case TEST_FIND_END_RANGE:
             {
                 set_digi_it first_a, last_a, s_first;

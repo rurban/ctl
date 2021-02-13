@@ -736,6 +736,11 @@ static inline I
 JOIN(A, find_end)(A* self, I* s_range)
 {
     I begin = JOIN(A, begin)(self);
+    if (JOIN(I, done)(s_range))
+    {
+        JOIN(I, set_done)(&begin);
+        return begin;
+    }
     if (JOIN(A, search_range)(&begin, s_range))
         return begin;
     else

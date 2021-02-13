@@ -258,14 +258,14 @@ main(void)
         TEST(ADJACENT_FIND_RANGE) \
         TEST(FIND_FIRST_OF) \
         TEST(FIND_FIRST_OF_RANGE) \
+        TEST(FIND_END) \
+        TEST(FIND_END_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EQUAL_RANGE) /* 64 */ \
+        TEST(EQUAL_RANGE) /* 67 */ \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
-        TEST(FIND_END) \
-        TEST(FIND_END_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -1490,12 +1490,11 @@ main(void)
                     list_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_FIND_END:
                 {
                     list_digi aa;
                     std::list<DIGI> bb;
-                    setup_lists(&aa, bb, TEST_RAND(5), NULL);
+                    setup_lists(&aa, bb, TEST_RAND(4), NULL);
                     print_lst(&aa);
                     list_digi_it s_first = list_digi_begin(&aa);
                     list_digi_it it = list_digi_find_end(&a, &s_first);
@@ -1514,7 +1513,7 @@ main(void)
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
                     list_digi aa;
                     std::list<DIGI> bb;
-                    setup_lists(&aa, bb, TEST_RAND(5), NULL);
+                    setup_lists(&aa, bb, TEST_RAND(4), NULL);
                     print_lst(&aa);
                     s_first = list_digi_begin(&aa);
 # if __cpp_lib_erase_if >= 202002L
@@ -1525,7 +1524,6 @@ main(void)
                     list_digi_free(&aa);
                     break;
                 }
-#endif // DEBUG
 #ifdef DEBUG
                 case TEST_LOWER_BOUND: // 64
                 {

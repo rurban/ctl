@@ -418,11 +418,11 @@ main(void)
             TEST(ADJACENT_FIND_RANGE) \
             TEST(FIND_FIRST_OF) \
             TEST(FIND_FIRST_OF_RANGE) \
+            TEST(FIND_END) \
+            TEST(FIND_END_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
             TEST(EQUAL_RANGE) /* 67 */ \
-            TEST(FIND_END) \
-            TEST(FIND_END_RANGE) \
             TEST(LOWER_BOUND) \
             TEST(UPPER_BOUND) \
             TEST(LOWER_BOUND_RANGE) \
@@ -1615,19 +1615,27 @@ main(void)
                     deq_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_FIND_END:
                 {
                     deq_digi aa;
                     std::deque<DIGI> bb;
                     setup_deque(&aa, bb);
+                    deq_digi_resize(&aa, 4, digi_init(0));
+                    bb.resize(4);
                     deq_digi_it s_first = deq_digi_begin(&aa);
+                    print_deq(&a);
+                    print_deq(&aa);
                     deq_digi_it it = deq_digi_find_end(&a, &s_first);
                     auto iter = find_end(b.begin(), b.end(), bb.begin(), bb.end());
                     bool found_a = !deq_digi_it_done(&it);
                     bool found_b = iter != b.end();
-                    CHECK_ITER(it, b, iter);
+                    LOG("=> %s/%s, %ld/%ld\n",
+                        found_a ? "yes" : "no",
+                        found_b ? "yes" : "no",
+                        deq_digi_it_index(&it),
+                        std::distance(b.begin(), iter));
                     assert(found_a == found_b);
+                    CHECK_RANGE(it, iter, b.end());
                     deq_digi_free(&aa);
                     break;
                 }
@@ -1639,16 +1647,25 @@ main(void)
                     deq_digi aa;
                     std::deque<DIGI> bb;
                     setup_deque(&aa, bb);
+                    deq_digi_resize(&aa, 4, digi_init(0));
+                    bb.resize(4);
                     s_first = deq_digi_begin(&aa);
 # if __cpp_lib_erase_if >= 202002L
                     first_a = deq_digi_find_end_range(&first_a, &s_first);
-                    auto it = find_end(first_b, last_b, bb.begin(), bb.end());
-                    CHECK_ITER(first_a, b, it);
+                    auto iter = find_end(first_b, last_b, bb.begin(), bb.end());
+                    bool found_a = !deq_digi_it_done(&first_a);
+                    bool found_b = iter != last_b;
+                    LOG("=> %s/%s, %ld/%ld\n",
+                        found_a ? "yes" : "no",
+                        found_b ? "yes" : "no",
+                        deq_digi_it_index(&first_a),
+                        std::distance(b.begin(), iter));
+                    assert(found_a == found_b);
+                    CHECK_RANGE(first_a, iter, last_b);
 # endif
                     deq_digi_free(&aa);
                     break;
                 }
-#endif // DEBUG
 #ifdef DEBUG
                 case TEST_LOWER_BOUND: // 64
                 {

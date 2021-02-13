@@ -313,6 +313,8 @@ main(void)
         TEST(ADJACENT_FIND_RANGE) \
         TEST(FIND_FIRST_OF) \
         TEST(FIND_FIRST_OF_RANGE) \
+        TEST(FIND_END) \
+        TEST(FIND_END_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EMPLACE) /* 59 */ \
@@ -320,8 +322,6 @@ main(void)
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_RANGE) \
         TEST(TRANSFORM_IT_RANGE) \
-        TEST(FIND_END) \
-        TEST(FIND_END_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -1421,17 +1421,23 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_FIND_END:
                 {
                     vec_digi aa;
                     std::vector<DIGI> bb;
                     gen_vectors(&aa, bb, TEST_RAND(4));
                     vec_digi_it s_first = vec_digi_begin(&aa);
+                    print_vec(&a);
+                    print_vec(&aa);
                     vec_digi_it it = vec_digi_find_end(&a, &s_first);
                     auto iter = find_end(b.begin(), b.end(), bb.begin(), bb.end());
                     bool found_a = !vec_digi_it_done(&it);
                     bool found_b = iter != b.end();
+                    LOG("=> %s/%s, %ld/%ld\n",
+                        found_a ? "yes" : "no",
+                        found_b ? "yes" : "no",
+                        it.ref - a.vector,
+                        iter - b.begin());
                     CHECK_ITER(it, b, iter);
                     assert(found_a == found_b);
                     vec_digi_free(&aa);
@@ -1454,7 +1460,6 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#endif // DEBUG
             default:
                 fail++;
 #ifdef DEBUG
