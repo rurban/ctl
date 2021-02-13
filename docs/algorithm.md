@@ -123,10 +123,10 @@ searches a range for a number of consecutive copies of an element. _(NYI)_
 
     copy
     copy_if (C++11)
-    copy_range (C++20)
+    A* copy_range (I* range, A* out) (C++20)
     copy_if_range (C++20)
  
-copies a range of elements to a new location. _(NYI)_
+copies a range of elements to the end of another container.
 
     copy_n (C++11)
     copy_n_range (C++20)
@@ -134,17 +134,14 @@ copies a range of elements to a new location. _(NYI)_
 copies a number of elements to a new location. _(NYI)_
 
     copy_backward
-    copy_backward_range (C++20)
  
 copies a range of elements in backwards order. _(NYI)_
  
-    move (C++11)
-    move_range (C++20)
+    I* move (I* range, I* out) (C++11)
  
-moves a range of elements to a new location. _(NYI)_
+moves a range of elements to the end of a new container.
 
     move_backward (C++11)
-    move_backward_range (C++20)
  
 moves a range of elements to a new location in backwards order. _(NYI)_
 
@@ -258,10 +255,10 @@ randomly re-orders elements in a range. _(NYI)_
  
 selects n random elements from a sequence. _(NYI)_
 
-    unique (A* self)
-    unique_range (C++20)
+    I unique (A* self)
+    I unique_range (I* range) (C++20)
  
-removes consecutive duplicate elements in a range. _(range NYI)_
+removes consecutive duplicate elements in a range.
 
     unique_copy
     unique_copy_range (C++20)

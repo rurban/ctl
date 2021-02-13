@@ -401,7 +401,7 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-                case TEST_ERASE_RANGE: // 40
+                case TEST_ERASE_RANGE: // 5
                 {
                     if(a.size > 1)
                     {
@@ -412,7 +412,11 @@ main(void)
                         vec_digi_erase_range(&first_a);
                         auto it = b.erase(first_b, last_b);
                         print_vec(&a);
+                        size_t index = vec_digi_it_index(&range_a);
+                        LOG("iter at %zu\n", index);
                         print_vector(b);
+                        long dist = std::distance(b.begin(), it);
+                        LOG("vs iter at %ld\n", dist);
                         CHECK_RANGE(first_a, it, last_b);
                     }
                     CHECK(a, b);

@@ -194,6 +194,8 @@ static inline void JOIN(A, shrink_to_fit)(A* self);
 static inline I JOIN(A, find)(A* self, T key);
 static inline void JOIN(A, fit)(A* self, size_t capacity);
 #endif
+static inline A* JOIN(A, move_range)(I* range, A* out);
+static inline I JOIN(A, erase)(I* pos);
 
 #include <ctl/bits/container.h>
 
@@ -530,8 +532,9 @@ JOIN(A, erase_range)(I* range)
     if (range->end != end)
     {
         memmove(range->ref, range->end, (end - range->end) * sizeof (T));
-        memset(end - size, 0, size * sizeof (T)); // clear the rest?
+        memset(end - size, 0, size * sizeof (T)); // clear the slack?
     }
+    JOIN(I, set_done)(range);
     self->size -= size;
 #else
     static T zero;
@@ -724,6 +727,28 @@ JOIN(A, find)(A* self, T key)
     return JOIN(A, end(self));
 }
 #endif
+
+// move elements from range to the end of out.
+// different to C++ where the deletion is skipped.
+// the STL does no move, just does assignment. (like our at)
+static inline A*
+JOIN(A, move_range)(I* range, A* out)
+{
+    static T zero;
+    A* self = range->container;
+    T* ref = range->ref;
+    while(ref != range->end)
+    {
+        JOIN(A, push_back)(out, *ref);
+        // erase without free
+        size_t index = ref - &self->vector[0];
+        memmove(ref, ref + 1, (self->size - index - 1) * sizeof (T));
+        self->vector[self->size - 1] = zero;
+        self->size--;
+        ref++;
+    }
+    return out;
+}
 
 #if defined(CTL_STR) || \
     defined(CTL_U8STR)

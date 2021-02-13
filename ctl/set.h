@@ -974,19 +974,6 @@ JOIN(A, erase_if)(A* self, int (*_match)(T*))
     return JOIN(A, remove_if)(self, _match);
 }
 
-static inline void /* I, B* ?? */
-JOIN(A, unique)(A* self)
-{
-    B* node = JOIN(A, first)(self);
-    while (node)
-    {
-        B* next = JOIN(B, next)(node);
-        if(next && JOIN(A, _equal)(self, &node->value, &next->value))
-            JOIN(A, erase_node)(self, node);
-        node = next;
-    }
-}
-
 static inline A
 JOIN(A, intersection)(A* a, A* b)
 {

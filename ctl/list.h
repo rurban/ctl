@@ -216,6 +216,7 @@ static inline A JOIN(A, copy)(A* self);
 static inline A JOIN(A, init_from)(A* copy);
 static inline void JOIN(A, push_back)(A* self, T value);
 static inline I JOIN(A, find)(A* self, T key);
+static inline A* JOIN(A, move_range)(I* range, A* out);
 
 #include <ctl/bits/container.h>
 
@@ -647,13 +648,28 @@ JOIN(A, splice_range)(I* pos, I* range2)
     }
 }
 
-// only needed for merge
+// only needed for merge and move
 static inline void
 JOIN(A, transfer_after)(A* self, A* other, B* position, B* node)
 {
     ASSERT(other->size);
     JOIN(A, disconnect)(other, node);
     JOIN(A, connect_after)(self, position, node);
+}
+
+// move elements from range to the end of out
+static inline A*
+JOIN(A, move_range)(I* range, A* out)
+{
+    A* self = range->container;
+    B* node = range->node;
+    while(node != range->end)
+    {
+        B* next = node->next;
+        JOIN(A, transfer_after)(out, self, out->tail, node);
+        node = next;
+    }
+    return out;
 }
 
 static inline void

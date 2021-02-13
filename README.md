@@ -446,10 +446,10 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`shuffle_range`                  |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`sample`                         |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`sample_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`unique`                         |    |    |    |    | ✓  |    |    | -  | -  | -  | -  | -  |
-|`unique_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`unique_copy`                    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`unique_copy_range`              |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`unique`                         |    |    |    |    | ✓  | -  | -  | -  | -  | -  | -  | -  |
+|`unique_range`                   |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`unique_copy`                    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`unique_copy_range`              |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`is_partitioned`                 |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`is_partitioned_range`           |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`partition`                      |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |

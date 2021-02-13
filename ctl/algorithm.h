@@ -867,6 +867,7 @@ JOIN(A, lower_bound_range)(I* range, T value)
         self->free(&value);
     return it;
 }
+
 static inline I
 JOIN(A, upper_bound_range)(I* range, T value)
 {
@@ -890,6 +891,43 @@ JOIN(A, upper_bound_range)(I* range, T value)
     return it;
 }
 
+// uset, set don't need it
+#if !defined CTL_SET
+
+static inline I
+JOIN(A, unique_range)(I* range)
+{
+    JOIN(A, it) prev = *range;
+    if (JOIN(I, done)(range))
+        return prev;
+    JOIN(I, next)(range);
+    A* self = range->container;
+    while(!JOIN(I, done)(range))
+    {
+        if (!JOIN(A, _equal)(self, prev.ref, range->ref))
+        {
+            JOIN(I, next)(&prev);
+            if (prev.ref != range->ref)
+                JOIN(A, move_range)(range, &prev);
+        }
+        JOIN(I, next)(range);
+    }
+    JOIN(I, next)(&prev);
+    return prev;
+}
+
+// list has its own variant
+#if !defined CTL_LIST
+static inline I
+JOIN(A, unique)(A *self)
+{
+    if (JOIN(A, size)(self) < 2)
+        return JOIN(A, end)(self);
+    I range = JOIN(A, begin)(self);
+    return JOIN(A, unique_range)(&range);
+}
+#endif // LIST
+#endif // SET
 #endif // USET
 
 #endif // DEBUG
@@ -903,8 +941,6 @@ JOIN(A, upper_bound_range)(I* range, T value)
 // copy_n_range C++20
 // copy_backward
 // copy_backward_range C++20
-// move C++11
-// move_range
 // move_backward C++11
 // move_backward_range C++20
 

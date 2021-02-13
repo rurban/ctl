@@ -33,8 +33,10 @@ void print_list(std::list<DIGI> &b)
 #define print_lst_range(x)
 #ifdef DEBUG
 #define TEST_MAX_VALUE 15
-#undef TEST_MAX_SIZE
-#define TEST_MAX_SIZE 10
+#ifndef LONG
+# undef TEST_MAX_SIZE
+# define TEST_MAX_SIZE 10
+#endif
 #else
 #define print_lst(x)
 #define print_list(x)
@@ -267,6 +269,7 @@ main(void)
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
+        TEST(UNIQUE_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -1515,7 +1518,24 @@ main(void)
                     break;
                 }
 #ifdef DEBUG
-                case TEST_LOWER_BOUND: // 64
+                case TEST_UNIQUE_RANGE:
+                {
+                    list_digi_it range;
+                    std::list<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &range, b, first_b, last_b);
+                    print_lst_range(range);
+                    list_digi_it aa = list_digi_unique_range(&range);
+                    auto bb = unique(first_b, last_b);
+                    b.erase(bb, ++bb);
+                    size_t index = list_digi_it_index(&aa);
+                    LOG("found %s at %zu, ", list_digi_it_done(&aa) ? "no" : "yes", index);
+                    long dist = std::distance(b.begin(), bb);
+                    LOG("vs found %s at %ld\n", bb == last_b ? "no" : "yes", dist);
+                    assert((long)index == dist);
+                    //CHECK_RANGE(aa, bb, last_b);
+                    break;
+                }
+                case TEST_LOWER_BOUND: // 72
                 {
                     list_digi_it it = list_digi_begin(&a);
                     list_digi_it_advance(&it, a.size / 2);

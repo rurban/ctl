@@ -717,6 +717,21 @@ JOIN(A, swap)(A* self, A* other)
     *other = temp;
 }
 
+// move elements from range to the end of out
+static inline A*
+JOIN(A, move_range)(I* range, A* out)
+{
+    A* self = range->container;
+    size_t index = range->index;
+    while(index != range->end)
+    {
+        T* ref = JOIN(A, at)(self, index);
+        JOIN(A, push_back)(out, *ref);
+        index++;
+    }
+    return out;
+}
+
 //#include <ctl/algorithm.h>
 
 #undef T
