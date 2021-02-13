@@ -726,8 +726,7 @@ main(void)
                     {
                         set_digi_it it = set_digi_begin(&a);
                         set_digi_it_advance(&it, 1);
-                        set_digi_it end = set_digi_end(&a);
-                        set_digi_erase_range(&it, &end);
+                        set_digi_erase_range(&it);
                         auto iter = b.begin();
                         advance(iter, 1);
                         b.erase(iter, b.end());

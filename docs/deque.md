@@ -182,7 +182,7 @@ erases the element at index.
 
 erases the element at pos.
 
-    I* erase_range (I* first, I* last)
+    I* erase_range (I* range)
 
 erases elements.
 

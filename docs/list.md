@@ -140,7 +140,7 @@ Insert the value into the container before pos.
 
 erases the element.
 
-    erase_range (I* first, I* last)
+    I* erase_range (I* range)
 
 erases elements.
 

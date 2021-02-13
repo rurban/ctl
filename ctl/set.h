@@ -778,20 +778,21 @@ JOIN(A, erase_it)(I* it)
         JOIN(A, erase_node)(it->container, node);
 }
 
-static inline void
-JOIN(A, erase_range)(I* from, I* to)
+static inline I*
+JOIN(A, erase_range)(I* range)
 {
-    if(!JOIN(I, done)(from))
+    if(!JOIN(I, done)(range))
     {
         // TODO: check if clear would be faster (from==begin && to==end)
-        B* node = from->node;
-        while(node != to->node)
+        B* node = range->node;
+        while(node != range->end)
         {
             B* next = JOIN(B, next)(node);
-            JOIN(A, erase_node)(from->container, node);
+            JOIN(A, erase_node)(range->container, node);
             node = next;
         }
     }
+    return range;
 }
 
 static inline void

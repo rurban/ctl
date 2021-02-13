@@ -149,7 +149,7 @@ erases the element by value.
 
 erases the element at pos.
 
-    erase_range (I* first, I* last)
+    I* erase_range (I* range)
 
 erases elements.
 

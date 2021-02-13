@@ -176,7 +176,7 @@ erases the element by index, and returns the position following the last removed
 
 erases a single element at position. Ignores `pos->end` range.
 
-    I erase_range (I* range)
+    I* erase_range (I* range)
 
 erases elements from range.
 

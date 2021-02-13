@@ -530,17 +530,18 @@ JOIN(A, resize)(A* self, size_t size, T value)
 }
 
 static inline I*
-JOIN(A, erase_range)(A* self, I* first, I* last)
+JOIN(A, erase_range)(I* range)
 {
-    size_t i = first->index;
-    size_t e = last->index;
+    if (JOIN(I, done)(range))
+        return range;
+    A* self = range->container;
+    size_t i = range->index;
+    size_t e = range->end;
     if (i >= self->size || i >= e)
-        return last;
+        return range;
     for(; i < e; e--)
-    {
         JOIN(A, erase_index)(self, i);
-    }
-    return first;
+    return range;
 }
 
 static inline void

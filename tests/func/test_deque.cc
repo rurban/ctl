@@ -721,26 +721,25 @@ main(void)
                         deq_digi_resize(&a, 10, digi_init(value));
                         b.resize(10, DIGI{value});
                     }
-                    deq_digi_it from, to;
+                    deq_digi_it range;
                     const size_t index = TEST_RAND(a.size/2);
                     const size_t iend = index + TEST_RAND(a.size - index);
-                    from = deq_digi_begin(&a);
-                    deq_digi_it_advance(&from, index);
-                    to = deq_digi_end(&a);
-                    deq_digi_it_advance(&to, (long)iend - a.size);
+                    range = deq_digi_begin(&a);
+                    deq_digi_it_advance(&range, index);
+                    range.end = iend;
                     LOG ("erase_range %zu of %zu\n", index, a.size);
-                    deq_digi_it *pos = deq_digi_erase_range(&a, &from, &to);
+                    deq_digi_erase_range(&range);
                     LOG ("CTL erase_range [%lu - %lu):\n",
                          index, iend);
                     print_deq (&a);
 
-                    std::deque<DIGI>::iterator iter =
-                        b.erase(b.begin() + index, b.begin() + iend);
-                    LOG ("STL erase [%ld, %ld):\n", std::distance(b.begin(), iter), iend);
-                    CHECK_ITER (*pos, b, iter);
+                    auto b_from = b.begin() + index;
+                    auto b_end = b.begin() + iend;
+                    /*auto iter =*/
+                    b.erase(b_from, b_end);
+                    //LOG ("STL erase [%ld, %ld):\n", std::distance(b.begin(), iter), iend);
                     print_deque (b);
-                    if (a.size != b.size())
-                        fail++;
+                    //CHECK_RANGE (range, iter, b_end);
                     CHECK(a, b);
                     break;
                 }

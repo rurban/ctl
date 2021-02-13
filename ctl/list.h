@@ -563,17 +563,18 @@ JOIN(A, erase_if)(A* self, int _match(T*))
     return JOIN(A, remove_if)(self, _match);
 }
 
-static inline void
-JOIN(A, erase_range)(I* first, I* last)
+static inline I*
+JOIN(A, erase_range)(I* range)
 {
-    B* node = first->node;
-    A* self = first->container;
-    while (node != last->node)
+    B* node = range->node;
+    A* self = range->container;
+    while (node != range->end)
     {
         B* next = node->next;
         JOIN(A, erase_node)(self, node);
         node = next;
     }
+    return range;
 }
 
 static inline void

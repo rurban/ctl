@@ -278,6 +278,7 @@ main(void)
         TEST(CLEAR) \
         TEST(ERASE) \
         TEST(ERASE_INDEX) \
+        TEST(ERASE_RANGE) \
         TEST(INSERT) \
         TEST(INSERT_INDEX) \
         TEST(INSERT_COUNT) \
@@ -332,7 +333,6 @@ main(void)
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EMPLACE) \
-        TEST(ERASE_RANGE) \
         TEST(EQUAL_RANGE) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_RANGE) \
@@ -422,26 +422,23 @@ main(void)
                     CHECK(a, b);
                     break;
                 }
-#ifdef DEBUG
-                case TEST_ERASE_RANGE: // 40
+                case TEST_ERASE_RANGE:
                 {
                     if(a.size > 1)
                     {
-                        const size_t i1 = TEST_RAND(a.size);
-                        const size_t i2 = i1 + TEST_RAND(a.size - i1);
-                        vec_int_it from = vec_int_begin(&a);
-                        vec_int_it_advance(&from, i1);
-                        vec_int_it to = vec_int_begin(&a);
-                        vec_int_it_advance(&to, i2);
-                        from = vec_int_erase_range(&from, &to);
-                        /* auto it = */
-                        b.erase(b.begin() + i1, b.begin() + i2);
-                        //CHECK_ITER(from, b, it);
+                        vec_int_it first_a, last_a;
+                        std::vector<int>::iterator first_b, last_b;
+                        get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
+                        print_vec_range(first_a);
+                        vec_int_erase_range(&first_a);
+                        auto it = b.erase(first_b, last_b);
+                        print_vec(&a);
+                        print_vector(b);
+                        CHECK_RANGE(first_a, it, last_b);
                     }
                     CHECK(a, b);
                     break;
                 }
-#endif
                 case TEST_INSERT:
                 {
                     size_t amount = TEST_RAND(512);

@@ -905,15 +905,12 @@ main(void)
                     list_digi_it first_a, last_a;
                     std::list<DIGI>::iterator first_b, last_b;
                     get_random_iters (&a, &first_a, &last_a, b, first_b, last_b);
-                    const size_t index = TEST_RAND(a.size);
-                    list_digi_it pos = list_digi_begin(&a);
-                    list_digi_it_advance(&pos, index);
-                    auto it = b.begin();
-                    advance(it, index);
+                    /*auto it = */
                     b.erase(first_b, last_b);
-                    list_digi_erase_range(&first_a, &last_a);
+                    list_digi_erase_range(&first_a);
                     print_lst(&a);
                     print_list(b);
+                    //CHECK_RANGE(first_a, it, last_b);
                     CHECK(a, b);
                 }
                 break;
