@@ -554,22 +554,16 @@ main(void)
             }
             case TEST_MERGE:
             {
-                list_digi aa = list_digi_init();
+                list_digi aa = list_digi_init_from(&a);
                 std::list<DIGI> bb;
-                int total = 0;
-                for(size_t pushes = 0; pushes < size; pushes++)
-                {
-                    int value = TEST_RAND(128);
-                    total += value;
-                    if(pushes == (size - 1))
-                        // MAX + 1 ENSURES MERGE CAN APPEND TO TAIL.
-                        total = max_value + 1;
-                    list_digi_push_back(&aa, digi_init(total));
-                    bb.push_back(DIGI{total});
-                }
+                setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                list_digi_sort(&a);
+                list_digi_sort(&aa);
+                b.sort();
+                bb.sort();
                 b.merge(bb);
                 list_digi_merge(&a, &aa);
-                CHECK(a, b); // failed once on windows
+                CHECK(a, b);
                 break;
             }
             case TEST_EQUAL:
