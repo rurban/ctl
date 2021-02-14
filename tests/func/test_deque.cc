@@ -422,11 +422,11 @@ main(void)
             TEST(FIND_FIRST_OF_RANGE) \
             TEST(FIND_END) \
             TEST(FIND_END_RANGE) \
+            TEST(UNIQUE_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-            TEST(EQUAL_RANGE) /* 69 */ \
+            TEST(EQUAL_RANGE) /* 70 */ \
             TEST(UNIQUE) \
-            TEST(UNIQUE_RANGE) \
             TEST(LOWER_BOUND) \
             TEST(UPPER_BOUND) \
             TEST(LOWER_BOUND_RANGE) \
@@ -1675,7 +1675,7 @@ main(void)
                 {
                     print_deq(&a);
                     deq_digi_it aa = deq_digi_unique(&a);
-                    bool found_a = !deq_digi_it_done(&aa);
+                    bool found_a = aa.end < a.size;
                     size_t index = deq_digi_it_index(&aa);
                     print_deq(&a);
                     // C++ is special here with its move hack
@@ -1690,14 +1690,16 @@ main(void)
                     assert((long)index == dist);
                     break;
                 }
+#endif // DEBUG
                 case TEST_UNIQUE_RANGE:
                 {
                     deq_digi_it range;
                     std::deque<DIGI>::iterator first_b, last_b;
                     get_random_iters (&a, &range, b, first_b, last_b);
                     print_deq_range(range);
+                    size_t orig_size = a.size;
                     deq_digi_it aa = deq_digi_unique_range(&range);
-                    bool found_a = !deq_digi_it_done(&aa);
+                    bool found_a = a.size < orig_size;
                     size_t index = deq_digi_it_index(&aa);
                     auto bb = unique(first_b, last_b);
                     bool found_b = bb != last_b;
@@ -1712,6 +1714,7 @@ main(void)
                     assert((long)index == dist);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_LOWER_BOUND: // 64
                 {
                     int median = *deq_digi_at(&a, a.size / 2)->value;
@@ -1747,7 +1750,7 @@ main(void)
                     break;
             }
 #ifdef DEBUG
-            if (which < TEST_ERASE_RANGE)
+            if (which < TEST_EQUAL_RANGE)
 #endif
                 CHECK(a, b);
             deq_digi_free(&a);
