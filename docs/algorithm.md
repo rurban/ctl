@@ -346,10 +346,10 @@ returns an iterator to the first element greater than a certain value. _(NYI)_
   
 determines if an element exists in a certain range. _(NYI)_
 
-    bool equal_range
-    bool equal_range_range (C++20)
+    bool equal_value (I* range, T key)
+    bool equal_range (I* range1, I* range2)
   
-returns range of elements matching a specific key. _(NYI)_
+returns true if all elements match a specific key, or all other elements.
 
 ## Other operations on sorted ranges
 

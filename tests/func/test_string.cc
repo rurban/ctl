@@ -250,6 +250,9 @@ main(void)
             TEST(INSERT_COUNT) \
             TEST(INSERT_RANGE) \
             TEST(ASSIGN) \
+            TEST(EQUAL) \
+            TEST(EQUAL_VALUE) \
+            TEST(EQUAL_RANGE) \
             TEST(REPLACE) \
             TEST(FIND) \
             TEST(RFIND) \
@@ -293,8 +296,7 @@ main(void)
             TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-            TEST(EQUAL_RANGE) /* 59 */ \
-            TEST(GENERATE_N_RANGE) \
+            TEST(GENERATE_N_RANGE) /* 61 */ \
             TEST(TRANSFORM_RANGE) \
             TEST(UNIQUE) \
             TEST(UNIQUE_RANGE) \
@@ -615,6 +617,60 @@ main(void)
                     size_t assign_size = TEST_RAND(a.size);
                     str_assign(&a, assign_size, value);
                     b.assign(assign_size, value);
+                    break;
+                }
+                case TEST_EQUAL:
+                {
+                    str aa = str_copy(&a);
+                    std::string bb = b;
+                    if (TEST_RAND(2) && a.size)
+                    {
+                        a.vector[0] = 'a';
+                        b[0] = 'a';
+                    }
+                    bool same_b = b == bb;
+                    assert(str_equal(&a, &aa) == same_b);
+                    str_free(&aa);
+                    break;
+                }
+                case TEST_EQUAL_VALUE:
+                {
+                    size_t size1 = MIN(TEST_RAND(a.size), 5);
+                    str_resize(&a, size1, '\0');
+                    b.resize(size1);
+                    str_it r1a;
+                    std::string::iterator r1b, last1_b;
+                    get_random_iters (&a, &r1a, b, r1b, last1_b);
+                    size_t index = TEST_RAND(a.size-1);
+                    char value = a.size ? a.vector[index] : 'a';
+                    LOG("equal_value %c of \"%.*s\"\n", value,
+                        (int)(r1a.end - r1a.ref), r1a.ref);
+                    bool same_a = str_equal_value(&r1a, value);
+                    bool same_b = r1b != last1_b;
+                    for(; r1b != last1_b; r1b++) {
+                        if (value != *r1b)
+                        {
+                            same_b = false;
+                            break;
+                        }
+                    }
+                    LOG("same_a: %d same_b: %d\n", (int)same_a, (int)same_b);
+                    assert(same_a == same_b);
+                    break;
+                }
+                case TEST_EQUAL_RANGE:
+                {
+                    str aa = str_copy(&a);
+                    std::string bb = b;
+                    str_it r1a, r2a;
+                    std::string::iterator r1b, last1_b, r2b, last2_b;
+                    get_random_iters (&a, &r1a, b, r1b, last1_b);
+                    get_random_iters (&aa, &r2a, bb, r2b, last2_b);
+                    bool same_a = str_equal_range(&r1a, &r2a);
+                    bool same_b = std::equal(r1b, last1_b, r2b, last2_b);
+                    LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
+                    assert(same_a == same_b);
+                    str_free(&aa);
                     break;
                 }
                 case TEST_SWAP:

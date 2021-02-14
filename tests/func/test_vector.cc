@@ -276,6 +276,8 @@ main(void)
         TEST(REMOVE_IF) \
         TEST(ERASE_IF) \
         TEST(EQUAL) \
+        TEST(EQUAL_VALUE) \
+        TEST(EQUAL_RANGE) \
         TEST(FIND) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
@@ -322,7 +324,6 @@ main(void)
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EMPLACE) /* 63 */ \
-        TEST(EQUAL_RANGE) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_RANGE) \
         TEST(TRANSFORM_IT_RANGE) \
@@ -1382,6 +1383,46 @@ main(void)
                     //TODO check found_a against iter results
                     assert(d1a == distance(b.begin(), pair.first));
                     assert(d2a == distance(bb.begin(), pair.second));
+                    vec_digi_free(&aa);
+                    break;
+                }
+                case TEST_EQUAL_VALUE:
+                {
+                    size_t size1 = MIN(TEST_RAND(a.size), 5);
+                    vec_digi_resize(&a, size1, digi_init(0));
+                    b.resize(size1);
+                    vec_digi_it r1a;
+                    std::vector<DIGI>::iterator r1b, last1_b;
+                    get_random_iters (&a, &r1a, b, r1b, last1_b);
+                    size_t index = TEST_RAND(a.size-1);
+                    int value = a.size ? *a.vector[index].value : 0;
+                    LOG("equal_value %d\n", value);
+                    print_vec_range(r1a);
+                    bool same_a = vec_digi_equal_value(&r1a, digi_init(value));
+                    bool same_b = r1b != last1_b;
+                    for(; r1b != last1_b; r1b++) {
+                        if (value != *(*r1b).value)
+                        {
+                            same_b = false;
+                            break;
+                        }
+                    }
+                    LOG("same_a: %d same_b: %d\n", (int)same_a, (int)same_b);
+                    assert(same_a == same_b);
+                    break;
+                }
+                case TEST_EQUAL_RANGE:
+                {
+                    vec_digi aa = vec_digi_copy(&a);
+                    std::vector<DIGI> bb = b;
+                    vec_digi_it r1a, r2a;
+                    std::vector<DIGI>::iterator r1b, last1_b, r2b, last2_b;
+                    get_random_iters (&a, &r1a, b, r1b, last1_b);
+                    get_random_iters (&aa, &r2a, bb, r2b, last2_b);
+                    bool same_a = vec_digi_equal_range(&r1a, &r2a);
+                    bool same_b = std::equal(r1b, last1_b, r2b, last2_b);
+                    LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
+                    assert(same_a == same_b);
                     vec_digi_free(&aa);
                     break;
                 }

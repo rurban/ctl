@@ -219,6 +219,8 @@ main(void)
         TEST(SPLICE_RANGE) \
         TEST(MERGE) \
         TEST(EQUAL) \
+        TEST(EQUAL_VALUE) \
+        TEST(EQUAL_RANGE) \
         TEST(SORT) \
         TEST(UNIQUE) \
         TEST(FIND) \
@@ -266,8 +268,7 @@ main(void)
         TEST(UNIQUE_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EQUAL_RANGE) /* 67 */ \
-        TEST(GENERATE_N_RANGE) \
+        TEST(GENERATE_N_RANGE) /* 70 */ \
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
         TEST(LOWER_BOUND) \
@@ -1230,22 +1231,45 @@ main(void)
                     list_digi_free(&aa);
                     break;
                 }
-#if 0
-            /*case TEST_EQUAL_RANGE:*/
-            {
-                /*
-                int vb = TEST_RAND(TEST_MAX_VALUE);
-                list_digi_it first_a;
-                std::list<DIGI>::iterator first_b, last_b;
-                get_random_iters (&a, &first_a, b, first_b, last_b);
-                // FIXME API take iter as third arg, not value
-                bool aa = list_digi_equal_range(&first_a, digi_init(vb));
-                bool bb = equal_range(first_b, last_b, find(b.begin(), b.end(), DIGI{vb}));
-                assert(aa == bb);
-                */
-                break;
-            }
-#endif
+                case TEST_EQUAL_VALUE:
+                {
+                    size_t size1 = MIN(TEST_RAND(a.size), 5);
+                    list_digi_resize(&a, size1, digi_init(0));
+                    b.resize(size1);
+                    list_digi_it r1a;
+                    std::list<DIGI>::iterator r1b, last1_b;
+                    get_random_iters (&a, &r1a, b, r1b, last1_b);
+                    int value = a.size ? *a.head->value.value : 0;
+                    LOG("equal_value %d\n", value);
+                    print_lst(&a);
+                    bool same_a = list_digi_equal_value(&r1a, digi_init(value));
+                    bool same_b = r1b != last1_b;
+                    for(; r1b != last1_b; r1b++) {
+                        if (value != *(*r1b).value)
+                        {
+                            same_b = false;
+                            break;
+                        }
+                    }
+                    LOG("same_a: %d same_b: %d\n", (int)same_a, (int)same_b);
+                    assert(same_a == same_b);
+                    break;
+                }
+                case TEST_EQUAL_RANGE:
+                {
+                    list_digi aa = list_digi_copy(&a);
+                    std::list<DIGI> bb = b;
+                    list_digi_it r1a, r2a;
+                    std::list<DIGI>::iterator r1b, last1_b, r2b, last2_b;
+                    get_random_iters (&a, &r1a, b, r1b, last1_b);
+                    get_random_iters (&aa, &r2a, bb, r2b, last2_b);
+                    bool same_a = list_digi_equal_range(&r1a, &r2a);
+                    bool same_b = std::equal(r1b, last1_b, r2b, last2_b);
+                    LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
+                    assert(same_a == same_b);
+                    list_digi_free(&aa);
+                    break;
+                }
                 case TEST_GENERATE_N: // TEST=63
                 {
                     size_t count = TEST_RAND(20);

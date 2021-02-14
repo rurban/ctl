@@ -166,6 +166,8 @@ main(void)
         TEST(SWAP) \
         TEST(ASSIGN) \
         TEST(EQUAL) \
+        TEST(EQUAL_VALUE) \
+        TEST(EQUAL_RANGE) \
         TEST(FIND) \
         TEST(FIND_IF) \
         TEST(FIND_IF_NOT) \
@@ -198,7 +200,6 @@ main(void)
         TEST(FIND_END_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EQUAL_RANGE) \
         TEST(DIFFERENCE) \
         TEST(SYMMETRIC_DIFFERENCE) /* 38*/ \
         TEST(INTERSECTION) \
@@ -306,6 +307,43 @@ main(void)
                 std::array<DIGI,100> bb = b;
                 assert(arr100_digi_equal(&a, &aa));
                 assert(b == bb);
+                arr100_digi_free(&aa);
+                break;
+            }
+            case TEST_EQUAL_VALUE:
+            {
+                arr100_digi_it r1a;
+                std::array<DIGI,100>::iterator r1b, last1_b;
+                get_random_iters (&a, &r1a, b, r1b, last1_b);
+                size_t index = TEST_RAND(N);
+                int value = *a.vector[index].value;
+                LOG("equal_value %d\n", value);
+                print_arr100(&a);
+                bool same_a = arr100_digi_equal_value(&r1a, digi_init(value));
+                bool same_b = r1b != last1_b;
+                for(; r1b != last1_b; r1b++) {
+                    if (value != *(*r1b).value)
+                    {
+                        same_b = false;
+                        break;
+                    }
+                }
+                LOG("same_a: %d same_b: %d\n", (int)same_a, (int)same_b);
+                assert(same_a == same_b);
+                break;
+            }
+            case TEST_EQUAL_RANGE:
+            {
+                arr100_digi aa = arr100_digi_copy(&a);
+                std::array<DIGI,100> bb = b;
+                arr100_digi_it r1a, r2a;
+                std::array<DIGI,100>::iterator r1b, last1_b, r2b, last2_b;
+                get_random_iters (&a, &r1a, b, r1b, last1_b);
+                get_random_iters (&aa, &r2a, bb, r2b, last2_b);
+                bool same_a = arr100_digi_equal_range(&r1a, &r2a);
+                bool same_b = std::equal(r1b, last1_b, r2b, last2_b);
+                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
+                assert(same_a == same_b);
                 arr100_digi_free(&aa);
                 break;
             }

@@ -779,14 +779,13 @@ JOIN(A, adjacent_find)(A *self)
     return *JOIN(A, adjacent_find_range)(&range);
 }
 
-#ifdef DEBUG
+#ifndef CTL_USET
 
-#if !defined(CTL_USET) && !defined(CTL_STR)
-// API? 3rd arg should be an iter, not a value
 static inline bool
-JOIN(A, equal_range)(A* self, I* range, T value)
+JOIN(A, equal_value)(I* range, T value)
 {
-    bool result = true;
+    bool result = !JOIN(I, done)(range);
+    A* self = range->container;
     foreach_range_(A, i, range)
         if(!JOIN(A, _equal)(self, i.ref, &value))
         {
@@ -797,8 +796,26 @@ JOIN(A, equal_range)(A* self, I* range, T value)
         self->free(&value);
     return result;
 }
-#endif // USET+STR
 
+static inline bool
+JOIN(A, equal_range)(I* range1, I* range2)
+{
+    A* self = range1->container;
+    CTL_ASSERT_EQUAL
+    while(!JOIN(I, done)(range1))
+    {
+        if (JOIN(I, done)(range2) ||
+            !JOIN(A, _equal)(self, range1->ref, range2->ref))
+            return false;
+        JOIN(I, next)(range1);
+        JOIN(I, next)(range2);
+    }
+    return JOIN(I, done)(range2) ? true : false;
+}
+
+#endif // USET
+
+#ifdef DEBUG
 #ifndef CTL_USET
 
 static inline I
