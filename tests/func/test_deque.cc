@@ -422,11 +422,11 @@ main(void)
             TEST(FIND_FIRST_OF_RANGE) \
             TEST(FIND_END) \
             TEST(FIND_END_RANGE) \
-            TEST(UNIQUE_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
             TEST(EQUAL_RANGE) /* 70 */ \
             TEST(UNIQUE) \
+            TEST(UNIQUE_RANGE) \
             TEST(LOWER_BOUND) \
             TEST(UPPER_BOUND) \
             TEST(LOWER_BOUND_RANGE) \
@@ -1690,7 +1690,6 @@ main(void)
                     assert((long)index == dist);
                     break;
                 }
-#endif // DEBUG
                 case TEST_UNIQUE_RANGE:
                 {
                     deq_digi_it range;
@@ -1714,6 +1713,7 @@ main(void)
                     assert((long)index == dist);
                     break;
                 }
+#endif // DEBUG
 #ifdef DEBUG
                 case TEST_LOWER_BOUND: // 64
                 {
