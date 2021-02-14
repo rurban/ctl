@@ -1459,7 +1459,7 @@ main(void)
                         range_a.ref - a.vector,
                         it - b.begin());
                     if (found_a)
-                        assert(it == first_b);
+                        assert(it != last_b);
                     else
                         assert(it == last_b);
                     vec_digi_free(&aa);
