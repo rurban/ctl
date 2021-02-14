@@ -170,12 +170,14 @@ docs/man/ctl.h.3: docs/index.md
 	@mkdir -p docs/man
 	ronn < $< > $@
 docs/man/%.h.3 : docs/%.md
+	@mkdir -p docs/man
 	ronn < $< > $@
 
 install: man
 	-rm docs/man/index.h.3
-	mkdir -p ${DESTDIR)${PREFIX)/include/ctl
-	cp ctl/*.h ${DESTDIR)${PREFIX)/include/ctl/
+	mkdir -p $(DESTDIR)$(PREFIX)/include/ctl/bits
+	cp ctl/*.h $(DESTDIR)$(PREFIX)/include/ctl/
+	cp ctl/bits/*.h $(DESTDIR)$(PREFIX)/include/ctl/bits/
 	mkdir -p ${DESTDIR)${PREFIX)/share/man/man3
 	cp docs/man/* ${DESTDIR)${PREFIX)/share/man/man3/
 	mkdir -p ${DESTDIR)${PREFIX)/share/doc/ctl/images
