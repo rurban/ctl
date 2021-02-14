@@ -511,7 +511,7 @@ Use the original long names, not three-letter abbrevations.
 
 `#define NOT_INTEGRAL` not `COMPARE`
 
-Our version number `CTL_VERSION` is greater than 2020 (starting with `202102L`),
+Our version number `CTL_VERSION` is greater than 2020 (starting with `202102`),
 the old ctl is lower than 2020, starting with `1.0`.
 
 Added lots of missing methods. We have 657 methods, 129 of them unique.
