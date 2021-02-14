@@ -114,7 +114,7 @@ JOIN(I, ref)(I* iter)
 static inline size_t
 JOIN(I, index)(I* iter)
 {
-    return (iter->ref - JOIN(A, front)(iter->container)) / sizeof (T);
+    return iter->ref - JOIN(A, front)(iter->container);
 }
 
 static inline int
@@ -530,11 +530,9 @@ JOIN(A, erase_range)(I* range)
             self->free(ref);
 # endif
     if (range->end != end)
-    {
         memmove(range->ref, range->end, (end - range->end) * sizeof (T));
-        memset(end - size, 0, size * sizeof (T)); // clear the slack?
-    }
-    JOIN(I, set_done)(range);
+    memset(end - size, 0, size * sizeof (T)); // clear the slack?
+    //range->end = range->ref;
     self->size -= size;
 #else
     static T zero;

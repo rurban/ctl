@@ -420,7 +420,8 @@ main(void)
                         print_vector(b);
                         long dist = std::distance(b.begin(), it);
                         LOG("vs iter at %ld\n", dist);
-                        CHECK_RANGE(range_a, it, last_b);
+                        assert((long)index == dist);
+                        //CHECK_RANGE(range_a, it, last_b);
                     }
                     CHECK(a, b);
                     break;
