@@ -446,8 +446,8 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`shuffle_range`                  |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`sample`                         |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`sample_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`unique`                         | ✓  | x  |    |    | ✓  | -  | -  | -  | -  | -  | -  | -  |
-|`unique_range`                   | ✓  | x  |    |    | ✓  | -  | -  | -  | -  | -  | -  | -  |
+|`unique`                         | ✓  | x  | -  | x  | ✓  | -  | -  | -  | -  | -  | -  | -  |
+|`unique_range`                   | ✓  | x  | -  | x  | ✓  | -  | -  | -  | -  | -  | -  | -  |
 |`unique_copy`                    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`unique_copy_range`              |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`is_partitioned`                 |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |

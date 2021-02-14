@@ -424,7 +424,9 @@ main(void)
             TEST(FIND_END_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-            TEST(EQUAL_RANGE) /* 67 */ \
+            TEST(EQUAL_RANGE) /* 69 */ \
+            TEST(UNIQUE) \
+            TEST(UNIQUE_RANGE) \
             TEST(LOWER_BOUND) \
             TEST(UPPER_BOUND) \
             TEST(LOWER_BOUND_RANGE) \
@@ -1669,6 +1671,47 @@ main(void)
                     break;
                 }
 #ifdef DEBUG
+                case TEST_UNIQUE:
+                {
+                    print_deq(&a);
+                    deq_digi_it aa = deq_digi_unique(&a);
+                    bool found_a = !deq_digi_it_done(&aa);
+                    size_t index = deq_digi_it_index(&aa);
+                    print_deq(&a);
+                    // C++ is special here with its move hack
+                    auto bb = unique(b.begin(), b.end());
+                    bool found_b = bb != b.end();
+                    long dist = std::distance(b.begin(), bb);
+                    b.resize(dist);
+                    LOG("found %s at %zu, ", found_a ? "yes" : "no", index);
+                    LOG("vs found %s at %ld\n", found_b ? "yes" : "no", dist);
+                    print_deque(b);
+                    assert(found_a == found_b);
+                    assert((long)index == dist);
+                    break;
+                }
+                case TEST_UNIQUE_RANGE:
+                {
+                    deq_digi_it range;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &range, b, first_b, last_b);
+                    print_deq_range(range);
+                    deq_digi_it aa = deq_digi_unique_range(&range);
+                    bool found_a = !deq_digi_it_done(&aa);
+                    size_t index = deq_digi_it_index(&aa);
+                    auto bb = unique(first_b, last_b);
+                    bool found_b = bb != last_b;
+                    long dist = std::distance(b.begin(), bb);
+                    if (found_b)
+                        b.erase(bb, last_b);
+                    LOG("found %s at %zu, ", found_a ? "yes" : "no", index);
+                    LOG("vs found %s at %ld\n", found_b ? "yes" : "no", dist);
+                    print_deq(&a);
+                    print_deque(b);
+                    assert(found_a == found_b);
+                    assert((long)index == dist);
+                    break;
+                }
                 case TEST_LOWER_BOUND: // 64
                 {
                     int median = *deq_digi_at(&a, a.size / 2)->value;

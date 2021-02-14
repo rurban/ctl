@@ -772,16 +772,6 @@ JOIN(A, unique_range)(I* range)
     return *range;
 }
 
-static inline I
-JOIN(A, unique)(A *self)
-{
-    if (JOIN(A, size)(self) < 2)
-        return JOIN(A, end)(self);
-    I range = JOIN(A, begin)(self);
-    return JOIN(A, unique_range)(&range);
-}
-
-
 #if defined(CTL_STR) || \
     defined(CTL_U8STR)
 # include <ctl/algorithm.h>

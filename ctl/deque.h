@@ -249,12 +249,6 @@ JOIN(I, distance_range)(I* range)
     return range->end - range->index;
 }
 
-// forwards for algorithm
-static inline A JOIN(A, copy)(A* self);
-static inline A JOIN(A, init)(void);
-static inline I JOIN(A, find)(A* self, T key);
-static inline void JOIN(A, push_back)(A* self, T value);
-
 static inline A
 JOIN(A, init_from)(A* copy)
 {
@@ -266,6 +260,13 @@ JOIN(A, init_from)(A* copy)
     self.equal = copy->equal;
     return self;
 }
+
+// forwards for algorithm
+static inline A JOIN(A, copy)(A* self);
+static inline A JOIN(A, init)(void);
+static inline I JOIN(A, find)(A* self, T key);
+static inline void JOIN(A, push_back)(A* self, T value);
+static inline I* JOIN(A, erase)(I* pos);
 
 #include <ctl/bits/container.h>
 
@@ -731,6 +732,30 @@ JOIN(A, move_range)(I* range, A* out)
         index++;
     }
     return out;
+}
+
+static inline I
+JOIN(A, unique_range)(I* range)
+{
+    if (JOIN(I, done)(range))
+        return *range;
+    I prev = *range;
+    JOIN(I, next)(range);
+    A* self = range->container;
+    while(!JOIN(I, done)(range))
+    {
+        if (JOIN(A, _equal)(self, prev.ref, range->ref))
+        {
+            JOIN(A, erase)(range);
+            range->end--;
+        }
+        else
+        {
+            JOIN(I, next)(range);
+            JOIN(I, next)(&prev);
+        }
+    }
+    return *range;
 }
 
 //#include <ctl/algorithm.h>

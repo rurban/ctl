@@ -890,32 +890,13 @@ JOIN(A, upper_bound_range)(I* range, T value)
         self->free(&value);
     return it;
 }
+#endif // USET
+#endif // DEBUG
 
 // uset, set don't need it. list has its own.
-#if !defined CTL_SET && !defined CTL_LIST && !defined CTL_VEC
-
-static inline I
-JOIN(A, unique_range)(I* range)
-{
-    JOIN(A, it) prev = *range;
-    if (JOIN(I, done)(range))
-        return prev;
-    JOIN(I, next)(range);
-    A* self = range->container;
-    while(!JOIN(I, done)(range))
-    {
-        // FIXME save next, decrement range->end
-        if (JOIN(A, _equal)(self, prev.ref, range->ref))
-        {
-            JOIN(A, erase)(range);
-            JOIN(I, advance_end)(range, -1);
-        }
-        JOIN(I, next)(&prev);
-        JOIN(I, next)(range);
-    }
-    JOIN(I, next)(&prev);
-    return prev;
-}
+// not sure yet about array. maybe with POD array.
+#if !defined CTL_USET && !defined CTL_SET && !defined CTL_LIST && !defined CTL_ARR
+static inline I JOIN(A, unique_range)(I* range);
 
 static inline I
 JOIN(A, unique)(A *self)
@@ -925,10 +906,7 @@ JOIN(A, unique)(A *self)
     I range = JOIN(A, begin)(self);
     return JOIN(A, unique_range)(&range);
 }
-#endif // SET
-#endif // USET
-
-#endif // DEBUG
+#endif // USET, SET, LIST
 
 // TODO:
 // search_n
