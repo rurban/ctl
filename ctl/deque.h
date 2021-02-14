@@ -727,6 +727,7 @@ JOIN(A, move_range)(I* range, A* out)
     {
         T* ref = JOIN(A, at)(self, index);
         JOIN(A, push_back)(out, *ref);
+        JOIN(A, erase_index)(self, index);
         index++;
     }
     return out;

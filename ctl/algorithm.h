@@ -891,8 +891,8 @@ JOIN(A, upper_bound_range)(I* range, T value)
     return it;
 }
 
-// uset, set don't need it
-#if !defined CTL_SET
+// uset, set don't need it. list has its own.
+#if !defined CTL_SET && !defined CTL_LIST && !defined CTL_VEC
 
 static inline I
 JOIN(A, unique_range)(I* range)
@@ -904,20 +904,19 @@ JOIN(A, unique_range)(I* range)
     A* self = range->container;
     while(!JOIN(I, done)(range))
     {
-        if (!JOIN(A, _equal)(self, prev.ref, range->ref))
+        // FIXME save next, decrement range->end
+        if (JOIN(A, _equal)(self, prev.ref, range->ref))
         {
-            JOIN(I, next)(&prev);
-            if (prev.ref != range->ref)
-                JOIN(A, move_range)(range, &prev);
+            JOIN(A, erase)(range);
+            JOIN(I, advance_end)(range, -1);
         }
+        JOIN(I, next)(&prev);
         JOIN(I, next)(range);
     }
     JOIN(I, next)(&prev);
     return prev;
 }
 
-// list has its own variant
-#if !defined CTL_LIST
 static inline I
 JOIN(A, unique)(A *self)
 {
@@ -926,7 +925,6 @@ JOIN(A, unique)(A *self)
     I range = JOIN(A, begin)(self);
     return JOIN(A, unique_range)(&range);
 }
-#endif // LIST
 #endif // SET
 #endif // USET
 

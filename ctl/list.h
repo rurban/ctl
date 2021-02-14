@@ -719,6 +719,28 @@ JOIN(A, sort)(A* self)
     }
 }
 
+static inline I
+JOIN(A, unique_range)(I* range)
+{
+    JOIN(A, it) prev = *range;
+    if (JOIN(I, done)(range))
+        return prev;
+    JOIN(I, next)(range);
+    A* self = range->container;
+    while(range->node != range->end)
+    {
+        B* next = range->node->next;
+        range->ref = &range->node->value;
+        if (JOIN(A, _equal)(self, prev.ref, range->ref))
+            JOIN(A, erase)(range);
+        prev.node = prev.node->next;
+        prev.ref = &prev.node->value;
+        range->node = next;
+    }
+    JOIN(I, next)(&prev);
+    return prev;
+}
+
 static inline void /* I, B* ?? */
 JOIN(A, unique)(A* self)
 {

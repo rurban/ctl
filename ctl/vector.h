@@ -750,6 +750,39 @@ JOIN(A, move_range)(I* range, A* out)
     return out;
 }
 
+static inline I
+JOIN(A, unique_range)(I* range)
+{
+    JOIN(A, it) prev = *range;
+    if (JOIN(I, done)(range))
+        return prev;
+    JOIN(I, next)(range);
+    A* self = range->container;
+    while(!JOIN(I, done)(range))
+    {
+        if (JOIN(A, _equal)(self, prev.ref, range->ref))
+        {
+            JOIN(A, erase)(range);
+            range->end--;
+        }
+        else
+            JOIN(I, next)(range);
+        JOIN(I, next)(&prev);
+    }
+    JOIN(I, next)(&prev);
+    return prev;
+}
+
+static inline I
+JOIN(A, unique)(A *self)
+{
+    if (JOIN(A, size)(self) < 2)
+        return JOIN(A, end)(self);
+    I range = JOIN(A, begin)(self);
+    return JOIN(A, unique_range)(&range);
+}
+
+
 #if defined(CTL_STR) || \
     defined(CTL_U8STR)
 # include <ctl/algorithm.h>
