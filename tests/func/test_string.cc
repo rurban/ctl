@@ -293,9 +293,11 @@ main(void)
             TEST(ADJACENT_FIND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-            TEST(EQUAL_RANGE) /* 57 */ \
+            TEST(EQUAL_RANGE) /* 59 */ \
             TEST(GENERATE_N_RANGE) \
             TEST(TRANSFORM_RANGE) \
+            TEST(UNIQUE) \
+            TEST(UNIQUE_RANGE) \
             TEST(LOWER_BOUND) \
             TEST(UPPER_BOUND) \
             TEST(LOWER_BOUND_RANGE) \
@@ -1213,6 +1215,47 @@ main(void)
                     break;
                 }
 #ifdef DEBUG
+                case TEST_UNIQUE:
+                {
+                    //print_str(&a);
+                    str_it aa = str_unique(&a);
+                    bool found_a = !str_it_done(&aa);
+                    size_t index = str_it_index(&aa);
+                    //print_str(&a);
+                    // C++ is special here with its move hack
+                    auto bb = unique(b.begin(), b.end());
+                    bool found_b = bb != b.end();
+                    long dist = std::distance(b.begin(), bb);
+                    b.resize(dist);
+                    LOG("found %s at %zu of \"%s\" ", found_a ? "yes" : "no", index, a.vector);
+                    LOG("vs found %s at %ld of \"%s\"\n", found_b ? "yes" : "no", dist, b.c_str());
+                    //print_string(b);
+                    assert(found_a == found_b);
+                    assert((long)index == dist);
+                    break;
+                }
+                case TEST_UNIQUE_RANGE:
+                {
+                    str_it range;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &range, b, first_b, last_b);
+                    LOG("\"%.*s\" of \"%s\"\n", (int)(range.end - range.ref), range.ref, a.vector);
+                    str_it aa = str_unique_range(&range);
+                    bool found_a = !str_it_done(&aa);
+                    size_t index = str_it_index(&aa);
+                    auto bb = unique(first_b, last_b);
+                    bool found_b = bb != last_b;
+                    long dist = std::distance(b.begin(), bb);
+                    if (found_b)
+                        b.erase(bb, last_b);
+                    LOG("found %s at %zu => \"%.*s\" ", found_a ? "yes" : "no", index,
+                        (int)(range.end - range.ref), range.ref);
+                    LOG("vs found %s at %ld => \"%.*s\"\n", found_b ? "yes" : "no", dist,
+                        (int)(last_b - first_b), &(*first_b));
+                    assert(found_a == found_b);
+                    assert((long)index == dist);
+                    break;
+                }
                 case TEST_LOWER_BOUND: // 64
                 {
                     char median = *str_at(&a, a.size / 2);
