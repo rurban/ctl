@@ -1466,8 +1466,9 @@ main(void)
                 case TEST_UNIQUE:
                 {
                     print_vec(&a);
+                    digi* orig_end = &a.vector[a.size];
                     vec_digi_it aa = vec_digi_unique(&a);
-                    bool found_a = !vec_digi_it_done(&aa);
+                    bool found_a = aa.end < orig_end;
                     size_t index = vec_digi_it_index(&aa);
                     print_vec(&a);
                     // C++ is special here with its move hack
@@ -1488,8 +1489,9 @@ main(void)
                     std::vector<DIGI>::iterator first_b, last_b;
                     get_random_iters (&a, &range, b, first_b, last_b);
                     print_vec_range(range);
+                    digi* orig_end = range.end;
                     vec_digi_it aa = vec_digi_unique_range(&range);
-                    bool found_a = !vec_digi_it_done(&aa);
+                    bool found_a = aa.end < orig_end;
                     size_t index = vec_digi_it_index(&aa);
                     auto bb = unique(first_b, last_b);
                     bool found_b = bb != last_b;
