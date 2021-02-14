@@ -2,15 +2,18 @@
    SPDX-License-Identifier: MIT */
 
 // DO NOT STANDALONE INCLUDE.
+// clang-format off
 #if !defined CTL_LIST && \
     !defined CTL_SLIST && \
     !defined CTL_SET && \
     !defined CTL_USET && \
+    !defined CTL_UMAP && \
     !defined CTL_VEC && \
     !defined CTL_ARR && \
     !defined CTL_DEQ
 #error "No CTL container defined for <ctl/bits/container.h>"
 #endif
+// clang-format on
 
 // FIXME once per A
 //#ifndef CAT(HAVE, JOIN(T, it_vtable))
