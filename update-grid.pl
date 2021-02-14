@@ -184,16 +184,19 @@ sub hdr {
 # print grid
 hdr();
 line();
+my ($countok, $countm);
 for (@m) {
   my $L = $M - length($_);
   my $s = sprintf("|`%s`%s", $_, ' ' x $L);
   # sort methods in $m->{$c} by order in @c
   for my $c (@c) {
     my $x = $m->{$_}->{$c};
+    $countok++ if $x eq '✓';
     $x = '' unless $x;
     $s .= sprintf "| %-3s", $x;
     #push @x, sprintf("| %-3s", $x);
   }
+  $countm++ if $s =~ /✓/;
   $s .= "|\n";
   #push @x, "|\n";
   printf $s;
@@ -212,6 +215,10 @@ sub update {
   open my $out, '>:utf8', 'README.md.tmp' or die "$! README.md.tmp";
   $found = 0;
   while (<$in>) {
+    if (/We have \d+ methods/) {
+      s{We have (\d+) methods, (\d+) of them unique}
+       {We have $countok methods, $countm of them unique};
+    }
     if (!$found and /^\|       \s+\|vec\s+\|str\s+/) {
       $found++;
     }

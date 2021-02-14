@@ -446,8 +446,8 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`shuffle_range`                  |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`sample`                         |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`sample_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`unique`                         | ✓  |    |    |    | ✓  | -  | -  | -  | -  | -  | -  | -  |
-|`unique_range`                   | ✓  |    |    |    | x  | -  | -  | -  | -  | -  | -  | -  |
+|`unique`                         | ✓  | x  |    |    | ✓  | -  | -  | -  | -  | -  | -  | -  |
+|`unique_range`                   | ✓  | x  |    |    | x  | -  | -  | -  | -  | -  | -  | -  |
 |`unique_copy`                    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`unique_copy_range`              |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`is_partitioned`                 |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
@@ -514,7 +514,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 2020 (starting with `202102L`),
 the old ctl is lower than 2020, starting with `1.0`.
 
-Added lots of missing methods. We have 657 methods, 130 of them unique.
+Added lots of missing methods. We have 656 methods, 129 of them unique.
 glouw has 196 methods, 63 of them unique.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.
