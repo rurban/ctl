@@ -317,15 +317,15 @@ main(void)
         TEST(FIND_FIRST_OF_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
+        TEST(UNIQUE) \
+        TEST(UNIQUE_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 61 */ \
+        TEST(EMPLACE) /* 63 */ \
         TEST(EQUAL_RANGE) \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_RANGE) \
         TEST(TRANSFORM_IT_RANGE) \
-        TEST(UNIQUE) \
-        TEST(UNIQUE_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -1463,21 +1463,23 @@ main(void)
                     vec_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_UNIQUE:
                 {
                     print_vec(&a);
                     vec_digi_it aa = vec_digi_unique(&a);
-                    print_vec(&a);
-                    auto bb = unique(b.begin(), b.end());
-                    //b.erase(bb, ++bb);
+                    bool found_a = !vec_digi_it_done(&aa);
                     size_t index = vec_digi_it_index(&aa);
-                    LOG("found %s at %zu, ", vec_digi_it_done(&aa) ? "no" : "yes", index);
+                    print_vec(&a);
+                    // C++ is special here with its move hack
+                    auto bb = unique(b.begin(), b.end());
+                    bool found_b = bb != b.end();
                     long dist = std::distance(b.begin(), bb);
-                    LOG("vs found %s at %ld\n", bb == b.end() ? "no" : "yes", dist);
+                    b.resize(dist);
+                    LOG("found %s at %zu, ", found_a ? "yes" : "no", index);
+                    LOG("vs found %s at %ld\n", found_b ? "yes" : "no", dist);
                     print_vector(b);
+                    assert(found_a == found_b);
                     assert((long)index == dist);
-                    //CHECK_RANGE(aa, bb, last_b);
                     break;
                 }
                 case TEST_UNIQUE_RANGE:
@@ -1487,19 +1489,21 @@ main(void)
                     get_random_iters (&a, &range, b, first_b, last_b);
                     print_vec_range(range);
                     vec_digi_it aa = vec_digi_unique_range(&range);
+                    bool found_a = !vec_digi_it_done(&aa);
+                    size_t index = vec_digi_it_index(&aa);
                     auto bb = unique(first_b, last_b);
-                    b.erase(bb, ++bb);
-                    size_t index = vec_digi_it_index(&aa) + 1;
-                    LOG("found %s at %zu, ", vec_digi_it_done(&aa) ? "no" : "yes", index);
+                    bool found_b = bb != last_b;
                     long dist = std::distance(b.begin(), bb);
-                    LOG("vs found %s at %ld\n", bb == last_b ? "no" : "yes", dist);
+                    if (found_b)
+                        b.erase(bb, last_b);
+                    LOG("found %s at %zu, ", found_a ? "yes" : "no", index);
+                    LOG("vs found %s at %ld\n", found_b ? "yes" : "no", dist);
                     print_vec(&a);
                     print_vector(b);
+                    assert(found_a == found_b);
                     assert((long)index == dist);
-                    //CHECK_RANGE(aa, bb, last_b);
                     break;
                 }
-#endif // DEBUG
             default:
                 fail++;
 #ifdef DEBUG

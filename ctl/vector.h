@@ -628,7 +628,7 @@ static inline I
 JOIN(A, erase)(I* pos)
 {
     A* self = pos->container;
-    return JOIN(A, erase_index)(self, pos->ref - &self->vector[0]);
+    return JOIN(A, erase_index)(self, JOIN(I, index)(pos));
 }
 
 static inline void
@@ -751,9 +751,9 @@ JOIN(A, move_range)(I* range, A* out)
 static inline I
 JOIN(A, unique_range)(I* range)
 {
-    JOIN(A, it) prev = *range;
     if (JOIN(I, done)(range))
-        return prev;
+        return *range;
+    I prev = *range;
     JOIN(I, next)(range);
     A* self = range->container;
     while(!JOIN(I, done)(range))
@@ -764,11 +764,12 @@ JOIN(A, unique_range)(I* range)
             range->end--;
         }
         else
+        {
             JOIN(I, next)(range);
-        JOIN(I, next)(&prev);
+            JOIN(I, next)(&prev);
+        }
     }
-    JOIN(I, next)(&prev);
-    return prev;
+    return *range;
 }
 
 static inline I
