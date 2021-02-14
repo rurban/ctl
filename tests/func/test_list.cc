@@ -263,13 +263,13 @@ main(void)
         TEST(FIND_FIRST_OF_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
+        TEST(UNIQUE_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) /* 67 */ \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
-        TEST(UNIQUE_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
@@ -1517,7 +1517,6 @@ main(void)
                     list_digi_free(&aa);
                     break;
                 }
-#ifdef DEBUG
                 case TEST_UNIQUE_RANGE:
                 {
                     list_digi_it range;
@@ -1525,16 +1524,20 @@ main(void)
                     get_random_iters (&a, &range, b, first_b, last_b);
                     print_lst_range(range);
                     list_digi_it aa = list_digi_unique_range(&range);
-                    auto bb = unique(first_b, last_b);
-                    b.erase(bb, ++bb);
+                    bool found_a = !list_digi_it_done(&aa);
                     size_t index = list_digi_it_index(&aa);
-                    LOG("found %s at %zu, ", list_digi_it_done(&aa) ? "no" : "yes", index);
+                    auto bb = unique(first_b, last_b);
+                    bool found_b = bb != last_b;
                     long dist = std::distance(b.begin(), bb);
-                    LOG("vs found %s at %ld\n", bb == last_b ? "no" : "yes", dist);
+                    if (found_b)
+                        b.erase(bb, last_b);
+                    LOG("found %s at %zu, ", found_a ? "yes" : "no", index);
+                    LOG("vs found %s at %ld\n", found_b ? "yes" : "no", dist);
+                    assert(found_a == found_b);
                     assert((long)index == dist);
-                    //CHECK_RANGE(aa, bb, last_b);
                     break;
                 }
+#ifdef DEBUG
                 case TEST_LOWER_BOUND: // 72
                 {
                     list_digi_it it = list_digi_begin(&a);
