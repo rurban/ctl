@@ -734,30 +734,6 @@ JOIN(A, move_range)(I* range, A* out)
     return out;
 }
 
-static inline I
-JOIN(A, unique_range)(I* range)
-{
-    if (JOIN(I, done)(range))
-        return *range;
-    I prev = *range;
-    JOIN(I, next)(range);
-    A* self = range->container;
-    while(!JOIN(I, done)(range))
-    {
-        if (JOIN(A, _equal)(self, prev.ref, range->ref))
-        {
-            JOIN(A, erase)(range);
-            range->end--;
-        }
-        else
-        {
-            JOIN(I, next)(range);
-            JOIN(I, next)(&prev);
-        }
-    }
-    return *range;
-}
-
 //#include <ctl/algorithm.h>
 
 #undef T

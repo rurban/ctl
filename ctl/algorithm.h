@@ -893,11 +893,40 @@ JOIN(A, upper_bound_range)(I* range, T value)
 #endif // USET
 #endif // DEBUG
 
-// uset, set don't need it. list has its own.
-// not sure yet about array. maybe with POD array.
-#if !defined CTL_USET && !defined CTL_SET && !defined CTL_LIST && !defined CTL_ARR
-static inline I JOIN(A, unique_range)(I* range);
+// uset, set don't need it.
+#if !defined CTL_USET && !defined CTL_SET
 
+// list has its own
+#if defined CTL_VEC || defined CTL_DEQ
+static inline I
+JOIN(A, unique_range)(I* range)
+{
+    if (JOIN(I, done)(range))
+        return *range;
+    I prev = *range;
+    JOIN(I, next)(range);
+    A* self = range->container;
+    while(!JOIN(I, done)(range))
+    {
+        if (JOIN(A, _equal)(self, prev.ref, range->ref))
+        {
+            JOIN(A, erase)(range);
+            range->end--;
+        }
+        else
+        {
+            JOIN(I, next)(range);
+            JOIN(I, next)(&prev);
+        }
+    }
+    return *range;
+}
+#elif !defined CTL_ARR
+static inline I JOIN(A, unique_range)(I* range);
+#endif // VEC, DEQ
+
+// not sure yet about array. maybe with POD array.
+#if !defined CTL_LIST && !defined CTL_ARR
 static inline I
 JOIN(A, unique)(A *self)
 {
@@ -906,7 +935,9 @@ JOIN(A, unique)(A *self)
     I range = JOIN(A, begin)(self);
     return JOIN(A, unique_range)(&range);
 }
-#endif // USET, SET, LIST
+#endif // LIST, ARR
+
+#endif // USET, SET
 
 // TODO:
 // search_n
