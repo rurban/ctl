@@ -129,8 +129,10 @@ check: ${TESTS} docs/index.md
 	@${CXX} --version | head -n2
 	@echo ${CXX} ${CXXFLAGS}
 
-all: check perf examples #verify
+all: check perf examples api.lst #verify
 
+api.lst: $(H)
+	grep '^JOIN(A, ' ctl/*.h | perl -pe 's/JOIN\(A, (\w+?)\)/ $1/' >$@
 .cflags: ALWAYS
 	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
 images:
