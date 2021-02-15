@@ -179,6 +179,35 @@ libstdc++ uses POWER2 by default, libc++ supports both, depending on the initial
 This trades memory for faster unsuccessful searches, such as with insert with
 high load factor.
 
+## Security
+
+The CTL is more opinionated on security than the STL.
+
+The default **`max_size`** of containers is restricted to max 2^32 byte, i.e. 2GB,
+to avoid DDOS attacks. Allocating an overlarge container may need several
+minutes until it crashes. If you really need more than 2GB containers adjust
+your `max_size` for your container.
+
+The `unordered_set` hashtable has by default **security policies** enabled to avoid
+**DDOS attacks** by exploiting weak hash functions or exposure of ordering on the
+unfortunate linked-list chaining, demanded by the unfortunate C++ specs. The
+usual random seed strategy is considered security theatre, but can be enabled by
+`#define CTL_USET_SECURITY_COLLCOUNTING 0` and define a custom hash function
+with a random seed.
+See [unordered_set hash-policy](docs/unordered_set.md#hash-policy) and
+[github.com/rurban/smhasher/#security](https://github.com/rurban/smhasher/#security).
+
+Using a mix of 3way and 2way comparators may lead to **endless loops** with certain
+sequences only. The STL does nothing against it, we try to detect this at least in the
+set core methods.
+
+The CTL is **formally verified** via cbmc and satabs models for most core functions, the
+STL not. Several STL bugs and limitations have been found by our test suite. See
+also [cprover.org/stl/](http://www.cprover.org/stl/) for <vector> and <list> verifications.
+
+Proper unicode security practices are in work. The STL and most other libraries ignore
+it. Esp. for identifiers, which need to be identifiable, but are not.
+
 ## Running Tests
 
 To run all functional tests, run:
