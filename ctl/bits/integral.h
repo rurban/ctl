@@ -103,21 +103,27 @@ static inline void _JOIN(A, _set_default_methods)(A *self)
 #if defined str || defined u8string || defined charp || defined u8ident || defined ucharp
     {
 #ifdef CTL_USET
-        __set_str_hash(self, T);
+        if (!self->hash)
+            __set_str_hash(self, T);
 #else
-        self->compare = str_key_compare;
+        if (!self->compare)
+            self->compare = str_key_compare;
 #endif
-        self->equal = str_equal;
+        if (!self->equal)
+            self->equal = str_equal;
     }
     else
 #endif
 #endif
 #ifdef CTL_USET
-        self->hash = _JOIN(A, _default_integral_hash);
+        if (!self->hash)
+            self->hash = _JOIN(A, _default_integral_hash);
 #else
-    self->compare = _JOIN(A, _default_integral_compare);
+    if (!self->compare)
+        self->compare = _JOIN(A, _default_integral_compare);
 #endif
-    self->equal = _JOIN(A, _default_integral_equal);
+    if (!self->equal)
+        self->equal = _JOIN(A, _default_integral_equal);
 }
 
 #else
