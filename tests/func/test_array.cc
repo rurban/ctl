@@ -43,11 +43,35 @@ void print_array(std::array<DIGI,100> &b)
 #define TEST_MAX_VALUE INT_MAX
 #endif
 
+int middle(arr100_digi* a)
+{
+    return (*arr100_digi_front(a)->value - *arr100_digi_back(a)->value) / 2;
+}
+
+int median(arr100_digi* a)
+{
+    arr100_digi_it it = arr100_digi_begin(a);
+    arr100_digi_it_advance(&it, N / 2);
+    return it.ref->value ? *it.ref->value : 0;
+}
+
 int random_element(arr100_digi* a)
 {
     const size_t index = TEST_RAND(N);
     digi *vp = arr100_digi_at(a, index);
     return *vp->value;
+}
+
+int pick_random(arr100_digi* a)
+{
+    switch (TEST_RAND(4))
+    {
+    case 0: return middle(a);
+    case 1: return median(a);
+    case 2: return random_element(a);
+    case 3: return TEST_RAND(TEST_MAX_VALUE);
+    }
+    assert(0);
 }
 
 #define CHECK(_x, _y) {                                           \
@@ -198,17 +222,17 @@ main(void)
         TEST(FIND_FIRST_OF_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
-
-#define FOREACH_DEBUG(TEST) \
-        TEST(DIFFERENCE) \
-        TEST(SYMMETRIC_DIFFERENCE) /* 38*/ \
-        TEST(INTERSECTION) \
-        TEST(GENERATE_N_RANGE) \
-        TEST(TRANSFORM_RANGE) /* 41 */ \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
+
+#define FOREACH_DEBUG(TEST) \
+        TEST(DIFFERENCE) \
+        TEST(SYMMETRIC_DIFFERENCE) /* 41*/ \
+        TEST(INTERSECTION) \
+        TEST(GENERATE_N_RANGE) \
+        TEST(TRANSFORM_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -365,7 +389,7 @@ main(void)
             }
             case TEST_FIND_RANGE:
             {
-                int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : random_element(&a);
+                int vb = pick_random(&a);
                 digi key = digi_init(vb);
                 arr100_digi_it first_a;
                 std::array<DIGI,100>::iterator first_b, last_b;
@@ -839,34 +863,68 @@ main(void)
                 arr100_digi_free(&aa);
                 break;
             }
-#ifdef DEBUG
             case TEST_LOWER_BOUND:
             {
-                int median = *arr100_digi_at(&a, N / 2)->value;
-                print_arr100(&a);
-                arr100_digi_it aa = arr100_digi_lower_bound(&a, digi_init(median));
-                auto bb = std::lower_bound(b.begin(), b.end(), DIGI{median});
+                arr100_digi_sort(&a);
+                std::sort(b.begin(), b.end());
+                int key = pick_random(&a);
+                arr100_digi_it aa = arr100_digi_lower_bound(&a, digi_init(key));
+                auto bb = std::lower_bound(b.begin(), b.end(), DIGI{key});
+                if (bb != b.end())
+                {
+                    LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                }
                 CHECK_ITER(aa, b, bb);
                 break;
             }
             case TEST_UPPER_BOUND:
             {
-                int median = *arr100_digi_at(&a, N / 2)->value;
-                print_arr100(&a);
-                arr100_digi_it aa = arr100_digi_upper_bound(&a, digi_init(median));
-                auto bb = std::upper_bound(b.begin(), b.end(), DIGI{median});
+                arr100_digi_sort(&a);
+                std::sort(b.begin(), b.end());
+                int key = pick_random(&a);
+                arr100_digi_it aa = arr100_digi_upper_bound(&a, digi_init(key));
+                auto bb = std::upper_bound(b.begin(), b.end(), DIGI{key});
+                if (bb != b.end())
+                {
+                    LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                }
                 CHECK_ITER(aa, b, bb);
                 break;
             }
-            /**/case TEST_LOWER_BOUND_RANGE:
+            case TEST_LOWER_BOUND_RANGE:
             {
+                arr100_digi_sort(&a);
+                std::sort(b.begin(), b.end());
+                arr100_digi_it first_a;
+                std::array<DIGI,100>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                int key = pick_random(&a);
+                arr100_digi_it *aa = arr100_digi_lower_bound_range(&first_a, digi_init(key));
+                std::array<DIGI,100>::iterator bb = std::lower_bound(first_b, last_b, DIGI{key});
+                if (bb != last_b)
+                {
+                    LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                }
+                CHECK_RANGE(*aa, bb, last_b);
                 break;
             }
-            /**/case TEST_UPPER_BOUND_RANGE:
+            case TEST_UPPER_BOUND_RANGE:
             {
+                arr100_digi_sort(&a);
+                std::sort(b.begin(), b.end());
+                arr100_digi_it first_a;
+                std::array<DIGI,100>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                int key = pick_random(&a);
+                arr100_digi_it *aa = arr100_digi_upper_bound_range(&first_a, digi_init(key));
+                std::array<DIGI,100>::iterator bb = std::upper_bound(first_b, last_b, DIGI{key});
+                if (bb != last_b)
+                {
+                    LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                }
+                CHECK_RANGE(*aa, bb, last_b);
                 break;
             }
-#endif
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);

@@ -332,24 +332,19 @@ partially sorts the given range making sure that it is partitioned by the given 
 ## Binary search operations (on sorted ranges)
 
     I lower_bound (A* self, T value)
-    I lower_bound_range (I* first, I* last, T value) (C++20)
+    I lower_bound_range (I* range, T value) (C++20)
   
-returns an iterator to the first element not less than the given value. _(NYI)_
+returns an iterator to the first element not less than the given value.
 
     I upper_bound (A* self, T value)
-    I upper_bound_range (I* first, I* last, T value) (C++20)
+    I upper_bound_range (I* range, T value) (C++20)
 
-returns an iterator to the first element greater than a certain value. _(NYI)_
+returns an iterator to the first element greater than a certain value.
 
     binary_search
     binary_search_range (C++20)
   
 determines if an element exists in a certain range. _(NYI)_
-
-    bool equal_value (I* range, T key)
-    bool equal_range (I* range1, I* range2)
-  
-returns true if all elements match a specific key, or all other elements.
 
 ## Other operations on sorted ranges
 
@@ -462,9 +457,13 @@ clamps a value between a pair of boundary values. _(NYI)_
 ## Comparison operations
 
     int equal (A* self, A* other)
-    equal_range (C++20)
- 
-determines if two sets of elements are the same
+
+determines if two sets of elements are the same.
+
+    bool equal_value (I* range, T key)
+    bool equal_range (I* range1, I* range2)
+
+returns true if all elements match a specific key, or all other elements.
  
     int lexicographical_compare
     int lexicographical_compare_range (C++20)

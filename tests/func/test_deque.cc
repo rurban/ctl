@@ -126,6 +126,20 @@ void print_deque(std::deque<DIGI> &b)
     } else                                                        \
         assert (_iter == b_end)
 
+int middle(deq_digi* a)
+{
+    if (!a->size)
+        return 0;
+    return (*deq_digi_front(a)->value - *deq_digi_back(a)->value) / 2;
+}
+
+int median(deq_digi* a)
+{
+    deq_digi_it it = deq_digi_begin(a);
+    deq_digi_it_advance(&it, a->size / 2);
+    return a->size ? *it.ref->value : 0;
+}
+
 int random_element(deq_digi* a)
 {
     const size_t index = TEST_RAND(a->size);
@@ -133,6 +147,18 @@ int random_element(deq_digi* a)
         return 0;
     digi *vp = deq_digi_at(a, index);
     return *vp->value;
+}
+
+int pick_random(deq_digi* a)
+{
+    switch (TEST_RAND(4))
+    {
+    case 0: return middle(a);
+    case 1: return median(a);
+    case 2: return random_element(a);
+    case 3: return TEST_RAND(TEST_MAX_VALUE);
+    }
+    assert(0);
 }
 
 static void
@@ -424,14 +450,14 @@ main(void)
             TEST(FIND_FIRST_OF_RANGE) \
             TEST(FIND_END) \
             TEST(FIND_END_RANGE) \
-
-#define FOREACH_DEBUG(TEST) \
-            TEST(UNIQUE) /* 69 */ \
-            TEST(UNIQUE_RANGE) \
             TEST(LOWER_BOUND) \
             TEST(UPPER_BOUND) \
             TEST(LOWER_BOUND_RANGE) \
             TEST(UPPER_BOUND_RANGE) \
+
+#define FOREACH_DEBUG(TEST) \
+            TEST(UNIQUE) /* 71 */ \
+            TEST(UNIQUE_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -941,8 +967,7 @@ main(void)
                 }
                 case TEST_FIND_RANGE:
                 {
-                    int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
-                        : random_element(&a);
+                    int vb = pick_random(&a);
                     digi key = digi_init(vb);
                     deq_digi_it first_a;
                     std::deque<DIGI>::iterator first_b, last_b;
@@ -1755,32 +1780,68 @@ main(void)
                     break;
                 }
 #endif // DEBUG
-#ifdef DEBUG
-                case TEST_LOWER_BOUND: // 64
+                case TEST_LOWER_BOUND:
                 {
-                    int median = *deq_digi_at(&a, a.size / 2)->value;
-                    deq_digi_it aa = deq_digi_lower_bound(&a, digi_init(median));
-                    auto bb = lower_bound(b.begin(), b.end(), DIGI{median});
+                    deq_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    int key = pick_random(&a);
+                    deq_digi_it aa = deq_digi_lower_bound(&a, digi_init(key));
+                    auto bb = lower_bound(b.begin(), b.end(), DIGI{key});
+                    if (bb != b.end())
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                    }
                     CHECK_ITER(aa, b, bb);
                     break;
                 }
                 case TEST_UPPER_BOUND:
                 {
-                    int median = *deq_digi_at(&a, a.size / 2)->value;
-                    deq_digi_it aa = deq_digi_upper_bound(&a, digi_init(median));
-                    auto bb = upper_bound(b.begin(), b.end(), DIGI{median});
+                    deq_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    int key = pick_random(&a);
+                    deq_digi_it aa = deq_digi_upper_bound(&a, digi_init(key));
+                    auto bb = upper_bound(b.begin(), b.end(), DIGI{key});
+                    if (bb != b.end())
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                    }
                     CHECK_ITER(aa, b, bb);
                     break;
                 }
-                /**/case TEST_LOWER_BOUND_RANGE:
+                case TEST_LOWER_BOUND_RANGE:
                 {
+                    deq_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    deq_digi_it first_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    int key = pick_random(&a);
+                    deq_digi_it *aa = deq_digi_lower_bound_range(&first_a, digi_init(key));
+                    std::deque<DIGI>::iterator bb = lower_bound(first_b, last_b, DIGI{key});
+                    if (bb != last_b)
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                    }
+                    CHECK_RANGE(*aa, bb, last_b);
                     break;
                 }
-                /**/case TEST_UPPER_BOUND_RANGE:
+                case TEST_UPPER_BOUND_RANGE:
                 {
+                    deq_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    deq_digi_it first_a;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    int key = pick_random(&a);
+                    deq_digi_it *aa = deq_digi_upper_bound_range(&first_a, digi_init(key));
+                    std::deque<DIGI>::iterator bb = upper_bound(first_b, last_b, DIGI{key});
+                    if (bb != last_b)
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                    }
+                    CHECK_RANGE(*aa, bb, last_b);
                     break;
                 }
-#endif
 
                 default:
 #ifdef DEBUG

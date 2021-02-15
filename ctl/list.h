@@ -192,11 +192,16 @@ JOIN(I, index)(I* iter)
     return (size_t)JOIN(I, distance)(&begin, iter);
 }
 
-static inline long
+static inline size_t
 JOIN(I, distance_range)(I* range)
 {
-    I end = JOIN(I, iter)(range->container, range->end);
-    return JOIN(I, index)(&end) - JOIN(I, index)(range);
+    size_t d = 0;
+    B* n = range->node;
+    if (n  == range->end)
+        return 0;
+    for(; n != NULL && n != range->end; d++)
+        n = n->next;
+    return d;
 }
 
 static inline void

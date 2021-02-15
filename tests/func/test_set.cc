@@ -22,8 +22,10 @@ digi_3way_compare(digi* a, digi* b)
 #include <algorithm>
 #include <iterator>
 
+#ifndef LONG
 # undef TEST_MAX_SIZE
 # define TEST_MAX_SIZE 15
+#endif
 # define TEST_MAX_VALUE 50
 
 #ifndef DEBUG
@@ -73,6 +75,23 @@ void print_setpp(std::set<DIGI>& b) {
         assert(*(_it).ref->value == *(*_iter).value); \
     } else                                         \
         assert (_iter == b_end)
+
+
+int middle(set_digi* a)
+{
+    if (!a->size)
+        return 0;
+    set_digi_node* n1 = set_digi_first(a);
+    set_digi_node* n2 = set_digi_last(a);
+    return (*n1->value.value - *n2->value.value) / 2;
+}
+
+int median(set_digi* a)
+{
+    set_digi_it it = set_digi_begin(a);
+    set_digi_it_advance(&it, a->size / 2);
+    return a->size ? *it.ref->value : 0;
+}
 
 int pick_element(set_digi* a)
 {
@@ -192,7 +211,6 @@ main(void)
         TEST(COPY) \
         TEST(EQUAL) \
         TEST(EQUAL_VALUE) \
-        TEST(EQUAL_RANGE) \
         TEST(UNION) \
         TEST(INTERSECTION) \
         TEST(SYMMETRIC_DIFFERENCE) \
@@ -227,16 +245,17 @@ main(void)
         TEST(FIND_FIRST_OF_RANGE) \
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
-
-#define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 50 */ \
-        TEST(EXTRACT) \
-        TEST(MERGE) \
-        TEST(GENERATE_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
+
+#define FOREACH_DEBUG(TEST) \
+        TEST(EQUAL_RANGE) \
+        TEST(EMPLACE) /* 54 */ \
+        TEST(EXTRACT) \
+        TEST(MERGE) \
+        TEST(GENERATE_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -499,21 +518,18 @@ main(void)
                 assert(same_a == same_b);
                 break;
             }
+#ifdef DEBUG
             case TEST_EQUAL_RANGE:
             {
-                set_digi aa = set_digi_copy(&a);
-                std::set<DIGI> bb = b;
-                set_digi_it r1a, r2a;
-                std::set<DIGI>::iterator r1b, last1_b, r2b, last2_b;
-                get_random_iters (&a, &r1a, b, r1b, last1_b);
-                get_random_iters (&aa, &r2a, bb, r2b, last2_b);
-                bool same_a = set_digi_equal_range(&r1a, &r2a);
-                bool same_b = std::equal(r1b, last1_b, r2b, last2_b);
-                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
-                assert(same_a == same_b);
-                set_digi_free(&aa);
+                int key = median(&a);
+                set_digi_it lower, upper;
+                set_digi_equal_range(&a, digi_init(key), &lower, &upper);
+                auto pair = b.equal_range(DIGI{key});
+                (void)pair;
+                // TODO test
                 break;
             }
+#endif // DEBUG
             case TEST_UNION:
             {
                 set_digi aa;
@@ -1147,36 +1163,60 @@ main(void)
                 set_digi_free(&aa);
                 break;
             }
-#ifdef DEBUG
-            case TEST_LOWER_BOUND: // 64
+            case TEST_LOWER_BOUND:
             {
-                set_digi_it it = set_digi_begin(&a);
-                set_digi_it_advance(&it, a.size / 2);
-                int median = *it.ref->value;
-                set_digi_it aa = set_digi_lower_bound(&a, digi_init(median));
-                auto bb = lower_bound(b.begin(), b.end(), DIGI{median});
+                int key = median(&a);
+                set_digi_it aa = set_digi_lower_bound(&a, digi_init(key));
+                std::set<DIGI>::iterator bb = lower_bound(b.begin(), b.end(), DIGI{key});
+                if (bb != b.end())
+                {
+                    LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                }
                 CHECK_ITER(aa, b, bb);
                 break;
             }
             case TEST_UPPER_BOUND:
             {
-                set_digi_it it = set_digi_begin(&a);
-                set_digi_it_advance(&it, a.size / 2);
-                int median = *it.ref->value;
-                set_digi_it aa = set_digi_upper_bound(&a, digi_init(median));
-                auto bb = upper_bound(b.begin(), b.end(), DIGI{median});
+                int key = median(&a);
+                set_digi_it aa = set_digi_upper_bound(&a, digi_init(key));
+                std::set<DIGI>::iterator bb = upper_bound(b.begin(), b.end(), DIGI{key});
+                if (bb != b.end())
+                {
+                    LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                }
                 CHECK_ITER(aa, b, bb);
                 break;
             }
-            /**/case TEST_LOWER_BOUND_RANGE:
+            case TEST_LOWER_BOUND_RANGE:
             {
+                set_digi_it first_a;
+                std::set<DIGI>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                int key = median(&a);
+                set_digi_it *aa = set_digi_lower_bound_range(&first_a, digi_init(key));
+                std::set<DIGI>::iterator bb = lower_bound(first_b, last_b, DIGI{key});
+                if (bb != last_b)
+                {
+                    LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                }
+                CHECK_RANGE(*aa, bb, last_b);
                 break;
             }
-            /**/case TEST_UPPER_BOUND_RANGE:
+            case TEST_UPPER_BOUND_RANGE:
             {
+                set_digi_it first_a;
+                std::set<DIGI>::iterator first_b, last_b;
+                get_random_iters (&a, &first_a, b, first_b, last_b);
+                int key = median(&a);
+                set_digi_it *aa = set_digi_upper_bound_range(&first_a, digi_init(key));
+                std::set<DIGI>::iterator bb = upper_bound(first_b, last_b, DIGI{key});
+                if (bb != last_b)
+                {
+                    LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                }
+                CHECK_RANGE(*aa, bb, last_b);
                 break;
             }
-#endif // DEBUG
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);

@@ -356,8 +356,9 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`prev`                           | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  |
 |`distance`                       | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  |
 |`index`                          | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  |
+|`advance`                        | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  |
 |`advance_end`                    | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  |
-|`distance`                       | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  |
+|`distance_range`                 | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`range`                          | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
@@ -474,14 +475,14 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`stable_sort_range`              |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`nth_element`                    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`nth_element_range`              |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`lower_bound`                    | x  | x  | x  | x  | x  | x  |    | x  | x  | -  | -  | -  |
-|`lower_bound_range`              | x  | x  | x  | x  | x  | x  |    | -  | -  | -  | -  | -  |
-|`upper_bound`                    | x  | x  | x  | x  | x  | x  |    | x  | x  | -  | -  | -  |
-|`upper_bound_range`              | x  | x  | x  | x  | x  | x  |    | -  | -  | -  | -  | -  |
+|`lower_bound`                    | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|`lower_bound_range`              | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|`upper_bound`                    | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|`upper_bound_range`              | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`binary_search`                  |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`binary_search_range`            |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`equal_value`                    | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
-|`equal_range`                    | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
+|`equal_range`                    | ✓  | ✓  | ✓  | ✓  | ✓  | x  | x  | -  | -  | -  | -  | -  |
 |`merge`                          |    |    |    |    | ✓  | x  |    | x  | x  | -  | -  | -  |
 |`merge_range`                    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`inplace_merge`                  |    |    |    |    |    |    |    |    |    | -  | -  | -  |
@@ -514,7 +515,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 2020 (starting with `202102`),
 the old ctl is lower than 2020, starting with `1.0`.
 
-Added lots of missing methods. We have 669 methods, 131 of them unique.
+Added lots of missing methods. We have 698 methods, 136 of them unique.
 glouw has 196 methods, 63 of them unique.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.

@@ -128,6 +128,7 @@ for my $c (qw(vec str arr deq list set map)) {
   for (qw(advance distance range foreach_range foreach_n foreach_n_range)) {
     $m->{$_}->{$c} = '✓';
   }
+  $m->{distance_range}->{$c} = $m->{lower_bound_range}->{$c};
   # union tests copy_range
   if ($c ne 'set' and $c ne 'map') {
     $m->{copy_range}->{$c} = $m->{union}->{$c};
@@ -138,7 +139,7 @@ for my $c (qw(uset umap)) {
     $m->{$_}->{$c} = '✓';
   }
   # undefined iter methods
-  for (qw(advance distance range foreach_range foreach_n foreach_n_range)) {
+  for (qw(advance advance_end distance distance_range range foreach_range foreach_n foreach_n_range)) {
     $m->{$_}->{$c} = '-';
   }
   for (@m) { # and undefined range methods

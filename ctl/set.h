@@ -206,6 +206,18 @@ JOIN(I, distance)(I* iter, I* other)
     return n ? -d : -(long)(iter->container->size);
 }
 
+static inline size_t
+JOIN(I, distance_range)(I* range)
+{
+    size_t d = 0;
+    B* n = range->node;
+    if (n  == range->end)
+        return 0;
+    for(; n != NULL && n != range->end; d++)
+        n = JOIN(B, next)(n);
+    return d;
+}
+
 // set first and last ranges
 static inline void
 JOIN(I, range)(I* iter, I* last)
@@ -218,13 +230,6 @@ JOIN(I, index)(I* iter)
 {
     I begin = JOIN(A, begin)(iter->container);
     return (size_t)JOIN(I, distance)(&begin, iter);
-}
-
-static inline long
-JOIN(I, distance_range)(I* range)
-{
-    I end = JOIN(I, iter)(range->container, range->end);
-    return JOIN(I, index)(&end) - JOIN(I, index)(range);
 }
 
 static inline A JOIN(A, init_from)(A* copy);
@@ -1222,6 +1227,20 @@ JOIN(A, find_first_of_range)(I *range1, I* range2)
  not_found:
     JOIN(I, set_done)(range1);
     return false;
+}
+
+#ifdef CTL_MAP
+static inline I JOIN(A, lower_bound)(A* self, T value);
+static inline I JOIN(A, upper_bound)(A* self, T value);
+#endif
+
+// set.equal_range does interval search for key, returning the
+// lower_bound/upper_bound pair.
+static inline void
+JOIN(A, equal_range)(A* self, T key, I* lower_bound, I* upper_bound)
+{
+    *lower_bound = JOIN(A, lower_bound)(self, key);
+    *upper_bound = JOIN(A, upper_bound)(self, key);
 }
 
 // TODO join (aka bulk insert)

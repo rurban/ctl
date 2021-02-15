@@ -191,9 +191,10 @@ the range.
 
 checks if the container contains an element with specific key. (C++20)
 
-    bool equal_range (I* first, I* last, T value)
+    equal_range (A* self, T key, I* lower_bound, I* upper_bound)
 
-if range of elements match a specific key. _(NYI)_
+returns `lower_bound` and `upper_bound` ranges for the key. Different to the
+[algorithm](algorithm.md) `equal_range` function.
 
     I lower_bound (A* self, T key)
 

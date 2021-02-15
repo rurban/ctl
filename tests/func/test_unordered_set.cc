@@ -154,8 +154,6 @@ main(void)
         TEST(EXTRACT) /* 30 */ \
         TEST(MERGE) \
         TEST(REMOVE_IF) \
-        TEST(LOWER_BOUND) \
-        TEST(UPPER_BOUND) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -666,8 +664,6 @@ main(void)
             case TEST_MERGE:
             case TEST_REMOVE_IF:
             case TEST_EQUAL_RANGE:
-            case TEST_LOWER_BOUND:
-            case TEST_UPPER_BOUND:
                 printf("nyi\n");
                 break;
 #endif

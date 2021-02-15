@@ -294,16 +294,16 @@ main(void)
             TEST(SEARCH_RANGE) \
             TEST(ADJACENT_FIND) \
             TEST(ADJACENT_FIND_RANGE) \
+            TEST(LOWER_BOUND) \
+            TEST(UPPER_BOUND) \
+            TEST(LOWER_BOUND_RANGE) \
+            TEST(UPPER_BOUND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
             TEST(GENERATE_N_RANGE) /* 61 */ \
             TEST(TRANSFORM_RANGE) \
             TEST(UNIQUE) \
             TEST(UNIQUE_RANGE) \
-            TEST(LOWER_BOUND) \
-            TEST(UPPER_BOUND) \
-            TEST(LOWER_BOUND_RANGE) \
-            TEST(UPPER_BOUND_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -1312,31 +1312,69 @@ main(void)
                     assert((long)index == dist);
                     break;
                 }
-                case TEST_LOWER_BOUND: // 64
+#endif // DEBUG
+                case TEST_LOWER_BOUND:
                 {
-                    char median = *str_at(&a, a.size / 2);
-                    str_it aa = str_lower_bound(&a, median);
-                    auto bb = lower_bound(b.begin(), b.end(), median);
+                    str_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    const char key = RAND_CHAR;
+                    str_it aa = str_lower_bound(&a, key);
+                    auto bb = lower_bound(b.begin(), b.end(), key);
+                    if (bb != b.end())
+                    {
+                        LOG("%c: %c vs %c\n", key, *aa.ref, *bb);
+                    }
                     CHECK_ITER(aa, b, bb);
                     break;
                 }
                 case TEST_UPPER_BOUND:
                 {
-                    char median = *str_at(&a, a.size / 2);
-                    str_it aa = str_upper_bound(&a, median);
-                    auto bb = upper_bound(b.begin(), b.end(), median);
+                    str_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    const char key = RAND_CHAR;
+                    str_it aa = str_upper_bound(&a, key);
+                    auto bb = upper_bound(b.begin(), b.end(), key);
+                    if (bb != b.end())
+                    {
+                        LOG("%c: %c vs %c\n", key, *aa.ref, *bb);
+                    }
                     CHECK_ITER(aa, b, bb);
                     break;
                 }
-                /**/case TEST_LOWER_BOUND_RANGE:
+                case TEST_LOWER_BOUND_RANGE:
                 {
+                    str_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    const char key = RAND_CHAR;
+                    str_it range;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &range, b, first_b, last_b);
+                    str_it *aa = str_lower_bound_range(&range, key);
+                    auto bb = lower_bound(first_b, last_b, key);
+                    if (bb != last_b)
+                    {
+                        LOG("%c: %c vs %c\n", key, *aa->ref, *bb);
+                    }
+                    CHECK_RANGE(*aa, bb, last_b);
                     break;
                 }
-                /**/case TEST_UPPER_BOUND_RANGE:
+                case TEST_UPPER_BOUND_RANGE:
                 {
+                    str_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    const char key = RAND_CHAR;
+                    str_it range;
+                    std::string::iterator first_b, last_b;
+                    get_random_iters (&a, &range, b, first_b, last_b);
+                    str_it *aa = str_upper_bound_range(&range, key);
+                    auto bb = upper_bound(first_b, last_b, key);
+                    if (bb != last_b)
+                    {
+                        LOG("%c: %c vs %c\n", key, *aa->ref, *bb);
+                    }
+                    CHECK_RANGE(*aa, bb, last_b);
                     break;
                 }
-#endif // DEBUG
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);

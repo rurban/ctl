@@ -779,7 +779,7 @@ JOIN(A, adjacent_find)(A *self)
     return *JOIN(A, adjacent_find_range)(&range);
 }
 
-#ifndef CTL_USET
+#if !defined CTL_USET
 
 static inline bool
 JOIN(A, equal_value)(I* range, T value)
@@ -796,6 +796,12 @@ JOIN(A, equal_value)(I* range, T value)
         self->free(&value);
     return result;
 }
+#endif // USET
+
+#if !defined CTL_USET && !defined CTL_SET
+
+// Note: set.equal_range does interval search for key, returning the
+// lower_bound/upper_bound pair.
 
 static inline bool
 JOIN(A, equal_range)(I* range1, I* range2)
@@ -813,102 +819,114 @@ JOIN(A, equal_range)(I* range1, I* range2)
     return JOIN(I, done)(range2) ? true : false;
 }
 
-#endif // USET
+#endif // USET, SET
 
-#ifdef DEBUG
 #ifndef CTL_USET
 
-static inline I
-JOIN(A, lower_bound)(A* self, T value)
+// Binary search operations (on sorted ranges)
+// Slow on non-random access iters
+
+static inline I*
+JOIN(A, lower_bound_range)(I* range, T value)
 {
+    A* self = range->container;
     CTL_ASSERT_COMPARE
-    JOIN(A, it) it = JOIN(A, begin)(self);
-    size_t count = JOIN(A, size)(self);
+    I it;
+    size_t count = JOIN(I, distance_range)(range);
     while (count > 0)
     {
         size_t step = count / 2;
+        it = *range;
         JOIN(I, advance)(&it, step);
         if (self->compare(it.ref, &value))
         {
             JOIN(I, next)(&it);
+            *range = it;
             count -= step + 1;
         } else
             count = step;
     }
     if(self->free)
         self->free(&value);
-    return it;
+    return range;
+}
+
+static inline I*
+JOIN(A, upper_bound_range)(I* range, T value)
+{
+    A* self = range->container;
+    CTL_ASSERT_COMPARE
+    I it;
+    size_t count = JOIN(I, distance_range)(range);
+    while (count > 0)
+    {
+        size_t step = count / 2;
+        it = *range;
+        JOIN(I, advance)(&it, step);
+        if (!self->compare(&value, it.ref))
+        {
+            JOIN(I, next)(&it);
+            *range = it;
+            count -= step + 1;
+        } else
+            count = step;
+    }
+    if(self->free)
+        self->free(&value);
+    return range;
+}
+
+static inline I
+JOIN(A, lower_bound)(A* self, T value)
+{
+    CTL_ASSERT_COMPARE
+    I it = JOIN(A, begin)(self);
+    I range = it;
+    size_t count = JOIN(A, size)(self);
+    while (count > 0)
+    {
+        size_t step = count / 2;
+        it = range;
+        JOIN(I, advance)(&it, step);
+        if (self->compare(it.ref, &value))
+        {
+            JOIN(I, next)(&it);
+            range = it;
+            count -= step + 1;
+        } else
+            count = step;
+    }
+    if(self->free)
+        self->free(&value);
+    return range;
 }
 
 static inline I
 JOIN(A, upper_bound)(A* self, T value)
 {
     CTL_ASSERT_COMPARE
-    JOIN(A, it) it = JOIN(A, begin)(self);
+    I it = JOIN(A, begin)(self);
+    I range = it;
     size_t count = JOIN(A, size)(self);
     while (count > 0)
     {
         size_t step = count / 2;
+        it = range;
         JOIN(I, advance)(&it, step);
         if (!self->compare(&value, it.ref))
         {
             JOIN(I, next)(&it);
+            range = it;
             count -= step + 1;
         } else
             count = step;
     }
     if(self->free)
         self->free(&value);
-    return it;
+    return range;
 }
 
-static inline I
-JOIN(A, lower_bound_range)(I* range, T value)
-{
-    A* self = range->container;
-    CTL_ASSERT_COMPARE
-    JOIN(A, it) it = *range;
-    size_t count = JOIN(I, distance_range)(range); // FIXME
-    while (count > 0)
-    {
-        size_t step = count / 2;
-        JOIN(I, advance)(&it, step);
-        if (self->compare(it.ref, &value))
-        {
-            JOIN(I, next)(&it);
-            count -= step + 1;
-        } else
-            count = step;
-    }
-    if(self->free)
-        self->free(&value);
-    return it;
-}
-
-static inline I
-JOIN(A, upper_bound_range)(I* range, T value)
-{
-    A* self = range->container;
-    CTL_ASSERT_COMPARE
-    JOIN(A, it) it = *range;
-    size_t count = JOIN(I, distance_range)(range);
-    while (count > 0)
-    {
-        size_t step = count / 2;
-        JOIN(I, advance)(&it, step);
-        if (!self->compare(&value, it.ref))
-        {
-            JOIN(I, next)(&it);
-            count -= step + 1;
-        } else
-            count = step;
-    }
-    if(self->free)
-        self->free(&value);
-    return it;
-}
 #endif // USET
-#endif // DEBUG
 
 // uset, set don't need it.
 #if !defined CTL_USET && !defined CTL_SET

@@ -43,22 +43,40 @@ void print_list(std::list<DIGI> &b)
 #define TEST_MAX_VALUE INT_MAX
 #endif
 
+int middle(list_digi* a)
+{
+    if (!a->size)
+        return 0;
+    return (*list_digi_front(a)->value - *list_digi_back(a)->value) / 2;
+}
+
+int median(list_digi* a)
+{
+    list_digi_it it = list_digi_begin(a);
+    list_digi_it_advance(&it, a->size / 2);
+    return a->size ? *it.ref->value : 0;
+}
+
 int random_element(list_digi* a)
 {
     const size_t index = TEST_RAND(a->size);
-    int test_value = 0;
-    size_t current = 0;
-    list_foreach_ref(list_digi, a, it)
-    {
-        if(current == index)
-        {
-            test_value = *it.ref->value;
-            break;
-        }
-        current++;
-    }
-    return test_value;
+    list_digi_it it = list_digi_begin(a);
+    list_digi_it_advance(&it, index);
+    return a->size ? *it.ref->value : 0;
 }
+
+int pick_random(list_digi* a)
+{
+    switch (TEST_RAND(4))
+    {
+    case 0: return middle(a);
+    case 1: return median(a);
+    case 2: return random_element(a);
+    case 3: return TEST_RAND(TEST_MAX_VALUE);
+    }
+    assert(0);
+}
+
 
 #define CHECK(_x, _y) {                                           \
     assert(_x.size == _y.size());                                 \
@@ -266,15 +284,15 @@ main(void)
         TEST(FIND_END) \
         TEST(FIND_END_RANGE) \
         TEST(UNIQUE_RANGE) \
+        TEST(LOWER_BOUND) \
+        TEST(UPPER_BOUND) \
+        TEST(LOWER_BOUND_RANGE) \
+        TEST(UPPER_BOUND_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(GENERATE_N_RANGE) /* 70 */ \
         TEST(TRANSFORM_IT) \
         TEST(TRANSFORM_RANGE) \
-        TEST(LOWER_BOUND) \
-        TEST(UPPER_BOUND) \
-        TEST(LOWER_BOUND_RANGE) \
-        TEST(UPPER_BOUND_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -596,8 +614,7 @@ main(void)
             }
             case TEST_FIND:
             {
-                int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
-                                         : random_element(&a);
+                int value = pick_random(&a);
                 digi key = digi_init(value);
                 list_digi_it aa = list_digi_find(&a, key);
                 auto bb = find(b.begin(), b.end(), DIGI{value});
@@ -642,8 +659,7 @@ main(void)
             }
             case TEST_FIND_RANGE:
             {
-                int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
-                                         : random_element(&a);
+                int vb = pick_random(&a);
                 digi key = digi_init(vb);
                 list_digi_it first_a;
                 std::list<DIGI>::iterator first_b, last_b;
@@ -1420,7 +1436,7 @@ main(void)
                         }
                         *first_b = DIGI{0};
                     }
-                    //print_vec_range(needle);
+                    //print_list_range(needle);
                     range = list_digi_begin(&a);
                     bool found = list_digi_search_range(&range, &needle);
                     auto iter = search(b.begin(), b.end(), first_b, last_b);
@@ -1445,7 +1461,7 @@ main(void)
                     list_digi_it range;
                     std::list<DIGI>::iterator first_b, last_b;
                     get_random_iters (&a, &range, b, first_b, last_b);
-                    //print_vec_range(range);
+                    //print_list_range(range);
                     list_digi_it *aa = list_digi_adjacent_find_range(&range);
                     auto bb = adjacent_find(first_b, last_b);
                     CHECK_RANGE(*aa, bb, last_b);
@@ -1561,36 +1577,68 @@ main(void)
                     assert((long)index == dist);
                     break;
                 }
-#ifdef DEBUG
-                case TEST_LOWER_BOUND: // 72
+                case TEST_LOWER_BOUND: // 73
                 {
-                    list_digi_it it = list_digi_begin(&a);
-                    list_digi_it_advance(&it, a.size / 2);
-                    int median = *it.ref->value;
-                    list_digi_it aa = list_digi_lower_bound(&a, digi_init(median));
-                    auto bb = lower_bound(b.begin(), b.end(), DIGI{median});
-                    CHECK_RANGE(aa, bb, b.end());
+                    list_digi_sort(&a);
+                    b.sort();
+                    int key = pick_random(&a);
+                    list_digi_it aa = list_digi_lower_bound(&a, digi_init(key));
+                    auto bb = lower_bound(b.begin(), b.end(), DIGI{key});
+                    if (bb != b.end())
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                    }
+                    CHECK_ITER(aa, b, bb);
                     break;
                 }
                 case TEST_UPPER_BOUND:
                 {
-                    list_digi_it it = list_digi_begin(&a);
-                    list_digi_it_advance(&it, a.size / 2);
-                    int median = *it.ref->value;
-                    list_digi_it aa = list_digi_upper_bound(&a, digi_init(median));
-                    auto bb = upper_bound(b.begin(), b.end(), DIGI{median});
-                    CHECK_RANGE(aa, bb, b.end());
+                    list_digi_sort(&a);
+                    b.sort();
+                    int key = pick_random(&a);
+                    list_digi_it aa = list_digi_upper_bound(&a, digi_init(key));
+                    auto bb = upper_bound(b.begin(), b.end(), DIGI{key});
+                    if (bb != b.end())
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                    }
+                    CHECK_ITER(aa, b, bb);
                     break;
                 }
-                /**/case TEST_LOWER_BOUND_RANGE:
+                case TEST_LOWER_BOUND_RANGE:
                 {
+                    list_digi_sort(&a);
+                    b.sort();
+                    list_digi_it first_a;
+                    std::list<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    int key = pick_random(&a);
+                    list_digi_it *aa = list_digi_lower_bound_range(&first_a, digi_init(key));
+                    std::list<DIGI>::iterator bb = lower_bound(first_b, last_b, DIGI{key});
+                    if (bb != last_b)
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                    }
+                    CHECK_RANGE(*aa, bb, last_b);
                     break;
                 }
-                /**/case TEST_UPPER_BOUND_RANGE:
+                case TEST_UPPER_BOUND_RANGE:
                 {
+                    list_digi_sort(&a);
+                    b.sort();
+                    list_digi_it first_a;
+                    std::list<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    int key = pick_random(&a);
+                    list_digi_it *aa = list_digi_upper_bound_range(&first_a, digi_init(key));
+                    std::list<DIGI>::iterator bb = upper_bound(first_b, last_b, DIGI{key});
+                    if (bb != last_b)
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                    }
+                    CHECK_RANGE(*aa, bb, last_b);
                     break;
                 }
-#endif // DEBUG
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);

@@ -74,13 +74,40 @@ void print_vector(std::vector<DIGI> &b)
 #define TEST_MAX_VALUE INT_MAX
 #endif
 
-int random_element(vec_digi* a)
+
+int middle(vec_digi* a)
+{
+    if (!a->size)
+        return 0;
+    return (*vec_digi_front(a)->value - *vec_digi_back(a)->value) / 2;
+}
+
+int median(vec_digi* a)
+{
+    vec_digi_it it = vec_digi_begin(a);
+    vec_digi_it_advance(&it, a->size / 2);
+    return a->size ? *it.ref->value : 0;
+}
+
+int pick_element(vec_digi* a)
 {
     const size_t index = TEST_RAND(a->size);
     if (!a->size)
         return 0;
     digi *vp = vec_digi_at(a, index);
     return *vp->value;
+}
+
+int pick_random(vec_digi* a)
+{
+    switch (TEST_RAND(4))
+    {
+    case 0: return middle(a);
+    case 1: return median(a);
+    case 2: return pick_element(a);
+    case 3: return TEST_RAND(TEST_MAX_VALUE);
+    }
+    assert(0);
 }
 
 // tested variants
@@ -321,16 +348,16 @@ main(void)
         TEST(FIND_END_RANGE) \
         TEST(UNIQUE) \
         TEST(UNIQUE_RANGE) \
-
-#define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 63 */ \
-        TEST(GENERATE_N_RANGE) \
-        TEST(TRANSFORM_RANGE) \
-        TEST(TRANSFORM_IT_RANGE) \
         TEST(LOWER_BOUND) \
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
+
+#define FOREACH_DEBUG(TEST) \
+        TEST(EMPLACE) /* 65 */ \
+        TEST(GENERATE_N_RANGE) \
+        TEST(TRANSFORM_RANGE) \
+        TEST(TRANSFORM_IT_RANGE) \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -673,8 +700,7 @@ main(void)
                 }
                 case TEST_FIND_RANGE:
                 {
-                    int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
-                        : random_element(&a);
+                    int vb = pick_random(&a);
                     digi key = digi_init(vb);
                     vec_digi_it range_a;
                     std::vector<DIGI>::iterator first_b, last_b;
@@ -866,32 +892,68 @@ main(void)
                     LOG("found %s\n", vec_digi_it_done(aa) ? "no" : "yes");
                     break;
                 }
-#ifdef DEBUG
                 case TEST_LOWER_BOUND: // 64
                 {
-                    int median = *vec_digi_at(&a, a.size / 2)->value;
-                    vec_digi_it aa = vec_digi_lower_bound(&a, digi_init(median));
-                    auto bb = lower_bound(b.begin(), b.end(), DIGI{median});
+                    vec_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    int key = pick_random(&a);
+                    vec_digi_it aa = vec_digi_lower_bound(&a, digi_init(key));
+                    auto bb = lower_bound(b.begin(), b.end(), DIGI{key});
+                    if (bb != b.end())
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                    }
                     CHECK_ITER(aa, b, bb);
                     break;
                 }
                 case TEST_UPPER_BOUND:
                 {
-                    int median = *vec_digi_at(&a, a.size / 2)->value;
-                    vec_digi_it aa = vec_digi_upper_bound(&a, digi_init(median));
-                    auto bb = upper_bound(b.begin(), b.end(), DIGI{median});
+                    vec_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    int key = pick_random(&a);
+                    vec_digi_it aa = vec_digi_upper_bound(&a, digi_init(key));
+                    auto bb = upper_bound(b.begin(), b.end(), DIGI{key});
+                    if (bb != b.end())
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                    }
                     CHECK_ITER(aa, b, bb);
                     break;
                 }
-                /**/case TEST_LOWER_BOUND_RANGE:
+                case TEST_LOWER_BOUND_RANGE:
                 {
+                    vec_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    vec_digi_it first_a;
+                    std::vector<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    int key = pick_random(&a);
+                    vec_digi_it *aa = vec_digi_lower_bound_range(&first_a, digi_init(key));
+                    std::vector<DIGI>::iterator bb = lower_bound(first_b, last_b, DIGI{key});
+                    if (bb != last_b)
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                    }
+                    CHECK_RANGE(*aa, bb, last_b);
                     break;
                 }
-                /**/case TEST_UPPER_BOUND_RANGE:
+                case TEST_UPPER_BOUND_RANGE:
                 {
+                    vec_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    vec_digi_it first_a;
+                    std::vector<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &first_a, b, first_b, last_b);
+                    int key = pick_random(&a);
+                    vec_digi_it *aa = vec_digi_upper_bound_range(&first_a, digi_init(key));
+                    std::vector<DIGI>::iterator bb = upper_bound(first_b, last_b, DIGI{key});
+                    if (bb != last_b)
+                    {
+                        LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                    }
+                    CHECK_RANGE(*aa, bb, last_b);
                     break;
                 }
-#endif
                 case TEST_GENERATE_RANGE:
                 {
                     vec_digi_it range_a;

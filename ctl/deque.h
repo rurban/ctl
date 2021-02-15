@@ -181,6 +181,7 @@ JOIN(I, next)(I* iter)
     iter->index++;
     if(iter->index < iter->end)
         iter->ref = JOIN(A, at)(iter->container, iter->index);
+    ASSERT(iter->end >= iter->index);
 }
 
 static inline void
@@ -197,12 +198,14 @@ static inline void
 JOIN(I, range)(I* first, I* last)
 {
     last->end = first->end = last->index;
+    ASSERT(first->end >= first->index);
 }
 
 static inline void
 JOIN(I, set_end)(I* iter, I* last)
 {
     iter->end = last->index;
+    ASSERT(iter->end >= iter->index);
 }
 
 static inline I*
@@ -221,6 +224,7 @@ JOIN(I, advance)(I* iter, long i)
         iter->index += i;
         iter->ref = JOIN(A, at)(iter->container, iter->index);
     }
+    ASSERT(iter->end >= iter->index);
     return iter;
 }
 
@@ -234,6 +238,7 @@ JOIN(I, advance_end)(I* iter, long i)
     {
         iter->end += i;
     }
+    ASSERT(iter->end >= iter->index);
 }
 
 static inline long
@@ -243,9 +248,10 @@ JOIN(I, distance)(I* iter, I* other)
     return other->index - iter->index;
 }
 
-static inline long
+static inline size_t
 JOIN(I, distance_range)(I* range)
 {
+    ASSERT(range->end >= range->index);
     return range->end - range->index;
 }
 

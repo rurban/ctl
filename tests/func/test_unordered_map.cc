@@ -119,8 +119,6 @@ main(void)
         TEST(EMPLACE_HINT) \
         TEST(MERGE) \
         TEST(REMOVE_IF) \
-        TEST(LOWER_BOUND) \
-        TEST(UPPER_BOUND) \
         TEST(GENERATE) \
         TEST(TRANSFORM) \
 
@@ -433,8 +431,6 @@ main(void)
             //case TEST_EMPLACE_HINT:
             //case TEST_MERGE:
             //case TEST_REMOVE_IF:
-            //case TEST_LOWER_BOUND:
-            //case TEST_UPPER_BOUND:
             //case TEST_GENERATE:
             //case TEST_TRANSFORM:
 #endif

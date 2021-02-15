@@ -101,6 +101,10 @@ Creates a new iterator at the initial position.
 
 Returns the distance from begin.
 
+    size_t distance_range (I* range)
+
+Returns the distance between range and `range->end`.
+
 # Performance
 
 Compared to the old ctl, our iterators are about twice as fast, just our
