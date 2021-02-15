@@ -11,85 +11,80 @@ OLD_MAIN
 
 #include <queue>
 
-#define CHECK(_x, _y) {                                           \
-    while(_x.size > 0) {                                          \
-        assert(_x.size == _y.size());                             \
-        assert(queue_digi_empty(&_x) == _y.empty());                \
-        assert(*_y.front().value == *queue_digi_front(&_x)->value); \
-        assert(*_y.back().value == *queue_digi_back(&_x)->value);   \
-        _y.pop();                                                 \
-        queue_digi_pop(&_x);                                        \
-    }                                                             \
-}
+#define CHECK(_x, _y)                                                                                                  \
+    {                                                                                                                  \
+        while (_x.size > 0)                                                                                            \
+        {                                                                                                              \
+            assert(_x.size == _y.size());                                                                              \
+            assert(queue_digi_empty(&_x) == _y.empty());                                                               \
+            assert(*_y.front().value == *queue_digi_front(&_x)->value);                                                \
+            assert(*_y.back().value == *queue_digi_back(&_x)->value);                                                  \
+            _y.pop();                                                                                                  \
+            queue_digi_pop(&_x);                                                                                       \
+        }                                                                                                              \
+    }
 
-int
-main(void)
+int main(void)
 {
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
-    for(size_t loop = 0; loop < loops; loop++)
+    for (size_t loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
         queue_digi a = queue_digi_init();
         std::queue<DIGI> b;
-        for(size_t pushes = 0; pushes < size; pushes++)
+        for (size_t pushes = 0; pushes < size; pushes++)
         {
             const int value = TEST_RAND(INT_MAX);
             queue_digi_push(&a, digi_init(value));
             b.push(DIGI{value});
         }
-#define FOREACH_METH(TEST) \
-        TEST(PUSH) \
-        TEST(POP) \
-        TEST(SWAP)
-        
+#define FOREACH_METH(TEST)                                                                                             \
+    TEST(PUSH)                                                                                                         \
+    TEST(POP)                                                                                                          \
+    TEST(SWAP)
+
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
-        enum {
-            FOREACH_METH(GENERATE_ENUM)
-            TEST_TOTAL
+        enum
+        {
+            FOREACH_METH(GENERATE_ENUM) TEST_TOTAL
         };
 #ifdef DEBUG
-        static const char *test_names[] = {
-            FOREACH_METH(GENERATE_NAME)
-            ""
-        };
+        static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) ""};
 #endif
         int which = TEST_RAND(TEST_TOTAL);
         if (test >= 0 && test < (int)TEST_TOTAL)
             which = test;
-        LOG ("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
-        switch(which)
+        LOG("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
+        switch (which)
         {
-            case TEST_PUSH:
+        case TEST_PUSH: {
+            const int value = TEST_RAND(INT_MAX);
+            b.push(DIGI{value});
+            queue_digi_push(&a, digi_init(value));
+            break;
+        }
+        case TEST_POP: {
+            if (a.size > 0)
             {
-                const int value = TEST_RAND(INT_MAX);
-                b.push(DIGI{value});
-                queue_digi_push(&a, digi_init(value));
-                break;
+                b.pop();
+                queue_digi_pop(&a);
             }
-            case TEST_POP:
-            {
-                if(a.size > 0)
-                {
-                    b.pop();
-                    queue_digi_pop(&a);
-                }
-                break;
-            }
-            case TEST_SWAP:
-            {
-                queue_digi aa = queue_digi_copy(&a);
-                queue_digi aaa = queue_digi_init();
-                std::queue<DIGI> bb = b;
-                std::queue<DIGI> bbb;
-                queue_digi_swap(&aaa, &aa);
-                std::swap(bb, bbb);
-                CHECK(aaa, bbb);
-                queue_digi_free(&aaa);
-                break;
-            }
+            break;
+        }
+        case TEST_SWAP: {
+            queue_digi aa = queue_digi_copy(&a);
+            queue_digi aaa = queue_digi_init();
+            std::queue<DIGI> bb = b;
+            std::queue<DIGI> bbb;
+            queue_digi_swap(&aaa, &aa);
+            std::swap(bb, bbb);
+            CHECK(aaa, bbb);
+            queue_digi_free(&aaa);
+            break;
+        }
         }
         CHECK(a, b);
         queue_digi_free(&a);

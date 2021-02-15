@@ -11,7 +11,8 @@
 #define N 4
 #include "ctl/array.h"
 
-int main () {
+int main()
+{
     arr4_int a = arr4_int_init();
 #ifdef CBMC
     const int a1 = nondet_int();
@@ -30,7 +31,7 @@ int main () {
     assert(*arr4_int_at(&a, 2) == a2);
     *arr4_int_at(&a, 0) = 0;
     *arr4_int_at(&a, 2) = a3;
-    for (int i=0; i<4; i++)
+    for (int i = 0; i < 4; i++)
         LOG("arr4[%d] %d\n", i, *arr4_int_at(&a, i));
     assert(a.vector[0] == 0);
     assert(a.vector[1] == a2);

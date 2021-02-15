@@ -7,7 +7,8 @@
 #define T int
 #include "ctl/unordered_set.h"
 
-int main () {
+int main()
+{
     uset_int a = uset_int_init(NULL, NULL);
 #ifdef CBMC
     const int a1 = nondet_int();

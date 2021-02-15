@@ -10,7 +10,8 @@
 #define T int
 #include "ctl/list.h"
 
-int main () {
+int main()
+{
     list_int a = list_int_init();
 #ifdef CBMC
     const int a1 = nondet_int();
@@ -39,12 +40,12 @@ int main () {
     list_int_push_front(&a, 3);
     list_int_push_back(&a, 4);
 
-    //foreach(list_int, &a, it)
+    // foreach(list_int, &a, it)
     //    LOG("%d\n", *it.ref);
     list_int_sort(&a);
     assert(*list_int_front(&a) == a1);
     assert(*list_int_back(&a) == 4);
-    //foreach(list_int, &a, it)
+    // foreach(list_int, &a, it)
     //    LOG("%d\n", *it.ref);
     assert(list_int_count(&a, 0) == 0);
     assert(list_int_count(&a, a1) >= 1);

@@ -226,8 +226,7 @@
 #define T arr128_int
 #include <ctl/unordered_set.h>
 
-int
-main(void)
+int main(void)
 {
     TEST_PASS(__FILE__);
 }

@@ -7,7 +7,8 @@
 #define T int
 #include "ctl/vector.h"
 
-int main () {
+int main()
+{
     vec_int a = vec_int_init();
 #ifdef CBMC
     const int a1 = nondet_int();
@@ -34,7 +35,7 @@ int main () {
     vec_int_erase_index(&a, 1);
     vec_int_push_back(&a, a3);
     vec_int_push_back(&a, a4);
-    //vec_int_sort(&a); => vector-2.c
+    // vec_int_sort(&a); => vector-2.c
     assert(vec_int_count(&a, 0) == 1);
     assert(vec_int_count(&a, a1) >= 1);
     vec_int_free(&a);

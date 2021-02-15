@@ -1,31 +1,30 @@
+#include <algorithm>
+#include <array>
 #include <deque>
 #include <list>
 #include <queue>
 #include <set>
 #include <stack>
-#include <vector>
 #include <string>
-#include <array>
 #include <unordered_set>
-#include <algorithm>
+#include <vector>
 
 #define N 1024
 
-void
-A()
+void A()
 {
     std::deque<int> a;
-    std::vector<int>b;
+    std::vector<int> b;
     std::list<int> c;
     std::queue<int> d;
     std::set<int> e;
     std::stack<int> f;
     std::string g;
     std::priority_queue<int> i;
-    std::array<int,N> j;
+    std::array<int, N> j;
     std::unordered_set<int> k;
 
-    for (int el=0; el<N; el++)
+    for (int el = 0; el < N; el++)
     {
         a.push_back(el);
         a.push_front(el);
@@ -68,11 +67,10 @@ A()
     std::count(k.begin(), k.end(), 0);
 }
 
-void
-B()
+void B()
 {
     std::deque<short> a;
-    std::vector<short>b;
+    std::vector<short> b;
     std::list<short> c;
     std::queue<short> d;
     std::set<short> e;
@@ -101,11 +99,10 @@ B()
     i.pop();
 }
 
-void
-C()
+void C()
 {
     std::deque<float> a;
-    std::vector<float>b;
+    std::vector<float> b;
     std::list<float> c;
     std::queue<float> d;
     std::set<float> e;
@@ -134,11 +131,10 @@ C()
     i.pop();
 }
 
-void
-D()
+void D()
 {
     std::deque<double> a;
-    std::vector<double>b;
+    std::vector<double> b;
     std::list<double> c;
     std::queue<double> d;
     std::set<double> e;
@@ -167,8 +163,7 @@ D()
     i.pop();
 }
 
-int
-main()
+int main()
 {
     A();
     B();

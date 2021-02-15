@@ -17,11 +17,10 @@
 #define uset umap
 #include <ctl/unordered_set.h>
 
-static inline I
-JOIN(A, insert_or_assign)(A* self, T value)
+static inline I JOIN(A, insert_or_assign)(A *self, T value)
 {
-    B* node;
-    if((node = JOIN(A, find_node)(self, value)))
+    B *node;
+    if ((node = JOIN(A, find_node)(self, value)))
     {
         FREE_VALUE(self, value);
         return JOIN(I, iter)(self, node);
@@ -33,11 +32,10 @@ JOIN(A, insert_or_assign)(A* self, T value)
     }
 }
 
-static inline I
-JOIN(A, insert_or_assign_found)(A* self, T value, int *foundp)
+static inline I JOIN(A, insert_or_assign_found)(A *self, T value, int *foundp)
 {
-    B* node;
-    if((node = JOIN(A, find_node)(self, value)))
+    B *node;
+    if ((node = JOIN(A, find_node)(self, value)))
     {
         FREE_VALUE(self, value);
         *foundp = 1;

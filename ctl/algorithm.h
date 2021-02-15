@@ -6,62 +6,48 @@
 //#ifndef __CTL_ALGORITHM_H__
 //#define __CTL_ALGORITHM_H__
 
-#if !defined CTL_LIST && \
-    !defined CTL_SET && \
-    !defined CTL_USET && \
-    !defined CTL_VEC && \
-    !defined CTL_ARR && \
-    !defined CTL_DEQ && \
-    /* plus all children also. we don't include it for parents */ \
-    !defined CTL_STACK && \
-    !defined CTL_QUEUE && \
-    !defined CTL_PQU && \
-    !defined CTL_MAP && \
-    !defined CTL_UMAP
-# error "No CTL container defined for <ctl/algorithm.h>"
+#if !defined CTL_LIST && !defined CTL_SET && !defined CTL_USET && !defined CTL_VEC && !defined CTL_ARR &&              \
+    !defined CTL_DEQ && /* plus all children also. we don't include it for parents */                                  \
+    !defined CTL_STACK && !defined CTL_QUEUE && !defined CTL_PQU && !defined CTL_MAP && !defined CTL_UMAP
+#error "No CTL container defined for <ctl/algorithm.h>"
 #endif
 #undef CTL_ALGORITHM
 #define CTL_ALGORITHM
 
 // Generic algorithms with ranges
 
-static inline I
-JOIN(A, find_if)(A* self, int _match(T*))
+static inline I JOIN(A, find_if)(A *self, int _match(T *))
 {
-    foreach(A, self, i)
-        if(_match(i.ref))
+    foreach (A, self, i)
+        if (_match(i.ref))
             return i;
     return JOIN(A, end)(self);
 }
 
 // C++11
-static inline I
-JOIN(A, find_if_not)(A* self, int _match(T*))
+static inline I JOIN(A, find_if_not)(A *self, int _match(T *))
 {
-    foreach(A, self, i)
-        if(!_match(i.ref))
+    foreach (A, self, i)
+        if (!_match(i.ref))
             return i;
     return JOIN(A, end)(self);
 }
 
 // C++11
-static inline bool
-JOIN(A, all_of)(A* self, int _match(T*))
+static inline bool JOIN(A, all_of)(A *self, int _match(T *))
 {
     I pos = JOIN(A, find_if_not)(self, _match);
     return JOIN(I, done)(&pos);
 }
 
 // C++11
-static inline bool
-JOIN(A, any_of)(A* self, int _match(T*))
+static inline bool JOIN(A, any_of)(A *self, int _match(T *))
 {
     I pos = JOIN(A, find_if)(self, _match);
     return !JOIN(I, done)(&pos);
 }
 
-static inline bool
-JOIN(A, none_of)(A* self, int _match(T*))
+static inline bool JOIN(A, none_of)(A *self, int _match(T *))
 {
     I pos = JOIN(A, find_if)(self, _match);
     return JOIN(I, done)(&pos);
@@ -71,16 +57,14 @@ JOIN(A, none_of)(A* self, int _match(T*))
 
 #if !defined CTL_USET && !defined CTL_SET
 
-static inline bool
-JOIN(A, find_range)(I* range, T value)
+static inline bool JOIN(A, find_range)(I *range, T value)
 {
-    A* self = range->container;
-    foreach_range_(A, i, range)
-        if(JOIN(A, _equal)(self, i.ref, &value))
-        {
-            *range = i;
-            return true;
-        }
+    A *self = range->container;
+    foreach_range_(A, i, range) if (JOIN(A, _equal)(self, i.ref, &value))
+    {
+        *range = i;
+        return true;
+    }
     JOIN(I, set_done)(range);
     return false;
 }
@@ -88,29 +72,22 @@ JOIN(A, find_range)(I* range, T value)
 #endif // USET, SET
 #if !defined CTL_USET
 
-static inline I
-JOIN(A, find_if_range)(I* range, int _match(T*))
+static inline I JOIN(A, find_if_range)(I *range, int _match(T *))
 {
-    foreach_range_(A, i, range)
-        if(_match(i.ref))
-            return i;
+    foreach_range_(A, i, range) if (_match(i.ref)) return i;
     JOIN(I, set_done)(range);
     return *range;
 }
 
-static inline I
-JOIN(A, find_if_not_range)(I* range, int _match(T*))
+static inline I JOIN(A, find_if_not_range)(I *range, int _match(T *))
 {
-    foreach_range_(A, i, range)
-        if(!_match(i.ref))
-            return i;
+    foreach_range_(A, i, range) if (!_match(i.ref)) return i;
     JOIN(I, set_done)(range);
     return *range;
 }
 
 // C++20
-static inline bool
-JOIN(A, all_of_range)(I* range, int _match(T*))
+static inline bool JOIN(A, all_of_range)(I *range, int _match(T *))
 {
     I pos = JOIN(A, find_if_not_range)(range, _match);
     if (JOIN(I, done)(range))
@@ -118,8 +95,7 @@ JOIN(A, all_of_range)(I* range, int _match(T*))
     return JOIN(I, done)(&pos);
 }
 // C++20
-static inline bool
-JOIN(A, none_of_range)(I* range, int _match(T*))
+static inline bool JOIN(A, none_of_range)(I *range, int _match(T *))
 {
     I pos = JOIN(A, find_if_range)(range, _match);
     if (JOIN(I, done)(range))
@@ -127,26 +103,20 @@ JOIN(A, none_of_range)(I* range, int _match(T*))
     return JOIN(I, done)(&pos);
 }
 // C++20
-static inline bool
-JOIN(A, any_of_range)(I* range, int _match(T*))
+static inline bool JOIN(A, any_of_range)(I *range, int _match(T *))
 {
     return !JOIN(A, none_of_range)(range, _match);
 }
 
 #endif // USET (ranges)
 
-
 // set/uset have optimized implementations.
 // These require now sorted containers via operator< and push_back.
-#if defined(CTL_LIST) || \
-    defined(CTL_VEC) || \
-    defined(CTL_STR) || \
-    defined(CTL_DEQ)
+#if defined(CTL_LIST) || defined(CTL_VEC) || defined(CTL_STR) || defined(CTL_DEQ)
 
-static inline A*
-JOIN(A, copy_range)(I* range, A* out)
+static inline A *JOIN(A, copy_range)(I *range, A *out)
 {
-    while(!JOIN(I, done)(range))
+    while (!JOIN(I, done)(range))
     {
         JOIN(A, push_back)(out, out->copy(range->ref));
         JOIN(I, next)(range);
@@ -154,8 +124,7 @@ JOIN(A, copy_range)(I* range, A* out)
     return out;
 }
 
-static inline int
-JOIN(A, _found)(A* a, T* ref)
+static inline int JOIN(A, _found)(A *a, T *ref)
 {
 #ifdef CTL_STR
     return strchr(a->vector, *ref) ? 1 : 0;
@@ -194,11 +163,10 @@ JOIN(A, union)(A* a, A* b)
 }
 */
 
-static inline A
-JOIN(A, union_range)(I* r1, I* r2)
+static inline A JOIN(A, union_range)(I *r1, I *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    while(!JOIN(I, done)(r1))
+    while (!JOIN(I, done)(r1))
     {
         if (JOIN(I, done)(r2))
             return *JOIN(A, copy_range)(r1, &self);
@@ -217,13 +185,12 @@ JOIN(A, union_range)(I* r1, I* r2)
     }
     JOIN(A, copy_range)(r2, &self);
 #if defined CTL_STR
-    //JOIN(A, reserve)(&self, self.size);
+    // JOIN(A, reserve)(&self, self.size);
 #endif
     return self;
 }
 
-static inline A
-JOIN(A, union)(A* a, A* b)
+static inline A JOIN(A, union)(A *a, A *b)
 {
     JOIN(A, it) r1 = JOIN(A, begin)(a);
     JOIN(A, it) r2 = JOIN(A, begin)(b);
@@ -231,11 +198,10 @@ JOIN(A, union)(A* a, A* b)
 }
 
 // FIXME str
-static inline A
-JOIN(A, intersection_range)(I* r1, I* r2)
+static inline A JOIN(A, intersection_range)(I *r1, I *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    while(!JOIN(I, done)(r1) && !JOIN(I, done)(r2))
+    while (!JOIN(I, done)(r1) && !JOIN(I, done)(r2))
     {
         if (self.compare(r1->ref, r2->ref))
             JOIN(I, next)(r1);
@@ -250,15 +216,14 @@ JOIN(A, intersection_range)(I* r1, I* r2)
         }
     }
 #if defined CTL_STR
-    //JOIN(A, reserve)(&self, self.size);
+    // JOIN(A, reserve)(&self, self.size);
 #elif defined CTL_VEC
     JOIN(A, shrink_to_fit)(&self);
 #endif
     return self;
 }
 
-static inline A
-JOIN(A, intersection)(A* a, A* b)
+static inline A JOIN(A, intersection)(A *a, A *b)
 {
 #if 0
     A self = JOIN(A, init_from)(a);
@@ -274,11 +239,10 @@ JOIN(A, intersection)(A* a, A* b)
 }
 
 // Warning: fails with 3-way compare!
-static inline A
-JOIN(A, difference_range)(I* r1, I* r2)
+static inline A JOIN(A, difference_range)(I *r1, I *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    while(!JOIN(I, done)(r1))
+    while (!JOIN(I, done)(r1))
     {
         if (JOIN(I, done)(r2))
             return *JOIN(A, copy_range)(r1, &self);
@@ -298,8 +262,7 @@ JOIN(A, difference_range)(I* r1, I* r2)
     return self;
 }
 
-static inline A
-JOIN(A, difference)(A* a, A* b)
+static inline A JOIN(A, difference)(A *a, A *b)
 {
 #if 0
     A self = JOIN(A, init_from)(a);
@@ -314,11 +277,10 @@ JOIN(A, difference)(A* a, A* b)
 #endif
 }
 
-static inline A
-JOIN(A, symmetric_difference_range)(I* r1, I* r2)
+static inline A JOIN(A, symmetric_difference_range)(I *r1, I *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    while(!JOIN(I, done)(r1))
+    while (!JOIN(I, done)(r1))
     {
         if (JOIN(I, done)(r2))
             return *JOIN(A, copy_range)(r1, &self);
@@ -339,13 +301,12 @@ JOIN(A, symmetric_difference_range)(I* r1, I* r2)
     }
     JOIN(A, copy_range)(r2, &self);
 #if defined CTL_STR
-    //JOIN(A, reserve)(&self, self.size);
+    // JOIN(A, reserve)(&self, self.size);
 #endif
     return self;
 }
 
-static inline A
-JOIN(A, symmetric_difference)(A* a, A* b)
+static inline A JOIN(A, symmetric_difference)(A *a, A *b)
 {
 #if 0
     A self = JOIN(A, init_from)(a);
@@ -363,11 +324,10 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 #endif
 }
 
-static inline bool
-JOIN(A, includes_range)(I* r1, I* r2)
+static inline bool JOIN(A, includes_range)(I *r1, I *r2)
 {
-    A* self = r1->container;
-    while(!JOIN(I, done)(r2))
+    A *self = r1->container;
+    while (!JOIN(I, done)(r2))
     {
         if (JOIN(I, done)(r1) || self->compare(r2->ref, r1->ref))
             return false;
@@ -378,8 +338,7 @@ JOIN(A, includes_range)(I* r1, I* r2)
     return true;
 }
 
-static inline bool
-JOIN(A, includes)(A* a, A* b)
+static inline bool JOIN(A, includes)(A *a, A *b)
 {
     JOIN(A, it) r1 = JOIN(A, begin)(a);
     JOIN(A, it) r2 = JOIN(A, begin)(b);
@@ -393,10 +352,9 @@ JOIN(A, includes)(A* a, A* b)
 // for list and vector we just set/replace the elements.
 #if !defined(CTL_USET) && !defined(CTL_SET)
 
-static inline void
-JOIN(A, generate)(A* self, T _gen(void))
+static inline void JOIN(A, generate)(A *self, T _gen(void))
 {
-    foreach(A, self, i)
+    foreach (A, self, i)
     {
 #ifndef POD
         if (self->free)
@@ -406,11 +364,10 @@ JOIN(A, generate)(A* self, T _gen(void))
     }
 }
 
-static inline void
-JOIN(A, generate_range)(I* range, T _gen(void))
+static inline void JOIN(A, generate_range)(I *range, T _gen(void))
 {
 #ifndef POD
-    A* self = range->container;
+    A *self = range->container;
 #endif
     foreach_range_(A, i, range)
     {
@@ -422,11 +379,10 @@ JOIN(A, generate_range)(I* range, T _gen(void))
     }
 }
 
-static inline A
-JOIN(A, transform)(A* self, T _unop(T*))
+static inline A JOIN(A, transform)(A *self, T _unop(T *))
 {
     A other = JOIN(A, copy)(self);
-    foreach(A, &other, i)
+    foreach (A, &other, i)
     {
 #ifndef POD
         T tmp = _unop(i.ref);
@@ -441,15 +397,14 @@ JOIN(A, transform)(A* self, T _unop(T*))
 }
 
 #ifndef CTL_ARR
-static inline A
-JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
+static inline A JOIN(A, transform_it)(A *self, I *pos, T _binop(T *, T *))
 {
     A other = JOIN(A, init_from)(self);
 #ifdef CTL_VEC
     if (self->size > 1)
         JOIN(A, fit)(&other, self->size - 1);
 #endif
-    foreach(A, self, i)
+    foreach (A, self, i)
     {
         if (JOIN(I, done)(pos))
             break;
@@ -465,8 +420,7 @@ JOIN(A, transform_it)(A* self, I* pos, T _binop(T*, T*))
 #endif // ARR
 
 // std::deque has a different idea
-static inline void
-JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
+static inline void JOIN(A, generate_n)(A *self, size_t count, T _gen(void))
 {
     foreach_n(A, self, i, count)
     {
@@ -479,11 +433,10 @@ JOIN(A, generate_n)(A* self, size_t count, T _gen(void))
 }
 
 // And here std::deque is a travesty. Or right.
-static inline void
-JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
+static inline void JOIN(A, generate_n_range)(I *first, size_t count, T _gen(void))
 {
 #ifndef POD
-    A* self = first->container;
+    A *self = first->container;
 #endif
     foreach_n_range(A, first, i, count)
     {
@@ -496,8 +449,7 @@ JOIN(A, generate_n_range)(I* first, size_t count, T _gen(void))
 }
 
 // not inserted, dest container with size must exist
-static inline I
-JOIN(A, transform_range)(I* range, I dest, T _unop(T*))
+static inline I JOIN(A, transform_range)(I *range, I dest, T _unop(T *))
 {
     foreach_range_(A, i, range)
     {
@@ -514,8 +466,7 @@ JOIN(A, transform_range)(I* range, I dest, T _unop(T*))
 }
 
 // not inserted, dest container with size must exist
-static inline I
-JOIN(A, transform_it_range)(I* range, I* pos, I dest, T _binop(T*, T*))
+static inline I JOIN(A, transform_it_range)(I *range, I *pos, I dest, T _binop(T *, T *))
 {
     foreach_range_(A, i, range)
     {
@@ -532,12 +483,11 @@ JOIN(A, transform_it_range)(I* range, I* pos, I dest, T _binop(T*, T*))
     return dest;
 }
 
-#else // USET/SET
+#else  // USET/SET
 // no push_back, but insert
-static inline A*
-JOIN(A, copy_range)(I* range, A* out)
+static inline A *JOIN(A, copy_range)(I *range, A *out)
 {
-    while(!JOIN(I, done)(range))
+    while (!JOIN(I, done)(range))
     {
         JOIN(A, insert)(out, out->copy(range->ref));
         JOIN(I, next)(range);
@@ -548,41 +498,36 @@ JOIN(A, copy_range)(I* range, A* out)
 
 #if !defined(CTL_USET)
 /// uset has cached_hash optims
-static inline size_t
-JOIN(A, count_range)(I* range, T value)
+static inline size_t JOIN(A, count_range)(I *range, T value)
 {
-    A* self = range->container;
+    A *self = range->container;
     size_t count = 0;
-    foreach_range_(A, i, range)
-        if(JOIN(A, _equal)(self, i.ref, &value))
-            count++;
+    foreach_range_(A, i, range) if (JOIN(A, _equal)(self, i.ref, &value)) count++;
     if (self->free)
         self->free(&value);
     return count;
 }
 #if !defined(CTL_SET) && !defined(CTL_STR)
 // str has its own variant via faster find. set/uset do not need it.
-static inline size_t
-JOIN(A, count)(A* self, T value)
+static inline size_t JOIN(A, count)(A *self, T value)
 {
     size_t count = 0;
-    foreach(A, self, i)
-        if(JOIN(A, _equal)(self, i.ref, &value))
+    foreach (A, self, i)
+        if (JOIN(A, _equal)(self, i.ref, &value))
             count++;
-    if(self->free)
+    if (self->free)
         self->free(&value);
     return count;
 }
 #endif // SET/STR
 
-static inline bool
-JOIN(A, mismatch)(I* range1, I* range2)
+static inline bool JOIN(A, mismatch)(I *range1, I *range2)
 {
-    A* self = range1->container;
+    A *self = range1->container;
     CTL_ASSERT_EQUAL
     int done = JOIN(I, done)(range1);
     if (!JOIN(I, done)(range2))
-        while(!done && JOIN(A, _equal)(self, range1->ref, range2->ref))
+        while (!done && JOIN(A, _equal)(self, range1->ref, range2->ref))
         {
             JOIN(I, next)(range1);
             JOIN(I, next)(range2);
@@ -599,22 +544,18 @@ JOIN(A, mismatch)(I* range1, I* range2)
 
 //#if !defined(CTL_STR)
 // C++20
-static inline size_t
-JOIN(A, count_if_range)(I* range, int _match(T*))
+static inline size_t JOIN(A, count_if_range)(I *range, int _match(T *))
 {
     size_t count = 0;
-    foreach_range_(A, i, range)
-        if(_match(i.ref))
-            count++;
+    foreach_range_(A, i, range) if (_match(i.ref)) count++;
     return count;
 }
 
-static inline size_t
-JOIN(A, count_if)(A* self, int _match(T*))
+static inline size_t JOIN(A, count_if)(A *self, int _match(T *))
 {
     size_t count = 0;
-    foreach(A, self, i)
-        if(_match(i.ref))
+    foreach (A, self, i)
+        if (_match(i.ref))
             count++;
     return count;
 }
@@ -624,12 +565,11 @@ JOIN(A, count_if)(A* self, int _match(T*))
 
 // i.e. like strcspn, but returning the first found match
 // has better variants for STR and SET
-static inline bool
-JOIN(A, find_first_of_range)(I *range1, I* range2)
+static inline bool JOIN(A, find_first_of_range)(I *range1, I *range2)
 {
     if (JOIN(I, done)(range1) || JOIN(I, done)(range2))
         return false;
-    A* self = range1->container;
+    A *self = range1->container;
     // TODO: sort range2 and binary_search
     while (1)
     {
@@ -649,8 +589,7 @@ JOIN(A, find_first_of_range)(I *range1, I* range2)
 #endif // STR,SET
 
 #ifndef CTL_STR
-static inline I
-JOIN(A, find_first_of)(A* self, I* range2)
+static inline I JOIN(A, find_first_of)(A *self, I *range2)
 {
     I begin = JOIN(A, begin)(self);
     if (JOIN(A, find_first_of_range)(&begin, range2))
@@ -662,8 +601,7 @@ JOIN(A, find_first_of)(A* self, I* range2)
 
 // Sets range1 (the haystack) to the found pointer if found.
 // Naive r1*r2 cost, no Boyer-Moore yet.
-static inline bool
-JOIN(A, search_range)(I *range1, I* range2)
+static inline bool JOIN(A, search_range)(I *range1, I *range2)
 {
 
     if (JOIN(I, done)(range1))
@@ -681,8 +619,8 @@ JOIN(A, search_range)(I *range1, I* range2)
         return false;
     }
 #else
-    A* self = range1->container;
-    for (; ; JOIN(I, next)(range1))
+    A *self = range1->container;
+    for (;; JOIN(I, next)(range1))
     {
         I it = *range1;
         I s_it = *range2;
@@ -703,8 +641,7 @@ JOIN(A, search_range)(I *range1, I* range2)
 }
 
 // Returns iterator to the found pointer or end
-static inline I
-JOIN(A, search)(A* self, I* subseq)
+static inline I JOIN(A, search)(A *self, I *subseq)
 {
     I begin = JOIN(A, begin)(self);
     if (JOIN(A, search_range)(&begin, subseq))
@@ -713,8 +650,7 @@ JOIN(A, search)(A* self, I* subseq)
         return JOIN(A, end)(self);
 }
 
-static inline I
-JOIN(A, find_end_range)(I* range1, I* range2)
+static inline I JOIN(A, find_end_range)(I *range1, I *range2)
 {
     if (JOIN(I, done)(range2))
     {
@@ -736,8 +672,7 @@ JOIN(A, find_end_range)(I* range1, I* range2)
     return result;
 }
 
-static inline I
-JOIN(A, find_end)(A* self, I* s_range)
+static inline I JOIN(A, find_end)(A *self, I *s_range)
 {
     I begin = JOIN(A, begin)(self);
     if (JOIN(I, done)(s_range))
@@ -751,13 +686,12 @@ JOIN(A, find_end)(A* self, I* s_range)
         return JOIN(A, end)(self);
 }
 
-static inline I*
-JOIN(A, adjacent_find_range)(I *range)
+static inline I *JOIN(A, adjacent_find_range)(I *range)
 {
 
     if (JOIN(I, done)(range))
         return range;
-    A* self = range->container;
+    A *self = range->container;
     I next = *range;
     JOIN(I, next)(&next);
     for (; !JOIN(I, done)(&next); *range = next, JOIN(I, next)(&next))
@@ -769,8 +703,7 @@ JOIN(A, adjacent_find_range)(I *range)
     return range;
 }
 
-static inline I
-JOIN(A, adjacent_find)(A *self)
+static inline I JOIN(A, adjacent_find)(A *self)
 {
 
     if (JOIN(A, size)(self) < 2)
@@ -781,18 +714,16 @@ JOIN(A, adjacent_find)(A *self)
 
 #if !defined CTL_USET
 
-static inline bool
-JOIN(A, equal_value)(I* range, T value)
+static inline bool JOIN(A, equal_value)(I *range, T value)
 {
     bool result = !JOIN(I, done)(range);
-    A* self = range->container;
-    foreach_range_(A, i, range)
-        if(!JOIN(A, _equal)(self, i.ref, &value))
-        {
-            result = false;
-            break;
-        }
-    if(self && self->free)
+    A *self = range->container;
+    foreach_range_(A, i, range) if (!JOIN(A, _equal)(self, i.ref, &value))
+    {
+        result = false;
+        break;
+    }
+    if (self && self->free)
         self->free(&value);
     return result;
 }
@@ -803,15 +734,13 @@ JOIN(A, equal_value)(I* range, T value)
 // Note: set.equal_range does interval search for key, returning the
 // lower_bound/upper_bound pair.
 
-static inline bool
-JOIN(A, equal_range)(I* range1, I* range2)
+static inline bool JOIN(A, equal_range)(I *range1, I *range2)
 {
-    A* self = range1->container;
+    A *self = range1->container;
     CTL_ASSERT_EQUAL
-    while(!JOIN(I, done)(range1))
+    while (!JOIN(I, done)(range1))
     {
-        if (JOIN(I, done)(range2) ||
-            !JOIN(A, _equal)(self, range1->ref, range2->ref))
+        if (JOIN(I, done)(range2) || !JOIN(A, _equal)(self, range1->ref, range2->ref))
             return false;
         JOIN(I, next)(range1);
         JOIN(I, next)(range2);
@@ -826,10 +755,9 @@ JOIN(A, equal_range)(I* range1, I* range2)
 // Binary search operations (on sorted ranges)
 // Slow on non-random access iters
 
-static inline I*
-JOIN(A, lower_bound_range)(I* range, T value)
+static inline I *JOIN(A, lower_bound_range)(I *range, T value)
 {
-    A* self = range->container;
+    A *self = range->container;
     CTL_ASSERT_COMPARE
     I it;
     size_t count = JOIN(I, distance_range)(range);
@@ -843,18 +771,18 @@ JOIN(A, lower_bound_range)(I* range, T value)
             JOIN(I, next)(&it);
             *range = it;
             count -= step + 1;
-        } else
+        }
+        else
             count = step;
     }
-    if(self->free)
+    if (self->free)
         self->free(&value);
     return range;
 }
 
-static inline I*
-JOIN(A, upper_bound_range)(I* range, T value)
+static inline I *JOIN(A, upper_bound_range)(I *range, T value)
 {
-    A* self = range->container;
+    A *self = range->container;
     CTL_ASSERT_COMPARE
     I it;
     size_t count = JOIN(I, distance_range)(range);
@@ -868,16 +796,16 @@ JOIN(A, upper_bound_range)(I* range, T value)
             JOIN(I, next)(&it);
             *range = it;
             count -= step + 1;
-        } else
+        }
+        else
             count = step;
     }
-    if(self->free)
+    if (self->free)
         self->free(&value);
     return range;
 }
 
-static inline I
-JOIN(A, lower_bound)(A* self, T value)
+static inline I JOIN(A, lower_bound)(A *self, T value)
 {
     CTL_ASSERT_COMPARE
     I it = JOIN(A, begin)(self);
@@ -893,16 +821,16 @@ JOIN(A, lower_bound)(A* self, T value)
             JOIN(I, next)(&it);
             range = it;
             count -= step + 1;
-        } else
+        }
+        else
             count = step;
     }
-    if(self->free)
+    if (self->free)
         self->free(&value);
     return range;
 }
 
-static inline I
-JOIN(A, upper_bound)(A* self, T value)
+static inline I JOIN(A, upper_bound)(A *self, T value)
 {
     CTL_ASSERT_COMPARE
     I it = JOIN(A, begin)(self);
@@ -918,22 +846,22 @@ JOIN(A, upper_bound)(A* self, T value)
             JOIN(I, next)(&it);
             range = it;
             count -= step + 1;
-        } else
+        }
+        else
             count = step;
     }
-    if(self->free)
+    if (self->free)
         self->free(&value);
     return range;
 }
 
-static inline bool
-JOIN(A, binary_search_range)(I* range, T value)
+static inline bool JOIN(A, binary_search_range)(I *range, T value)
 {
-    A* self = range->container;
+    A *self = range->container;
     size_t count = JOIN(I, distance_range)(range);
     if (!count)
     {
-        if(self->free)
+        if (self->free)
             self->free(&value);
         return false;
     }
@@ -950,22 +878,22 @@ JOIN(A, binary_search_range)(I* range, T value)
             JOIN(I, next)(&it);
             *range = it;
             count -= step + 1;
-        } else
+        }
+        else
             count = step;
     }
     result = !JOIN(I, done)(range) && !self->compare(&value, range->ref);
-    if(self->free)
+    if (self->free)
         self->free(&value);
     return result;
 }
 
-static inline bool
-JOIN(A, binary_search)(A* self, T value)
+static inline bool JOIN(A, binary_search)(A *self, T value)
 {
     size_t count = JOIN(A, size)(self);
     if (!count)
     {
-        if(self->free)
+        if (self->free)
             self->free(&value);
         return false;
     }
@@ -983,11 +911,12 @@ JOIN(A, binary_search)(A* self, T value)
             JOIN(I, next)(&it);
             range = it;
             count -= step + 1;
-        } else
+        }
+        else
             count = step;
     }
     result = !JOIN(I, done)(&range) && !self->compare(&value, range.ref);
-    if(self->free)
+    if (self->free)
         self->free(&value);
     return result;
 }
@@ -999,15 +928,14 @@ JOIN(A, binary_search)(A* self, T value)
 
 // list has its own
 #if defined CTL_VEC || defined CTL_DEQ
-static inline I
-JOIN(A, unique_range)(I* range)
+static inline I JOIN(A, unique_range)(I *range)
 {
     if (JOIN(I, done)(range))
         return *range;
     I prev = *range;
     JOIN(I, next)(range);
-    A* self = range->container;
-    while(!JOIN(I, done)(range))
+    A *self = range->container;
+    while (!JOIN(I, done)(range))
     {
         if (JOIN(A, _equal)(self, prev.ref, range->ref))
         {
@@ -1023,13 +951,12 @@ JOIN(A, unique_range)(I* range)
     return *range;
 }
 #elif !defined CTL_ARR
-static inline I JOIN(A, unique_range)(I* range);
+static inline I JOIN(A, unique_range)(I *range);
 #endif // VEC, DEQ
 
 // not sure yet about array. maybe with POD array.
 #if !defined CTL_LIST && !defined CTL_ARR
-static inline I
-JOIN(A, unique)(A *self)
+static inline I JOIN(A, unique)(A *self)
 {
     if (JOIN(A, size)(self) < 2)
         return JOIN(A, end)(self);

@@ -96,32 +96,32 @@ typedef unsigned long ulong;
 #ifdef DEBUG
 void print_deq_int(deq_int *a)
 {
-    for(size_t i = 0; i < a->size; i++)
-        printf ("%zu: %d\n", i, *deq_int_at(a, i));
-    printf ("\n");
+    for (size_t i = 0; i < a->size; i++)
+        printf("%zu: %d\n", i, *deq_int_at(a, i));
+    printf("\n");
 }
 #endif
 
-int
-main(void)
+int main(void)
 {
-#define TEST_LIST(type, v1, v2) {             \
-    type a = type##_init();                   \
-    type##_push_back(&a, v1);                 \
-    type##_it found = type##_find(&a, v1);    \
-    assert(!type##_it_done(&found)); /* equal */ \
-    type##_push_back(&a, v2);                 \
-    type b = type##_copy(&a);                 \
-    type##_sort(&a);            /* compare */ \
-    assert(type##_equal(&a, &b));             \
-    type##_free(&a);                          \
-    type##_free(&b);                          \
-}
-    
+#define TEST_LIST(type, v1, v2)                                                                                        \
+    {                                                                                                                  \
+        type a = type##_init();                                                                                        \
+        type##_push_back(&a, v1);                                                                                      \
+        type##_it found = type##_find(&a, v1);                                                                         \
+        assert(!type##_it_done(&found)); /* equal */                                                                   \
+        type##_push_back(&a, v2);                                                                                      \
+        type b = type##_copy(&a);                                                                                      \
+        type##_sort(&a); /* compare */                                                                                 \
+        assert(type##_equal(&a, &b));                                                                                  \
+        type##_free(&a);                                                                                               \
+        type##_free(&b);                                                                                               \
+    }
+
     TEST_LIST(deq_int, 1, 2);
     TEST_LIST(list_long, 1L, 2L);
     TEST_LIST(list_short, 1, 2);
-    //TEST_LIST(vec_bool, true, false);
+    // TEST_LIST(vec_bool, true, false);
     TEST_LIST(list_char, 1, 2);
     TEST_LIST(list_unsigned_char, 1, 2);
 
@@ -134,7 +134,7 @@ main(void)
     }
     {
         map_float a = map_float_init(NULL);
-        map_float_insert(&a, 1.f);       // compare
+        map_float_insert(&a, 1.f); // compare
         map_float_it found = map_float_find(&a, 1.f);
         assert(!map_float_it_done(&found)); // equal
         map_float_free(&a);
@@ -142,19 +142,19 @@ main(void)
     TEST_LIST(vec_double, 1.0, 2.0);
     {
         uset_long a = uset_long_init(NULL, NULL);
-        uset_long_insert(&a, 1L);       // hash
+        uset_long_insert(&a, 1L);                    // hash
         uset_long_it found = uset_long_find(&a, 1L); // equal
-        assert(!uset_long_it_done(&found)); // equal
+        assert(!uset_long_it_done(&found));          // equal
         uset_long_free(&a);
     }
     {
         arr128_int a = arr128_int_init();
-        for (int i=0; i<127; i++)
+        for (int i = 0; i < 127; i++)
             arr128_int_set(&a, i, rand() % INT_MAX);
         arr128_int_set(&a, 127, 1);
         assert(arr128_int_find(&a, 1)); /* equal */
         arr128_int b = arr128_int_copy(&a);
-        arr128_int_sort(&b); 		/* compare */
+        arr128_int_sort(&b); /* compare */
         arr128_int_sort(&a);
         assert(arr128_int_equal(&a, &b));
         arr128_int_free(&b);

@@ -5,7 +5,7 @@
 /* It should be possible to do it thread-safe. Not yet. */
 
 #ifndef T
-# error "Template type T undefined for <ctl/deque.h>"
+#error "Template type T undefined for <ctl/deque.h>"
 #endif
 
 #define CTL_DEQ
@@ -13,8 +13,8 @@
 #define B JOIN(A, bucket)
 #define I JOIN(A, it)
 
-#include <ctl/ctl.h>
 #include <ctl/bits/iterators.h>
+#include <ctl/ctl.h>
 
 #ifndef DEQ_BUCKET_SIZE
 #define DEQ_BUCKET_SIZE (512)
@@ -29,68 +29,64 @@ typedef struct B
 
 typedef struct A
 {
-    B** pages;
+    B **pages;
     size_t mark_a;
     size_t mark_b;
     size_t capacity;
     size_t size;
-    void (*free)(T*);
-    T (*copy)(T*);
-    int (*compare)(T*, T*); // 2-way operator<
-    int (*equal)(T*, T*);
+    void (*free)(T *);
+    T (*copy)(T *);
+    int (*compare)(T *, T *); // 2-way operator<
+    int (*equal)(T *, T *);
 } A;
 
 typedef struct I
 {
-    T* ref;
+    T *ref;
     size_t index;
     size_t end;
-    A* container;
+    A *container;
 } I;
 
-static inline B**
-JOIN(A, first)(A* self)
+static inline B **JOIN(A, first)(A *self)
 {
     return &self->pages[self->mark_a];
 }
 
-static inline B**
-JOIN(A, last)(A* self)
+static inline B **JOIN(A, last)(A *self)
 {
     return &self->pages[self->mark_b - 1];
 }
 
-static inline T*
-JOIN(A, at)(A* self, size_t index)
+static inline T *JOIN(A, at)(A *self, size_t index)
 {
     // allow accessing end (for iters)
     if (index == self->size)
         return NULL;
-    else if(UNLIKELY(self->size == 0 || index > self->size))
+    else if (UNLIKELY(self->size == 0 || index > self->size))
     {
-        ASSERT (index <= self->size || !"invalid deque index");
+        ASSERT(index <= self->size || !"invalid deque index");
         self->capacity = 1;
-        self->pages = (B**) calloc(1, sizeof(B*));
+        self->pages = (B **)calloc(1, sizeof(B *));
         if (!self->pages)
             return NULL;
-        self->pages[0] = (B*) calloc(1, sizeof(B));
+        self->pages[0] = (B *)calloc(1, sizeof(B));
         if (!self->pages[0])
             return NULL;
         return &self->pages[0]->value[0];
     }
     else
     {
-        const B* first = *JOIN(A, first)(self);
+        const B *first = *JOIN(A, first)(self);
         const size_t actual = index + first->a;
         const size_t q = actual / DEQ_BUCKET_SIZE;
         const size_t r = actual % DEQ_BUCKET_SIZE;
-        B* page = self->pages[self->mark_a + q];
+        B *page = self->pages[self->mark_a + q];
         return &page->value[r];
     }
 }
 
-static inline void
-JOIN(A, shrink_to_fit)(A* self)
+static inline void JOIN(A, shrink_to_fit)(A *self)
 {
     if (self->capacity > self->size)
     {
@@ -100,20 +96,17 @@ JOIN(A, shrink_to_fit)(A* self)
     return;
 }
 
-static inline T*
-JOIN(A, front)(A* self)
+static inline T *JOIN(A, front)(A *self)
 {
     return JOIN(A, at)(self, 0);
 }
 
-static inline T*
-JOIN(A, back)(A* self)
+static inline T *JOIN(A, back)(A *self)
 {
     return JOIN(A, at)(self, self->size - 1);
 }
 
-static inline I
-JOIN(A, begin)(A* self)
+static inline I JOIN(A, begin)(A *self)
 {
     static I zero;
     I iter = zero;
@@ -125,8 +118,7 @@ JOIN(A, begin)(A* self)
 }
 
 // We support `it.advance(a.end(), -1)`, so we must create a fresh iter.
-static inline I
-JOIN(A, end)(A* self)
+static inline I JOIN(A, end)(A *self)
 {
     static I zero;
     I iter = zero;
@@ -139,8 +131,7 @@ JOIN(A, end)(A* self)
 }
 
 // create an iter from an index
-static inline I
-JOIN(B, iter)(A* self, size_t index)
+static inline I JOIN(B, iter)(A *self, size_t index)
 {
     static I zero;
     I iter = zero;
@@ -151,41 +142,35 @@ JOIN(B, iter)(A* self, size_t index)
     return iter;
 }
 
-static inline T*
-JOIN(I, ref)(I* iter)
+static inline T *JOIN(I, ref)(I *iter)
 {
     return iter->ref;
 }
 
-static inline size_t
-JOIN(I, index)(I* iter)
+static inline size_t JOIN(I, index)(I *iter)
 {
     return iter->index;
 }
 
-static inline int
-JOIN(I, done)(I* iter)
+static inline int JOIN(I, done)(I *iter)
 {
     return iter->index == iter->end;
 }
 
-static inline void
-JOIN(I, set_done)(I* iter)
+static inline void JOIN(I, set_done)(I *iter)
 {
     iter->index = iter->end;
 }
 
-static inline void
-JOIN(I, next)(I* iter)
+static inline void JOIN(I, next)(I *iter)
 {
     iter->index++;
-    if(iter->index < iter->end)
+    if (iter->index < iter->end)
         iter->ref = JOIN(A, at)(iter->container, iter->index);
     ASSERT(iter->end >= iter->index);
 }
 
-static inline void
-JOIN(I, prev)(I* iter)
+static inline void JOIN(I, prev)(I *iter)
 {
     if (iter->index)
     {
@@ -194,27 +179,22 @@ JOIN(I, prev)(I* iter)
     }
 }
 
-static inline void
-JOIN(I, range)(I* first, I* last)
+static inline void JOIN(I, range)(I *first, I *last)
 {
     last->end = first->end = last->index;
     ASSERT(first->end >= first->index);
 }
 
-static inline void
-JOIN(I, set_end)(I* iter, I* last)
+static inline void JOIN(I, set_end)(I *iter, I *last)
 {
     iter->end = last->index;
     ASSERT(iter->end >= iter->index);
 }
 
-static inline I*
-JOIN(I, advance)(I* iter, long i)
+static inline I *JOIN(I, advance)(I *iter, long i)
 {
     // error case: overflow => end or NULL?
-    if(iter->index + i >= iter->end ||
-       iter->index + i >= iter->container->size ||
-       (long)iter->index + i < 0)
+    if (iter->index + i >= iter->end || iter->index + i >= iter->container->size || (long)iter->index + i < 0)
     {
         iter->index = iter->end;
         iter->ref = NULL;
@@ -228,35 +208,29 @@ JOIN(I, advance)(I* iter, long i)
     return iter;
 }
 
-static inline void
-JOIN(I, advance_end)(I* iter, long i)
+static inline void JOIN(I, advance_end)(I *iter, long i)
 {
     // error case: overflow => end or NULL?
-    if(!(iter->index + i >= iter->end ||
-         iter->index + i >= iter->container->size ||
-         (long)iter->index + i < 0))
+    if (!(iter->index + i >= iter->end || iter->index + i >= iter->container->size || (long)iter->index + i < 0))
     {
         iter->end += i;
     }
     ASSERT(iter->end >= iter->index);
 }
 
-static inline long
-JOIN(I, distance)(I* iter, I* other)
+static inline long JOIN(I, distance)(I *iter, I *other)
 {
     // wrap around?
     return other->index - iter->index;
 }
 
-static inline size_t
-JOIN(I, distance_range)(I* range)
+static inline size_t JOIN(I, distance_range)(I *range)
 {
     ASSERT(range->end >= range->index);
     return range->end - range->index;
 }
 
-static inline A
-JOIN(A, init_from)(A* copy)
+static inline A JOIN(A, init_from)(A *copy)
 {
     static A zero;
     A self = zero;
@@ -268,47 +242,43 @@ JOIN(A, init_from)(A* copy)
 }
 
 // forwards for algorithm
-static inline A JOIN(A, copy)(A* self);
+static inline A JOIN(A, copy)(A *self);
 static inline A JOIN(A, init)(void);
-static inline I JOIN(A, find)(A* self, T key);
-static inline void JOIN(A, push_back)(A* self, T value);
-static inline I* JOIN(A, erase)(I* pos);
+static inline I JOIN(A, find)(A *self, T key);
+static inline void JOIN(A, push_back)(A *self, T value);
+static inline I *JOIN(A, erase)(I *pos);
 
 #include <ctl/bits/container.h>
 
-static inline B*
-JOIN(B, init)(size_t cut)
+static inline B *JOIN(B, init)(size_t cut)
 {
-    B* self = (B*) malloc(sizeof(B));
+    B *self = (B *)malloc(sizeof(B));
     self->a = self->b = cut;
     return self;
 }
 
-static inline B*
-JOIN(B, next)(B* self)
+static inline B *JOIN(B, next)(B *self)
 {
     return self;
 }
 
-static inline void
-JOIN(A, set)(A* self, size_t index, T value)
+static inline void JOIN(A, set)(A *self, size_t index, T value)
 {
-    T* ref = JOIN(A, at)(self, index);
+    T *ref = JOIN(A, at)(self, index);
 #ifndef POD
-    if(self->free)
+    if (self->free)
         self->free(ref);
 #endif
     *ref = value;
 }
 
-static inline void
-JOIN(A, alloc)(A* self, size_t capacity, size_t shift_from)
+static inline void JOIN(A, alloc)(A *self, size_t capacity, size_t shift_from)
 {
     self->capacity = capacity;
-    self->pages = (B**) realloc(self->pages, capacity * sizeof(B*));
+    self->pages = (B **)realloc(self->pages, capacity * sizeof(B *));
     size_t shift = (self->capacity - shift_from) / 2;
     size_t i = self->mark_b;
-    while(i != 0)
+    while (i != 0)
     {
         i--;
         self->pages[i + shift] = self->pages[i];
@@ -317,8 +287,7 @@ JOIN(A, alloc)(A* self, size_t capacity, size_t shift_from)
     self->mark_b += shift;
 }
 
-static inline A
-JOIN(A, init)(void)
+static inline A JOIN(A, init)(void)
 {
     static A zero;
     A self = zero;
@@ -332,10 +301,9 @@ JOIN(A, init)(void)
     return self;
 }
 
-static inline void
-JOIN(A, push_front)(A* self, T value)
+static inline void JOIN(A, push_front)(A *self, T value)
 {
-    if(JOIN(A, empty)(self))
+    if (JOIN(A, empty)(self))
     {
         self->mark_a = 0;
         self->mark_b = 1;
@@ -344,45 +312,43 @@ JOIN(A, push_front)(A* self, T value)
     }
     else
     {
-        B* page = *JOIN(A, first)(self);
-        if(page->a == 0)
+        B *page = *JOIN(A, first)(self);
+        if (page->a == 0)
         {
-            if(self->mark_a == 0)
+            if (self->mark_a == 0)
                 JOIN(A, alloc)(self, 2 * self->capacity, self->mark_a);
             self->mark_a--;
             *JOIN(A, first)(self) = JOIN(B, init)(DEQ_BUCKET_SIZE);
         }
     }
-    B* page = *JOIN(A, first)(self);
+    B *page = *JOIN(A, first)(self);
     page->a--;
     self->size++;
     page->value[page->a] = value;
 }
 
-static inline void
-JOIN(A, pop_front)(A* self)
+static inline void JOIN(A, pop_front)(A *self)
 {
-    B* page = *JOIN(A, first)(self);
+    B *page = *JOIN(A, first)(self);
 #ifndef POD
-    if(self->free)
+    if (self->free)
     {
-        T* ref = &page->value[page->a];
+        T *ref = &page->value[page->a];
         self->free(ref);
     }
 #endif
     page->a++;
     self->size--;
-    if(page->a == page->b)
+    if (page->a == page->b)
     {
         free(page);
         self->mark_a++;
     }
 }
 
-static inline void
-JOIN(A, push_back)(A* self, T value)
+static inline void JOIN(A, push_back)(A *self, T value)
 {
-    if(JOIN(A, empty)(self))
+    if (JOIN(A, empty)(self))
     {
         self->mark_a = 0;
         self->mark_b = 1;
@@ -391,59 +357,57 @@ JOIN(A, push_back)(A* self, T value)
     }
     else
     {
-        B* page = *JOIN(A, last)(self);
-        if(page->b == DEQ_BUCKET_SIZE)
+        B *page = *JOIN(A, last)(self);
+        if (page->b == DEQ_BUCKET_SIZE)
         {
-            if(self->mark_b == self->capacity)
+            if (self->mark_b == self->capacity)
                 JOIN(A, alloc)(self, 2 * self->capacity, self->mark_b);
             self->mark_b++;
             *JOIN(A, last)(self) = JOIN(B, init)(0);
         }
     }
-    B* page = *JOIN(A, last)(self);
+    B *page = *JOIN(A, last)(self);
     page->value[page->b] = value;
     page->b++;
     self->size++;
 }
 
-static inline void
-JOIN(A, pop_back)(A* self)
+static inline void JOIN(A, pop_back)(A *self)
 {
-    B* page = *JOIN(A, last)(self);
+    B *page = *JOIN(A, last)(self);
     page->b--;
     self->size--;
 #ifndef POD
-    if(self->free)
+    if (self->free)
     {
-        T* ref = &page->value[page->b];
+        T *ref = &page->value[page->b];
         self->free(ref);
     }
 #endif
-    if(page->b == page->a)
+    if (page->b == page->a)
     {
         free(page);
         self->mark_b--;
     }
 }
 
-static inline size_t
-JOIN(A, erase_index)(A* self, size_t index)
+static inline size_t JOIN(A, erase_index)(A *self, size_t index)
 {
     static T zero;
     JOIN(A, set)(self, index, zero);
 #ifndef POD
-    void (*saved)(T*) = self->free;
+    void (*saved)(T *) = self->free;
     self->free = NULL;
 #endif
-    if(index < self->size / 2)
+    if (index < self->size / 2)
     {
-        for(size_t i = index; i > 0; i--)
+        for (size_t i = index; i > 0; i--)
             *JOIN(A, at)(self, i) = *JOIN(A, at)(self, i - 1);
         JOIN(A, pop_front)(self);
     }
     else
     {
-        for(size_t i = index; i < self->size - 1; i++)
+        for (size_t i = index; i < self->size - 1; i++)
             *JOIN(A, at)(self, i) = *JOIN(A, at)(self, i + 1);
         JOIN(A, pop_back)(self);
     }
@@ -453,32 +417,30 @@ JOIN(A, erase_index)(A* self, size_t index)
     return index;
 }
 
-static inline I*
-JOIN(A, erase)(I* pos)
+static inline I *JOIN(A, erase)(I *pos)
 {
     pos->index = JOIN(A, erase_index)(pos->container, pos->index);
     return pos;
 }
 
-static inline void
-JOIN(A, insert_index)(A* self, size_t index, T value)
+static inline void JOIN(A, insert_index)(A *self, size_t index, T value)
 {
-    if(self->size > 0)
+    if (self->size > 0)
     {
 #ifndef POD
-        void (*saved)(T*) = self->free;
+        void (*saved)(T *) = self->free;
         self->free = NULL;
 #endif
-        if(index < self->size / 2)
+        if (index < self->size / 2)
         {
             JOIN(A, push_front)(self, *JOIN(A, at)(self, 0));
-            for(size_t i = 0; i < index; i++)
+            for (size_t i = 0; i < index; i++)
                 *JOIN(A, at)(self, i) = *JOIN(A, at)(self, i + 1);
         }
         else
         {
             JOIN(A, push_back)(self, *JOIN(A, at)(self, self->size - 1));
-            for(size_t i = self->size - 1; i > index; i--)
+            for (size_t i = self->size - 1; i > index; i--)
                 *JOIN(A, at)(self, i) = *JOIN(A, at)(self, i - 1);
         }
         *JOIN(A, at)(self, index) = value;
@@ -490,51 +452,46 @@ JOIN(A, insert_index)(A* self, size_t index, T value)
         JOIN(A, push_back)(self, value);
 }
 
-static inline void
-JOIN(A, insert)(I* pos, T value)
+static inline void JOIN(A, insert)(I *pos, T value)
 {
-    A* self = pos->container;
-    if(self->size > 0)
+    A *self = pos->container;
+    if (self->size > 0)
         JOIN(A, insert_index)(self, pos->index, value);
     else
         JOIN(A, push_back)(self, value);
 }
 
-static inline void
-JOIN(A, clear)(A* self)
+static inline void JOIN(A, clear)(A *self)
 {
-    while(!JOIN(A, empty)(self))
+    while (!JOIN(A, empty)(self))
         JOIN(A, pop_back)(self);
 }
 
-static inline void
-JOIN(A, free)(A* self)
+static inline void JOIN(A, free)(A *self)
 {
     JOIN(A, clear)(self);
     free(self->pages);
     *self = JOIN(A, init)();
 }
 
-static inline A
-JOIN(A, copy)(A* self)
+static inline A JOIN(A, copy)(A *self)
 {
     A other = JOIN(A, init)();
-    while(other.size < self->size)
+    while (other.size < self->size)
     {
-        T* value = JOIN(A, at)(self, other.size);
+        T *value = JOIN(A, at)(self, other.size);
         JOIN(A, push_back)(&other, other.copy(value));
     }
     return other;
 }
 
-static inline void
-JOIN(A, resize)(A* self, size_t size, T value)
+static inline void JOIN(A, resize)(A *self, size_t size, T value)
 {
-    if(size != self->size)
+    if (size != self->size)
     {
         // TODO optimize POD with realloc and memset
-        while(size != self->size)
-            if(size < self->size)
+        while (size != self->size)
+            if (size < self->size)
                 JOIN(A, pop_back)(self);
             else
                 JOIN(A, push_back)(self, self->copy(&value));
@@ -542,57 +499,49 @@ JOIN(A, resize)(A* self, size_t size, T value)
     FREE_VALUE(self, value);
 }
 
-static inline I*
-JOIN(A, erase_range)(I* range)
+static inline I *JOIN(A, erase_range)(I *range)
 {
     if (JOIN(I, done)(range))
         return range;
-    A* self = range->container;
+    A *self = range->container;
     size_t i = range->index;
     size_t e = range->end;
     if (i >= self->size || i >= e)
         return range;
-    for(; i < e; e--)
+    for (; i < e; e--)
         JOIN(A, erase_index)(self, i);
     return range;
 }
 
-static inline void
-JOIN(A, emplace)(I* pos, T* value)
+static inline void JOIN(A, emplace)(I *pos, T *value)
 {
     JOIN(A, insert)(pos, *value);
 }
 
-static inline void
-JOIN(A, emplace_front)(A* self, T* value)
+static inline void JOIN(A, emplace_front)(A *self, T *value)
 {
     JOIN(A, push_front)(self, *value);
 }
 
-static inline void
-JOIN(A, emplace_back)(A* self, T* value)
+static inline void JOIN(A, emplace_back)(A *self, T *value)
 {
     JOIN(A, push_back)(self, *value);
 }
 
 static inline void /* I* */
-JOIN(A, insert_range)(I* pos, I* range)
+    JOIN(A, insert_range)(I *pos, I *range)
 {
-    A* self = pos->container;
+    A *self = pos->container;
     size_t index = pos->index;
     // safe against realloc within same container: relative indices only.
     // The STL cannot do that.
-    if(!JOIN(I, done)(pos))
+    if (!JOIN(I, done)(pos))
     {
-        foreach_range_(A, iter, range)
-            if (iter.ref)
-                JOIN(A, insert_index)(self, index++, self->copy(iter.ref));
+        foreach_range_(A, iter, range) if (iter.ref) JOIN(A, insert_index)(self, index++, self->copy(iter.ref));
     }
     else
     {
-        foreach_range_(A, iter, range)
-            if (iter.ref)
-                JOIN(A, push_back)(self, self->copy(iter.ref));
+        foreach_range_(A, iter, range) if (iter.ref) JOIN(A, push_back)(self, self->copy(iter.ref));
     }
     /*
     if (pos->index)
@@ -602,53 +551,48 @@ JOIN(A, insert_range)(I* pos, I* range)
     */
 }
 
-static inline I*
-JOIN(A, insert_count)(I* pos, size_t count, T value)
+static inline I *JOIN(A, insert_count)(I *pos, size_t count, T value)
 {
-    A* self = pos->container;
+    A *self = pos->container;
     // detect overflows, esp. silent signed conversions, like -1
     size_t index = pos->index;
-    if (self->size + count < self->size ||
-        index + count < count ||
-        self->size + count > JOIN(A, max_size)())
+    if (self->size + count < self->size || index + count < count || self->size + count > JOIN(A, max_size)())
     {
-        ASSERT (self->size + count >= self->size || !"count overflow");
-        ASSERT (index + count >= count || !"pos overflow");
-        ASSERT (self->size + count < JOIN(A, max_size)() || !"max_size overflow");
+        ASSERT(self->size + count >= self->size || !"count overflow");
+        ASSERT(index + count >= count || !"pos overflow");
+        ASSERT(self->size + count < JOIN(A, max_size)() || !"max_size overflow");
         FREE_VALUE(self, value);
         return NULL;
     }
-    for(size_t i = index; i < count + index; i++)
+    for (size_t i = index; i < count + index; i++)
         JOIN(A, insert_index)(self, i, self->copy(&value));
     FREE_VALUE(self, value);
     return pos;
 }
 
-static inline void
-JOIN(A, assign)(A* self, size_t size, T value)
+static inline void JOIN(A, assign)(A *self, size_t size, T value)
 {
     JOIN(A, resize)(self, size, self->copy(&value));
-    for(size_t i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
         JOIN(A, set)(self, i, self->copy(&value));
     FREE_VALUE(self, value);
 }
 
 // including to
-static inline void
-JOIN(A, _ranged_sort)(A* self, size_t from, size_t to, int _compare(T*, T*))
+static inline void JOIN(A, _ranged_sort)(A *self, size_t from, size_t to, int _compare(T *, T *))
 {
-    if(UNLIKELY(from >= to))
+    if (UNLIKELY(from >= to))
         return;
     // TODO insertion_sort cutoff
-    //long mid = (from + to) / 2; // overflow!
+    // long mid = (from + to) / 2; // overflow!
     // Dietz formula http://aggregate.org/MAGIC/#Average%20of%20Integers
     size_t mid = ((from ^ to) >> 1) + (from & to);
     SWAP(T, JOIN(A, at)(self, from), JOIN(A, at)(self, mid));
     size_t z = from;
     // check overflow of a + 1
     if (LIKELY(from + 1 > from))
-        for(size_t i = from + 1; i <= to; i++)
-            if(!_compare(JOIN(A, at)(self, from), JOIN(A, at)(self, i)))
+        for (size_t i = from + 1; i <= to; i++)
+            if (!_compare(JOIN(A, at)(self, from), JOIN(A, at)(self, i)))
             {
                 z++;
                 SWAP(T, JOIN(A, at)(self, z), JOIN(A, at)(self, i));
@@ -661,8 +605,7 @@ JOIN(A, _ranged_sort)(A* self, size_t from, size_t to, int _compare(T*, T*))
         JOIN(A, _ranged_sort)(self, z + 1, to, _compare);
 }
 
-static inline void
-JOIN(A, sort)(A* self)
+static inline void JOIN(A, sort)(A *self)
 {
     CTL_ASSERT_COMPARE
     // TODO insertion_sort cutoff
@@ -671,8 +614,7 @@ JOIN(A, sort)(A* self)
 }
 
 // excluding to
-static inline void
-JOIN(A, sort_range)(A* self, size_t from, size_t to)
+static inline void JOIN(A, sort_range)(A *self, size_t from, size_t to)
 {
     CTL_ASSERT_COMPARE
     // TODO insertion_sort cutoff
@@ -680,17 +622,16 @@ JOIN(A, sort_range)(A* self, size_t from, size_t to)
         JOIN(A, _ranged_sort)(self, from, to - 1, self->compare);
 }
 
-static inline size_t
-JOIN(A, remove_if)(A* self, int (*_match)(T*))
+static inline size_t JOIN(A, remove_if)(A *self, int (*_match)(T *))
 {
     if (!self->size)
         return 0;
     size_t erases = 0;
-    T* ref = JOIN(A, at)(self, 0);
-    for(size_t i = 0; i < self->size;)
+    T *ref = JOIN(A, at)(self, 0);
+    for (size_t i = 0; i < self->size;)
     {
         ref = JOIN(A, at)(self, i);
-        if(_match(ref))
+        if (_match(ref))
         {
             JOIN(A, erase_index)(self, i);
             erases++;
@@ -701,23 +642,20 @@ JOIN(A, remove_if)(A* self, int (*_match)(T*))
     return erases;
 }
 
-static inline size_t
-JOIN(A, erase_if)(A* self, int (*_match)(T*))
+static inline size_t JOIN(A, erase_if)(A *self, int (*_match)(T *))
 {
     return JOIN(A, remove_if)(self, _match);
 }
 
-static inline I
-JOIN(A, find)(A* self, T key)
+static inline I JOIN(A, find)(A *self, T key)
 {
-    foreach(A, self, i)
-        if(JOIN(A, _equal)(self, i.ref, &key))
+    foreach (A, self, i)
+        if (JOIN(A, _equal)(self, i.ref, &key))
             return i;
     return JOIN(A, end)(self);
 }
 
-static inline void
-JOIN(A, swap)(A* self, A* other)
+static inline void JOIN(A, swap)(A *self, A *other)
 {
     A temp = *self;
     *self = *other;
@@ -725,14 +663,13 @@ JOIN(A, swap)(A* self, A* other)
 }
 
 // move elements from range to the end of out
-static inline A*
-JOIN(A, move_range)(I* range, A* out)
+static inline A *JOIN(A, move_range)(I *range, A *out)
 {
-    A* self = range->container;
+    A *self = range->container;
     size_t index = range->index;
-    while(index != range->end)
+    while (index != range->end)
     {
-        T* ref = JOIN(A, at)(self, index);
+        T *ref = JOIN(A, at)(self, index);
         JOIN(A, push_back)(out, *ref);
         JOIN(A, erase_index)(self, index);
         index++;

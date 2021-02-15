@@ -1,4 +1,4 @@
-/* 
+/*
   cbmc --trace --function main -I. tests/verify/set-erase.c
 */
 //#define USE_INTERNAL_VERIFY
@@ -8,7 +8,7 @@
 #define T int
 #include "ctl/set.h"
 
-void check (set_int *a)
+void check(set_int *a)
 {
 #ifdef CBMC
     const int a1 = nondet_int();
@@ -33,7 +33,8 @@ void check (set_int *a)
     set_int_free(a);
 }
 
-int main () {
+int main()
+{
     set_int a = set_int_init(_set_int__default_integral_compare);
     check(&a);
     a = set_int_init(_set_int__default_integral_compare3);

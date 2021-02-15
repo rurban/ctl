@@ -11,7 +11,8 @@
 #define T int
 #include "ctl/deque.h"
 
-int main () {
+int main()
+{
     deq_int a = deq_int_init();
 #ifdef CBMC
     const int a1 = nondet_int();
@@ -26,7 +27,7 @@ int main () {
     deq_int_push_front(&a, 0);
     deq_int_it it = deq_int_begin(&a);
     deq_int_insert(&it, a1);
-    deq_int_it_advance (&it, 1);
+    deq_int_it_advance(&it, 1);
     deq_int_insert(&it, 0);
     deq_int_insert_index(&a, 2, a2);
     assert(a.size == 4);

@@ -2,32 +2,25 @@
    SPDX-License-Identifier: MIT */
 
 // DO NOT STANDALONE INCLUDE.
-#if !defined CTL_LIST && \
-    !defined CTL_SET && \
-    !defined CTL_USET && \
-    !defined CTL_VEC && \
-    !defined CTL_ARR && \
+#if !defined CTL_LIST && !defined CTL_SET && !defined CTL_USET && !defined CTL_VEC && !defined CTL_ARR &&              \
     !defined CTL_DEQ
-# error "No CTL container defined for <ctl/bits/container.h>"
+#error "No CTL container defined for <ctl/bits/container.h>"
 #endif
 
 #include <stdbool.h>
 
 #ifndef CTL_ARR
-static inline int
-JOIN(A, empty)(A* self)
+static inline int JOIN(A, empty)(A *self)
 {
     return self->size == 0;
 }
 
-static inline size_t
-JOIN(A, size)(A* self)
+static inline size_t JOIN(A, size)(A *self)
 {
     return self->size;
 }
 
-static inline size_t
-JOIN(A, max_size)()
+static inline size_t JOIN(A, max_size)()
 {
     return 4294967296 / sizeof(T); // 32bit at most. avoid DDOS
 }
@@ -43,34 +36,32 @@ JOIN(I, each)(A* a)
 }
 */
 
-static inline T
-JOIN(A, implicit_copy)(T* self)
+static inline T JOIN(A, implicit_copy)(T *self)
 {
     return *self;
 }
 
 // not valid for uset, str.
 #if !defined(CTL_USET) && !defined(CTL_STR)
-static inline int
-JOIN(A, equal)(A* self, A* other)
+static inline int JOIN(A, equal)(A *self, A *other)
 {
-    if(JOIN(A, size)(self) != JOIN(A, size)(other))
+    if (JOIN(A, size)(self) != JOIN(A, size)(other))
         return 0;
     I i1 = JOIN(A, begin)(self);
     I i2 = JOIN(A, begin)(other);
-    while(!JOIN(I, done)(&i1) && !JOIN(I, done)(&i2))
+    while (!JOIN(I, done)(&i1) && !JOIN(I, done)(&i2))
     {
-        T* r1 = JOIN(I, ref)(&i1);
-        T* r2 = JOIN(I, ref)(&i2);
-        if(self->equal)
+        T *r1 = JOIN(I, ref)(&i1);
+        T *r2 = JOIN(I, ref)(&i2);
+        if (self->equal)
         {
-            if(!self->equal(r1, r2))
+            if (!self->equal(r1, r2))
                 return 0;
         }
         else
         {
             // this works with 2-way and 3-way compare
-            if(self->compare(r1, r2) || self->compare(r2, r1))
+            if (self->compare(r1, r2) || self->compare(r2, r1))
                 return 0;
         }
         JOIN(I, next)(&i1);
@@ -84,11 +75,10 @@ JOIN(A, equal)(A* self, A* other)
 #include <ctl/bits/integral.h>
 
 #if !defined(CTL_USET)
-static inline int
-JOIN(A, _equal)(A* self, T* a, T* b)
+static inline int JOIN(A, _equal)(A *self, T *a, T *b)
 {
     CTL_ASSERT_EQUAL
-    if(self->equal)
+    if (self->equal)
         return self->equal(a, b);
     else
         return !self->compare(a, b) && !self->compare(b, a);
@@ -99,7 +89,7 @@ JOIN(A, _equal)(A* self, T* a, T* b)
 // parents are vec: str, pqu. deq: queue, stack. set: map, uset: umap
 // ignore str: u8str, u8id for now.
 #undef _IS_PARENT_CHILD_FOLLOWS
-#if defined CTL_VEC && (defined CTL_PQU || defined CTL_STR  || defined CTL_U8STR)
+#if defined CTL_VEC && (defined CTL_PQU || defined CTL_STR || defined CTL_U8STR)
 //#pragma message "vec child"
 #define _IS_PARENT_CHILD_FOLLOWS
 #endif
@@ -117,7 +107,7 @@ JOIN(A, _equal)(A* self, T* a, T* b)
 #endif
 
 #ifndef _IS_PARENT_CHILD_FOLLOWS
-# include <ctl/algorithm.h>
+#include <ctl/algorithm.h>
 //#else
 //# pragma message "_IS_PARENT_CHILD_FOLLOWS defined"
 #endif

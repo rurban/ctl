@@ -2,29 +2,29 @@
    SPDX-License-Identifier: MIT */
 
 #ifndef T
-# error "Template type T undefined for <ctl/stack.h>"
+#error "Template type T undefined for <ctl/stack.h>"
 #endif
 
-#define push_back   push
-#define pop_back    pop
-#define back        top
-#define at          __AT
-#define front       __FRONT
-#define begin       __BEGIN
-#define end         __END
-#define push_front  __PUSH_FRONT
-#define pop_front   __POP_FRONT
-#define erase       __ERASE
-#define insert      __INSERT
-#define resize      __RESIZE
-#define assign      __ASSIGN
-#define clear       __CLEAR
+#define push_back push
+#define pop_back pop
+#define back top
+#define at __AT
+#define front __FRONT
+#define begin __BEGIN
+#define end __END
+#define push_front __PUSH_FRONT
+#define pop_front __POP_FRONT
+#define erase __ERASE
+#define insert __INSERT
+#define resize __RESIZE
+#define assign __ASSIGN
+#define clear __CLEAR
 #define ranged_sort __RANGED_SORT
-#define sort        __SORT
-#define range       __RANGE
-#define each        __EACH
-#define step        __STEP
-#define remove_if   __REMOVE_IF
+#define sort __SORT
+#define range __RANGE
+#define each __EACH
+#define step __STEP
+#define remove_if __REMOVE_IF
 
 // Replace the three instances of `deq` below
 // with either `vec` or `list`, depending on your use case.

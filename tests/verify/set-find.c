@@ -1,4 +1,4 @@
-/* 
+/*
   cbmc --compact-trace --depth 6 --unwind 6 --function main -I. tests/verify/set-find.c
 */
 //#define USE_INTERNAL_VERIFY
@@ -8,7 +8,8 @@
 #define T int
 #include "ctl/set.h"
 
-int main () {
+int main()
+{
     set_int a = set_int_init(NULL);
     set_int_insert(&a, 0);
     set_int_insert(&a, 1);

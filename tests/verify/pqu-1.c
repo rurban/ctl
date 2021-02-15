@@ -10,7 +10,8 @@
 #define T int
 #include "ctl/priority_queue.h"
 
-int main () {
+int main()
+{
     pqu_int a = pqu_int_init(NULL);
 #ifdef CBMC
     const int a1 = nondet_int();
@@ -31,7 +32,7 @@ int main () {
     pqu_int_push(&a, a4);
     pqu_int_pop(&a);
     assert(a.size == 4);
-    for(int i=0; i<4;i++)
+    for (int i = 0; i < 4; i++)
         LOG("pqu[%d]: %d\n", i, a.vector[i]);
     assert(a.vector[0] == a3);
     assert(a.vector[1] == a2);

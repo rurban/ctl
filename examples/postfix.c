@@ -18,10 +18,9 @@
 #define T str
 #include <ctl/stack.h>
 
-int
-get_prec(char c)
+int get_prec(char c)
 {
-    switch(c)
+    switch (c)
     {
     case '*':
     case '/':
@@ -33,16 +32,14 @@ get_prec(char c)
     return 0;
 }
 
-int
-is_digit(char c)
+int is_digit(char c)
 {
     return c >= '0' && c <= '9';
 }
 
-int
-is_of_operator(char c)
+int is_of_operator(char c)
 {
-    switch(c)
+    switch (c)
     {
     case '+':
     case '-':
@@ -53,63 +50,51 @@ is_of_operator(char c)
     return 0;
 }
 
-int
-is_operator(str* s)
+int is_operator(str *s)
 {
-    return str_compare(s, "+") == 0
-        || str_compare(s, "-") == 0
-        || str_compare(s, "/") == 0
-        || str_compare(s, "*") == 0;
+    return str_compare(s, "+") == 0 || str_compare(s, "-") == 0 || str_compare(s, "/") == 0 || str_compare(s, "*") == 0;
 }
 
-int
-is_paren(char c)
+int is_paren(char c)
 {
-    return c == '('
-        || c == ')';
+    return c == '(' || c == ')';
 }
 
-int
-is_space(char c)
+int is_space(char c)
 {
     return c == ' ';
 }
 
-str
-get_digit(str* s, size_t i)
+str get_digit(str *s, size_t i)
 {
     size_t j = i;
-    while(is_digit(s->vector[j]))
+    while (is_digit(s->vector[j]))
         j++;
     return str_substr(s, i, j - i);
 }
 
-str
-get_operator(str* s, size_t i)
+str get_operator(str *s, size_t i)
 {
     size_t j = i;
-    while(is_of_operator(s->vector[j]))
+    while (is_of_operator(s->vector[j]))
         j++;
     return str_substr(s, i, j - i);
 }
 
-ls
-tokenize(str* s)
+ls tokenize(str *s)
 {
     ls tokens = ls_init();
-    for(size_t i = 0; i < s->size; i++)
+    for (size_t i = 0; i < s->size; i++)
     {
         char c = s->vector[i];
-        if(is_space(c))
+        if (is_space(c))
             continue;
         str token;
-        if(is_paren(c))
+        if (is_paren(c))
             token = str_substr(s, i, 1);
-        else
-        if(is_digit(c))
+        else if (is_digit(c))
             token = get_digit(s, i);
-        else
-        if(is_of_operator(c))
+        else if (is_of_operator(c))
             token = get_operator(s, i);
         else
         {
@@ -122,29 +107,28 @@ tokenize(str* s)
     return tokens;
 }
 
-ls
-to_postfix(ls* tokens)
+ls to_postfix(ls *tokens)
 {
     ls postfix = ls_init();
     ss operators = ss_init();
-    foreach(ls, tokens, it)
+    foreach (ls, tokens, it)
     {
-        str* token = it.ref;
+        str *token = it.ref;
         char c = token->vector[0];
-        if(is_digit(c))
+        if (is_digit(c))
         {
             ls_push_back(&postfix, str_copy(token));
-            if(postfix.size > 1 && operators.size)
+            if (postfix.size > 1 && operators.size)
             {
-                if(it.node->next)
+                if (it.node->next)
                 {
-                    str* next = &it.node->next->value;
+                    str *next = &it.node->next->value;
                     char cc = next->vector[0];
-                    if(get_prec(c) < get_prec(cc))
+                    if (get_prec(c) < get_prec(cc))
                     {
-                        str* operator = ss_top(&operators);
+                        str *operator= ss_top(&operators);
                         char ccc = operator->vector[0];
-                        if(ccc != '(')
+                        if (ccc != '(')
                         {
                             ls_push_back(&postfix, str_copy(operator));
                             ss_pop(&operators);
@@ -153,23 +137,20 @@ to_postfix(ls* tokens)
                 }
             }
         }
-        else
-        if(is_operator(token))
+        else if (is_operator(token))
             ss_push(&operators, str_copy(token));
-        else
-        if(is_paren(c))
+        else if (is_paren(c))
         {
-            if(c == '(')
+            if (c == '(')
                 ss_push(&operators, str_copy(token));
-            else
-            if(c == ')')
+            else if (c == ')')
             {
                 int done = 0;
-                while(!done)
+                while (!done)
                 {
-                    str* top = ss_top(&operators);
+                    str *top = ss_top(&operators);
                     char cc = top->vector[0];
-                    if(cc == '(')
+                    if (cc == '(')
                         done = 1;
                     else
                         ls_push_back(&postfix, str_copy(top));
@@ -183,9 +164,9 @@ to_postfix(ls* tokens)
             exit(1);
         }
     }
-    while(!ss_empty(&operators))
+    while (!ss_empty(&operators))
     {
-        str* operator = ss_top(&operators);
+        str *operator= ss_top(&operators);
         ls_push_back(&postfix, str_copy(operator));
         ss_pop(&operators);
     }
@@ -193,14 +174,13 @@ to_postfix(ls* tokens)
     return postfix;
 }
 
-int
-main(void)
+int main(void)
 {
     str s = str_init("64 * (128 / 2 - 128 / (2 - 1))");
     ls tokens = tokenize(&s);
     ls postfix = to_postfix(&tokens);
     puts(str_c_str(&s));
-    foreach(ls, &postfix, it)
+    foreach (ls, &postfix, it)
         puts(str_c_str(it.ref));
     ls_free(&tokens);
     ls_free(&postfix);

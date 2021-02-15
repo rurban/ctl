@@ -7,7 +7,8 @@
 #define T int
 #include "ctl/vector.h"
 
-int main () {
+int main()
+{
     vec_int a = vec_int_init();
     vec_int_push_back(&a, 4);
     vec_int_push_back(&a, 1);

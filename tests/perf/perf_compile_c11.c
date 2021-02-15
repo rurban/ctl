@@ -127,64 +127,59 @@
 
 #include <ctl/string.h>
 
-static int
-compare_key_int(int* a, int* b)
+static int compare_key_int(int *a, int *b)
 {
     return (*a == *b) ? 0 : (*a < *b) ? -1 : 1;
 }
 
-static int
-compare_int(int* a, int* b)
+static int compare_int(int *a, int *b)
 {
     return *a < *b;
 }
 
-static size_t
-hash_int(int* a) { return *a; }
+static size_t hash_int(int *a)
+{
+    return *a;
+}
 
-static int
-equal_int(int* a, int* b) { return *a == *b; }
+static int equal_int(int *a, int *b)
+{
+    return *a == *b;
+}
 
-static int
-compare_key_short(short* a, short* b)
+static int compare_key_short(short *a, short *b)
 {
     return (*a == *b) ? 0 : (*a < *b) ? -1 : 1;
 }
 
-static int
-compare_short(short* a, short* b)
+static int compare_short(short *a, short *b)
 {
     return *a < *b;
 }
 
-static int
-compare_key_float(float* a, float* b)
+static int compare_key_float(float *a, float *b)
 {
     return (*a == *b) ? 0 : (*a < *b) ? -1 : 1;
 }
 
-static int
-compare_float(float* a, float* b)
+static int compare_float(float *a, float *b)
 {
     return *a < *b;
 }
 
-static int
-compare_key_double(double* a, double* b)
+static int compare_key_double(double *a, double *b)
 {
     return (*a == *b) ? 0 : (*a < *b) ? -1 : 1;
 }
 
-static int
-compare_double(double* a, double* b)
+static int compare_double(double *a, double *b)
 {
     return *a < *b;
 }
 
 #define N 1024
 
-void
-A(void)
+void A(void)
 {
     deq_int a = deq_int_init();
     vec_int b = vec_int_init();
@@ -197,7 +192,7 @@ A(void)
     arr1024_int j = arr1024_int_init();
     uset_int k = uset_int_init(hash_int, equal_int);
 
-    for (int el=0; el<N; el++)
+    for (int el = 0; el < N; el++)
     {
         deq_int_push_back(&a, el);
         deq_int_push_front(&a, el);
@@ -249,8 +244,7 @@ A(void)
     uset_int_free(&k);
 }
 
-void
-B(void)
+void B(void)
 {
     deq_short a = deq_short_init();
     vec_short b = vec_short_init();
@@ -291,8 +285,7 @@ B(void)
     pqu_short_free(&i);
 }
 
-void
-C(void)
+void C(void)
 {
     deq_float a = deq_float_init();
     vec_float b = vec_float_init();
@@ -333,8 +326,7 @@ C(void)
     pqu_float_free(&i);
 }
 
-void
-D(void)
+void D(void)
 {
     deq_double a = deq_double_init();
     vec_double b = vec_double_init();
@@ -375,8 +367,7 @@ D(void)
     pqu_double_free(&i);
 }
 
-int
-main(void)
+int main(void)
 {
     A();
     B();

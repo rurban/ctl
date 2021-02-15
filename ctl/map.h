@@ -2,7 +2,7 @@
    SPDX-License-Identifier: MIT */
 
 #ifndef T
-# error "Template struct type T undefined for <ctl/map.h>"
+#error "Template struct type T undefined for <ctl/map.h>"
 #endif
 
 #include <ctl/ctl.h>
@@ -16,26 +16,24 @@
 #define _set _map
 #include <ctl/set.h>
 
-static inline I
-JOIN(A, insert_or_assign)(A* self, T key)
+static inline I JOIN(A, insert_or_assign)(A *self, T key)
 {
-    B* insert = JOIN(B, init)(key, 0);
-    if(self->root)
+    B *insert = JOIN(B, init)(key, 0);
+    if (self->root)
     {
-        B* node = self->root;
-        while(1)
+        B *node = self->root;
+        while (1)
         {
             int diff = self->compare(&key, &node->value);
-            if(diff == 0)
+            if (diff == 0)
             {
                 JOIN(A, free_node)(self, node);
                 *node = *insert;
                 return JOIN(I, iter)(self, node);
             }
-            else
-            if(diff < 0)
+            else if (diff < 0)
             {
-                if(node->l)
+                if (node->l)
                     node = node->l;
                 else
                 {
@@ -45,7 +43,7 @@ JOIN(A, insert_or_assign)(A* self, T key)
             }
             else
             {
-                if(node->r)
+                if (node->r)
                     node = node->r;
                 else
                 {
@@ -66,27 +64,25 @@ JOIN(A, insert_or_assign)(A* self, T key)
     return JOIN(I, iter)(self, insert);
 }
 
-static inline I
-JOIN(A, insert_or_assign_found)(A* self, T key, int* foundp)
+static inline I JOIN(A, insert_or_assign_found)(A *self, T key, int *foundp)
 {
-    B* insert = JOIN(B, init)(key, 0);
-    if(self->root)
+    B *insert = JOIN(B, init)(key, 0);
+    if (self->root)
     {
-        B* node = self->root;
-        while(1)
+        B *node = self->root;
+        while (1)
         {
             int diff = self->compare(&key, &node->value);
-            if(diff == 0)
+            if (diff == 0)
             {
                 JOIN(A, free_node)(self, node);
                 *node = *insert;
                 *foundp = 1;
                 return JOIN(I, iter)(self, node);
             }
-            else
-            if(diff < 0)
+            else if (diff < 0)
             {
-                if(node->l)
+                if (node->l)
                     node = node->l;
                 else
                 {
@@ -96,7 +92,7 @@ JOIN(A, insert_or_assign_found)(A* self, T key, int* foundp)
             }
             else
             {
-                if(node->r)
+                if (node->r)
                     node = node->r;
                 else
                 {
