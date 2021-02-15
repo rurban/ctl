@@ -99,6 +99,7 @@ TESTS = \
 	tests/func/test_unordered_set \
 	tests/func/test_unordered_set_power2 \
 	tests/func/test_unordered_set_cached \
+	tests/func/test_unordered_set_sleep \
 	tests/func/test_stack \
 	tests/func/test_array \
 	tests/func/test_double_array \
@@ -285,6 +286,9 @@ tests/func/test_unordered_set_power2: .cflags ${COMMON_H} ctl/unordered_set.h \
 tests/func/test_unordered_set_cached: .cflags ${COMMON_H} ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
 	${CXX} ${CFLAGS} -DCTL_USET_CACHED_HASH tests/func/test_unordered_set.cc -o $@
+tests/func/test_unordered_set_sleep: .cflags ${COMMON_H} ctl/unordered_set.h \
+                          tests/func/test_unordered_set_sleep.c
+	${CC} ${CFLAGS} -O3 -finline tests/func/test_unordered_set_sleep.c -o $@
 tests/func/test_unordered_map: .cflags ${COMMON_H} ctl/unordered_map.h ctl/unordered_set.h \
                           tests/func/test_unordered_map.cc
 	${CXX} ${CFLAGS} -o $@ $@.cc

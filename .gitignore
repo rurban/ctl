@@ -28,6 +28,7 @@ a.out
 /tests/func/test_unordered_set
 /tests/func/test_unordered_set_cached
 /tests/func/test_unordered_set_power2
+/tests/func/test_unordered_set_sleep
 /tests/func/test_vec_capacity
 /tests/func/test_vector
 /tests/perf/*.log
