@@ -52,14 +52,15 @@ Such iterators on `unordered_set` make not much sense, as the order is random.
     bool all_of (A* self, int _match(T*)) (C++11)
     bool any_of `(A* self, int _match(T*)) (C++11)
     bool none_of (A* self, int _match(T*)) (C++11)
-    bool all_of_range (I* first, I* last, int _match(T*))
-    bool any_of_range (I* first, I* last, int _match(T*))
-    bool none_of_range (I* first, I* last, int _match(T*))
+    bool all_of_range (I* range, int _match(T*))
+    bool any_of_range (I* range, int _match(T*))
+    bool none_of_range (I* range, int _match(T*))
 
 checks if a predicate is true for all, any or none of the elements in a range
 
     foreach (A, self, iter) {...}
     foreach_range (A, iter, first, last) {...}
+    foreach_range_ (A, iter, range) {...}
 
 applies a block to a range of elements with iter.
  
@@ -70,8 +71,8 @@ applies a block with iter to the first n elements of a sequence.
 
     size_t count (A* self, T value)
     size_t count_if (A* self, int _match(T*))
-    size_t count_range (I* first, I* last, T value)
-    size_t count_if_range (I* first, I *last, int _match(T*))
+    size_t count_range (I* range, T value)
+    size_t count_if_range (I* range, int _match(T*))
  
 returns the number of elements satisfying specific criteria.
 
@@ -83,15 +84,15 @@ finds if and the first position where two ranges differ.
     I find_if (A* self, int _match(T*))
     I find_if_not (A* self, int _match(T*)) (C++11)
     bool find_range (I* range, T value)
-    I find_if_range (I* first, I* last, int _match(T*))
-    I find_if_not_range (I* first, I* last, int _match(T*))
+    I find_if_range (I* range, int _match(T*))
+    I find_if_not_range (I* range, int _match(T*))
  
 finds the first element satisfying specific criteria. 
 Either return a fresh iterator I, or return bool and set the range argument to the found element.
 Does not consume/free the T value.
 
-    I find_end
-    I find_end_range
+    I find_end (A* self, I* range2)
+    I find_end_range (I* range1, I* range2)
  
 finds the last sequence of elements in a certain range.
 
@@ -105,9 +106,9 @@ searches for any one of a set of elements.
  
 finds the first two adjacent items that are equal.
 
-    I search (A* self, I* first2, I last2)
+    I search (A* self, I* range2)
     bool search_range (I* range1, I *range2) 
-    I bm_search (A* self, I* first2, I last2)  (C++17) (NYI)
+    I bm_search (A* self, I* range2)  (C++17) (NYI)
     bool bm_search_range (I* range1, I *range2)  (C++17) (NYI)
  
 searches for a range of elements. naive cost `range1` * `range2`.
@@ -159,8 +160,8 @@ assigns a value to a number of elements
 
     A transform (A* self, T unop(T*))
     A transform_it (A* self, I* pos, T _binop(T*, T*))
-    I transform_range (I* first1, I* last1, I dest, T _unop(T*)) (NY)
-    I transform_it_range (I* first1, I* last1, I* pos, I dest,
+    I transform_range (I* range1, I dest, T _unop(T*)) (NY)
+    I transform_it_range (I* range1, I* pos, I dest,
                           T _binop(T*, T*))
 
 applies a function to a range of elements. Returning results in a copy, or for
@@ -168,7 +169,7 @@ the range variants in an output iterator `dest`.  unop takes the iterator
 element, binop takes as 2nd argument the 2nd iterator `pos`.
 
     generate (A* self, T _gen(void))
-    generate_range (I* first, I* last, T _gen(void))
+    generate_range (I* range, T _gen(void))
  
 assigns the results of successive function calls to every element in a
 range.
@@ -304,8 +305,8 @@ checks whether a range is sorted into ascending order. _(NYI)_
  
 finds the largest sorted subrange. _(NYI)_
 
-    sort
-    sort_range
+    sort (A* self)
+    sort_range (I* range)
  
 sorts a range into ascending order.
 
@@ -341,10 +342,10 @@ returns an iterator to the first element not less than the given value.
 
 returns an iterator to the first element greater than a certain value.
 
-    binary_search
-    binary_search_range
+    bool binary_search (A* self, T value)
+    bool binary_search_range (I* range, T value)
   
-determines if an element exists in a certain range. _(NYI)_
+determines if an element exists in a sorted sequence.
 
 ## Other operations on sorted ranges
 
@@ -464,6 +465,7 @@ determines if two sets of elements are the same.
     bool equal_range (I* range1, I* range2)
 
 returns true if all elements match a specific key, or all other elements.
+Note: `equal_range` for `set` has a different API and functionality.
  
     int lexicographical_compare
     int lexicographical_compare_range

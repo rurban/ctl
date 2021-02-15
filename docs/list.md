@@ -127,7 +127,7 @@ inserts value before the element.
 
 inserts count copies of value before the element.
 
-    I* insert_range (I* pos, I* first, I* last)
+    I* insert_range (I* pos, I* range2)
 
 inserts copies of values from first to last before pos.
 
@@ -186,11 +186,11 @@ merges two sorted lists.
 
 Moves all elements from the other list to this list before pos.
 
-    splice_it (I* pos, I* first2)
+    splice_it (I* pos, I* range2)
 
 Moves the element first2 from the other list to this list before pos.
 
-    splice_range (I* pos, I* first2, I* last2)
+    splice_range (I* pos, I* range2)
 
 Moves a range of elements from the other list to this list before pos.
 

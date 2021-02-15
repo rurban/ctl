@@ -175,10 +175,6 @@ erases the element by key, i.e. pair.first
 
 erases the element by match.
 
-    erase_range (A* self, I* first, I* last)
-
-erases elements
-
     swap (A* self, A* other)
 
 swaps the contents
@@ -218,9 +214,6 @@ checks if the container contains element with specific key,
 i.e. pair.first. (C++20)
 
     int equal (A* self, A* other)
-    int equal_range (A* self, I* first2, I* last2)
-
-if range of elements match a specific key. _(NYI)_
 
 ## Bucket interface
 
@@ -228,7 +221,7 @@ if range of elements match a specific key. _(NYI)_
 
 returns an iterator to the beginning of the specified bucket _(NYI)_
 
-    B*end (A* self, size_t bucket_index)
+    B* end (A* self, size_t bucket_index)
 
 returns an iterator to the end of the specified bucket _(NYI)_
 
@@ -287,7 +280,7 @@ This might regenerate the hash table, but not the buckets.
 
 specializes the swap algorithm
 
-    remove_if (A* self, int T_match(T*))
+    size_if remove_if (A* self, int _match(T*))
 
 Removes all elements satisfying specific criteria.
 
@@ -307,8 +300,5 @@ finds element by predicate
     bool all_of (A* self, int _match(T*))
     bool any_of (A* self, int _match(T*))
     bool none_of (A* self, int _match(T*))
-    bool all_of_range (A* self, I* first, I* last, int _match(T*))
-    bool any_of_range (A* self, I* first, I* last, int _match(T*))
-    bool none_of_range (A* self, I* first, I* last, int _match(T*))
 
 See [algorithm](algorithm.md) for more.

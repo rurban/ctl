@@ -198,11 +198,11 @@ returns `lower_bound` and `upper_bound` ranges for the key. Different to the
 
     I lower_bound (A* self, T key)
 
-returns an iterator to the first element not less than the given key. _(NYI)_
+returns an iterator to the first element not less than the given key.
 
     I upper_bound (A* self, T key)
 
-returns an iterator to the first element greater than the given key. _(NYI)_
+returns an iterator to the first element greater than the given key.
 
 ## Observers
 
@@ -232,24 +232,25 @@ erases all elements satisfying specific criteria. (C++20) _(NYI)_
     bool all_of (A* self, int _match(T*)) (C++11)
     bool any_of `(A* self, int _match(T*)) (C++11)
     bool none_of (A* self, int _match(T*)) (C++11)
-    bool all_of_range (I* first, I* last, int _match(T*)) (C++20)
-    bool any_of_range (I* first, I* last, int _match(T*)) (C++20)
-    bool none_of_range (I* first, I* last, int _match(T*)) (C++20)
+    bool all_of_range (I* range, int _match(T*))
+    bool any_of_range (I* range, int _match(T*))
+    bool none_of_range (I* range, int _match(T*))
 
     foreach (A, self, iter) {...}
-    foreach_range (A, iter, first, last) {...} (C++20)
+    foreach_range (A, iter, first, last) {...}
+    foreach_range_ (A, iter, range) {...}
 
     size_t count (A* self, T value)
     size_t count_if (A* self, int _match(T*))
-    size_t count_range (I* first, I* last, T value) (C++20)
-    size_t count_if_range (I* first, I *last, int _match(T*)) (C++20)
+    size_t count_range (I* range, T value) (C++20)
+    size_t count_if_range (I* range, int _match(T*)) (C++20)
 
     find (A* self, T key)
     find_if (A* self, int _match(T*))
     find_if_not (A* self, int _match(T*)) (C++11)
-    find_range (I* first, I* last, T key) (C++20)
-    find_if_range (I* first, I* last, int _match(T*)) (C++20)
-    find_if_not_range (I* first, I* last, int _match(T*)) (C++20)
+    find_range (I* range, T key) (C++20)
+    find_if_range (I* range, int _match(T*)) (C++20)
+    find_if_not_range (I* range, int _match(T*)) (C++20)
 
     remove (A* self, T key)                        _(NYI)_
     size_t remove_if (A* self, int match(T*))
@@ -258,29 +259,23 @@ erases all elements satisfying specific criteria. (C++20) _(NYI)_
 
     A transform (A* self, T unop(T*))
     A transform_it (A* self, I* pos, T _binop(T*, T*))
-    I transform_range (I* first1, I* last1, I dest, T _unop(T*))
-    I transform_it_range (I* first1, I* last1, I* pos, I dest,
-                          T _binop(T*, T*))
+    I transform_range (I* range1, I dest, T _unop(T*))
+    I transform_it_range (I* range1, I* pos, I dest, T _binop(T*, T*))
 
 applies a function to a range of elements. Returning results in a copy, or for
 the range variants in an output iterator `dest`.  unop takes the iterator
 element, binop takes as 2nd argument the 2nd iterator `pos`.
 
     generate (A* self, T _gen(void))
-    generate_range (I* first, I* last, T _gen(void)) (C++20) (NY)
+    generate_range (I* range, T _gen(void)) (C++20) (NY)
 
 assigns the results of successive function calls to every element in a
 range.
 
     generate_n (A* self, size_t count, T _gen(void))
-    generate_n_range (I* first, size_t n, T _gen(void))   (C++20)
+    generate_n_range (I* first, size_t n, T _gen(void))
 
 assigns the results of successive function calls to N elements in a range.
 Unlike with the STL, `generate_n` shrinks to n elements.
-
-    A difference (A* self, A* other)
-    A intersection (A* self, A* other)
-    A symmetric_difference (A* self, A* other)
-    A union (A* self, A* other)
 
 See [algorithm](algorithm.md) for more.

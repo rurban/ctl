@@ -166,7 +166,7 @@ inserts value before pos.
 
 inserts count values before pos.
 
-    insert_range (I* pos, I* first, I* last)
+    insert_range (I* pos, I* range2)
 
 inserts values from range [first, last) before pos.
 
@@ -247,7 +247,7 @@ Sorts the elements in non-descending order.
 Currently it's a `stable_sort`, i.e. the order of equal elements is preserved.
 (a merge-sort)
 
-    sort_range (A* self, I* first, I* last)
+    sort_range (I* range)
 
 Sorts the elements in the range `[first, last)` in non-descending order.
 

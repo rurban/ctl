@@ -168,7 +168,7 @@ erases the element by pair.first
 
 erases the element at position
 
-    erase_range (I* first, I* last)
+    erase_range (I* range)
 
 erases elements
 
@@ -201,19 +201,7 @@ finds element with specific key, i.e. pair.first
 
     bool contains (A* self, T key)
 
-checks if the container contains element with specific key. `(C++20)
-
-    bool equal_range (A* self, I* first, I* last, T value)
-
-if range of elements match a specific key.  _(NYI)_
-
-    I lower_bound (A* self, T key)
-
-returns an iterator to the first element not less than the given key.  _(NYI)_
-
-    I upper_bound (A* self, T key)
-
-returns an iterator to the first element greater than the given key.  _(NYI)_
+checks if the container contains element with specific key. (C++20)
 
 ## Observers
 
@@ -223,17 +211,14 @@ Returns the function that compares keys in objects of type T.  _(NYI)_
 
 ## Non-member functions
 
-    swap (A* self)
+    swap (A* self, A* other)
 
 specializes the swap algorithm
 
-    remove_if (A* self, int match(T*))
+    size_t remove_if (A* self, int match(T*))
+    size_t erase_if (A* self, int (*_match)(T*))
 
-Removes all elements satisfying specific criteria.
-
-    erase_if (A* self)
-
-erases all elements satisfying specific criteria (C++20)
+Remove all elements satisfying specific criteria.
 
     A intersection (A* self, A* other)
     A union (A* self, A* other)

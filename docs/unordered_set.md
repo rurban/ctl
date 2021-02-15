@@ -144,9 +144,9 @@ erases the element by key
 
 erases the element by match.
 
-    erase_range (A* self, I* first, I* last)
+    erase_range (A* self, I* range)
 
-erases elements
+erases elements. (NYI)
 
     swap (A* self, A* other)
 
@@ -189,10 +189,6 @@ checks if the container contains element with specific key. (C++20)
     int equal (A* self, A* other)
     
 if all elements are equal.
-
-    bool equal_range (A* self, I* first, I* last, T key)
-
-if range of elements match a specific key. _(range NYI)_
 
 ## Bucket interface
 

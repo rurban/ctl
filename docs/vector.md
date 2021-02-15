@@ -156,7 +156,7 @@ clears the contents
     insert_index (A* self, size_t index, T value)
     insert (I* pos, T value)
     insert_count (I* pos, size_t count, T value)
-    insert_range (I* pos, I* first2, I* last2)
+    insert_range (I* pos, I* range2)
 
 inserts the element(s). (C++17)
 
@@ -204,21 +204,21 @@ returns the number of elements matching specific key.
 
     I find (A* self, T value)
 
-returns an iterator to element with specific key.
+linear search for an element.
 
-    bool equal_range (A* self)
+    bool equal_range (I* range1, I* range2)
 
-returns range of elements matching a specific key. _(NYI)_
+returns range of elements matching a specific key.
 
     I lower_bound (A* self, T key)
-    I lower_bound_range (I* first, I* last, T key)
+    I lower_bound_range (I* range, T key)
 
-returns an iterator to the first element not less than the given key. _(NYI)_
+returns an iterator to the first element of the sorted sequence not less than the given key.
 
     I upper_bound (A* self, T key)
-    I upper_bound_range (I* first, I* last, T key)
+    I upper_bound_range (I* range, T key)
 
-returns an iterator to the first element greater than the given key. _(NYI)_
+returns an iterator to the first element of the sorted sequence greater than the given key.
 
 ## Observers
 

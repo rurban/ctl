@@ -62,7 +62,7 @@ destructs the array.
 
 replaces the contents of the container.
 
-    assign_range (A* self, T* first, T* last)
+    assign_range (A* self, T* range2)
 
 replaces the contents of the container with the values from range.
 
@@ -157,18 +157,6 @@ returns the number of elements matching specific key.
 
 finds element with specific key
 
-    bool equal_range (A* self)
-
-returns range of elements matching a specific key. _(NYI)_
-
-    T* lower_bound (A* self)
-
-returns an iterator to the first element not less than the given key. _(NYI)_
-
-    T* upper_bound (A* self)
-
-returns an iterator to the first element greater than the given key. _(NYI)_
-
 ## Observers
 
     FN value_comp (A* self)
@@ -177,7 +165,7 @@ Returns the function that compares keys in objects of type value_type T. _(NYI)_
 
 ## Non-member functions
 
-    swap (A* self)
+    swap (A* self, A* other)
 
 specializes the swap algorithm
 

@@ -63,7 +63,7 @@ destructs the string.
 
 replaces the contents of the container.
 
-    assign_range (str* self, I* first, I* last)
+    assign_range (str* self, I* range)
 
 replaces the contents of the container with the values from range.
 
@@ -163,7 +163,7 @@ erases the element by index
 
 erases the element at position
 
-    erase_range (str* self, I* first, I* last)
+    erase_range (str* self, I* range)
 
 erases elements from to
 
@@ -197,18 +197,6 @@ finds element with specific key
 
 checks if the container contains element with specific key. (C++20)
 
-    int equal_range (str* self)
-
-returns range of elements matching a specific key. _(NYI)_
-
-    size_t lower_bound (str* self)
-
-returns an iterator to the first element not less than the given key. _(NYI)_
-
-    char* upper_bound (str* self)
-
-returns an iterator to the first element greater than the given key. _(NYI)_
-
 ## Observers
 
     value_comp (str* self)
@@ -229,8 +217,10 @@ Removes all elements satisfying specific criteria.
 
 erases all elements satisfying specific criteria (C++20)
 
-    intersection (str* self, str* other)
-    union (str* self, str* other)
-    difference (str* self, str* other)
-    symmetric_difference (str* self, str* other)
+    str intersection (str* self, str* other)
+    str union (str* self, str* other)
+    str difference (str* self, str* other)
+    str symmetric_difference (str* self, str* other)
 
+
+See [algorithm](algorithm.md) for more.
