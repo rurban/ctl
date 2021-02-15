@@ -867,7 +867,10 @@ static inline I JOIN(A, emplace_hint)(I *pos, T *value)
                 continue;
 #endif
             if (self->equal(value, &n->value))
+            {
+                FREE_VALUE(self, *value);
                 return JOIN(I, iter)(self, n);
+            }
 #if CTL_USET_SECURITY_COLLCOUNTING
             // with max 2^32 keys, 128 collisions is safely considered a DDOS attack.
             if (++count & 128)
@@ -897,8 +900,8 @@ static inline I JOIN(A, emplace_hint)(I *pos, T *value)
 #if CTL_USET_SECURITY_COLLCOUNTING == 4 || CTL_USET_SECURITY_COLLCOUNTING == 5
     not_found:
 #endif
-        B *node = JOIN(B, init)(*value);
-        FREE_VALUE(self, *value);
+        B *node = (B *)calloc(1, sizeof(B));
+        memcpy(&node->value, value, sizeof(T));
 #if CTL_USET_SECURITY_COLLCOUNTING == 4
         if (self->is_sorted_vector)
             return JOIN(B, insert_sorted_vector)(buckets, *value);
