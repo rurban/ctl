@@ -239,6 +239,8 @@ int main(void)
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
+    TEST(SEARCH_N)                                                                                                     \
+    TEST(SEARCH_N_RANGE)                                                                                               \
     TEST(ADJACENT_FIND)                                                                                                \
     TEST(ADJACENT_FIND_RANGE)                                                                                          \
     TEST(FIND_FIRST_OF)                                                                                                \
@@ -250,14 +252,14 @@ int main(void)
     TEST(LOWER_BOUND_RANGE)                                                                                            \
     TEST(UPPER_BOUND_RANGE)                                                                                            \
     TEST(BINARY_SEARCH)                                                                                                \
-    TEST(BINARY_SEARCH_RANGE)
+    TEST(BINARY_SEARCH_RANGE)                                                                                          \
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EQUAL_RANGE)                                                                                                  \
-    TEST(EMPLACE) /* 56 */                                                                                             \
+    TEST(EMPLACE) /* 58 */                                                                                             \
     TEST(EXTRACT)                                                                                                      \
     TEST(MERGE)                                                                                                        \
-    TEST(GENERATE_RANGE)
+    TEST(GENERATE_RANGE)                                                                                               \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -984,6 +986,32 @@ int main(void)
             assert(found == !set_digi_it_done(&range));
             CHECK_ITER(range, b, iter);
             set_digi_free(&aa);
+            break;
+        }
+        case TEST_SEARCH_N: {
+            print_set(&a);
+            size_t count = TEST_RAND(4);
+            int value = pick_random(&a);
+            LOG("search_n %zu %d\n", count, value);
+            set_digi_it aa = set_digi_search_n(&a, count, digi_init(value));
+            auto bb = search_n(b.begin(), b.end(), count, DIGI{value});
+            CHECK_ITER(aa, b, bb);
+            LOG("found %s at %zu\n", set_digi_it_done(&aa) ? "no" : "yes",
+                set_digi_it_index(&aa));
+            break;
+        }
+        case TEST_SEARCH_N_RANGE: {
+            set_digi_it range;
+            std::set<DIGI>::iterator first_b, last_b;
+            get_random_iters(&a, &range, b, first_b, last_b);
+            size_t count = TEST_RAND(4);
+            int value = pick_random(&a);
+            LOG("search_n_range %zu %d\n", count, value);
+            set_digi_it *aa = set_digi_search_n_range(&range, count, digi_init(value));
+            auto bb = search_n(first_b, last_b, count, DIGI{value});
+            CHECK_RANGE(*aa, bb, last_b);
+            LOG("found %s at %zu\n", set_digi_it_done(aa) ? "no" : "yes",
+                set_digi_it_index(aa));
             break;
         }
         case TEST_ADJACENT_FIND: {

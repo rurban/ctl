@@ -304,6 +304,8 @@ int main(void)
     TEST(TRANSFORM_IT)                                                                                                 \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
+    TEST(SEARCH_N)                                                                                                     \
+    TEST(SEARCH_N_RANGE)                                                                                               \
     TEST(ADJACENT_FIND)                                                                                                \
     TEST(ADJACENT_FIND_RANGE)                                                                                          \
     TEST(LOWER_BOUND)                                                                                                  \
@@ -1186,6 +1188,33 @@ int main(void)
                 assert(found == !str_it_done(&range));
                 CHECK_ITER(range, b, iter);
                 str_free(&aa);
+                break;
+            }
+            case TEST_SEARCH_N: {
+                //print_str(&a);
+                size_t count = TEST_RAND(4);
+                char c = RAND_CHAR;
+                LOG("search_n %zu %c\n", count, c);
+                str_it aa = str_search_n(&a, count, c);
+                auto bb = search_n(b.begin(), b.end(), count, c);
+                CHECK_ITER(aa, b, bb);
+                LOG("found %s at %zu\n", str_it_done(&aa) ? "no" : "yes",
+                    str_it_index(&aa));
+                break;
+            }
+            case TEST_SEARCH_N_RANGE: {
+                str_it range;
+                std::string::iterator first_b, last_b;
+                get_random_iters(&a, &range, b, first_b, last_b);
+                size_t count = TEST_RAND(4);
+                char c = RAND_CHAR;
+                LOG("search_n_range %zu %c\n", count, c);
+                //print_str_range(&range);
+                str_it *aa = str_search_n_range(&range, count, c);
+                auto bb = search_n(first_b, last_b, count, c);
+                CHECK_RANGE(*aa, bb, last_b);
+                LOG("found %s at %zu\n", str_it_done(aa) ? "no" : "yes",
+                    str_it_index(aa));
                 break;
             }
             case TEST_ADJACENT_FIND: {

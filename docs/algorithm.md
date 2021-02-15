@@ -116,9 +116,10 @@ searches for a range of elements. naive cost `range1` * `range2`.
 `search` returns an iterator to the pointer if found, or end.
 planned are also boyer-moore, boyer-moore-horspool, kmp and rabin-karp.
 
-    I search_n
+    I* search_n (A *self, size_t count, T value)
+    I search_n_range (I *range, size_t count, T value)
  
-searches a range for a number of consecutive copies of an element. _(NYI)_
+searches a range for a number of consecutive copies of an element.
 
 ## Modifying sequence operations
 

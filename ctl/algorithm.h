@@ -686,6 +686,54 @@ static inline I JOIN(A, find_end)(A *self, I *s_range)
         return JOIN(A, end)(self);
 }
 
+static inline I *JOIN(A, search_n_range)(I *range, size_t count, T value)
+{
+    A *self = range->container;
+    if (JOIN(I, done)(range) || !count)
+    {
+        FREE_VALUE(self, value);
+        return range;
+    }
+    for (; !JOIN(I, done)(range); JOIN(I, next)(range))
+    {
+        if (!JOIN(A, _equal)(self, range->ref, &value))
+            continue;
+        I it = *range;
+        size_t i = 0;
+        while (1)
+        {
+            if (++i >= count)
+            {
+                FREE_VALUE(self, value);
+                *range = it;
+                return range;
+            }
+            JOIN(I, next)(range);
+            if (JOIN(I, done)(range))
+            {
+                FREE_VALUE(self, value);
+                return range;
+            }
+            if (!JOIN(A, _equal)(self, range->ref, &value))
+                break;
+        }
+    }
+    FREE_VALUE(self, value);
+    return range;
+}
+
+static inline I JOIN(A, search_n)(A *self, size_t count, T value)
+{
+
+    if (JOIN(A, size)(self) < count)
+    {
+        FREE_VALUE(self, value);
+        return count ? JOIN(A, end)(self) : JOIN(A, begin)(self);
+    }
+    I range = JOIN(A, begin)(self);
+    return *JOIN(A, search_n_range)(&range, count, value);
+}
+
 static inline I *JOIN(A, adjacent_find_range)(I *range)
 {
 

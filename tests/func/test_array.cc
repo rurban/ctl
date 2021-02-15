@@ -224,6 +224,8 @@ int main(void)
     TEST(TRANSFORM_IT)                                                                                                 \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
+    TEST(SEARCH_N)                                                                                                     \
+    TEST(SEARCH_N_RANGE)                                                                                               \
     TEST(ADJACENT_FIND)                                                                                                \
     TEST(ADJACENT_FIND_RANGE)                                                                                          \
     TEST(FIND_FIRST_OF)                                                                                                \
@@ -730,6 +732,31 @@ int main(void)
                 assert(iter == b.end());
             CHECK_ITER(range, b, iter);
             arr100_digi_free(&aa);
+            break;
+        }
+        case TEST_SEARCH_N: {
+            print_arr100(&a);
+            size_t count = TEST_RAND(4);
+            int value = pick_random(&a);
+            LOG("search_n %zu %d\n", count, value);
+            arr100_digi_it aa = arr100_digi_search_n(&a, count, digi_init(value));
+            auto bb = std::search_n(b.begin(), b.end(), count, DIGI{value});
+            CHECK_ITER(aa, b, bb);
+            LOG("found %s at %zu\n", arr100_digi_it_done(&aa) ? "no" : "yes", arr100_digi_it_index(&aa));
+            break;
+        }
+        case TEST_SEARCH_N_RANGE: {
+            arr100_digi_it range;
+            std::array<DIGI,100>::iterator first_b, last_b;
+            get_random_iters(&a, &range, b, first_b, last_b);
+            size_t count = TEST_RAND(4);
+            int value = pick_random(&a);
+            LOG("search_n_range %zu %d\n", count, value);
+            //print_arr100_range(&range);
+            arr100_digi_it *aa = arr100_digi_search_n_range(&range, count, digi_init(value));
+            auto bb = std::search_n(first_b, last_b, count, DIGI{value});
+            CHECK_RANGE(*aa, bb, last_b);
+            LOG("found %s at %zu\n", arr100_digi_it_done(aa) ? "no" : "yes", arr100_digi_it_index(aa));
             break;
         }
         case TEST_FIND_FIRST_OF: {

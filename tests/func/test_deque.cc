@@ -446,6 +446,8 @@ int main(void)
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
+    TEST(SEARCH_N)                                                                                                     \
+    TEST(SEARCH_N_RANGE)                                                                                               \
     TEST(ADJACENT_FIND)                                                                                                \
     TEST(ADJACENT_FIND_RANGE)                                                                                          \
     TEST(FIND_FIRST_OF)                                                                                                \
@@ -1507,6 +1509,33 @@ int main(void)
                 assert(found == !deq_digi_it_done(&range));
                 CHECK_ITER(range, b, iter);
                 deq_digi_free(&aa);
+                break;
+            }
+            case TEST_SEARCH_N: {
+                print_deq(&a);
+                size_t count = TEST_RAND(4);
+                int value = pick_random(&a);
+                LOG("search_n %zu %d\n", count, value);
+                deq_digi_it aa = deq_digi_search_n(&a, count, digi_init(value));
+                auto bb = search_n(b.begin(), b.end(), count, DIGI{value});
+                CHECK_ITER(aa, b, bb);
+                LOG("found %s at %zu\n", deq_digi_it_done(&aa) ? "no" : "yes",
+                    deq_digi_it_index(&aa));
+                break;
+            }
+            case TEST_SEARCH_N_RANGE: {
+                deq_digi_it range;
+                std::deque<DIGI>::iterator first_b, last_b;
+                get_random_iters(&a, &range, b, first_b, last_b);
+                size_t count = TEST_RAND(4);
+                int value = pick_random(&a);
+                LOG("search_n_range %zu %d\n", count, value);
+                print_deq_range(&range);
+                deq_digi_it *aa = deq_digi_search_n_range(&range, count, digi_init(value));
+                auto bb = search_n(first_b, last_b, count, DIGI{value});
+                CHECK_RANGE(*aa, bb, last_b);
+                LOG("found %s at %zu\n", deq_digi_it_done(aa) ? "no" : "yes",
+                    deq_digi_it_index(aa));
                 break;
             }
             case TEST_ADJACENT_FIND: {
