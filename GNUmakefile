@@ -380,6 +380,8 @@ dist: man
 	mkdir -p ctl-${VERSION}/tests/perf/{arr,deq,lst,pqu,set,str,uset,vec}
 	for f in `git ls-tree -r --full-tree master|cut -c54-`; do \
           cp -p "$$f" "ctl-${VERSION}/$$f"; done
+	-rm ctl-${VERSION}/.git*
+	-rm ctl-${VERSION}/.cirrus.yml
 	tar cfz ctl-${VERSION}.tar.gz ctl-${VERSION}
 	tar cfJ ctl-${VERSION}.tar.xz ctl-${VERSION}
 	rm -rf ctl-${VERSION}
