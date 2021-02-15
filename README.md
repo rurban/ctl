@@ -104,6 +104,11 @@ Removed the compare and equal args from `equal`, `sort`, `sort_range`, `find`,
 Without an `equal` method two `compare` calls are used, so having a special equal
 method is preferred if one of those methods from above are used.
 
+**2way vs 3way compare**: Officially only the lower-than `operator<` 2-way comparator
+is supported, as in the STL. However, with the `set` core methods the 3way
+comparator `<=>` (such as e.g. `memcmp`, `strcmp`) may also be used. Not with algorithms!
+It is not faster with 3way, rather slower.
+
 If you have a POD type, i.e. a struct with only integral types, i.e. no pointers, you
 have to define `NOT_INTEGRAL`.
 
