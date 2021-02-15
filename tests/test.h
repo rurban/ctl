@@ -13,9 +13,10 @@
 #include <unistd.h>
 #else
 #define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
+#include <windows.h>
 #include <process.h>
 #include <sysinfoapi.h>
-#include <windows.h>
 #define getpid _getpid
 #endif
 #include <assert.h>

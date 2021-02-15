@@ -44,8 +44,8 @@ hash of its value. This allows fast access to individual elements, since once a
 hash is computed, it refers to the exact bucket the element is placed into.
 
 We need the slow chained hash table to guarantee that pointers into nodes and
-values stay the same. For faster open-adressing hash tables an experimental
-[hashtable](hashtable.md) container is planned.
+values stay the same. For faster open-adressing hash tables a seperate 
+[hashtable](hashtable.md) container is in work.
 Container elements may not be modified since modification could change an
 element's hash and corrupt the container.
 
@@ -64,16 +64,17 @@ element's hash and corrupt the container.
     A init (T_hash(T*), T_equal(T*, T*))
 
 constructs the hash table.
-with INTEGRAL types the member may be NULL, and are then set to default
+With INTEGRAL types the members may be NULL, and are then set to default
 methods.
 
     free (A* self)
 
 destructs the hash table.
 
-    assign (A* self, A* other)
+    assign_range (A* self, I* range)
 
-replaces the contents of the container.
+replaces the contents of the container with elements from a different
+container, if possible. _(NYI)_
 
     A copy (A* self)
 
@@ -83,14 +84,14 @@ returns a copy of the container.
 
     I begin (A* self)
 
-constructs an iterator to the beginning
+constructs an iterator to the beginning.
 
     I end (A* self)
 
-constructs an iterator to the end
+constructs an iterator to the end.
 
 `unordered_set` does not support ranges, as this does not make sense.
-Our iterator just supports `foreach` and `foreach_n`.
+Our `uset` iterator just supports `foreach`.
 
 ## Capacity
 
@@ -223,6 +224,8 @@ Growth policy defines:
 `CTL_USET_GROWTH_POWER2` rehashes with bucket_count * 2,
 `CTL_USET_GROWTH_PRIMED` rehashes with the next prime at bucket_count * 1.618.
 
+`CTL_USET_GROWTH_FACTOR` defaults to above.
+
 `CTL_USET_CACHED_HASH` stores the hash of each value in the bucket and is used
 to short-circuit slower equal value comparisons. It trades memory for faster
 unsuccesful searches, such as with insert with high load factor and many collisions.
@@ -231,16 +234,28 @@ Planned:
 - `CTL_USET_MOVE_TO_FRONT` moves a bucket in a chain not at the top
 position to the top in each access, such as find and contains, not only insert.
 
-- `CTL_USET_GROWTH_FACTOR` defaults to `2.0` for `CTL_USET_GROWTH_POWER2` and
-`1.618` for `CTL_USET_GROWTH_PRIMED`.
+`CTL_USET_SECURITY_COLLCOUNTING` **security policies** against DDOS attacks,
+overflowing the chained list:
 
-- Security policies against DDOS attacks, overflowing the chained list:
-  - a seeded hash might need a 2nd hash arg (esp. with threads),
-  - collision counting with abort,
-  - collision counting with sleep,
-  - collision counting with change to sorted vector,
-  - collision counting with change to tree (as in java),
-  - sorted vector.
+A seeded hash might need a 2nd hash arg (esp. with threads), but random hash
+seeds are only security theatre.
+
+0: ignore `CTL_USET_SECURITY_COLLCOUNTING 0`
+
+1: sorted vector. `CTL_USET_SECURITY_COLLCOUNTING 1` _(NYI)_
+
+2: collision counting with sleep. `CTL_USET_SECURITY_COLLCOUNTING 2`
+
+3: collision counting with abort. `CTL_USET_SECURITY_COLLCOUNTING 3`
+
+4: collision counting with change to sorted vector. `CTL_USET_SECURITY_COLLCOUNTING 4` _(NYI)_
+
+5: collision counting with change to tree (as in java). `CTL_USET_SECURITY_COLLCOUNTING 5` _(NYI)_
+
+With 2 and 3 you may also override `CTL_USET_SECURITY_ACTION` which default to
+`sleep(1)` for 2 on non-windows, `Sleep(500)` on Windows, and `abort()`
+for 3. E.g. to include extra logging for `fail2ban`.
+
 
 Methods:
 

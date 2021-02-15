@@ -17,13 +17,24 @@ Growth policies:
 - CTL_USET_CACHED_HASH:      store the hash in the bucket. faster find when
                              unsuccesful (eg on high load factor), but needs a bit more space.
 
-Planned:
-
-- CTL_USET_MOVE_TO_FRONT moves a bucket in a chain not at the top
-position to the top in each access, such as find and contains, not only insert.
-
 - CTL_USET_GROWTH_FACTOR defaults to 2.0 for CTL_USET_GROWTH_POWER2 and
 `1.618` for CTL_USET_GROWTH_PRIMED.
+
+Security policies against DDOS attacks, overflowing the chained list:
+
+A seeded hash might need a 2nd hash arg (esp. with threads), but random hash
+seeds are only security theatre.
+
+  0: ignore: `CTL_USET_SECURITY_COLLCOUNTING 0`
+  1: sorted vector `CTL_USET_SECURITY_COLLCOUNTING 1`
+  2: collision counting with sleep: `CTL_USET_SECURITY_COLLCOUNTING 2`
+  3: collision counting with abort: `CTL_USET_SECURITY_COLLCOUNTING 3`
+  4: collision counting with change to sorted vector `CTL_USET_SECURITY_COLLCOUNTING 4`
+  5: collision counting with change to tree (as in java) `CTL_USET_SECURITY_COLLCOUNTING 5`
+
+Planned:
+- CTL_USET_MOVE_TO_FRONT moves a bucket in a chain not at the top
+position to the top in each access, such as find and contains, not only insert.
 
 */
 #ifndef T
@@ -36,8 +47,44 @@ position to the top in each access, such as find and contains, not only insert.
 #ifdef CTL_USET_GROWTH_POWER2
 #undef CTL_USET_GROWTH_PRIMED
 #endif
+#ifndef CTL_USET_GROWTH_FACTOR
+#ifdef CTL_USET_GROWTH_POWER2
+#define CTL_USET_GROWTH_FACTOR 2
+#else
+#define CTL_USET_GROWTH_FACTOR 1.618
+#endif
+#endif
+// speeds up subsequent accesses to the same key (i.e. find + erase)
+// not yet enabled
+#ifndef CTL_USET_MOVE_TO_FRONT
+#define CTL_USET_MOVE_TO_FRONT 0
+#endif
+#ifndef CTL_USET_SECURITY_COLLCOUNTING // defaults to sleep
+#define CTL_USET_SECURITY_COLLCOUNTING 2
+#endif
 
 // TODO extract, merge, equal_range
+
+#if CTL_USET_SECURITY_COLLCOUNTING == 2 // sleep
+#ifndef _WIN32
+#include <unistd.h>
+#ifndef CTL_USET_SECURITY_ACTION
+#define CTL_USET_SECURITY_ACTION sleep(1)
+#endif
+#else
+#define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
+#include <windows.h>
+#ifndef CTL_USET_SECURITY_ACTION
+#define CTL_USET_SECURITY_ACTION  Sleep(500)
+#endif
+#endif
+#elif CTL_USET_SECURITY_COLLCOUNTING == 3 // abort
+#include <stdlib.h>
+#ifndef CTL_USET_SECURITY_ACTION
+#define CTL_USET_SECURITY_ACTION abort()
+#endif
+#endif
 
 #include <stdbool.h>
 #if !defined(__GNUC__) && defined(CTL_USET_GROWTH_POWER2)
@@ -73,6 +120,11 @@ typedef struct A
     T (*copy)(T *);
     size_t (*hash)(T *);
     int (*equal)(T *, T *);
+#if CTL_USET_SECURITY_COLLCOUNTING == 4
+    bool is_sorted_vector;
+#elif CTL_USET_SECURITY_COLLCOUNTING == 5
+    bool is_map;
+#endif
 } A;
 
 typedef struct I
@@ -609,6 +661,19 @@ static inline B *JOIN(A, find_node)(A *self, T value)
 #else
         B **buckets = JOIN(A, _bucket)(self, value);
 #endif
+#if CTL_USET_SECURITY_COLLCOUNTING > 1
+        unsigned int count = 0;
+#endif
+#if CTL_USET_SECURITY_COLLCOUNTING == 1
+        return JOIN(B, find_sorted_vector)(buckets, value);
+#elif CTL_USET_SECURITY_COLLCOUNTING == 4
+        if (self->is_sorted_vector)
+            return JOIN(B, find_sorted_vector)(buckets, value);
+#elif CTL_USET_SECURITY_COLLCOUNTING == 5
+        if (self->is_map)
+            return JOIN(B, find_map)(self, value);
+#endif
+
         for (B *n = *buckets; n; n = n->next)
         {
 #ifdef CTL_USET_CACHED_HASH
@@ -617,8 +682,40 @@ static inline B *JOIN(A, find_node)(A *self, T value)
                 continue;
 #endif
             if (self->equal(&value, &n->value))
-                // TODO move-to-front
+            {
+#if 0 // not yet
+                // speedup subsequent read accesses?
+#if CTL_USET_MOVE_TO_FRONT
+                if (n != *buckets)
+                {
+                    /* |*buckets ... -> n -> next => |n -> *buckets ... -> next */
+                    B* tmp = (*buckets)->next;
+                    *buckets = n;
+                    n->next = *buckets;
+                    (*buckets)->next = tmp;
+                    ASSERT(n != n->next);
+                }
+#endif
+#endif
                 return n;
+            }
+#if CTL_USET_SECURITY_COLLCOUNTING
+            // with max 2^32 keys, 128 collisions is safely considered a DDOS attack.
+            if (++count & 128)
+            {
+# if CTL_USET_SECURITY_COLLCOUNTING == 2
+                CTL_USET_SECURITY_ACTION;
+# elif CTL_USET_SECURITY_COLLCOUNTING == 3
+                CTL_USET_SECURITY_ACTION;
+# elif CTL_USET_SECURITY_COLLCOUNTING == 4
+                JOIN(B, change_to_sorted_vector)(self, buckets);
+                return JOIN(B, find_sorted_vector)(buckets, value);
+# elif CTL_USET_SECURITY_COLLCOUNTING == 5
+                JOIN(B, change_to_map)(self);
+                return JOIN(B, find_map)(self, value);
+# endif
+            }
+#endif
         }
     }
     return NULL;
@@ -635,6 +732,17 @@ static inline I JOIN(A, find)(A *self, T value)
 
 static inline B **JOIN(A, push_cached)(A *self, T *value)
 {
+#if CTL_USET_SECURITY_COLLCOUNTING == 1
+    B **buckets = JOIN(A, _bucket)(self, *value);
+    return JOIN(B, insert_sorted_vector)(buckets, value);
+#elif CTL_USET_SECURITY_COLLCOUNTING == 4
+    if (self->is_sorted_vector)
+        return JOIN(B, insert_sorted_vector)(JOIN(A, _bucket)(self, *value), value);
+#elif CTL_USET_SECURITY_COLLCOUNTING == 5
+    if (self->is_map)
+        return JOIN(B, insert_map)(self, value);
+#endif
+
 #ifdef CTL_USET_CACHED_HASH
     size_t hash = self->hash(value);
     B **buckets = JOIN(A, _bucket_hash)(self, hash);
@@ -656,15 +764,14 @@ static inline void JOIN(A, _pre_insert_grow)(A *self)
     if (self->size + 1 > self->max_bucket_count)
     {
 #ifdef CTL_USET_GROWTH_POWER2
-        const size_t bucket_count = 2 * self->bucket_count;
+        const size_t bucket_count = CTL_USET_GROWTH_FACTOR * self->bucket_count;
         // LOG ("rehash from %lu to %lu, load %f\n", self->size, self->bucket_count,
         //     JOIN(A, load_factor)(self));
         JOIN(A, _rehash)(self, bucket_count);
 #else
         // The natural growth factor is the golden ratio. libstc++ v3 and
         // libc++ use 2.0 here.
-        // size_t const bucket_count = (size_t)((double)self->bucket_count * 1.618033);
-        size_t const bucket_count = 1.618 * (double)self->bucket_count;
+        size_t const bucket_count = CTL_USET_GROWTH_FACTOR * (double)self->bucket_count;
         JOIN(A, rehash)(self, bucket_count);
 #endif
     }
@@ -739,6 +846,20 @@ static inline I JOIN(A, emplace_hint)(I *pos, T *value)
 #else
         B **buckets = JOIN(A, _bucket)(self, *value);
 #endif
+#if CTL_USET_SECURITY_COLLCOUNTING > 1
+        unsigned int count = 0;
+#endif
+#if CTL_USET_SECURITY_COLLCOUNTING == 1
+        if (!JOIN(B, find_sorted_vector)(buckets, value))
+            return JOIN(B, insert_sorted_vector)(buckets, value);
+#elif CTL_USET_SECURITY_COLLCOUNTING == 4
+        if (self->is_sorted_vector && !JOIN(B, find_sorted_vector)(buckets, value))
+            goto not_found;
+#elif CTL_USET_SECURITY_COLLCOUNTING == 5
+        if (self->is_map && !JOIN(B, find_map)(self, value))
+            goto not_found;
+#endif
+
         for (B *n = *buckets; n; n = n->next)
         {
 #ifdef CTL_USET_CACHED_HASH
@@ -746,21 +867,52 @@ static inline I JOIN(A, emplace_hint)(I *pos, T *value)
                 continue;
 #endif
             if (self->equal(value, &n->value))
-            {
-                FREE_VALUE(self, *value);
-                // TODO move-to-front
                 return JOIN(I, iter)(self, n);
+#if CTL_USET_SECURITY_COLLCOUNTING
+            // with max 2^32 keys, 128 collisions is safely considered a DDOS attack.
+            if (++count & 128)
+            {
+# if CTL_USET_SECURITY_COLLCOUNTING == 2
+                CTL_USET_SECURITY_ACTION;
+# elif CTL_USET_SECURITY_COLLCOUNTING == 3
+                CTL_USET_SECURITY_ACTION;
+# elif CTL_USET_SECURITY_COLLCOUNTING == 4
+                JOIN(B, change_to_sorted_vector)(self, buckets);
+                n = JOIN(B, find_sorted_vector)(buckets, value);
+                if (n)
+                    return JOIN(I, iter)(self, n);
+                else
+                    break;
+# elif CTL_USET_SECURITY_COLLCOUNTING == 5
+                JOIN(B, change_to_map)(self);
+                n = JOIN(B, find_map)(self, value);
+                if (n)
+                    return JOIN(I, iter)(self, n);
+                else
+                    break;
+# endif
             }
+#endif
         }
-        // not found
+#if CTL_USET_SECURITY_COLLCOUNTING == 4 || CTL_USET_SECURITY_COLLCOUNTING == 5
+    not_found:
+#endif
         B *node = JOIN(B, init)(*value);
         FREE_VALUE(self, *value);
+#if CTL_USET_SECURITY_COLLCOUNTING == 4
+        if (self->is_sorted_vector)
+            return JOIN(B, insert_sorted_vector)(buckets, *value);
+#elif CTL_USET_SECURITY_COLLCOUNTING == 5
+        if (self->is_map)
+            return JOIN(B, insert_map)(self, *value);
+#else
         JOIN(B, push)(buckets, node);
         pos->container->size++;
         pos->node = node;
         JOIN(I, update)(pos);
         pos->buckets = buckets;
         return *pos;
+#endif
     }
     else
     {
