@@ -352,9 +352,11 @@ main(void)
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
+        TEST(BINARY_SEARCH) \
+        TEST(BINARY_SEARCH_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
-        TEST(EMPLACE) /* 65 */ \
+        TEST(EMPLACE) /* 71 */ \
         TEST(GENERATE_N_RANGE) \
         TEST(TRANSFORM_RANGE) \
         TEST(TRANSFORM_IT_RANGE) \
@@ -1607,6 +1609,31 @@ main(void)
                     print_vector(b);
                     assert(found_a == found_b);
                     assert((long)index == dist);
+                    break;
+                }
+                case TEST_BINARY_SEARCH:
+                {
+                    vec_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    int key = pick_random(&a);
+                    bool found_a = vec_digi_binary_search(&a, digi_init(key));
+                    bool found_b = binary_search(b.begin(), b.end(), DIGI{key});
+                    LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                    assert(found_a == found_b);
+                    break;
+                }
+                case TEST_BINARY_SEARCH_RANGE:
+                {
+                    vec_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    vec_digi_it range;
+                    std::vector<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &range, b, first_b, last_b);
+                    int key = pick_random(&a);
+                    bool found_a = vec_digi_binary_search_range(&range, digi_init(key));
+                    bool found_b = binary_search(first_b, last_b, DIGI{key});
+                    LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                    assert(found_a == found_b);
                     break;
                 }
             default:

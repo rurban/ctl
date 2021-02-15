@@ -926,6 +926,72 @@ JOIN(A, upper_bound)(A* self, T value)
     return range;
 }
 
+static inline bool
+JOIN(A, binary_search_range)(I* range, T value)
+{
+    A* self = range->container;
+    size_t count = JOIN(I, distance_range)(range);
+    if (!count)
+    {
+        if(self->free)
+            self->free(&value);
+        return false;
+    }
+    CTL_ASSERT_COMPARE
+    bool result;
+    I it;
+    while (count > 0)
+    {
+        size_t step = count / 2;
+        it = *range;
+        JOIN(I, advance)(&it, step);
+        if (self->compare(it.ref, &value))
+        {
+            JOIN(I, next)(&it);
+            *range = it;
+            count -= step + 1;
+        } else
+            count = step;
+    }
+    result = !JOIN(I, done)(range) && !self->compare(&value, range->ref);
+    if(self->free)
+        self->free(&value);
+    return result;
+}
+
+static inline bool
+JOIN(A, binary_search)(A* self, T value)
+{
+    size_t count = JOIN(A, size)(self);
+    if (!count)
+    {
+        if(self->free)
+            self->free(&value);
+        return false;
+    }
+    CTL_ASSERT_COMPARE
+    bool result;
+    I it = JOIN(A, begin)(self);
+    I range = it;
+    while (count > 0)
+    {
+        size_t step = count / 2;
+        it = range;
+        JOIN(I, advance)(&it, step);
+        if (self->compare(it.ref, &value))
+        {
+            JOIN(I, next)(&it);
+            range = it;
+            count -= step + 1;
+        } else
+            count = step;
+    }
+    result = !JOIN(I, done)(&range) && !self->compare(&value, range.ref);
+    if(self->free)
+        self->free(&value);
+    return result;
+}
+
 #endif // USET
 
 // uset, set don't need it.

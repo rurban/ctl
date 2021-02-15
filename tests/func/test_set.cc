@@ -95,27 +95,23 @@ int median(set_digi* a)
 
 int pick_element(set_digi* a)
 {
-#if 1
     if (!a->size)
         return 0;
     set_digi_it it = set_digi_begin(a);
     set_digi_it_advance(&it, TEST_RAND(a->size));
     return *it.ref->value;
-#else
-    const size_t index = TEST_RAND(a->size);
-    int test_value = 0;
-    size_t current = 0;
-    foreach(set_digi, a, it)
+}
+
+int pick_random(set_digi* a)
+{
+    switch (TEST_RAND(4))
     {
-        if(current == index)
-        {
-            test_value = *it.ref->value;
-            break;
-        }
-        current++;
+    case 0: return middle(a);
+    case 1: return median(a);
+    case 2: return pick_element(a);
+    case 3: return TEST_RAND(TEST_MAX_VALUE);
     }
-    return test_value;
-#endif
+    assert(0);
 }
 
 static void
@@ -249,10 +245,12 @@ main(void)
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
+        TEST(BINARY_SEARCH) \
+        TEST(BINARY_SEARCH_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(EQUAL_RANGE) \
-        TEST(EMPLACE) /* 54 */ \
+        TEST(EMPLACE) /* 56 */ \
         TEST(EXTRACT) \
         TEST(MERGE) \
         TEST(GENERATE_RANGE) \
@@ -728,8 +726,7 @@ main(void)
             }
             case TEST_FIND_RANGE: // 29
             {
-                int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE)
-                                      : pick_element(&a);
+                int vb = pick_random(&a);
                 digi key = digi_init(vb);
                 set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
@@ -1165,7 +1162,7 @@ main(void)
             }
             case TEST_LOWER_BOUND:
             {
-                int key = median(&a);
+                int key = pick_random(&a);
                 set_digi_it aa = set_digi_lower_bound(&a, digi_init(key));
                 std::set<DIGI>::iterator bb = lower_bound(b.begin(), b.end(), DIGI{key});
                 if (bb != b.end())
@@ -1177,7 +1174,7 @@ main(void)
             }
             case TEST_UPPER_BOUND:
             {
-                int key = median(&a);
+                int key = pick_random(&a);
                 set_digi_it aa = set_digi_upper_bound(&a, digi_init(key));
                 std::set<DIGI>::iterator bb = upper_bound(b.begin(), b.end(), DIGI{key});
                 if (bb != b.end())
@@ -1192,7 +1189,7 @@ main(void)
                 set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, b, first_b, last_b);
-                int key = median(&a);
+                int key = pick_random(&a);
                 set_digi_it *aa = set_digi_lower_bound_range(&first_a, digi_init(key));
                 std::set<DIGI>::iterator bb = lower_bound(first_b, last_b, DIGI{key});
                 if (bb != last_b)
@@ -1207,7 +1204,7 @@ main(void)
                 set_digi_it first_a;
                 std::set<DIGI>::iterator first_b, last_b;
                 get_random_iters (&a, &first_a, b, first_b, last_b);
-                int key = median(&a);
+                int key = pick_random(&a);
                 set_digi_it *aa = set_digi_upper_bound_range(&first_a, digi_init(key));
                 std::set<DIGI>::iterator bb = upper_bound(first_b, last_b, DIGI{key});
                 if (bb != last_b)
@@ -1215,6 +1212,29 @@ main(void)
                     LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
                 }
                 CHECK_RANGE(*aa, bb, last_b);
+                break;
+            }
+            case TEST_BINARY_SEARCH:
+            {
+                int key = pick_random(&a);
+                print_set(&a);
+                bool found_a = set_digi_binary_search(&a, digi_init(key));
+                bool found_b = binary_search(b.begin(), b.end(), DIGI{key});
+                LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                assert(found_a == found_b);
+                break;
+            }
+            case TEST_BINARY_SEARCH_RANGE:
+            {
+                set_digi_it range;
+                std::set<DIGI>::iterator first_b, last_b;
+                get_random_iters (&a, &range, b, first_b, last_b);
+                print_set(&a);
+                int key = pick_random(&a);
+                bool found_a = set_digi_binary_search_range(&range, digi_init(key));
+                bool found_b = binary_search(first_b, last_b, DIGI{key});
+                LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                assert(found_a == found_b);
                 break;
             }
             default:

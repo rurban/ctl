@@ -454,6 +454,8 @@ main(void)
             TEST(UPPER_BOUND) \
             TEST(LOWER_BOUND_RANGE) \
             TEST(UPPER_BOUND_RANGE) \
+            TEST(BINARY_SEARCH)       \
+            TEST(BINARY_SEARCH_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
             TEST(UNIQUE) /* 71 */ \
@@ -1840,6 +1842,31 @@ main(void)
                         LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
                     }
                     CHECK_RANGE(*aa, bb, last_b);
+                    break;
+                }
+                case TEST_BINARY_SEARCH:
+                {
+                    deq_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    int key = pick_random(&a);
+                    bool found_a = deq_digi_binary_search(&a, digi_init(key));
+                    bool found_b = binary_search(b.begin(), b.end(), DIGI{key});
+                    LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                    assert(found_a == found_b);
+                    break;
+                }
+                case TEST_BINARY_SEARCH_RANGE:
+                {
+                    deq_digi_sort(&a);
+                    std::sort(b.begin(), b.end());
+                    deq_digi_it range;
+                    std::deque<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &range, b, first_b, last_b);
+                    int key = pick_random(&a);
+                    bool found_a = deq_digi_binary_search_range(&range, digi_init(key));
+                    bool found_b = binary_search(first_b, last_b, DIGI{key});
+                    LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                    assert(found_a == found_b);
                     break;
                 }
 

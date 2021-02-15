@@ -288,6 +288,8 @@ main(void)
         TEST(UPPER_BOUND) \
         TEST(LOWER_BOUND_RANGE) \
         TEST(UPPER_BOUND_RANGE) \
+        TEST(BINARY_SEARCH) \
+        TEST(BINARY_SEARCH_RANGE) \
 
 #define FOREACH_DEBUG(TEST) \
         TEST(GENERATE_N_RANGE) /* 70 */ \
@@ -1639,6 +1641,32 @@ main(void)
                     CHECK_RANGE(*aa, bb, last_b);
                     break;
                 }
+                case TEST_BINARY_SEARCH:
+                {
+                    list_digi_sort(&a);
+                    b.sort();
+                    int key = pick_random(&a);
+                    bool found_a = list_digi_binary_search(&a, digi_init(key));
+                    bool found_b = binary_search(b.begin(), b.end(), DIGI{key});
+                    LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                    assert(found_a == found_b);
+                    break;
+                }
+                case TEST_BINARY_SEARCH_RANGE:
+                {
+                    list_digi_sort(&a);
+                    b.sort();
+                    list_digi_it range;
+                    std::list<DIGI>::iterator first_b, last_b;
+                    get_random_iters (&a, &range, b, first_b, last_b);
+                    int key = pick_random(&a);
+                    bool found_a = list_digi_binary_search_range(&range, digi_init(key));
+                    bool found_b = binary_search(first_b, last_b, DIGI{key});
+                    LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                    assert(found_a == found_b);
+                    break;
+                }
+
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);

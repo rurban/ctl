@@ -479,8 +479,8 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`lower_bound_range`              | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`upper_bound`                    | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`upper_bound_range`              | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
-|`binary_search`                  |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`binary_search_range`            |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`binary_search`                  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|`binary_search_range`            | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`equal_value`                    | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
 |`equal_range`                    | ✓  | ✓  | ✓  | ✓  | ✓  | x  | x  | -  | -  | -  | -  | -  |
 |`merge`                          |    |    |    |    | ✓  | x  |    | x  | x  | -  | -  | -  |
@@ -515,7 +515,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 2020 (starting with `202102`),
 the old ctl is lower than 2020, starting with `1.0`.
 
-Added lots of missing methods. We have 698 methods, 136 of them unique.
+Added lots of missing methods. We have 710 methods, 138 of them unique.
 glouw has 196 methods, 63 of them unique.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.
