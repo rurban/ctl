@@ -232,7 +232,6 @@ install: man
 	cp docs/man/* $(DESTDIR)$(PREFIX)/share/man/man3/
 	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/ctl/images
 	cp docs/*.md $(DESTDIR)$(PREFIX)/share/doc/ctl/
-	cp -r docs/*/*.md $(DESTDIR)$(PREFIX)/share/doc/ctl/
 	cp docs/images/*.log.png $(DESTDIR)$(PREFIX)/share/doc/ctl/images/
 
 clean:
