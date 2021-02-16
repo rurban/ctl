@@ -1,4 +1,4 @@
-name: Full C/C++ CI (1.5hrs)
+name: Full C/C++ CI
 
 on:
   push:
