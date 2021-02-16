@@ -26,6 +26,8 @@ Defined automatically for all containers, CTL suffix **_it**.
     list_int_it_range(&first, &last);
 
     some_method_range(first, last);
+    // set the current position to the end position
+    list_int_set_done(&first);
 
 
 ## DESCRIPTION
@@ -42,7 +44,14 @@ We don't fully support **output iterators**, like `back_inserter` or `inserter` 
 They are currently only defined for `transform_range` and `transform_it_range`,
 which are not enabled yet, and problematic for `set`.
 
+We don't support yet generic iterators, abstracting different containers. So we
+cannot yet e.g. insert a vector into a deque, or use a mixed set algorithm with
+different container types. See [GH #19](https://github.com/rurban/ctl/issues/19).
+
 Also we don't fully support `reverse_iterator` via `I prev` yet.
+
+But we add the end position so we can hold full ranges. And we added API's to
+work with the addional end position.
 
 ## Iterators
 
@@ -83,7 +92,7 @@ returns the value reference.
 
     set_done (I* iter)
 
-sets the end so its done.
+sets the position to the end, so it's done.
 
     set_end (I* iter, I* last)
 

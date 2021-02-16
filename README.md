@@ -134,18 +134,23 @@ Forgetting a compare method will assert with "compare undefined", if enabled.
 ## Iterators and Ranges
 
 The special iterator objects created by `begin`, `end` and returned by `next`,
-`advance` return the positions, but have more iterator specific fields contained
-within.
+`advance` contain return the current and the end position for ranges
+and have more iterator specific fields contained within. Thus they are fat and
+safe iterators.
 
-Previous versions of the ctl (_with version numbers < 2020_) had different heavy
+Previous versions of the ctl (_with version numbers < 2020_) had different heavier
 and incompatible iterators, initialized by `each`. Our iterators are as in the
-STL initialized with `begin` or `end`, and for ranges with `range`.  Now the
-iterator contains the value or node ref, and nothing else.  Now they are
-compatible with the STL and are even faster than them.
+STL initialized with `begin` or `end`, and for ranges with `range`.  Now they are
+compatible with the STL and are safer.
+
+We don't support yet generic iterators, abstracting different containers. So we
+cannot yet e.g. insert a vector into a deque, or use a mixed set algorithm with
+different container types. See [GH #19](https://github.com/rurban/ctl/issues/19).
 
 See [iterators](docs/iterators.md).
 
-Range methods are suffixed with `_range`.
+Range methods are suffixed with `_range`, taking a single iterator as range,
+similar to C++20 ranges, but they are heavy pairs.
 
 ## Performance
 
