@@ -217,8 +217,8 @@ sub update {
   $found = 0;
   while (<$in>) {
     if (/We have \d+ methods/) {
-      s{We have (\d+) methods, (\d+) of them unique}
-       {We have $countok methods, $countm of them unique};
+      s{We have (\d+) methods in (\d+) stable variants}
+       {We have $countm methods in $countok stable variants};
     }
     if (!$found and /^\|       \s+\|vec\s+\|str\s+/) {
       $found++;
