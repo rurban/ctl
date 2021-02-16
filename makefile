@@ -7,7 +7,7 @@ PREFIX ?= /usr/local
 CC ?= gcc
 CXX ?= g++
 VERSION!=(grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
-VERSION ?= 202101
+VERSION ?= 202102
 
 # probe for -std=c++20, 17 or 11
 TRY_CXX20!=(${CXX} -std=c++20 -I. tests/func/test_deque.cc -o /dev/null && echo -std=c++20) || true
@@ -169,10 +169,10 @@ docs/index.md : README.md
 
 docs/man/ctl.h.3: docs/index.md
 	@mkdir -p docs/man
-	ronn < $< > $@
+	ronn --manual "CTL Manual ${VERSION}" --organization=rurban/ctl < $< > $@
 docs/man/%.h.3 : docs/%.md
 	@mkdir -p docs/man
-	ronn < $< > $@
+	ronn --manual "CTL Manual ${VERSION}" --organization=rurban/ctl < $< > $@
 
 install: man
 	-rm docs/man/index.h.3

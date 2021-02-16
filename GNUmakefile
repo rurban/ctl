@@ -2,7 +2,7 @@ PREFIX = /usr/local
 CC ?= gcc
 CXX ?= g++
 VERSION := $(shell grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
-VERSION ?= 202101
+VERSION ?= 202102
 
 .SUFFIXES: .cc .c .i .o .md .3
 .PHONY: all man install clean doc images perf examples verify asan debug stress stress-long ALWAYS
@@ -216,12 +216,14 @@ docs/index.md : README.md ./update-index.pl
 
 man: docs/man/ctl.h.3 $(MANPAGES)
 
+RONN_ARGS=--manual "CTL Manual $(VERSION)" --organization=rurban/ctl
 docs/man/ctl.h.3: docs/index.md
 	@mkdir -p docs/man
-	ronn < $< > $@
+	ronn $(RONN_ARGS) < $< > $@
+
 docs/man/%.h.3 : docs/%.md
 	@mkdir -p docs/man
-	ronn < $< > $@
+	ronn $(RONN_ARGS) < $< > $@
 
 install: man
 	-rm docs/man/index.h.3
