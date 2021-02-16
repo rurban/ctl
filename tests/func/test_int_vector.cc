@@ -107,10 +107,40 @@ void print_vector(std::vector<int> &b)
 #define TEST_MAX_VALUE INT_MAX
 #endif
 
-int random_element(vec_int *a)
+int middle(vec_int *a)
+{
+    if (!a->size)
+        return 0;
+    return (*vec_int_front(a) - *vec_int_back(a)) / 2;
+}
+
+int median(vec_int *a)
+{
+    vec_int_it it = vec_int_begin(a);
+    vec_int_it_advance(&it, a->size / 2);
+    return a->size ? *it.ref : 0;
+}
+
+int pick_element(vec_int *a)
 {
     const size_t index = TEST_RAND(a->size);
     return a->size ? *vec_int_at(a, index) : 0;
+}
+
+int pick_random(vec_int *a)
+{
+    switch (TEST_RAND(4))
+    {
+    case 0:
+        return middle(a);
+    case 1:
+        return median(a);
+    case 2:
+        return pick_element(a);
+    case 3:
+        return TEST_RAND(TEST_MAX_VALUE);
+    }
+    assert(0);
 }
 
 // tested variants
@@ -308,6 +338,8 @@ int main(void)
     TEST(REMOVE_IF)                                                                                                    \
     TEST(ERASE_IF)                                                                                                     \
     TEST(EQUAL)                                                                                                        \
+    TEST(EQUAL_VALUE)                                                                                                  \
+    TEST(EQUAL_RANGE)                                                                                                  \
     TEST(FIND)                                                                                                         \
     TEST(FIND_IF)                                                                                                      \
     TEST(FIND_IF_NOT)                                                                                                  \
@@ -342,21 +374,28 @@ int main(void)
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
+    TEST(SEARCH_N)                                                                                                     \
+    TEST(SEARCH_N_RANGE)                                                                                               \
     TEST(ADJACENT_FIND)                                                                                                \
-    TEST(ADJACENT_FIND_RANGE)
-
-#define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(EMPLACE)                                                                                                      \
-    TEST(EQUAL_RANGE)                                                                                                  \
-    TEST(GENERATE_N_RANGE)                                                                                             \
-    TEST(TRANSFORM_RANGE)                                                                                              \
-    TEST(TRANSFORM_IT_RANGE)                                                                                           \
+    TEST(ADJACENT_FIND_RANGE)                                                                                          \
+    TEST(FIND_FIRST_OF)                                                                                                \
+    TEST(FIND_FIRST_OF_RANGE)                                                                                          \
     TEST(FIND_END)                                                                                                     \
     TEST(FIND_END_RANGE)                                                                                               \
+    TEST(UNIQUE)                                                                                                       \
+    TEST(UNIQUE_RANGE)                                                                                                 \
     TEST(LOWER_BOUND)                                                                                                  \
     TEST(UPPER_BOUND)                                                                                                  \
     TEST(LOWER_BOUND_RANGE)                                                                                            \
-    TEST(UPPER_BOUND_RANGE)
+    TEST(UPPER_BOUND_RANGE)                                                                                            \
+    TEST(BINARY_SEARCH)                                                                                                \
+    TEST(BINARY_SEARCH_RANGE)
+
+#define FOREACH_DEBUG(TEST)                                                                                            \
+    TEST(EMPLACE)                                                                                                      \
+    TEST(GENERATE_N_RANGE)                                                                                             \
+    TEST(TRANSFORM_RANGE)                                                                                              \
+    TEST(TRANSFORM_IT_RANGE)                                                                                           \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -663,7 +702,7 @@ int main(void)
                 break;
             }
             case TEST_FIND_RANGE: {
-                int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : random_element(&a);
+                int vb = pick_random(&a);
                 vec_int_it first_a;
                 std::vector<int>::iterator first_b, last_b;
                 get_random_iters(&a, &first_a, b, first_b, last_b);
@@ -1289,6 +1328,33 @@ int main(void)
                 vec_int_free(&aa);
                 break;
             }
+            case TEST_SEARCH_N: {
+                print_vec(&a);
+                size_t count = TEST_RAND(4);
+                int value = pick_random(&a);
+                LOG("search_n %zu %d\n", count, value);
+                vec_int_it aa = vec_int_search_n(&a, count, value);
+                auto bb = search_n(b.begin(), b.end(), count, value);
+                CHECK_ITER(aa, b, bb);
+                LOG("found %s at %zu\n", vec_int_it_done(&aa) ? "no" : "yes",
+                    vec_int_it_index(&aa));
+                break;
+            }
+            case TEST_SEARCH_N_RANGE: {
+                vec_int_it range;
+                std::vector<int>::iterator first_b, last_b;
+                get_random_iters(&a, &range, b, first_b, last_b);
+                size_t count = TEST_RAND(4);
+                int value = pick_random(&a);
+                LOG("search_n_range %zu %d\n", count, value);
+                print_vec_range(range);
+                vec_int_it *aa = vec_int_search_n_range(&range, count, value);
+                auto bb = search_n(first_b, last_b, count, value);
+                CHECK_RANGE(*aa, bb, last_b);
+                LOG("found %s at %zu\n", vec_int_it_done(aa) ? "no" : "yes",
+                    vec_int_it_index(aa));
+                break;
+            }
             case TEST_ADJACENT_FIND: {
                 print_vec(&a);
                 vec_int_it aa = vec_int_adjacent_find(&a);
@@ -1308,59 +1374,242 @@ int main(void)
                 LOG("found %s\n", vec_int_it_done(aa) ? "no" : "yes");
                 break;
             }
-#ifdef DEBUG
-            case TEST_LOWER_BOUND: // 64
+            case TEST_LOWER_BOUND:
             {
-                int median = *vec_int_at(&a, a.size / 2);
-                vec_int_it aa = vec_int_lower_bound(&a, median);
-                auto bb = lower_bound(b.begin(), b.end(), median);
+                vec_int_sort(&a);
+                std::sort(b.begin(), b.end());
+                int key = pick_random(&a);
+                vec_int_it aa = vec_int_lower_bound(&a, key);
+                auto bb = lower_bound(b.begin(), b.end(), key);
+                if (bb != b.end())
+                {
+                    LOG("%d: %d vs %d\n", key, *aa.ref, *bb);
+                }
                 CHECK_ITER(aa, b, bb);
                 break;
             }
             case TEST_UPPER_BOUND: {
-                int median = *vec_int_at(&a, a.size / 2);
-                vec_int_it aa = vec_int_upper_bound(&a, median);
-                auto bb = upper_bound(b.begin(), b.end(), median);
+                vec_int_sort(&a);
+                std::sort(b.begin(), b.end());
+                int key = pick_random(&a);
+                vec_int_it aa = vec_int_upper_bound(&a, key);
+                auto bb = upper_bound(b.begin(), b.end(), key);
+                if (bb != b.end())
+                {
+                    LOG("%d: %d vs %d\n", key, *aa.ref, *bb);
+                }
                 CHECK_ITER(aa, b, bb);
                 break;
             }
-            /**/ case TEST_LOWER_BOUND_RANGE : {
-                break;
-            }
-            /**/ case TEST_UPPER_BOUND_RANGE : {
-                break;
-            }
-#endif
-#if 0
-                case TEST_FIND_END:
+            case TEST_LOWER_BOUND_RANGE: {
+                vec_int_sort(&a);
+                std::sort(b.begin(), b.end());
+                vec_int_it first_a;
+                std::vector<int>::iterator first_b, last_b;
+                get_random_iters(&a, &first_a, b, first_b, last_b);
+                int key = pick_random(&a);
+                vec_int_it *aa = vec_int_lower_bound_range(&first_a, key);
+                std::vector<int>::iterator bb = lower_bound(first_b, last_b, key);
+                if (bb != last_b)
                 {
-                    if(a.size > 0)
+                    LOG("%d: %d vs %d\n", key, *aa->ref, *bb);
+                }
+                CHECK_RANGE(*aa, bb, last_b);
+                break;
+            }
+            case TEST_UPPER_BOUND_RANGE: {
+                vec_int_sort(&a);
+                std::sort(b.begin(), b.end());
+                vec_int_it first_a;
+                std::vector<int>::iterator first_b, last_b;
+                get_random_iters(&a, &first_a, b, first_b, last_b);
+                int key = pick_random(&a);
+                vec_int_it *aa = vec_int_upper_bound_range(&first_a, key);
+                std::vector<int>::iterator bb = upper_bound(first_b, last_b, key);
+                if (bb != last_b)
+                {
+                    LOG("%d: %d vs %d\n", key, *aa->ref, *bb);
+                }
+                CHECK_RANGE(*aa, bb, last_b);
+                break;
+            }
+            case TEST_EQUAL_VALUE: {
+                size_t size1 = MIN(TEST_RAND(a.size), 5);
+                vec_int_resize(&a, size1, 0);
+                b.resize(size1);
+                vec_int_it r1a;
+                std::vector<int>::iterator r1b, last1_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                size_t index = TEST_RAND(a.size - 1);
+                int value = a.size ? a.vector[index] : 0;
+                LOG("equal_value %d\n", value);
+                print_vec_range(r1a);
+                bool same_a = vec_int_equal_value(&r1a, value);
+                bool same_b = r1b != last1_b;
+                for (; r1b != last1_b; r1b++)
+                {
+                    if (value != *r1b)
                     {
-                        vec_int_it first_a;
-                        vec_int_it aa = vec_int_find_end(&a, &s_first, &s_last);
-                        auto bb = find_end(b.begin(), b.end(), ...);
-                        bool found_a = !vec_int_it_done(&aa);
-                        bool found_b = bb != b.end();
-                        assert(found_a == found_b);
-                        if(found_a && found_b)
-                            assert(*aa == *bb);
+                        same_b = false;
+                        break;
                     }
-                    break;
                 }
-                case TEST_FIND_END_RANGE:
-                {
-                    vec_int_it first_a, s_first;
-                    std::vector<int>::iterator first_b, last_b, s_first_b, s_last_b;
-                    get_random_iters (&a, &first_a, b, first_b, last_b);
-#if __cpp_lib_erase_if >= 202002L
-                    first_a = vec_int_find_end_range(&first_a, &s_first_a);
-                    auto it = find_end(first_b, last_b, vb);
-                    CHECK_ITER(first_a, b, it);
-                    CHECK(a, b);
+                LOG("same_a: %d same_b: %d\n", (int)same_a, (int)same_b);
+                assert(same_a == same_b);
+                break;
+            }
+            case TEST_EQUAL_RANGE: {
+                vec_int aa = vec_int_copy(&a);
+                std::vector<int> bb = b;
+                vec_int_it r1a, r2a;
+                std::vector<int>::iterator r1b, last1_b, r2b, last2_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                get_random_iters(&aa, &r2a, bb, r2b, last2_b);
+#if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
+                bool same_a = vec_int_equal_range(&r1a, &r2a);
+                bool same_b = std::equal(r1b, last1_b, r2b, last2_b);
+                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
+                assert(same_a == same_b);
+#else
+                vec_int_equal_range(&r1a, &r2a);
+                printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");
 #endif
-                    break;
-                }
-#endif // 0
+                vec_int_free(&aa);
+                break;
+            }
+            case TEST_FIND_FIRST_OF: {
+                vec_int aa;
+                std::vector<int> bb;
+                gen_vectors(&aa, bb, TEST_RAND(15));
+                vec_int_it range2 = vec_int_begin(&aa);
+                vec_int_it it = vec_int_find_first_of(&a, &range2);
+                auto iter = std::find_first_of(b.begin(), b.end(), bb.begin(), bb.end());
+                print_vec(&a);
+                print_vec(&aa);
+                LOG("=> %zu vs %ld\n", vec_int_it_index(&it), iter - b.begin());
+                CHECK_ITER(it, b, iter);
+                vec_int_free(&aa);
+                break;
+            }
+            case TEST_FIND_FIRST_OF_RANGE: {
+                vec_int aa;
+                std::vector<int> bb;
+                gen_vectors(&aa, bb, TEST_RAND(15));
+                vec_int_it range_a, s_first;
+                std::vector<int>::iterator first_b, last_b, s_first_b, s_last_b;
+                get_random_iters(&a, &range_a, b, first_b, last_b);
+                get_random_iters(&aa, &s_first, bb, s_first_b, s_last_b);
+
+                bool found_a = vec_int_find_first_of_range(&range_a, &s_first);
+                auto it = std::find_first_of(first_b, last_b, s_first_b, s_last_b);
+                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", it != last_b ? "yes" : "no", range_a.ref - a.vector,
+                    it - b.begin());
+                if (found_a)
+                    assert(it != last_b);
+                else
+                    assert(it == last_b);
+                vec_int_free(&aa);
+                break;
+            }
+            case TEST_FIND_END: {
+                vec_int aa;
+                std::vector<int> bb;
+                gen_vectors(&aa, bb, TEST_RAND(4));
+                vec_int_it s_first = vec_int_begin(&aa);
+                print_vec(&a);
+                print_vec(&aa);
+                vec_int_it it = vec_int_find_end(&a, &s_first);
+                auto iter = find_end(b.begin(), b.end(), bb.begin(), bb.end());
+                bool found_a = !vec_int_it_done(&it);
+                bool found_b = iter != b.end();
+                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", found_b ? "yes" : "no", it.ref - a.vector,
+                    iter - b.begin());
+                CHECK_ITER(it, b, iter);
+                assert(found_a == found_b);
+                vec_int_free(&aa);
+                break;
+            }
+            case TEST_FIND_END_RANGE: {
+                vec_int_it range_a, s_first;
+                std::vector<int>::iterator first_b, last_b;
+                get_random_iters(&a, &range_a, b, first_b, last_b);
+                vec_int aa;
+                std::vector<int> bb;
+                gen_vectors(&aa, bb, TEST_RAND(4));
+                s_first = vec_int_begin(&aa);
+#if __cpp_lib_erase_if >= 202002L
+                range_a = vec_int_find_end_range(&range_a, &s_first);
+                auto it = find_end(first_b, last_b, bb.begin(), bb.end());
+                CHECK_ITER(range_a, b, it);
+#endif
+                vec_int_free(&aa);
+                break;
+            }
+            case TEST_UNIQUE: {
+                print_vec(&a);
+                int *orig_end = &a.vector[a.size];
+                vec_int_it aa = vec_int_unique(&a);
+                bool found_a = aa.end < orig_end;
+                size_t index = vec_int_it_index(&aa);
+                print_vec(&a);
+                // C++ is special here with its move hack
+                auto bb = unique(b.begin(), b.end());
+                bool found_b = bb != b.end();
+                long dist = std::distance(b.begin(), bb);
+                b.resize(dist);
+                LOG("found %s at %zu, ", found_a ? "yes" : "no", index);
+                LOG("vs found %s at %ld\n", found_b ? "yes" : "no", dist);
+                print_vector(b);
+                assert(found_a == found_b);
+                assert((long)index == dist);
+                break;
+            }
+            case TEST_UNIQUE_RANGE: {
+                vec_int_it range;
+                std::vector<int>::iterator first_b, last_b;
+                get_random_iters(&a, &range, b, first_b, last_b);
+                print_vec_range(range);
+                int *orig_end = range.end;
+                vec_int_it aa = vec_int_unique_range(&range);
+                bool found_a = aa.end < orig_end;
+                size_t index = vec_int_it_index(&aa);
+                auto bb = unique(first_b, last_b);
+                bool found_b = bb != last_b;
+                long dist = std::distance(b.begin(), bb);
+                if (found_b)
+                    b.erase(bb, last_b);
+                LOG("found %s at %zu, ", found_a ? "yes" : "no", index);
+                LOG("vs found %s at %ld\n", found_b ? "yes" : "no", dist);
+                print_vec(&a);
+                print_vector(b);
+                assert(found_a == found_b);
+                assert((long)index == dist);
+                break;
+            }
+            case TEST_BINARY_SEARCH: {
+                vec_int_sort(&a);
+                std::sort(b.begin(), b.end());
+                int key = pick_random(&a);
+                bool found_a = vec_int_binary_search(&a, key);
+                bool found_b = binary_search(b.begin(), b.end(), key);
+                LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                assert(found_a == found_b);
+                break;
+            }
+            case TEST_BINARY_SEARCH_RANGE: {
+                vec_int_sort(&a);
+                std::sort(b.begin(), b.end());
+                vec_int_it range;
+                std::vector<int>::iterator first_b, last_b;
+                get_random_iters(&a, &range, b, first_b, last_b);
+                int key = pick_random(&a);
+                bool found_a = vec_int_binary_search_range(&range, key);
+                bool found_b = binary_search(first_b, last_b, key);
+                LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                assert(found_a == found_b);
+                break;
+            }
+
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);
