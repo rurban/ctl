@@ -1455,7 +1455,17 @@ int main(void)
                 get_random_iters(&a, &r1a, b, r1b, last1_b);
                 get_random_iters(&aa, &r2a, bb, r2b, last2_b);
                 /*bool found_a = */ deq_digi_mismatch(&r1a, &r2a);
+#if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
                 auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
+#else
+                if (!bb.size() || !distance(r2b, last2_b))
+                {
+                    printf("skip std::mismatch with empty 2nd range. use C++14\n");
+                    deq_digi_free(&aa);
+                    break;
+                }
+                auto pair = std::mismatch(r1b, last1_b, r2b);
+#endif
                 int d1a = deq_digi_it_distance(&b1, &r1a);
                 int d2a = deq_digi_it_distance(&b2, &r2a);
                 LOG("iter1 %d, iter2 %d\n", d1a, d2a);
@@ -1673,9 +1683,16 @@ int main(void)
                 get_random_iters(&a, &r1a, b, r1b, last1_b);
                 get_random_iters(&aa, &r2a, bb, r2b, last2_b);
                 bool same_a = deq_digi_equal_range(&r1a, &r2a);
+#if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
                 bool same_b = std::equal(r1b, last1_b, r2b, last2_b);
                 LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
                 assert(same_a == same_b);
+#else
+                bool same_b = std::equal(r1b, last1_b, r2b);
+                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
+                if (same_a != same_b)
+                    printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");
+#endif
                 deq_digi_free(&aa);
                 break;
             }

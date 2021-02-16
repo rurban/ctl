@@ -1223,7 +1223,17 @@ int main(void)
                 get_random_iters(&a, &r1a, b, r1b, last1_b);
                 get_random_iters(&aa, &r2a, bb, r2b, last2_b);
                 /*bool found_a = */ vec_int_mismatch(&r1a, &r2a);
+#if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
                 auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
+#else
+                if (!bb.size() || !distance(r2b, last2_b))
+                {
+                    printf("skip std::mismatch with empty 2nd range. use C++14\n");
+                    vec_int_free(&aa);
+                    break;
+                }
+                auto pair = std::mismatch(r1b, last1_b, r2b);
+#endif
                 int d1a = vec_int_it_distance(&b1, &r1a);
                 int d2a = vec_int_it_distance(&b2, &r2a);
                 LOG("iter1 %d, iter2 %d\n", d1a, d2a);
