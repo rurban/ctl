@@ -369,6 +369,7 @@ static inline int JOIN(A, _equal)(A *self, T *a, T *b)
 static inline A JOIN(A, init_from)(A *copy);
 static inline A JOIN(A, copy)(A *self);
 static inline void JOIN(A, insert)(A *self, T value);
+static inline bool JOIN(A, inserter)(A *self, T value);
 
 #include <ctl/bits/container.h>
 
@@ -1132,19 +1133,19 @@ static inline void JOIN(A, swap)(A *self, A *other)
     *other = temp;
 }
 
-static inline bool JOIN(A, inserter)(A *self, T *value)
+static inline bool JOIN(A, inserter)(A *self, T value)
 {
-    if (JOIN(A, find_node)(self, *value))
+    if (JOIN(A, find_node)(self, value))
     {
         // already exists: keep
         if (self->free)
-            self->free(value);
+            self->free(&value);
         return false;
     }
     else
     {
-        JOIN(A, erase)(self, *value);
-        JOIN(A, insert)(self, *value);
+        //JOIN(A, erase)(self, value);
+        JOIN(A, insert)(self, value);
         return true;
     }
 }
@@ -1156,10 +1157,7 @@ static inline void JOIN(A, generate)(A *self, T _gen(void))
     size_t size = self->size;
     JOIN(A, clear)(self);
     for (size_t i = 0; i < size; i++)
-    {
-        T tmp = _gen();
-        JOIN(A, inserter)(self, &tmp);
-    }
+        JOIN(A, inserter)(self, _gen());
 }
 
 // These just insert in-place.

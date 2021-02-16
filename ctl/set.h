@@ -961,7 +961,7 @@ static inline A JOIN(A, symmetric_difference)(A *a, A *b)
     return self;
 }
 
-static inline bool JOIN(A, inserter)(A *self, B *node, T *value)
+static inline bool JOIN(A, _inserter)(A *self, B *node, T *value)
 {
     if (JOIN(A, _equal)(self, &node->value, value))
     {
@@ -1011,7 +1011,7 @@ static inline void JOIN(A, generate_range)(I *range, T _gen(void))
     {
         B *next = JOIN(B, next)(node);
         T tmp = _gen();
-        JOIN(A, inserter)(self, node, &tmp);
+        JOIN(A, _inserter)(self, node, &tmp);
         node = next;
     }
 }

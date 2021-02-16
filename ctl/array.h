@@ -407,6 +407,35 @@ static inline A JOIN(A, transform_it)(A *self, I *pos, T _binop(T *, T *))
     return other;
 }
 
+static inline A JOIN(A, copy_if_range)(I *range, int _match(T*))
+{
+    A out = JOIN(A, init_from)(range->container);
+    size_t i = JOIN(I, index)(range);
+    while (!JOIN(I, done)(range))
+    {
+        if (_match(range->ref))
+            JOIN(A, set)(&out, i, out.copy(range->ref));
+        i++;
+        JOIN(I, next)(range);
+    }
+    return out;
+}
+
+static inline A JOIN(A, copy_if)(A *self, int _match(T*))
+{
+    A out = JOIN(A, init_from)(self);
+    I range = JOIN(A, begin)(self);
+    size_t i = 0;
+    while (!JOIN(I, done)(&range))
+    {
+        if (_match(range.ref))
+            JOIN(A, set)(&out, i, out.copy(range.ref));
+        i++;
+        JOIN(I, next)(&range);
+    }
+    return out;
+}
+
 #undef A
 #undef I
 #undef N

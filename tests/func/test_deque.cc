@@ -443,6 +443,8 @@ int main(void)
     TEST(TRANSFORM_IT)                                                                                                 \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(TRANSFORM_IT_RANGE)                                                                                           \
+    TEST(COPY_IF)                                                                                                      \
+    TEST(COPY_IF_RANGE)                                                                                                \
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
@@ -1441,6 +1443,48 @@ int main(void)
                 deq_digi_free(&aa);
                 break;
             }
+            case TEST_COPY_IF: {
+                deq_digi aa = deq_digi_copy_if(&a, digi_is_odd);
+/*
+#if __cplusplus >= 202002L
+                auto bb = a | std::ranges::views::filter(DIGI_is_odd);
+                std::ranges::copy(bb, std::back_inserter(bb));
+                ADJUST_CAP("filter_range", aa, bb);
+                CHECK(aa, bb);
+#endif
+*/
+                std::deque<DIGI> bb;
+#if __cplusplus >= 201103L && !defined(_MSC_VER)
+                std::copy_if(b.begin(), b.end(), std::back_inserter(bb), DIGI_is_odd);
+#else
+                for (auto &d: b) {
+                    if (DIGI_is_odd(d))
+                        bb.push_back(d);
+                }
+#endif
+                ADJUST_CAP("copy_if", aa, bb);
+                CHECK(aa, bb);
+                deq_digi_free(&aa);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_COPY_IF_RANGE: {
+                deq_digi_it range;
+                std::deque<DIGI>::iterator first_b, last_b;
+                get_random_iters(&a, &range, b, first_b, last_b);
+                deq_digi aa = deq_digi_copy_if_range(&range, digi_is_odd);
+#ifndef _MSC_VER
+#if __cplusplus >= 201103L
+                std::deque<DIGI> bb;
+                std::copy_if(first_b, last_b, std::back_inserter(bb), DIGI_is_odd);
+                ADJUST_CAP("copy_if_range", aa, bb);
+                CHECK(aa, bb);
+#endif
+#endif
+                deq_digi_free(&aa);
+                CHECK(a, b);
+                break;
+            }
             case TEST_MISMATCH: {
                 if (a.size < 2)
                     break;
@@ -1540,7 +1584,7 @@ int main(void)
                 size_t count = TEST_RAND(4);
                 int value = pick_random(&a);
                 LOG("search_n_range %zu %d\n", count, value);
-                print_deq_range(&range);
+                print_deq_range(range);
                 deq_digi_it *aa = deq_digi_search_n_range(&range, count, digi_init(value));
                 auto bb = search_n(first_b, last_b, count, DIGI{value});
                 CHECK_RANGE(*aa, bb, last_b);

@@ -437,8 +437,9 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`search_n`                       | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`search_n_range`                 | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`copy_range`                     | ✓  | ✓  | -  | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
-|`copy_if`                        |    |    |    |    |    |    |    |    |    | -  | -  | -  |
-|`copy_if_range`                  |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`inserter`                       | ✓  | ✓  | x  | ✓  | ✓  | ✓  |    | ✓  |    | -  | -  | -  |
+|`copy_if`                        | ✓  | ✓  | x  | ✓  | ✓  | ✓  |    | ✓  |    | -  | -  | -  |
+|`copy_if_range`                  | ✓  | ✓  | x  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`copy_n`                         |    |    |    |    |    |    |    |    |    | -  | -  | -  |
 |`copy_n_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`copy_backward`                  |    |    |    |    |    |    |    |    |    | -  | -  | -  |
@@ -453,7 +454,7 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`fill_n_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`transform`                      | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | ✓  | x  | -  | -  | -  |
 |`transform_it`                   | ✓  | ✓  | ✓  | ✓  | x  | ✓  |    |    |    | -  | -  | -  |
-|`transform_range`                | x  | x  | x  | ✓  | x  | ✓  |    | -  | -  | -  | -  | -  |
+|`transform_range`                | ✓  | x  | x  | ✓  | x  | ✓  |    | -  | -  | -  | -  | -  |
 |`transform_it_range`             | x  |    |    | ✓  |    | ✓  |    | -  | -  | -  | -  | -  |
 |`generate`                       | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | ✓  | x  | -  | -  | -  |
 |`generate_range`                 | ✓  | ✓  | ✓  | ✓  | ✓  | x  |    | -  | -  | -  | -  | -  |
@@ -559,7 +560,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 2020 (starting with `202102`),
 the old ctl is lower than 2020, starting with `1.0`.
 
-Added lots of missing methods. We have 140 methods in 722 stable variants.
+Added lots of missing methods. We have 143 methods in 740 stable variants.
 glouw has 63 methods in 196 stable variants.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.

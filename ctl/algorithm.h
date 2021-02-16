@@ -111,7 +111,6 @@ static inline bool JOIN(A, any_of_range)(I *range, int _match(T *))
 #endif // USET (ranges)
 
 // set/uset have optimized implementations.
-// These require now sorted containers via operator< and push_back.
 #if defined(CTL_LIST) || defined(CTL_VEC) || defined(CTL_STR) || defined(CTL_DEQ)
 
 static inline A *JOIN(A, copy_range)(I *range, A *out)
@@ -134,7 +133,7 @@ static inline int JOIN(A, _found)(A *a, T *ref)
 #endif
 }
 
-// requires sorted containers (via operator<) and push_back
+// These require sorted containers via operator< and push_back.
 /*
 static inline A
 JOIN(A, union)(A* a, A* b)
@@ -495,6 +494,49 @@ static inline A *JOIN(A, copy_range)(I *range, A *out)
     return out;
 }
 #endif // USET/SET inserter
+
+#if !defined(CTL_ARR)
+
+#if !defined(CTL_USET) && !defined(CTL_UMAP)
+// need to match the uset API
+static inline void JOIN(A, inserter)(A *self, T value)
+{
+#if defined(CTL_DEQ) || defined(CTL_LIST) || defined(CTL_VEC) || defined(CTL_STR)
+    JOIN(A, push_back)(self, value);
+#elif defined(CTL_SET) || defined(CTL_MAP)
+    JOIN(A, insert)(self, value);
+#else
+    // uset and array have its own
+    #error "no inserter for this container"
+#endif
+}
+#endif // USET
+
+static inline A JOIN(A, copy_if_range)(I *range, int _match(T*))
+{
+    A out = JOIN(A, init_from)(range->container);
+    while (!JOIN(I, done)(range))
+    {
+        if (_match(range->ref))
+            JOIN(A, inserter)(&out, out.copy(range->ref));
+        JOIN(I, next)(range);
+    }
+    return out;
+}
+
+static inline A JOIN(A, copy_if)(A *self, int _match(T*))
+{
+    A out = JOIN(A, init_from)(self);
+    I range = JOIN(A, begin)(self);
+    while (!JOIN(I, done)(&range))
+    {
+        if (_match(range.ref))
+            JOIN(A, inserter)(&out, out.copy(range.ref));
+        JOIN(I, next)(&range);
+    }
+    return out;
+}
+#endif // ARR
 
 #if !defined(CTL_USET)
 /// uset has cached_hash optims
@@ -1016,10 +1058,6 @@ static inline I JOIN(A, unique)(A *self)
 #endif // USET, SET
 
 // TODO:
-// search_n
-// search_n_range C++20
-// copy_if C++11
-// copy_if_range C++20
 // copy_n C++11
 // copy_n_range C++20
 // copy_backward

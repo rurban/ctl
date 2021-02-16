@@ -302,6 +302,8 @@ int main(void)
     TEST(GENERATE_N)                                                                                                   \
     TEST(TRANSFORM)                                                                                                    \
     TEST(TRANSFORM_IT)                                                                                                 \
+    TEST(COPY_IF)                                                                                                      \
+    TEST(COPY_IF_RANGE)                                                                                                \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
     TEST(SEARCH_N)                                                                                                     \
@@ -316,10 +318,10 @@ int main(void)
     TEST(BINARY_SEARCH_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(GENERATE_N_RANGE) /* 61 */                                                                                    \
+    TEST(GENERATE_N_RANGE) /* 72 */                                                                                    \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(UNIQUE)                                                                                                       \
-    TEST(UNIQUE_RANGE)
+    TEST(UNIQUE_RANGE)                                                                                                 \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -1120,6 +1122,43 @@ int main(void)
                 break;
             }
 #endif // DEBUG
+            case TEST_COPY_IF: {
+                str aa = str_copy_if(&a, is_upper);
+                std::string bb;
+#if __cplusplus >= 201103L && !defined(_MSC_VER)
+                std::copy_if(b.begin(), b.end(), std::back_inserter(bb), STL_is_upper);
+#else
+                for (auto &d: b) {
+                    if (DIGI_is_upper(d))
+                        bb.push_back(d);
+                }
+#endif
+                ADJUST_CAP("copy_if", aa, bb);
+                CHECK(aa, bb);
+                str_free(&aa);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_COPY_IF_RANGE: {
+                str_it range;
+                std::string::iterator first_b, last_b;
+                get_random_iters(&a, &range, b, first_b, last_b);
+                str aa = str_copy_if_range(&range, is_upper);
+                std::string bb;
+#if __cplusplus >= 201103L && !defined(_MSC_VER)
+                std::copy_if(first_b, last_b, std::back_inserter(bb), STL_is_upper);
+#else
+                for (auto d = first_b; d != last_b; d++) {
+                    if (STL_is_upper(*d))
+                        bb.push_back(*d);
+                }
+#endif
+                ADJUST_CAP("copy_if_range", aa, bb);
+                CHECK(aa, bb);
+                str_free(&aa);
+                CHECK(a, b);
+                break;
+            }
             case TEST_MISMATCH: // 40
             {
                 if (a.size < 2)

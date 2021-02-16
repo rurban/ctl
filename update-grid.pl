@@ -123,6 +123,7 @@ for my $c (qw(vec str arr deq list set map uset umap)) {
   for (qw(begin end next foreach ref)) {
     $m->{$_}->{$c} = '✓';
   }
+  $m->{inserter}->{$c} = $m->{copy_if}->{$c};
 }
 for my $c (qw(vec str arr deq list set map)) {
   for (qw(advance distance range foreach_range foreach_n foreach_n_range)) {

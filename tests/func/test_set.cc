@@ -236,6 +236,8 @@ int main(void)
     TEST(TRANSFORM_IT)                                                                                                 \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(TRANSFORM_IT_RANGE)                                                                                           \
+    TEST(COPY_IF)                                                                                                      \
+    TEST(COPY_IF_RANGE)                                                                                                \
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
@@ -256,7 +258,7 @@ int main(void)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EQUAL_RANGE)                                                                                                  \
-    TEST(EMPLACE) /* 58 */                                                                                             \
+    TEST(EMPLACE) /* 62 */                                                                                             \
     TEST(EXTRACT)                                                                                                      \
     TEST(MERGE)                                                                                                        \
     TEST(GENERATE_RANGE)                                                                                               \
@@ -916,6 +918,40 @@ int main(void)
             CHECK(aa, bb);
             CHECK(a, b);
             set_digi_free(&aa);
+            break;
+        }
+        case TEST_COPY_IF: {
+            set_digi aa = set_digi_copy_if(&a, digi_is_odd);
+            std::set<DIGI> bb;
+#if __cplusplus >= 201103L
+            std::copy_if(b.begin(), b.end(), std::inserter(bb, bb.begin()), DIGIc_is_odd);
+#else
+            for (auto &d : b)
+                if (DIGI_is_odd(d))
+                    bb.push_back(d);
+#endif
+            CHECK(aa, bb);
+            set_digi_free(&aa);
+            CHECK(a, b);
+            break;
+        }
+        case TEST_COPY_IF_RANGE: {
+            set_digi_it range;
+            std::set<DIGI>::iterator first_b, last_b;
+            get_random_iters(&a, &range, b, first_b, last_b);
+            set_digi aa = set_digi_copy_if_range(&range, digi_is_odd);
+            std::set<DIGI> bb;
+#if __cplusplus >= 201103L
+            std::copy_if(first_b, last_b, std::inserter(bb, bb.begin()), DIGIc_is_odd);
+#else
+            for (auto d = first_b; d != last_b; d++) {
+                if (DIGI_is_odd(*d))
+                    bb.push_back(*d);
+            }
+#endif
+            CHECK(aa, bb);
+            set_digi_free(&aa);
+            CHECK(a, b);
             break;
         }
         case TEST_MISMATCH: {

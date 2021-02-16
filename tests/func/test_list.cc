@@ -276,6 +276,8 @@ int main(void)
     TEST(GENERATE_RANGE)                                                                                               \
     TEST(GENERATE_N)                                                                                                   \
     TEST(TRANSFORM)                                                                                                    \
+    TEST(COPY_IF)                                                                                                      \
+    TEST(COPY_IF_RANGE)                                                                                                \
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
@@ -909,6 +911,42 @@ int main(void)
             CHECK(aa, bb);
             CHECK(a, b);
             list_digi_free(&aa);
+            break;
+        }
+        case TEST_COPY_IF: {
+            list_digi aa = list_digi_copy_if(&a, digi_is_odd);
+            std::list<DIGI> bb;
+#if __cplusplus >= 201103L && !defined(_MSC_VER)
+            std::copy_if(b.begin(), b.end(), std::back_inserter(bb), DIGI_is_odd);
+#else
+            for (auto &d : b)
+            {
+                if (DIGI_is_odd(d))
+                    bb.push_back(d);
+            }
+#endif
+            CHECK(aa, bb);
+            list_digi_free(&aa);
+            CHECK(a, b);
+            break;
+        }
+        case TEST_COPY_IF_RANGE: {
+            list_digi_it range;
+            std::list<DIGI>::iterator first_b, last_b;
+            get_random_iters(&a, &range, b, first_b, last_b);
+            list_digi aa = list_digi_copy_if_range(&range, digi_is_odd);
+            std::list<DIGI> bb;
+#if __cplusplus >= 201103L && !defined(_MSC_VER)
+            std::copy_if(first_b, last_b, std::back_inserter(bb), DIGI_is_odd);
+#else
+            for (auto d = first_b; d != last_b; d++) {
+                if (DIGI_is_odd(*d))
+                    bb.push_back(*d);
+            }
+#endif
+            CHECK(aa, bb);
+            list_digi_free(&aa);
+            CHECK(a, b);
             break;
         }
         case TEST_INCLUDES: {

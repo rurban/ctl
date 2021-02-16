@@ -241,10 +241,12 @@ int main(void)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(DIFFERENCE)                                                                                                   \
-    TEST(SYMMETRIC_DIFFERENCE) /* 41*/                                                                                 \
+    TEST(SYMMETRIC_DIFFERENCE) /* 49*/                                                                                 \
     TEST(INTERSECTION)                                                                                                 \
     TEST(GENERATE_N_RANGE)                                                                                             \
-    TEST(TRANSFORM_RANGE)
+    TEST(TRANSFORM_RANGE)                                                                                              \
+    TEST(COPY_IF)                                                                                                      \
+    TEST(COPY_IF_RANGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -641,6 +643,38 @@ int main(void)
             // heap use-after-free
             CHECK(a, b);
             arr100_digi_free(&aa);
+            break;
+        }
+        case TEST_COPY_IF: {
+            arr100_digi aa = arr100_digi_copy_if(&a, digi_is_odd);
+            std::array<DIGI, 100> bb = b;
+            size_t i = 0;
+            for (auto &d : b)
+            {
+                if (DIGI_is_odd(d))
+                    bb[i] = d;
+                i++;
+            }
+            CHECK(aa, bb);
+            arr100_digi_free(&aa);
+            CHECK(a, b);
+            break;
+        }
+        case TEST_COPY_IF_RANGE: {
+            arr100_digi_it range;
+            std::array<DIGI, 100>::iterator first_b, last_b;
+            get_random_iters(&a, &range, b, first_b, last_b);
+            arr100_digi aa = arr100_digi_copy_if_range(&range, digi_is_odd);
+            size_t i = arr100_digi_it_index(&range);
+            std::array<DIGI, 100> bb = b;
+            for (auto &d : b)
+            {
+                if (DIGI_is_odd(d))
+                    bb[i] = d;
+                i++;
+            }
+            arr100_digi_free(&aa);
+            CHECK(a, b);
             break;
         }
 #endif // DEBUG

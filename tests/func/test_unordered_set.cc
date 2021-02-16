@@ -144,12 +144,13 @@ int main(void)
     TEST(GENERATE)                                                                                                     \
     TEST(GENERATE_N)                                                                                                   \
     TEST(TRANSFORM)                                                                                                    \
+    TEST(COPY_IF)                                                                                                      \
     TEST(EMPLACE)                                                                                                      \
     TEST(EMPLACE_FOUND)                                                                                                \
-    TEST(EMPLACE_HINT) /* 29 */
+    TEST(EMPLACE_HINT) /* 30 */
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(EXTRACT) /* 30 */                                                                                             \
+    TEST(EXTRACT) /* 31 */                                                                                             \
     TEST(MERGE)                                                                                                        \
     TEST(REMOVE_IF)
 
@@ -359,7 +360,7 @@ int main(void)
             uset_digi aaa = uset_digi_union(&a, &aa);
             std::unordered_set<DIGI, DIGI_hash> bbb;
 #if 0 // If the STL would be actually usable
-                std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
+            std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
                                std::inserter(bbb, std::next(bbb.begin())));
 #else
             std::copy(b.begin(), b.end(), std::inserter(bbb, bbb.end()));
@@ -385,7 +386,7 @@ int main(void)
             uset_digi aaa = uset_digi_intersection(&a, &aa);
             std::unordered_set<DIGI, DIGI_hash> bbb;
 #if 0 // If the STL would be actually usable
-                std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
+            std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
                                       std::inserter(bbb, std::next(bbb.begin())));
 #else
             for (const auto &elem : b)
@@ -409,10 +410,10 @@ int main(void)
             uset_digi aaa = uset_digi_difference(&a, &aa);
             std::unordered_set<DIGI, DIGI_hash> bbb;
 #if 0
-                // Note: the STL cannot do this simple task, because it requires
-                // both sets to be ordered.
-                std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
-                                    std::inserter(bbb, std::next(bbb.begin())));
+            // Note: the STL cannot do this simple task, because it requires
+            // both sets to be ordered.
+            std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                std::inserter(bbb, std::next(bbb.begin())));
 #else
             std::copy(b.begin(), b.end(), std::inserter(bbb, bbb.end()));
             for (const auto &elem : bb)
@@ -440,8 +441,8 @@ int main(void)
             print_uset(&aaa);
             std::unordered_set<DIGI, DIGI_hash> bbb;
 #if 0 // If the STL would be actually usable
-                std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
-                                              std::inserter(bbb, std::next(bbb.begin())));
+            std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
+                                          std::inserter(bbb, std::next(bbb.begin())));
 #else
             // union: b + bb
             std::copy(b.begin(), b.end(), std::inserter(bbb, bbb.end()));
@@ -610,13 +611,29 @@ int main(void)
             uset_digi_free(&aa);
             break;
         }
+        case TEST_COPY_IF: {
+            print_uset(&a);
+            uset_digi aa = uset_digi_copy_if(&a, digi_is_odd);
+            std::unordered_set<DIGI, DIGI_hash> bb;
+#if __cplusplus >= 201103L
+            std::copy_if(b.begin(), b.end(), std::inserter(bb, bb.begin()), DIGIc_is_odd);
+#else
+            for (auto &d : b)
+                if (DIGI_is_odd(d))
+                    bb.insert(d);
+#endif
+            CHECK(aa, bb);
+            uset_digi_free(&aa);
+            CHECK(a, b);
+            break;
+        }
 #if 0
-            case TEST_EXTRACT:
-            case TEST_MERGE:
-            case TEST_REMOVE_IF:
-            case TEST_EQUAL_RANGE:
-                printf("nyi\n");
-                break;
+        case TEST_EXTRACT:
+        case TEST_MERGE:
+        case TEST_REMOVE_IF:
+        case TEST_EQUAL_RANGE:
+            printf("nyi\n");
+            break;
 #endif
         default:
 #ifdef DEBUG
