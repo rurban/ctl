@@ -39,14 +39,15 @@ typedef struct A
     int (*equal)(T *, T *);
 } A;
 
-struct JOIN(T, it_vtable);
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
-    T *ref;
+    T *ref; /* will be removed later */
     size_t index;
     size_t end;
     A *container;
-    struct JOIN(T, it_vtable) *vtable;
+    struct JOIN(T, it_vtable) vtable;
 } I;
 
 #include <ctl/bits/iterators.h>
@@ -99,6 +100,9 @@ static inline void JOIN(A, shrink_to_fit)(A *self)
     return;
 }
 
+// create an iter from an index
+static inline I JOIN(B, iter)(A *self, size_t index);
+
 static inline T *JOIN(A, front)(A *self)
 {
     return JOIN(A, at)(self, 0);
@@ -111,38 +115,13 @@ static inline T *JOIN(A, back)(A *self)
 
 static inline I JOIN(A, begin)(A *self)
 {
-    static I zero;
-    I iter = zero;
-    iter.ref = JOIN(A, front)(self); // unchecked
-    iter.index = 0;
-    iter.end = self->size;
-    iter.container = self;
-    return iter;
+    return JOIN(B, iter)(self, 0);
 }
 
 // We support `it.advance(a.end(), -1)`, so we must create a fresh iter.
 static inline I JOIN(A, end)(A *self)
 {
-    static I zero;
-    I iter = zero;
-    if (self->size)
-        iter.ref = JOIN(A, back)(self);
-    iter.index = self->size;
-    iter.end = self->size;
-    iter.container = self;
-    return iter;
-}
-
-// create an iter from an index
-static inline I JOIN(B, iter)(A *self, size_t index)
-{
-    static I zero;
-    I iter = zero;
-    iter.ref = JOIN(A, at)(self, index); // bounds-checked
-    iter.index = index;
-    iter.end = self->size;
-    iter.container = self;
-    return iter;
+    return JOIN(B, iter)(self, self->size);
 }
 
 static inline T *JOIN(I, ref)(I *iter)
@@ -165,7 +144,7 @@ static inline void JOIN(I, set_done)(I *iter)
     iter->index = iter->end;
 }
 
-static inline void JOIN(I, next)(I *iter)
+static void JOIN(I, next)(I *iter)
 {
     iter->index++;
     if (iter->index < iter->end)
@@ -252,6 +231,21 @@ static inline void JOIN(A, push_back)(A *self, T value);
 static inline I *JOIN(A, erase)(I *pos);
 
 #include <ctl/bits/container.h>
+
+static inline I JOIN(B, iter)(A *self, size_t index)
+{
+    static I zero;
+    I iter = zero;
+    if (index < self->size)
+        iter.ref = JOIN(A, at)(self, index); // bounds-checked
+    else
+        iter.ref = JOIN(A, back)(self);
+    iter.index = index;
+    iter.end = self->size;
+    iter.container = self;
+    iter.vtable = JOIN(I, vtable);
+    return iter;
+}
 
 static inline B *JOIN(B, init)(size_t cut)
 {

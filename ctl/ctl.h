@@ -61,17 +61,3 @@
 #ifndef MAX
 #define MAX(a, b) a >= b ? a : b
 #endif
-
-/* Three types of iterators. deque with index, see there */
-#define CTL_T_ITER_FIELDS                                                                                              \
-    T *ref; /* will be removed later */                                                                                \
-    T *end;                                                                                                            \
-    A *container;                                                                                                      \
-    struct JOIN(T, it_vtable) * vtable;
-
-#define CTL_B_ITER_FIELDS                                                                                              \
-    B *node;                                                                                                           \
-    T *ref; /* will be removed later */                                                                                \
-    B *end;                                                                                                            \
-    A *container;                                                                                                      \
-    struct JOIN(T, it_vtable) * vtable;

@@ -8,10 +8,10 @@
 #endif
 
 #define CTL_STR
-#define vec_char str
 #define HOLD
 #define POD
 #define T char
+#define vec_char str
 #define MUST_ALIGN_16(T) (sizeof(T) == sizeof(char))
 #define str_init str___INIT
 #define str_equal str___EQUAL

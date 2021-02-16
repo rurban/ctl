@@ -34,13 +34,14 @@ typedef struct A
 
 typedef int (*JOIN(A, compare_fn))(T *, T *);
 
-struct JOIN(T, it_vtable);
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
-    T *ref;
+    T *ref; // will be removed soon
     T *end;
     A *container;
-    JOIN(T, it_vtable) *vtable;
+    JOIN(T, it_vtable) vtable;
 } I;
 
 #include <ctl/bits/iterators.h>
@@ -66,30 +67,7 @@ static inline T *JOIN(A, back)(A *self)
     return self->size ? JOIN(A, at)(self, self->size - 1) : NULL;
 }
 
-static inline I JOIN(I, iter)(A *self, size_t index)
-{
-    static I zero;
-    I iter = zero;
-    //#ifndef DISALLOW_OVERFLOW
-    iter.ref = &self->vector[index];
-    iter.end = &self->vector[self->size];
-    /*
-    #else
-        // breaks distance, index, advance
-        if (index < self->size)
-        {
-            iter.ref = &self->vector[index];
-            iter.end = &self->vector[self->size];
-        }
-        else
-        {
-            iter.ref = iter.end = NULL;
-        }
-    #endif
-    */
-    iter.container = self;
-    return iter;
-}
+static inline I JOIN(I, iter)(A *self, size_t index);
 
 static inline I JOIN(A, begin)(A *self)
 {
@@ -186,6 +164,17 @@ static inline A *JOIN(A, move_range)(I *range, A *out);
 static inline I JOIN(A, erase)(I *pos);
 
 #include <ctl/bits/container.h>
+
+static inline I JOIN(I, iter)(A *self, size_t index)
+{
+    static I zero;
+    I iter = zero;
+    iter.ref = &self->vector[index];
+    iter.end = &self->vector[self->size];
+    iter.container = self;
+    iter.vtable = JOIN(I, vtable);
+    return iter;
+}
 
 static inline A JOIN(A, init)(void)
 {

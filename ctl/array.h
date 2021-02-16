@@ -35,13 +35,16 @@ typedef struct A
 
 typedef int (*JOIN(A, compare_fn))(T *, T *);
 
-struct JOIN(T, it_vtable);
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
     CTL_T_ITER_FIELDS;
 } I;
 
 #include <ctl/bits/iterators.h>
+
+static inline I JOIN(I, iter)(A *self, size_t index);
 
 static inline size_t JOIN(A, size)(A *self)
 {
@@ -84,16 +87,6 @@ static inline T *JOIN(A, front)(A *self)
 static inline T *JOIN(A, back)(A *self)
 {
     return &self->vector[N - 1];
-}
-
-static inline I JOIN(I, iter)(A *self, size_t index)
-{
-    static I zero;
-    I iter = zero;
-    iter.ref = &self->vector[index];
-    iter.end = &self->vector[N];
-    iter.container = self;
-    return iter;
 }
 
 static inline I JOIN(A, begin)(A *self)
@@ -177,6 +170,17 @@ static inline A JOIN(A, init_from)(A *copy);
 static inline A JOIN(A, copy)(A *self);
 
 #include <ctl/bits/container.h>
+
+static inline I JOIN(I, iter)(A *self, size_t index)
+{
+    static I zero;
+    I iter = zero;
+    iter.ref = &self->vector[index];
+    iter.end = &self->vector[N];
+    iter.container = self;
+    iter.vtable = JOIN(I, vtable);
+    return iter;
+}
 
 static inline A JOIN(A, init)(void)
 {

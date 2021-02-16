@@ -34,29 +34,20 @@ typedef struct A
     int (*equal)(T *, T *);
 } A;
 
-struct JOIN(T, it_vtable);
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
     B *node;
-    T *ref;
+    T *ref;  /* will be removed later */
     B *end;
     A *container;
-    JOIN(T, it_vtable) *vtable;
+    JOIN(T, it_vtable) vtable;
 } I;
 
 #include <ctl/bits/iterators.h>
 
-static inline I JOIN(I, iter)(A *self, B *node)
-{
-    static I zero;
-    I iter = zero;
-    iter.node = node;
-    if (node)
-        iter.ref = &node->value;
-    iter.container = self;
-    // end defaults to NULL
-    return iter;
-}
+static inline I JOIN(I, iter)(A *self, B *node);
 
 static inline B *JOIN(B, min)(B *node)
 {
@@ -134,11 +125,10 @@ static inline void JOIN(I, set_end)(I *iter, I *last)
     iter->end = last->node;
 }
 
-static inline I *JOIN(I, next)(I *iter)
+static inline void JOIN(I, next)(I *iter)
 {
     iter->node = JOIN(B, next)(iter->node);
     iter->ref = iter->node ? &iter->node->value : NULL;
-    return iter;
 }
 
 /* seems to be pretty costly, or?
@@ -222,6 +212,19 @@ static inline B *JOIN(A, insert)(A *self, T key);
 static inline bool JOIN(A, find_first_of_range)(I *range1, I *range2);
 
 #include <ctl/bits/container.h>
+
+static inline I JOIN(I, iter)(A *self, B *node)
+{
+    static I zero;
+    I iter = zero;
+    iter.node = node;
+    if (node)
+        iter.ref = &node->value;
+    iter.container = self;
+    // end defaults to NULL
+    iter.vtable = JOIN(I, vtable);
+    return iter;
+}
 
 static inline A JOIN(A, init)(int _compare(T *, T *))
 {

@@ -126,16 +126,17 @@ typedef struct A
 #endif
 } A;
 
-struct JOIN(T, it_vtable);
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
     B *node; // the bucket
-    T *ref;
+    T *ref;  // will be removed later
     B *next;
     // B* end; // if ranges were added to usets
     A *container;
     B **buckets; // the chain
-    struct JOIN(T, it_vtable) *vtable;
+    struct JOIN(T, it_vtable) vtable;
 } I;
 
 #include <ctl/bits/iterators.h>
@@ -156,49 +157,9 @@ static inline size_t JOIN(I, cached_index)(A *self, B *node)
 #define BUCKET_INDEX(iter) JOIN(I, index)((iter)->container, (iter)->node->value)
 #endif
 
-static inline I JOIN(I, iter)(A *self, B *node)
-{
-    static I zero;
-    I iter = zero;
-    iter.node = node;
-    if (node)
-    {
-        iter.next = node->next;
-        iter.ref = &node->value;
-    }
-    iter.container = self;
-    iter.buckets = &self->buckets[BUCKET_INDEX(&iter)];
-    return iter;
-}
-
-static inline I JOIN(A, begin)(A *self)
-{
-    static I zero;
-    I iter = zero;
-    B **bend = &self->buckets[self->bucket_count];
-    iter.container = self;
-    for (B **b = self->buckets; b < bend; b++)
-    {
-        if (*b)
-        {
-            B *node = *b;
-            iter.ref = &node->value;
-            iter.node = node;
-            iter.next = node->next;
-            iter.buckets = b;
-            return iter;
-        }
-    }
-    return iter;
-}
-
-static inline I JOIN(A, end)(A *self)
-{
-    static I zero;
-    I iter = zero;
-    iter.container = self;
-    return iter;
-}
+static inline I JOIN(I, iter)(A *self, B *node);
+static inline I JOIN(A, begin)(A *self);
+static inline I JOIN(A, end)(A *self);
 
 static inline T *JOIN(I, ref)(I *iter)
 {
@@ -223,7 +184,7 @@ static inline void JOIN(I, update)(I *iter)
 /* Need two states: if next is not empty, we are still in the bucket chain.
  * if empty, we need to advance to the next bucket: buckets++.
  */
-static inline void JOIN(I, next)(I *iter)
+static void JOIN(I, next)(I *iter)
 {
     ASSERT(iter->node);
     ASSERT(iter->buckets);
@@ -375,6 +336,53 @@ static inline void JOIN(A, insert)(A *self, T value);
 static inline bool JOIN(A, inserter)(A *self, T value);
 
 #include <ctl/bits/container.h>
+
+static inline I JOIN(A, begin)(A *self)
+{
+    static I zero;
+    I iter = zero;
+    iter.container = self;
+    iter.vtable = JOIN(I, vtable);
+    B **bend = &self->buckets[self->bucket_count];
+    for (B **b = self->buckets; b < bend; b++)
+    {
+        if (*b)
+        {
+            B *node = *b;
+            iter.ref = &node->value;
+            iter.node = node;
+            iter.next = node->next;
+            iter.buckets = b;
+            return iter;
+        }
+    }
+    return iter;
+}
+
+static inline I JOIN(A, end)(A *self)
+{
+    static I zero;
+    I iter = zero;
+    iter.container = self;
+    iter.vtable = JOIN(I, vtable);
+    return iter;
+}
+
+static inline I JOIN(I, iter)(A *self, B *node)
+{
+    static I zero;
+    I iter = zero;
+    iter.node = node;
+    if (node)
+    {
+        iter.next = node->next;
+        iter.ref = &node->value;
+    }
+    iter.container = self;
+    iter.vtable = JOIN(I, vtable);
+    iter.buckets = &self->buckets[BUCKET_INDEX(&iter)];
+    return iter;
+}
 
 static inline size_t JOIN(A, __next_prime)(size_t number)
 {

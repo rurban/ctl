@@ -17,22 +17,6 @@
 #error "Template type T undefined for <ctl/bits/iterators.h>"
 #endif
 
-static inline void JOIN(I, next)(I *iter);
-static inline T *JOIN(I, ref)(I *iter);
-static inline int JOIN(I, done)(I *iter);
-
-// Iterator vtable
-// FIXME once per T
-//#undef have_ctl_vtable
-//#define have_ctl_vtable JOIN(HAVE, JOIN(T, it_vtable))
-//#ifndef JOIN(HAVE, JOIN(T, it_vtable))
-struct JOIN(T, it_vtable) {
-    void next(I*);
-    T* ref(I*);
-    int done(I*);
-};
-//#endif
-
 #if defined CTL_LIST || defined CTL_SET || defined CTL_MAP || defined CTL_USET || defined CTL_UMAP
 
 #define CTL_B_ITER

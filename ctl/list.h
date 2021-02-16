@@ -31,14 +31,15 @@ typedef struct A
     int (*equal)(T *, T *);
 } A;
 
-struct JOIN(T, it_vtable);
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
     B *node;
-    T *ref;
+    T *ref; // will be removed later
     B *end;
     A *container;
-    struct JOIN(T, it_vtable) *vtable;
+    struct JOIN(T, it_vtable) vtable;
 } I;
 
 #include <ctl/bits/iterators.h>
@@ -55,17 +56,7 @@ static inline T *JOIN(A, back)(A *self)
     return self->tail ? &self->tail->value : NULL;
 }
 
-static inline I JOIN(I, iter)(A *self, B *node)
-{
-    static I zero;
-    I iter = zero;
-    iter.node = node;
-    if (LIKELY(node))
-        iter.ref = &node->value;
-    // iter.end = NULL;
-    iter.container = self;
-    return iter;
-}
+static inline I JOIN(I, iter)(A *self, B *node);
 
 static inline I JOIN(A, begin)(A *self)
 {
@@ -211,6 +202,19 @@ static inline I JOIN(A, find)(A *self, T key);
 static inline A *JOIN(A, move_range)(I *range, A *out);
 
 #include <ctl/bits/container.h>
+
+static inline I JOIN(I, iter)(A *self, B *node)
+{
+    static I zero;
+    I iter = zero;
+    iter.node = node;
+    if (LIKELY(node))
+        iter.ref = &node->value;
+    // iter.end = NULL;
+    iter.container = self;
+    iter.vtable = JOIN(I, vtable);
+    return iter;
+}
 
 static inline A JOIN(A, init)(void)
 {
