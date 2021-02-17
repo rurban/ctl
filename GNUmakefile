@@ -104,7 +104,7 @@ CXXFLAGS += $(CFLAGS)
 
 H        = $(wildcard ctl/*.h) $(wildcard ctl/bits/*.h)
 COMMON_H = ctl/ctl.h ctl/algorithm.h ctl/bits/container.h \
-           ctl/bits/integral.h ctl/bits/iterators.h
+           ctl/bits/integral.h ctl/bits/iterators.h ctl/bits/iterator_vtable.h
 TESTS = \
 	tests/func/test_vector \
 	tests/func/test_string \
@@ -126,7 +126,9 @@ TESTS = \
 	tests/func/test_integral \
 	tests/func/test_integral_c11 \
 	tests/func/test_c11 \
-	tests/func/test_container_composing
+	tests/func/test_container_composing \
+	tests/func/test_generic_iter
+
 ifneq ($(DEBUG),)
 TESTS += \
 	tests/func/test_map     \

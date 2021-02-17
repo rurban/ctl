@@ -120,6 +120,7 @@ static inline A *JOIN(A, copy_range)(I *range, A *out)
     void (*next)(struct I*) = JOIN(I, next);
     T* (*ref)(struct I*) = JOIN(I, ref);
     int (*done)(struct I*) = JOIN(I, done);
+    // FIXME need the range->container copy method
     while (!done(range))
     {
         JOIN(A, push_back)(out, out->copy(ref(range)));
