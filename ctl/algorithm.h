@@ -14,6 +14,8 @@
 #undef CTL_ALGORITHM
 #define CTL_ALGORITHM
 
+#define GI JOIN(A, it)
+
 // Generic algorithms with ranges
 
 static inline I JOIN(A, find_if)(A *self, int _match(T *))
@@ -115,10 +117,13 @@ static inline bool JOIN(A, any_of_range)(I *range, int _match(T *))
 
 static inline A *JOIN(A, copy_range)(I *range, A *out)
 {
-    while (!JOIN(I, done)(range))
+    void (*next)(struct I*) = JOIN(I, next);
+    T* (*ref)(struct I*) = JOIN(I, ref);
+    int (*done)(struct I*) = JOIN(I, done);
+    while (!done(range))
     {
-        JOIN(A, push_back)(out, out->copy(range->ref));
-        JOIN(I, next)(range);
+        JOIN(A, push_back)(out, out->copy(ref(range)));
+        next(range);
     }
     return out;
 }
@@ -163,23 +168,27 @@ JOIN(A, union)(A* a, A* b)
 }
 */
 
-static inline A JOIN(A, union_range)(I *r1, I *r2)
+static inline A JOIN(A, union_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+ 
     while (!JOIN(I, done)(r1))
     {
-        if (JOIN(I, done)(r2))
+        if (done2(r2))
             return *JOIN(A, copy_range)(r1, &self);
-        if (self.compare(r2->ref, r1->ref))
+        if (self.compare(ref2(r2), r1->ref))
         {
-            JOIN(A, push_back)(&self, self.copy(r2->ref));
-            JOIN(I, next)(r2);
+            JOIN(A, push_back)(&self, self.copy(ref2(r2)));
+            next2(r2);
         }
         else
         {
             JOIN(A, push_back)(&self, self.copy(r1->ref));
-            if (!self.compare(r1->ref, r2->ref))
-                JOIN(I, next)(r2);
+            if (!self.compare(r1->ref, ref2(r2)))
+                next2(r2);
             JOIN(I, next)(r1);
         }
     }
@@ -198,21 +207,25 @@ static inline A JOIN(A, union)(A *a, A *b)
 }
 
 // FIXME str
-static inline A JOIN(A, intersection_range)(I *r1, I *r2)
+static inline A JOIN(A, intersection_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    while (!JOIN(I, done)(r1) && !JOIN(I, done)(r2))
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    while (!JOIN(I, done)(r1) && !done2(r2))
     {
-        if (self.compare(r1->ref, r2->ref))
+        if (self.compare(r1->ref, ref2(r2)))
             JOIN(I, next)(r1);
         else
         {
-            if (!self.compare(r2->ref, r1->ref))
+            if (!self.compare(ref2(r2), r1->ref))
             {
                 JOIN(A, push_back)(&self, self.copy(r1->ref));
                 JOIN(I, next)(r1);
             }
-            JOIN(I, next)(r2);
+            next2(r2);
         }
     }
 #if defined CTL_STR
@@ -239,24 +252,28 @@ static inline A JOIN(A, intersection)(A *a, A *b)
 }
 
 // Warning: fails with 3-way compare!
-static inline A JOIN(A, difference_range)(I *r1, I *r2)
+static inline A JOIN(A, difference_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
     while (!JOIN(I, done)(r1))
     {
-        if (JOIN(I, done)(r2))
+        if (done2(r2))
             return *JOIN(A, copy_range)(r1, &self);
         // r1 < r2 (fails with 3-way compare)
-        if (self.compare(r1->ref, r2->ref))
+        if (self.compare(r1->ref, ref2(r2)))
         {
             JOIN(A, push_back)(&self, self.copy(r1->ref));
             JOIN(I, next)(r1);
         }
         else
         {
-            if (!self.compare(r2->ref, r1->ref))
+            if (!self.compare(ref2(r2), r1->ref))
                 JOIN(I, next)(r1);
-            JOIN(I, next)(r2);
+            next2(r2);
         }
     }
     return self;
@@ -277,26 +294,30 @@ static inline A JOIN(A, difference)(A *a, A *b)
 #endif
 }
 
-static inline A JOIN(A, symmetric_difference_range)(I *r1, I *r2)
+static inline A JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
     while (!JOIN(I, done)(r1))
     {
-        if (JOIN(I, done)(r2))
+        if (done2(r2))
             return *JOIN(A, copy_range)(r1, &self);
 
-        if (self.compare(r1->ref, r2->ref))
+        if (self.compare(r1->ref, ref2(r2)))
         {
             JOIN(A, push_back)(&self, self.copy(r1->ref));
             JOIN(I, next)(r1);
         }
         else
         {
-            if (self.compare(r2->ref, r1->ref))
-                JOIN(A, push_back)(&self, self.copy(r2->ref));
+            if (self.compare(ref2(r2), r1->ref))
+                JOIN(A, push_back)(&self, self.copy(ref2(r2)));
             else
                 JOIN(I, next)(r1);
-            JOIN(I, next)(r2);
+            next2(r2);
         }
     }
     JOIN(A, copy_range)(r2, &self);
@@ -324,15 +345,19 @@ static inline A JOIN(A, symmetric_difference)(A *a, A *b)
 #endif
 }
 
-static inline bool JOIN(A, includes_range)(I *r1, I *r2)
+static inline bool JOIN(A, includes_range)(I *r1, GI *r2)
 {
     A *self = r1->container;
-    while (!JOIN(I, done)(r2))
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    while (!done2(r2))
     {
-        if (JOIN(I, done)(r1) || self->compare(r2->ref, r1->ref))
+        if (JOIN(I, done)(r1) || self->compare(ref2(r2), r1->ref))
             return false;
-        if (!self->compare(r1->ref, r2->ref))
-            JOIN(I, next)(r2);
+        if (!self->compare(r1->ref, ref2(r2)))
+            next2(r2);
         JOIN(I, next)(r1);
     }
     return true;
@@ -513,17 +538,21 @@ static inline void JOIN(A, inserter)(A *self, T value)
 }
 
 // both need to be sorted
-static inline A JOIN(A, merge_range)(I *r1, I *r2)
+static inline A JOIN(A, merge_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
     while (!JOIN(I, done)(r1))
     {
-        if (JOIN(I, done)(r2))
+        if (done2(r2))
             return *JOIN(A, copy_range)(r1, &self);
-        if (self.compare(r2->ref, r1->ref))
+        if (self.compare(ref2(r2), r1->ref))
         {
-            JOIN(A, inserter)(&self, self.copy(r2->ref));
-            JOIN(I, next)(r2);
+            JOIN(A, inserter)(&self, self.copy(ref2(r2)));
+            next2(r2);
         }
         else
         {
@@ -598,24 +627,28 @@ static inline size_t JOIN(A, count)(A *self, T value)
 }
 #endif // SET/STR
 
-static inline bool JOIN(A, mismatch)(I *range1, I *range2)
+static inline bool JOIN(A, mismatch)(I *range1, GI *range2)
 {
     A *self = range1->container;
     CTL_ASSERT_EQUAL
-    int done = JOIN(I, done)(range1);
-    if (!JOIN(I, done)(range2))
-        while (!done && JOIN(A, _equal)(self, range1->ref, range2->ref))
+    void (*next2)(struct I*) = range2->vtable.next;
+    T* (*ref2)(struct I*) = range2->vtable.ref;
+    int (*done2)(struct I*) = range2->vtable.done;
+
+    int done1 = JOIN(I, done)(range1);
+    if (!done2(range2))
+        while (!done1 && JOIN(A, _equal)(self, range1->ref, ref2(range2)))
         {
             JOIN(I, next)(range1);
-            JOIN(I, next)(range2);
-            done = JOIN(I, done)(range1);
-            if (JOIN(I, done)(range2))
+            next2(range2);
+            done1 = JOIN(I, done)(range1);
+            if (done2(range2))
             {
-                done = 1;
+                done1 = 1;
                 break;
             }
         }
-    return done ? false : true;
+    return done1 ? false : true;
 }
 #endif // USET
 
@@ -642,18 +675,22 @@ static inline size_t JOIN(A, count_if)(A *self, int _match(T *))
 
 // i.e. like strcspn, but returning the first found match
 // has better variants for STR and SET
-static inline bool JOIN(A, find_first_of_range)(I *range1, I *range2)
+static inline bool JOIN(A, find_first_of_range)(I *range1, GI *range2)
 {
-    if (JOIN(I, done)(range1) || JOIN(I, done)(range2))
+    void (*next2)(struct I*) = range2->vtable.next;
+    T* (*ref2)(struct I*) = range2->vtable.ref;
+    int (*done2)(struct I*) = range2->vtable.done;
+
+    if (JOIN(I, done)(range1) || done2(range2))
         return false;
     A *self = range1->container;
     // TODO: sort range2 and binary_search
     while (1)
     {
         // TODO unroll it into slices of 4, as strcspn does
-        for (I it = *range2; !JOIN(I, done)(&it); JOIN(I, next)(&it))
+        for (I it = *range2; !done2(&it); next2(&it))
         {
-            if (JOIN(A, _equal)(self, range1->ref, it.ref))
+            if (JOIN(A, _equal)(self, range1->ref, ref2(&it)))
                 return true;
         }
         JOIN(I, next)(range1);
@@ -666,7 +703,7 @@ static inline bool JOIN(A, find_first_of_range)(I *range1, I *range2)
 #endif // STR,SET
 
 #ifndef CTL_STR
-static inline I JOIN(A, find_first_of)(A *self, I *range2)
+static inline I JOIN(A, find_first_of)(A *self, GI *range2)
 {
     I begin = JOIN(A, begin)(self);
     if (JOIN(A, find_first_of_range)(&begin, range2))
@@ -678,17 +715,19 @@ static inline I JOIN(A, find_first_of)(A *self, I *range2)
 
 // Sets range1 (the haystack) to the found pointer if found.
 // Naive r1*r2 cost, no Boyer-Moore yet.
-static inline bool JOIN(A, search_range)(I *range1, I *range2)
+static inline bool JOIN(A, search_range)(I *range1, GI *range2)
 {
+    T* (*ref2)(struct I*) = range2->vtable.ref;
+    int (*done2)(struct I*) = range2->vtable.done;
 
     if (JOIN(I, done)(range1))
         return false;
-    if (JOIN(I, done)(range2))
+    if (done2(range2))
         return true;
 #ifdef CTL_STR
     // Note: strstr is easily beatable. See
     // http://0x80.pl/articles/simd-strfind.html
-    if ((range1->ref = strstr(range1->ref, range2->ref)))
+    if ((range1->ref = strstr(range1->ref, ref2(range2))))
         return true;
     else
     {
@@ -697,20 +736,21 @@ static inline bool JOIN(A, search_range)(I *range1, I *range2)
     }
 #else
     A *self = range1->container;
+    void (*next2)(struct I*) = range2->vtable.next;
     for (;; JOIN(I, next)(range1))
     {
         I it = *range1;
         I s_it = *range2;
         for (;;)
         {
-            if (JOIN(I, done)(&s_it))
+            if (done2(&s_it))
                 return true;
             if (JOIN(I, done)(&it))
                 return false;
-            if (!JOIN(A, _equal)(self, it.ref, s_it.ref))
+            if (!JOIN(A, _equal)(self, it.ref, ref2(&s_it)))
                 break;
             JOIN(I, next)(&it);
-            JOIN(I, next)(&s_it);
+            next2(&s_it);
         }
     }
     return false;
@@ -727,9 +767,9 @@ static inline I JOIN(A, search)(A *self, I *subseq)
         return JOIN(A, end)(self);
 }
 
-static inline I JOIN(A, find_end_range)(I *range1, I *range2)
+static inline I JOIN(A, find_end_range)(I *range1, GI *range2)
 {
-    if (JOIN(I, done)(range2))
+    if (range2->vtable.done(range2))
     {
         JOIN(I, set_done)(range1);
         return *range1;
@@ -859,18 +899,22 @@ static inline bool JOIN(A, equal_value)(I *range, T value)
 // Note: set.equal_range does interval search for key, returning the
 // lower_bound/upper_bound pair.
 
-static inline bool JOIN(A, equal_range)(I *range1, I *range2)
+static inline bool JOIN(A, equal_range)(I *range1, GI *range2)
 {
     A *self = range1->container;
     CTL_ASSERT_EQUAL
+    void (*next2)(struct I*) = range2->vtable.next;
+    T* (*ref2)(struct I*) = range2->vtable.ref;
+    int (*done2)(struct I*) = range2->vtable.done;
+
     while (!JOIN(I, done)(range1))
     {
-        if (JOIN(I, done)(range2) || !JOIN(A, _equal)(self, range1->ref, range2->ref))
+        if (done2(range2) || !JOIN(A, _equal)(self, range1->ref, ref2(range2)))
             return false;
         JOIN(I, next)(range1);
-        JOIN(I, next)(range2);
+        next2(range2);
     }
-    return JOIN(I, done)(range2) ? true : false;
+    return done2(range2) ? true : false;
 }
 
 #endif // USET, SET

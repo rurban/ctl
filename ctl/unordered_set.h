@@ -130,13 +130,13 @@ typedef struct A
 
 typedef struct I
 {
-    B *node; // the bucket
-    T *ref;  // will be removed later
-    B *next;
-    // B* end; // if ranges were added to usets
-    A *container;
-    B **buckets; // the chain
     JOIN(I, vtable_t) vtable;
+    T *ref;      // will be removed later
+    B *next;
+    // B* end;   // if ranges were added to usets
+    A *container;
+    B *node;     // the bucket
+    B **buckets; // the chain
 } I;
 
 #include <ctl/bits/iterators.h>

@@ -43,11 +43,11 @@ typedef struct A
 
 typedef struct I
 {
+    JOIN(I, vtable_t) vtable;
     T *ref; /* will be removed later */
-    size_t index;
     size_t end;
     A *container;
-    JOIN(I, vtable_t) vtable;
+    size_t index;
 } I;
 
 #include <ctl/bits/iterators.h>

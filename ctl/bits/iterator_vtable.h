@@ -9,17 +9,17 @@
 
 /* Three types of iterators. deque with index, see there */
 #define CTL_T_ITER_FIELDS                                                                                              \
+    struct JOIN(I, vtable_t) vtable;                                                                                   \
     T *ref; /* will be removed later */                                                                                \
     T *end;                                                                                                            \
-    A *container;                                                                                                      \
-    struct JOIN(I, vtable_t) vtable
+    A *container
 
 #define CTL_B_ITER_FIELDS                                                                                              \
-    B *node;                                                                                                           \
+    struct JOIN(I, vtable_t) vtable;                                                                                   \
     T *ref; /* will be removed later */                                                                                \
     B *end;                                                                                                            \
     A *container;                                                                                                      \
-    struct JOIN(I, vtable_t) vtable
+    B *node
 
 struct I;
 //static inline void JOIN(I, next)(struct I *iter);

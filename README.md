@@ -564,7 +564,8 @@ glouw has 63 methods in 196 stable variants.
 Probe for -std=c++20 c++ support and use this for testing against the STL.
 Fallback to c++2a, c++17 or c++11.
 
-Added **array**, **map** and **unordered_map** containers.
+Added **array**, **map** and **unordered_map** containers; generic iterators
+with a vtable.
 
 Added docs and manpages.
 
@@ -598,8 +599,9 @@ glouw/ctl. We support two-way and three-way compare for set, which needs more
 comparisons, but is safer.
 
 Redesigned iterators and better range support. Much closer to the STL, and
-much faster. Full generic iterator support is in `bits/iterator.h`, `algorithm.h`, the
-extended `range` methods, and `foreach_range`, `foreach_n`, `foreach_n_range` macros.
+much faster. Full generic iterator support is in `bits/iterator.h`,
+`bits/iterator_vtable.h`, `algorithm.h`, the extended `range` methods,
+and `foreach_range`, `foreach_n`, `foreach_n_range` macros.
 
 Reproducible tests with `SEED=n`,
 Optimized test dependencies, time went from 25s to 3s even with ccache.
@@ -639,17 +641,15 @@ clang with libc++), and Windows MSVC (default CL 19).
 
 ### Differences to the STL
 
-Our iterators are currently not as generic as the STL ones. We can only loop
-over the same container type and call the container-specific function. E.g. we
-cannot insert a vector into a deque of the same type. We will need to add a
-small vtable to iterators for the ref, next and done functions.
-
-But our iterators are safe and fat with an end range. We work towards C++20
+Our iterators are safe and fat with an end range. We work towards C++20
 ranges (single arg iterator), not begin/end pairs.  Not as safe as glouw/ctl
 iterators, but also not as slow. We need 2 assignments (currently. will be
 fixed), the STL needs one assignment, glouw/ctl needs three
 assignments. glouw/ctl is safe for destructive operations (i.e. insert, erase)
 in a foreach loop, we and the STL are not.
+
+Our iterators are generic only for certain algorithm methods, where we use
+a 2nd range of any cntainer type on a typed container.
 
 Our vector and string growth policies for multiple insertions are much better.
 E.g. in the set algos or insert_count.

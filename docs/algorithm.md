@@ -36,15 +36,19 @@ for various backends like openmp or TBB.
 unordered_set does not support ranges, nor count functions ending with `_n`.
 Such iterators on `unordered_set` make not much sense, as the order is random.
 
+All ranges in 2nd argument positions support generic iterators, i.e. `GI*` ranges,
+with the same value type, but any container types.
+
+
 ## Member types
 
-`T`                      value type
+`T`     value type
 
-`A` being `list_T`       container type
+`A`     container type
 
-`B` being `list_T_node`  node type
+`I`     iterator type for A
 
-`I` being `list_T_it`    iterator type
+`GI`    generic iterator type for all containers.
 
 
 ## Non-modifying sequence operations
@@ -76,7 +80,7 @@ applies a block with iter to the first n elements of a sequence.
  
 returns the number of elements satisfying specific criteria.
 
-    bool mismatch (I* range1, I* range2)
+    bool mismatch (I* range1, GI* range2)
  
 finds if and the first position where two ranges differ.
 
@@ -91,13 +95,13 @@ finds the first element satisfying specific criteria.
 Either return a fresh iterator I, or return bool and set the range argument to the found element.
 Does not consume/free the T value.
 
-    I find_end (A* self, I* range2)
-    I find_end_range (I* range1, I* range2)
+    I find_end (A* self, GI* range2)
+    I find_end_range (I* range1, GI* range2)
  
 finds the last sequence of elements in a certain range.
 
-    I find_first_of (A* self, I* range2)
-    bool find_first_of_range (I* range1, I* range2)
+    I find_first_of (A* self, GI* range2)
+    bool find_first_of_range (I* range1, GI* range2)
  
 searches for any one of a set of elements.
 
@@ -107,9 +111,9 @@ searches for any one of a set of elements.
 finds the first two adjacent items that are equal.
 
     I search (A* self, I* range2)
-    bool search_range (I* range1, I *range2) 
-    I bm_search (A* self, I* range2)  (C++17) (NYI)
-    bool bm_search_range (I* range1, I *range2)  (C++17) (NYI)
+    bool search_range (I* range1, GI *range2) 
+    I bm_search (A* self, GI* range2)  (C++17) (NYI)
+    bool bm_search_range (I* range1, GI *range2)  (C++17) (NYI)
  
 searches for a range of elements. naive cost `range1` * `range2`.
 `search_range` sets `range1` (the haystack) to the found pointer if found.
@@ -351,7 +355,7 @@ determines if an element exists in a sorted sequence.
 ## Other operations on sorted ranges
 
     A merge (A* self, A* other)
-    merge_range
+    merge_range  (I* range1, GI* range2)
  
 merges two sorted ranges. _(range NYI)_
 
@@ -363,27 +367,27 @@ merges two ordered ranges in-place. _(NYI)_
 ## Set operations (on sorted ranges)
 
     bool includes (A* self, A* subseq)
-    bool includes_range (I* range1, I* subrange)
+    bool includes_range (I* range1, GI* subrange)
  
 returns true if one sorted sequence is a sorted subsequence of another.
 
     A difference (A* self, A* other)
-    A difference_range (I* range1, I* range2)
+    A difference_range (I* range1, GI* range2)
  
 computes the difference between two ordered ranges.
 
     A intersection (A* self, A* other)
-    A intersection_range (I* range1, I* range2)
+    A intersection_range (I* range1, GI* range2)
  
 computes the intersection of two ordered ranges.
  
     A symmetric_difference (A* self, A* other)
-    A symmetric_difference_range (I* range1, I* range2)
+    A symmetric_difference_range (I* range1, GI* range2)
  
 computes the symmetric difference between two ordered ranges.
 
     A union (A* self, A* other)
-    A union_range (I* range1, I* range2)
+    A union_range (I* range1, GI* range2)
  
 computes the union of two sets or ordered ranges.
 
@@ -463,7 +467,7 @@ clamps a value between a pair of boundary values. _(NYI)_
 determines if two sets of elements are the same.
 
     bool equal_value (I* range, T key)
-    bool equal_range (I* range1, I* range2)
+    bool equal_range (I* range1, GI* range2)
 
 returns true if all elements match a specific key, or all other elements.
 Note: `equal_range` for `set` has a different API and functionality.

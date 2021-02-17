@@ -40,18 +40,19 @@ Some iterators advance on linked nodes (_"B iters"_), some others on value
 refs (_"T iters"_). The deque additionally holds the `index`, the unordered_set
 the `next` and `buckets` pointer.
 
+Each iterator also holds the end position so we can hold full ranges. And we
+added API's to work with the addional end position.
+
+We also support for certain algorithm methods generic iterators as 2nd range,
+abstracting different containers. So we can insert a vector into a deque, or use
+a mixed set algorithm with different container types. They are denoted as `GI*`,
+generic iters.
+
 We don't fully support **output iterators**, like `back_inserter` or `inserter` yet.
 They are currently only defined for `transform_range` and `transform_it_range`,
 which are not enabled yet, and problematic for `set`.
 
-We don't support yet generic iterators, abstracting different containers. So we
-cannot yet e.g. insert a vector into a deque, or use a mixed set algorithm with
-different container types. See [GH #19](https://github.com/rurban/ctl/issues/19).
-
-Also we don't fully support `reverse_iterator` via `I prev` yet.
-
-But we add the end position so we can hold full ranges. And we added API's to
-work with the addional end position.
+We don't fully support `reverse_iterator` via `I prev` yet.
 
 ## Iterators
 
