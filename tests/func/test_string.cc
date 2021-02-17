@@ -1124,8 +1124,9 @@ int main(void)
 #endif // DEBUG
             case TEST_COPY_IF: {
                 str aa = str_copy_if(&a, is_upper);
+#ifndef _MSC_VER // fails to compile
                 std::string bb;
-#if __cplusplus >= 201103L && !defined(_MSC_VER)
+#if __cplusplus >= 201103L
                 std::copy_if(b.begin(), b.end(), std::back_inserter(bb), STL_is_upper);
 #else
                 for (auto &d: b) {
@@ -1135,6 +1136,7 @@ int main(void)
 #endif
                 ADJUST_CAP("copy_if", aa, bb);
                 CHECK(aa, bb);
+#endif
                 str_free(&aa);
                 CHECK(a, b);
                 break;
@@ -1144,8 +1146,9 @@ int main(void)
                 std::string::iterator first_b, last_b;
                 get_random_iters(&a, &range, b, first_b, last_b);
                 str aa = str_copy_if_range(&range, is_upper);
+#ifndef _MSC_VER // fails to compile
                 std::string bb;
-#if __cplusplus >= 201103L && !defined(_MSC_VER)
+#if __cplusplus >= 201103L
                 std::copy_if(first_b, last_b, std::back_inserter(bb), STL_is_upper);
 #else
                 for (auto d = first_b; d != last_b; d++) {
@@ -1155,6 +1158,7 @@ int main(void)
 #endif
                 ADJUST_CAP("copy_if_range", aa, bb);
                 CHECK(aa, bb);
+#endif
                 str_free(&aa);
                 CHECK(a, b);
                 break;

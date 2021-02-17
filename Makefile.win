@@ -1,3 +1,4 @@
+# -*- Makefile -*-
 # nmake windows makefile just for GitHub Actions
 PREFIX = install
 CC = cl
