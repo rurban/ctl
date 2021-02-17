@@ -22,19 +22,14 @@
     struct JOIN(I, vtable_t) vtable
 
 struct I;
-static void JOIN(I, next)(struct I *iter);
-static inline T *JOIN(I, ref)(struct I *iter);
-static inline int JOIN(I, done)(struct I *iter);
+//static inline void JOIN(I, next)(struct I *iter);
+//static inline T *JOIN(I, ref)(struct I *iter);
+//static inline int JOIN(I, done)(struct I *iter);
 
 // Iterator vtable
-// FIXME once per T
-//#undef have_ctl_vtable
-//#define have_ctl_vtable JOIN(HAVE, JOIN(T, it_vtable))
-//#ifndef JOIN(HAVE, JOIN(T, it_vtable))
-struct JOIN(I, vtable_t) {
-    void (*next)(struct I*);
-    T*   (*ref) (struct I*);
-    int  (*done)(struct I*);
-};
-//#endif
-
+typedef struct JOIN(I, vtable_t)
+{
+    void (*next)(struct I *);
+    T *(*ref)(struct I *);
+    int (*done)(struct I *);
+} JOIN(I, vtable_t);

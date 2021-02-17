@@ -136,7 +136,7 @@ typedef struct I
     // B* end; // if ranges were added to usets
     A *container;
     B **buckets; // the chain
-    struct JOIN(I, vtable_t) vtable;
+    JOIN(I, vtable_t) vtable;
 } I;
 
 #include <ctl/bits/iterators.h>
@@ -184,7 +184,7 @@ static inline void JOIN(I, update)(I *iter)
 /* Need two states: if next is not empty, we are still in the bucket chain.
  * if empty, we need to advance to the next bucket: buckets++.
  */
-static void JOIN(I, next)(I *iter)
+static inline void JOIN(I, next)(I *iter)
 {
     ASSERT(iter->node);
     ASSERT(iter->buckets);
@@ -263,25 +263,6 @@ static inline void JOIN(I, prev)(I *iter)
     (void)iter;
 }
 
-/*
-static inline void
-JOIN(I, step)(I* self)
-{
-    if(self->next == NULL)
-    {
-        for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
-            if((self->next = self->container->buckets[i]))
-            {
-                JOIN(I, update)(self);
-                return;
-            }
-        self->done = 1;
-    }
-    else
-        JOIN(I, update)(self);
-}
-*/
-
 static inline B *JOIN(B, next)(A *container, B *node)
 {
     if (node->next)
@@ -300,27 +281,26 @@ static inline B *JOIN(B, next)(A *container, B *node)
 }
 /*
 static inline I
-JOIN(I, range)(A* container, B* begin, B* end)
+JOIN(I, range)(A* container, I* begin, I* end)
 {
     static I zero;
-    I self = zero;
+    I iter = zero;
     if(begin)
     {
-        //LOG ("range init\n");
-        self.step = JOIN(I, step);
-        self.node = begin;
-        self.ref = &self.node->value;
-        self.next = self.node->next;
-        self.end = end;
-        self.container = container;
-        self.bucket_index = JOIN(I, index)(container, *self.ref);
+        iter.node = begin->node;
+        iter.ref = &iter.node->value;
+        iter.next = iter.node->next;
+        iter.end = end->node;
+        iter.container = container;
+        iter.buckets = begin->buckets;
+        iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
     }
     else
     {
-        //LOG ("range done\n");
-        self.done = 1;
+        iter.node = NULL;
+        iter.end = NULL;
     }
-    return self;
+    return iter;
 }
 */
 
@@ -342,7 +322,9 @@ static inline I JOIN(A, begin)(A *self)
     static I zero;
     I iter = zero;
     iter.container = self;
-    iter.vtable = JOIN(I, vtable_g);
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);
     B **bend = &self->buckets[self->bucket_count];
     for (B **b = self->buckets; b < bend; b++)
     {
@@ -364,7 +346,10 @@ static inline I JOIN(A, end)(A *self)
     static I zero;
     I iter = zero;
     iter.container = self;
-    iter.vtable = JOIN(I, vtable_g);
+    //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);    
     return iter;
 }
 
@@ -379,7 +364,10 @@ static inline I JOIN(I, iter)(A *self, B *node)
         iter.ref = &node->value;
     }
     iter.container = self;
-    iter.vtable = JOIN(I, vtable_g);
+    //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);
     iter.buckets = &self->buckets[BUCKET_INDEX(&iter)];
     return iter;
 }

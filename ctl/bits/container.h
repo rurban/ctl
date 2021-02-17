@@ -7,9 +7,13 @@
 #error "No CTL container defined for <ctl/bits/container.h>"
 #endif
 
-static const struct JOIN(I, vtable_t)
-JOIN(I, vtable_g) =
-  { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+// FIXME once per A
+//#ifndef CAT(HAVE, JOIN(T, it_vtable))
+//#define CAT(HAVE, JOIN(T, it_vtable))
+//static const struct JOIN(I, vtable_t)
+//JOIN(I, vtable_g) =
+//  { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+//#endif
 
 #include <stdbool.h>
 

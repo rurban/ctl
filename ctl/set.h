@@ -222,7 +222,10 @@ static inline I JOIN(I, iter)(A *self, B *node)
         iter.ref = &node->value;
     iter.container = self;
     // end defaults to NULL
-    iter.vtable = JOIN(I, vtable_g);
+    //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);
     return iter;
 }
 

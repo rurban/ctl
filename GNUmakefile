@@ -106,27 +106,27 @@ H        = $(wildcard ctl/*.h) $(wildcard ctl/bits/*.h)
 COMMON_H = ctl/ctl.h ctl/algorithm.h ctl/bits/container.h \
            ctl/bits/integral.h ctl/bits/iterators.h
 TESTS = \
-	tests/func/test_c11 \
-	tests/func/test_container_composing \
-	tests/func/test_integral \
-	tests/func/test_integral_c11 \
+	tests/func/test_vector \
+	tests/func/test_string \
+	tests/func/test_array \
 	tests/func/test_deque \
 	tests/func/test_list \
-	tests/func/test_string \
-	tests/func/test_priority_queue \
-	tests/func/test_queue \
 	tests/func/test_set \
 	tests/func/test_unordered_set \
+	tests/func/test_priority_queue \
+	tests/func/test_queue \
+	tests/func/test_stack \
 	tests/func/test_unordered_set_power2 \
 	tests/func/test_unordered_set_cached \
 	tests/func/test_unordered_set_sleep \
-	tests/func/test_stack \
-	tests/func/test_array \
 	tests/func/test_double_array \
-	tests/func/test_vector \
 	tests/func/test_int_vector \
 	tests/func/test_vec_capacity \
-	tests/func/test_str_capacity
+	tests/func/test_str_capacity \
+	tests/func/test_integral \
+	tests/func/test_integral_c11 \
+	tests/func/test_c11 \
+	tests/func/test_container_composing
 ifneq ($(DEBUG),)
 TESTS += \
 	tests/func/test_map     \
