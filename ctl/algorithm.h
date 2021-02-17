@@ -14,8 +14,6 @@
 #undef CTL_ALGORITHM
 #define CTL_ALGORITHM
 
-#define GI JOIN(A, it)
-
 // Generic algorithms with ranges
 
 static inline I JOIN(A, find_if)(A *self, int _match(T *))

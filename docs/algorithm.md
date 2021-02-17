@@ -357,7 +357,7 @@ determines if an element exists in a sorted sequence.
     A merge (A* self, A* other)
     merge_range  (I* range1, GI* range2)
  
-merges two sorted ranges. _(range NYI)_
+merges the 2nd container into the first.
 
     inplace_merge
     inplace_merge_range

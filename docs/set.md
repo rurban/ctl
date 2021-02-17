@@ -133,6 +133,10 @@ clears the contents
 
 inserts the element(s). (C++17)
 
+    insert_generic (A* self, GI* range2)
+
+inserts copies of values from generic range2. _(NYI)_
+
     emplace (A* self, T* value)
 
 constructs elements in-place. _(NYI)_
@@ -152,6 +156,10 @@ erases the element at pos.
     I* erase_range (I* range)
 
 erases elements.
+
+    erase_generic (A* self, GI* range)
+
+erases elements by value from another container.
 
     swap (A* self, A* other)
 

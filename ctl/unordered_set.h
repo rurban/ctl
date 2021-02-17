@@ -95,6 +95,7 @@ position to the top in each access, such as find and contains, not only insert.
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#define GI JOIN(A, it)
 
 #include <ctl/ctl.h>
 
@@ -1071,6 +1072,19 @@ static inline A JOIN(A, copy)(A *self)
     return other;
 }
 
+static inline void JOIN(A, erase_generic)(A* self, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    while (!done(range))
+    {
+        JOIN(A, erase)(self, *ref(range));
+        next(range);
+    }
+}
+
 static inline A JOIN(A, union)(A *a, A *b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
@@ -1201,6 +1215,7 @@ static inline A JOIN(A, transform)(A *self, T _unop(T *))
 #undef A
 #undef B
 #undef I
+#undef GI
 #undef T
 #else
 #undef HOLD

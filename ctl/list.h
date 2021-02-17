@@ -10,6 +10,7 @@
 #define A JOIN(list, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#define GI JOIN(A, it)
 
 #include <ctl/ctl.h>
 
@@ -556,6 +557,19 @@ static inline I *JOIN(A, erase_range)(I *range)
     return range;
 }
 
+static inline void JOIN(A, erase_generic)(A* self, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    while (!done(range))
+    {
+        JOIN(A, remove)(self, *ref(range));
+        next(range);
+    }
+}
+
 static inline void JOIN(A, swap)(A *self, A *other)
 {
     A temp = *self;
@@ -724,4 +738,5 @@ static inline I JOIN(A, find)(A *self, T key)
 #undef A
 #undef B
 #undef I
+#undef GI
 #undef CTL_LIST

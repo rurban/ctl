@@ -12,6 +12,7 @@
 #define A JOIN(deq, T)
 #define B JOIN(A, bucket)
 #define I JOIN(A, it)
+#define GI JOIN(A, it)
 
 #include <ctl/ctl.h>
 
@@ -684,6 +685,7 @@ static inline A *JOIN(A, move_range)(I *range, A *out)
 #undef A
 #undef B
 #undef I
+#undef GI
 #undef POD
 #undef NOT_INTEGRAL
 #undef CTL_DEQ

@@ -10,6 +10,7 @@
 #define CTL_VEC
 #define A JOIN(vec, T)
 #define I JOIN(A, it)
+#define GI JOIN(A, it)
 
 #include <ctl/ctl.h>
 
@@ -579,6 +580,23 @@ static inline I JOIN(A, erase)(I *pos)
     A *self = pos->container;
     return JOIN(A, erase_index)(self, JOIN(I, index)(pos));
 }
+
+#ifndef CTL_STR
+static inline void JOIN(A, erase_generic)(A* self, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    while (!done(range))
+    {
+        I pos = JOIN(A, find)(self, *ref(range));
+        if (!JOIN(I, done)(&pos))
+            JOIN(A, erase)(&pos);
+        next(range);
+    }
+}
+#endif
 
 static inline void JOIN(A, swap)(A *self, A *other)
 {

@@ -131,6 +131,10 @@ inserts count copies of value before the element.
 
 inserts copies of values from first to last before pos.
 
+    insert_generic (I* pos, GI* range2)
+
+inserts copies of values from generic range2 before pos. _(NYI)_
+
     I* emplace (I* pos, T* value)
 
 Insert the value into the container before pos.
@@ -143,6 +147,10 @@ erases the element.
     I* erase_range (I* range)
 
 erases elements.
+
+    erase_generic (A* self, GI* range2)
+
+erases elements by value from another container.
 
     push_front (A* self, T value)
 

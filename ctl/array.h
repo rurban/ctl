@@ -19,6 +19,7 @@
 #define C PASTE(arr, N)
 #define A JOIN(C, T)
 #define I JOIN(A, it)
+#define GI JOIN(A, it)
 
 typedef struct A
 {
@@ -447,6 +448,7 @@ static inline A JOIN(A, copy_if)(A *self, int _match(T*))
 
 #undef A
 #undef I
+#undef GI
 #undef N
 #undef CUTOFF
 

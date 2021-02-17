@@ -142,7 +142,7 @@ void print_list(std::list<int> &b)
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         list_int_push_back(&a, vb);                                                                                    \
         b.push_back(vb);                                                                                               \
-    }
+    }                                                                                                                  \
     print_lst(&a)
 
 #define SETUP_LIST2                                                                                                    \
@@ -298,9 +298,9 @@ int main(void)
         {
             FOREACH_METH(GENERATE_ENUM)
 #ifdef DEBUG
-                FOREACH_DEBUG(GENERATE_ENUM)
+            FOREACH_DEBUG(GENERATE_ENUM)
 #endif
-                    TEST_TOTAL
+            TEST_TOTAL
         };
 #ifdef DEBUG
         static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GENERATE_NAME) ""};
@@ -320,6 +320,7 @@ int main(void)
                 switch (t2)
                 {
                 case CTL_LIST : {
+                    LOG("insert list into list\n");
                     SETUP_LIST2;
                     b.insert(b.begin(), bb.begin(), bb.end());
                     list_int_it begin = list_int_begin(&a);
@@ -329,6 +330,7 @@ int main(void)
                     break;
                 }
                 case CTL_ARRAY : {
+                    LOG("insert array into list\n");
                     SETUP_ARR2;
                     b.insert(b.begin(), bb.begin(), bb.end());
                     list_int_it begin = list_int_begin(&a);
@@ -441,6 +443,7 @@ int main(void)
                     {
                     case CTL_LIST : {
                         SETUP_LIST2;
+                        LOG("merge list into list\n");
                         list_int_it begin = list_int_begin(&a);
                         list_int aaa = list_int_merge_range(&begin, &range2);
                         b.merge(bb);
@@ -451,6 +454,7 @@ int main(void)
                     }
                     case CTL_VECTOR : {
                         SETUP_VEC2;
+                        LOG("merge vector into list\n");
                         list_int_it begin = list_int_begin(&a);
                         list_int aaa = list_int_merge_range(&begin, (list_int_it *)&range2);
 #ifndef _MSC_VER
@@ -464,6 +468,7 @@ int main(void)
                     }
                     case CTL_ARRAY : {
                         SETUP_ARR2;
+                        LOG("merge array into list\n");
                         list_int_it begin = list_int_begin(&a);
                         list_int aaa = list_int_merge_range(&begin, (list_int_it *)&range2);
 #ifndef _MSC_VER
@@ -477,6 +482,7 @@ int main(void)
                     }
                     case CTL_SET : {
                         SETUP_SET2;
+                        LOG("merge set into list\n");
                         list_int_it begin = list_int_begin(&a);
                         list_int aaa = list_int_merge_range(&begin, (list_int_it *)&range2);
 #ifndef _MSC_VER
@@ -490,6 +496,7 @@ int main(void)
                     }
                     case CTL_USET : {
                         SETUP_USET2;
+                        LOG("merge unordered_set into list\n");
                         list_int_it begin = list_int_begin(&a);
                         list_int aaa = list_int_merge_range(&begin, (list_int_it *)&range2);
 #ifndef _MSC_VER
@@ -510,6 +517,7 @@ int main(void)
                     {
                     case CTL_LIST : {
                         SETUP_LIST2;
+                        LOG("merge list into vector\n");
                         vec_int_it begin = vec_int_begin(&a);
                         vec_int aaa = vec_int_merge_range(&begin, (vec_int_it *)&range2);
 #ifndef _MSC_VER
@@ -523,6 +531,7 @@ int main(void)
                     }
                     case CTL_VECTOR : {
                         SETUP_VEC2;
+                        LOG("merge vector into vector\n");
                         vec_int_it begin = vec_int_begin(&a);
                         vec_int aaa = vec_int_merge_range(&begin, &range2);
 #ifndef _MSC_VER
@@ -536,6 +545,7 @@ int main(void)
                     }
                     case CTL_ARRAY : {
                         SETUP_ARR2;
+                        LOG("merge array into vector\n");
                         vec_int_it begin = vec_int_begin(&a);
                         vec_int aaa = vec_int_merge_range(&begin, (vec_int_it *)&range2);
 #ifndef _MSC_VER
@@ -549,6 +559,7 @@ int main(void)
                     }
                     case CTL_SET : {
                         SETUP_SET2;
+                        LOG("merge set into vector\n");
                         vec_int_it begin = vec_int_begin(&a);
                         vec_int aaa = vec_int_merge_range(&begin, (vec_int_it *)&range2);
 #ifndef _MSC_VER
@@ -562,6 +573,7 @@ int main(void)
                     }
                     case CTL_USET : {
                         SETUP_USET2;
+                        LOG("merge unorderd_set into vector\n");
                         vec_int_it begin = vec_int_begin(&a);
                         vec_int aaa = vec_int_merge_range(&begin, (vec_int_it *)&range2);
 #ifndef _MSC_VER

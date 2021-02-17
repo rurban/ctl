@@ -11,6 +11,7 @@
 #define A JOIN(set, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#define GI JOIN(A, it)
 
 #include <ctl/ctl.h>
 #include <stdbool.h>
@@ -902,6 +903,21 @@ static inline size_t JOIN(A, erase_if)(A *self, int (*_match)(T *))
     return JOIN(A, remove_if)(self, _match);
 }
 
+static inline void JOIN(A, erase_generic)(A* self, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    while (!done(range))
+    {
+        B* node = JOIN(A, find_node)(self, *ref(range));
+        if (node)
+            JOIN(A, erase_node)(self, node);
+        next(range);
+    }
+}
+
 static inline A JOIN(A, intersection)(A *a, A *b)
 {
     A self = JOIN(A, init)(a->compare);
@@ -1164,6 +1180,7 @@ static inline void JOIN(A, equal_range)(A *self, T key, I *lower_bound, I *upper
 #undef A
 #undef B
 #undef I
+#undef GI
 #else
 #undef HOLD
 #endif
