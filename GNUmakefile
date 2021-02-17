@@ -149,8 +149,8 @@ check: $(TESTS) docs/index.md
 
 all: check perf examples api.lst verify
 
-api.lst: $(H)
-	grep '^JOIN(A, ' ctl/*.h | perl -pe 's/JOIN\(A, (\w+?)\)/ $1/' >$@
+api.lst: $(H) GNUmakefile
+	perl -lne'/^static.*JOIN\(A, (\w+)\)(.+\))$$/ && print "$$ARGV: $$1 $$2"' ctl/*.h > $@
 
 .cflags: ALWAYS
 	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@

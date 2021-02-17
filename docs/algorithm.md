@@ -386,7 +386,7 @@ computes the symmetric difference between two ordered ranges.
     A union_range (I* range1, I* range2)
  
 computes the union of two sets or ordered ranges.
- 
+
 ## Heap operations
 
     bool is_heap (C++11)
