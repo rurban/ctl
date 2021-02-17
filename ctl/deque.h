@@ -103,7 +103,7 @@ static inline T *JOIN(A, front)(A *self)
 
 static inline T *JOIN(A, back)(A *self)
 {
-    return JOIN(A, at)(self, self->size - 1);
+    return self->size ? JOIN(A, at)(self, self->size - 1) : NULL;
 }
 
 static inline I JOIN(A, begin)(A *self)
