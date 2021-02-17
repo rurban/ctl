@@ -12,14 +12,14 @@
     T *ref; /* will be removed later */                                                                                \
     T *end;                                                                                                            \
     A *container;                                                                                                      \
-    struct JOIN(T, it_vtable) vtable
+    struct JOIN(I, vtable_t) vtable
 
 #define CTL_B_ITER_FIELDS                                                                                              \
     B *node;                                                                                                           \
     T *ref; /* will be removed later */                                                                                \
     B *end;                                                                                                            \
     A *container;                                                                                                      \
-    struct JOIN(T, it_vtable) vtable
+    struct JOIN(I, vtable_t) vtable
 
 struct I;
 static void JOIN(I, next)(struct I *iter);
@@ -31,7 +31,7 @@ static inline int JOIN(I, done)(struct I *iter);
 //#undef have_ctl_vtable
 //#define have_ctl_vtable JOIN(HAVE, JOIN(T, it_vtable))
 //#ifndef JOIN(HAVE, JOIN(T, it_vtable))
-struct JOIN(T, it_vtable) {
+struct JOIN(I, vtable_t) {
     void (*next)(struct I*);
     T*   (*ref) (struct I*);
     int  (*done)(struct I*);

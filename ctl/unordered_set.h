@@ -136,7 +136,7 @@ typedef struct I
     // B* end; // if ranges were added to usets
     A *container;
     B **buckets; // the chain
-    struct JOIN(T, it_vtable) vtable;
+    struct JOIN(I, vtable_t) vtable;
 } I;
 
 #include <ctl/bits/iterators.h>
@@ -342,7 +342,7 @@ static inline I JOIN(A, begin)(A *self)
     static I zero;
     I iter = zero;
     iter.container = self;
-    iter.vtable = JOIN(I, vtable);
+    iter.vtable = JOIN(I, vtable_g);
     B **bend = &self->buckets[self->bucket_count];
     for (B **b = self->buckets; b < bend; b++)
     {
@@ -364,7 +364,7 @@ static inline I JOIN(A, end)(A *self)
     static I zero;
     I iter = zero;
     iter.container = self;
-    iter.vtable = JOIN(I, vtable);
+    iter.vtable = JOIN(I, vtable_g);
     return iter;
 }
 
@@ -379,7 +379,7 @@ static inline I JOIN(I, iter)(A *self, B *node)
         iter.ref = &node->value;
     }
     iter.container = self;
-    iter.vtable = JOIN(I, vtable);
+    iter.vtable = JOIN(I, vtable_g);
     iter.buckets = &self->buckets[BUCKET_INDEX(&iter)];
     return iter;
 }

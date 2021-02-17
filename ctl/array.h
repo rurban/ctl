@@ -178,7 +178,7 @@ static inline I JOIN(I, iter)(A *self, size_t index)
     iter.ref = &self->vector[index];
     iter.end = &self->vector[N];
     iter.container = self;
-    iter.vtable = JOIN(I, vtable);
+    iter.vtable = JOIN(I, vtable_g);
     return iter;
 }
 

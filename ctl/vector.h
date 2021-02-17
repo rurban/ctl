@@ -41,7 +41,7 @@ typedef struct I
     T *ref; // will be removed soon
     T *end;
     A *container;
-    JOIN(T, it_vtable) vtable;
+    JOIN(I, vtable_t) vtable;
 } I;
 
 #include <ctl/bits/iterators.h>
@@ -172,7 +172,7 @@ static inline I JOIN(I, iter)(A *self, size_t index)
     iter.ref = &self->vector[index];
     iter.end = &self->vector[self->size];
     iter.container = self;
-    iter.vtable = JOIN(I, vtable);
+    iter.vtable = JOIN(I, vtable_g);
     return iter;
 }
 

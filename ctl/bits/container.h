@@ -7,8 +7,8 @@
 #error "No CTL container defined for <ctl/bits/container.h>"
 #endif
 
-static const struct JOIN(T, it_vtable)
-JOIN(I, vtable) =
+static const struct JOIN(I, vtable_t)
+JOIN(I, vtable_g) =
   { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
 
 #include <stdbool.h>
