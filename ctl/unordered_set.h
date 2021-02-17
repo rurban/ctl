@@ -325,6 +325,7 @@ static inline I JOIN(A, begin)(A *self)
     iter.vtable.next = JOIN(I, next);
     iter.vtable.ref = JOIN(I, ref);
     iter.vtable.done = JOIN(I, done);
+    iter.vtable.copy = self->copy;
     B **bend = &self->buckets[self->bucket_count];
     for (B **b = self->buckets; b < bend; b++)
     {
@@ -350,6 +351,7 @@ static inline I JOIN(A, end)(A *self)
     iter.vtable.next = JOIN(I, next);
     iter.vtable.ref = JOIN(I, ref);
     iter.vtable.done = JOIN(I, done);    
+    iter.vtable.copy = self->copy;
     return iter;
 }
 
@@ -368,6 +370,7 @@ static inline I JOIN(I, iter)(A *self, B *node)
     iter.vtable.next = JOIN(I, next);
     iter.vtable.ref = JOIN(I, ref);
     iter.vtable.done = JOIN(I, done);
+    iter.vtable.copy = self->copy;
     iter.buckets = &self->buckets[BUCKET_INDEX(&iter)];
     return iter;
 }

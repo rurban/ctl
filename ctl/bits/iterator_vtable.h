@@ -32,4 +32,5 @@ typedef struct JOIN(I, vtable_t)
     void (*next)(struct I *);
     T *(*ref)(struct I *);
     int (*done)(struct I *);
+    T (*copy)(T *);
 } JOIN(I, vtable_t);
