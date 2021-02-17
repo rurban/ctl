@@ -315,13 +315,15 @@ int main(void)
     TEST(LOWER_BOUND_RANGE)                                                                                            \
     TEST(UPPER_BOUND_RANGE)                                                                                            \
     TEST(BINARY_SEARCH)                                                                                                \
-    TEST(BINARY_SEARCH_RANGE)
+    TEST(BINARY_SEARCH_RANGE)                                                                                          \
+    TEST(MERGE)                                                                                                        \
+    TEST(MERGE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(GENERATE_N_RANGE) /* 72 */                                                                                    \
+    TEST(GENERATE_N_RANGE) /* 74 */                                                                                    \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(UNIQUE)                                                                                                       \
-    TEST(UNIQUE_RANGE)                                                                                                 \
+    TEST(UNIQUE_RANGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -1414,6 +1416,57 @@ int main(void)
                 assert(found_a == found_b);
                 break;
             }
+            case TEST_MERGE: {
+                //str_sort(&a);
+                //std::sort(b.begin(), b.end());
+                str aa;
+                std::string bb;
+                gen_strings(&aa, bb, TEST_RAND(a.size));
+                //str_sort(&aa);
+                //std::sort(bb.begin(), bb.end());
+
+                str aaa = str_merge(&a, &aa);
+# ifndef _MSC_VER
+                std::string bbb;
+                std::merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
+                LOG("merge \"%s\", \"%s\" => \"%s\" (%zu)\n", a.vector, aa.vector, aaa.vector, aaa.size);
+                LOG("vs    \"%s\", \"%s\" => \"%s\" (%zu)\n", b.c_str(), bb.c_str(), bbb.c_str(), bbb.size());
+                ADJUST_CAP("merge", aaa, bbb);
+                CHECK(aaa, bbb);
+# endif
+                str_free(&aa);
+                str_free(&aaa);
+                break;
+            }
+            case TEST_MERGE_RANGE: {
+                str_sort(&a);
+                std::sort(b.begin(), b.end());
+                str aa;
+                std::string bb;
+                gen_strings(&aa, bb, TEST_RAND(a.size));
+                str_sort(&aa);
+                std::sort(bb.begin(), bb.end());
+                str_it range_a1, range_a2;
+                std::string::iterator first_b1, last_b1, first_b2, last_b2;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+
+                str aaa = str_merge_range(&range_a1, &range_a2);
+#ifndef _MSC_VER
+                std::string bbb;
+                std::merge(first_b1, last_b1, first_b2, last_b2, std::back_inserter(bbb));
+                LOG("merge_range \"%.*s\", \"%.*s\" => \"%s\" (%zu)\n", (int)(range_a1.end - range_a1.ref),
+                    range_a1.ref, (int)(range_a2.end - range_a2.ref), range_a2.ref, aaa.vector, aaa.size);
+                LOG("vs          \"%.*s\", \"%.*s\" => \"%s\" (%zu)\n", (int)(last_b1 - first_b1), &(*first_b1),
+                    (int)(last_b2 - first_b2), &(*first_b2), bbb.c_str(), bbb.size());
+                ADJUST_CAP("merge_range", aaa, bbb);
+                CHECK(aaa, bbb);
+#endif
+                str_free(&aa);
+                str_free(&aaa);
+                break;
+            }
+
             default:
 #ifdef DEBUG
                 printf("unhandled testcase %d %s\n", which, test_names[which]);

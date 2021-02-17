@@ -255,13 +255,14 @@ int main(void)
     TEST(UPPER_BOUND_RANGE)                                                                                            \
     TEST(BINARY_SEARCH)                                                                                                \
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
+    TEST(MERGE)                                                                                                        \
+    TEST(MERGE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EQUAL_RANGE)                                                                                                  \
     TEST(EMPLACE) /* 62 */                                                                                             \
     TEST(EXTRACT)                                                                                                      \
-    TEST(MERGE)                                                                                                        \
-    TEST(GENERATE_RANGE)                                                                                               \
+    TEST(GENERATE_RANGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -1241,6 +1242,49 @@ int main(void)
             assert(found_a == found_b);
             break;
         }
+        case TEST_MERGE: {
+            set_digi aa = set_digi_init_from(&a);
+            std::set<DIGI> bb;
+            setup_sets(&aa, bb);
+            print_set(&a);
+            print_set(&aa);
+            set_digi aaa = set_digi_merge(&a, &aa);
+#if __cpp_lib_node_extract >= 201606L
+            b.merge(bb); // C++17
+            print_set(&aaa);
+            print_setpp(b);
+            CHECK(aaa, b);
+            b.clear();
+            set_digi_clear(&a);
+#else
+            std::set<DIGI> bbb;
+            merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
+            CHECK(aaa, bbb);
+#endif
+            set_digi_free(&aa);
+            set_digi_free(&aaa);
+            break;
+        }
+        case TEST_MERGE_RANGE: {
+            set_digi_it range_a1, range_a2;
+            std::set<DIGI>::iterator first_b1, last_b1, first_b2, last_b2;
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            set_digi aa = set_digi_init_from(&a);
+            std::set<DIGI> bb;
+            setup_sets(&aa, bb);
+            get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+
+            set_digi aaa = set_digi_merge_range(&range_a1, &range_a2);
+#if !defined(_MSC_VER)
+            std::set<DIGI> bbb;
+            merge(first_b1, last_b1, first_b2, last_b2, std::inserter(bbb, bbb.begin()));
+            CHECK(aaa, bbb);
+#endif
+            set_digi_free(&aa);
+            set_digi_free(&aaa);
+            break;
+        }
+
         default:
 #ifdef DEBUG
             printf("unhandled testcase %d %s\n", which, test_names[which]);

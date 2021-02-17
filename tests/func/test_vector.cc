@@ -365,7 +365,9 @@ int main(void)
     TEST(BINARY_SEARCH)                                                                                                \
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
     TEST(COPY_IF)                                                                                                      \
-    TEST(COPY_IF_RANGE)
+    TEST(COPY_IF_RANGE)                                                                                                \
+    TEST(MERGE)                                                                                                        \
+    TEST(MERGE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EMPLACE) /* 76 */                                                                                             \
@@ -1649,6 +1651,49 @@ int main(void)
                 assert(found_a == found_b);
                 break;
             }
+            case TEST_MERGE: {
+                vec_digi_sort(&a);
+                std::sort(b.begin(), b.end());
+                vec_digi aa;
+                std::vector<DIGI> bb;
+                gen_vectors(&aa, bb, TEST_RAND(a.size));
+                vec_digi_sort(&aa);
+                std::sort(bb.begin(), bb.end());
+
+                vec_digi aaa = vec_digi_merge(&a, &aa);
+#ifndef _MSC_VER
+                std::vector<DIGI> bbb;
+                merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
+                CHECK(aaa, bbb);
+#endif
+                vec_digi_free(&aa);
+                vec_digi_free(&aaa);
+                break;
+            }
+            case TEST_MERGE_RANGE: {
+                vec_digi_sort(&a);
+                std::sort(b.begin(), b.end());
+                vec_digi_it range_a1, range_a2;
+                std::vector<DIGI>::iterator first_b1, last_b1, first_b2, last_b2;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                vec_digi aa;
+                std::vector<DIGI> bb;
+                gen_vectors(&aa, bb, TEST_RAND(a.size));
+                vec_digi_sort(&aa);
+                std::sort(bb.begin(), bb.end());
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+
+                vec_digi aaa = vec_digi_merge_range(&range_a1, &range_a2);
+#ifndef _MSC_VER
+                std::vector<DIGI> bbb;
+                merge(first_b1, last_b1, first_b2, last_b2, std::back_inserter(bbb));
+                CHECK(aaa, bbb);
+#endif
+                vec_digi_free(&aa);
+                vec_digi_free(&aaa);
+                break;
+            }
+
             default:
                 fail++;
 #ifdef DEBUG

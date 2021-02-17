@@ -238,6 +238,7 @@ int main(void)
     TEST(SPLICE_IT)                                                                                                    \
     TEST(SPLICE_RANGE)                                                                                                 \
     TEST(MERGE)                                                                                                        \
+    TEST(MERGE_RANGE)                                                                                                  \
     TEST(EQUAL)                                                                                                        \
     TEST(EQUAL_VALUE)                                                                                                  \
     TEST(EQUAL_RANGE)                                                                                                  \
@@ -568,9 +569,29 @@ int main(void)
             list_digi_sort(&aa);
             b.sort();
             bb.sort();
-            b.merge(bb);
             list_digi_merge(&a, &aa);
+            b.merge(bb);
             CHECK(a, b);
+            list_digi_free(&aa);
+            break;
+        }
+        case TEST_MERGE_RANGE: {
+            list_digi_it range_a1, range_a2;
+            std::list<DIGI>::iterator first_b1, last_b1, first_b2, last_b2;
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            list_digi aa;
+            std::list<DIGI> bb;
+            setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+            get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+
+            list_digi aaa = list_digi_merge_range(&range_a1, &range_a2);
+#if !defined(_MSC_VER)
+            std::list<DIGI> bbb;
+            merge(first_b1, last_b1, first_b2, last_b2, std::back_inserter(bbb));
+            CHECK(aaa, bbb);
+#endif
+            list_digi_free(&aa);
+            list_digi_free(&aaa);
             break;
         }
         case TEST_EQUAL: {

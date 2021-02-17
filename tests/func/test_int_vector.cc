@@ -389,13 +389,15 @@ int main(void)
     TEST(LOWER_BOUND_RANGE)                                                                                            \
     TEST(UPPER_BOUND_RANGE)                                                                                            \
     TEST(BINARY_SEARCH)                                                                                                \
-    TEST(BINARY_SEARCH_RANGE)
+    TEST(BINARY_SEARCH_RANGE)                                                                                          \
+    TEST(MERGE)                                                                                                        \
+    TEST(MERGE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(EMPLACE)                                                                                                      \
+    TEST(EMPLACE) /* 75 */                                                                                             \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_RANGE)                                                                                              \
-    TEST(TRANSFORM_IT_RANGE)                                                                                           \
+    TEST(TRANSFORM_IT_RANGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -1607,6 +1609,48 @@ int main(void)
                 bool found_b = binary_search(first_b, last_b, key);
                 LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
                 assert(found_a == found_b);
+                break;
+            }
+            case TEST_MERGE: {
+                vec_int_sort(&a);
+                std::sort(b.begin(), b.end());
+                vec_int aa;
+                std::vector<int> bb;
+                gen_vectors(&aa, bb, TEST_RAND(a.size));
+                vec_int_sort(&aa);
+                std::sort(bb.begin(), bb.end());
+
+                vec_int aaa = vec_int_merge(&a, &aa);
+#ifndef _MSC_VER
+                std::vector<int> bbb;
+                merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
+                CHECK(aaa, bbb);
+#endif
+                vec_int_free(&aa);
+                vec_int_free(&aaa);
+                break;
+            }
+            case TEST_MERGE_RANGE: {
+                vec_int_sort(&a);
+                std::sort(b.begin(), b.end());
+                vec_int_it range_a1, range_a2;
+                std::vector<int>::iterator first_b1, last_b1, first_b2, last_b2;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                vec_int aa;
+                std::vector<int> bb;
+                gen_vectors(&aa, bb, TEST_RAND(a.size));
+                vec_int_sort(&aa);
+                std::sort(bb.begin(), bb.end());
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+
+                vec_int aaa = vec_int_merge_range(&range_a1, &range_a2);
+#ifndef _MSC_VER
+                std::vector<int> bbb;
+                merge(first_b1, last_b1, first_b2, last_b2, std::back_inserter(bbb));
+                CHECK(aaa, bbb);
+#endif
+                vec_int_free(&aa);
+                vec_int_free(&aaa);
                 break;
             }
 

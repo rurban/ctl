@@ -133,7 +133,8 @@ static inline int JOIN(A, _found)(A *a, T *ref)
 #endif
 }
 
-// These require sorted containers via operator< and push_back.
+/* These require sorted containers via operator< and push_back. */
+
 /*
 static inline A
 JOIN(A, union)(A* a, A* b)
@@ -510,7 +511,41 @@ static inline void JOIN(A, inserter)(A *self, T value)
     #error "no inserter for this container"
 #endif
 }
+
+// both need to be sorted
+static inline A JOIN(A, merge_range)(I *r1, I *r2)
+{
+    A self = JOIN(A, init_from)(r1->container);
+    while (!JOIN(I, done)(r1))
+    {
+        if (JOIN(I, done)(r2))
+            return *JOIN(A, copy_range)(r1, &self);
+        if (self.compare(r2->ref, r1->ref))
+        {
+            JOIN(A, inserter)(&self, self.copy(r2->ref));
+            JOIN(I, next)(r2);
+        }
+        else
+        {
+            JOIN(A, inserter)(&self, self.copy(r1->ref));
+            JOIN(I, next)(r1);
+        }
+    }
+    JOIN(A, copy_range)(r2, &self);
+    return self;
+}
+
+#ifndef CTL_LIST
+static inline A JOIN(A, merge)(A *a, A *b)
+{
+    JOIN(A, it) r1 = JOIN(A, begin)(a);
+    JOIN(A, it) r2 = JOIN(A, begin)(b);
+    return JOIN(A, merge_range)(&r1, &r2);
+}
+#endif // LIST
+
 #endif // USET
+
 
 static inline A JOIN(A, copy_if_range)(I *range, int _match(T*))
 {

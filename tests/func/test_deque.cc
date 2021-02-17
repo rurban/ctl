@@ -461,7 +461,9 @@ int main(void)
     TEST(LOWER_BOUND_RANGE)                                                                                            \
     TEST(UPPER_BOUND_RANGE)                                                                                            \
     TEST(BINARY_SEARCH)                                                                                                \
-    TEST(BINARY_SEARCH_RANGE)
+    TEST(BINARY_SEARCH_RANGE)                                                                                          \
+    TEST(MERGE)                                                                                                        \
+    TEST(MERGE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(UNIQUE) /* 71 */                                                                                              \
@@ -1861,6 +1863,40 @@ int main(void)
                 bool found_b = binary_search(first_b, last_b, DIGI{key});
                 LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
                 assert(found_a == found_b);
+                break;
+            }
+            case TEST_MERGE: {
+                deq_digi aa;
+                std::deque<DIGI> bb;
+                setup_deque(&aa, bb);
+
+                deq_digi aaa = deq_digi_merge(&a, &aa);
+#ifndef _MSC_VER
+                std::deque<DIGI> bbb;
+                merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
+                CHECK(aaa, bbb);
+#endif
+                deq_digi_free(&aa);
+                deq_digi_free(&aaa);
+                break;
+            }
+            case TEST_MERGE_RANGE: {
+                deq_digi_it range_a1, range_a2;
+                std::deque<DIGI>::iterator first_b1, last_b1, first_b2, last_b2;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                deq_digi aa;
+                std::deque<DIGI> bb;
+                setup_deque(&aa, bb);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+
+                deq_digi aaa = deq_digi_merge_range(&range_a1, &range_a2);
+#ifndef _MSC_VER
+                std::deque<DIGI> bbb;
+                merge(first_b1, last_b1, first_b2, last_b2, std::back_inserter(bbb));
+                CHECK(aaa, bbb);
+#endif
+                deq_digi_free(&aa);
+                deq_digi_free(&aaa);
                 break;
             }
 
