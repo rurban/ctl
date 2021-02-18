@@ -378,17 +378,22 @@ int main(void)
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
+            // clang-format off
             enum
             {
                 FOREACH_METH(GENERATE_ENUM)
 #ifdef DEBUG
-                    FOREACH_DEBUG(GENERATE_ENUM)
+                FOREACH_DEBUG(GENERATE_ENUM)
 #endif
-                        TEST_TOTAL
+                TEST_TOTAL
             };
 #ifdef DEBUG
-            static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GENERATE_NAME) ""};
+            static const char *test_names[] = {
+                FOREACH_METH(GENERATE_NAME)
+                FOREACH_DEBUG(GENERATE_NAME)
+                ""};
 #endif
+            // clang-format on
             int which = TEST_RAND(TEST_TOTAL);
             if (test >= 0 && test < (int)TEST_TOTAL)
                 which = test;

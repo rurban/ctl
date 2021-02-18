@@ -1106,12 +1106,52 @@ static inline A JOIN(A, union)(A *a, A *b)
     return self;
 }
 
+static inline A JOIN(A, union_range)(I *r1, GI *r2)
+{
+    A self = JOIN(A, init_from)(r1->container);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    foreach_range_ (A, it1, r1)
+        JOIN(A, insert)(&self, self.copy(it1.ref));
+    while(!done2(r2))
+    {
+        JOIN(A, insert)(&self, self.copy(ref2(r2)));
+        next2(r2);
+    }
+    return self;
+}
+
 static inline A JOIN(A, intersection)(A *a, A *b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
     foreach (A, a, it)
         if (JOIN(A, find_node)(b, *it.ref))
             JOIN(A, insert)(&self, self.copy(it.ref));
+    return self;
+}
+
+static inline A JOIN(A, intersection_range)(I *r1, GI *r2)
+{
+    A *a = r1->container;
+    A self = JOIN(A, init)(a->hash, a->equal);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    // works only with full r1. which is basically ok.
+    while(!done2(r2))
+    {
+        if (JOIN(A, find_node)(a, *ref2(r2)))
+            JOIN(A, insert)(&self, self.copy(ref2(r2)));
+        next2(r2);
+    }
+    /*
+    foreach (A, a, it)
+        if (JOIN(A, find_node)(b, *it.ref))
+            JOIN(A, insert)(&self, self.copy(it.ref));
+    */
     return self;
 }
 
