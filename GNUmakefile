@@ -213,7 +213,10 @@ verify: $(VERIFY)
 
 MANPAGES = $(patsubst docs/%.md,docs/man/%.h.3, $(wildcard docs/*.md))
 
-README.md: $(wildcard tests/func/test_*.cc) ./update-grid.pl
+README.md: ./update-grid.pl tests/func/test_vector tests/func/test_string \
+  tests/func/test_array tests/func/test_deque tests/func/test_list tests/func/test_set \
+  tests/func/test_unordered_set	tests/func/test_priority_queue tests/func/test_queue \
+  tests/func/test_stack
 	./update-grid.pl
 
 docs/index.md : README.md ./update-index.pl

@@ -78,18 +78,13 @@ void print_list(std::list<int> &b)
 #define TEST_MAX_VALUE 1500
 #endif
 
-#define CHECK(_x, _y)                                                                                                  \
+#define CHECK(ty1, cppty, _x, _y)                                                                                      \
     {                                                                                                                  \
         assert(_x.size == _y.size());                                                                                  \
-        assert(list_int_empty(&_x) == _y.empty());                                                                     \
-        if (_x.size > 0)                                                                                               \
-        {                                                                                                              \
-            assert(_y.front() == *list_int_front(&_x));                                                               \
-            assert(_y.back() == *list_int_back(&_x));                                                                 \
-        }                                                                                                              \
-        std::list<int>::iterator _iter = _y.begin();                                                                   \
+        assert(ty1##_int_empty(&_x) == _y.empty());                                                                    \
+        std::cppty::iterator _iter = _y.begin();                                                                       \
         int i = 0;                                                                                                     \
-        list_foreach_ref(list_int, &_x, _it)                                                                           \
+        foreach(ty1##_int, &_x, _it)                                                                                   \
         {                                                                                                              \
             LOG("%d: %d, ", i, *_it.ref);                                                                              \
             assert(*_it.ref == *_iter);                                                                                \
@@ -97,15 +92,13 @@ void print_list(std::list<int> &b)
             _iter++;                                                                                                   \
         }                                                                                                              \
         LOG("\n");                                                                                                     \
-        list_int_it _it = list_int_begin(&_x);                                                                         \
+        ty1##_int_it _it = ty1##_int_begin(&_x);                                                                       \
         for (auto &_d : _y)                                                                                            \
         {                                                                                                              \
             assert(*_it.ref == _d);                                                                                    \
-            list_int_it_next(&_it);                                                                                    \
+            ty1##_int_it_next(&_it);                                                                                   \
         }                                                                                                              \
     }
-#undef CHECK
-#define CHECK(_x, _y)
 
 #define LOG_ITER(_it, b, _iter, line)                                                                                  \
     if ((_it)->node != NULL)                                                                                           \
@@ -137,7 +130,7 @@ void print_list(std::list<int> &b)
 #define SETUP_LIST1                                                                                                    \
     list_int a = list_int_init();                                                                                      \
     std::list<int> b;                                                                                                  \
-    for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
+    for (int i = 0; i < (int)TEST_RAND(TEST_MAX_SIZE); i++)             \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         list_int_push_back(&a, vb);                                                                                    \
@@ -240,12 +233,12 @@ void print_list(std::list<int> &b)
     print_set(&aa)
 
 #define SETUP_USET1                                                                                                    \
-    set_int a = uset_int_init(NULL, NULL);                                                                             \
+    uset_int a = uset_int_init(NULL, NULL);                                                                            \
     std::unordered_set<int> b;                                                                                         \
     for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
-        set_int_insert(&a, vb);                                                                                        \
+        uset_int_insert(&a, vb);                                                                                       \
         b.insert(vb);                                                                                                  \
     }                                                                                                                  \
     print_uset(&a)
@@ -313,128 +306,339 @@ int main(void)
         {
 #ifdef DEBUG
         case TEST_INSERT_GENERIC:
+
+#define INSERT_INTO(ty2, ty1, cppty)                                                                                   \
+    LOG("insert " #ty2 " into " #ty1 "\n");                                                                            \
+    b.insert(b.begin(), bb.begin(), bb.end());                                                                         \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int_insert_generic(&begin, (ty1##_int_it *)&range2);                                                         \
+    CHECK(ty1, cppty, a, b);                                                                                           \
+    ty2##_int_free(&aa)
+
             switch (t1)
             {
-            case CTL_LIST : {
-                SETUP_LIST1;
-                switch (t2)
-                {
-                case CTL_LIST : {
-                    LOG("insert list into list\n");
-                    SETUP_LIST2;
-                    b.insert(b.begin(), bb.begin(), bb.end());
-                    list_int_it begin = list_int_begin(&a);
-                    list_int_insert_generic(&begin, (list_int_it*)&range2);
-                    //CHECK(a, b);
-                    list_int_free(&aa);
-                    break;
-                }
-                case CTL_ARRAY : {
-                    LOG("insert array into list\n");
-                    SETUP_ARR2;
-                    b.insert(b.begin(), bb.begin(), bb.end());
-                    list_int_it begin = list_int_begin(&a);
-                    list_int_insert_generic(&begin, (list_int_it*)&range2);
-                    //CHECK(a, b);
-                    arr25_int_free(&aa);
-                    break;
-                }
-                case CTL_VECTOR : {
-                    SETUP_VEC2;
-                    b.insert(b.begin(), bb.begin(), bb.end());
-                    list_int_it begin = list_int_begin(&a);
-                    list_int_insert_generic(&begin, (list_int_it*)&range2);
-                    //CHECK(a, b);
-                    vec_int_free(&aa);
-                    break;
-                }
-                } // switch t2
-                list_int_free(&a);
-            }
             case CTL_VECTOR : {
                 SETUP_VEC1;
                 switch (t2)
                 {
-                case CTL_LIST : {
-                    SETUP_LIST2;
-                    b.insert(b.begin(), bb.begin(), bb.end());
-                    vec_int_it begin = vec_int_begin(&a);
-                    vec_int_insert_generic(&begin, (vec_int_it*)&range2);
-                    CHECK(a, b);
-                    list_int_free(&aa);
-                    break;
-                }
                 case CTL_VECTOR : {
-                    SETUP_VEC2;
-                    b.insert(b.begin(), bb.begin(), bb.end());
-                    vec_int_it begin = vec_int_begin(&a);
-                    vec_int_insert_generic(&begin, &range2);
-                    CHECK(a, b);
-                    vec_int_free(&aa);
-                    break;
+                    SETUP_VEC2; INSERT_INTO(vec, vec, vector<int>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; INSERT_INTO(arr25, vec, vector<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; INSERT_INTO(deq, vec, vector<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; INSERT_INTO(list, vec, vector<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; INSERT_INTO(set, vec, vector<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; INSERT_INTO(uset, vec, vector<int>); break;
                 }
                 } // switch t2
-                vec_int_free(&a);
+                vec_int_free(&a); break;
+            }
+            case CTL_ARRAY : {
+                SETUP_ARR1;
+                switch (t2)
+                {
+                case CTL_LIST : {
+                    SETUP_LIST2; INSERT_INTO(list, arr25, array<int,25>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; INSERT_INTO(arr25, arr25, array<int,25>); break;
+                }
+                case CTL_VECTOR : {
+                    SETUP_VEC2; INSERT_INTO(vec, arr25, array<int,25>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; INSERT_INTO(set, arr25, array<int,25>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; INSERT_INTO(uset, arr25, array<int,25>); break;
+                }
+                } // switch t2
+                arr25_int_free(&a); break;
+            }
+            case CTL_DEQUE : {
+                SETUP_DEQ1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; INSERT_INTO(vec, deq, deque<int>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; INSERT_INTO(arr25, deq, deque<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; INSERT_INTO(deq, deq, deque<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; INSERT_INTO(list, deq, deque<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; INSERT_INTO(set, deq, deque<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; INSERT_INTO(uset, deq, deque<int>); break;
+                }
+                } // switch t2
+                deq_int_free(&a); break;
+            }
+            case CTL_LIST : {
+                SETUP_LIST1;
+                switch (t2)
+                {
+                case CTL_ARRAY : {
+                    SETUP_ARR2; INSERT_INTO(arr25, list, list<int>); break;
+                }
+                case CTL_VECTOR : {
+                    SETUP_VEC2; INSERT_INTO(vec, list, list<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; INSERT_INTO(deq, list, list<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; INSERT_INTO(list, list, list<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; INSERT_INTO(set, list, list<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; INSERT_INTO(uset, list, list<int>); break;
+                }
+                } // switch t2
+                list_int_free(&a); break;
+            }
+            case CTL_SET : {
+                SETUP_SET1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; INSERT_INTO(vec, set, set<int>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; INSERT_INTO(arr25, set, set<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; INSERT_INTO(deq, set, set<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; INSERT_INTO(list, set, set<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; INSERT_INTO(set, set, set<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; INSERT_INTO(uset, set, set<int>); break;
+                }
+                } // switch t2
+                list_int_free(&a); break;
+            }
+            case CTL_USET : {
+                SETUP_USET1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; INSERT_INTO(vec, uset); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; INSERT_INTO(arr25, uset); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; INSERT_INTO(list, uset); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; INSERT_INTO(deq, uset); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; INSERT_INTO(set, uset); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; INSERT_INTO(uset, uset); break;
+                }
+                } // switch t2
+                uset_int_free(&a); break;
             }
             } // switch t1
             break;
 
         case TEST_ERASE_GENERIC:
-            if (!a.size)
-                break;
+
+#define ERASE_FROM(ty2, ty1, cppty)                                                                                    \
+    LOG("erase " #ty2 " from " #ty1 "\n");                                                                             \
+    b.erase(bb.begin(), bb.end());                                                                                     \
+    ty1##_int_erase_generic(&a, (ty1##_int_it *)&range2);                                                              \
+    CHECK(ty1, cppty, a, b);                                                                                           \
+    ty2##_int_free(&aa)
+
             switch (t1)
             {
-            case CTL_LIST : {
-                SETUP_LIST1;
-                switch (t2)
-                {
-                case CTL_LIST : {
-                    SETUP_LIST2;
-                    b.erase(bb.begin(), bb.end());
-                    list_int_erase_generic(&a, &range2);
-                    CHECK(a, b);
-                    list_int_free(&a);
-                    list_int_free(&aa);
-                    break;
-                }
-                case CTL_VECTOR : {
-                    SETUP_VEC2;
-                    b.erase(bb.begin(), bb.end());
-                    list_int_erase_generic(&a, &range2);
-                    CHECK(a, b);
-                    list_int_free(&a);
-                    vec_int_free(&aa);
-                    break;
-                }
-                } // switch t2
-            }     // LIST
             case CTL_VECTOR : {
                 SETUP_VEC1;
                 switch (t2)
                 {
-                case CTL_LIST : {
-                    SETUP_LIST2;
-                    b.erase(bb.begin(), bb.end());
-                    vec_int_erase_generic(&a, &range2);
-                    CHECK(a, b);
-                    list_int_free(&a);
-                    list_int_free(&aa);
-                    break;
-                    }
                 case CTL_VECTOR : {
-                    SETUP_VEC2;
-                    b.erase(bb.begin(), bb.end());
-                    vec_int_erase_generic(&a, &range2);
-                    CHECK(a, b);
-                    list_int_free(&a);
-                    vec_int_free(&aa);
-                    break;
+                    SETUP_VEC2; ERASE_FROM(vec, vec, vector<int>); break;
                 }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ERASE_FROM(arr25, vec, vector<int>); break;
                 }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ERASE_FROM(deq, vec, vector<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ERASE_FROM(vec, vector, list<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ERASE_FROM(set, vec, vector<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ERASE_FROM(uset, vec, vector<int>); break;
+                }
+                } // switch t2
+                vec_int_free(&a); break;
+            }
+            // cannot erase from array
+            case CTL_ARRAY : break;
+            case CTL_DEQUE : {
+                SETUP_DEQ1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; ERASE_FROM(vec, deq, deque<int>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ERASE_FROM(arr25, deq, deque<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ERASE_FROM(deq, deq, deque<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ERASE_FROM(deq, deque, list<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ERASE_FROM(set, deq, deque<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ERASE_FROM(uset, deq, deque<int>); break;
+                }
+                } // switch t2
+                deq_int_free(&a); break;
+            }
+            case CTL_LIST : {
+                SETUP_LIST1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; ERASE_FROM(vec, list, list<int>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ERASE_FROM(arr25, list, list<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ERASE_FROM(deq, list, list<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ERASE_FROM(list, list, list<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ERASE_FROM(set, list, list<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ERASE_FROM(uset, list, list<int>); break;
+                }
+                } // switch t2
+                list_int_free(&a); break;
+            }     // LIST
+            case CTL_SET : {
+                SETUP_SET1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; ERASE_FROM(vec, set, set<int>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ERASE_FROM(arr25, set, set<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ERASE_FROM(deq, set, set<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ERASE_FROM(set, set, list<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ERASE_FROM(set, set, set<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ERASE_FROM(uset, set, set<int>); break;
+                }
+                } // switch t2
+                set_int_free(&a); break;
+            }
+            case CTL_USET : {
+                SETUP_USET1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; ERASE_FROM(vec, uset, unordered_set<int>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ERASE_FROM(arr25, uset, unordered_set<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ERASE_FROM(deq, uset, unordered_set<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ERASE_FROM(uset, unordered_set, list<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ERASE_FROM(set, uset, unordered_set<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ERASE_FROM(uset, uset, unordered_set<int>); break;
+                }
+                } // switch t2
+                uset_int_free(&a); break;
+            }
             }
             break;
 #endif
             case TEST_MERGE_RANGE:
+
+#ifndef _MSC_VER
+#define MERGE_INTO(ty2, ty1, cppty)                                                                                    \
+    LOG("merge " #ty2 " into " #ty1 "\n");                                                                             \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
+    std::cppty bbb;                                                                                                    \
+    merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                                          \
+    CHECK(ty1, cppty, aaa, bbb);                                                                                       \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#define MERGE_INTO_SET(ty2, ty1, cppty)                                                                                \
+    LOG("merge " #ty2 " into " #ty1 "\n");                                                                             \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
+    std::cppty bbb;                                                                                                    \
+    merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                                  \
+    CHECK(ty1, cppty, aaa, bbb);                                                                                       \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#else
+#define MERGE_INTO(ty2, ty1, cppty)                                                                                    \
+    LOG("merge " #ty2 " into " #ty1 "\n");                                                                             \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#define MERGE_INTO_SET(ty2, ty1, cppty)  MERGE_INTO(ty2, ty1, cppty)
+#endif
+
                 switch (t1)
                 {
                 case CTL_LIST : {
@@ -447,148 +651,135 @@ int main(void)
                         list_int_it begin = list_int_begin(&a);
                         list_int aaa = list_int_merge_range(&begin, &range2);
                         b.merge(bb);
-                        CHECK(aaa, b);
+                        CHECK(list, list<int>, aaa, b);
                         list_int_free(&aa);
                         list_int_free(&aaa);
                         break;
                     }
                     case CTL_VECTOR : {
-                        SETUP_VEC2;
-                        LOG("merge vector into list\n");
-                        list_int_it begin = list_int_begin(&a);
-                        list_int aaa = list_int_merge_range(&begin, (list_int_it *)&range2);
-#ifndef _MSC_VER
-                        std::vector<int> bbb;
-                        merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
-                        CHECK(aaa, bbb);
-#endif
-                        list_int_free(&aaa);
-                        vec_int_free(&aa);
-                        break;
+                        SETUP_VEC2; MERGE_INTO(vec, list, list<int>); break;
                     }
                     case CTL_ARRAY : {
-                        SETUP_ARR2;
-                        LOG("merge array into list\n");
-                        list_int_it begin = list_int_begin(&a);
-                        list_int aaa = list_int_merge_range(&begin, (list_int_it *)&range2);
-#ifndef _MSC_VER
-                        std::vector<int> bbb;
-                        merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
-                        CHECK(aaa, bbb);
-#endif
-                        list_int_free(&aaa);
-                        arr25_int_free(&aa);
-                        break;
+                        SETUP_ARR2; MERGE_INTO(arr25, list, list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; MERGE_INTO(deq, list, list<int>); break;
                     }
                     case CTL_SET : {
-                        SETUP_SET2;
-                        LOG("merge set into list\n");
-                        list_int_it begin = list_int_begin(&a);
-                        list_int aaa = list_int_merge_range(&begin, (list_int_it *)&range2);
-#ifndef _MSC_VER
-                        std::vector<int> bbb;
-                        merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
-                        CHECK(aaa, bbb);
-#endif
-                        list_int_free(&aaa);
-                        set_int_free(&aa);
-                        break;
+                        SETUP_SET2; MERGE_INTO_SET(set, list, list<int>); break;
                     }
                     case CTL_USET : {
-                        SETUP_USET2;
-                        LOG("merge unordered_set into list\n");
-                        list_int_it begin = list_int_begin(&a);
-                        list_int aaa = list_int_merge_range(&begin, (list_int_it *)&range2);
-#ifndef _MSC_VER
-                        std::vector<int> bbb;
-                        merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
-                        CHECK(aaa, bbb);
-#endif
-                        list_int_free(&aaa);
-                        uset_int_free(&aa);
-                        break;
+                        SETUP_USET2; MERGE_INTO_SET(uset, list, list<int>); break;
                     }
                     } // switch t2
-                    list_int_free(&a);
+                    list_int_free(&a); break;
                 } // LIST
                 case CTL_VECTOR : {
                     SETUP_VEC1;
                     switch (t2)
                     {
-                    case CTL_LIST : {
-                        SETUP_LIST2;
-                        LOG("merge list into vector\n");
-                        vec_int_it begin = vec_int_begin(&a);
-                        vec_int aaa = vec_int_merge_range(&begin, (vec_int_it *)&range2);
-#ifndef _MSC_VER
-                        std::vector<int> bbb;
-                        merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
-                        CHECK(aaa, bbb);
-#endif
-                        vec_int_free(&aaa);
-                        list_int_free(&aa);
-                        break;
-                    }
                     case CTL_VECTOR : {
-                        SETUP_VEC2;
-                        LOG("merge vector into vector\n");
-                        vec_int_it begin = vec_int_begin(&a);
-                        vec_int aaa = vec_int_merge_range(&begin, &range2);
-#ifndef _MSC_VER
-                        std::vector<int> bbb;
-                        merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
-                        CHECK(aaa, bbb);
-#endif
-                        vec_int_free(&aaa);
-                        vec_int_free(&aa);
-                        break;
+                        SETUP_VEC2; MERGE_INTO(vec, vec, vector<int>); break;
                     }
                     case CTL_ARRAY : {
-                        SETUP_ARR2;
-                        LOG("merge array into vector\n");
-                        vec_int_it begin = vec_int_begin(&a);
-                        vec_int aaa = vec_int_merge_range(&begin, (vec_int_it *)&range2);
-#ifndef _MSC_VER
-                        std::vector<int> bbb;
-                        merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
-                        CHECK(aaa, bbb);
-#endif
-                        vec_int_free(&aaa);
-                        arr25_int_free(&aa);
-                        break;
+                        SETUP_ARR2; MERGE_INTO(arr25, vec, vector<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; MERGE_INTO(deq, vec, vector<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; MERGE_INTO(list, vec, vector<int>); break;
                     }
                     case CTL_SET : {
-                        SETUP_SET2;
-                        LOG("merge set into vector\n");
-                        vec_int_it begin = vec_int_begin(&a);
-                        vec_int aaa = vec_int_merge_range(&begin, (vec_int_it *)&range2);
-#ifndef _MSC_VER
-                        std::vector<int> bbb;
-                        merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
-                        CHECK(aaa, bbb);
-#endif
-                        vec_int_free(&aaa);
-                        set_int_free(&aa);
-                        break;
+                        SETUP_SET2; MERGE_INTO(set, vec, vector<int>); break;
                     }
                     case CTL_USET : {
-                        SETUP_USET2;
-                        LOG("merge unorderd_set into vector\n");
-                        vec_int_it begin = vec_int_begin(&a);
-                        vec_int aaa = vec_int_merge_range(&begin, (vec_int_it *)&range2);
-#ifndef _MSC_VER
-                        std::vector<int> bbb;
-                        merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
-                        CHECK(aaa, bbb);
-#endif
-                        CHECK(aaa, b);
-                        vec_int_free(&aaa);
-                        uset_int_free(&aa);
-                        break;
+                        SETUP_USET2; MERGE_INTO(uset, vec, vector<int>); break;
                     }
                     } // switch t2
                     vec_int_free(&a);
                 } // VECTOR
+                // cannot merge into array
+                case CTL_ARRAY : break;
+                case CTL_DEQUE : {
+                    SETUP_DEQ1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; MERGE_INTO(vec, deq, deque<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; MERGE_INTO(arr25, deq, deque<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; MERGE_INTO(list, deq, deque<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; MERGE_INTO(deq, deq, deque<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; MERGE_INTO(set, deq, deque<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; MERGE_INTO(uset, deq, deque<int>); break;
+                    }
+                    } // switch t2
+                    deq_int_free(&a); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; MERGE_INTO_SET(vec, set, set<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; MERGE_INTO_SET(arr25, set, set<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; MERGE_INTO_SET(list, set, set<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; MERGE_INTO_SET(deq, set, set<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; MERGE_INTO_SET(set, set, set<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; MERGE_INTO_SET(uset, set, set<int>); break;
+                    }
+                    } // switch t2
+                    set_int_free(&a); break;
+                }
+                // uset_merge_range not yet implemented
+                case CTL_USET : break;
+/* TODO
+                case CTL_USET : {
+                    SETUP_USET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; MERGE_INTO_SET(vec, uset, unordered_set<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; MERGE_INTO_SET(arr25, uset, unordered_set<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; MERGE_INTO_SET(list, uset, unordered_set<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; MERGE_INTO_SET(deq, uset, unordered_set<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; MERGE_INTO_SET(set, uset, unordered_set<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; MERGE_INTO_SET(uset, uset, unordered_set<int>); break;
+                    }
+                    } // switch t2
+                    uset_int_free(&a);
+                }
+*/
                 } // switch t1
                 break;
 

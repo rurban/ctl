@@ -519,6 +519,31 @@ static inline I *JOIN(A, insert_range)(I *pos, I *range)
     return pos;
 }
 
+static inline void JOIN(A, insert_generic)(I *pos, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    A *self = pos->container;
+    if (!pos->node)
+    {
+        while (!done(range))
+        {
+            JOIN(A, connect_after)(self, self->tail, JOIN(B, init)(self->copy(ref(range))));
+            next(range);
+        }
+    }
+    else
+    {
+        while (!done(range))
+        {
+            JOIN(A, connect_before)(self, pos->node, JOIN(B, init)(self->copy(ref(range))));
+            next(range);
+        }
+    }
+}
+
 static inline size_t JOIN(A, remove_if)(A *self, int _match(T *))
 {
     if (!self->size)

@@ -34,7 +34,7 @@
 #define TEST_PASS(f) printf("%s: PASS\n", f)
 #define TEST_FAIL(f) printf("%s: FAIL\n", f)
 
-#define TEST_RAND(max) (((max) == 0) ? 0 : (rand() % (max)))
+#define TEST_RAND(max) (((max) == 0) ? 0 : (int)(rand() % (max)))
 
 #define TEST_PERF_RUNS (100)
 #define TEST_PERF_CHUNKS (256)
