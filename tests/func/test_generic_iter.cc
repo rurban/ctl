@@ -145,7 +145,7 @@ void print_list(std::list<int> &b)
 #define SETUP_LIST2                                                                                                    \
     list_int aa = list_int_init();                                                                                     \
     std::list<int> bb;                                                                                                 \
-    for (int i = 0; i < TEST_RAND(25); i++)                                                                 \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         list_int_push_back(&aa, vb);                                                                                   \
@@ -162,16 +162,20 @@ void print_list(std::list<int> &b)
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         vec_int_push_back(&a, vb);                                                                                     \
         b.push_back(vb);                                                                                               \
-    }
+    }                                                                                                                  \
+    vec_int_sort(&a);                                                                                                 \
+    std::sort(b.begin(), b.end())
 #define SETUP_VEC2                                                                                                     \
     vec_int aa = vec_int_init();                                                                                       \
     std::vector<int> bb;                                                                                               \
-    for (int i = 0; i < TEST_RAND(25); i++)                                                                        \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         vec_int_push_back(&aa, vb);                                                                                    \
         bb.push_back(vb);                                                                                              \
     }                                                                                                                  \
+    vec_int_sort(&aa);                                                                                                \
+    std::sort(bb.begin(), bb.end());                                                                                   \
     vec_int_it range2 = vec_int_begin(&aa)
 
 #define SETUP_ARR1                                                                                                     \
@@ -182,36 +186,44 @@ void print_list(std::list<int> &b)
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         a.vector[i] = vb;                                                                                              \
         b[i] = vb;                                                                                                     \
-    }
+    }                                                                                                                  \
+    arr25_int_sort(&a);                                                                                               \
+    std::sort(b.begin(), b.end())
 #define SETUP_ARR2                                                                                                     \
     arr25_int aa = arr25_int_init();                                                                                   \
     std::array<int, 25> bb;                                                                                            \
-    for (int i = 0; i < TEST_RAND(25); i++)                                                                        \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         aa.vector[i] = vb;                                                                                             \
         bb[i] = vb;                                                                                                    \
     }                                                                                                                  \
+    arr25_int_sort(&aa);                                                                                              \
+    std::sort(bb.begin(), bb.end());                                                                                   \
     arr25_int_it range2 = arr25_int_begin(&aa)
 
 #define SETUP_DEQ1                                                                                                     \
     deq_int a = deq_int_init();                                                                                        \
-    std::deque<int> b;                                                                                                \
+    std::deque<int> b;                                                                                                 \
     for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
-        deq_int_push_back(&a, vb);                                                                                      \
+        deq_int_push_back(&a, vb);                                                                                     \
         b.push_back(vb);                                                                                               \
-    }
+    }                                                                                                                  \
+    deq_int_sort(&a);                                                                                                 \
+    std::sort(b.begin(), b.end())
 #define SETUP_DEQ2                                                                                                     \
     deq_int aa = deq_int_init();                                                                                       \
-    std::deque<int> bb;                                                                                               \
-    for (int i = 0; i < TEST_RAND(25); i++)                                                                        \
+    std::deque<int> bb;                                                                                                \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
-        deq_int_push_back(&aa, vb);                                                                                     \
+        deq_int_push_back(&aa, vb);                                                                                    \
         bb.push_back(vb);                                                                                              \
     }                                                                                                                  \
+    deq_int_sort(&aa);                                                                                                 \
+    std::sort(bb.begin(), bb.end());                                                                                   \
     deq_int_it range2 = deq_int_begin(&aa)
 
 #define SETUP_SET1                                                                                                     \
@@ -258,7 +270,8 @@ void print_list(std::list<int> &b)
     uset_int_it range2 = uset_int_begin(&aa);                                                                          \
     print_uset(&aa)
 
-int main(void)
+    int
+    main(void)
     {
         int errors = 0;
         INIT_SRAND;
@@ -276,17 +289,17 @@ int main(void)
     TEST(INCLUDES_RANGE)                                                                                               \
     TEST(UNION_RANGE)                                                                                                  \
     TEST(INTERSECTION_RANGE)                                                                                           \
-    TEST(DIFFERENCE_RANGE)
+    TEST(SYMMETRIC_DIFFERENCE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
+    TEST(DIFFERENCE_RANGE)                                                                                             \
     TEST(EQUAL_RANGE)                                                                                                  \
     TEST(REMOVE_RANGE)                                                                                                 \
-    TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH_RANGE)                                                                                                 \
     TEST(SEARCH_N_RANGE)                                                                                               \
     TEST(FIND_FIRST_OF_RANGE)                                                                                          \
-    TEST(FIND_END_RANGE)                                                                                               \
+    TEST(FIND_END_RANGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -950,7 +963,7 @@ int main(void)
 
 #ifndef _MSC_VER
 #define INTERSECTION_RANGE_SET(ty2, ty1, cppty)                                                                        \
-    LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
+    LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
     std::cppty bbb;                                                                                                    \
@@ -959,7 +972,7 @@ int main(void)
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define INTERSECTION_RANGE(ty2, ty1, cppty)                                                                            \
-    LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
+    LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
     std::cppty bbb;                                                                                                    \
@@ -969,7 +982,7 @@ int main(void)
     ty2##_int_free(&aa)
 #else
 #define INTERSECTION_RANGE(ty2, ty1, cppty)                                                                            \
-    LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
+    LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
     ty1##_int_free(&aaa);                                                                                              \
@@ -1108,42 +1121,176 @@ int main(void)
                 } // switch t1
                 break;
 
-#if 0
             case TEST_SYMMETRIC_DIFFERENCE_RANGE:
-                list_int aa;
-                std::list<int> bb;
-                //setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
-                list_int_sort(&a);
-                list_int_sort(&aa);
-                b.sort();
-                bb.sort();
-                list_int_it first_a1;
-                std::list<int>::iterator first_b1, last_b1;
-                list_int_it first_a2;
-                std::list<int>::iterator first_b2, last_b2;
 
-                LOG("CTL a + aa\n");
-                print_lst_range(first_a1);
-                print_lst_range(first_a2);
-                list_int aaa = list_int_symmetric_difference_range(&first_a1, &first_a2);
-                LOG("CTL => aaa\n");
-                print_lst(&aaa);
-
-                std::list<int> bbb;
-                LOG("STL b + bb\n");
-                print_list(b);
-                print_list(bb);
 #ifndef _MSC_VER
-                std::set_symmetric_difference(first_b1, last_b1, first_b2, last_b2, std::back_inserter(bbb));
-                LOG("STL => bbb\n");
-                print_list(bbb);
-                CHECK(aa, bb);
-                CHECK(aaa, bbb);
+#define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty)                                                                \
+    LOG("symmetric_difference " #ty2 " from " #ty1 "\n");                                                              \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    std::cppty bbb;                                                                                                    \
+    std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));          \
+    CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#define SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                    \
+    LOG("symmetric_difference " #ty2 " from " #ty1 "\n");                                                              \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    std::cppty bbb;                                                                                                    \
+    std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                  \
+    CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#else
+#define SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                    \
+    LOG("symmetric_difference " #ty2 " from " #ty1 "\n");                                                              \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty) SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)
 #endif
-                list_int_free(&aaa);
-                list_int_free(&aa);
+
+                switch (t1)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SYMMETRIC_DIFFERENCE_RANGE(vec, vec, vector<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SYMMETRIC_DIFFERENCE_RANGE(arr25, vec, vector<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SYMMETRIC_DIFFERENCE_RANGE(deq, vec, vector<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; SYMMETRIC_DIFFERENCE_RANGE(list, vec, vector<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; SYMMETRIC_DIFFERENCE_RANGE(set, vec, vector<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; SYMMETRIC_DIFFERENCE_RANGE(uset, vec, vector<int>); break;
+                    }
+                    } // switch t2
+                    vec_int_free(&a); break;
+                }
+                case CTL_ARRAY : break;
+                case CTL_DEQUE : {
+                    SETUP_DEQ1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SYMMETRIC_DIFFERENCE_RANGE(vec, deq, deque<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SYMMETRIC_DIFFERENCE_RANGE(arr25, deq, deque<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SYMMETRIC_DIFFERENCE_RANGE(deq, deq, deque<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; SYMMETRIC_DIFFERENCE_RANGE(list, deq, deque<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; SYMMETRIC_DIFFERENCE_RANGE(set, deq, deque<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; SYMMETRIC_DIFFERENCE_RANGE(uset, deq, deque<int>); break;
+                    }
+                    } // switch t2
+                    deq_int_free(&a); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SYMMETRIC_DIFFERENCE_RANGE(vec, list, list<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SYMMETRIC_DIFFERENCE_RANGE(arr25, list, list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SYMMETRIC_DIFFERENCE_RANGE(deq, list, list<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; 
+                        SYMMETRIC_DIFFERENCE_RANGE(list, list, list<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; SYMMETRIC_DIFFERENCE_RANGE(set, list, list<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; SYMMETRIC_DIFFERENCE_RANGE(uset, list, list<int>); break;
+                    }
+                    } // switch t2
+                    list_int_free(&a); break;
+                }
+                case CTL_SET : break; // nyi
+#if 0
+                {
+                    SETUP_SET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SYMMETRIC_DIFFERENCE_RANGE_SET(vec, set, set<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SYMMETRIC_DIFFERENCE_RANGE_SET(arr25, set, set<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SYMMETRIC_DIFFERENCE_RANGE_SET(deq, set, set<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; SYMMETRIC_DIFFERENCE_RANGE_SET(list, set, set<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; SYMMETRIC_DIFFERENCE_RANGE_SET(set, set, set<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; SYMMETRIC_DIFFERENCE_RANGE_SET(uset, set, set<int>); break;
+                    }
+                    } // switch t2
+                    set_int_free(&a); break;
+                }
+#endif 
+                case CTL_USET : break; // nyi
+#if 0
+                {
+                    SETUP_USET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SYMMETRIC_DIFFERENCE_RANGE_SET(vec, uset, unordered_set<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SYMMETRIC_DIFFERENCE_RANGE_SET(arr25, uset, unordered_set<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SYMMETRIC_DIFFERENCE_RANGE_SET(deq, uset, unordered_set<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; SYMMETRIC_DIFFERENCE_RANGE_SET(list, uset, unordered_set<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; SYMMETRIC_DIFFERENCE_RANGE_SET(set, uset, unordered_set<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; SYMMETRIC_DIFFERENCE_RANGE_SET(uset, uset, unordered_set<int>); break;
+                    }
+                    } // switch t2
+                    uset_int_free(&a); break;
+                }
+#endif
+                } // switch t1
                 break;
-            }
+                
+#if 0
             case TEST_EQUAL_RANGE: {
                 list_int aa = list_int_copy(&a);
                 std::list<int> bb = b;
