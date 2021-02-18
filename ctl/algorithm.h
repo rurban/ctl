@@ -676,7 +676,7 @@ static inline size_t JOIN(A, count_if)(A *self, int _match(T *))
 
 // i.e. like strcspn, but returning the first found match
 // has better variants for STR and SET
-static inline bool JOIN(A, find_first_of_range)(I *range1, GI *range2)
+static inline bool JOIN(A, find_first_of_range)(I *range1, I *range2)
 {
     void (*next2)(struct I*) = range2->vtable.next;
     T* (*ref2)(struct I*) = range2->vtable.ref;
@@ -689,7 +689,7 @@ static inline bool JOIN(A, find_first_of_range)(I *range1, GI *range2)
     while (1)
     {
         // TODO unroll it into slices of 4, as strcspn does
-        for (I it = *range2; !done2(&it); next2(&it))
+        for (I it = *range2; !done2(&it); next2(&it)) // FIXME generic
         {
             if (JOIN(A, _equal)(self, range1->ref, ref2(&it)))
                 return true;
@@ -704,7 +704,7 @@ static inline bool JOIN(A, find_first_of_range)(I *range1, GI *range2)
 #endif // STR,SET
 
 #ifndef CTL_STR
-static inline I JOIN(A, find_first_of)(A *self, GI *range2)
+static inline I JOIN(A, find_first_of)(A *self, I *range2)
 {
     I begin = JOIN(A, begin)(self);
     if (JOIN(A, find_first_of_range)(&begin, range2))
@@ -716,7 +716,8 @@ static inline I JOIN(A, find_first_of)(A *self, GI *range2)
 
 // Sets range1 (the haystack) to the found pointer if found.
 // Naive r1*r2 cost, no Boyer-Moore yet.
-static inline bool JOIN(A, search_range)(I *range1, GI *range2)
+// FIXME Does not work yet with generic range2
+static inline bool JOIN(A, search_range)(I *range1, I *range2)
 {
     T* (*ref2)(struct I*) = range2->vtable.ref;
     int (*done2)(struct I*) = range2->vtable.done;
@@ -741,7 +742,7 @@ static inline bool JOIN(A, search_range)(I *range1, GI *range2)
     for (;; JOIN(I, next)(range1))
     {
         I it = *range1;
-        I s_it = *range2;
+        GI s_it = *range2; // FIXME generic
         for (;;)
         {
             if (done2(&s_it))
@@ -768,7 +769,8 @@ static inline I JOIN(A, search)(A *self, I *subseq)
         return JOIN(A, end)(self);
 }
 
-static inline I JOIN(A, find_end_range)(I *range1, GI *range2)
+// FIXME Does not work yet with generic range2
+static inline I JOIN(A, find_end_range)(I *range1, I *range2)
 {
     if (range2->vtable.done(range2))
     {

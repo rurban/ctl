@@ -36,9 +36,10 @@ for various backends like openmp or TBB.
 unordered_set does not support ranges, nor count functions ending with `_n`.
 Such iterators on `unordered_set` make not much sense, as the order is random.
 
-All ranges in 2nd argument positions support generic iterators, i.e. `GI*` ranges,
-with the same value type, but any container types.
-
+Most ranges in 2nd argument positions support generic iterators, i.e. `GI*`
+ranges, with the same value type, but any container types. Just `search_range`
+and `find_first_of` are still broken for generic iterators. The STL has still
+much more limitations than the CTL.
 
 ## Member types
 
@@ -95,13 +96,13 @@ finds the first element satisfying specific criteria.
 Either return a fresh iterator I, or return bool and set the range argument to the found element.
 Does not consume/free the T value.
 
-    I find_end (A* self, GI* range2)
-    I find_end_range (I* range1, GI* range2)
+    I find_end (A* self, I* range2)
+    I find_end_range (I* range1, I* range2)
  
 finds the last sequence of elements in a certain range.
 
-    I find_first_of (A* self, GI* range2)
-    bool find_first_of_range (I* range1, GI* range2)
+    I find_first_of (A* self, I* range2)
+    bool find_first_of_range (I* range1, I* range2)
  
 searches for any one of a set of elements.
 
@@ -111,7 +112,7 @@ searches for any one of a set of elements.
 finds the first two adjacent items that are equal.
 
     I search (A* self, I* range2)
-    bool search_range (I* range1, GI *range2) 
+    bool search_range (I* range1, I *range2) 
     I bm_search (A* self, GI* range2)  (C++17) (NYI)
     bool bm_search_range (I* range1, GI *range2)  (C++17) (NYI)
  
