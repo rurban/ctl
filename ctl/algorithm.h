@@ -115,12 +115,12 @@ static inline bool JOIN(A, any_of_range)(I *range, int _match(T *))
 
 static inline A *JOIN(A, copy_range)(I *range, A *out)
 {
-    void (*next)(struct I*) = range->vtable.next;
-    T* (*ref)(struct I*) = range->vtable.ref;
-    int (*done)(struct I*) = range->vtable.done;
+    void (*next)(struct I*) = JOIN(I, next);
+    T* (*ref)(struct I*) = JOIN(I, ref);
+    int (*done)(struct I*) = JOIN(I, done);
     while (!done(range))
     {
-        JOIN(A, push_back)(out, range->vtable.copy(ref(range)));
+        JOIN(A, push_back)(out, out->copy(ref(range)));
         next(range);
     }
     return out;

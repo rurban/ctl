@@ -227,7 +227,6 @@ static inline I JOIN(I, iter)(A *self, B *node)
     iter.vtable.next = JOIN(I, next);
     iter.vtable.ref = JOIN(I, ref);
     iter.vtable.done = JOIN(I, done);
-    iter.vtable.copy = self->copy;
     return iter;
 }
 
