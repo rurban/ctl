@@ -113,11 +113,11 @@ static inline bool JOIN(A, any_of_range)(I *range, int _match(T *))
 // set/uset have optimized implementations.
 #if defined(CTL_LIST) || defined(CTL_VEC) || defined(CTL_STR) || defined(CTL_DEQ)
 
-static inline A *JOIN(A, copy_range)(I *range, A *out)
+static inline A *JOIN(A, copy_range)(GI *range, A *out)
 {
-    void (*next)(struct I*) = JOIN(I, next);
-    T* (*ref)(struct I*) = JOIN(I, ref);
-    int (*done)(struct I*) = JOIN(I, done);
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
     while (!done(range))
     {
         JOIN(A, push_back)(out, out->copy(ref(range)));
@@ -510,12 +510,15 @@ static inline I JOIN(A, transform_it_range)(I *range, I *pos, I dest, T _binop(T
 
 #else  // USET/SET
 // no push_back, but insert
-static inline A *JOIN(A, copy_range)(I *range, A *out)
+static inline A *JOIN(A, copy_range)(GI *range, A *out)
 {
-    while (!JOIN(I, done)(range))
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+    while (!done(range))
     {
-        JOIN(A, insert)(out, out->copy(range->ref));
-        JOIN(I, next)(range);
+        JOIN(A, insert)(out, out->copy(ref(range)));
+        next(range);
     }
     return out;
 }
