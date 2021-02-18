@@ -48,23 +48,49 @@ types_t pick_type(void) {
     return types[TEST_RAND(LEN)];
 }
 
-void print_lst(list_int *a)
+void print_vec(vec_int *a)
 {
+    printf("vec: ");
+    foreach (vec_int, a, it) printf("%d, ", *it.ref);
+    printf("\n");
+}
+void print_arr25(arr25_int *a)
+{
+    printf("arr25: ");
+    foreach (arr25_int, a, it) printf("%d, ", it.ref ? *it.ref : -1);
+    printf("\n");
+}
+void print_deq(deq_int *a)
+{
+    printf("deq: ");
+    foreach (deq_int, a, it) printf("%d, ", *it.ref);
+    printf("\n");
+}
+void print_list(list_int *a)
+{
+    printf("list: ");
     list_foreach_ref(list_int, a, it) printf("%d, ", *it.ref);
-    printf("\n====\n");
+    printf("\n");
+}
+void print_set(set_int *a)
+{
+    printf("set: ");
+    foreach (set_int, a, it) printf("%d, ", *it.ref);
+    printf("\n");
+}
+void print_uset(uset_int *a)
+{
+    printf("uset: ");
+    foreach (uset_int, a, it) printf("%d, ", *it.ref);
+    printf("\n");
 }
 
-void print_list(std::list<int> &b)
+void print_list_stl(std::list<int> &b)
 {
     for (auto &d : b)
         printf("%d, ", d);
     printf("\n----\n");
 }
-
-#define print_vec(x)
-#define print_lst_range(x)
-#define print_set(x)
-#define print_uset(x)
 
 #ifdef DEBUG
 #define TEST_MAX_VALUE 15
@@ -73,74 +99,51 @@ void print_list(std::list<int> &b)
 #define TEST_MAX_SIZE 10
 #endif
 #else
-#define print_lst(x)
+#define print_vec(x)
+#define print_arr25(x)
+#define print_deq(x)
 #define print_list(x)
+#define print_set(x)
+#define print_uset(x)
 #define TEST_MAX_VALUE 1500
 #endif
 
-// TODO: from or to uset is unordered
+// from or to uset is unordered, all C++ set algorithms on uset are considered broken.
 #define CHECK(ty1, ty2, cppty, _x, _y)                                                                                 \
     {                                                                                                                  \
-        assert(_x.size == _y.size());                                                                                  \
-        assert(ty1##_int_empty(&_x) == _y.empty());                                                                    \
         if (strcmp(#ty1, "uset") && strcmp(#ty2, "uset"))                                                              \
         {                                                                                                              \
-            std::cppty::iterator _iter = _y.begin();                                                                   \
+            assert(_x.size == _y.size());                                                                              \
+            assert(ty1##_int_empty(&_x) == _y.empty());                                                                \
+            ty1##_int_it _it1 = ty1##_int_begin(&_x);                                                                  \
             int i = 0;                                                                                                 \
-            foreach (ty1##_int, &_x, _it)                                                                              \
-            {                                                                                                          \
-                LOG("%d: %d, ", i, *_it.ref);                                                                          \
-                assert(*_it.ref == *_iter);                                                                            \
-                i++;                                                                                                   \
-                _iter++;                                                                                               \
-            }                                                                                                          \
-            LOG("\n");                                                                                                 \
-            ty1##_int_it _it = ty1##_int_begin(&_x);                                                                   \
             for (auto &_d : _y)                                                                                        \
             {                                                                                                          \
-                assert(*_it.ref == _d);                                                                                \
-                ty1##_int_it_next(&_it);                                                                               \
+                LOG("%d: %d, ", i, _d);                                                                                \
+                i++;                                                                                                   \
+                assert(*_it1.ref == _d);                                                                               \
+                ty1##_int_it_next(&_it1);                                                                              \
+            }                                                                                                          \
+            LOG("\n");                                                                                                 \
+            std::cppty::iterator _iter = _y.begin();                                                                   \
+            foreach (ty1##_int, &_x, _it2)                                                                             \
+            {                                                                                                          \
+                assert(*_it2.ref == *_iter);                                                                           \
+                _iter++;                                                                                               \
             }                                                                                                          \
         }                                                                                                              \
     }
 
-#define LOG_ITER(_it, b, _iter, line)                                                                                  \
-    if ((_it)->node != NULL)                                                                                           \
-    {                                                                                                                  \
-        if (_iter == b.end())                                                                                          \
-            printf("STL iter at end, line %u FAIL\n", line);                                                           \
-        if (*((_it)->ref) != *(*_iter).value)                                                                          \
-            printf("iter %d vs %d, line %u FAIL\n", *((_it)->ref), *(*_iter).value, line);                             \
-    }                                                                                                                  \
-    else                                                                                                               \
-        assert(_iter == b.end())
-#define CHECK_ITER(_it, b, _iter)                                                                                      \
-    if (!list_int_it_done(&_it))                                                                                       \
-    {                                                                                                                  \
-        assert(_iter != b.end());                                                                                      \
-        assert(*(_it).ref == *_iter);                                                                                  \
-    }                                                                                                                  \
-    else                                                                                                               \
-        assert(_iter == b.end())
-#define CHECK_RANGE(_it, _iter, b_end)                                                                                 \
-    if (!list_int_it_done(&_it))                                                                                       \
-    {                                                                                                                  \
-        assert(_iter != b_end);                                                                                        \
-        assert(*(_it).ref == *_iter);                                                                                  \
-    }                                                                                                                  \
-    else                                                                                                               \
-        assert(_iter == b_end)
-
 #define SETUP_LIST1                                                                                                    \
     list_int a = list_int_init();                                                                                      \
     std::list<int> b;                                                                                                  \
-    for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)             \
+    for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         list_int_push_back(&a, vb);                                                                                    \
         b.push_back(vb);                                                                                               \
     }                                                                                                                  \
-    print_lst(&a)
+    print_list(&a)
 
 #define SETUP_LIST2                                                                                                    \
     list_int aa = list_int_init();                                                                                     \
@@ -152,7 +155,7 @@ void print_list(std::list<int> &b)
         bb.push_back(vb);                                                                                              \
     }                                                                                                                  \
     list_int_it range2 = list_int_begin(&aa);                                                                          \
-    print_lst(&aa)
+    print_list(&aa)
 
 #define SETUP_VEC1                                                                                                     \
     vec_int a = vec_int_init();                                                                                        \
@@ -163,8 +166,9 @@ void print_list(std::list<int> &b)
         vec_int_push_back(&a, vb);                                                                                     \
         b.push_back(vb);                                                                                               \
     }                                                                                                                  \
-    vec_int_sort(&a);                                                                                                 \
-    std::sort(b.begin(), b.end())
+    vec_int_sort(&a);                                                                                                  \
+    std::sort(b.begin(), b.end());                                                                                     \
+    print_vec(&a)
 #define SETUP_VEC2                                                                                                     \
     vec_int aa = vec_int_init();                                                                                       \
     std::vector<int> bb;                                                                                               \
@@ -174,9 +178,10 @@ void print_list(std::list<int> &b)
         vec_int_push_back(&aa, vb);                                                                                    \
         bb.push_back(vb);                                                                                              \
     }                                                                                                                  \
-    vec_int_sort(&aa);                                                                                                \
+    vec_int_sort(&aa);                                                                                                 \
     std::sort(bb.begin(), bb.end());                                                                                   \
-    vec_int_it range2 = vec_int_begin(&aa)
+    vec_int_it range2 = vec_int_begin(&aa);                                                                            \
+    print_vec(&aa)
 
 #define SETUP_ARR1                                                                                                     \
     arr25_int a = arr25_int_init();                                                                                    \
@@ -187,8 +192,9 @@ void print_list(std::list<int> &b)
         a.vector[i] = vb;                                                                                              \
         b[i] = vb;                                                                                                     \
     }                                                                                                                  \
-    arr25_int_sort(&a);                                                                                               \
-    std::sort(b.begin(), b.end())
+    arr25_int_sort(&a);                                                                                                \
+    std::sort(b.begin(), b.end());                                                                                     \
+    print_arr25(&a)
 #define SETUP_ARR2                                                                                                     \
     arr25_int aa = arr25_int_init();                                                                                   \
     std::array<int, 25> bb;                                                                                            \
@@ -198,9 +204,10 @@ void print_list(std::list<int> &b)
         aa.vector[i] = vb;                                                                                             \
         bb[i] = vb;                                                                                                    \
     }                                                                                                                  \
-    arr25_int_sort(&aa);                                                                                              \
+    arr25_int_sort(&aa);                                                                                               \
     std::sort(bb.begin(), bb.end());                                                                                   \
-    arr25_int_it range2 = arr25_int_begin(&aa)
+    arr25_int_it range2 = arr25_int_begin(&aa);                                                                        \
+    print_arr25(&aa)
 
 #define SETUP_DEQ1                                                                                                     \
     deq_int a = deq_int_init();                                                                                        \
@@ -211,8 +218,9 @@ void print_list(std::list<int> &b)
         deq_int_push_back(&a, vb);                                                                                     \
         b.push_back(vb);                                                                                               \
     }                                                                                                                  \
-    deq_int_sort(&a);                                                                                                 \
-    std::sort(b.begin(), b.end())
+    deq_int_sort(&a);                                                                                                  \
+    std::sort(b.begin(), b.end());                                                                                     \
+    print_deq(&a)
 #define SETUP_DEQ2                                                                                                     \
     deq_int aa = deq_int_init();                                                                                       \
     std::deque<int> bb;                                                                                                \
@@ -224,7 +232,8 @@ void print_list(std::list<int> &b)
     }                                                                                                                  \
     deq_int_sort(&aa);                                                                                                 \
     std::sort(bb.begin(), bb.end());                                                                                   \
-    deq_int_it range2 = deq_int_begin(&aa)
+    deq_int_it range2 = deq_int_begin(&aa);                                                                            \
+    print_deq(&aa)
 
 #define SETUP_SET1                                                                                                     \
     set_int a = set_int_init(NULL);                                                                                    \
@@ -270,18 +279,17 @@ void print_list(std::list<int> &b)
     uset_int_it range2 = uset_int_begin(&aa);                                                                          \
     print_uset(&aa)
 
-    int
-    main(void)
+int main(void)
+{
+    int errors = 0;
+    INIT_SRAND;
+    INIT_TEST_LOOPS(10);
+    for (size_t loop = 0; loop < loops; loop++)
     {
-        int errors = 0;
-        INIT_SRAND;
-        INIT_TEST_LOOPS(10);
-        for (size_t loop = 0; loop < loops; loop++)
-        {
-            const types_t t1 = pick_type();
-            LOG("main type: %d, ", t1);
-            const types_t t2 = pick_type();
-            LOG("2nd type: %d\n", t2);
+        const types_t t1 = pick_type();
+        LOG("main type: %d, ", t1);
+        const types_t t2 = pick_type();
+        LOG("2nd type: %d\n", t2);
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(INSERT_GENERIC)                                                                                               \
@@ -295,11 +303,11 @@ void print_list(std::list<int> &b)
     TEST(DIFFERENCE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(REMOVE_RANGE)                                                                                                 \
     TEST(SEARCH_RANGE)                                                                                                 \
     TEST(SEARCH_N_RANGE)                                                                                               \
     TEST(FIND_FIRST_OF_RANGE)                                                                                          \
     TEST(FIND_END_RANGE)
+    //TEST(REMOVE_RANGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -333,12 +341,14 @@ void print_list(std::list<int> &b)
     LOG("insert " #ty2 " into " #ty1 "\n");                                                                            \
     /* C++ cannot insert generic iters into set/uset */                                                                \
     ty1##_int_insert_generic(&a, (ty1##_int_it *)&range2);                                                             \
+    print_##ty1(&a);                                                                                                   \
     ty2##_int_free(&aa)
 #define INSERT_INTO(ty2, ty1, cppty)                                                                                   \
     LOG("insert " #ty2 " into " #ty1 "\n");                                                                            \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int_insert_generic(&begin, (ty1##_int_it *)&range2);                                                         \
     b.insert(b.begin(), bb.begin(), bb.end());                                                                         \
+    print_##ty1(&a);                                                                                                   \
     CHECK(ty1, ty2, cppty, a, b);                                                                                      \
     ty2##_int_free(&aa)
 
@@ -494,6 +504,7 @@ void print_list(std::list<int> &b)
     ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
     std::cppty bbb;                                                                                                    \
     merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                                          \
+    print_##ty1(&aaa);                                                                                                 \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -503,6 +514,7 @@ void print_list(std::list<int> &b)
     ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
     std::cppty bbb;                                                                                                    \
     merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                                  \
+    print_##ty1(&aaa);                                                                                                 \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -511,6 +523,7 @@ void print_list(std::list<int> &b)
     LOG("merge " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
+    print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define MERGE_INTO_SET(ty2, ty1, cppty)  MERGE_INTO(ty2, ty1, cppty)
@@ -658,11 +671,12 @@ void print_list(std::list<int> &b)
 
             case TEST_INCLUDES_RANGE:
 
-#define INCLUDES_RANGE(ty2, ty1)                                                                                \
+#define INCLUDES_RANGE(ty2, ty1)                                                                                       \
     LOG("includes " #ty2 " from " #ty1 "\n");                                                                          \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     bool a_found = ty1##_int_includes_range(&begin, (ty1##_int_it *)&range2);                                          \
     bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());                                            \
+    LOG("a_found %d == b_found %d\n", (int)a_found, (int)b_found);                                                     \
     assert(a_found == b_found);                                                                                        \
     ty2##_int_free(&aa)
 
@@ -805,6 +819,7 @@ void print_list(std::list<int> &b)
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     bool same_a = ty1##_int_equal_range(&begin, (ty1##_int_it *)&range2);                                              \
     bool same_b = std::equal(b.begin(), b.end(), bb.begin(), bb.end());                                                \
+    LOG("same_a %d == same_b %d\n", (int)same_a, (int)same_b);                                                         \
     assert(same_a == same_b);                                                                                          \
     ty2##_int_free(&aa)
 #else
@@ -813,6 +828,7 @@ void print_list(std::list<int> &b)
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     bool same_a = ty1##_int_equal_range(&begin, (ty1##_int_it *)&range2);                                              \
     bool same_b = std::equal(b.begin(), b.end(), bb.begin());                                                          \
+    LOG("same_a %d == same_b %d\n", (int)same_a, (int)same_b);                                                         \
     if (same_a != same_b)                                                                                              \
         printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");                                        \
     ty2##_int_free(&aa)
@@ -1053,6 +1069,7 @@ void print_list(std::list<int> &b)
     ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
     std::cppty bbb;                                                                                                    \
     std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                         \
+    print_##ty1(&aaa);                                                                                                 \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -1060,6 +1077,7 @@ void print_list(std::list<int> &b)
     LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
+    print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                                 \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
@@ -1070,6 +1088,7 @@ void print_list(std::list<int> &b)
     LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
+    print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define UNION_RANGE_SET(ty2, ty1, cppty) UNION_RANGE(ty2, ty1, cppty)
@@ -1213,6 +1232,7 @@ void print_list(std::list<int> &b)
     LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
+    print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                  \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
@@ -1222,6 +1242,7 @@ void print_list(std::list<int> &b)
     LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
+    print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                          \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
@@ -1232,6 +1253,7 @@ void print_list(std::list<int> &b)
     LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
+    print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define INTERSECTION_RANGE_SET(ty2, ty1, cppty) INTERSECTION_RANGE(ty2, ty1, cppty)
@@ -1384,6 +1406,7 @@ void print_list(std::list<int> &b)
     LOG("symmetric_difference " #ty2 " from " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                  \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
@@ -1394,6 +1417,7 @@ void print_list(std::list<int> &b)
     LOG("symmetric_difference " #ty2 " from " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty) SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)
@@ -1544,6 +1568,7 @@ void print_list(std::list<int> &b)
     LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                    \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
@@ -1553,6 +1578,7 @@ void print_list(std::list<int> &b)
     LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                            \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
@@ -1563,6 +1589,7 @@ void print_list(std::list<int> &b)
     LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define DIFFERENCE_RANGE_SET(ty2, ty1, cppty) DIFFERENCE_RANGE(ty2, ty1, cppty)
@@ -1575,34 +1602,22 @@ void print_list(std::list<int> &b)
                     switch (t2)
                     {
                     case CTL_VECTOR: {
-                        SETUP_VEC2;
-                        DIFFERENCE_RANGE(vec, vec, vector<int>);
-                        break;
+                        SETUP_VEC2; DIFFERENCE_RANGE(vec, vec, vector<int>); break;
                     }
                     case CTL_ARRAY: {
-                        SETUP_ARR2;
-                        DIFFERENCE_RANGE(arr25, vec, vector<int>);
-                        break;
+                        SETUP_ARR2; DIFFERENCE_RANGE(arr25, vec, vector<int>); break;
                     }
                     case CTL_DEQUE: {
-                        SETUP_DEQ2;
-                        DIFFERENCE_RANGE(deq, vec, vector<int>);
-                        break;
+                        SETUP_DEQ2; DIFFERENCE_RANGE(deq, vec, vector<int>); break;
                     }
                     case CTL_LIST: {
-                        SETUP_LIST2;
-                        DIFFERENCE_RANGE(list, vec, vector<int>);
-                        break;
+                        SETUP_LIST2; DIFFERENCE_RANGE(list, vec, vector<int>); break;
                     }
                     case CTL_SET: {
-                        SETUP_SET2;
-                        DIFFERENCE_RANGE(set, vec, vector<int>);
-                        break;
+                        SETUP_SET2; DIFFERENCE_RANGE(set, vec, vector<int>); break;
                     }
                     case CTL_USET: {
-                        SETUP_USET2;
-                        DIFFERENCE_RANGE(uset, vec, vector<int>);
-                        break;
+                        SETUP_USET2; DIFFERENCE_RANGE(uset, vec, vector<int>); break;
                     }
                     } // switch t2
                     vec_int_free(&a);
@@ -1615,34 +1630,22 @@ void print_list(std::list<int> &b)
                     switch (t2)
                     {
                     case CTL_VECTOR: {
-                        SETUP_VEC2;
-                        DIFFERENCE_RANGE(vec, deq, deque<int>);
-                        break;
+                        SETUP_VEC2; DIFFERENCE_RANGE(vec, deq, deque<int>); break;
                     }
                     case CTL_ARRAY: {
-                        SETUP_ARR2;
-                        DIFFERENCE_RANGE(arr25, deq, deque<int>);
-                        break;
+                        SETUP_ARR2; DIFFERENCE_RANGE(arr25, deq, deque<int>); break;
                     }
                     case CTL_DEQUE: {
-                        SETUP_DEQ2;
-                        DIFFERENCE_RANGE(deq, deq, deque<int>);
-                        break;
+                        SETUP_DEQ2; DIFFERENCE_RANGE(deq, deq, deque<int>); break;
                     }
                     case CTL_LIST: {
-                        SETUP_LIST2;
-                        DIFFERENCE_RANGE(list, deq, deque<int>);
-                        break;
+                        SETUP_LIST2; DIFFERENCE_RANGE(list, deq, deque<int>); break;
                     }
                     case CTL_SET: {
-                        SETUP_SET2;
-                        DIFFERENCE_RANGE(set, deq, deque<int>);
-                        break;
+                        SETUP_SET2; DIFFERENCE_RANGE(set, deq, deque<int>); break;
                     }
                     case CTL_USET: {
-                        SETUP_USET2;
-                        DIFFERENCE_RANGE(uset, deq, deque<int>);
-                        break;
+                        SETUP_USET2; DIFFERENCE_RANGE(uset, deq, deque<int>); break;
                     }
                     } // switch t2
                     deq_int_free(&a);
@@ -1653,34 +1656,22 @@ void print_list(std::list<int> &b)
                     switch (t2)
                     {
                     case CTL_VECTOR: {
-                        SETUP_VEC2;
-                        DIFFERENCE_RANGE(vec, list, list<int>);
-                        break;
+                        SETUP_VEC2; DIFFERENCE_RANGE(vec, list, list<int>); break;
                     }
                     case CTL_ARRAY: {
-                        SETUP_ARR2;
-                        DIFFERENCE_RANGE(arr25, list, list<int>);
-                        break;
+                        SETUP_ARR2; DIFFERENCE_RANGE(arr25, list, list<int>); break;
                     }
                     case CTL_DEQUE: {
-                        SETUP_DEQ2;
-                        DIFFERENCE_RANGE(deq, list, list<int>);
-                        break;
+                        SETUP_DEQ2; DIFFERENCE_RANGE(deq, list, list<int>); break;
                     }
                     case CTL_LIST: {
-                        SETUP_LIST2;
-                        DIFFERENCE_RANGE(list, list, list<int>);
-                        break;
+                        SETUP_LIST2; DIFFERENCE_RANGE(list, list, list<int>); break;
                     }
                     case CTL_SET: {
-                        SETUP_SET2;
-                        DIFFERENCE_RANGE(set, list, list<int>);
-                        break;
+                        SETUP_SET2; DIFFERENCE_RANGE(set, list, list<int>); break;
                     }
                     case CTL_USET: {
-                        SETUP_USET2;
-                        DIFFERENCE_RANGE(uset, list, list<int>);
-                        break;
+                        SETUP_USET2; DIFFERENCE_RANGE(uset, list, list<int>); break;
                     }
                     } // switch t2
                     list_int_free(&a);
@@ -1748,38 +1739,6 @@ void print_list(std::list<int> &b)
                 break;
                 
 #if 0
-            case TEST_MISMATCH: {
-                if (a.size < 2)
-                    break;
-                list_int aa;
-                std::list<int> bb;
-                //setup_lists(&aa, bb, TEST_RAND(a.size), NULL);
-                list_int_it b1, b2;
-                b1 = list_int_begin(&a);
-                b2 = list_int_begin(&aa);
-                list_int_it r1a, r2a;
-                std::list<int>::iterator r1b, last1_b, r2b, last2_b;
-                /*bool found_a = */ list_int_mismatch(&r1a, &r2a);
-#if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
-                auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
-#else
-                if (!bb.size() || !distance(r2b, last2_b))
-                {
-                    printf("skip std::mismatch with empty 2nd range. use C++14\n");
-                    list_int_free(&aa);
-                    break;
-                }
-                auto pair = std::mismatch(r1b, last1_b, r2b);
-#endif
-                int d1a = list_int_it_distance(&b1, &r1a);
-                int d2a = list_int_it_distance(&b2, &r2a);
-                LOG("iter1 %d, iter2 %d\n", d1a, d2a);
-                // TODO check found_a against iter results
-                assert(d1a == distance(b.begin(), pair.first));
-                assert(d2a == distance(bb.begin(), pair.second));
-                list_int_free(&aa);
-                break;
-            }
             case TEST_SEARCH_RANGE: {
                 list_int aa = list_int_copy(&a);
                 std::list<int> bb = b;
@@ -1827,7 +1786,7 @@ void print_list(std::list<int> &b)
                 list_int aa;
                 std::list<int> bb;
                 //setup_lists(&aa, bb, TEST_RAND(4), NULL);
-                print_lst(&aa);
+                print_list(&aa);
                 s_first = list_int_begin(&aa);
 #if __cpp_lib_erase_if >= 202002L
             first_a = list_int_find_end_range(&first_a, &s_first);
