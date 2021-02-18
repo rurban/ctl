@@ -287,13 +287,13 @@ void print_list(std::list<int> &b)
     TEST(INSERT_GENERIC)                                                                                               \
     TEST(MERGE_RANGE)                                                                                                  \
     TEST(INCLUDES_RANGE)                                                                                               \
+    TEST(EQUAL_RANGE)                                                                                                  \
     TEST(UNION_RANGE)                                                                                                  \
     TEST(INTERSECTION_RANGE)                                                                                           \
-    TEST(SYMMETRIC_DIFFERENCE_RANGE)
+    TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
+    TEST(DIFFERENCE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(DIFFERENCE_RANGE)                                                                                             \
-    TEST(EQUAL_RANGE)                                                                                                  \
     TEST(REMOVE_RANGE)                                                                                                 \
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH_RANGE)                                                                                                 \
@@ -797,7 +797,119 @@ void print_list(std::list<int> &b)
                 } // switch t1
                 break;
 
-            case TEST_UNION_RANGE:
+            case TEST_EQUAL_RANGE:
+
+#if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
+#define EQUAL_RANGE(ty2, ty1)                                                                                          \
+    LOG("equal_range " #ty2 " from " #ty1 "\n");                                                                       \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    bool same_a = ty1##_int_equal_range(&begin, (ty1##_int_it *)&range2);                                              \
+    bool same_b = std::equal(b.begin(), b.end(), bb.begin(), bb.end());                                                \
+    assert(same_a == same_b);                                                                                          \
+    ty2##_int_free(&aa)
+#else
+#define EQUAL_RANGE(ty2, ty1)                                                                                          \
+    LOG("equal_range " #ty2 " from " #ty1 "\n");                                                                       \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    bool same_a = ty1##_int_equal_range(&begin, (ty1##_int_it *)&range2);                                              \
+    bool same_b = std::equal(b.begin(), b.end(), bb.begin());                                                          \
+    if (same_a != same_b)                                                                                              \
+        printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");                                        \
+    ty2##_int_free(&aa)
+#endif
+
+                switch (t1)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; EQUAL_RANGE(vec, vec); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; EQUAL_RANGE(arr25, vec); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; EQUAL_RANGE(deq, vec); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; EQUAL_RANGE(list, vec); break;
+                    }
+                    case CTL_SET : break;
+                    case CTL_USET : break;
+                    } // switch t2
+                    vec_int_free(&a); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; EQUAL_RANGE(vec, arr25); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; EQUAL_RANGE(arr25, arr25); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; EQUAL_RANGE(deq, arr25); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; EQUAL_RANGE(list, arr25); break;
+                    }
+                    case CTL_SET : break;
+                    case CTL_USET : break;
+                    } // switch t2
+                    arr25_int_free(&a); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; EQUAL_RANGE(vec, deq); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; EQUAL_RANGE(arr25, deq); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; EQUAL_RANGE(deq, deq); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; EQUAL_RANGE(list, deq); break;
+                    }
+                    case CTL_SET : break;
+                    case CTL_USET : break;
+                    } // switch t2
+                    deq_int_free(&a); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; EQUAL_RANGE(vec, list); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; EQUAL_RANGE(arr25, list); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; EQUAL_RANGE(deq, list); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; EQUAL_RANGE(list, list); break;
+                    }
+                    case CTL_SET : break;
+                    case CTL_USET : break;
+                    } // switch t2
+                    list_int_free(&a); break;
+                }
+                case CTL_SET : break;
+                case CTL_USET : break;
+                } // switch t1
+                break;
+
+        case TEST_UNION_RANGE:
 
 #ifndef _MSC_VER
 #define UNION_RANGE_SET(ty2, ty1, cppty)                                                                               \
@@ -1289,27 +1401,218 @@ void print_list(std::list<int> &b)
 #endif
                 } // switch t1
                 break;
+
+            case TEST_DIFFERENCE_RANGE:
+
+#ifndef _MSC_VER
+#define DIFFERENCE_RANGE_SET(ty2, ty1, cppty)                                                                          \
+    LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    std::cppty bbb;                                                                                                    \
+    std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                    \
+    CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#define DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                              \
+    LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    std::cppty bbb;                                                                                                    \
+    std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                            \
+    CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#else
+#define DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                              \
+    LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#define DIFFERENCE_RANGE_SET(ty2, ty1, cppty) DIFFERENCE_RANGE(ty2, ty1, cppty)
+#endif
+
+                switch (t1)
+                {
+                case CTL_VECTOR: {
+                    SETUP_VEC1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR: {
+                        SETUP_VEC2;
+                        DIFFERENCE_RANGE(vec, vec, vector<int>);
+                        break;
+                    }
+                    case CTL_ARRAY: {
+                        SETUP_ARR2;
+                        DIFFERENCE_RANGE(arr25, vec, vector<int>);
+                        break;
+                    }
+                    case CTL_DEQUE: {
+                        SETUP_DEQ2;
+                        DIFFERENCE_RANGE(deq, vec, vector<int>);
+                        break;
+                    }
+                    case CTL_LIST: {
+                        SETUP_LIST2;
+                        DIFFERENCE_RANGE(list, vec, vector<int>);
+                        break;
+                    }
+                    case CTL_SET: {
+                        SETUP_SET2;
+                        DIFFERENCE_RANGE(set, vec, vector<int>);
+                        break;
+                    }
+                    case CTL_USET: {
+                        SETUP_USET2;
+                        DIFFERENCE_RANGE(uset, vec, vector<int>);
+                        break;
+                    }
+                    } // switch t2
+                    vec_int_free(&a);
+                    break;
+                }
+                case CTL_ARRAY:
+                    break;
+                case CTL_DEQUE: {
+                    SETUP_DEQ1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR: {
+                        SETUP_VEC2;
+                        DIFFERENCE_RANGE(vec, deq, deque<int>);
+                        break;
+                    }
+                    case CTL_ARRAY: {
+                        SETUP_ARR2;
+                        DIFFERENCE_RANGE(arr25, deq, deque<int>);
+                        break;
+                    }
+                    case CTL_DEQUE: {
+                        SETUP_DEQ2;
+                        DIFFERENCE_RANGE(deq, deq, deque<int>);
+                        break;
+                    }
+                    case CTL_LIST: {
+                        SETUP_LIST2;
+                        DIFFERENCE_RANGE(list, deq, deque<int>);
+                        break;
+                    }
+                    case CTL_SET: {
+                        SETUP_SET2;
+                        DIFFERENCE_RANGE(set, deq, deque<int>);
+                        break;
+                    }
+                    case CTL_USET: {
+                        SETUP_USET2;
+                        DIFFERENCE_RANGE(uset, deq, deque<int>);
+                        break;
+                    }
+                    } // switch t2
+                    deq_int_free(&a);
+                    break;
+                }
+                case CTL_LIST: {
+                    SETUP_LIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR: {
+                        SETUP_VEC2;
+                        DIFFERENCE_RANGE(vec, list, list<int>);
+                        break;
+                    }
+                    case CTL_ARRAY: {
+                        SETUP_ARR2;
+                        DIFFERENCE_RANGE(arr25, list, list<int>);
+                        break;
+                    }
+                    case CTL_DEQUE: {
+                        SETUP_DEQ2;
+                        DIFFERENCE_RANGE(deq, list, list<int>);
+                        break;
+                    }
+                    case CTL_LIST: {
+                        SETUP_LIST2;
+                        DIFFERENCE_RANGE(list, list, list<int>);
+                        break;
+                    }
+                    case CTL_SET: {
+                        SETUP_SET2;
+                        DIFFERENCE_RANGE(set, list, list<int>);
+                        break;
+                    }
+                    case CTL_USET: {
+                        SETUP_USET2;
+                        DIFFERENCE_RANGE(uset, list, list<int>);
+                        break;
+                    }
+                    } // switch t2
+                    list_int_free(&a);
+                    break;
+                }
+                case CTL_SET:
+                    break; // nyi
+#if 0
+                {
+                    SETUP_SET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; DIFFERENCE_RANGE_SET(vec, set, set<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; DIFFERENCE_RANGE_SET(arr25, set, set<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; DIFFERENCE_RANGE_SET(deq, set, set<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; DIFFERENCE_RANGE_SET(list, set, set<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; DIFFERENCE_RANGE_SET(set, set, set<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; DIFFERENCE_RANGE_SET(uset, set, set<int>); break;
+                    }
+                    } // switch t2
+                    set_int_free(&a); break;
+                }
+#endif
+                case CTL_USET:
+                    break; // nyi
+#if 0
+                {
+                    SETUP_USET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; DIFFERENCE_RANGE_SET(vec, uset, unordered_set<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; DIFFERENCE_RANGE_SET(arr25, uset, unordered_set<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; DIFFERENCE_RANGE_SET(deq, uset, unordered_set<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; DIFFERENCE_RANGE_SET(list, uset, unordered_set<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; DIFFERENCE_RANGE_SET(set, uset, unordered_set<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; DIFFERENCE_RANGE_SET(uset, uset, unordered_set<int>); break;
+                    }
+                    } // switch t2
+                    uset_int_free(&a); break;
+                }
+#endif
+                } // switch t1
+                break;
                 
 #if 0
-            case TEST_EQUAL_RANGE: {
-                list_int aa = list_int_copy(&a);
-                std::list<int> bb = b;
-                list_int_it r1a, r2a;
-                std::list<int>::iterator r1b, last1_b, r2b, last2_b;
-                bool same_a = list_int_equal_range(&r1a, &r2a);
-#if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
-                bool same_b = std::equal(r1b, last1_b, r2b, last2_b);
-                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
-                assert(same_a == same_b);
-#else
-                bool same_b = std::equal(r1b, last1_b, r2b);
-                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
-                if (same_a != same_b)
-                    printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");
-#endif
-                list_int_free(&aa);
-                break;
-            }
             case TEST_MISMATCH: {
                 if (a.size < 2)
                     break;
