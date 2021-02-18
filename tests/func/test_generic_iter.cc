@@ -288,6 +288,7 @@ void print_list(std::list<int> &b)
     TEST(MERGE_RANGE)                                                                                                  \
     TEST(INCLUDES_RANGE)                                                                                               \
     TEST(EQUAL_RANGE)                                                                                                  \
+    TEST(MISMATCH)                                                                                                     \
     TEST(UNION_RANGE)                                                                                                  \
     TEST(INTERSECTION_RANGE)                                                                                           \
     TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
@@ -295,7 +296,6 @@ void print_list(std::list<int> &b)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(REMOVE_RANGE)                                                                                                 \
-    TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH_RANGE)                                                                                                 \
     TEST(SEARCH_N_RANGE)                                                                                               \
     TEST(FIND_FIRST_OF_RANGE)                                                                                          \
@@ -905,6 +905,141 @@ void print_list(std::list<int> &b)
                     list_int_free(&a); break;
                 }
                 case CTL_SET : break;
+                case CTL_USET : break;
+                } // switch t1
+                break;
+
+        case TEST_MISMATCH:
+
+#if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
+#define MISMATCH(ty2, ty1)                                                                                             \
+    LOG("mismatch " #ty2 " from " #ty1 "\n");                                                                          \
+    ty1##_int_it b1 = ty1##_int_begin(&a);                                                                             \
+    ty2##_int_it b2 = ty2##_int_begin(&aa);                                                                            \
+    ty1##_int_it r1a = ty1##_int_begin(&a);                                                                            \
+    ty1##_int_mismatch(&r1a, (ty1##_int_it *)&range2);                                                                 \
+    auto pair = std::mismatch(b.begin(), b.end(), bb.begin(), bb.end());                                               \
+    int d1a = ty1##_int_it_distance(&b1, &r1a);                                                                        \
+    int d2a = ty2##_int_it_distance(&b2, &range2);                                                                     \
+    assert(d1a == std::distance(b.begin(), pair.first));                                                               \
+    assert(d2a == std::distance(bb.begin(), pair.second));                                                             \
+    ty2##_int_free(&aa)
+#else
+#define MISMATCH(ty2, ty1)                                                                                             \
+    LOG("mismatch " #ty2 " with " #ty1 "\n");                                                                          \
+    ty1##_int_it b1 = ty1##_int_begin(&a);                                                                             \
+    ty2##_int_it b2 = ty2##_int_begin(&aa);                                                                            \
+    ty1##_int_it r1a = ty1##_int_begin(&a);                                                                            \
+    /*bool same_a = */ ty1##_int_mismatch(&r1a, (ty1##_int_it *)&range2);                                              \
+    if (!bb.size() || !std::distance(bb.begin(), bb.end()))                                                            \
+    {                                                                                                                  \
+        printf("skip std::mismatch with empty 2nd range. use C++14\n");                                                \
+        ty2##_int_free(&aa);                                                                                           \
+        break;                                                                                                         \
+    }                                                                                                                  \
+    auto pair = std::mismatch(b.begin(), b.end(), bb.begin());                                                         \
+    int d1a = ty1##_int_it_distance(&b1, &r1a);                                                                        \
+    int d2a = ty2##_int_it_distance(&b2, &range2);                                                                     \
+    assert(d1a == std::distance(b.begin(), pair.first));                                                               \
+    assert(d2a == std::distance(bb.begin(), pair.second));                                                             \
+    ty2##_int_free(&aa)
+#endif
+
+                switch (t1)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; MISMATCH(vec, vec); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; MISMATCH(arr25, vec); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; MISMATCH(deq, vec); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; MISMATCH(list, vec); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; MISMATCH(set, vec); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    vec_int_free(&a); break;
+                }
+                case CTL_ARRAY : break;
+                case CTL_DEQUE : {
+                    SETUP_DEQ1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; MISMATCH(vec, deq); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; MISMATCH(arr25, deq); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; MISMATCH(deq, deq); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; MISMATCH(list, deq); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; MISMATCH(set, deq); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    deq_int_free(&a); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; MISMATCH(vec, list); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; MISMATCH(arr25, list); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; MISMATCH(deq, list); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; MISMATCH(list, list); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; MISMATCH(set, list); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    list_int_free(&a); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; MISMATCH(vec, set); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; MISMATCH(arr25, set); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; MISMATCH(deq, set); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; MISMATCH(list, set); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; MISMATCH(set, set); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    set_int_free(&a); break;
+                }
                 case CTL_USET : break;
                 } // switch t1
                 break;
