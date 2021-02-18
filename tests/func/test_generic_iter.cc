@@ -751,9 +751,6 @@ int main(void)
                     } // switch t2
                     set_int_free(&a); break;
                 }
-                // uset_merge_range not yet implemented
-                case CTL_USET : break;
-/* TODO
                 case CTL_USET : {
                     SETUP_USET1;
                     switch (t2)
@@ -779,7 +776,6 @@ int main(void)
                     } // switch t2
                     uset_int_free(&a);
                 }
-*/
                 } // switch t1
                 break;
 

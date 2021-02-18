@@ -535,7 +535,7 @@ static inline void JOIN(A, inserter)(A *self, T value)
 #endif
 }
 
-// both need to be sorted
+// both are better be sorted
 static inline A JOIN(A, merge_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
@@ -570,9 +570,7 @@ static inline A JOIN(A, merge)(A *a, A *b)
     return JOIN(A, merge_range)(&r1, &r2);
 }
 #endif // LIST
-
 #endif // USET
-
 
 static inline A JOIN(A, copy_if_range)(I *range, int _match(T*))
 {

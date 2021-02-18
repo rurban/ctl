@@ -147,11 +147,12 @@ int main(void)
     TEST(COPY_IF)                                                                                                      \
     TEST(EMPLACE)                                                                                                      \
     TEST(EMPLACE_FOUND)                                                                                                \
-    TEST(EMPLACE_HINT) /* 30 */
+    TEST(EMPLACE_HINT) /* 30 */                                                                                        \
+    TEST(MERGE)                                                                                                        \
+    TEST(MERGE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(EXTRACT) /* 31 */                                                                                             \
-    TEST(MERGE)                                                                                                        \
+    TEST(EXTRACT) /* 33 */                                                                                             \
     TEST(REMOVE_IF)
 
 #define GENERATE_ENUM(x) TEST_##x,
@@ -627,9 +628,53 @@ int main(void)
             CHECK(a, b);
             break;
         }
+        case TEST_MERGE: {
+            uset_digi aa = uset_digi_init_from(&a);
+            std::unordered_set<DIGI, DIGI_hash> bb;
+            setup_sets(&aa, bb);
+            print_uset(&a);
+            print_uset(&aa);
+            uset_digi aaa = uset_digi_merge(&a, &aa);
+#if __cpp_lib_node_extract >= 201606L
+            b.merge(bb); // C++17
+            print_uset(&aaa);
+            print_unordered_set(b);
+            CHECK(aaa, b);
+            b.clear();
+            uset_digi_clear(&a);
+#else
+            std::unordered_set<DIGI, DIGI_hash> bbb;
+            merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
+            CHECK(aaa, bbb);
+#endif
+            uset_digi_free(&aa);
+            uset_digi_free(&aaa);
+            break;
+        }
+        case TEST_MERGE_RANGE: {
+            uset_digi_it range_a1, range_a2;
+            //std::unordered_set<DIGI>::iterator first_b1, last_b1, first_b2, last_b2;
+            //get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            uset_digi aa = uset_digi_init_from(&a);
+            std::unordered_set<DIGI, DIGI_hash> bb;
+            setup_sets(&aa, bb);
+            range_a1 = uset_digi_begin(&a);
+            range_a2 = uset_digi_begin(&aa);
+            //get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+
+            uset_digi aaa = uset_digi_merge_range(&range_a1, &range_a2);
+#if !defined(_MSC_VER)
+            std::unordered_set<DIGI, DIGI_hash> bbb;
+            merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
+            CHECK(aaa, bbb);
+#endif
+            uset_digi_free(&aa);
+            uset_digi_free(&aaa);
+            break;
+        }
+
 #if 0
         case TEST_EXTRACT:
-        case TEST_MERGE:
         case TEST_REMOVE_IF:
         case TEST_EQUAL_RANGE:
             printf("nyi\n");

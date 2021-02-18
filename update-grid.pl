@@ -143,9 +143,9 @@ for my $c (qw(uset umap)) {
   for (qw(advance advance_end distance distance_range range foreach_range foreach_n foreach_n_range)) {
     $m->{$_}->{$c} = '-';
   }
-  for (@m) { # and undefined range methods
-    $m->{$_}->{$c} = '-' if /_range$/;
-  }
+  #for (@m) { # and undefined range methods. but merge_range and generic_iter algos
+  #  $m->{$_}->{$c} = '-' if /_range$/;
+  #}
 }
 
 # layout:

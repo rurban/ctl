@@ -1163,6 +1163,27 @@ static inline bool JOIN(A, inserter)(A *self, T value)
     }
 }
 
+// i.e. insert_range
+static inline A JOIN(A, merge_range)(I *r1, GI *r2)
+{
+    A self = JOIN(A, copy)(r1->container);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    while (!done2(r2))
+    {
+        JOIN(A, inserter)(&self, self.copy(ref2(r2)));
+        next2(r2);
+    }
+    return self;
+}
+
+static inline A JOIN(A, merge)(A *self, A* other)
+{
+    return JOIN(A, union)(self, other);
+}
+
 // specialize, using our inserter (i.e. replace if different)
 // This one changes in place.
 static inline void JOIN(A, generate)(A *self, T _gen(void))
