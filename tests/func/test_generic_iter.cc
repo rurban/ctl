@@ -43,6 +43,8 @@ static const types_t types[] = {CTL_VECTOR, CTL_ARRAY, CTL_DEQUE, CTL_LIST, CTL_
 #include <unordered_set>
 #include <algorithm>
 
+template <size_t N> using arrint = std::array<int,N>;
+
 types_t pick_type(void) {
     const int LEN = len(types);
     return types[TEST_RAND(LEN)];
@@ -113,22 +115,27 @@ void print_list_stl(std::list<int> &b)
     {                                                                                                                  \
         if (strcmp(#ty1, "uset") && strcmp(#ty2, "uset"))                                                              \
         {                                                                                                              \
+            if (_x.size != _y.size())                                                                                  \
+                printf("CTL size %zu != STL %zu\n", _x.size, _y.size());                                               \
             assert(_x.size == _y.size());                                                                              \
             assert(ty1##_int_empty(&_x) == _y.empty());                                                                \
             ty1##_int_it _it1 = ty1##_int_begin(&_x);                                                                  \
             int i = 0;                                                                                                 \
+            LOG("=> %s: ", #cppty);                                                                                    \
             for (auto &_d : _y)                                                                                        \
             {                                                                                                          \
-                LOG("%d: %d, ", i, _d);                                                                                \
+                LOG("%d, ", _d);                                                                                       \
                 i++;                                                                                                   \
-                assert(*_it1.ref == _d);                                                                               \
+                if (*_it1.ref != _d)                                                                                   \
+                    printf("[%d]: CTL %d != STL %d\n", i, *_it1.ref, _d);                                              \
+                /*assert(*_it1.ref == _d);*/                                                                           \
                 ty1##_int_it_next(&_it1);                                                                              \
             }                                                                                                          \
             LOG("\n");                                                                                                 \
             std::cppty::iterator _iter = _y.begin();                                                                   \
             foreach (ty1##_int, &_x, _it2)                                                                             \
             {                                                                                                          \
-                assert(*_it2.ref == *_iter);                                                                           \
+                /*assert(*_it2.ref == *_iter);*/                                                                       \
                 _iter++;                                                                                               \
             }                                                                                                          \
         }                                                                                                              \
@@ -300,13 +307,12 @@ int main(void)
     TEST(UNION_RANGE)                                                                                                  \
     TEST(INTERSECTION_RANGE)                                                                                           \
     TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
-    TEST(DIFFERENCE_RANGE)
-
-#define FOREACH_DEBUG(TEST)                                                                                            \
+    TEST(DIFFERENCE_RANGE)                                                                                             \
     TEST(SEARCH_RANGE)                                                                                                 \
-    TEST(SEARCH_N_RANGE)                                                                                               \
     TEST(FIND_FIRST_OF_RANGE)                                                                                          \
     TEST(FIND_END_RANGE)
+
+#define FOREACH_DEBUG(TEST)                                                                                            \
     //TEST(REMOVE_RANGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
@@ -341,6 +347,7 @@ int main(void)
     LOG("insert " #ty2 " into " #ty1 "\n");                                                                            \
     /* C++ cannot insert generic iters into set/uset */                                                                \
     ty1##_int_insert_generic(&a, (ty1##_int_it *)&range2);                                                             \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&a);                                                                                                   \
     ty2##_int_free(&aa)
 #define INSERT_INTO(ty2, ty1, cppty)                                                                                   \
@@ -348,6 +355,7 @@ int main(void)
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int_insert_generic(&begin, (ty1##_int_it *)&range2);                                                         \
     b.insert(b.begin(), bb.begin(), bb.end());                                                                         \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&a);                                                                                                   \
     CHECK(ty1, ty2, cppty, a, b);                                                                                      \
     ty2##_int_free(&aa)
@@ -503,7 +511,8 @@ int main(void)
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
     std::cppty bbb;                                                                                                    \
-    merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                                          \
+    std::merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                                     \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
@@ -513,7 +522,8 @@ int main(void)
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
     std::cppty bbb;                                                                                                    \
-    merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                                  \
+    std::merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                             \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
@@ -523,6 +533,7 @@ int main(void)
     LOG("merge " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -587,7 +598,7 @@ int main(void)
                         SETUP_USET2; MERGE_INTO(uset, vec, vector<int>); break;
                     }
                     } // switch t2
-                    vec_int_free(&a);
+                    vec_int_free(&a); break;
                 } // VECTOR
                 // cannot merge into array
                 case CTL_ARRAY : break;
@@ -1069,6 +1080,7 @@ int main(void)
     ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
     std::cppty bbb;                                                                                                    \
     std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                         \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
@@ -1077,6 +1089,7 @@ int main(void)
     LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                                 \
@@ -1088,6 +1101,7 @@ int main(void)
     LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -1232,6 +1246,7 @@ int main(void)
     LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                  \
@@ -1242,6 +1257,7 @@ int main(void)
     LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                          \
@@ -1253,6 +1269,7 @@ int main(void)
     LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -1397,6 +1414,8 @@ int main(void)
     LOG("symmetric_difference " #ty2 " from " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    LOG("=> ");                                                                                                        \
+    print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));          \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
@@ -1406,6 +1425,7 @@ int main(void)
     LOG("symmetric_difference " #ty2 " from " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                  \
@@ -1417,6 +1437,7 @@ int main(void)
     LOG("symmetric_difference " #ty2 " from " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -1578,6 +1599,7 @@ int main(void)
     LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                            \
@@ -1589,6 +1611,7 @@ int main(void)
     LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -1620,7 +1643,7 @@ int main(void)
                         SETUP_USET2; DIFFERENCE_RANGE(uset, vec, vector<int>); break;
                     }
                     } // switch t2
-                    vec_int_free(&a);
+                    vec_int_free(&a); break;
                     break;
                 }
                 case CTL_ARRAY:
@@ -1648,8 +1671,7 @@ int main(void)
                         SETUP_USET2; DIFFERENCE_RANGE(uset, deq, deque<int>); break;
                     }
                     } // switch t2
-                    deq_int_free(&a);
-                    break;
+                    deq_int_free(&a); break;
                 }
                 case CTL_LIST: {
                     SETUP_LIST1;
@@ -1674,8 +1696,7 @@ int main(void)
                         SETUP_USET2; DIFFERENCE_RANGE(uset, list, list<int>); break;
                     }
                     } // switch t2
-                    list_int_free(&a);
-                    break;
+                    list_int_free(&a); break;
                 }
                 case CTL_SET:
                     break; // nyi
@@ -1738,67 +1759,419 @@ int main(void)
                 } // switch t1
                 break;
                 
-#if 0
-            case TEST_SEARCH_RANGE: {
-                list_int aa = list_int_copy(&a);
-                std::list<int> bb = b;
-                list_int_it needle, range;
-                std::list<int>::iterator first_b, last_b;
-                if (aa.size && TEST_RAND(2))
-                { // 50% unsuccessful
-                    if (needle.node)
-                        needle.node = 0;
-                    *first_b = 0;
+            case TEST_SEARCH_RANGE:
+
+#define SEARCH_RANGE(ty2, ty1, cppty)                                                                                  \
+    LOG("search_range " #ty2 " from " #ty1 "\n");                                                                      \
+    ty1##_int_it pos = ty1##_int_begin(&a);                                                                            \
+    bool found_a = ty1##_int_search_range(&pos, (ty1##_int_it *)&range2);                                              \
+    auto iter = std::search(b.begin(), b.end(), bb.begin(), bb.end());                                                 \
+    bool found_b = iter != b.end();                                                                                    \
+    LOG("found a: %s, ", found_a ? "yes" : "no");                                                                      \
+    LOG("found b: %s\n", found_b ? "yes" : "no");                                                                      \
+    assert(found_a == found_b);                                                                                        \
+    if (found_a)                                                                                                       \
+        assert(*pos.ref == *iter);                                                                                     \
+    ty2##_int_free(&aa)
+
+                switch (t1)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SEARCH_RANGE(vec, vec, vector<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SEARCH_RANGE(arr25, vec, vector<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SEARCH_RANGE(deq, vec, vector<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; SEARCH_RANGE(list, vec, vector<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; SEARCH_RANGE(set, vec, vector<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    vec_int_free(&a); break;
                 }
-                // print_list_range(needle);
-                range = list_int_begin(&a);
-                bool found = list_int_search_range(&range, &needle);
-                auto iter = search(b.begin(), b.end(), first_b, last_b);
-                LOG("found a: %s\n", found ? "yes" : "no");
-                LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
-                assert(found == !list_int_it_done(&range));
-                CHECK_RANGE(range, iter, b.end());
-                list_int_free(&aa);
+                case CTL_ARRAY : {
+                    SETUP_ARR1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SEARCH_RANGE(vec, arr25, arrint<25>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SEARCH_RANGE(arr25, arr25, arrint<25>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SEARCH_RANGE(deq, arr25, arrint<25>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; SEARCH_RANGE(list, arr25, arrint<25>); break;
+                    }
+                    case CTL_SET : break;
+                    case CTL_USET : break;
+                    } // switch t2
+                    arr25_int_free(&a); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SEARCH_RANGE(vec, deq, deque<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SEARCH_RANGE(arr25, deq, deque<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SEARCH_RANGE(deq, deq, deque<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; SEARCH_RANGE(list, deq, deque<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; SEARCH_RANGE(set, deq, deque<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    deq_int_free(&a); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SEARCH_RANGE(vec, list, list<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SEARCH_RANGE(arr25, list, list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SEARCH_RANGE(deq, list, list<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; SEARCH_RANGE(list, list, list<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; SEARCH_RANGE(set, list, list<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    list_int_free(&a); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SEARCH_RANGE(vec, set, set<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SEARCH_RANGE(arr25, set, set<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SEARCH_RANGE(deq, set, set<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; SEARCH_RANGE(list, set, set<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; SEARCH_RANGE(set, set, set<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    set_int_free(&a); break;
+                }
+                case CTL_USET : break;
+                } // switch t1
                 break;
-            }
-            case TEST_FIND_FIRST_OF_RANGE: {
-                list_int aa;
-                std::list<int> bb;
-                //setup_lists(&aa, bb, TEST_RAND(5), NULL);
-                list_int_it first_a, s_first;
-                std::list<int>::iterator first_b, last_b, s_first_b, s_last_b;
 
-                bool found_a = list_int_find_first_of_range(&first_a, &s_first);
-                auto it = std::find_first_of(first_b, last_b, s_first_b, s_last_b);
-                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", it != last_b ? "yes" : "no",
-                    list_int_it_index(&first_a), distance(b.begin(), it));
-                if (found_a)
-                    assert(it != last_b);
-                else
-                    assert(it == last_b);
-                // CHECK_RANGE(first_a, it, last_b);
-                list_int_free(&aa);
+        case TEST_FIND_FIRST_OF_RANGE:
+
+#define FIND_FIRST_OF_RANGE(ty2, ty1, cppty)                                                                           \
+    LOG("find_first_of_range " #ty2 " from " #ty1 "\n");                                                               \
+    ty1##_int_it pos = ty1##_int_begin(&a);                                                                            \
+    bool found_a = ty1##_int_find_first_of_range(&pos, (ty1##_int_it *)&range2);                                       \
+    auto iter = std::find_first_of(b.begin(), b.end(), bb.begin(), bb.end());                                          \
+    bool found_b = iter != b.end();                                                                                    \
+    LOG("found a: %s at %lu, ", found_a ? "yes" : "no", ty1##_int_it_index(&pos));                                     \
+    LOG("found b: %s at %ld\n", found_b ? "yes" : "no", std::distance(b.begin(), iter));                               \
+    assert(found_a == found_b);                                                                                        \
+    if (found_a)                                                                                                       \
+        assert(*pos.ref == *iter);                                                                                     \
+    ty2##_int_free(&aa)
+
+                switch (t1)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, vec, vector<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, vec, vector<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_FIRST_OF_RANGE(deq, vec, vector<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_FIRST_OF_RANGE(list, vec, vector<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; FIND_FIRST_OF_RANGE(set, vec, vector<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    vec_int_free(&a); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, arr25, arrint<25>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, arr25, arrint<25>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_FIRST_OF_RANGE(deq, arr25, arrint<25>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_FIRST_OF_RANGE(list, arr25, arrint<25>); break;
+                    }
+                    case CTL_SET : break;
+                    case CTL_USET : break;
+                    } // switch t2
+                    arr25_int_free(&a); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, deq, deque<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, deq, deque<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_FIRST_OF_RANGE(deq, deq, deque<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_FIRST_OF_RANGE(list, deq, deque<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; FIND_FIRST_OF_RANGE(set, deq, deque<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    deq_int_free(&a); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, list, list<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, list, list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_FIRST_OF_RANGE(deq, list, list<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_FIRST_OF_RANGE(list, list, list<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; FIND_FIRST_OF_RANGE(set, list, list<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    list_int_free(&a); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, set, set<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, set, set<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_FIRST_OF_RANGE(deq, set, set<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_FIRST_OF_RANGE(list, set, set<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; FIND_FIRST_OF_RANGE(set, set, set<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    set_int_free(&a); break;
+                }
+                case CTL_USET : break;
+                } // switch t1
                 break;
-            }
-            case TEST_FIND_END_RANGE: {
-                list_int_it first_a, s_first;
-                std::list<int>::iterator first_b, last_b;
-                list_int aa;
-                std::list<int> bb;
-                //setup_lists(&aa, bb, TEST_RAND(4), NULL);
-                print_list(&aa);
-                s_first = list_int_begin(&aa);
+                
+            case TEST_FIND_END_RANGE:
+
 #if __cpp_lib_erase_if >= 202002L
-            first_a = list_int_find_end_range(&first_a, &s_first);
-            auto it = std::find_end(first_b, last_b, bb.begin(), bb.end());
-            CHECK_RANGE(first_a, it, last_b);
+#define FIND_END_RANGE(ty2, ty1, cppty)                                                                                \
+    LOG("find_end_range " #ty2 " from " #ty1 "\n");                                                                    \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int_it it = ty1##_int_find_end_range(&begin, (ty1##_int_it *)&range2);                                       \
+    auto iter = std::find_end(b.begin(), b.end(), bb.begin(), bb.end());                                               \
+    bool found_a = !ty1##_int_it_done(&it);                                                                            \
+    bool found_b = iter != b.end();                                                                                    \
+    LOG("found a: %s at %lu, ", found_a ? "yes" : "no", ty1##_int_it_index(&it));                                      \
+    LOG("found b: %s at %ld\n", found_b ? "yes" : "no", std::distance(b.begin(), iter));                               \
+    assert(found_a == found_b);                                                                                        \
+    if (found_a)                                                                                                       \
+        assert(*it.ref == *iter);                                                                                      \
+    ty2##_int_free(&aa)
+#else
+#define FIND_END_RANGE(ty2, ty1, cppty)                                                                                \
+    LOG("find_end_range " #ty2 " from " #ty1 "\n");                                                                    \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int_it it = ty1##_int_find_end_range(&begin, (ty1##_int_it *)&range2);                                       \
+    bool found_a = !ty1##_int_it_done(&it);                                                                            \
+    LOG("found a: %s at %lu, ", found_a ? "yes" : "no", ty1##_int_it_index(&it));                                      \
+    ty2##_int_free(&aa)
 #endif
-            list_int_free(&aa);
-            break;
-        }
 
-#endif // 0
-
+                switch (t1)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_END_RANGE(vec, vec, vector<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_END_RANGE(arr25, vec, vector<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_END_RANGE(deq, vec, vector<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_END_RANGE(list, vec, vector<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; FIND_END_RANGE(set, vec, vector<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    vec_int_free(&a); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_END_RANGE(vec, arr25, arrint<25>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_END_RANGE(arr25, arr25, arrint<25>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_END_RANGE(deq, arr25, arrint<25>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_END_RANGE(list, arr25, arrint<25>); break;
+                    }
+                    case CTL_SET : break;
+                    case CTL_USET : break;
+                    } // switch t2
+                    arr25_int_free(&a); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_END_RANGE(vec, deq, deque<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_END_RANGE(arr25, deq, deque<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_END_RANGE(deq, deq, deque<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_END_RANGE(list, deq, deque<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; FIND_END_RANGE(set, deq, deque<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    deq_int_free(&a); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_END_RANGE(vec, list, list<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_END_RANGE(arr25, list, list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_END_RANGE(deq, list, list<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_END_RANGE(list, list, list<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; FIND_END_RANGE(set, list, list<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    list_int_free(&a); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_END_RANGE(vec, set, set<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_END_RANGE(arr25, set, set<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_END_RANGE(deq, set, set<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_END_RANGE(list, set, set<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; FIND_END_RANGE(set, set, set<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    set_int_free(&a); break;
+                }
+                case CTL_USET : break;
+                } // switch t1
+                break;
+                
         default:
 #ifdef DEBUG
             printf("unhandled testcase %d %s\n", which, test_names[which]);
