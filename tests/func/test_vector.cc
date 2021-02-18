@@ -371,6 +371,7 @@ int main(void)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EMPLACE) /* 76 */                                                                                             \
+    TEST(INSERT_GENERIC)                                                                                               \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_IT_RANGE)
 
@@ -522,7 +523,7 @@ int main(void)
                     b.insert(b.begin() + index, first_b, last_b);
                     vec_digi_insert_range(&pos, &range_a);
                     // our growth strategy is better. but for test sake adjust it
-                    vec_digi_reserve(&a, b.capacity());
+                    ADJUST_CAP("insert", a, b);
                     print_vec(&a);
                     print_vector(b);
                     CHECK(a, b);
@@ -530,6 +531,25 @@ int main(void)
                 }
                 break;
             }
+#ifdef DEBUG
+            case TEST_INSERT_GENERIC: {
+                print_vec(&a);
+                vec_digi aa = vec_digi_init_from(&a);
+                std::vector<DIGI> bb;
+                gen_vectors(&aa, bb, TEST_RAND(a.size));
+                print_vec(&aa);
+                vec_digi_it begin = vec_digi_begin(&a);
+                vec_digi_it range2 = vec_digi_begin(&aa);
+                vec_digi_insert_generic(&begin, &range2);
+                b.insert(b.begin(), bb.begin(), bb.end());
+                ADJUST_CAP("insert", a, b);
+                print_vec(&a);
+                print_vector(b);
+                CHECK(a, b);
+                vec_digi_free(&aa);
+                break;
+            }
+#endif
             case TEST_RESIZE: {
                 const size_t resize = 3 * TEST_RAND(a.size) + 1;
                 b.resize(resize);

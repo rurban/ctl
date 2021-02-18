@@ -526,6 +526,8 @@ static inline void JOIN(A, insert_generic)(I *pos, GI *range)
     int (*done)(struct I*) = range->vtable.done;
 
     A *self = pos->container;
+    if (range->container == self)
+        return;
     if (!pos->node)
     {
         while (!done(range))
@@ -587,6 +589,8 @@ static inline void JOIN(A, erase_generic)(A* self, GI *range)
     T* (*ref)(struct I*) = range->vtable.ref;
     int (*done)(struct I*) = range->vtable.done;
 
+    if (range->container == self)
+        return;
     while (!done(range))
     {
         JOIN(A, remove)(self, *ref(range));

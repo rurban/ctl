@@ -336,7 +336,7 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`insert_count`                   | ✓  | ✓  | -  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
 |`insert_range`                   | ✓  | ✓  | -  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`insert_range`                   | ✓  | ✓  | -  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
-|`insert_generic`                 |    |    |    |    |    |    |    |    |    | -  | -  | -  |
+|`insert_generic`                 | x  |    |    | x  | ✓  | ✓  |    | x  |    | -  | -  | -  |
 |`insert_or_assign`               | -  | -  | -  | -  | -  | -  | ✓  | -  | ✓  | -  | -  | -  |
 |`insert_or_assign_found`         | -  | -  | -  | -  | -  | -  |    | -  | ✓  | -  | -  | -  |
 |`load_factor`                    | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | -  | -  | -  |
@@ -355,7 +355,7 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`erase_index`                    | ✓  | ✓  | -  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  |
 |`erase_node`                     | -  | -  | -  | -  | ✓  | ✓  |    |    |    | -  | -  | -  |
 |`erase_range`                    | ✓  |    | -  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
-|`erase_generic`                  | ✓  |    | -  | ✓  | ✓  | ✓  |    |    |    | -  | -  | -  |
+|`erase_generic`                  | -  | -  | -  | -  | x  | -  | -  | -  | -  | -  | -  | -  |
 |`top`                            | -  | -  | -  | -  | -  | -  | -  | -  | -  | ✓  |    | ✓  |
 |`push`                           | -  | -  | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | ✓  |
 |`pop`                            | -  | -  | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | ✓  |
@@ -562,7 +562,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 2020 (starting with `202102`),
 the old ctl is lower than 2020, starting with `1.0`.
 
-Added lots of missing methods. We have 145 methods in 757 stable variants.
+Added lots of missing methods. We have 145 methods in 755 stable variants.
 glouw has 63 methods in 196 stable variants.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.

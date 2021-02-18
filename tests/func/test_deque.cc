@@ -467,7 +467,8 @@ int main(void)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(UNIQUE) /* 71 */                                                                                              \
-    TEST(UNIQUE_RANGE)
+    TEST(UNIQUE_RANGE)                                                                                                 \
+    TEST(INSERT_GENERIC)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -734,6 +735,31 @@ int main(void)
                 deq_digi_free(&aa);
                 break;
             }
+#ifdef DEBUG
+            case TEST_INSERT_GENERIC:
+            {
+                deq_digi aa = deq_digi_init_from(&a);
+                std::deque<DIGI> bb;
+                setup_deque(&aa, bb);
+                print_deq(&aa);
+                const size_t index = TEST_RAND(a.size);
+                deq_digi_it pos = deq_digi_begin(&a);
+                deq_digi_it range2 = deq_digi_begin(&aa);
+                deq_digi_it_advance(&pos, index);
+                LOG("insert_range 0-%zu at %zu:\n", size2 - 1, index);
+                deq_digi_insert_generic(&pos, &range2);
+                b.insert(b.begin() + index, bb.begin(), bb.end());
+                LOG("CTL =>\n");
+                print_deq(&a);
+                LOG("STL =>\n");
+                print_deque(b);
+                if (a.size != b.size())
+                    fail++;
+                CHECK(a, b);
+                deq_digi_free(&aa);
+                break;
+            }
+#endif
             case TEST_ERASE_RANGE: {
                 int value = TEST_RAND(TEST_MAX_VALUE);
                 if (a.size < 4)

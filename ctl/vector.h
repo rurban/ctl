@@ -581,21 +581,22 @@ static inline I JOIN(A, erase)(I *pos)
 }
 
 #ifndef CTL_STR
-static inline void JOIN(A, erase_generic)(A* self, GI *range)
+#ifdef DEBUG
+static inline void JOIN(A, insert_generic)(I *pos, GI *range)
 {
+    A* self = pos->container;
     void (*next)(struct I*) = range->vtable.next;
     T* (*ref)(struct I*) = range->vtable.ref;
     int (*done)(struct I*) = range->vtable.done;
 
     while (!done(range))
     {
-        I pos = JOIN(A, find)(self, *ref(range));
-        if (!JOIN(I, done)(&pos))
-            JOIN(A, erase)(&pos);
+        JOIN(A, insert)(pos, self->copy(ref(range)));
         next(range);
     }
 }
-#endif
+#endif // DEBUG
+#endif // STR
 
 static inline void JOIN(A, swap)(A *self, A *other)
 {

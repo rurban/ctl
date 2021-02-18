@@ -153,22 +153,28 @@ int main(void)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EXTRACT) /* 33 */                                                                                             \
+    TEST(INSERT_GENERIC)                                                                                               \
     TEST(REMOVE_IF)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
+        // clang-format off
         enum
         {
             FOREACH_METH(GENERATE_ENUM)
 #ifdef DEBUG
-                FOREACH_DEBUG(GENERATE_ENUM)
+            FOREACH_DEBUG(GENERATE_ENUM)
 #endif
-                    TEST_TOTAL
+            TEST_TOTAL
         };
 #ifdef DEBUG
-        static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GENERATE_NAME) ""};
+        static const char *test_names[] = {
+            FOREACH_METH(GENERATE_NAME)
+            FOREACH_DEBUG(GENERATE_NAME)
+            ""};
 #endif
+        // clang-format on        
         int which = TEST_RAND(TEST_TOTAL);
         if (test >= 0 && test < (int)TEST_TOTAL)
             which = test;
@@ -354,6 +360,21 @@ int main(void)
             uset_digi_free(&aa);
             break;
         }
+#ifdef DEBUG
+        case TEST_INSERT_GENERIC: {
+            uset_digi aa;
+            std::unordered_set<DIGI, DIGI_hash> bb;
+            setup_sets(&aa, bb);
+            uset_digi_it range2 = uset_digi_begin(&a);
+            uset_digi_insert_generic(&a, &range2);
+            b.insert(bb.begin(), bb.end());
+            print_uset(&a);
+            print_unordered_set(b);
+            CHECK(a, b);
+            uset_digi_free(&aa);
+            break;
+        }
+#endif
         case TEST_UNION: {
             uset_digi aa;
             std::unordered_set<DIGI, DIGI_hash> bb;

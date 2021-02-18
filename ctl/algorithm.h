@@ -343,6 +343,9 @@ static inline A JOIN(A, symmetric_difference)(A *a, A *b)
 #endif
 }
 
+#endif // LIST, VEC, STR, DEQ
+#if !defined CTL_USET
+
 static inline bool JOIN(A, includes_range)(I *r1, GI *r2)
 {
     A *self = r1->container;
@@ -367,8 +370,7 @@ static inline bool JOIN(A, includes)(A *a, A *b)
     JOIN(A, it) r2 = JOIN(A, begin)(b);
     return JOIN(A, includes_range)(&r1, &r2);
 }
-
-#endif // !USET/SET
+#endif // USET
 
 // generate and transform have no inserter support yet,
 // so we cannot yet use it for set nor uset. we want to call insert/push_back on them.

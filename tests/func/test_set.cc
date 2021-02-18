@@ -198,6 +198,7 @@ int main(void)
     TEST(INSERT)                                                                                                       \
     TEST(INSERT_FOUND)                                                                                                 \
     TEST(INSERT_RANGE)                                                                                                 \
+    TEST(INSERT_GENERIC)                                                                                               \
     TEST(ERASE)                                                                                                        \
     TEST(REMOVE_IF)                                                                                                    \
     TEST(ERASE_IF)                                                                                                     \
@@ -267,17 +268,22 @@ int main(void)
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
+        // clang-format off
         enum
         {
             FOREACH_METH(GENERATE_ENUM)
 #ifdef DEBUG
-                FOREACH_DEBUG(GENERATE_ENUM)
+            FOREACH_DEBUG(GENERATE_ENUM)
 #endif
-                    TEST_TOTAL
+            TEST_TOTAL
         };
 #ifdef DEBUG
-        static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GENERATE_NAME) ""};
+        static const char *test_names[] = {
+            FOREACH_METH(GENERATE_NAME)
+            FOREACH_DEBUG(GENERATE_NAME)
+            ""};
 #endif
+        // clang-format on
         int which = TEST_RAND(TEST_TOTAL);
         if (test >= 0 && test < (int)TEST_TOTAL)
             which = test;
@@ -332,6 +338,28 @@ int main(void)
             get_random_iters(&aa, &first_a, bb, first_b, last_b);
 
             set_digi_insert_range(&a, &first_a);
+            b.insert(first_b, last_b);
+            print_set(&a);
+            print_setpp(b);
+            set_digi_free(&aa);
+            CHECK(a, b);
+            break;
+        }
+        case TEST_INSERT_GENERIC: {
+            print_set(&a);
+            set_digi aa = set_digi_init_from(&a);
+            std::set<DIGI> bb;
+            for (int i = 0; i < TEST_RAND(25); i++)
+            {
+                set_digi_insert(&aa, digi_init(i));
+                bb.insert(DIGI{i});
+            }
+            print_set(&aa);
+            set_digi_it first_a;
+            std::set<DIGI>::iterator first_b, last_b;
+            get_random_iters(&aa, &first_a, bb, first_b, last_b);
+
+            set_digi_insert_generic(&a, &first_a);
             b.insert(first_b, last_b);
             print_set(&a);
             print_setpp(b);

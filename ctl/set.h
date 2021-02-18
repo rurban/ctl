@@ -902,12 +902,29 @@ static inline size_t JOIN(A, erase_if)(A *self, int (*_match)(T *))
     return JOIN(A, remove_if)(self, _match);
 }
 
+static inline void JOIN(A, insert_generic)(A* self, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    if (range->container == self)
+        return;
+    while (!done(range))
+    {
+        JOIN(A, insert)(self, self->copy(ref(range)));
+        next(range);
+    }
+}
+
 static inline void JOIN(A, erase_generic)(A* self, GI *range)
 {
     void (*next)(struct I*) = range->vtable.next;
     T* (*ref)(struct I*) = range->vtable.ref;
     int (*done)(struct I*) = range->vtable.done;
 
+    if (range->container == self)
+        return;
     while (!done(range))
     {
         B* node = JOIN(A, find_node)(self, *ref(range));

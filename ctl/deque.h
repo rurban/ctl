@@ -678,6 +678,19 @@ static inline A *JOIN(A, move_range)(I *range, A *out)
     return out;
 }
 
+static inline void JOIN(A, insert_generic)(I *pos, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    while (!done(range))
+    {
+        JOIN(A, insert)(pos, *ref(range));
+        next(range);
+    }
+}
+
 //#include <ctl/algorithm.h>
 
 #undef T

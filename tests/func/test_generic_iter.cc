@@ -78,25 +78,29 @@ void print_list(std::list<int> &b)
 #define TEST_MAX_VALUE 1500
 #endif
 
+// FIXME: check uset
 #define CHECK(ty1, cppty, _x, _y)                                                                                      \
     {                                                                                                                  \
         assert(_x.size == _y.size());                                                                                  \
         assert(ty1##_int_empty(&_x) == _y.empty());                                                                    \
-        std::cppty::iterator _iter = _y.begin();                                                                       \
-        int i = 0;                                                                                                     \
-        foreach(ty1##_int, &_x, _it)                                                                                   \
+        if (strcmp(#ty1, "uset"))                                                                                      \
         {                                                                                                              \
-            LOG("%d: %d, ", i, *_it.ref);                                                                              \
-            assert(*_it.ref == *_iter);                                                                                \
-            i++;                                                                                                       \
-            _iter++;                                                                                                   \
-        }                                                                                                              \
-        LOG("\n");                                                                                                     \
-        ty1##_int_it _it = ty1##_int_begin(&_x);                                                                       \
-        for (auto &_d : _y)                                                                                            \
-        {                                                                                                              \
-            assert(*_it.ref == _d);                                                                                    \
-            ty1##_int_it_next(&_it);                                                                                   \
+            std::cppty::iterator _iter = _y.begin();                                                                   \
+            int i = 0;                                                                                                 \
+            foreach (ty1##_int, &_x, _it)                                                                              \
+            {                                                                                                          \
+                LOG("%d: %d, ", i, *_it.ref);                                                                          \
+                assert(*_it.ref == *_iter);                                                                            \
+                i++;                                                                                                   \
+                _iter++;                                                                                               \
+            }                                                                                                          \
+            LOG("\n");                                                                                                 \
+            ty1##_int_it _it = ty1##_int_begin(&_x);                                                                   \
+            for (auto &_d : _y)                                                                                        \
+            {                                                                                                          \
+                assert(*_it.ref == _d);                                                                                \
+                ty1##_int_it_next(&_it);                                                                               \
+            }                                                                                                          \
         }                                                                                                              \
     }
 
@@ -130,7 +134,7 @@ void print_list(std::list<int> &b)
 #define SETUP_LIST1                                                                                                    \
     list_int a = list_int_init();                                                                                      \
     std::list<int> b;                                                                                                  \
-    for (int i = 0; i < (int)TEST_RAND(TEST_MAX_SIZE); i++)             \
+    for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)             \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         list_int_push_back(&a, vb);                                                                                    \
@@ -141,7 +145,7 @@ void print_list(std::list<int> &b)
 #define SETUP_LIST2                                                                                                    \
     list_int aa = list_int_init();                                                                                     \
     std::list<int> bb;                                                                                                 \
-    for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                 \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         list_int_push_back(&aa, vb);                                                                                   \
@@ -162,7 +166,7 @@ void print_list(std::list<int> &b)
 #define SETUP_VEC2                                                                                                     \
     vec_int aa = vec_int_init();                                                                                       \
     std::vector<int> bb;                                                                                               \
-    for (int i = 0; i < TEST_RAND(a.size); i++)                                                                        \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                        \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         vec_int_push_back(&aa, vb);                                                                                    \
@@ -182,7 +186,7 @@ void print_list(std::list<int> &b)
 #define SETUP_ARR2                                                                                                     \
     arr25_int aa = arr25_int_init();                                                                                   \
     std::array<int, 25> bb;                                                                                            \
-    for (int i = 0; i < TEST_RAND(a.size); i++)                                                                        \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                        \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         aa.vector[i] = vb;                                                                                             \
@@ -202,7 +206,7 @@ void print_list(std::list<int> &b)
 #define SETUP_DEQ2                                                                                                     \
     deq_int aa = deq_int_init();                                                                                       \
     std::deque<int> bb;                                                                                               \
-    for (int i = 0; i < TEST_RAND(a.size); i++)                                                                        \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                        \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         deq_int_push_back(&aa, vb);                                                                                     \
@@ -223,7 +227,7 @@ void print_list(std::list<int> &b)
 #define SETUP_SET2                                                                                                     \
     set_int aa = set_int_init(NULL);                                                                                   \
     std::set<int> bb;                                                                                                  \
-    for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                 \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         set_int_insert(&aa, vb);                                                                                       \
@@ -245,7 +249,7 @@ void print_list(std::list<int> &b)
 #define SETUP_USET2                                                                                                    \
     uset_int aa = uset_int_init(NULL, NULL);                                                                           \
     std::unordered_set<int> bb;                                                                                        \
-    for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                 \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         uset_int_insert(&aa, vb);                                                                                      \
@@ -282,7 +286,7 @@ int main(void)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(INSERT_GENERIC)                                                                                               \
-    TEST(ERASE_GENERIC)                                                                                                \
+    TEST(REMOVE_RANGE)                                                                                                 \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -301,7 +305,7 @@ int main(void)
         int which = TEST_RAND(TEST_TOTAL);
         if (test >= 0 && test < (int)TEST_TOTAL)
             which = test;
-        LOG("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
+        LOG("TEST %s %d\n", test_names[which], which);
         switch (which)
         {
 #ifdef DEBUG
@@ -342,28 +346,8 @@ int main(void)
                 } // switch t2
                 vec_int_free(&a); break;
             }
-            case CTL_ARRAY : {
-                SETUP_ARR1;
-                switch (t2)
-                {
-                case CTL_LIST : {
-                    SETUP_LIST2; INSERT_INTO(list, arr25, array<int,25>); break;
-                }
-                case CTL_ARRAY : {
-                    SETUP_ARR2; INSERT_INTO(arr25, arr25, array<int,25>); break;
-                }
-                case CTL_VECTOR : {
-                    SETUP_VEC2; INSERT_INTO(vec, arr25, array<int,25>); break;
-                }
-                case CTL_SET : {
-                    SETUP_SET2; INSERT_INTO(set, arr25, array<int,25>); break;
-                }
-                case CTL_USET : {
-                    SETUP_USET2; INSERT_INTO(uset, arr25, array<int,25>); break;
-                }
-                } // switch t2
-                arr25_int_free(&a); break;
-            }
+            // cannot insert into array
+            case CTL_ARRAY : break;
             case CTL_DEQUE : {
                 SETUP_DEQ1;
                 switch (t2)
@@ -414,7 +398,10 @@ int main(void)
                 } // switch t2
                 list_int_free(&a); break;
             }
-            case CTL_SET : {
+            // C++ cannot insert into set
+            case CTL_SET : break;
+/*                
+            {
                 SETUP_SET1;
                 switch (t2)
                 {
@@ -437,177 +424,42 @@ int main(void)
                     SETUP_USET2; INSERT_INTO(uset, set, set<int>); break;
                 }
                 } // switch t2
-                list_int_free(&a); break;
-            }
-            case CTL_USET : {
-                SETUP_USET1;
-                switch (t2)
-                {
-                case CTL_VECTOR : {
-                    SETUP_VEC2; INSERT_INTO(vec, uset); break;
-                }
-                case CTL_ARRAY : {
-                    SETUP_ARR2; INSERT_INTO(arr25, uset); break;
-                }
-                case CTL_LIST : {
-                    SETUP_LIST2; INSERT_INTO(list, uset); break;
-                }
-                case CTL_DEQUE : {
-                    SETUP_DEQ2; INSERT_INTO(deq, uset); break;
-                }
-                case CTL_SET : {
-                    SETUP_SET2; INSERT_INTO(set, uset); break;
-                }
-                case CTL_USET : {
-                    SETUP_USET2; INSERT_INTO(uset, uset); break;
-                }
-                } // switch t2
-                uset_int_free(&a); break;
-            }
-            } // switch t1
-            break;
-
-        case TEST_ERASE_GENERIC:
-
-#define ERASE_FROM(ty2, ty1, cppty)                                                                                    \
-    LOG("erase " #ty2 " from " #ty1 "\n");                                                                             \
-    b.erase(bb.begin(), bb.end());                                                                                     \
-    ty1##_int_erase_generic(&a, (ty1##_int_it *)&range2);                                                              \
-    CHECK(ty1, cppty, a, b);                                                                                           \
-    ty2##_int_free(&aa)
-
-            switch (t1)
-            {
-            case CTL_VECTOR : {
-                SETUP_VEC1;
-                switch (t2)
-                {
-                case CTL_VECTOR : {
-                    SETUP_VEC2; ERASE_FROM(vec, vec, vector<int>); break;
-                }
-                case CTL_ARRAY : {
-                    SETUP_ARR2; ERASE_FROM(arr25, vec, vector<int>); break;
-                }
-                case CTL_DEQUE : {
-                    SETUP_DEQ2; ERASE_FROM(deq, vec, vector<int>); break;
-                }
-                case CTL_LIST : {
-                    SETUP_LIST2; ERASE_FROM(vec, vector, list<int>); break;
-                }
-                case CTL_SET : {
-                    SETUP_SET2; ERASE_FROM(set, vec, vector<int>); break;
-                }
-                case CTL_USET : {
-                    SETUP_USET2; ERASE_FROM(uset, vec, vector<int>); break;
-                }
-                } // switch t2
-                vec_int_free(&a); break;
-            }
-            // cannot erase from array
-            case CTL_ARRAY : break;
-            case CTL_DEQUE : {
-                SETUP_DEQ1;
-                switch (t2)
-                {
-                case CTL_VECTOR : {
-                    SETUP_VEC2; ERASE_FROM(vec, deq, deque<int>); break;
-                }
-                case CTL_ARRAY : {
-                    SETUP_ARR2; ERASE_FROM(arr25, deq, deque<int>); break;
-                }
-                case CTL_DEQUE : {
-                    SETUP_DEQ2; ERASE_FROM(deq, deq, deque<int>); break;
-                }
-                case CTL_LIST : {
-                    SETUP_LIST2; ERASE_FROM(deq, deque, list<int>); break;
-                }
-                case CTL_SET : {
-                    SETUP_SET2; ERASE_FROM(set, deq, deque<int>); break;
-                }
-                case CTL_USET : {
-                    SETUP_USET2; ERASE_FROM(uset, deq, deque<int>); break;
-                }
-                } // switch t2
-                deq_int_free(&a); break;
-            }
-            case CTL_LIST : {
-                SETUP_LIST1;
-                switch (t2)
-                {
-                case CTL_VECTOR : {
-                    SETUP_VEC2; ERASE_FROM(vec, list, list<int>); break;
-                }
-                case CTL_ARRAY : {
-                    SETUP_ARR2; ERASE_FROM(arr25, list, list<int>); break;
-                }
-                case CTL_DEQUE : {
-                    SETUP_DEQ2; ERASE_FROM(deq, list, list<int>); break;
-                }
-                case CTL_LIST : {
-                    SETUP_LIST2; ERASE_FROM(list, list, list<int>); break;
-                }
-                case CTL_SET : {
-                    SETUP_SET2; ERASE_FROM(set, list, list<int>); break;
-                }
-                case CTL_USET : {
-                    SETUP_USET2; ERASE_FROM(uset, list, list<int>); break;
-                }
-                } // switch t2
-                list_int_free(&a); break;
-            }     // LIST
-            case CTL_SET : {
-                SETUP_SET1;
-                switch (t2)
-                {
-                case CTL_VECTOR : {
-                    SETUP_VEC2; ERASE_FROM(vec, set, set<int>); break;
-                }
-                case CTL_ARRAY : {
-                    SETUP_ARR2; ERASE_FROM(arr25, set, set<int>); break;
-                }
-                case CTL_DEQUE : {
-                    SETUP_DEQ2; ERASE_FROM(deq, set, set<int>); break;
-                }
-                case CTL_LIST : {
-                    SETUP_LIST2; ERASE_FROM(set, set, list<int>); break;
-                }
-                case CTL_SET : {
-                    SETUP_SET2; ERASE_FROM(set, set, set<int>); break;
-                }
-                case CTL_USET : {
-                    SETUP_USET2; ERASE_FROM(uset, set, set<int>); break;
-                }
-                } // switch t2
                 set_int_free(&a); break;
             }
-            case CTL_USET : {
+*/
+            // C++ cannot insert into unordered_set
+            case CTL_USET : break;
+/*
+            {
                 SETUP_USET1;
                 switch (t2)
                 {
                 case CTL_VECTOR : {
-                    SETUP_VEC2; ERASE_FROM(vec, uset, unordered_set<int>); break;
+                    SETUP_VEC2; INSERT_INTO(vec, uset, unordered_set<int>); break;
                 }
                 case CTL_ARRAY : {
-                    SETUP_ARR2; ERASE_FROM(arr25, uset, unordered_set<int>); break;
-                }
-                case CTL_DEQUE : {
-                    SETUP_DEQ2; ERASE_FROM(deq, uset, unordered_set<int>); break;
+                    SETUP_ARR2; INSERT_INTO(arr25, uset, unordered_set<int>); break;
                 }
                 case CTL_LIST : {
-                    SETUP_LIST2; ERASE_FROM(uset, unordered_set, list<int>); break;
+                    SETUP_LIST2; INSERT_INTO(list, uset, unordered_set<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; INSERT_INTO(deq, uset, unordered_set<int>); break;
                 }
                 case CTL_SET : {
-                    SETUP_SET2; ERASE_FROM(set, uset, unordered_set<int>); break;
+                    SETUP_SET2; INSERT_INTO(set, uset, unordered_set<int>); break;
                 }
                 case CTL_USET : {
-                    SETUP_USET2; ERASE_FROM(uset, uset, unordered_set<int>); break;
+                    SETUP_USET2; INSERT_INTO(uset, uset, unordered_set<int>); break;
                 }
                 } // switch t2
                 uset_int_free(&a); break;
             }
-            }
+*/
+            } // switch t1
             break;
 #endif
+
             case TEST_MERGE_RANGE:
 
 #ifndef _MSC_VER
@@ -774,59 +626,186 @@ int main(void)
                         SETUP_USET2; MERGE_INTO_SET(uset, uset, unordered_set<int>); break;
                     }
                     } // switch t2
-                    uset_int_free(&a);
+                    uset_int_free(&a); break;
                 }
                 } // switch t1
                 break;
 
-#if 0
             case TEST_INCLUDES_RANGE: {
-                SETUP_LIST1;
-                SETUP_LIST2;
-                list_int_it begin = list_int_begin(&a);
-                bool a_found = list_int_includes_range(&begin, &range2);
-                bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
-                assert(a_found == b_found);
-                CHECK(aa, bb);
-                list_int_free(&aa);
-                list_int_free(&a);
+
+#define INCLUDES_RANGE(ty2, ty1)                                                                                \
+    LOG("includes " #ty2 " from " #ty1 "\n");                                                                          \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    bool a_found = ty1##_int_includes_range(&begin, (ty1##_int_it *)&range2);                                          \
+    bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());                                            \
+    assert(a_found == b_found);                                                                                        \
+    ty2##_int_free(&aa)
+
+                switch (t1)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; INCLUDES_RANGE(vec, vec); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; INCLUDES_RANGE(arr25, vec); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; INCLUDES_RANGE(deq, vec); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; INCLUDES_RANGE(list, vec); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; INCLUDES_RANGE(set, vec); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; INCLUDES_RANGE(uset, vec); break;
+                    }
+                    } // switch t2
+                    vec_int_free(&a); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; INCLUDES_RANGE(vec, arr25); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; INCLUDES_RANGE(arr25, arr25); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; INCLUDES_RANGE(deq, arr25); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; INCLUDES_RANGE(list, arr25); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; INCLUDES_RANGE(set, arr25); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; INCLUDES_RANGE(uset, arr25); break;
+                    }
+                    } // switch t2
+                    arr25_int_free(&a); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; INCLUDES_RANGE(vec, deq); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; INCLUDES_RANGE(arr25, deq); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; INCLUDES_RANGE(deq, deq); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; INCLUDES_RANGE(list, deq); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; INCLUDES_RANGE(set, deq); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; INCLUDES_RANGE(uset, deq); break;
+                    }
+                    } // switch t2
+                    deq_int_free(&a); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; INCLUDES_RANGE(vec, list); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; INCLUDES_RANGE(arr25, list); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; INCLUDES_RANGE(deq, list); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; INCLUDES_RANGE(list, list); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; INCLUDES_RANGE(set, list); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; INCLUDES_RANGE(uset, list); break;
+                    }
+                    } // switch t2
+                    list_int_free(&a); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; INCLUDES_RANGE(vec, set); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; INCLUDES_RANGE(arr25, set); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; INCLUDES_RANGE(deq, set); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; INCLUDES_RANGE(list, set); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; INCLUDES_RANGE(set, set); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; INCLUDES_RANGE(uset, set); break;
+                    }
+                    } // switch t2
+                    set_int_free(&a); break;
+                }
+                case CTL_USET : break;
+                } // switch t1
                 break;
             }
             case TEST_UNION_RANGE: {
-                list_int aa;
-                std::list<int> bb;
-                //setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
-                list_int_sort(&a);
-                list_int_sort(&aa);
-                b.sort();
-                bb.sort();
-                list_int_it first_a1;
-                std::list<int>::iterator first_b1, last_b1;
-                list_int_it first_a2;
-                std::list<int>::iterator first_b2, last_b2;
 
-                LOG("CTL a + aa\n");
-                print_lst_range(first_a1);
-                print_lst_range(first_a2);
-                list_int aaa = list_int_union_range(&first_a1, &first_a2);
-                LOG("CTL => aaa\n");
-                print_lst(&aaa);
-
-                std::list<int> bbb;
-                LOG("STL b + bb\n");
-                print_list(b);
-                print_list(bb);
 #ifndef _MSC_VER
-                std::set_union(first_b1, last_b1, first_b2, last_b2, std::back_inserter(bbb));
-                LOG("STL => bbb\n");
-                print_list(bbb);
-                CHECK(aa, bb);
-                CHECK(aaa, bbb);
+#define UNION_RANGE_SET(ty2, ty1, cppty)                                                                               \
+    LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
+    std::cppty bbb;                                                                                                    \
+    std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                         \
+    CHECK(ty1, cppty, aaa, bbb);                                                                                       \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#define UNION_RANGE(ty2, ty1, cppty)                                                                                   \
+    LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
+    std::cppty bbb;                                                                                                    \
+    std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                                 \
+    CHECK(ty1, cppty, aaa, bbb);                                                                                       \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#else
+#define UNION_RANGE(ty2, ty1, cppty)                                                                               \
+    LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#define UNION_RANGE_SET(ty2, ty1, cppty) UNION_RANGE(ty2, ty1, cppty)
 #endif
-                list_int_free(&aaa);
-                list_int_free(&aa);
-                break;
+
             }
+
+#if 0
             case TEST_INTERSECTION_RANGE: {
                 list_int aa;
                 std::list<int> bb;

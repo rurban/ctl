@@ -1069,6 +1069,19 @@ static inline A JOIN(A, copy)(A *self)
     return other;
 }
 
+static inline void JOIN(A, insert_generic)(A* self, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    while (!done(range))
+    {
+        JOIN(A, insert)(self, self->copy(ref(range)));
+        next(range);
+    }
+}
+
 static inline void JOIN(A, erase_generic)(A* self, GI *range)
 {
     void (*next)(struct I*) = range->vtable.next;

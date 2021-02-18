@@ -234,7 +234,8 @@ int main(void)
     TEST(EMPLACE_BACK) /* 15 */                                                                                        \
     TEST(REMOVE_IF)                                                                                                    \
     TEST(ERASE_IF)                                                                                                     \
-    TEST(SPLICE) /* 18 */                                                                                              \
+    TEST(INSERT_GENERIC)                                                                                               \
+    TEST(SPLICE)                                                                                                       \
     TEST(SPLICE_IT)                                                                                                    \
     TEST(SPLICE_RANGE)                                                                                                 \
     TEST(MERGE)                                                                                                        \
@@ -299,6 +300,7 @@ int main(void)
     TEST(BINARY_SEARCH_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
+    TEST(ERASE_GENERIC)                                                                                                \
     TEST(GENERATE_N_RANGE) /* 70 */                                                                                    \
     TEST(TRANSFORM_IT)                                                                                                 \
     TEST(TRANSFORM_RANGE)
@@ -905,6 +907,39 @@ int main(void)
                 CHECK(a, b);
             }
             break;
+        case TEST_INSERT_GENERIC: {
+            print_lst(&a);
+            list_digi aa;
+            std::list<DIGI> bb;
+            setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+            list_digi_it begin = list_digi_begin(&a);
+            list_digi_it range2 = list_digi_begin(&aa);
+            print_lst(&aa);
+            b.insert(b.begin(), bb.begin(), bb.end());
+            list_digi_insert_generic(&begin, &range2);
+            print_lst(&a);
+            print_list(b);
+            CHECK(a, b);
+            list_digi_free(&aa);
+            break;
+        }
+#ifdef DEBUG
+        case TEST_ERASE_GENERIC:
+            if (a.size)
+            {
+                print_lst(&a);
+                list_digi aa;
+                std::list<DIGI> bb;
+                setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+                list_digi_it range2 = list_digi_begin(&aa);
+                b.erase(bb.begin(), bb.end());
+                list_digi_erase_generic(&a, &range2);
+                print_lst(&a);
+                print_list(b);
+                CHECK(a, b);
+            }
+            break;
+#endif
         case TEST_GENERATE: {
             digi_generate_reset();
             list_digi_generate(&a, digi_generate);
