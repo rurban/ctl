@@ -272,8 +272,8 @@ static inline int str_equal(str *self, str *other)
     return strcmp(self->vector, other->vector) == 0;
 }
 
-#ifndef HOLD
 #undef POD
+#ifndef HOLD
 #undef vec_char
 #undef T
 #else

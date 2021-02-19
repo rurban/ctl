@@ -539,7 +539,8 @@ static inline void JOIN(A, insert_count)(I *pos, size_t count, T value)
 #if defined CTL_STR
     JOIN(A, reserve)(self, self->size);
 #endif
-    FREE_VALUE(self, value);
+    if (self->free)
+        self->free(&value);
 }
 
 static inline void JOIN(A, insert_range)(I *pos, I *range2)

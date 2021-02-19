@@ -296,7 +296,8 @@ static inline void JOIN(A, erase_node)(A *self, B *node)
 {
     if (LIKELY(self->size))
         JOIN(A, disconnect)(self, node);
-    FREE_VALUE(self, node->value);
+    if (self->free)
+        self->free(&node->value);
     free(node);
 }
 
@@ -378,7 +379,8 @@ static inline void JOIN(A, resize)(A *self, size_t size, T value)
     if (LIKELY(size != self->size && size < JOIN(A, max_size)()))
         for (size_t i = 0; size != self->size; i++)
             (size < self->size) ? JOIN(A, pop_back)(self) : JOIN(A, push_back)(self, self->copy(&value));
-    FREE_VALUE(self, value);
+    if (self->free)
+        self->free(&value);
 }
 
 static inline A JOIN(A, copy)(A *self)

@@ -493,7 +493,8 @@ static inline void JOIN(A, resize)(A *self, size_t size, T value)
             else
                 JOIN(A, push_back)(self, self->copy(&value));
     }
-    FREE_VALUE(self, value);
+    if (self->free)
+        self->free(&value);
 }
 
 static inline I *JOIN(A, erase_range)(I *range)
@@ -558,12 +559,14 @@ static inline I *JOIN(A, insert_count)(I *pos, size_t count, T value)
         ASSERT(self->size + count >= self->size || !"count overflow");
         ASSERT(index + count >= count || !"pos overflow");
         ASSERT(self->size + count < JOIN(A, max_size)() || !"max_size overflow");
-        FREE_VALUE(self, value);
+        if (self->free)
+            self->free(&value);
         return NULL;
     }
     for (size_t i = index; i < count + index; i++)
         JOIN(A, insert_index)(self, i, self->copy(&value));
-    FREE_VALUE(self, value);
+    if (self->free)
+        self->free(&value);
     return pos;
 }
 
@@ -572,7 +575,8 @@ static inline void JOIN(A, assign)(A *self, size_t size, T value)
     JOIN(A, resize)(self, size, self->copy(&value));
     for (size_t i = 0; i < size; i++)
         JOIN(A, set)(self, i, self->copy(&value));
-    FREE_VALUE(self, value);
+    if (self->free)
+        self->free(&value);
 }
 
 // including to

@@ -22,13 +22,9 @@
 
 #define len(a) (sizeof(a) / sizeof(*(a)))
 
-#ifndef POD
 #define FREE_VALUE(self, value)                                                                                        \
     if (self->free)                                                                                                    \
         self->free(&(value))
-#else
-#define FREE_VALUE(self, value)
-#endif
 
 #ifdef DEBUG
 #define LOG(...) fprintf(stderr, __VA_ARGS__)
