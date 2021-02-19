@@ -21,6 +21,11 @@
 #endif
 #include <assert.h>
 
+#define POD
+#define T int
+#include <ctl/queue.h>
+#include <ctl/string.h>
+
 #ifdef LONG
 #define TEST_MAX_SIZE (4096)
 #define TEST_MAX_LOOPS (8096)
@@ -72,20 +77,64 @@ static inline long TEST_TIME(void)
 
 #define INIT_TEST_LOOPS(n)                                                                                             \
     size_t loops = TEST_RAND(TEST_MAX_LOOPS);                                                                          \
-    int test = -1;                                                                                                     \
+    queue_int tests = queue_int_init();                                                                                \
+    static int test = -1;                                                                                              \
     char *env = getenv("TEST");                                                                                        \
     if (env)                                                                                                           \
-        sscanf(env, "%d", &test);                                                                                      \
-    if (test >= 0)                                                                                                     \
-        loops = n;                                                                                                     \
+        parse_TEST(env, &test, &tests, number_ok);                                                                     \
+    if (tests.size)                                                                                                    \
+    {                                                                                                                  \
+        loops = tests.size == 1 ? n : tests.size;                                                                      \
+        LOG("LOOPS: %zu\n", loops);                                                                                    \
+    }                                                                                                                  \
     if ((env = getenv("LOOPS")))                                                                                       \
-    sscanf(env, "%zu", &loops)
+        sscanf(env, "%zu", &loops)
+
+/*
+  TEST=OK tests all stable tests even with DEBUG
+  TEST=1-10 or TEST=1,5,7,8-10 tests ranges.
+*/
+void parse_TEST(char* env, int *test, queue_int *tests, const int number_ok)
+{
+    if (!strcmp(env, "OK"))
+    {
+        for (int j=0; j<number_ok; j++)
+            queue_int_push(tests, j);
+        LOG("TEST OK: 0-%d\n", number_ok-1);
+        return;
+    }
+    sscanf(env, "%d", test);
+    if (!strchr(env, '-') && !strchr(env, ','))
+        return;
+    if (*test >= 0)
+        queue_int_push(tests, *test);
+    str s = str_init(env);
+    str_it r1 = str_it_begin(&s);
+    str alts = str_init("-,");
+    str_it r2 = str_it_begin(&alts);
+    while (str_find_first_of_range(&r1, &r2))
+    {
+        int i = 0;
+        char *p = r1.ref;
+        sscanf(p+1, "%d", &i);
+        if (*p == '-' && i > *test)
+            for (int j=*test+1; j<i; j++)
+                queue_int_push(tests, j);
+        else if (i && *p == ',')
+            queue_int_push(tests, i);
+        str_it_advance(&r1, 1);
+    }
+    str_free(&s);
+    str_free(&alts);
+}
 
 #endif
 
+#ifndef MAX
+#define MAX(a, b) (a) > (b) ? (a) : (b)
+#endif
 #ifndef MIN
 #define MIN(a, b) (a) < (b) ? (a) : (b)
-#define MAX(a, b) (a) > (b) ? (a) : (b)
 #endif
 
 #define OLD_MAIN                                                                                                       \

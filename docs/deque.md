@@ -212,7 +212,7 @@ adds the value reference to the end.
 
     pop_front (A* self)
 
-removes the first element
+removes the first element.
 
     pop_back (A* self)
 

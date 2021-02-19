@@ -14,6 +14,65 @@ OLD_MAIN
 #include <iterator>
 #include <map>
 
+#define FOREACH_METH(TEST)                                                                                             \
+    TEST(INSERT)                                                                                                       \
+    TEST(INSERT_OR_ASSIGN)                                                                                             \
+    TEST(ERASE)                                                                                                        \
+    TEST(CLEAR)                                                                                                        \
+    TEST(SWAP)                                                                                                         \
+    TEST(COUNT)                                                                                                        \
+    TEST(FIND_NODE)                                                                                                    \
+    TEST(FIND)                                                                                                         \
+    TEST(COPY)                                                                                                         \
+    TEST(EQUAL)                                                                                                        \
+    TEST(UNION)                                                                                                        \
+    TEST(INTERSECTION)                                                                                                 \
+    TEST(SYMMETRIC_DIFFERENCE)                                                                                         \
+    TEST(DIFFERENCE)
+
+#define FOREACH_DEBUG(TEST)                                                                                            \
+    /* TEST(EMPLACE) */                                                                                                \
+    /* TEST(EXTRACT) */                                                                                                \
+    /* TEST(MERGE) */                                                                                                  \
+    TEST(CONTAINS)                                                                                                     \
+    TEST(ERASE_IF)                                                                                                     \
+    TEST(EQUAL_RANGE)                                                                                                  \
+    TEST(FIND_RANGE)                                                                                                   \
+    TEST(FIND_IF)                                                                                                      \
+    TEST(FIND_IF_NOT)                                                                                                  \
+    TEST(FIND_IF_RANGE)                                                                                                \
+    TEST(FIND_IF_NOT_RANGE)                                                                                            \
+    TEST(ALL_OF)                                                                                                       \
+    TEST(ANY_OF)                                                                                                       \
+    TEST(NONE_OF)                                                                                                      \
+    TEST(ALL_OF_RANGE)                                                                                                 \
+    TEST(ANY_OF_RANGE)                                                                                                 \
+    TEST(NONE_OF_RANGE)                                                                                                \
+    TEST(COUNT_IF)                                                                                                     \
+    TEST(COUNT_IF_RANGE)                                                                                               \
+    TEST(COUNT_RANGE)
+
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+// clang-format off
+enum
+{
+    FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+    FOREACH_DEBUG(GENERATE_ENUM)
+#endif
+    TEST_TOTAL
+};
+static const char *test_ok_names[] = { FOREACH_METH(GENERATE_NAME) };
+static const int number_ok = sizeof(test_ok_names)/sizeof(char*);
+#ifdef DEBUG
+static const char *test_names[] = {FOREACH_METH(GENERATE_NAME)
+    FOREACH_DEBUG(GENERATE_NAME)
+    ""};
+#endif
+// clang-format on
+
 #define CHECK(_x, _y)                                                                                                  \
     {                                                                                                                  \
         assert(_x.size == _y.size());                                                                                  \
@@ -61,65 +120,14 @@ int main(void)
         map_strint a;
         std::map<std::string, int> b;
         setup_sets(&a, b);
-#define FOREACH_METH(TEST)                                                                                             \
-    TEST(INSERT)                                                                                                       \
-    TEST(INSERT_OR_ASSIGN)                                                                                             \
-    TEST(ERASE)                                                                                                        \
-    TEST(CLEAR)                                                                                                        \
-    TEST(SWAP)                                                                                                         \
-    TEST(COUNT)                                                                                                        \
-    TEST(FIND_NODE)                                                                                                    \
-    TEST(FIND)                                                                                                         \
-    TEST(COPY)                                                                                                         \
-    TEST(EQUAL)                                                                                                        \
-    TEST(UNION)                                                                                                        \
-    TEST(INTERSECTION)                                                                                                 \
-    TEST(SYMMETRIC_DIFFERENCE)                                                                                         \
-    TEST(DIFFERENCE)
-
-#define FOREACH_DEBUG(TEST)                                                                                            \
-    /* TEST(EMPLACE) */                                                                                                \
-    /* TEST(EXTRACT) */                                                                                                \
-    /* TEST(MERGE) */                                                                                                  \
-    TEST(CONTAINS)                                                                                                     \
-    TEST(ERASE_IF)                                                                                                     \
-    TEST(EQUAL_RANGE)                                                                                                  \
-    TEST(FIND_RANGE)                                                                                                   \
-    TEST(FIND_IF)                                                                                                      \
-    TEST(FIND_IF_NOT)                                                                                                  \
-    TEST(FIND_IF_RANGE)                                                                                                \
-    TEST(FIND_IF_NOT_RANGE)                                                                                            \
-    TEST(ALL_OF)                                                                                                       \
-    TEST(ANY_OF)                                                                                                       \
-    TEST(NONE_OF)                                                                                                      \
-    TEST(ALL_OF_RANGE)                                                                                                 \
-    TEST(ANY_OF_RANGE)                                                                                                 \
-    TEST(NONE_OF_RANGE)                                                                                                \
-    TEST(COUNT_IF)                                                                                                     \
-    TEST(COUNT_IF_RANGE)                                                                                               \
-    TEST(COUNT_RANGE)
-
-#define GENERATE_ENUM(x) TEST_##x,
-#define GENERATE_NAME(x) #x,
-
-        // clang-format off
-        enum
+        int which;
+        if (tests.size)
         {
-            FOREACH_METH(GENERATE_ENUM)
-#ifdef DEBUG
-            FOREACH_DEBUG(GENERATE_ENUM)
-#endif
-            TEST_TOTAL
-        };
-#ifdef DEBUG
-        static const char *test_names[] = {FOREACH_METH(GENERATE_NAME)
-            FOREACH_DEBUG(GENERATE_NAME)
-            ""};
-#endif
-        // clang-format on
-        int which = TEST_RAND(TEST_TOTAL);
-        if (test >= 0 && test < (int)TEST_TOTAL)
-            which = test;
+            which = *queue_int_front(&tests);
+            queue_int_pop(&tests);
+        }
+        else
+            which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
         LOG("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
         switch (which)
         {
@@ -343,6 +351,7 @@ int main(void)
         CHECK(a, b);
         map_strint_free(&a);
     }
+    queue_int_free(&tests);
     TEST_PASS(__FILE__);
 }
 

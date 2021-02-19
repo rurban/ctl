@@ -75,9 +75,10 @@
 #define T pqu_int
 #include <ctl/unordered_set.h>
 
-#define POD
-#define T int
-#include <ctl/queue.h>
+// already defined by test.h
+//#define POD
+//#define T int
+//#include <ctl/queue.h>
 
 #define T queue_int
 #include <ctl/set.h>

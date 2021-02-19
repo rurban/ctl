@@ -12,6 +12,73 @@ OLD_MAIN
 #include <algorithm>
 #include <array>
 
+#define FOREACH_METH(TEST)                                                                                             \
+    TEST(SELF)                                                                                                         \
+    TEST(FILL)                                                                                                         \
+    TEST(FILL_N)                                                                                                       \
+    TEST(SORT)                                                                                                         \
+    TEST(COPY)                                                                                                         \
+    TEST(SWAP)                                                                                                         \
+    TEST(ASSIGN)                                                                                                       \
+    TEST(EQUAL)                                                                                                        \
+    TEST(CLEAR)                                                                                                        \
+    TEST(FIND)                                                                                                         \
+    TEST(FIND_IF)                                                                                                      \
+    TEST(FIND_IF_NOT)                                                                                                  \
+    TEST(ALL_OF)                                                                                                       \
+    TEST(ANY_OF)                                                                                                       \
+    TEST(NONE_OF)                                                                                                      \
+    TEST(COUNT)                                                                                                        \
+    TEST(COUNT_IF)                                                                                                     \
+    TEST(FIND_RANGE)                                                                                                   \
+    TEST(FIND_IF_RANGE)                                                                                                \
+    TEST(FIND_IF_NOT_RANGE)                                                                                            \
+    TEST(NONE_OF_RANGE)                                                                                                \
+    TEST(COUNT_IF_RANGE)                                                                                               \
+    TEST(COUNT_RANGE)                                                                                                  \
+    TEST(ALL_OF_RANGE)                                                                                                 \
+    TEST(ANY_OF_RANGE)                                                                                                 \
+    TEST(GENERATE)                                                                                                     \
+    TEST(GENERATE_RANGE)                                                                                               \
+    TEST(TRANSFORM)
+
+#define FOREACH_DEBUG(TEST)                                                                                            \
+    TEST(EQUAL_RANGE)                                                                                                  \
+    TEST(LOWER_BOUND)                                                                                                  \
+    TEST(UPPER_BOUND)                                                                                                  \
+    TEST(LOWER_BOUND_RANGE)                                                                                            \
+    TEST(UPPER_BOUND_RANGE)                                                                                            \
+    TEST(UNION)                                                                                                        \
+    TEST(DIFFERENCE)                                                                                                   \
+    TEST(SYMETRIC_DIFFERENCE)                                                                                          \
+    TEST(INTERSECTION)                                                                                                 \
+    TEST(GENERATE_N)                                                                                                   \
+    TEST(GENERATE_N_RANGE)                                                                                             \
+    TEST(TRANSFORM_IT)                                                                                                 \
+    TEST(TRANSFORM_RANGE)
+
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+// clang-format off
+enum
+{
+    FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+    FOREACH_DEBUG(GENERATE_ENUM)
+#endif
+    TEST_TOTAL
+};
+static const char *test_ok_names[] = { FOREACH_METH(GENERATE_NAME) };
+static const int number_ok = sizeof(test_ok_names)/sizeof(char*);
+#ifdef DEBUG
+static const char *test_names[] = {
+    FOREACH_METH(GENERATE_NAME)
+    FOREACH_DEBUG(GENERATE_NAME)
+    ""};
+// clang-format on
+#endif
+
 int double_is_odd(double *d)
 {
     return ((long)*d) % 2;
@@ -180,74 +247,14 @@ int main(void)
             b[i] = value;
             a.vector[i] = value;
         }
-
-#define FOREACH_METH(TEST)                                                                                             \
-    TEST(SELF)                                                                                                         \
-    TEST(FILL)                                                                                                         \
-    TEST(FILL_N)                                                                                                       \
-    TEST(SORT)                                                                                                         \
-    TEST(COPY)                                                                                                         \
-    TEST(SWAP)                                                                                                         \
-    TEST(ASSIGN)                                                                                                       \
-    TEST(EQUAL)                                                                                                        \
-    TEST(CLEAR)                                                                                                        \
-    TEST(FIND)                                                                                                         \
-    TEST(FIND_IF)                                                                                                      \
-    TEST(FIND_IF_NOT)                                                                                                  \
-    TEST(ALL_OF)                                                                                                       \
-    TEST(ANY_OF)                                                                                                       \
-    TEST(NONE_OF)                                                                                                      \
-    TEST(COUNT)                                                                                                        \
-    TEST(COUNT_IF)                                                                                                     \
-    TEST(FIND_RANGE)                                                                                                   \
-    TEST(FIND_IF_RANGE)                                                                                                \
-    TEST(FIND_IF_NOT_RANGE)                                                                                            \
-    TEST(NONE_OF_RANGE)                                                                                                \
-    TEST(COUNT_IF_RANGE)                                                                                               \
-    TEST(COUNT_RANGE)                                                                                                  \
-    TEST(ALL_OF_RANGE)                                                                                                 \
-    TEST(ANY_OF_RANGE)                                                                                                 \
-    TEST(GENERATE)                                                                                                     \
-    TEST(GENERATE_RANGE)                                                                                               \
-    TEST(TRANSFORM)
-
-#define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(EQUAL_RANGE)                                                                                                  \
-    TEST(LOWER_BOUND)                                                                                                  \
-    TEST(UPPER_BOUND)                                                                                                  \
-    TEST(LOWER_BOUND_RANGE)                                                                                            \
-    TEST(UPPER_BOUND_RANGE)                                                                                            \
-    TEST(UNION)                                                                                                        \
-    TEST(DIFFERENCE)                                                                                                   \
-    TEST(SYMETRIC_DIFFERENCE)                                                                                          \
-    TEST(INTERSECTION)                                                                                                 \
-    TEST(GENERATE_N)                                                                                                   \
-    TEST(GENERATE_N_RANGE)                                                                                             \
-    TEST(TRANSFORM_IT)                                                                                                 \
-    TEST(TRANSFORM_RANGE)
-
-#define GENERATE_ENUM(x) TEST_##x,
-#define GENERATE_NAME(x) #x,
-
-        // clang-format off
-        enum
+        int which;
+        if (tests.size)
         {
-            FOREACH_METH(GENERATE_ENUM)
-#ifdef DEBUG
-            FOREACH_DEBUG(GENERATE_ENUM)
-#endif
-            TEST_TOTAL
-        };
-#ifdef DEBUG
-        static const char *test_names[] = {
-            FOREACH_METH(GENERATE_NAME)
-            FOREACH_DEBUG(GENERATE_NAME)
-            ""};
-        // clang-format on
-#endif
-        int which = TEST_RAND(TEST_TOTAL);
-        if (test >= 0 && test < (int)TEST_TOTAL)
-            which = test;
+            which = *queue_int_front(&tests);
+            queue_int_pop(&tests);
+        }
+        else
+            which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
         LOG("TEST=%d %s\n", which, test_names[which]);
         switch (which)
         {
@@ -575,6 +582,7 @@ int main(void)
         CHECK(a, b);
         arr20_double_free(&a);
     }
+    queue_int_free(&tests);
     if (fail)
         TEST_FAIL(__FILE__);
     else

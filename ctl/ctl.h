@@ -25,7 +25,7 @@
 #ifndef POD
 #define FREE_VALUE(self, value)                                                                                        \
     if (self->free)                                                                                                    \
-    self->free(&(value))
+        self->free(&(value))
 #else
 #define FREE_VALUE(self, value)
 #endif

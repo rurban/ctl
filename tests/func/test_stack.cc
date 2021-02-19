@@ -11,6 +11,29 @@ OLD_MAIN
 
 #include <stack>
 
+#define FOREACH_METH(TEST)                                                                                             \
+    TEST(EMPTY)                                                                                                        \
+    TEST(SIZE)                                                                                                         \
+    TEST(TOP)                                                                                                          \
+    TEST(PUSH)                                                                                                         \
+    TEST(POP)                                                                                                          \
+    TEST(SWAP)
+
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+// clang-format off
+enum
+{
+    FOREACH_METH(GENERATE_ENUM)
+    TEST_TOTAL
+};
+static const int number_ok = (int)TEST_TOTAL;
+#ifdef DEBUG
+static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) ""};
+#endif
+// clang-format on
+
 #define CHECK(_x, _y)                                                                                                  \
     {                                                                                                                  \
         while (_x.size > 0)                                                                                            \
@@ -38,27 +61,14 @@ int main(void)
             stack_digi_push(&a, digi_init(value));
             b.push(DIGI{value});
         }
-#define FOREACH_METH(TEST)                                                                                             \
-    TEST(EMPTY)                                                                                                        \
-    TEST(SIZE)                                                                                                         \
-    TEST(TOP)                                                                                                          \
-    TEST(PUSH)                                                                                                         \
-    TEST(POP)                                                                                                          \
-    TEST(SWAP)
-
-#define GENERATE_ENUM(x) TEST_##x,
-#define GENERATE_NAME(x) #x,
-
-        enum
+        int which;
+        if (tests.size)
         {
-            FOREACH_METH(GENERATE_ENUM) TEST_TOTAL
-        };
-#ifdef DEBUG
-        static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) ""};
-#endif
-        int which = TEST_RAND(TEST_TOTAL);
-        if (test >= 0 && test < (int)TEST_TOTAL)
-            which = test;
+            which = *queue_int_front(&tests);
+            queue_int_pop(&tests);
+        }
+        else
+            which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
         LOG("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
         switch (which)
         {
@@ -91,6 +101,7 @@ int main(void)
         CHECK(a, b);
         stack_digi_free(&a);
     }
+    queue_int_free(&tests);
     TEST_PASS(__FILE__);
 }
 

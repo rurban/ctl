@@ -24,6 +24,43 @@
 #define T int
 #include <ctl/unordered_set.h>
 
+#define FOREACH_METH(TEST)                                                                                             \
+    TEST(INSERT_GENERIC)                                                                                               \
+    TEST(MERGE_RANGE)                                                                                                  \
+    TEST(INCLUDES_RANGE)                                                                                               \
+    TEST(EQUAL_RANGE)                                                                                                  \
+    TEST(MISMATCH)                                                                                                     \
+    TEST(UNION_RANGE)                                                                                                  \
+    TEST(INTERSECTION_RANGE)                                                                                           \
+    TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
+    TEST(SEARCH_RANGE)                                                                                                 \
+    TEST(FIND_FIRST_OF_RANGE)                                                                                          \
+    TEST(FIND_END_RANGE)
+
+#define FOREACH_DEBUG(TEST)                                                                                            \
+    TEST(DIFFERENCE_RANGE)                                                                                             \
+    //TEST(REMOVE_RANGE)
+
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+// clang-format off
+enum
+{
+    FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+    FOREACH_DEBUG(GENERATE_ENUM)
+#endif
+    TEST_TOTAL
+};
+static const char *test_ok_names[] = { FOREACH_METH(GENERATE_NAME) };
+static const int number_ok = sizeof(test_ok_names)/sizeof(char*);
+#ifdef DEBUG
+static const char *test_names[] = { FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GENERATE_NAME) ""};
+#endif
+// clang-format on
+
+
 typedef enum types_t
 {
     CTL_VECTOR,
@@ -304,45 +341,14 @@ int main(void)
         const types_t t2 = pick_type();
         LOG("2nd type: %d\n", t2);
 
-#define FOREACH_METH(TEST)                                                                                             \
-    TEST(INSERT_GENERIC)                                                                                               \
-    TEST(MERGE_RANGE)                                                                                                  \
-    TEST(INCLUDES_RANGE)                                                                                               \
-    TEST(EQUAL_RANGE)                                                                                                  \
-    TEST(MISMATCH)                                                                                                     \
-    TEST(UNION_RANGE)                                                                                                  \
-    TEST(INTERSECTION_RANGE)                                                                                           \
-    TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
-    TEST(SEARCH_RANGE)                                                                                                 \
-    TEST(FIND_FIRST_OF_RANGE)                                                                                          \
-    TEST(FIND_END_RANGE)
-
-#define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(DIFFERENCE_RANGE)                                                                                             \
-    //TEST(REMOVE_RANGE)
-
-#define GENERATE_ENUM(x) TEST_##x,
-#define GENERATE_NAME(x) #x,
-
-        // clang-format off
-        enum
+        int which;
+        if (tests.size)
         {
-            FOREACH_METH(GENERATE_ENUM)
-#ifdef DEBUG
-            FOREACH_DEBUG(GENERATE_ENUM)
-#endif
-            TEST_TOTAL
-        };
-#ifdef DEBUG
-        static const char *test_names[] = {
-            FOREACH_METH(GENERATE_NAME)
-            FOREACH_DEBUG(GENERATE_NAME)
-            ""};
-#endif
-        // clang-format on
-        int which = TEST_RAND(TEST_TOTAL);
-        if (test >= 0 && test < (int)TEST_TOTAL)
-            which = test;
+            which = *queue_int_front(&tests);
+            queue_int_pop(&tests);
+        }
+        else
+            which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
         LOG("TEST %s %d\n", test_names[which], which);
         switch (which)
         {
@@ -2189,6 +2195,7 @@ int main(void)
             break;
         }
     }
+    queue_int_free(&tests);
     if (errors)
         TEST_FAIL(__FILE__);
     else

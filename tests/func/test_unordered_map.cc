@@ -16,6 +16,65 @@ OLD_MAIN
 #include <string>
 #include <unordered_map>
 
+#define FOREACH_METH(TEST)                                                                                             \
+    TEST(INSERT)                                                                                                       \
+    TEST(INSERT_FOUND)                                                                                                 \
+    TEST(INSERT_OR_ASSIGN)                                                                                             \
+    TEST(INSERT_OR_ASSIGN_FOUND)                                                                                       \
+    TEST(ERASE)                                                                                                        \
+    TEST(ERASE_IF)                                                                                                     \
+    TEST(CLEAR)                                                                                                        \
+    TEST(COUNT)                                                                                                        \
+    TEST(CONTAINS)                                                                                                     \
+    TEST(FIND)                                                                                                         \
+    TEST(EQUAL)                                                                                                        \
+    TEST(REHASH)                                                                                                       \
+    TEST(RESERVE)                                                                                                      \
+    TEST(UNION)                                                                                                        \
+    TEST(INTERSECTION)                                                                                                 \
+    TEST(SYMMETRIC_DIFFERENCE)                                                                                         \
+    TEST(DIFFERENCE)
+
+#define FOREACH_DEBUG(TEST)                                                                                            \
+    /* TEST(EMPLACE) */                                                                                                \
+    /* TEST(EXTRACT) */                                                                                                \
+    /* TEST(MERGE) */                                                                                                  \
+    /* TEST(EQUAL_RANGE) */                                                                                            \
+    TEST(SWAP)                                                                                                         \
+    TEST(COPY)                                                                                                         \
+    TEST(FIND_IF)                                                                                                      \
+    TEST(FIND_IF_NOT)                                                                                                  \
+    TEST(ALL_OF)                                                                                                       \
+    TEST(ANY_OF)                                                                                                       \
+    TEST(NONE_OF)                                                                                                      \
+    TEST(COUNT_IF)                                                                                                     \
+    TEST(EMPLACE)                                                                                                      \
+    TEST(EMPLACE_FOUND)                                                                                                \
+    TEST(EMPLACE_HINT)                                                                                                 \
+    TEST(MERGE)                                                                                                        \
+    TEST(REMOVE_IF)                                                                                                    \
+    TEST(GENERATE)                                                                                                     \
+    TEST(TRANSFORM)
+
+#define GENERATE_ENUM(x) TEST_##x,
+#define GENERATE_NAME(x) #x,
+
+// clang-format off
+enum
+{
+    FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+    FOREACH_DEBUG(GENERATE_ENUM)
+#endif
+    TEST_TOTAL
+};
+// clang-format on
+static const char *test_ok_names[] = { FOREACH_METH(GENERATE_NAME) };
+static const int number_ok = sizeof(test_ok_names)/sizeof(char*);
+#ifdef DEBUG
+static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GENERATE_NAME) ""};
+#endif
+
 #define CHECK(_x, _y)                                                                                                  \
     {                                                                                                                  \
         assert(_x.size == _y.size());                                                                                  \
@@ -81,67 +140,13 @@ int main(void)
         umap_strint a;
         std::unordered_map<std::string, int> b;
         setup_sets(&a, b);
-#define FOREACH_METH(TEST)                                                                                             \
-    TEST(INSERT)                                                                                                       \
-    TEST(INSERT_FOUND)                                                                                                 \
-    TEST(INSERT_OR_ASSIGN)                                                                                             \
-    TEST(INSERT_OR_ASSIGN_FOUND)                                                                                       \
-    TEST(ERASE)                                                                                                        \
-    TEST(ERASE_IF)                                                                                                     \
-    TEST(CLEAR)                                                                                                        \
-    TEST(COUNT)                                                                                                        \
-    TEST(CONTAINS)                                                                                                     \
-    TEST(FIND)                                                                                                         \
-    TEST(EQUAL)                                                                                                        \
-    TEST(REHASH)                                                                                                       \
-    TEST(RESERVE)                                                                                                      \
-    TEST(UNION)                                                                                                        \
-    TEST(INTERSECTION)                                                                                                 \
-    TEST(SYMMETRIC_DIFFERENCE)                                                                                         \
-    TEST(DIFFERENCE)
-
-#define FOREACH_DEBUG(TEST)                                                                                            \
-    /* TEST(EMPLACE) */                                                                                                \
-    /* TEST(EXTRACT) */                                                                                                \
-    /* TEST(MERGE) */                                                                                                  \
-    /* TEST(EQUAL_RANGE) */                                                                                            \
-    TEST(SWAP)                                                                                                         \
-    TEST(COPY)                                                                                                         \
-    TEST(FIND_IF)                                                                                                      \
-    TEST(FIND_IF_NOT)                                                                                                  \
-    TEST(ALL_OF)                                                                                                       \
-    TEST(ANY_OF)                                                                                                       \
-    TEST(NONE_OF)                                                                                                      \
-    TEST(COUNT_IF)                                                                                                     \
-    TEST(EMPLACE)                                                                                                      \
-    TEST(EMPLACE_FOUND)                                                                                                \
-    TEST(EMPLACE_HINT)                                                                                                 \
-    TEST(MERGE)                                                                                                        \
-    TEST(REMOVE_IF)                                                                                                    \
-    TEST(GENERATE)                                                                                                     \
-    TEST(TRANSFORM)
-
-#define GENERATE_ENUM(x) TEST_##x,
-#define GENERATE_NAME(x) #x,
-
-        // clang-format off
-        enum
+        int which;
+        if (tests.size)
         {
-            FOREACH_METH(GENERATE_ENUM)
-#ifdef DEBUG
-            FOREACH_DEBUG(GENERATE_ENUM)
-#endif
-            TEST_TOTAL
-        };
-#ifdef DEBUG
-        static const char *test_names[] = {FOREACH_METH(GENERATE_NAME)
-            FOREACH_DEBUG(GENERATE_NAME)
-            ""};
-        // clang-format on
-#endif
-        int which = TEST_RAND(TEST_TOTAL);
-        if (test >= 0 && test < (int)TEST_TOTAL)
-            which = test;
+            which = *queue_int_front(&tests);
+            queue_int_pop(&tests);
+        } else
+            which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
         LOG("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
         switch (which)
         {
@@ -421,6 +426,7 @@ int main(void)
         CHECK(a, b);
         umap_strint_free(&a);
     }
+    queue_int_free(&tests);
     TEST_PASS(__FILE__);
 }
 
