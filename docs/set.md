@@ -259,6 +259,7 @@ erases all elements satisfying specific criteria. (C++20) _(NYI)_
     find_range (I* range, T key) (C++20)
     find_if_range (I* range, int _match(T*)) (C++20)
     find_if_not_range (I* range, int _match(T*)) (C++20)
+    bool find_first_of_range (I* range1, GI* range2)
 
     remove (A* self, T key)                        _(NYI)_
     size_t remove_if (A* self, int match(T*))

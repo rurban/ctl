@@ -1176,23 +1176,27 @@ static inline I JOIN(A, transform_it_range)(I *range1, I *pos, I dest, T _binop(
 }
 
 // i.e. strcspn, but returning the first found match
-static inline bool JOIN(A, find_first_of_range)(I *range1, I *range2)
+static inline bool JOIN(A, find_first_of_range)(I *range1, GI *range2)
 {
-    if (JOIN(I, done)(range1) || JOIN(I, done)(range2))
+    void (*next2)(struct I*) = range2->vtable.next;
+    T* (*ref2)(struct I*) = range2->vtable.ref;
+    int (*done2)(struct I*) = range2->vtable.done;
+
+    if (JOIN(I, done)(range1) || done2(range2))
         return false;
     I it = *range2;
     while (1)
     {
-        if (JOIN(I, done)(&it))
+        if (done2(&it))
             goto not_found;
         // find_range changes the 1st arg. need a copy
         I tmp = *range1;
-        if (JOIN(A, find_range)(&tmp, *it.ref))
+        if (JOIN(A, find_range)(&tmp, *ref2(&it)))
         {
             *range1 = tmp;
             return true;
         }
-        JOIN(I, next)(&it);
+        next2(&it);
     }
 not_found:
     JOIN(I, set_done)(range1);
