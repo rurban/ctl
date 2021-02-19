@@ -376,7 +376,6 @@ int main(void)
             {
             // cannot insert into array
             case CTL_ARRAY : break;
-#ifdef DEBUG
             case CTL_VECTOR : {
                 SETUP_VEC1;
                 switch (t2)
@@ -385,7 +384,10 @@ int main(void)
                     SETUP_VEC2; INSERT_INTO(vec, vec, vector<int>); break;
                 }
                 case CTL_ARRAY : {
-                    SETUP_ARR2; INSERT_INTO(arr25, vec, vector<int>); break;
+#ifdef DEBUG
+                    SETUP_ARR2; INSERT_INTO(arr25, vec, vector<int>);
+#endif
+                    break;
                 }
                 case CTL_DEQUE : {
                     SETUP_DEQ2; INSERT_INTO(deq, vec, vector<int>); break;
@@ -410,7 +412,10 @@ int main(void)
                     SETUP_VEC2; INSERT_INTO(vec, deq, deque<int>); break;
                 }
                 case CTL_ARRAY : {
-                    SETUP_ARR2; INSERT_INTO(arr25, deq, deque<int>); break;
+#ifdef DEBUG
+                    SETUP_ARR2; INSERT_INTO(arr25, deq, deque<int>);
+#endif
+                    break;
                 }
                 case CTL_DEQUE : {
                     SETUP_DEQ2; INSERT_INTO(deq, deq, deque<int>); break;
@@ -427,18 +432,15 @@ int main(void)
                 } // switch t2
                 deq_int_free(&a); break;
             }
-#else
-            // not yet stable
-            case CTL_VECTOR : break;
-            case CTL_DEQUE : break;
-            case CTL_USET : break;
-#endif
             case CTL_LIST : {
                 SETUP_LIST1;
                 switch (t2)
                 {
                 case CTL_ARRAY : {
-                    SETUP_ARR2; INSERT_INTO(arr25, list, list<int>); break;
+#ifdef DEBUG
+                    SETUP_ARR2; INSERT_INTO(arr25, list, list<int>);
+#endif
+                    break;
                 }
                 case CTL_VECTOR : {
                     SETUP_VEC2; INSERT_INTO(vec, list, list<int>); break;
@@ -467,7 +469,10 @@ int main(void)
                     SETUP_VEC2; INSERT_INTO_SET(vec, set, set<int>); break;
                 }
                 case CTL_ARRAY : {
-                    SETUP_ARR2; INSERT_INTO_SET(arr25, set, set<int>); break;
+#ifdef DEBUG
+                    SETUP_ARR2; INSERT_INTO_SET(arr25, set, set<int>);
+#endif
+                    break;
                 }
                 case CTL_DEQUE : {
                     SETUP_DEQ2; INSERT_INTO_SET(deq, set, set<int>); break;
@@ -484,7 +489,7 @@ int main(void)
                 } // switch t2
                 set_int_free(&a); break;
             }
-#ifdef DEBUG
+//#ifdef DEBUG
             // C++ cannot insert into unordered_set. CTL can
             case CTL_USET: {
                 SETUP_USET1;
@@ -494,7 +499,10 @@ int main(void)
                     SETUP_VEC2; INSERT_INTO_SET(vec, uset, unordered_set<int>); break;
                 }
                 case CTL_ARRAY : {
-                    SETUP_ARR2; INSERT_INTO_SET(arr25, uset, unordered_set<int>); break;
+#ifdef DEBUG
+                    SETUP_ARR2; INSERT_INTO_SET(arr25, uset, unordered_set<int>);
+#endif
+                    break;
                 }
                 case CTL_LIST : {
                     SETUP_LIST2; INSERT_INTO_SET(list, uset, unordered_set<int>); break;
@@ -511,7 +519,7 @@ int main(void)
                 } // switch t2
                 uset_int_free(&a); break;
             }
-#endif // DEBUG
+//#endif // DEBUG
             } // switch t1
             break;
 

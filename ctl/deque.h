@@ -453,9 +453,18 @@ static inline void JOIN(A, insert)(I *pos, T value)
 {
     A *self = pos->container;
     if (self->size > 0)
+    {
         JOIN(A, insert_index)(self, pos->index, value);
+    }
     else
+    {
         JOIN(A, push_back)(self, value);
+    }
+    /*
+    if (pos->index)
+        pos->index--;
+    pos->ref = JOIN(A, at)(self, pos->index); // bounds-checked (not at end)
+    */
 }
 
 static inline void JOIN(A, clear)(A *self)
@@ -535,17 +544,24 @@ static inline void /* I* */
     // The STL cannot do that.
     if (!JOIN(I, done)(pos))
     {
-        foreach_range_(A, iter, range) if (iter.ref) JOIN(A, insert_index)(self, index++, self->copy(iter.ref));
+        foreach_range_(A, iter, range)
+            if (iter.ref)
+                JOIN(A, insert_index)(self, index++, self->copy(iter.ref));
+        pos->index = index;
+        pos->end += JOIN(I, distance_range)(range);
     }
     else
     {
-        foreach_range_(A, iter, range) if (iter.ref) JOIN(A, push_back)(self, self->copy(iter.ref));
+        foreach_range_(A, iter, range)
+            if (iter.ref)
+                JOIN(A, push_back)(self, self->copy(iter.ref));
+        pos->end += JOIN(I, distance_range)(range);
     }
     /*
     if (pos->index)
         pos->index--;
     pos->ref = JOIN(A, at)(self, pos->index); // bounds-checked (not at end)
-    return pos;
+    //return pos;
     */
 }
 
@@ -567,6 +583,7 @@ static inline I *JOIN(A, insert_count)(I *pos, size_t count, T value)
         JOIN(A, insert_index)(self, i, self->copy(&value));
     if (self->free)
         self->free(&value);
+    pos->end += count;
     return pos;
 }
 
@@ -687,6 +704,8 @@ static inline void JOIN(A, insert_generic)(I *pos, GI *range)
     while (!done(range))
     {
         JOIN(A, insert)(pos, *ref(range));
+        pos->index++;
+        //pos->end++;
         next(range);
     }
 }
