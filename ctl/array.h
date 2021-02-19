@@ -192,8 +192,8 @@ static inline A JOIN(A, init)(void)
     A self = zero;
 #if N > CUTOFF
     self.vector = (T *)calloc(N, sizeof(T));
-//#else
-//    memset(self.vector, 0, N * sizeof(T));
+#else
+    memset(self.vector, 0, N * sizeof(T));
 #endif
 #ifdef POD
     self.copy = JOIN(A, implicit_copy);
