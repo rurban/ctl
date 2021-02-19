@@ -131,13 +131,7 @@ typedef struct A
 
 typedef struct I
 {
-    JOIN(I, vtable_t) vtable;
-    T *ref;      // will be removed later
-    B *next;
-    // B* end;   // if ranges were added to usets
-    A *container;
-    B *node;     // the bucket
-    B **buckets; // the chain
+    CTL_USET_ITER_FIELDS;
 } I;
 
 #include <ctl/bits/iterators.h>
@@ -179,7 +173,7 @@ static inline void JOIN(I, update)(I *iter)
     ASSERT(iter->node);
     ASSERT(iter->buckets - iter->container->buckets < (long)iter->container->bucket_count);
     iter->ref = &iter->node->value;
-    iter->next = iter->node->next;
+    //iter->next = iter->node->next;
 }
 
 /* Need two states: if next is not empty, we are still in the bucket chain.
@@ -189,7 +183,7 @@ static inline void JOIN(I, next)(I *iter)
 {
     ASSERT(iter->node);
     ASSERT(iter->buckets);
-    if (iter->next == NULL)
+    if (!iter->node->next)
     {
         A *self = iter->container;
         B **bend = &self->buckets[self->bucket_count];
@@ -207,7 +201,7 @@ static inline void JOIN(I, next)(I *iter)
     }
     else
     {
-        iter->node = iter->next;
+        iter->node = iter->node->next;
         JOIN(I, update)(iter);
     }
 }
@@ -221,7 +215,7 @@ static inline I *JOIN(I, advance)(I *iter, long i)
         iter->buckets = it.buckets;
         iter->node = it.node;
         iter->ref = it.ref;
-        iter->next = it.node->next;
+        //iter->next = it.node->next;
     }
     for (int j = 0; j < i; j++)
         JOIN(I, next)(iter);
@@ -290,7 +284,7 @@ JOIN(I, range)(A* container, I* begin, I* end)
     {
         iter.node = begin->node;
         iter.ref = &iter.node->value;
-        iter.next = iter.node->next;
+        //iter.next = iter.node->next;
         iter.end = end->node;
         iter.container = container;
         iter.buckets = begin->buckets;
@@ -334,7 +328,7 @@ static inline I JOIN(A, begin)(A *self)
             B *node = *b;
             iter.ref = &node->value;
             iter.node = node;
-            iter.next = node->next;
+            //iter.next = node->next;
             iter.buckets = b;
             return iter;
         }
@@ -361,7 +355,7 @@ static inline I JOIN(I, iter)(A *self, B *node)
     iter.node = node;
     if (node)
     {
-        iter.next = node->next;
+        //iter.next = node->next;
         iter.ref = &node->value;
     }
     iter.container = self;

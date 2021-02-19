@@ -44,11 +44,7 @@ typedef struct A
 
 typedef struct I
 {
-    JOIN(I, vtable_t) vtable;
-    T *ref; /* will be removed later */
-    size_t end;
-    A *container;
-    size_t index;
+    CTL_DEQ_ITER_FIELDS;
 } I;
 
 #include <ctl/bits/iterators.h>

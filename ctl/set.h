@@ -39,11 +39,7 @@ typedef struct A
 
 typedef struct I
 {
-    JOIN(I, vtable_t) vtable;
-    T *ref;  /* will be removed later */
-    B *end;
-    A *container;
-    B *node;
+    CTL_B_ITER_FIELDS;
 } I;
 
 #include <ctl/bits/iterators.h>

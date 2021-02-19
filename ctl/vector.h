@@ -39,10 +39,7 @@ typedef int (*JOIN(A, compare_fn))(T *, T *);
 
 typedef struct I
 {
-    JOIN(I, vtable_t) vtable;
-    T *ref; // will be removed soon
-    T *end;
-    A *container;
+    CTL_T_ITER_FIELDS;
 } I;
 
 #include <ctl/bits/iterators.h>
