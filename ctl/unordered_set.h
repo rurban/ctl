@@ -607,11 +607,17 @@ static inline void JOIN(A, rehash)(A *self, size_t desired_count)
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
     JOIN(A, reserve)(&rehashed, desired_count);
-    foreach (A, self, it)
+    B **bend = &self->buckets[self->bucket_count];
+    for (B **b = self->buckets; b < bend; b++)
     {
-        B **buckets = JOIN(A, _cached_bucket)(&rehashed, it.node);
-        if (it.node != *buckets)
-            JOIN(B, push)(buckets, it.node);
+        B* node = *b;
+        while (node)
+        {
+            B* next = node->next;
+            B **buckets = JOIN(A, _cached_bucket)(&rehashed, node);
+            JOIN(B, push)(buckets, node);
+            node = next;
+        }
     }
     rehashed.size = self->size;
     // LOG ("rehash temp. from %lu to %lu, load %f\n", rehashed.size, rehashed.bucket_count,
@@ -628,20 +634,26 @@ static inline void JOIN(A, _rehash)(A *self, size_t count)
     if (count == self->bucket_count)
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
-    // LOG("_rehash %zu => %zu\n", self->size, count);
+    LOG("_rehash %zu => %zu\n", self->size, count);
     JOIN(A, _reserve)(&rehashed, count);
-    foreach (A, self, it)
+
+    B **bend = &self->buckets[self->bucket_count];
+    for (B **b = self->buckets; b < bend; b++)
     {
-        B **buckets = JOIN(A, _cached_bucket)(&rehashed, it.node);
-        if (it.node != *buckets)
-            JOIN(B, push)(buckets, it.node);
+        B* node = *b;
+        while (node)
+        {
+            B* next = node->next;
+            B **buckets = JOIN(A, _cached_bucket)(&rehashed, node);
+            JOIN(B, push)(buckets, node);
+            node = next;
+        }
     }
     rehashed.size = self->size;
-    // LOG ("_rehash from %lu to %lu, load %f\n", rehashed.size, count,
-    //     JOIN(A, load_factor)(self));
+    LOG ("_rehash from %lu to %lu, load %f\n", rehashed.size, count,
+         JOIN(A, load_factor)(self));
     free(self->buckets);
     *self = rehashed;
-    return;
 }
 
 // Note: As this is used internally a lot, don't consume (free) the key.
@@ -1179,10 +1191,10 @@ static inline int JOIN(A, equal)(A *self, A *other)
     size_t count_b = 0;
     foreach (A, self, it)
         if (JOIN(A, find_node)(self, *it.ref))
-            count_a += 1;
+            count_a++;
     foreach (A, other, it2)
         if (JOIN(A, find_node)(other, *it2.ref))
-            count_b += 1;
+            count_b++;
     return count_a == count_b;
 }
 
