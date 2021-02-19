@@ -249,8 +249,8 @@ static inline A JOIN(A, intersection)(A *a, A *b)
 #endif
 }
 
-// Warning: fails with 3-way compare!
-static inline A JOIN(A, difference_range)(I *r1, GI *r2)
+// Warning: fails with 3-way compare! And with generic r2 also.
+static inline A JOIN(A, difference_range)(I *r1, I *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
     void (*next2)(struct I*) = r2->vtable.next;

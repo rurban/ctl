@@ -242,8 +242,8 @@ void print_uset(uset_int *a)
         a.vector[i] = vb;                                                                                              \
         b[i] = vb;                                                                                                     \
     }                                                                                                                  \
-    arr25_int_sort(&a);                                                                                                \
-    std::sort(b.begin(), b.end());                                                                                     \
+    /*arr25_int_sort(&a);*/                                                                                            \
+    /*std::sort(b.begin(), b.end());*/                                                                                 \
     print_arr25(&a)
 #define SETUP_ARR2                                                                                                     \
     arr25_int aa = arr25_int_init();                                                                                   \
@@ -254,8 +254,8 @@ void print_uset(uset_int *a)
         aa.vector[i] = vb;                                                                                             \
         bb[i] = vb;                                                                                                    \
     }                                                                                                                  \
-    arr25_int_sort(&aa);                                                                                               \
-    std::sort(bb.begin(), bb.end());                                                                                   \
+    /*arr25_int_sort(&aa);*/                                                                                           \
+    /*std::sort(bb.begin(), bb.end());*/                                                                               \
     arr25_int_it range2 = arr25_int_begin(&aa);                                                                        \
     print_arr25(&aa)
 

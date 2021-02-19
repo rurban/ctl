@@ -372,9 +372,10 @@ merges two ordered ranges in-place. _(NYI)_
 returns true if one sorted sequence is a sorted subsequence of another.
 
     A difference (A* self, A* other)
-    A difference_range (I* range1, GI* range2)
+    A difference_range (I* range1, I* range2)
  
 computes the difference between two ordered ranges.
+Warning: Fails with 3-way compare! And with generic `range2` also.
 
     A intersection (A* self, A* other)
     A intersection_range (I* range1, GI* range2)
