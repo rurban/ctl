@@ -52,47 +52,48 @@ types_t pick_type(void) {
 
 void print_vec(vec_int *a)
 {
-    printf("vec: ");
+    printf("%-15s: ", "vec");
     foreach (vec_int, a, it) printf("%d, ", *it.ref);
     printf("\n");
 }
 void print_arr25(arr25_int *a)
 {
-    printf("arr25: ");
+    printf("%-15s: ", "arr25");
     foreach (arr25_int, a, it) printf("%d, ", it.ref ? *it.ref : -1);
     printf("\n");
 }
 void print_deq(deq_int *a)
 {
-    printf("deq: ");
+    printf("%-15s: ", "deq");
     foreach (deq_int, a, it) printf("%d, ", *it.ref);
     printf("\n");
 }
 void print_list(list_int *a)
 {
-    printf("list: ");
+    printf("%-15s: ", "list");
     list_foreach_ref(list_int, a, it) printf("%d, ", *it.ref);
     printf("\n");
 }
 void print_set(set_int *a)
 {
-    printf("set: ");
+    printf("%-15s: ", "set");
     foreach (set_int, a, it) printf("%d, ", *it.ref);
     printf("\n");
 }
 void print_uset(uset_int *a)
 {
-    printf("uset: ");
+    printf("%-15s: ", "uset");
     foreach (uset_int, a, it) printf("%d, ", *it.ref);
     printf("\n");
 }
 
-void print_list_stl(std::list<int> &b)
-{
-    for (auto &d : b)
-        printf("%d, ", d);
-    printf("\n----\n");
-}
+#define print_stl(b, cppty)                                                                                            \
+    LOG("=> %-15s: ", #cppty);                                                                                         \
+    for (auto &_d : b)                                                                                                 \
+    {                                                                                                                  \
+        LOG("%d, ", _d);                                                                                               \
+    }                                                                                                                  \
+    LOG("\n")
 
 #ifdef DEBUG
 #define TEST_MAX_VALUE 15
@@ -107,6 +108,8 @@ void print_list_stl(std::list<int> &b)
 #define print_list(x)
 #define print_set(x)
 #define print_uset(x)
+#undef print_stl
+#define print_stl(x, y)
 #define TEST_MAX_VALUE 1500
 #endif
 
@@ -120,11 +123,10 @@ void print_list_stl(std::list<int> &b)
             assert(_x.size == _y.size());                                                                              \
             assert(ty1##_int_empty(&_x) == _y.empty());                                                                \
             ty1##_int_it _it1 = ty1##_int_begin(&_x);                                                                  \
+            print_stl(_y, cppty);                                                                                      \
             int i = 0;                                                                                                 \
-            LOG("=> %s: ", #cppty);                                                                                    \
             for (auto &_d : _y)                                                                                        \
             {                                                                                                          \
-                LOG("%d, ", _d);                                                                                       \
                 i++;                                                                                                   \
                 if (*_it1.ref != _d)                                                                                   \
                     printf("[%d]: CTL %d != STL %d\n", i, *_it1.ref, _d);                                              \
@@ -150,6 +152,8 @@ void print_list_stl(std::list<int> &b)
         list_int_push_back(&a, vb);                                                                                    \
         b.push_back(vb);                                                                                               \
     }                                                                                                                  \
+    list_int_sort(&a);                                                                                                 \
+    b.sort();                                                                                                          \
     print_list(&a)
 
 #define SETUP_LIST2                                                                                                    \
@@ -161,6 +165,8 @@ void print_list_stl(std::list<int> &b)
         list_int_push_back(&aa, vb);                                                                                   \
         bb.push_back(vb);                                                                                              \
     }                                                                                                                  \
+    list_int_sort(&aa);                                                                                                \
+    bb.sort();                                                                                                         \
     list_int_it range2 = list_int_begin(&aa);                                                                          \
     print_list(&aa)
 
@@ -307,12 +313,12 @@ int main(void)
     TEST(UNION_RANGE)                                                                                                  \
     TEST(INTERSECTION_RANGE)                                                                                           \
     TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
-    TEST(DIFFERENCE_RANGE)                                                                                             \
     TEST(SEARCH_RANGE)                                                                                                 \
     TEST(FIND_FIRST_OF_RANGE)                                                                                          \
     TEST(FIND_END_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
+    TEST(DIFFERENCE_RANGE)                                                                                             \
     //TEST(REMOVE_RANGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
@@ -826,7 +832,7 @@ int main(void)
 
 #if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
 #define EQUAL_RANGE(ty2, ty1)                                                                                          \
-    LOG("equal_range " #ty2 " from " #ty1 "\n");                                                                       \
+    LOG("equal_range " #ty2 " with " #ty1 "\n");                                                                       \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     bool same_a = ty1##_int_equal_range(&begin, (ty1##_int_it *)&range2);                                              \
     bool same_b = std::equal(b.begin(), b.end(), bb.begin(), bb.end());                                                \
@@ -835,7 +841,7 @@ int main(void)
     ty2##_int_free(&aa)
 #else
 #define EQUAL_RANGE(ty2, ty1)                                                                                          \
-    LOG("equal_range " #ty2 " from " #ty1 "\n");                                                                       \
+    LOG("equal_range " #ty2 " with " #ty1 "\n");                                                                       \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     bool same_a = ty1##_int_equal_range(&begin, (ty1##_int_it *)&range2);                                              \
     bool same_b = std::equal(b.begin(), b.end(), bb.begin());                                                          \
@@ -940,7 +946,7 @@ int main(void)
 
 #if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
 #define MISMATCH(ty2, ty1)                                                                                             \
-    LOG("mismatch " #ty2 " from " #ty1 "\n");                                                                          \
+    LOG("mismatch " #ty2 " with " #ty1 "\n");                                                                          \
     ty1##_int_it b1 = ty1##_int_begin(&a);                                                                             \
     ty2##_int_it b2 = ty2##_int_begin(&aa);                                                                            \
     ty1##_int_it r1a = ty1##_int_begin(&a);                                                                            \
@@ -1075,7 +1081,7 @@ int main(void)
 
 #ifndef _MSC_VER
 #define UNION_RANGE_SET(ty2, ty1, cppty)                                                                               \
-    LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
+    LOG("union " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
     std::cppty bbb;                                                                                                    \
@@ -1086,7 +1092,7 @@ int main(void)
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define UNION_RANGE(ty2, ty1, cppty)                                                                                   \
-    LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
+    LOG("union " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
     LOG("=> ");                                                                                                        \
@@ -1097,8 +1103,8 @@ int main(void)
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #else
-#define UNION_RANGE(ty2, ty1, cppty)                                                                               \
-    LOG("union " #ty2 " from " #ty1 "\n");                                                                             \
+#define UNION_RANGE(ty2, ty1, cppty)                                                                                   \
+    LOG("union " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
     LOG("=> ");                                                                                                        \
@@ -1243,7 +1249,7 @@ int main(void)
 
 #ifndef _MSC_VER
 #define INTERSECTION_RANGE_SET(ty2, ty1, cppty)                                                                        \
-    LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
+    LOG("intersection " #ty2 " with " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
     LOG("=> ");                                                                                                        \
@@ -1254,7 +1260,7 @@ int main(void)
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define INTERSECTION_RANGE(ty2, ty1, cppty)                                                                            \
-    LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
+    LOG("intersection " #ty2 " with " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
     LOG("=> ");                                                                                                        \
@@ -1266,7 +1272,7 @@ int main(void)
     ty2##_int_free(&aa)
 #else
 #define INTERSECTION_RANGE(ty2, ty1, cppty)                                                                            \
-    LOG("intersection " #ty2 " from " #ty1 "\n");                                                                      \
+    LOG("intersection " #ty2 " with " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
     LOG("=> ");                                                                                                        \
@@ -1411,7 +1417,7 @@ int main(void)
 
 #ifndef _MSC_VER
 #define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty)                                                                \
-    LOG("symmetric_difference " #ty2 " from " #ty1 "\n");                                                              \
+    LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
     LOG("=> ");                                                                                                        \
@@ -1422,7 +1428,7 @@ int main(void)
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                    \
-    LOG("symmetric_difference " #ty2 " from " #ty1 "\n");                                                              \
+    LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
     LOG("=> ");                                                                                                        \
@@ -1434,7 +1440,7 @@ int main(void)
     ty2##_int_free(&aa)
 #else
 #define SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                    \
-    LOG("symmetric_difference " #ty2 " from " #ty1 "\n");                                                              \
+    LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
     LOG("=> ");                                                                                                        \
@@ -1582,6 +1588,7 @@ int main(void)
                 } // switch t1
                 break;
 
+#ifdef DEBUG
             case TEST_DIFFERENCE_RANGE:
 
 #ifndef _MSC_VER
@@ -1758,11 +1765,12 @@ int main(void)
 #endif
                 } // switch t1
                 break;
-                
+#endif // DEBUG
+
             case TEST_SEARCH_RANGE:
 
 #define SEARCH_RANGE(ty2, ty1, cppty)                                                                                  \
-    LOG("search_range " #ty2 " from " #ty1 "\n");                                                                      \
+    LOG("search_range " #ty2 " in " #ty1 "\n");                                                                      \
     ty1##_int_it pos = ty1##_int_begin(&a);                                                                            \
     bool found_a = ty1##_int_search_range(&pos, (ty1##_int_it *)&range2);                                              \
     auto iter = std::search(b.begin(), b.end(), bb.begin(), bb.end());                                                 \
@@ -1896,7 +1904,7 @@ int main(void)
         case TEST_FIND_FIRST_OF_RANGE:
 
 #define FIND_FIRST_OF_RANGE(ty2, ty1, cppty)                                                                           \
-    LOG("find_first_of_range " #ty2 " from " #ty1 "\n");                                                               \
+    LOG("find_first_of_range " #ty2 " in " #ty1 "\n");                                                               \
     ty1##_int_it pos = ty1##_int_begin(&a);                                                                            \
     bool found_a = ty1##_int_find_first_of_range(&pos, (ty1##_int_it *)&range2);                                       \
     auto iter = std::find_first_of(b.begin(), b.end(), bb.begin(), bb.end());                                          \
@@ -2031,7 +2039,7 @@ int main(void)
 
 #if __cpp_lib_erase_if >= 202002L
 #define FIND_END_RANGE(ty2, ty1, cppty)                                                                                \
-    LOG("find_end_range " #ty2 " from " #ty1 "\n");                                                                    \
+    LOG("find_end_range " #ty2 " in " #ty1 "\n");                                                                    \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int_it it = ty1##_int_find_end_range(&begin, (ty1##_int_it *)&range2);                                       \
     auto iter = std::find_end(b.begin(), b.end(), bb.begin(), bb.end());                                               \
@@ -2045,7 +2053,7 @@ int main(void)
     ty2##_int_free(&aa)
 #else
 #define FIND_END_RANGE(ty2, ty1, cppty)                                                                                \
-    LOG("find_end_range " #ty2 " from " #ty1 "\n");                                                                    \
+    LOG("find_end_range " #ty2 " in " #ty1 "\n");                                                                    \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int_it it = ty1##_int_find_end_range(&begin, (ty1##_int_it *)&range2);                                       \
     bool found_a = !ty1##_int_it_done(&it);                                                                            \
