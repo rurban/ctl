@@ -132,12 +132,10 @@ void print_uset(uset_int *a)
     }                                                                                                                  \
     LOG("\n")
 
+#undef TEST_MAX_SIZE
+#define TEST_MAX_SIZE 25
 #ifdef DEBUG
 #define TEST_MAX_VALUE 15
-#ifndef LONG
-#undef TEST_MAX_SIZE
-#define TEST_MAX_SIZE 10
-#endif
 #else
 #define print_vec(x)
 #define print_arr25(x)
@@ -147,7 +145,7 @@ void print_uset(uset_int *a)
 #define print_uset(x)
 #undef print_stl
 #define print_stl(x, y)
-#define TEST_MAX_VALUE 1500
+#define TEST_MAX_VALUE 25
 #endif
 
 // from or to uset is unordered, all C++ set algorithms on uset are considered broken.
@@ -235,8 +233,10 @@ void print_uset(uset_int *a)
 
 #define SETUP_ARR1                                                                                                     \
     arr25_int a = arr25_int_init();                                                                                    \
+    if (a.equal != _arr25_int__default_integral_equal)                                                                 \
+        break;                                                                                                         \
     std::array<int, 25> b;                                                                                             \
-    for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
+    for (int i = 0; i < 25; i++)                                                                                       \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         a.vector[i] = vb;                                                                                              \
@@ -246,7 +246,7 @@ void print_uset(uset_int *a)
 #define SETUP_ARR2                                                                                                     \
     arr25_int aa = arr25_int_init();                                                                                   \
     std::array<int, 25> bb;                                                                                            \
-    for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
+    for (int i = 0; i < 25; i++)                                                                                       \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         aa.vector[i] = vb;                                                                                             \
@@ -1780,7 +1780,7 @@ int main(void)
             case TEST_SEARCH_RANGE:
 
 #define SEARCH_RANGE(ty2, ty1, cppty)                                                                                  \
-    LOG("search_range " #ty2 " in " #ty1 "\n");                                                                      \
+    LOG("search_range " #ty2 " in " #ty1 "\n");                                                                        \
     ty1##_int_it pos = ty1##_int_begin(&a);                                                                            \
     bool found_a = ty1##_int_search_range(&pos, (ty1##_int_it *)&range2);                                              \
     auto iter = std::search(b.begin(), b.end(), bb.begin(), bb.end());                                                 \

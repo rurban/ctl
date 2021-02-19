@@ -19,6 +19,7 @@
 #include <sysinfoapi.h>
 #define getpid _getpid
 #endif
+#undef NDEBUG
 #include <assert.h>
 
 #define POD
