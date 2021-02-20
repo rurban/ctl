@@ -503,8 +503,13 @@ static inline void JOIN(A, rotate_r)(A *self, B *node)
     node->p = l;
 }
 
-static inline void JOIN(A, insert_1)(A *, B *), JOIN(A, insert_2)(A *, B *), JOIN(A, insert_3)(A *, B *),
-    JOIN(A, insert_4)(A *, B *), JOIN(A, insert_5)(A *, B *);
+// clang-format off
+static inline void JOIN(A, insert_1)(A *, B *),
+    JOIN(A, insert_2)(A *, B *),
+    JOIN(A, insert_3)(A *, B *),
+    JOIN(A, insert_4)(A *, B *),
+    JOIN(A, insert_5)(A *, B *);
+// clang-format on
 
 // TODO bulk insert of sorted vector
 static inline B *JOIN(A, insert)(A *self, T key)
