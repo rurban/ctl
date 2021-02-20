@@ -14,20 +14,20 @@ jobs:
       matrix:
         MAKE:
           - lscpu
-          - make -j9 O0=1 SANITIZE=1 LONG=1
-          - make -j9 O1=1 SANITIZE=1 LONG=1
-          - make -j9 O2=1 SANITIZE=1 LONG=1
-          - make -j9 O3=1 SANITIZE=1 LONG=1
-          - make -j9 Os=1 SANITIZE=1 LONG=1
-          - make -j9 Ofast=1 SANITIZE=1 LONG=1
-          - make -j9 O0=1 LONG=1
-          - make -j9 O1=1 LONG=1
-          - make -j9 O2=1 LONG=1
-          - make -j9 O3=1 LONG=1
-          - make -j9 Os=1 LONG=1
-          - make -j9 Ofast=1 LONG=1
-          - make -j9 CC=gcc\ -std=c99
-          - make -j9 CC=gcc\ -std=c11
+          - make -j4 O0=1 SANITIZE=1 LONG=1
+          - make -j4 O1=1 SANITIZE=1 LONG=1
+          - make -j4 O2=1 SANITIZE=1 LONG=1
+          - make -j4 O3=1 SANITIZE=1 LONG=1
+          - make -j4 Os=1 SANITIZE=1 LONG=1
+          - make -j4 Ofast=1 SANITIZE=1 LONG=1
+          - make -j4 O0=1 LONG=1
+          - make -j4 O1=1 LONG=1
+          - make -j4 O2=1 LONG=1
+          - make -j4 O3=1 LONG=1
+          - make -j4 Os=1 LONG=1
+          - make -j4 Ofast=1 LONG=1
+          - make -j4 CC=gcc\ -std=c99
+          - make -j4 CC=gcc\ -std=c11
           - make -j4 CC='clang -std=c11' CXX='clang++ -stdlib=libc++'
           - make examples SANITIZE=1
           - make perf
