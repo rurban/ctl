@@ -44,9 +44,11 @@ with `#define N 128` and `#define T int`.
 
 `N`                     number of elements
 
-`A` being `arrN_T`       container type
+`A` being `arrN_T`      container type
 
-`I` being `arrN_T_it`    internal iterator type for loops
+`I` being `arrN_T_it`   internal iterator type for loops
+
+`GI` being `ctl_T_it`   generic iterator type for algorithms
 
 There is no `B` node type.
 

@@ -50,6 +50,8 @@ The complexity (efficiency) of common operations on a `vector` is as follows:
 
 `I` being `vec_T_it`    internal iterator type for loops
 
+`GI` being `ctl_T_it`   generic iterator type for algorithms
+
 There is no `B` node type.
 
 ## Member functions

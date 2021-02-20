@@ -146,10 +146,10 @@ and incompatible iterators, initialized by `each`. Our iterators are as in the
 STL initialized with `begin` or `end`, and for ranges with `range`.  Now they are
 compatible with the STL and are safer.
 
-We also support for certain algorithm methods **generic iterators** as 2nd range,
-abstracting different containers. So we can insert a vector into a deque, or use
-a mixed set algorithm with different container types. They are denoted as `GI*`,
-generic iters.
+We also support **generic iterators** of type `ctl_T_it`, abbrevated as `GI`,
+abstracting different containers. In most methods taking a second range argument.
+So we can insert a vector into a deque, or use a mixed set algorithm with
+different container types.
 
 See [iterators](iterators.md).
 

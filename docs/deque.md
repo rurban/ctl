@@ -60,7 +60,9 @@ The complexity (efficiency) of common operations on a `deque` is as follows:
 
 `B` being `deq_T_node`  node type
 
-`I` being `deq_T_it`    iterator type
+`I` being `deq_T_it`    specific iterator type
+
+`GI` being `ctl_T_it`   generic iterator type for algorithms
 
 There is a `B` node type, but iterators use the `I` type.
 

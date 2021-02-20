@@ -95,7 +95,8 @@ position to the top in each access, such as find and contains, not only insert.
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
-#define GI JOIN(A, it)
+#undef GI
+#define GI JOIN(JOIN(ctl, T), it)
 
 #include <ctl/ctl.h>
 

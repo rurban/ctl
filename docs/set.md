@@ -60,7 +60,9 @@ algorithm methods. Supporting three-way comparison bedises the default two-way
 
 `B` being `set_T_node`  node type
 
-`I` being `set_T_it`    iterator type
+`I` being `set_T_it`    specific iterator type
+
+`GI` being `ctl_T_it`   generic iterator type for algorithms
 
 ## Member functions
 

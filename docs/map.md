@@ -73,7 +73,9 @@ other: !comp(a, b) && !comp(b, a).
 
 `B` being `map_T_node`  node type
 
-`I` being `map_T_it`    iterator type
+`I` being `map_T_it`    specific iterator type
+
+`GI` being `ctl_T_it`   generic iterator type for algorithms
 
 ## Member functions
 

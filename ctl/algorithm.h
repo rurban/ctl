@@ -184,7 +184,7 @@ static inline A JOIN(A, union_range)(I *r1, GI *r2)
     while (!JOIN(I, done)(r1))
     {
         if (done2(r2))
-            return *JOIN(A, copy_range)(r1, &self);
+            return *JOIN(A, copy_range)(JOIN(I, generic)(r1), &self);
         if (self.compare(ref2(r2), r1->ref))
         {
             JOIN(A, push_back)(&self, self.copy(ref2(r2)));
@@ -209,7 +209,7 @@ static inline A JOIN(A, union)(A *a, A *b)
 {
     JOIN(A, it) r1 = JOIN(A, begin)(a);
     JOIN(A, it) r2 = JOIN(A, begin)(b);
-    return JOIN(A, union_range)(&r1, &r2);
+    return JOIN(A, union_range)(&r1, JOIN(I, generic)(&r2));
 }
 
 // FIXME str
@@ -253,7 +253,7 @@ static inline A JOIN(A, intersection)(A *a, A *b)
 #else
     JOIN(A, it) r1 = JOIN(A, begin)(a);
     JOIN(A, it) r2 = JOIN(A, begin)(b);
-    return JOIN(A, intersection_range)(&r1, &r2);
+    return JOIN(A, intersection_range)(&r1, JOIN(I, generic)(&r2));
 #endif
 }
 
@@ -261,14 +261,14 @@ static inline A JOIN(A, intersection)(A *a, A *b)
 static inline A JOIN(A, difference_range)(I *r1, I *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    void (*next2)(struct GI*) = r2->vtable.next;
-    T* (*ref2)(struct GI*) = r2->vtable.ref;
-    int (*done2)(struct GI*) = r2->vtable.done;
+    void (*next2)(struct I*) = (void (*)(I*))r2->vtable.next;
+    T* (*ref2)(struct I*) = (T *(*)(I*))r2->vtable.ref;
+    int (*done2)(struct I*) = (int (*)(I*))r2->vtable.done;
 
     while (!JOIN(I, done)(r1))
     {
         if (done2(r2))
-            return *JOIN(A, copy_range)(r1, &self);
+            return *JOIN(A, copy_range)(JOIN(I, generic)(r1), &self);
         // r1 < r2 (fails with 3-way compare)
         if (self.compare(r1->ref, ref2(r2)))
         {
@@ -296,7 +296,7 @@ static inline A JOIN(A, difference)(A *a, A *b)
 #else
     JOIN(A, it) r1 = JOIN(A, begin)(a);
     JOIN(A, it) r2 = JOIN(A, begin)(b);
-    return JOIN(A, difference_range)(&r1, &r2);
+    return JOIN(A, difference_range)(&r1, JOIN(I, generic)(&r2));
 #endif
 }
 
@@ -310,7 +310,7 @@ static inline A JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
     while (!JOIN(I, done)(r1))
     {
         if (done2(r2))
-            return *JOIN(A, copy_range)(r1, &self);
+            return *JOIN(A, copy_range)(JOIN(I, generic)(r1), &self);
 
         if (self.compare(r1->ref, ref2(r2)))
         {
@@ -347,7 +347,7 @@ static inline A JOIN(A, symmetric_difference)(A *a, A *b)
 #else
     JOIN(A, it) r1 = JOIN(A, begin)(a);
     JOIN(A, it) r2 = JOIN(A, begin)(b);
-    return JOIN(A, symmetric_difference_range)(&r1, &r2);
+    return JOIN(A, symmetric_difference_range)(&r1, JOIN(I, generic)(&r2));
 #endif
 }
 
@@ -376,7 +376,7 @@ static inline bool JOIN(A, includes)(A *a, A *b)
 {
     JOIN(A, it) r1 = JOIN(A, begin)(a);
     JOIN(A, it) r2 = JOIN(A, begin)(b);
-    return JOIN(A, includes_range)(&r1, &r2);
+    return JOIN(A, includes_range)(&r1, JOIN(I, generic)(&r2));
 }
 #else // !USET
 static inline bool JOIN(A, is_sorted)(I *range)
@@ -612,7 +612,7 @@ static inline A JOIN(A, merge_range)(I *r1, GI *r2)
     while (!JOIN(I, done)(r1))
     {
         if (done2(r2))
-            return *JOIN(A, copy_range)(r1, &self);
+            return *JOIN(A, copy_range)(JOIN(I, generic)(r1), &self);
         if (self.compare(ref2(r2), r1->ref))
         {
             JOIN(A, inserter)(&self, self.copy(ref2(r2)));
@@ -633,7 +633,7 @@ static inline A JOIN(A, merge)(A *a, A *b)
 {
     JOIN(A, it) r1 = JOIN(A, begin)(a);
     JOIN(A, it) r2 = JOIN(A, begin)(b);
-    return JOIN(A, merge_range)(&r1, &r2);
+    return JOIN(A, merge_range)(&r1, JOIN(I, generic)(&r2));
 }
 #endif // LIST
 #endif // USET
@@ -806,7 +806,7 @@ static inline bool JOIN(A, find_first_of_range)(I *range1, GI *range2)
     while (1)
     {
         // TODO unroll it into slices of 4, as strcspn does
-        for (I it = *range2; !done2(&it); next2(&it))
+        for (GI it = *range2; !done2(&it); next2(&it))
         {
             if (JOIN(A, _equal)(self, range1->ref, ref2(&it)))
                 return true;
@@ -858,7 +858,7 @@ static inline bool JOIN(A, search_range)(I *range1, GI *range2)
     for (;; JOIN(I, next)(range1))
     {
         I it = *range1;
-        I s_it = *range2;
+        GI s_it = *range2;
         for (;;)
         {
             if (done2(&s_it))
@@ -882,7 +882,7 @@ static inline bool JOIN(A, search_range)(I *range1, GI *range2)
 static inline I JOIN(A, search)(A *self, I *subseq)
 {
     I begin = JOIN(A, begin)(self);
-    if (JOIN(A, search_range)(&begin, subseq))
+    if (JOIN(A, search_range)(&begin, *JOIN(I, generic)(&subseq)))
         return begin;
     else
         return JOIN(A, end)(self);
@@ -918,7 +918,7 @@ static inline I JOIN(A, find_end)(A *self, I *s_range)
         JOIN(I, set_done)(&begin);
         return begin;
     }
-    if (JOIN(A, search_range)(&begin, s_range))
+    if (JOIN(A, search_range)(&begin, JOIN(I, generic)(s_range)))
         return begin;
     else
         return JOIN(A, end)(self);

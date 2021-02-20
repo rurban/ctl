@@ -207,7 +207,8 @@ void print_uset(uset_int *a)
     }                                                                                                                  \
     list_int_sort(&aa);                                                                                                \
     bb.sort();                                                                                                         \
-    list_int_it range2 = list_int_begin(&aa);                                                                          \
+    list_int_it begin2 = list_int_begin(&aa);                                                                          \
+    ctl_int_it *range2 = ty1##_int_it_generic(&begin2);                                                                \
     print_list(&aa)
 
 #define SETUP_VEC1                                                                                                     \
@@ -233,7 +234,8 @@ void print_uset(uset_int *a)
     }                                                                                                                  \
     vec_int_sort(&aa);                                                                                                 \
     std::sort(bb.begin(), bb.end());                                                                                   \
-    vec_int_it range2 = vec_int_begin(&aa);                                                                            \
+    vec_int_it begin2 = vec_int_begin(&aa);                                                                            \
+    ctl_int_it *range2 = ty1##_int_it_generic(&begin2);                                                                \
     print_vec(&aa)
 
 #define SETUP_ARR1                                                                                                     \
@@ -259,7 +261,8 @@ void print_uset(uset_int *a)
     }                                                                                                                  \
     arr25_int_sort(&aa);                                                                                               \
     std::sort(bb.begin(), bb.end());                                                                                   \
-    arr25_int_it range2 = arr25_int_begin(&aa);                                                                        \
+    arr25_int_it begin2 = arr25_int_begin(&aa);                                                                        \
+    ctl_int_it *range2 = ty1##_int_it_generic(&begin2);                                                                \
     print_arr25(&aa)
 
 #define SETUP_DEQ1                                                                                                     \
@@ -285,7 +288,8 @@ void print_uset(uset_int *a)
     }                                                                                                                  \
     deq_int_sort(&aa);                                                                                                 \
     std::sort(bb.begin(), bb.end());                                                                                   \
-    deq_int_it range2 = deq_int_begin(&aa);                                                                            \
+    deq_int_it begin2 = deq_int_begin(&aa);                                                                            \
+    ctl_int_it *range2 = ty1##_int_it_generic(&begin2);                                                                \
     print_deq(&aa)
 
 #define SETUP_SET1                                                                                                     \
@@ -307,7 +311,8 @@ void print_uset(uset_int *a)
         set_int_insert(&aa, vb);                                                                                       \
         bb.insert(vb);                                                                                                 \
     }                                                                                                                  \
-    set_int_it range2 = set_int_begin(&aa);                                                                            \
+    set_int_it begin2 = set_int_begin(&aa);                                                                            \
+    ctl_int_it *range2 = ty1##_int_it_generic(&begin2);                                                                \
     print_set(&aa)
 
 #define SETUP_USET1                                                                                                    \
@@ -323,13 +328,14 @@ void print_uset(uset_int *a)
 #define SETUP_USET2                                                                                                    \
     uset_int aa = uset_int_init(NULL, NULL);                                                                           \
     std::unordered_set<int> bb;                                                                                        \
-    for (int i = 0; i < TEST_RAND(25); i++)                                                                 \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         uset_int_insert(&aa, vb);                                                                                      \
         bb.insert(vb);                                                                                                 \
     }                                                                                                                  \
-    uset_int_it range2 = uset_int_begin(&aa);                                                                          \
+    uset_int_it begin2 = uset_int_begin(&aa);                                                                          \
+    ctl_int_it *range2 = ty1##_int_it_generic(&begin2);                                                                \
     print_uset(&aa)
 
 int main(void)
@@ -361,15 +367,15 @@ int main(void)
 #define INSERT_INTO_SET(ty2, ty1, cppty)                                                                               \
     LOG("insert " #ty2 " into " #ty1 "\n");                                                                            \
     /* C++ cannot insert generic iters into set/uset */                                                                \
-    ty1##_int_insert_generic(&a, (ty1##_int_it *)&range2);                                                             \
+    ty1##_int_insert_generic(&a, range2);                                                                              \
     LOG("=> ");                                                                                                        \
     print_##ty1(&a);                                                                                                   \
     ty2##_int_free(&aa)
 #define INSERT_INTO(ty2, ty1, cppty)                                                                                   \
     LOG("insert " #ty2 " into " #ty1 "\n");                                                                            \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ctl_generic_it *range2 = ty1##_int_it_generic(&begin);                                                             \
-    ty1##_int_insert_generic(&begin, &range2);                                                                         \
+    ctl_int_it *range2 = ty1##_int_it_generic(&begin);                                                                 \
+    ty1##_int_insert_generic(&begin, range2);                                                                          \
     b.insert(b.begin(), bb.begin(), bb.end());                                                                         \
     LOG("=> ");                                                                                                        \
     print_##ty1(&a);                                                                                                   \
@@ -533,7 +539,7 @@ int main(void)
 #define MERGE_INTO(ty2, ty1, cppty)                                                                                    \
     LOG("merge " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
+    ty1##_int aaa = ty1##_int_merge_range(&begin, range2);                                                             \
     std::cppty bbb;                                                                                                    \
     std::merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));                                     \
     LOG("=> ");                                                                                                        \
@@ -544,7 +550,7 @@ int main(void)
 #define MERGE_INTO_SET(ty2, ty1, cppty)                                                                                \
     LOG("merge " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
+    ty1##_int aaa = ty1##_int_merge_range(&begin, range2);                                                             \
     std::cppty bbb;                                                                                                    \
     std::merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                             \
     LOG("=> ");                                                                                                        \
@@ -556,7 +562,7 @@ int main(void)
 #define MERGE_INTO(ty2, ty1, cppty)                                                                                    \
     LOG("merge " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
+    ty1##_int aaa = ty1##_int_merge_range(&begin, range2);                                                             \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
@@ -710,7 +716,7 @@ int main(void)
 #define INCLUDES_RANGE(ty2, ty1)                                                                                       \
     LOG("includes " #ty2 " from " #ty1 "\n");                                                                          \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    bool a_found = ty1##_int_includes_range(&begin, (ty1##_int_it *)&range2);                                          \
+    bool a_found = ty1##_int_includes_range(&begin, range2);                                                           \
     bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());                                            \
     LOG("a_found %d == b_found %d\n", (int)a_found, (int)b_found);                                                     \
     if (!strcmp(#ty1, "uset") || !strcmp(#ty2, "uset"))                                                                \
@@ -867,7 +873,7 @@ int main(void)
 #define EQUAL_RANGE(ty2, ty1)                                                                                          \
     LOG("equal_range " #ty2 " with " #ty1 "\n");                                                                       \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    bool same_a = ty1##_int_equal_range(&begin, (ty1##_int_it *)&range2);                                              \
+    bool same_a = ty1##_int_equal_range(&begin, range2);                                                               \
     bool same_b = std::equal(b.begin(), b.end(), bb.begin(), bb.end());                                                \
     LOG("same_a %d == same_b %d\n", (int)same_a, (int)same_b);                                                         \
     assert(same_a == same_b);                                                                                          \
@@ -876,7 +882,7 @@ int main(void)
 #define EQUAL_RANGE(ty2, ty1)                                                                                          \
     LOG("equal_range " #ty2 " with " #ty1 "\n");                                                                       \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    bool same_a = ty1##_int_equal_range(&begin, (ty1##_int_it *)&range2);                                              \
+    bool same_a = ty1##_int_equal_range(&begin, range2);                                                               \
     if (!b.size() || !bb.size() || !std::distance(bb.begin(), bb.end()))                                               \
     {                                                                                                                  \
         printf("skip std::equal with empty range. use C++14\n");                                                       \
@@ -988,7 +994,7 @@ int main(void)
     ty1##_int_it b1 = ty1##_int_begin(&a);                                                                             \
     ty2##_int_it b2 = ty2##_int_begin(&aa);                                                                            \
     ty1##_int_it r1a = ty1##_int_begin(&a);                                                                            \
-    ty1##_int_mismatch(&r1a, (ty1##_int_it *)&range2);                                                                 \
+    ty1##_int_mismatch(&r1a, range2);                                                                                  \
     auto pair = std::mismatch(b.begin(), b.end(), bb.begin(), bb.end());                                               \
     int d1a = ty1##_int_it_distance(&b1, &r1a);                                                                        \
     int d2a = ty2##_int_it_distance(&b2, &range2);                                                                     \
@@ -1001,7 +1007,7 @@ int main(void)
     ty1##_int_it b1 = ty1##_int_begin(&a);                                                                             \
     ty2##_int_it b2 = ty2##_int_begin(&aa);                                                                            \
     ty1##_int_it r1a = ty1##_int_begin(&a);                                                                            \
-    /*bool same_a = */ ty1##_int_mismatch(&r1a, (ty1##_int_it *)&range2);                                              \
+    /*bool same_a = */ ty1##_int_mismatch(&r1a, range2);                                                               \
     if (!bb.size() || !std::distance(bb.begin(), bb.end()))                                                            \
     {                                                                                                                  \
         printf("skip std::mismatch with empty 2nd range. use C++14\n");                                                \
@@ -1230,7 +1236,7 @@ int main(void)
 #define UNION_RANGE_SET(ty2, ty1, cppty)                                                                               \
     LOG("union " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
+    ty1##_int aaa = ty1##_int_union_range(&begin, range2);                                                             \
     std::cppty bbb;                                                                                                    \
     std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                         \
     LOG("=> ");                                                                                                        \
@@ -1241,7 +1247,7 @@ int main(void)
 #define UNION_RANGE(ty2, ty1, cppty)                                                                                   \
     LOG("union " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
+    ty1##_int aaa = ty1##_int_union_range(&begin, range2);                                                             \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
@@ -1253,7 +1259,7 @@ int main(void)
 #define UNION_RANGE(ty2, ty1, cppty)                                                                                   \
     LOG("union " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
+    ty1##_int aaa = ty1##_int_union_range(&begin, range2);                                                             \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
@@ -1398,7 +1404,7 @@ int main(void)
 #define INTERSECTION_RANGE_SET(ty2, ty1, cppty)                                                                        \
     LOG("intersection " #ty2 " with " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
+    ty1##_int aaa = ty1##_int_intersection_range(&begin, range2);                                                      \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
@@ -1409,7 +1415,7 @@ int main(void)
 #define INTERSECTION_RANGE(ty2, ty1, cppty)                                                                            \
     LOG("intersection " #ty2 " with " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
+    ty1##_int aaa = ty1##_int_intersection_range(&begin, range2);                                                      \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
@@ -1421,7 +1427,7 @@ int main(void)
 #define INTERSECTION_RANGE(ty2, ty1, cppty)                                                                            \
     LOG("intersection " #ty2 " with " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
+    ty1##_int aaa = ty1##_int_intersection_range(&begin, range2);                                                      \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
@@ -1569,7 +1575,7 @@ int main(void)
 #define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty)                                                                \
     LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, range2);                                              \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
@@ -1580,7 +1586,7 @@ int main(void)
 #define SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                    \
     LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, range2);                                              \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
@@ -1592,7 +1598,7 @@ int main(void)
 #define SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                    \
     LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, range2);                                              \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
@@ -1745,7 +1751,7 @@ int main(void)
 #define DIFFERENCE_RANGE_SET(ty2, ty1, cppty)                                                                          \
     LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    ty1##_int aaa = ty1##_int_difference_range(&begin, range2);                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                    \
@@ -1755,7 +1761,7 @@ int main(void)
 #define DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                              \
     LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    ty1##_int aaa = ty1##_int_difference_range(&begin, range2);                                                        \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
@@ -1767,7 +1773,7 @@ int main(void)
 #define DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                              \
     LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    ty1##_int aaa = ty1##_int_difference_range(&begin, range2);                                       \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
@@ -1922,7 +1928,7 @@ int main(void)
 #define SEARCH_RANGE(ty2, ty1, cppty)                                                                                  \
     LOG("search_range " #ty2 " in " #ty1 "\n");                                                                        \
     ty1##_int_it pos = ty1##_int_begin(&a);                                                                            \
-    bool found_a = ty1##_int_search_range(&pos, (ty1##_int_it *)&range2);                                              \
+    bool found_a = ty1##_int_search_range(&pos, range2);                                                               \
     auto iter = std::search(b.begin(), b.end(), bb.begin(), bb.end());                                                 \
     bool found_b = iter != b.end();                                                                                    \
     LOG("found a: %s, ", found_a ? "yes" : "no");                                                                      \
@@ -2054,9 +2060,9 @@ int main(void)
         case TEST_FIND_FIRST_OF_RANGE:
 
 #define FIND_FIRST_OF_RANGE(ty2, ty1, cppty)                                                                           \
-    LOG("find_first_of_range " #ty2 " in " #ty1 "\n");                                                               \
+    LOG("find_first_of_range " #ty2 " in " #ty1 "\n");                                                                 \
     ty1##_int_it pos = ty1##_int_begin(&a);                                                                            \
-    bool found_a = ty1##_int_find_first_of_range(&pos, (ty1##_int_it *)&range2);                                       \
+    bool found_a = ty1##_int_find_first_of_range(&pos, range2);                                                        \
     auto iter = std::find_first_of(b.begin(), b.end(), bb.begin(), bb.end());                                          \
     bool found_b = iter != b.end();                                                                                    \
     LOG("found a: %s at %lu, ", found_a ? "yes" : "no", ty1##_int_it_index(&pos));                                     \
@@ -2066,106 +2072,155 @@ int main(void)
         assert(*pos.ref == *iter);                                                                                     \
     ty2##_int_free(&aa)
 
-                switch (t1)
+            switch (t1)
+            {
+            case CTL_VECTOR: {
+                SETUP_VEC1;
+                switch (t2)
                 {
-                case CTL_VECTOR : {
-                    SETUP_VEC1;
-                    switch (t2)
-                    {
-                    case CTL_VECTOR : {
-                        SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, vec, vector<int>); break;
-                    }
-                    case CTL_ARRAY : {
-                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, vec, vector<int>); break;
-                    }
-                    case CTL_DEQUE : {
-                        SETUP_DEQ2; FIND_FIRST_OF_RANGE(deq, vec, vector<int>); break;
-                    }
-                    case CTL_LIST : {
-                        SETUP_LIST2; FIND_FIRST_OF_RANGE(list, vec, vector<int>); break;
-                    }
-                    case CTL_SET : {
-                        SETUP_SET2; FIND_FIRST_OF_RANGE(set, vec, vector<int>); break;
-                    }
-                    case CTL_USET : break;
-                    } // switch t2
-                    vec_int_free(&a); break;
+                case CTL_VECTOR: {
+                    SETUP_VEC2;
+                    FIND_FIRST_OF_RANGE(vec, vec, vector<int>);
+                    break;
                 }
-                case CTL_ARRAY : {
-                    SETUP_ARR1;
-                    switch (t2)
-                    {
-                    case CTL_VECTOR : {
-                        SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, arr25, arrint<25>); break;
-                    }
-                    case CTL_ARRAY : {
-                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, arr25, arrint<25>); break;
-                    }
-                    case CTL_DEQUE : {
-                        SETUP_DEQ2; FIND_FIRST_OF_RANGE(deq, arr25, arrint<25>); break;
-                    }
-                    case CTL_LIST : {
-                        SETUP_LIST2; FIND_FIRST_OF_RANGE(list, arr25, arrint<25>); break;
-                    }
-                    case CTL_SET : break;
-                    case CTL_USET : break;
-                    } // switch t2
-                    arr25_int_free(&a); break;
+                case CTL_ARRAY: {
+                    SETUP_ARR2;
+                    FIND_FIRST_OF_RANGE(arr25, vec, vector<int>);
+                    break;
                 }
-                case CTL_DEQUE : {
-                    SETUP_DEQ1;
-                    switch (t2)
-                    {
-                    case CTL_VECTOR : {
-                        SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, deq, deque<int>); break;
-                    }
-                    case CTL_ARRAY : {
-                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, deq, deque<int>); break;
-                    }
-                    case CTL_DEQUE : {
-                        SETUP_DEQ2; FIND_FIRST_OF_RANGE(deq, deq, deque<int>); break;
-                    }
-                    case CTL_LIST : {
-                        SETUP_LIST2; FIND_FIRST_OF_RANGE(list, deq, deque<int>); break;
-                    }
-                    case CTL_SET : {
-                        SETUP_SET2; FIND_FIRST_OF_RANGE(set, deq, deque<int>); break;
-                    }
-                    case CTL_USET : break;
-                    } // switch t2
-                    deq_int_free(&a); break;
+                case CTL_DEQUE: {
+                    SETUP_DEQ2;
+                    FIND_FIRST_OF_RANGE(deq, vec, vector<int>);
+                    break;
                 }
-                case CTL_LIST : {
-                    SETUP_LIST1;
-                    switch (t2)
-                    {
-                    case CTL_VECTOR : {
-                        SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, list, list<int>); break;
-                    }
-                    case CTL_ARRAY : {
-                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, list, list<int>); break;
-                    }
-                    case CTL_DEQUE : {
-                        SETUP_DEQ2; FIND_FIRST_OF_RANGE(deq, list, list<int>); break;
-                    }
-                    case CTL_LIST : {
-                        SETUP_LIST2; FIND_FIRST_OF_RANGE(list, list, list<int>); break;
-                    }
-                    case CTL_SET : {
-                        SETUP_SET2; FIND_FIRST_OF_RANGE(set, list, list<int>); break;
-                    }
-                    case CTL_USET : break;
-                    } // switch t2
-                    list_int_free(&a); break;
+                case CTL_LIST: {
+                    SETUP_LIST2;
+                    FIND_FIRST_OF_RANGE(list, vec, vector<int>);
+                    break;
                 }
-                case CTL_SET : {
-                    SETUP_SET1;
-                    switch (t2)
-                    {
-                    case CTL_VECTOR : {
-                        SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, set, set<int>); break;
-                    }
-                    case CTL_ARRAY : {
+                case CTL_SET: {
+                    SETUP_SET2;
+                    FIND_FIRST_OF_RANGE(set, vec, vector<int>);
+                    break;
+                }
+                case CTL_USET:
+                    break;
+                } // switch t2
+                vec_int_free(&a);
+                break;
+            }
+            case CTL_ARRAY: {
+                SETUP_ARR1;
+                switch (t2)
+                {
+                case CTL_VECTOR: {
+                    SETUP_VEC2;
+                    FIND_FIRST_OF_RANGE(vec, arr25, arrint<25>);
+                    break;
+                }
+                case CTL_ARRAY: {
+                    SETUP_ARR2;
+                    FIND_FIRST_OF_RANGE(arr25, arr25, arrint<25>);
+                    break;
+                }
+                case CTL_DEQUE: {
+                    SETUP_DEQ2;
+                    FIND_FIRST_OF_RANGE(deq, arr25, arrint<25>);
+                    break;
+                }
+                case CTL_LIST: {
+                    SETUP_LIST2;
+                    FIND_FIRST_OF_RANGE(list, arr25, arrint<25>);
+                    break;
+                }
+                case CTL_SET:
+                    break;
+                case CTL_USET:
+                    break;
+                } // switch t2
+                arr25_int_free(&a);
+                break;
+            }
+            case CTL_DEQUE: {
+                SETUP_DEQ1;
+                switch (t2)
+                {
+                case CTL_VECTOR: {
+                    SETUP_VEC2;
+                    FIND_FIRST_OF_RANGE(vec, deq, deque<int>);
+                    break;
+                }
+                case CTL_ARRAY: {
+                    SETUP_ARR2;
+                    FIND_FIRST_OF_RANGE(arr25, deq, deque<int>);
+                    break;
+                }
+                case CTL_DEQUE: {
+                    SETUP_DEQ2;
+                    FIND_FIRST_OF_RANGE(deq, deq, deque<int>);
+                    break;
+                }
+                case CTL_LIST: {
+                    SETUP_LIST2;
+                    FIND_FIRST_OF_RANGE(list, deq, deque<int>);
+                    break;
+                }
+                case CTL_SET: {
+                    SETUP_SET2;
+                    FIND_FIRST_OF_RANGE(set, deq, deque<int>);
+                    break;
+                }
+                case CTL_USET:
+                    break;
+                } // switch t2
+                deq_int_free(&a);
+                break;
+            }
+            case CTL_LIST: {
+                SETUP_LIST1;
+                switch (t2)
+                {
+                case CTL_VECTOR: {
+                    SETUP_VEC2;
+                    FIND_FIRST_OF_RANGE(vec, list, list<int>);
+                    break;
+                }
+                case CTL_ARRAY: {
+                    SETUP_ARR2;
+                    FIND_FIRST_OF_RANGE(arr25, list, list<int>);
+                    break;
+                }
+                case CTL_DEQUE: {
+                    SETUP_DEQ2;
+                    FIND_FIRST_OF_RANGE(deq, list, list<int>);
+                    break;
+                }
+                case CTL_LIST: {
+                    SETUP_LIST2;
+                    FIND_FIRST_OF_RANGE(list, list, list<int>);
+                    break;
+                }
+                case CTL_SET: {
+                    SETUP_SET2;
+                    FIND_FIRST_OF_RANGE(set, list, list<int>);
+                    break;
+                }
+                case CTL_USET:
+                    break;
+                } // switch t2
+                list_int_free(&a);
+                break;
+            }
+            case CTL_SET: {
+                SETUP_SET1;
+                switch (t2)
+                {
+                case CTL_VECTOR: {
+                    SETUP_VEC2;
+                    FIND_FIRST_OF_RANGE(vec, set, set<int>);
+                    break;
+                }
+                case CTL_ARRAY: {
 #ifdef DEBUG
                         SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, set, set<int>);
 #endif
@@ -2192,9 +2247,9 @@ int main(void)
 
 #if __cpp_lib_erase_if >= 202002L
 #define FIND_END_RANGE(ty2, ty1, cppty)                                                                                \
-    LOG("find_end_range " #ty2 " in " #ty1 "\n");                                                                    \
+    LOG("find_end_range " #ty2 " in " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int_it it = ty1##_int_find_end_range(&begin, (ty1##_int_it *)&range2);                                       \
+    ty1##_int_it it = ty1##_int_find_end_range(&begin, range2);                                                        \
     auto iter = std::find_end(b.begin(), b.end(), bb.begin(), bb.end());                                               \
     bool found_a = !ty1##_int_it_done(&it);                                                                            \
     bool found_b = iter != b.end();                                                                                    \
@@ -2208,7 +2263,7 @@ int main(void)
 #define FIND_END_RANGE(ty2, ty1, cppty)                                                                                \
     LOG("find_end_range " #ty2 " in " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int_find_end_range(&begin, (ty1##_int_it *)&range2);                                                         \
+    ty1##_int_find_end_range(&begin, range2);                                                                          \
     ty2##_int_free(&aa)
 #endif
 

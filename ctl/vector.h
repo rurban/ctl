@@ -10,7 +10,7 @@
 #define CTL_VEC
 #define A JOIN(vec, T)
 #define I JOIN(A, it)
-#define GI JOIN(A, it)
+#define GI JOIN(JOIN(ctl, T), it)
 
 #include <ctl/ctl.h>
 

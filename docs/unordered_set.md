@@ -54,7 +54,9 @@ element's hash and corrupt the container.
 
 `B` being `uset_T_node`  node type
 
-`I` being `uset_T_it`    iterator type
+`I` being `uset_T_it`    specific iterator type
+
+`GI` being `ctl_T_it`    generic iterator type for algorithms
 
 ## Member functions
 

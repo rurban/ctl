@@ -19,7 +19,7 @@
 #define C PASTE(arr, N)
 #define A JOIN(C, T)
 #define I JOIN(A, it)
-#define GI JOIN(A, it)
+#define GI JOIN(JOIN(ctl, T), it)
 
 typedef struct A
 {

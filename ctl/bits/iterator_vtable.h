@@ -39,10 +39,6 @@
 
 struct I;
 
-#ifndef GI
-#define GI ctl_generic_it
-#endif
-
 // Iterator vtable
 typedef struct JOIN(I, vtable_t)
 {
@@ -51,10 +47,11 @@ typedef struct JOIN(I, vtable_t)
     int (*done)(struct GI *);
 } JOIN(I, vtable_t);
 
-// once
-#ifndef CTL_GENERIC_IT_DEFINED
-#define CTL_GENERIC_IT_DEFINED
-typedef struct ctl_generic_it {
+// once per T
+//#ifndef GI
+typedef struct GI {
     CTL_T_ITER_FIELDS;
-} ctl_generic_it;
-#endif
+} GI;
+//#endif
+
+static inline GI* JOIN(I, generic)(I* iter);

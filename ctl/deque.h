@@ -12,7 +12,7 @@
 #define A JOIN(deq, T)
 #define B JOIN(A, bucket)
 #define I JOIN(A, it)
-#define GI JOIN(A, it)
+#define GI JOIN(JOIN(ctl, T), it)
 
 #include <ctl/ctl.h>
 
@@ -246,18 +246,29 @@ static inline I JOIN(B, iter)(A *self, size_t index)
     iter.end = self->size;
     iter.container = self;
     //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+#ifndef CTL_LATE_VTABLE
     iter.vtable.next = (void (*)(struct GI *))JOIN(I, next);
     iter.vtable.ref = (T *(*)(struct GI *))JOIN(I, ref);
     iter.vtable.done = (int (*)(struct GI *))JOIN(I, done);
+#endif
     return iter;
 }
 
 // Alternatively we could think about initializing the vtable only here, not above.
 static inline GI* JOIN(I, generic)(I* iter)
 {
+#ifdef CTL_LATE_VTABLE
+    if (!iter->vtable.next)
+    {
+        iter.vtable.next = (void (*)(struct GI *))JOIN(I, next);
+        iter.vtable.ref = (T *(*)(struct GI *))JOIN(I, ref);
+        iter.vtable.done = (int (*)(struct GI *))JOIN(I, done);
+    }
+#else
     ASSERT(iter->vtable.next == (void (*)(struct GI *))JOIN(I, next));
     ASSERT(iter->vtable.ref == (T *(*)(struct GI *))JOIN(I, ref));
     ASSERT(iter->vtable.done == (int (*)(struct GI *))JOIN(I, done));
+#endif
     return (GI*)iter;
 }
 
