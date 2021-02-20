@@ -146,9 +146,10 @@ and incompatible iterators, initialized by `each`. Our iterators are as in the
 STL initialized with `begin` or `end`, and for ranges with `range`.  Now they are
 compatible with the STL and are safer.
 
-We don't support yet generic iterators, abstracting different containers. So we
-cannot yet e.g. insert a vector into a deque, or use a mixed set algorithm with
-different container types. See [GH #19](https://github.com/rurban/ctl/issues/19).
+We also support for certain algorithm methods generic iterators as 2nd range,
+abstracting different containers. So we can insert a vector into a deque, or use
+a mixed set algorithm with different container types. They are denoted as `GI*`,
+generic iters, and can be simply casted from container-specific iterators.
 
 See [iterators](docs/iterators.md).
 

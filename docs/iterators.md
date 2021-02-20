@@ -46,7 +46,7 @@ added API's to work with the addional end position.
 We also support for certain algorithm methods generic iterators as 2nd range,
 abstracting different containers. So we can insert a vector into a deque, or use
 a mixed set algorithm with different container types. They are denoted as `GI*`,
-generic iters.
+generic iters, and can be simply casted from container-specific iterators.
 
 We don't fully support **output iterators**, like `back_inserter` or `inserter` yet.
 They are currently only defined for `transform_range` and `transform_it_range`,
