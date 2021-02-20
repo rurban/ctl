@@ -252,6 +252,8 @@ void print_uset(uset_int *a)
         aa.vector[i] = vb;                                                                                             \
         bb[i] = vb;                                                                                                    \
     }                                                                                                                  \
+    arr25_int_sort(&aa);                                                                                               \
+    std::sort(bb.begin(), bb.end());                                                                                   \
     arr25_int_it range2 = arr25_int_begin(&aa);                                                                        \
     print_arr25(&aa)
 
@@ -1378,7 +1380,10 @@ int main(void)
                         SETUP_VEC2; INTERSECTION_RANGE_SET(vec, set, set<int>); break;
                     }
                     case CTL_ARRAY : {
-                        SETUP_ARR2; INTERSECTION_RANGE_SET(arr25, set, set<int>); break;
+#ifdef DEBUG
+                        SETUP_ARR2; INTERSECTION_RANGE_SET(arr25, set, set<int>);
+#endif
+                        break;
                     }
                     case CTL_DEQUE : {
                         SETUP_DEQ2; INTERSECTION_RANGE_SET(deq, set, set<int>); break;
@@ -2026,7 +2031,10 @@ int main(void)
                         SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, set, set<int>); break;
                     }
                     case CTL_ARRAY : {
-                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, set, set<int>); break;
+#ifdef DEBUG
+                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, set, set<int>);
+#endif
+                        break;
                     }
                     case CTL_DEQUE : {
                         SETUP_DEQ2; FIND_FIRST_OF_RANGE(deq, set, set<int>); break;
