@@ -704,6 +704,7 @@ int main(void)
 
             case TEST_INCLUDES_RANGE:
 
+#if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
 #define INCLUDES_RANGE(ty2, ty1)                                                                                       \
     LOG("includes " #ty2 " from " #ty1 "\n");                                                                          \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
@@ -712,7 +713,18 @@ int main(void)
     LOG("a_found %d == b_found %d\n", (int)a_found, (int)b_found);                                                     \
     assert(a_found == b_found);                                                                                        \
     ty2##_int_free(&aa)
-
+#else
+#define INCLUDES_RANGE(ty2, ty1)                                                                                       \
+    LOG("includes " #ty2 " from " #ty1 "\n");                                                                          \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    bool a_found = ty1##_int_includes_range(&begin, (ty1##_int_it *)&range2);                                          \
+    bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());                                            \
+    LOG("a_found %d == b_found %d\n", (int)a_found, (int)b_found);                                                     \
+    if (a_found != b_found)                                                                                            \
+        printf("a_found %d != b_found %d FAIL (C++11 without robust_nonmodifying_seq_ops)\n", (int)a_found,            \
+               (int)b_found);                                                                                          \
+    ty2##_int_free(&aa)
+#endif
                 switch (t1)
                 {
                 case CTL_VECTOR : {
@@ -860,10 +872,15 @@ int main(void)
     LOG("equal_range " #ty2 " with " #ty1 "\n");                                                                       \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     bool same_a = ty1##_int_equal_range(&begin, (ty1##_int_it *)&range2);                                              \
+    if (!b.size() || !bb.size() || !std::distance(bb.begin(), bb.end()))                                               \
+    {                                                                                                                  \
+        printf("skip std::equal with empty range. use C++14\n");                                                       \
+        ty2##_int_free(&aa);                                                                                           \
+        break;                                                                                                         \
+    }                                                                                                                  \
     bool same_b = std::equal(b.begin(), b.end(), bb.begin());                                                          \
-    LOG("same_a %d == same_b %d\n", (int)same_a, (int)same_b);                                                         \
     if (same_a != same_b)                                                                                              \
-        printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");                                        \
+        printf("std::equal broken with C++11, same_a %d != same_b %d FAIL. Use C++14\n", (int)same_a, (int)same_b);    \
     ty2##_int_free(&aa)
 #endif
 
@@ -989,8 +1006,8 @@ int main(void)
     auto pair = std::mismatch(b.begin(), b.end(), bb.begin());                                                         \
     int d1a = ty1##_int_it_distance(&b1, &r1a);                                                                        \
     int d2a = ty2##_int_it_distance(&b2, &range2);                                                                     \
-    assert(d1a == std::distance(b.begin(), pair.first));                                                               \
-    assert(d2a == std::distance(bb.begin(), pair.second));                                                             \
+    if (d1a != std::distance(b.begin(), pair.first) || d2a != std::distance(bb.begin(), pair.second))                  \
+        printf("std::mismatch broken with C++11\n");                                                                   \
     ty2##_int_free(&aa)
 #endif
 
