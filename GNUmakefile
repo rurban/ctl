@@ -183,6 +183,9 @@ tests/perf/arr/gen_arr0% : tests/perf/arr/gen_arr0%.cc \
   tests/perf/arr/perf_arr_generate .cflags $(COMMON_H) ctl/array.h
 	@$(CXX) $(CFLAGS) -o $@ $@.c
 
+compile_commands.json : $(H) GNUmakefile
+	make clean; bear make
+
 examples: $(EXAMPLES)
 
 VERIFY = $(patsubst %.c,%, $(wildcard tests/verify/*.c))

@@ -316,6 +316,9 @@ tests/func/test_int_vector: .cflags ${COMMON_H} ctl/vector.h \
                           tests/func/test_int_vector.cc
 	${CXX} ${CFLAGS} -o $@ $@.cc
 
+compile_commands.json : $(H) makefile
+	make clean; bear make
+
 asan:
 	$(MAKE) SANITIZE=1
 debug:

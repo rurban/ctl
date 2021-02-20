@@ -40,3 +40,5 @@ a.out
 /docs/man/
 /docs/images/old
 /perf.data*
+# generate via make clean; bear make
+/compile_commands.json
