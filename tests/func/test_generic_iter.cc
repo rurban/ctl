@@ -2073,8 +2073,7 @@ int main(void)
 #define FIND_END_RANGE(ty2, ty1, cppty)                                                                                \
     LOG("find_end_range " #ty2 " in " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int_it it = ty1##_int_find_end_range(&begin, (ty1##_int_it *)&range2);                                       \
-    LOG("found a: %s at %lu, ", ty1##_int_it_done(&it) ? "no" : "yes", ty1##_int_it_index(&it));                       \
+    ty1##_int_find_end_range(&begin, (ty1##_int_it *)&range2);                                                         \
     ty2##_int_free(&aa)
 #endif
 
