@@ -866,11 +866,12 @@ int main(void)
                 }
                 print_vec_range(needle);
                 range = vec_digi_begin(&a);
-                bool found = vec_digi_search_range(&range, &needle);
+                bool found_a = vec_digi_search_range(&range, &needle);
                 auto iter = search(b.begin(), b.end(), first_b, last_b);
-                LOG("found a: %s\n", found ? "yes" : "no");
-                LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
-                assert(found == !vec_digi_it_done(&range));
+                bool found_b = iter != b.end();
+                LOG("found a: %s\n", found_a ? "yes" : "no");
+                LOG("found b: %s\n", found_b ? "yes" : "no");
+                assert(found_a == found_b);
                 CHECK_ITER(range, b, iter);
                 vec_digi_free(&aa);
                 break;

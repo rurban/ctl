@@ -747,7 +747,10 @@ static inline bool JOIN(A, search_range)(I *range1, GI *range2)
             if (done2(&s_it))
                 return true;
             if (JOIN(I, done)(&it))
+            {
+                *range1 = it;
                 return false;
+            }
             if (!JOIN(A, _equal)(self, it.ref, ref2(&s_it)))
                 break;
             JOIN(I, next)(&it);
