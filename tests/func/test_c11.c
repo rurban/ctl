@@ -121,9 +121,10 @@ typedef char *charp;
 #error "POD leftover"
 #endif
 
-#define POD
-#define T int
-#include <ctl/queue.h>
+// already defined by test.h
+//#define POD
+//#define T int
+//#include <ctl/queue.h>
 
 #ifdef POD
 #error "POD leftover"

@@ -19,8 +19,7 @@
 #define C PASTE(arr, N)
 #define A JOIN(C, T)
 #define I JOIN(A, it)
-
-#include <ctl/bits/iterators.h>
+#define GI JOIN(A, it)
 
 typedef struct A
 {
@@ -37,10 +36,16 @@ typedef struct A
 
 typedef int (*JOIN(A, compare_fn))(T *, T *);
 
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
     CTL_T_ITER_FIELDS;
 } I;
+
+#include <ctl/bits/iterators.h>
+
+static inline I JOIN(I, iter)(A *self, size_t index);
 
 static inline size_t JOIN(A, size)(A *self)
 {
@@ -83,16 +88,6 @@ static inline T *JOIN(A, front)(A *self)
 static inline T *JOIN(A, back)(A *self)
 {
     return &self->vector[N - 1];
-}
-
-static inline I JOIN(I, iter)(A *self, size_t index)
-{
-    static I zero;
-    I iter = zero;
-    iter.ref = &self->vector[index];
-    iter.end = &self->vector[N];
-    iter.container = self;
-    return iter;
 }
 
 static inline I JOIN(A, begin)(A *self)
@@ -177,14 +172,28 @@ static inline A JOIN(A, copy)(A *self);
 
 #include <ctl/bits/container.h>
 
+static inline I JOIN(I, iter)(A *self, size_t index)
+{
+    static I zero;
+    I iter = zero;
+    iter.ref = &self->vector[index];
+    iter.end = &self->vector[N];
+    iter.container = self;
+    //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);
+    return iter;
+}
+
 static inline A JOIN(A, init)(void)
 {
     static A zero;
     A self = zero;
 #if N > CUTOFF
     self.vector = (T *)calloc(N, sizeof(T));
-//#else
-//    memset(self.vector, 0, N * sizeof(T));
+#else
+    memset(self.vector, 0, N * sizeof(T));
 #endif
 #ifdef POD
     self.copy = JOIN(A, implicit_copy);
@@ -438,6 +447,7 @@ static inline A JOIN(A, copy_if)(A *self, int _match(T*))
 
 #undef A
 #undef I
+#undef GI
 #undef N
 #undef CUTOFF
 

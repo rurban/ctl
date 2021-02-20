@@ -168,7 +168,11 @@ inserts count values before pos.
 
     insert_range (I* pos, I* range2)
 
-inserts values from range [first, last) before pos.
+inserts copies of values from range [first, last) before pos.
+
+    insert_generic (A* self, GI* range2)
+
+inserts copies of values from generic range2. _(NYI)_
 
     emplace (I* pos, T* value)
 
@@ -185,6 +189,10 @@ erases the element at pos.
     I* erase_range (I* range)
 
 erases elements.
+
+    erase_generic (A* self, GI* range2)
+
+erases elements by value from another container.
 
     push_front (A* self, T value)
 
@@ -204,7 +212,7 @@ adds the value reference to the end.
 
     pop_front (A* self)
 
-removes the first element
+removes the first element.
 
     pop_back (A* self)
 

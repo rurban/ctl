@@ -22,13 +22,9 @@
 
 #define len(a) (sizeof(a) / sizeof(*(a)))
 
-#ifndef POD
 #define FREE_VALUE(self, value)                                                                                        \
     if (self->free)                                                                                                    \
-    self->free(&(value))
-#else
-#define FREE_VALUE(self, value)
-#endif
+        self->free(&(value))
 
 #ifdef DEBUG
 #define LOG(...) fprintf(stderr, __VA_ARGS__)
@@ -61,14 +57,3 @@
 #ifndef MAX
 #define MAX(a, b) a >= b ? a : b
 #endif
-
-/* Three types of iterators. deque with index, see there */
-#define CTL_T_ITER_FIELDS                                                                                              \
-    T *ref;                                                                                                            \
-    T *end;                                                                                                            \
-    A *container
-#define CTL_B_ITER_FIELDS                                                                                              \
-    B *node;                                                                                                           \
-    T *ref;                                                                                                            \
-    B *end;                                                                                                            \
-    A *container

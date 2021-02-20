@@ -158,7 +158,11 @@ clears the contents
     insert_count (I* pos, size_t count, T value)
     insert_range (I* pos, I* range2)
 
-inserts the element(s). (C++17)
+inserts copies of the element(s), before pos.
+
+    insert_generic (I* pos, GI* range2)
+
+inserts copies of values from generic range2 before pos. _(NYI)_
 
     emplace (I* pos, T* value)
 
@@ -179,6 +183,10 @@ erases a single element at position. Ignores `pos->end` range.
     I* erase_range (I* range)
 
 erases elements from range.
+
+    erase_generic (A* self, GI* range2)
+
+erases elements by value from another container.
 
     swap (A* self, A* other)
 

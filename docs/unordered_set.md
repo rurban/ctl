@@ -125,6 +125,10 @@ inserts the element. (C++17)
 
 inserts the element and set *foundp if it already existed.
 
+    insert_generic (A* self, GI* range2)
+
+inserts copies of values from generic range2. _(NYI)_
+
     I emplace (A* self, T *value)
 
 constructs elements in-place. _(NY)_
@@ -147,7 +151,11 @@ erases the element by match.
 
     erase_range (A* self, I* range)
 
-erases elements. (NYI)
+erases elements. _(NYI)_
+
+    erase_generic (A* self, GI* range)
+
+erases elements by value from another container.
 
     swap (A* self, A* other)
 

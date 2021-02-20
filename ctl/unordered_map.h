@@ -55,3 +55,4 @@ static inline I JOIN(A, insert_or_assign_found)(A *self, T value, int *foundp)
 #undef A
 #undef B
 #undef I
+#undef GI

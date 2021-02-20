@@ -12,8 +12,8 @@
 #define A JOIN(deq, T)
 #define B JOIN(A, bucket)
 #define I JOIN(A, it)
+#define GI JOIN(A, it)
 
-#include <ctl/bits/iterators.h>
 #include <ctl/ctl.h>
 
 #ifndef DEQ_BUCKET_SIZE
@@ -40,13 +40,14 @@ typedef struct A
     int (*equal)(T *, T *);
 } A;
 
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
-    T *ref;
-    size_t index;
-    size_t end;
-    A *container;
+    CTL_DEQ_ITER_FIELDS;
 } I;
+
+#include <ctl/bits/iterators.h>
 
 static inline B **JOIN(A, first)(A *self)
 {
@@ -96,6 +97,9 @@ static inline void JOIN(A, shrink_to_fit)(A *self)
     return;
 }
 
+// create an iter from an index
+static inline I JOIN(B, iter)(A *self, size_t index);
+
 static inline T *JOIN(A, front)(A *self)
 {
     return JOIN(A, at)(self, 0);
@@ -108,38 +112,13 @@ static inline T *JOIN(A, back)(A *self)
 
 static inline I JOIN(A, begin)(A *self)
 {
-    static I zero;
-    I iter = zero;
-    iter.ref = JOIN(A, front)(self); // unchecked
-    iter.index = 0;
-    iter.end = self->size;
-    iter.container = self;
-    return iter;
+    return JOIN(B, iter)(self, 0);
 }
 
 // We support `it.advance(a.end(), -1)`, so we must create a fresh iter.
 static inline I JOIN(A, end)(A *self)
 {
-    static I zero;
-    I iter = zero;
-    if (self->size)
-        iter.ref = JOIN(A, back)(self);
-    iter.index = self->size;
-    iter.end = self->size;
-    iter.container = self;
-    return iter;
-}
-
-// create an iter from an index
-static inline I JOIN(B, iter)(A *self, size_t index)
-{
-    static I zero;
-    I iter = zero;
-    iter.ref = JOIN(A, at)(self, index); // bounds-checked
-    iter.index = index;
-    iter.end = self->size;
-    iter.container = self;
-    return iter;
+    return JOIN(B, iter)(self, self->size);
 }
 
 static inline T *JOIN(I, ref)(I *iter)
@@ -162,7 +141,7 @@ static inline void JOIN(I, set_done)(I *iter)
     iter->index = iter->end;
 }
 
-static inline void JOIN(I, next)(I *iter)
+static void JOIN(I, next)(I *iter)
 {
     iter->index++;
     if (iter->index < iter->end)
@@ -249,6 +228,24 @@ static inline void JOIN(A, push_back)(A *self, T value);
 static inline I *JOIN(A, erase)(I *pos);
 
 #include <ctl/bits/container.h>
+
+static inline I JOIN(B, iter)(A *self, size_t index)
+{
+    static I zero;
+    I iter = zero;
+    if (index < self->size)
+        iter.ref = JOIN(A, at)(self, index); // bounds-checked
+    else
+        iter.ref = JOIN(A, back)(self);
+    iter.index = index;
+    iter.end = self->size;
+    iter.container = self;
+    //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);
+    return iter;
+}
 
 static inline B *JOIN(B, init)(size_t cut)
 {
@@ -456,9 +453,18 @@ static inline void JOIN(A, insert)(I *pos, T value)
 {
     A *self = pos->container;
     if (self->size > 0)
+    {
         JOIN(A, insert_index)(self, pos->index, value);
+    }
     else
+    {
         JOIN(A, push_back)(self, value);
+    }
+    /*
+    if (pos->index)
+        pos->index--;
+    pos->ref = JOIN(A, at)(self, pos->index); // bounds-checked (not at end)
+    */
 }
 
 static inline void JOIN(A, clear)(A *self)
@@ -496,7 +502,8 @@ static inline void JOIN(A, resize)(A *self, size_t size, T value)
             else
                 JOIN(A, push_back)(self, self->copy(&value));
     }
-    FREE_VALUE(self, value);
+    if (self->free)
+        self->free(&value);
 }
 
 static inline I *JOIN(A, erase_range)(I *range)
@@ -537,17 +544,24 @@ static inline void /* I* */
     // The STL cannot do that.
     if (!JOIN(I, done)(pos))
     {
-        foreach_range_(A, iter, range) if (iter.ref) JOIN(A, insert_index)(self, index++, self->copy(iter.ref));
+        foreach_range_(A, iter, range)
+            if (iter.ref)
+                JOIN(A, insert_index)(self, index++, self->copy(iter.ref));
+        pos->index = index;
+        pos->end += JOIN(I, distance_range)(range);
     }
     else
     {
-        foreach_range_(A, iter, range) if (iter.ref) JOIN(A, push_back)(self, self->copy(iter.ref));
+        foreach_range_(A, iter, range)
+            if (iter.ref)
+                JOIN(A, push_back)(self, self->copy(iter.ref));
+        pos->end += JOIN(I, distance_range)(range);
     }
     /*
     if (pos->index)
         pos->index--;
     pos->ref = JOIN(A, at)(self, pos->index); // bounds-checked (not at end)
-    return pos;
+    //return pos;
     */
 }
 
@@ -561,12 +575,15 @@ static inline I *JOIN(A, insert_count)(I *pos, size_t count, T value)
         ASSERT(self->size + count >= self->size || !"count overflow");
         ASSERT(index + count >= count || !"pos overflow");
         ASSERT(self->size + count < JOIN(A, max_size)() || !"max_size overflow");
-        FREE_VALUE(self, value);
+        if (self->free)
+            self->free(&value);
         return NULL;
     }
     for (size_t i = index; i < count + index; i++)
         JOIN(A, insert_index)(self, i, self->copy(&value));
-    FREE_VALUE(self, value);
+    if (self->free)
+        self->free(&value);
+    pos->end += count;
     return pos;
 }
 
@@ -575,7 +592,8 @@ static inline void JOIN(A, assign)(A *self, size_t size, T value)
     JOIN(A, resize)(self, size, self->copy(&value));
     for (size_t i = 0; i < size; i++)
         JOIN(A, set)(self, i, self->copy(&value));
-    FREE_VALUE(self, value);
+    if (self->free)
+        self->free(&value);
 }
 
 // including to
@@ -677,12 +695,28 @@ static inline A *JOIN(A, move_range)(I *range, A *out)
     return out;
 }
 
+static inline void JOIN(A, insert_generic)(I *pos, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    while (!done(range))
+    {
+        JOIN(A, insert)(pos, *ref(range));
+        pos->index++;
+        //pos->end++;
+        next(range);
+    }
+}
+
 //#include <ctl/algorithm.h>
 
 #undef T
 #undef A
 #undef B
 #undef I
+#undef GI
 #undef POD
 #undef NOT_INTEGRAL
 #undef CTL_DEQ

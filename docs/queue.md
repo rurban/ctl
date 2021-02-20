@@ -94,7 +94,7 @@ returns the maximum possible number of elements, hard-coded to 2GB (32bit).
 
     push (A* self, T value)
 
-Push element to the end
+Push element to the end.
 
     emplace (A* self, T* value)
 
@@ -102,7 +102,7 @@ Push possibly uninitialized element to the end. (C++11) _(NYI)_
 
     pop (A* self)
 
-Removes the first element
+Removes the first element.
 
     swap (A* self, A* other)
 

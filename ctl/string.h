@@ -8,10 +8,10 @@
 #endif
 
 #define CTL_STR
-#define vec_char str
 #define HOLD
 #define POD
 #define T char
+#define vec_char str
 #define MUST_ALIGN_16(T) (sizeof(T) == sizeof(char))
 #define str_init str___INIT
 #define str_equal str___EQUAL
@@ -272,8 +272,8 @@ static inline int str_equal(str *self, str *other)
     return strcmp(self->vector, other->vector) == 0;
 }
 
-#ifndef HOLD
 #undef POD
+#ifndef HOLD
 #undef vec_char
 #undef T
 #else

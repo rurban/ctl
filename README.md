@@ -146,9 +146,10 @@ and incompatible iterators, initialized by `each`. Our iterators are as in the
 STL initialized with `begin` or `end`, and for ranges with `range`.  Now they are
 compatible with the STL and are safer.
 
-We don't support yet generic iterators, abstracting different containers. So we
-cannot yet e.g. insert a vector into a deque, or use a mixed set algorithm with
-different container types. See [GH #19](https://github.com/rurban/ctl/issues/19).
+We also support for certain algorithm methods generic iterators as 2nd range,
+abstracting different containers. So we can insert a vector into a deque, or use
+a mixed set algorithm with different container types. They are denoted as `GI*`,
+generic iters, and can be simply casted from container-specific iterators.
 
 See [iterators](docs/iterators.md).
 
@@ -334,7 +335,8 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`insert_index`                   | ✓  | ✓  | -  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  |
 |`insert_count`                   | ✓  | ✓  | -  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
 |`insert_range`                   | ✓  | ✓  | -  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
-|`insert_found`                   | -  | -  | -  | -  | -  | ✓  |    | ✓  | ✓  | -  | -  | -  |
+|`insert_range`                   | ✓  | ✓  | -  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|`insert_generic`                 | x  |    |    | x  | ✓  | ✓  |    | x  |    | -  | -  | -  |
 |`insert_or_assign`               | -  | -  | -  | -  | -  | -  | ✓  | -  | ✓  | -  | -  | -  |
 |`insert_or_assign_found`         | -  | -  | -  | -  | -  | -  |    | -  | ✓  | -  | -  | -  |
 |`load_factor`                    | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | -  | -  | -  |
@@ -353,6 +355,7 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`erase_index`                    | ✓  | ✓  | -  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  |
 |`erase_node`                     | -  | -  | -  | -  | ✓  | ✓  |    |    |    | -  | -  | -  |
 |`erase_range`                    | ✓  |    | -  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|`erase_generic`                  | -  | -  | -  | -  | x  | -  | -  | -  | -  | -  | -  | -  |
 |`top`                            | -  | -  | -  | -  | -  | -  | -  | -  | -  | ✓  |    | ✓  |
 |`push`                           | -  | -  | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | ✓  |
 |`pop`                            | -  | -  | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | ✓  |
@@ -526,20 +529,20 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`binary_search_range`            | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`equal_value`                    | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
 |`equal_range`                    | ✓  | ✓  | ✓  | ✓  | ✓  | x  | x  | -  | -  | -  | -  | -  |
-|`merge`                          | ✓  | ✓  |    | ✓  | ✓  | ✓  |    | x  | x  | -  | -  | -  |
-|`merge_range`                    | ✓  | ✓  |    | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|`merge`                          | ✓  | ✓  |    | ✓  | ✓  | ✓  |    | ✓  | x  | -  | -  | -  |
+|`merge_range`                    | ✓  | ✓  |    | ✓  | ✓  | ✓  |    | ✓  |    | -  | -  | -  |
 |`inplace_merge`                  |    |    |    |    |    |    |    |    |    | -  | -  | -  |
-|`inplace_merge_range`            |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`inplace_merge_range`            |    |    |    |    |    |    |    |    |    | -  | -  | -  |
 |`includes`                       | ✓  |    |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
 |`includes_range`                 | ✓  |    |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
 |`difference`                     | ✓  | ✓  | x  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`intersection`                   | ✓  | ✓  | x  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`symmetric_difference`           | ✓  | ✓  | x  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`union`                          | ✓  | ✓  | -  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
-|`difference_range`               | ✓  | ✓  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
-|`intersection_range`             | ✓  | ✓  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
-|`symmetric_difference_range`     | ✓  | ✓  |    | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
-|`union_range`                    | ✓  | ✓  | -  | ✓  | ✓  |    |    | -  | -  | -  | -  | -  |
+|`difference_range`               | ✓  | ✓  |    | ✓  | ✓  |    |    |    |    | -  | -  | -  |
+|`intersection_range`             | ✓  | ✓  |    | ✓  | ✓  |    |    |    |    | -  | -  | -  |
+|`symmetric_difference_range`     | ✓  | ✓  |    | ✓  | ✓  |    |    |    |    | -  | -  | -  |
+|`union_range`                    | ✓  | ✓  | -  | ✓  | ✓  |    |    |    |    | -  | -  | -  |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
 |                                 |vec |str |arr |deq |list|set |map |uset|umap|pqu |que |stk |
 
@@ -558,13 +561,14 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 2020 (starting with `202102`),
 the old ctl is lower than 2020, starting with `1.0`.
 
-Added lots of missing methods. We have 144 methods in 749 stable variants.
+Added lots of missing methods. We have 145 methods in 755 stable variants.
 glouw has 63 methods in 196 stable variants.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.
 Fallback to c++2a, c++17 or c++11.
 
-Added **array**, **map** and **unordered_map** containers.
+Added **array**, **map** and **unordered_map** containers; generic iterators
+with a vtable.
 
 Added docs and manpages.
 
@@ -598,8 +602,9 @@ glouw/ctl. We support two-way and three-way compare for set, which needs more
 comparisons, but is safer.
 
 Redesigned iterators and better range support. Much closer to the STL, and
-much faster. Full generic iterator support is in `bits/iterator.h`, `algorithm.h`, the
-extended `range` methods, and `foreach_range`, `foreach_n`, `foreach_n_range` macros.
+much faster. Full generic iterator support is in `bits/iterator.h`,
+`bits/iterator_vtable.h`, `algorithm.h`, the extended `range` methods,
+and `foreach_range`, `foreach_n`, `foreach_n_range` macros.
 
 Reproducible tests with `SEED=n`,
 Optimized test dependencies, time went from 25s to 3s even with ccache.
@@ -639,17 +644,15 @@ clang with libc++), and Windows MSVC (default CL 19).
 
 ### Differences to the STL
 
-Our iterators are currently not as generic as the STL ones. We can only loop
-over the same container type and call the container-specific function. E.g. we
-cannot insert a vector into a deque of the same type. We will need to add a
-small vtable to iterators for the ref, next and done functions.
-
-But our iterators are safe and fat with an end range. We work towards C++20
+Our iterators are safe and fat with an end range. We work towards C++20
 ranges (single arg iterator), not begin/end pairs.  Not as safe as glouw/ctl
 iterators, but also not as slow. We need 2 assignments (currently. will be
 fixed), the STL needs one assignment, glouw/ctl needs three
 assignments. glouw/ctl is safe for destructive operations (i.e. insert, erase)
 in a foreach loop, we and the STL are not.
+
+Our iterators are generic only for certain algorithm methods, where we use
+a 2nd range of any cntainer type on a typed container.
 
 Our vector and string growth policies for multiple insertions are much better.
 E.g. in the set algos or insert_count.

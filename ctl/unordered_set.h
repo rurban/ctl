@@ -95,8 +95,8 @@ position to the top in each access, such as find and contains, not only insert.
 #define A JOIN(uset, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#define GI JOIN(A, it)
 
-#include <ctl/bits/iterators.h>
 #include <ctl/ctl.h>
 
 typedef struct B
@@ -127,15 +127,14 @@ typedef struct A
 #endif
 } A;
 
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
-    B *node; // the bucket
-    T *ref;
-    B *next;
-    // B* end; // if ranges were added to usets
-    A *container;
-    B **buckets; // the chain
+    CTL_USET_ITER_FIELDS;
 } I;
+
+#include <ctl/bits/iterators.h>
 
 static inline size_t JOIN(I, index)(A *self, T value)
 {
@@ -153,49 +152,9 @@ static inline size_t JOIN(I, cached_index)(A *self, B *node)
 #define BUCKET_INDEX(iter) JOIN(I, index)((iter)->container, (iter)->node->value)
 #endif
 
-static inline I JOIN(I, iter)(A *self, B *node)
-{
-    static I zero;
-    I iter = zero;
-    iter.node = node;
-    if (node)
-    {
-        iter.next = node->next;
-        iter.ref = &node->value;
-    }
-    iter.container = self;
-    iter.buckets = &self->buckets[BUCKET_INDEX(&iter)];
-    return iter;
-}
-
-static inline I JOIN(A, begin)(A *self)
-{
-    static I zero;
-    I iter = zero;
-    B **bend = &self->buckets[self->bucket_count];
-    iter.container = self;
-    for (B **b = self->buckets; b < bend; b++)
-    {
-        if (*b)
-        {
-            B *node = *b;
-            iter.ref = &node->value;
-            iter.node = node;
-            iter.next = node->next;
-            iter.buckets = b;
-            return iter;
-        }
-    }
-    return iter;
-}
-
-static inline I JOIN(A, end)(A *self)
-{
-    static I zero;
-    I iter = zero;
-    iter.container = self;
-    return iter;
-}
+static inline I JOIN(I, iter)(A *self, B *node);
+static inline I JOIN(A, begin)(A *self);
+static inline I JOIN(A, end)(A *self);
 
 static inline T *JOIN(I, ref)(I *iter)
 {
@@ -214,7 +173,7 @@ static inline void JOIN(I, update)(I *iter)
     ASSERT(iter->node);
     ASSERT(iter->buckets - iter->container->buckets < (long)iter->container->bucket_count);
     iter->ref = &iter->node->value;
-    iter->next = iter->node->next;
+    //iter->next = iter->node->next;
 }
 
 /* Need two states: if next is not empty, we are still in the bucket chain.
@@ -224,7 +183,7 @@ static inline void JOIN(I, next)(I *iter)
 {
     ASSERT(iter->node);
     ASSERT(iter->buckets);
-    if (iter->next == NULL)
+    if (!iter->node->next)
     {
         A *self = iter->container;
         B **bend = &self->buckets[self->bucket_count];
@@ -242,7 +201,7 @@ static inline void JOIN(I, next)(I *iter)
     }
     else
     {
-        iter->node = iter->next;
+        iter->node = iter->node->next;
         JOIN(I, update)(iter);
     }
 }
@@ -256,7 +215,7 @@ static inline I *JOIN(I, advance)(I *iter, long i)
         iter->buckets = it.buckets;
         iter->node = it.node;
         iter->ref = it.ref;
-        iter->next = it.node->next;
+        //iter->next = it.node->next;
     }
     for (int j = 0; j < i; j++)
         JOIN(I, next)(iter);
@@ -299,25 +258,6 @@ static inline void JOIN(I, prev)(I *iter)
     (void)iter;
 }
 
-/*
-static inline void
-JOIN(I, step)(I* self)
-{
-    if(self->next == NULL)
-    {
-        for(size_t i = self->bucket_index + 1; i < self->container->bucket_count; i++)
-            if((self->next = self->container->buckets[i]))
-            {
-                JOIN(I, update)(self);
-                return;
-            }
-        self->done = 1;
-    }
-    else
-        JOIN(I, update)(self);
-}
-*/
-
 static inline B *JOIN(B, next)(A *container, B *node)
 {
     if (node->next)
@@ -336,27 +276,26 @@ static inline B *JOIN(B, next)(A *container, B *node)
 }
 /*
 static inline I
-JOIN(I, range)(A* container, B* begin, B* end)
+JOIN(I, range)(A* container, I* begin, I* end)
 {
     static I zero;
-    I self = zero;
+    I iter = zero;
     if(begin)
     {
-        //LOG ("range init\n");
-        self.step = JOIN(I, step);
-        self.node = begin;
-        self.ref = &self.node->value;
-        self.next = self.node->next;
-        self.end = end;
-        self.container = container;
-        self.bucket_index = JOIN(I, index)(container, *self.ref);
+        iter.node = begin->node;
+        iter.ref = &iter.node->value;
+        //iter.next = iter.node->next;
+        iter.end = end->node;
+        iter.container = container;
+        iter.buckets = begin->buckets;
+        iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
     }
     else
     {
-        //LOG ("range done\n");
-        self.done = 1;
+        iter.node = NULL;
+        iter.end = NULL;
     }
-    return self;
+    return iter;
 }
 */
 
@@ -372,6 +311,61 @@ static inline void JOIN(A, insert)(A *self, T value);
 static inline bool JOIN(A, inserter)(A *self, T value);
 
 #include <ctl/bits/container.h>
+
+static inline I JOIN(A, begin)(A *self)
+{
+    static I zero;
+    I iter = zero;
+    iter.container = self;
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);
+    B **bend = &self->buckets[self->bucket_count];
+    for (B **b = self->buckets; b < bend; b++)
+    {
+        if (*b)
+        {
+            B *node = *b;
+            iter.ref = &node->value;
+            iter.node = node;
+            //iter.next = node->next;
+            iter.buckets = b;
+            return iter;
+        }
+    }
+    return iter;
+}
+
+static inline I JOIN(A, end)(A *self)
+{
+    static I zero;
+    I iter = zero;
+    iter.container = self;
+    //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);    
+    return iter;
+}
+
+static inline I JOIN(I, iter)(A *self, B *node)
+{
+    static I zero;
+    I iter = zero;
+    iter.node = node;
+    if (node)
+    {
+        //iter.next = node->next;
+        iter.ref = &node->value;
+    }
+    iter.container = self;
+    //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);
+    iter.buckets = &self->buckets[BUCKET_INDEX(&iter)];
+    return iter;
+}
 
 static inline size_t JOIN(A, __next_prime)(size_t number)
 {
@@ -613,11 +607,17 @@ static inline void JOIN(A, rehash)(A *self, size_t desired_count)
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
     JOIN(A, reserve)(&rehashed, desired_count);
-    foreach (A, self, it)
+    B **bend = &self->buckets[self->bucket_count];
+    for (B **b = self->buckets; b < bend; b++)
     {
-        B **buckets = JOIN(A, _cached_bucket)(&rehashed, it.node);
-        if (it.node != *buckets)
-            JOIN(B, push)(buckets, it.node);
+        B* node = *b;
+        while (node)
+        {
+            B* next = node->next;
+            B **buckets = JOIN(A, _cached_bucket)(&rehashed, node);
+            JOIN(B, push)(buckets, node);
+            node = next;
+        }
     }
     rehashed.size = self->size;
     // LOG ("rehash temp. from %lu to %lu, load %f\n", rehashed.size, rehashed.bucket_count,
@@ -634,20 +634,26 @@ static inline void JOIN(A, _rehash)(A *self, size_t count)
     if (count == self->bucket_count)
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
-    // LOG("_rehash %zu => %zu\n", self->size, count);
+    LOG("_rehash %zu => %zu\n", self->size, count);
     JOIN(A, _reserve)(&rehashed, count);
-    foreach (A, self, it)
+
+    B **bend = &self->buckets[self->bucket_count];
+    for (B **b = self->buckets; b < bend; b++)
     {
-        B **buckets = JOIN(A, _cached_bucket)(&rehashed, it.node);
-        if (it.node != *buckets)
-            JOIN(B, push)(buckets, it.node);
+        B* node = *b;
+        while (node)
+        {
+            B* next = node->next;
+            B **buckets = JOIN(A, _cached_bucket)(&rehashed, node);
+            JOIN(B, push)(buckets, node);
+            node = next;
+        }
     }
     rehashed.size = self->size;
-    // LOG ("_rehash from %lu to %lu, load %f\n", rehashed.size, count,
-    //     JOIN(A, load_factor)(self));
+    LOG ("_rehash from %lu to %lu, load %f\n", rehashed.size, count,
+         JOIN(A, load_factor)(self));
     free(self->buckets);
     *self = rehashed;
-    return;
 }
 
 // Note: As this is used internally a lot, don't consume (free) the key.
@@ -1069,6 +1075,32 @@ static inline A JOIN(A, copy)(A *self)
     return other;
 }
 
+static inline void JOIN(A, insert_generic)(A* self, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    while (!done(range))
+    {
+        JOIN(A, insert)(self, self->copy(ref(range)));
+        next(range);
+    }
+}
+
+static inline void JOIN(A, erase_generic)(A* self, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    while (!done(range))
+    {
+        JOIN(A, erase)(self, *ref(range));
+        next(range);
+    }
+}
+
 static inline A JOIN(A, union)(A *a, A *b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
@@ -1080,12 +1112,52 @@ static inline A JOIN(A, union)(A *a, A *b)
     return self;
 }
 
+static inline A JOIN(A, union_range)(I *r1, GI *r2)
+{
+    A self = JOIN(A, init_from)(r1->container);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    foreach_range_ (A, it1, r1)
+        JOIN(A, insert)(&self, self.copy(it1.ref));
+    while(!done2(r2))
+    {
+        JOIN(A, insert)(&self, self.copy(ref2(r2)));
+        next2(r2);
+    }
+    return self;
+}
+
 static inline A JOIN(A, intersection)(A *a, A *b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
     foreach (A, a, it)
         if (JOIN(A, find_node)(b, *it.ref))
             JOIN(A, insert)(&self, self.copy(it.ref));
+    return self;
+}
+
+static inline A JOIN(A, intersection_range)(I *r1, GI *r2)
+{
+    A *a = r1->container;
+    A self = JOIN(A, init)(a->hash, a->equal);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    // works only with full r1. which is basically ok.
+    while(!done2(r2))
+    {
+        if (JOIN(A, find_node)(a, *ref2(r2)))
+            JOIN(A, insert)(&self, self.copy(ref2(r2)));
+        next2(r2);
+    }
+    /*
+    foreach (A, a, it)
+        if (JOIN(A, find_node)(b, *it.ref))
+            JOIN(A, insert)(&self, self.copy(it.ref));
+    */
     return self;
 }
 
@@ -1119,10 +1191,10 @@ static inline int JOIN(A, equal)(A *self, A *other)
     size_t count_b = 0;
     foreach (A, self, it)
         if (JOIN(A, find_node)(self, *it.ref))
-            count_a += 1;
+            count_a++;
     foreach (A, other, it2)
         if (JOIN(A, find_node)(other, *it2.ref))
-            count_b += 1;
+            count_b++;
     return count_a == count_b;
 }
 
@@ -1148,6 +1220,27 @@ static inline bool JOIN(A, inserter)(A *self, T value)
         JOIN(A, insert)(self, value);
         return true;
     }
+}
+
+// i.e. insert_range
+static inline A JOIN(A, merge_range)(I *r1, GI *r2)
+{
+    A self = JOIN(A, copy)(r1->container);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    while (!done2(r2))
+    {
+        JOIN(A, inserter)(&self, self.copy(ref2(r2)));
+        next2(r2);
+    }
+    return self;
+}
+
+static inline A JOIN(A, merge)(A *self, A* other)
+{
+    return JOIN(A, union)(self, other);
 }
 
 // specialize, using our inserter (i.e. replace if different)
@@ -1199,6 +1292,7 @@ static inline A JOIN(A, transform)(A *self, T _unop(T *))
 #undef A
 #undef B
 #undef I
+#undef GI
 #undef T
 #else
 #undef HOLD

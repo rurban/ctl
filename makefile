@@ -27,7 +27,8 @@ CXX += -std=c++11
 CC  += -std=c11
 
 .SUFFIXES: .o .i .3 .cc .c .md
-.PHONY: all man install clean doc images perf examples asan debug stress stress-long ALWAYS
+.PHONY: all man install clean doc images perf examples verify cppcheck asan \
+        debug stress stress-long ALWAYS
 
 #LONG ?= 0
 #SANITIZE ?= 0
@@ -81,32 +82,34 @@ CFLAGS += -DSRAND -DSEED=${SEED}
 . endif
 .endif
 
-CXXFLAGS=${CFLAGS}
+CXXFLAGS += ${CFLAGS}
 
-H        = ${wildcard ctl/*.h} ctl/bits/*.h
-COMMON_H = ctl/ctl.h ctl/bits/container.h ctl/algorithm.h
+H        = ${wildcard ctl/*.h} 
+COMMON_H = ctl/ctl.h ctl/algorithm.h ${wildcard ctl/bits/*.h}
 TESTS = \
-	tests/func/test_c11 \
-	tests/func/test_container_composing \
-	tests/func/test_integral \
-	tests/func/test_integral_c11 \
+	tests/func/test_vector \
+	tests/func/test_string \
+	tests/func/test_array \
 	tests/func/test_deque \
 	tests/func/test_list \
-	tests/func/test_string \
-	tests/func/test_priority_queue \
-	tests/func/test_queue \
 	tests/func/test_set \
 	tests/func/test_unordered_set \
+	tests/func/test_priority_queue \
+	tests/func/test_queue \
+	tests/func/test_stack \
 	tests/func/test_unordered_set_power2 \
 	tests/func/test_unordered_set_cached \
 	tests/func/test_unordered_set_sleep \
-	tests/func/test_stack \
-	tests/func/test_array \
 	tests/func/test_double_array \
-	tests/func/test_vector \
 	tests/func/test_int_vector \
 	tests/func/test_vec_capacity \
-	tests/func/test_str_capacity
+	tests/func/test_str_capacity \
+	tests/func/test_integral \
+	tests/func/test_integral_c11 \
+	tests/func/test_c11 \
+	tests/func/test_container_composing \
+	tests/func/test_generic_iter
+
 .ifdef DEBUG
 TESTS += \
 	tests/func/test_map     \
@@ -249,72 +252,78 @@ ${srcc2} : ${srcc2}.c .cflags ${H}
 
 verify: ${VERIFY}
 
+cppcheck:
+	cppcheck -j4 -I. tests/func/
+
 #tests/func/%: tests/func/%.cc .cflags ${H}
-#	${CXX} ${CFLAGS} -o $@ $@.cc
+#	${CXX} ${CXXFLAGS} -o $@ $@.cc
 #tests/func/test_integral_c11: .cflags ${H} tests/func/test_integral_c11.c
 #	${CC} ${CFLAGS} -o $@ $@.c
 #tests/func/test_integral: .cflags ${H} tests/func/test_integral.cc
-#	${CXX} ${CFLAGS} -o $@ $@.cc
+#	${CXX} ${CXXFLAGS} -o $@ $@.cc
 #tests/func/test_container_composing: .cflags ${H} \
 #                          tests/func/test_container_composing.cc
-#	${CXX} ${CFLAGS} -o $@ $@.cc
+#	${CXX} ${CXXFLAGS} -o $@ $@.cc
+#tests/func/test_generic_iter: .cflags ${H} \
+#                          tests/func/test_generic_iter.cc
+#	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_deque:    .cflags ${COMMON_H} ctl/deque.h \
                           tests/func/test_deque.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_list:     .cflags ${COMMON_H} ctl/list.h \
                           tests/func/test_list.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_priority_queue: .cflags ${COMMON_H} ctl/priority_queue.h ctl/vector.h \
                           tests/func/test_priority_queue.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_queue:    .cflags ${COMMON_H} ctl/queue.h ctl/deque.h \
                           tests/func/test_queue.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_set:      .cflags ${COMMON_H} ctl/set.h \
                           tests/func/test_set.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_map:      .cflags ${COMMON_H} ctl/map.h ctl/set.h \
                           tests/func/test_map.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_unordered_set: .cflags ${COMMON_H} ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_unordered_set_power2: .cflags ${COMMON_H} ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
-	${CXX} ${CFLAGS} -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc -o $@
+	${CXX} ${CXXFLAGS} -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc -o $@
 tests/func/test_unordered_set_cached: .cflags ${COMMON_H} ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
-	${CXX} ${CFLAGS} -DCTL_USET_CACHED_HASH tests/func/test_unordered_set.cc -o $@
+	${CXX} ${CXXFLAGS} -DCTL_USET_CACHED_HASH tests/func/test_unordered_set.cc -o $@
 tests/func/test_unordered_set_sleep: .cflags ${COMMON_H} ctl/unordered_set.h \
                           tests/func/test_unordered_set_sleep.c
 	${CC} ${CFLAGS} -O3 -finline tests/func/test_unordered_set_sleep.c -o $@
 tests/func/test_unordered_map: .cflags ${COMMON_H} ctl/unordered_map.h ctl/unordered_set.h \
                           tests/func/test_unordered_map.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_stack:    .cflags ${COMMON_H} ctl/stack.h ctl/deque.h \
                           tests/func/test_stack.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_string:   .cflags ${COMMON_H} ctl/string.h ctl/vector.h \
                           tests/func/test_string.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_str_capacity: .cflags ${COMMON_H} ctl/string.h ctl/vector.h \
                           tests/func/test_str_capacity.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_vec_capacity: .cflags ${COMMON_H} ctl/vector.h \
                           tests/func/test_vec_capacity.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_vector:   .cflags ${COMMON_H} ctl/vector.h \
                           tests/func/test_vector.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_array:   .cflags ${COMMON_H} ctl/array.h \
                           tests/func/test_array.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_double_array:   .cflags ${COMMON_H} ctl/array.h \
                           tests/func/test_double_array.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 tests/func/test_int_vector: .cflags ${COMMON_H} ctl/vector.h \
                           tests/func/test_int_vector.cc
-	${CXX} ${CFLAGS} -o $@ $@.cc
+	${CXX} ${CXXFLAGS} -o $@ $@.cc
 
 compile_commands.json : $(H) makefile
 	make clean; bear make

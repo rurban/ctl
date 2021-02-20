@@ -11,8 +11,8 @@
 #define A JOIN(set, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#define GI JOIN(A, it)
 
-#include <ctl/bits/iterators.h>
 #include <ctl/ctl.h>
 #include <stdbool.h>
 
@@ -35,25 +35,16 @@ typedef struct A
     int (*equal)(T *, T *);
 } A;
 
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
-    B *node;
-    T *ref;
-    B *end;
-    A *container;
+    CTL_B_ITER_FIELDS;
 } I;
 
-static inline I JOIN(I, iter)(A *self, B *node)
-{
-    static I zero;
-    I iter = zero;
-    iter.node = node;
-    if (node)
-        iter.ref = &node->value;
-    iter.container = self;
-    // end defaults to NULL
-    return iter;
-}
+#include <ctl/bits/iterators.h>
+
+static inline I JOIN(I, iter)(A *self, B *node);
 
 static inline B *JOIN(B, min)(B *node)
 {
@@ -131,11 +122,10 @@ static inline void JOIN(I, set_end)(I *iter, I *last)
     iter->end = last->node;
 }
 
-static inline I *JOIN(I, next)(I *iter)
+static inline void JOIN(I, next)(I *iter)
 {
     iter->node = JOIN(B, next)(iter->node);
     iter->ref = iter->node ? &iter->node->value : NULL;
-    return iter;
 }
 
 /* seems to be pretty costly, or?
@@ -219,6 +209,22 @@ static inline B *JOIN(A, insert)(A *self, T key);
 static inline bool JOIN(A, find_first_of_range)(I *range1, I *range2);
 
 #include <ctl/bits/container.h>
+
+static inline I JOIN(I, iter)(A *self, B *node)
+{
+    static I zero;
+    I iter = zero;
+    iter.node = node;
+    if (node)
+        iter.ref = &node->value;
+    iter.container = self;
+    // end defaults to NULL
+    //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);
+    return iter;
+}
 
 static inline A JOIN(A, init)(int _compare(T *, T *))
 {
@@ -497,8 +503,13 @@ static inline void JOIN(A, rotate_r)(A *self, B *node)
     node->p = l;
 }
 
-static inline void JOIN(A, insert_1)(A *, B *), JOIN(A, insert_2)(A *, B *), JOIN(A, insert_3)(A *, B *),
-    JOIN(A, insert_4)(A *, B *), JOIN(A, insert_5)(A *, B *);
+// clang-format off
+static inline void JOIN(A, insert_1)(A *, B *),
+    JOIN(A, insert_2)(A *, B *),
+    JOIN(A, insert_3)(A *, B *),
+    JOIN(A, insert_4)(A *, B *),
+    JOIN(A, insert_5)(A *, B *);
+// clang-format on
 
 // TODO bulk insert of sorted vector
 static inline B *JOIN(A, insert)(A *self, T key)
@@ -892,9 +903,41 @@ static inline size_t JOIN(A, erase_if)(A *self, int (*_match)(T *))
     return JOIN(A, remove_if)(self, _match);
 }
 
+static inline void JOIN(A, insert_generic)(A* self, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    if (range->container == self)
+        return;
+    while (!done(range))
+    {
+        JOIN(A, insert)(self, self->copy(ref(range)));
+        next(range);
+    }
+}
+
+static inline void JOIN(A, erase_generic)(A* self, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    if (range->container == self)
+        return;
+    while (!done(range))
+    {
+        B* node = JOIN(A, find_node)(self, *ref(range));
+        if (node)
+            JOIN(A, erase_node)(self, node);
+        next(range);
+    }
+}
+
 static inline A JOIN(A, intersection)(A *a, A *b)
 {
-    A self = JOIN(A, init)(a->compare);
+    A self = JOIN(A, init_from)(a);
     B *node = JOIN(A, first)(a);
     while (node)
     {
@@ -906,9 +949,27 @@ static inline A JOIN(A, intersection)(A *a, A *b)
     return self;
 }
 
+static inline A JOIN(A, intersection_range)(I *r1, GI *r2)
+{
+    A *a = r1->container;
+    A self = JOIN(A, init_from)(a);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    // works only with full r1. which is basically ok.
+    while(!done2(r2))
+    {
+        if (JOIN(A, find_node)(a, *ref2(r2)))
+            JOIN(A, insert)(&self, self.copy(ref2(r2)));
+        next2(r2);
+    }
+    return self;
+}
+
 static inline A JOIN(A, union)(A *a, A *b)
 {
-    A self = JOIN(A, init)(a->compare);
+    A self = JOIN(A, init_from)(a);
     B *node = JOIN(A, first)(a);
     while (node)
     {
@@ -922,6 +983,23 @@ static inline A JOIN(A, union)(A *a, A *b)
         B *next = JOIN(B, next)(node);
         JOIN(A, insert)(&self, self.copy(&node->value));
         node = next;
+    }
+    return self;
+}
+
+static inline A JOIN(A, union_range)(I *r1, GI *r2)
+{
+    A self = JOIN(A, init_from)(r1->container);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    foreach_range_ (A, it1, r1)
+        JOIN(A, insert)(&self, self.copy(it1.ref));
+    while(!done2(r2))
+    {
+        JOIN(A, insert)(&self, self.copy(ref2(r2)));
+        next2(r2);
     }
     return self;
 }
@@ -1103,23 +1181,27 @@ static inline I JOIN(A, transform_it_range)(I *range1, I *pos, I dest, T _binop(
 }
 
 // i.e. strcspn, but returning the first found match
-static inline bool JOIN(A, find_first_of_range)(I *range1, I *range2)
+static inline bool JOIN(A, find_first_of_range)(I *range1, GI *range2)
 {
-    if (JOIN(I, done)(range1) || JOIN(I, done)(range2))
+    void (*next2)(struct I*) = range2->vtable.next;
+    T* (*ref2)(struct I*) = range2->vtable.ref;
+    int (*done2)(struct I*) = range2->vtable.done;
+
+    if (JOIN(I, done)(range1) || done2(range2))
         return false;
     I it = *range2;
     while (1)
     {
-        if (JOIN(I, done)(&it))
+        if (done2(&it))
             goto not_found;
         // find_range changes the 1st arg. need a copy
         I tmp = *range1;
-        if (JOIN(A, find_range)(&tmp, *it.ref))
+        if (JOIN(A, find_range)(&tmp, *ref2(&it)))
         {
             *range1 = tmp;
             return true;
         }
-        JOIN(I, next)(&it);
+        next2(&it);
     }
 not_found:
     JOIN(I, set_done)(range1);
@@ -1154,6 +1236,7 @@ static inline void JOIN(A, equal_range)(A *self, T key, I *lower_bound, I *upper
 #undef A
 #undef B
 #undef I
+#undef GI
 #else
 #undef HOLD
 #endif

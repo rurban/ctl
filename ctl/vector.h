@@ -10,8 +10,8 @@
 #define CTL_VEC
 #define A JOIN(vec, T)
 #define I JOIN(A, it)
+#define GI JOIN(A, it)
 
-#include <ctl/bits/iterators.h>
 #include <ctl/ctl.h>
 
 // only for short strings, not vec_uint8_t
@@ -35,12 +35,14 @@ typedef struct A
 
 typedef int (*JOIN(A, compare_fn))(T *, T *);
 
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
-    T *ref;
-    T *end;
-    A *container;
+    CTL_T_ITER_FIELDS;
 } I;
+
+#include <ctl/bits/iterators.h>
 
 static inline size_t JOIN(A, capacity)(A *self)
 {
@@ -63,30 +65,7 @@ static inline T *JOIN(A, back)(A *self)
     return self->size ? JOIN(A, at)(self, self->size - 1) : NULL;
 }
 
-static inline I JOIN(I, iter)(A *self, size_t index)
-{
-    static I zero;
-    I iter = zero;
-    //#ifndef DISALLOW_OVERFLOW
-    iter.ref = &self->vector[index];
-    iter.end = &self->vector[self->size];
-    /*
-    #else
-        // breaks distance, index, advance
-        if (index < self->size)
-        {
-            iter.ref = &self->vector[index];
-            iter.end = &self->vector[self->size];
-        }
-        else
-        {
-            iter.ref = iter.end = NULL;
-        }
-    #endif
-    */
-    iter.container = self;
-    return iter;
-}
+static inline I JOIN(I, iter)(A *self, size_t index);
 
 static inline I JOIN(A, begin)(A *self)
 {
@@ -183,6 +162,20 @@ static inline A *JOIN(A, move_range)(I *range, A *out);
 static inline I JOIN(A, erase)(I *pos);
 
 #include <ctl/bits/container.h>
+
+static inline I JOIN(I, iter)(A *self, size_t index)
+{
+    static I zero;
+    I iter = zero;
+    iter.ref = &self->vector[index];
+    iter.end = &self->vector[self->size];
+    iter.container = self;
+    //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);
+    return iter;
+}
 
 static inline A JOIN(A, init)(void)
 {
@@ -517,15 +510,23 @@ static inline void JOIN(A, insert)(I *pos, T value)
     A *self = pos->container;
     if (!JOIN(I, done)(pos))
     {
+        // before pos
         size_t index = pos->ref - self->vector;
+        size_t end = pos->end - self->vector;
         // TODO memmove with POD
         JOIN(A, push_back)(self, *JOIN(A, back)(self));
         for (size_t i = self->size - 2; i > index; i--)
             self->vector[i] = self->vector[i - 1];
         self->vector[index] = value;
+        pos->ref = &self->vector[index];
+        pos->end = &self->vector[end];
     }
     else
+    {
+        // or at end
         JOIN(A, push_back)(self, value);
+        pos->end = pos->ref = &self->vector[self->size];
+    }
 }
 
 static inline void JOIN(A, insert_count)(I *pos, size_t count, T value)
@@ -546,7 +547,8 @@ static inline void JOIN(A, insert_count)(I *pos, size_t count, T value)
 #if defined CTL_STR
     JOIN(A, reserve)(self, self->size);
 #endif
-    FREE_VALUE(self, value);
+    if (self->free)
+        self->free(&value);
 }
 
 static inline void JOIN(A, insert_range)(I *pos, I *range2)
@@ -583,6 +585,25 @@ static inline I JOIN(A, erase)(I *pos)
     A *self = pos->container;
     return JOIN(A, erase_index)(self, JOIN(I, index)(pos));
 }
+
+#ifndef CTL_STR
+static inline void JOIN(A, insert_generic)(I *pos, GI *range)
+{
+    A* self = pos->container;
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    // JOIN(A, reserve)(self, self->size + JOIN(GI, distance_range)(range));
+    size_t index = JOIN(I, index)(pos);
+    while (!done(range))
+    {
+        JOIN(A, insert)(pos, self->copy(ref(range)));
+        pos->ref = &self->vector[++index];
+        next(range);
+    }
+}
+#endif // STR
 
 static inline void JOIN(A, swap)(A *self, A *other)
 {

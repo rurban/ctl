@@ -133,6 +133,10 @@ clears the contents
 
 inserts the element(s). (C++17)
 
+    insert_generic (A* self, GI* range2)
+
+inserts copies of values from generic range2. _(NYI)_
+
     emplace (A* self, T* value)
 
 constructs elements in-place. _(NYI)_
@@ -152,6 +156,10 @@ erases the element at pos.
     I* erase_range (I* range)
 
 erases elements.
+
+    erase_generic (A* self, GI* range)
+
+erases elements by value from another container.
 
     swap (A* self, A* other)
 
@@ -251,6 +259,7 @@ erases all elements satisfying specific criteria. (C++20) _(NYI)_
     find_range (I* range, T key) (C++20)
     find_if_range (I* range, int _match(T*)) (C++20)
     find_if_not_range (I* range, int _match(T*)) (C++20)
+    bool find_first_of_range (I* range1, GI* range2)
 
     remove (A* self, T key)                        _(NYI)_
     size_t remove_if (A* self, int match(T*))

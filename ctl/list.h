@@ -10,6 +10,7 @@
 #define A JOIN(list, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
+#define GI JOIN(A, it)
 
 #include <ctl/ctl.h>
 
@@ -31,17 +32,16 @@ typedef struct A
     int (*equal)(T *, T *);
 } A;
 
+#include <ctl/bits/iterator_vtable.h>
+
 typedef struct I
 {
-    B *node;
-    T *ref;
-    B *end;
-    A *container;
+    CTL_B_ITER_FIELDS;
 } I;
 
-typedef int (*JOIN(A, compare_fn))(T *, T *);
-
 #include <ctl/bits/iterators.h>
+
+typedef int (*JOIN(A, compare_fn))(T *, T *);
 
 static inline T *JOIN(A, front)(A *self)
 {
@@ -53,17 +53,7 @@ static inline T *JOIN(A, back)(A *self)
     return self->tail ? &self->tail->value : NULL;
 }
 
-static inline I JOIN(I, iter)(A *self, B *node)
-{
-    static I zero;
-    I iter = zero;
-    iter.node = node;
-    if (LIKELY(node))
-        iter.ref = &node->value;
-    // iter.end = NULL;
-    iter.container = self;
-    return iter;
-}
+static inline I JOIN(I, iter)(A *self, B *node);
 
 static inline I JOIN(A, begin)(A *self)
 {
@@ -210,6 +200,22 @@ static inline A *JOIN(A, move_range)(I *range, A *out);
 
 #include <ctl/bits/container.h>
 
+static inline I JOIN(I, iter)(A *self, B *node)
+{
+    static I zero;
+    I iter = zero;
+    iter.node = node;
+    if (LIKELY(node))
+        iter.ref = &node->value;
+    // iter.end = NULL;
+    iter.container = self;
+    //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
+    iter.vtable.next = JOIN(I, next);
+    iter.vtable.ref = JOIN(I, ref);
+    iter.vtable.done = JOIN(I, done);
+    return iter;
+}
+
 static inline A JOIN(A, init)(void)
 {
     static A zero;
@@ -290,7 +296,8 @@ static inline void JOIN(A, erase_node)(A *self, B *node)
 {
     if (LIKELY(self->size))
         JOIN(A, disconnect)(self, node);
-    FREE_VALUE(self, node->value);
+    if (self->free)
+        self->free(&node->value);
     free(node);
 }
 
@@ -372,7 +379,8 @@ static inline void JOIN(A, resize)(A *self, size_t size, T value)
     if (LIKELY(size != self->size && size < JOIN(A, max_size)()))
         for (size_t i = 0; size != self->size; i++)
             (size < self->size) ? JOIN(A, pop_back)(self) : JOIN(A, push_back)(self, self->copy(&value));
-    FREE_VALUE(self, value);
+    if (self->free)
+        self->free(&value);
 }
 
 static inline A JOIN(A, copy)(A *self)
@@ -509,6 +517,33 @@ static inline I *JOIN(A, insert_range)(I *pos, I *range)
     return pos;
 }
 
+static inline void JOIN(A, insert_generic)(I *pos, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    A *self = pos->container;
+    if (range->container == self)
+        return;
+    if (!pos->node)
+    {
+        while (!done(range))
+        {
+            JOIN(A, connect_after)(self, self->tail, JOIN(B, init)(self->copy(ref(range))));
+            next(range);
+        }
+    }
+    else
+    {
+        while (!done(range))
+        {
+            JOIN(A, connect_before)(self, pos->node, JOIN(B, init)(self->copy(ref(range))));
+            next(range);
+        }
+    }
+}
+
 static inline size_t JOIN(A, remove_if)(A *self, int _match(T *))
 {
     if (!self->size)
@@ -544,6 +579,21 @@ static inline I *JOIN(A, erase_range)(I *range)
         node = next;
     }
     return range;
+}
+
+static inline void JOIN(A, erase_generic)(A* self, GI *range)
+{
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    if (range->container == self)
+        return;
+    while (!done(range))
+    {
+        JOIN(A, remove)(self, *ref(range));
+        next(range);
+    }
 }
 
 static inline void JOIN(A, swap)(A *self, A *other)
@@ -714,4 +764,5 @@ static inline I JOIN(A, find)(A *self, T key)
 #undef A
 #undef B
 #undef I
+#undef GI
 #undef CTL_LIST

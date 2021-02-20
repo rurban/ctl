@@ -5,7 +5,8 @@ VERSION := $(shell grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
 VERSION ?= 202102
 
 .SUFFIXES: .cc .c .i .o .md .3
-.PHONY: all man install clean doc images perf examples verify asan debug stress stress-long ALWAYS
+.PHONY: all check man install clean doc images perf examples verify cppcheck asan \
+        debug stress stress-long ALWAYS
 
 TRY_CXX20 := $(shell $(CXX) -std=c++20 -I. tests/func/test_deque.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
@@ -104,29 +105,31 @@ CXXFLAGS += $(CFLAGS)
 
 H        = $(wildcard ctl/*.h) $(wildcard ctl/bits/*.h)
 COMMON_H = ctl/ctl.h ctl/algorithm.h ctl/bits/container.h \
-           ctl/bits/integral.h ctl/bits/iterators.h
+           ctl/bits/integral.h ctl/bits/iterators.h ctl/bits/iterator_vtable.h
 TESTS = \
-	tests/func/test_c11 \
-	tests/func/test_container_composing \
-	tests/func/test_integral \
-	tests/func/test_integral_c11 \
+	tests/func/test_vector \
+	tests/func/test_string \
+	tests/func/test_array \
 	tests/func/test_deque \
 	tests/func/test_list \
-	tests/func/test_string \
-	tests/func/test_priority_queue \
-	tests/func/test_queue \
 	tests/func/test_set \
 	tests/func/test_unordered_set \
+	tests/func/test_priority_queue \
+	tests/func/test_queue \
+	tests/func/test_stack \
 	tests/func/test_unordered_set_power2 \
 	tests/func/test_unordered_set_cached \
 	tests/func/test_unordered_set_sleep \
-	tests/func/test_stack \
-	tests/func/test_array \
 	tests/func/test_double_array \
-	tests/func/test_vector \
 	tests/func/test_int_vector \
 	tests/func/test_vec_capacity \
-	tests/func/test_str_capacity
+	tests/func/test_str_capacity \
+	tests/func/test_integral \
+	tests/func/test_integral_c11 \
+	tests/func/test_c11 \
+	tests/func/test_container_composing \
+	tests/func/test_generic_iter
+
 ifneq ($(DEBUG),)
 TESTS += \
 	tests/func/test_map     \
@@ -209,9 +212,15 @@ tests/verify/%-2 : tests/verify/%-2.c $(H)
 
 verify: $(VERIFY)
 
+cppcheck:
+	cppcheck -j4 -I. tests/func/
+
 MANPAGES = $(patsubst docs/%.md,docs/man/%.h.3, $(wildcard docs/*.md))
 
-README.md: $(wildcard tests/func/test_*.cc) ./update-grid.pl
+README.md: ./update-grid.pl tests/func/test_vector tests/func/test_string \
+  tests/func/test_array tests/func/test_deque tests/func/test_list tests/func/test_set \
+  tests/func/test_unordered_set	tests/func/test_priority_queue tests/func/test_queue \
+  tests/func/test_stack
 	./update-grid.pl
 
 docs/index.md : README.md ./update-index.pl
@@ -282,63 +291,62 @@ ctl/array.i:
 examples/% : examples/%.c .cflags $(H)
 	$(CC) $(CFLAGS) -o $@ $@.c
 
-tests/func/test_deque:    .cflags $(COMMON_H) ctl/deque.h \
+tests/func/test_deque:    .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/deque.h \
                           tests/func/test_deque.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_list:     .cflags $(COMMON_H) ctl/list.h \
+tests/func/test_list:     .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/list.h \
                           tests/func/test_list.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_priority_queue: .cflags $(COMMON_H) ctl/priority_queue.h ctl/vector.h \
+tests/func/test_priority_queue: .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/priority_queue.h ctl/vector.h \
                           tests/func/test_priority_queue.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_queue:    .cflags $(COMMON_H) ctl/queue.h ctl/deque.h \
+tests/func/test_queue:    .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/queue.h ctl/deque.h \
                           tests/func/test_queue.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_set:      .cflags $(COMMON_H) ctl/set.h \
+tests/func/test_set:      .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/set.h \
                           tests/func/test_set.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_map:      .cflags $(H) \
-                          tests/func/test_map.cc
+tests/func/test_map:      .cflags $(H) tests/test.h tests/func/strint.hh ctl/set.h ctl/map.h tests/func/test_map.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_unordered_set: .cflags $(COMMON_H) ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_unordered_set_power2: .cflags $(COMMON_H) ctl/unordered_set.h \
+tests/func/test_unordered_set_power2: .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
 	$(CXX) $(CXXFLAGS) -DCTL_USET_GROWTH_POWER2 tests/func/test_unordered_set.cc -o $@
-tests/func/test_unordered_set_cached: .cflags $(COMMON_H) ctl/unordered_set.h \
+tests/func/test_unordered_set_cached: .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/unordered_set.h \
                           tests/func/test_unordered_set.cc
 	$(CXX) $(CXXFLAGS) -DCTL_USET_CACHED_HASH tests/func/test_unordered_set.cc -o $@
-tests/func/test_unordered_set_sleep: .cflags $(COMMON_H) ctl/unordered_set.h \
+tests/func/test_unordered_set_sleep: .cflags $(COMMON_H) tests/test.h ctl/unordered_set.h \
                           tests/func/test_unordered_set_sleep.c
 	$(CC) $(CFLAGS) -O3 -finline tests/func/test_unordered_set_sleep.c -o $@
-tests/func/test_unordered_map: .cflags $(H) \
+tests/func/test_unordered_map: .cflags $(H) tests/test.h tests/func/strint.hh \
                           tests/func/test_unordered_map.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_stack:    .cflags $(COMMON_H) ctl/stack.h ctl/deque.h \
+tests/func/test_stack:    .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/stack.h ctl/deque.h \
                           tests/func/test_stack.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_string:   .cflags $(COMMON_H) ctl/string.h ctl/vector.h \
+tests/func/test_string:   .cflags $(COMMON_H) tests/test.h ctl/string.h ctl/vector.h \
                           tests/func/test_string.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_str_capacity: .cflags $(COMMON_H) ctl/string.h ctl/vector.h \
+tests/func/test_str_capacity: .cflags $(COMMON_H) tests/test.h ctl/string.h ctl/vector.h \
                           tests/func/test_str_capacity.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_vec_capacity: .cflags $(COMMON_H) ctl/vector.h \
+tests/func/test_vec_capacity: .cflags $(COMMON_H) tests/test.h ctl/vector.h \
                           tests/func/test_vec_capacity.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_vector:   .cflags $(COMMON_H) ctl/vector.h \
+tests/func/test_vector:   .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/vector.h \
                           tests/func/test_vector.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_array:   .cflags $(COMMON_H) ctl/array.h \
+tests/func/test_array:   .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/array.h \
                           tests/func/test_array.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_double_array:   .cflags $(COMMON_H) ctl/array.h \
+tests/func/test_double_array:   .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/array.h \
                           tests/func/test_double_array.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/%: tests/func/%.c .cflags $(H)
+tests/func/%: tests/func/%.c .cflags $(H) tests/test.h
 	$(CC) $(CFLAGS) -o $@ $@.c
-tests/func/%: tests/func/%.cc .cflags $(H)
+tests/func/%: tests/func/%.cc .cflags $(H) tests/test.h
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 
 asan:
