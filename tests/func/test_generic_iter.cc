@@ -368,7 +368,8 @@ int main(void)
 #define INSERT_INTO(ty2, ty1, cppty)                                                                                   \
     LOG("insert " #ty2 " into " #ty1 "\n");                                                                            \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
-    ty1##_int_insert_generic(&begin, (ty1##_int_it *)&range2);                                                         \
+    ctl_generic_it *range2 = ty1##_int_it_generic(&begin);                                                             \
+    ty1##_int_insert_generic(&begin, &range2);                                                                         \
     b.insert(b.begin(), bb.begin(), bb.end());                                                                         \
     LOG("=> ");                                                                                                        \
     print_##ty1(&a);                                                                                                   \

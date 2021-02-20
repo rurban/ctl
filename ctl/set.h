@@ -11,7 +11,6 @@
 #define A JOIN(set, T)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
-#define GI JOIN(A, it)
 
 #include <ctl/ctl.h>
 #include <stdbool.h>
@@ -225,10 +224,19 @@ static inline I JOIN(I, iter)(A *self, B *node)
     iter.container = self;
     // end defaults to NULL
     //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
-    iter.vtable.next = JOIN(I, next);
-    iter.vtable.ref = JOIN(I, ref);
-    iter.vtable.done = JOIN(I, done);
+    iter.vtable.next = (void (*)(struct GI *))JOIN(I, next);
+    iter.vtable.ref = (T *(*)(struct GI *))JOIN(I, ref);
+    iter.vtable.done = (int (*)(struct GI *))JOIN(I, done);
     return iter;
+}
+
+// Alternatively we could think about initializing the vtable only here, not above.
+static inline GI* JOIN(I, generic)(I* iter)
+{
+    ASSERT(iter->vtable.next == (void (*)(struct GI *))JOIN(I, next));
+    ASSERT(iter->vtable.ref == (T *(*)(struct GI *))JOIN(I, ref));
+    ASSERT(iter->vtable.done == (int (*)(struct GI *))JOIN(I, done));
+    return (GI*)iter;
 }
 
 static inline A JOIN(A, init)(int _compare(T *, T *))
@@ -910,9 +918,9 @@ static inline size_t JOIN(A, erase_if)(A *self, int (*_match)(T *))
 
 static inline void JOIN(A, insert_generic)(A* self, GI *range)
 {
-    void (*next)(struct I*) = range->vtable.next;
-    T* (*ref)(struct I*) = range->vtable.ref;
-    int (*done)(struct I*) = range->vtable.done;
+    void (*next)(struct GI*) = range->vtable.next;
+    T* (*ref)(struct GI*) = range->vtable.ref;
+    int (*done)(struct GI*) = range->vtable.done;
 
     if (range->container == self)
         return;
@@ -925,9 +933,9 @@ static inline void JOIN(A, insert_generic)(A* self, GI *range)
 
 static inline void JOIN(A, erase_generic)(A* self, GI *range)
 {
-    void (*next)(struct I*) = range->vtable.next;
-    T* (*ref)(struct I*) = range->vtable.ref;
-    int (*done)(struct I*) = range->vtable.done;
+    void (*next)(struct GI*) = range->vtable.next;
+    T* (*ref)(struct GI*) = range->vtable.ref;
+    int (*done)(struct GI*) = range->vtable.done;
 
     if (range->container == self)
         return;
@@ -958,9 +966,9 @@ static inline A JOIN(A, intersection_range)(I *r1, GI *r2)
 {
     A *a = r1->container;
     A self = JOIN(A, init_from)(a);
-    void (*next2)(struct I*) = r2->vtable.next;
-    T* (*ref2)(struct I*) = r2->vtable.ref;
-    int (*done2)(struct I*) = r2->vtable.done;
+    void (*next2)(struct GI*) = r2->vtable.next;
+    T* (*ref2)(struct GI*) = r2->vtable.ref;
+    int (*done2)(struct GI*) = r2->vtable.done;
 
     // works only with full r1. which is basically ok.
     while(!done2(r2))
@@ -995,9 +1003,9 @@ static inline A JOIN(A, union)(A *a, A *b)
 static inline A JOIN(A, union_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    void (*next2)(struct I*) = r2->vtable.next;
-    T* (*ref2)(struct I*) = r2->vtable.ref;
-    int (*done2)(struct I*) = r2->vtable.done;
+    void (*next2)(struct GI*) = r2->vtable.next;
+    T* (*ref2)(struct GI*) = r2->vtable.ref;
+    int (*done2)(struct GI*) = r2->vtable.done;
 
     foreach_range_ (A, it1, r1)
         JOIN(A, insert)(&self, self.copy(it1.ref));
@@ -1185,9 +1193,9 @@ static inline I JOIN(A, transform_it_range)(I *range1, I *pos, I dest, T _binop(
 // i.e. strcspn, but returning the first found match
 static inline bool JOIN(A, find_first_of_range)(I *range1, GI *range2)
 {
-    void (*next2)(struct I*) = range2->vtable.next;
-    T* (*ref2)(struct I*) = range2->vtable.ref;
-    int (*done2)(struct I*) = range2->vtable.done;
+    void (*next2)(struct GI*) = range2->vtable.next;
+    T* (*ref2)(struct GI*) = range2->vtable.ref;
+    int (*done2)(struct GI*) = range2->vtable.done;
 
     if (JOIN(I, done)(range1) || done2(range2))
         return false;

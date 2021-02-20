@@ -176,10 +176,19 @@ static inline I JOIN(I, iter)(A *self, size_t index)
     iter.end = &self->vector[self->size];
     iter.container = self;
     //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
-    iter.vtable.next = JOIN(I, next);
-    iter.vtable.ref = JOIN(I, ref);
-    iter.vtable.done = JOIN(I, done);
+    iter.vtable.next = (void (*)(struct GI *))JOIN(I, next);
+    iter.vtable.ref = (T *(*)(struct GI *))JOIN(I, ref);
+    iter.vtable.done = (int (*)(struct GI *))JOIN(I, done);
     return iter;
+}
+
+// Alternatively we could think about initializing the vtable only here, not above.
+static inline GI* JOIN(I, generic)(I* iter)
+{
+    ASSERT(iter->vtable.next == (void (*)(struct GI *))JOIN(I, next));
+    ASSERT(iter->vtable.ref == (T *(*)(struct GI *))JOIN(I, ref));
+    ASSERT(iter->vtable.done == (int (*)(struct GI *))JOIN(I, done));
+   return (GI*)iter;
 }
 
 static inline A JOIN(A, init)(void)
@@ -595,9 +604,9 @@ static inline I JOIN(A, erase)(I *pos)
 static inline void JOIN(A, insert_generic)(I *pos, GI *range)
 {
     A* self = pos->container;
-    void (*next)(struct I*) = range->vtable.next;
-    T* (*ref)(struct I*) = range->vtable.ref;
-    int (*done)(struct I*) = range->vtable.done;
+    void (*next)(struct GI*) = range->vtable.next;
+    T* (*ref)(struct GI*) = range->vtable.ref;
+    int (*done)(struct GI*) = range->vtable.done;
 
     // JOIN(A, reserve)(self, self->size + JOIN(GI, distance_range)(range));
     size_t index = JOIN(I, index)(pos);

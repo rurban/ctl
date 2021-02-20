@@ -45,8 +45,8 @@ added API's to work with the addional end position.
 
 We also support for certain algorithm methods generic iterators as 2nd range,
 abstracting different containers. So we can insert a vector into a deque, or use
-a mixed set algorithm with different container types. They are denoted as `GI*`,
-generic iters, and can be simply casted from container-specific iterators.
+a mixed set algorithm with different container types. Their type is
+`ctl_T_it`, abbrevated as `GI*`. Those are converted via the `generic` it method.
 
 We don't fully support **output iterators**, like `back_inserter` or `inserter` yet.
 They are currently only defined for some algorithms, and are problematic for `set`.
@@ -117,6 +117,11 @@ Returns the distance from begin.
     size_t distance_range (I* range)
 
 Returns the distance between range and `range->end`.
+
+    GI* generic (I* iter)
+
+Converts a container-specific iterator to a generic iterator, ensuring all
+vtables are properly initialized.
 
 # Performance
 

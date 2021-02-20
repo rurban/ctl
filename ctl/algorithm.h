@@ -123,9 +123,9 @@ static inline void JOIN(I, iter_swap)(I *a, I* b)
 
 static inline A *JOIN(A, copy_range)(GI *range, A *out)
 {
-    void (*next)(struct I*) = range->vtable.next;
-    T* (*ref)(struct I*) = range->vtable.ref;
-    int (*done)(struct I*) = range->vtable.done;
+    void (*next)(struct GI*) = range->vtable.next;
+    T* (*ref)(struct GI*) = range->vtable.ref;
+    int (*done)(struct GI*) = range->vtable.done;
     while (!done(range))
     {
         JOIN(A, push_back)(out, out->copy(ref(range)));
@@ -177,9 +177,9 @@ JOIN(A, union)(A* a, A* b)
 static inline A JOIN(A, union_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    void (*next2)(struct I*) = r2->vtable.next;
-    T* (*ref2)(struct I*) = r2->vtable.ref;
-    int (*done2)(struct I*) = r2->vtable.done;
+    void (*next2)(struct GI*) = r2->vtable.next;
+    T* (*ref2)(struct GI*) = r2->vtable.ref;
+    int (*done2)(struct GI*) = r2->vtable.done;
  
     while (!JOIN(I, done)(r1))
     {
@@ -216,9 +216,9 @@ static inline A JOIN(A, union)(A *a, A *b)
 static inline A JOIN(A, intersection_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    void (*next2)(struct I*) = r2->vtable.next;
-    T* (*ref2)(struct I*) = r2->vtable.ref;
-    int (*done2)(struct I*) = r2->vtable.done;
+    void (*next2)(struct GI*) = r2->vtable.next;
+    T* (*ref2)(struct GI*) = r2->vtable.ref;
+    int (*done2)(struct GI*) = r2->vtable.done;
 
     while (!JOIN(I, done)(r1) && !done2(r2))
     {
@@ -261,9 +261,9 @@ static inline A JOIN(A, intersection)(A *a, A *b)
 static inline A JOIN(A, difference_range)(I *r1, I *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    void (*next2)(struct I*) = r2->vtable.next;
-    T* (*ref2)(struct I*) = r2->vtable.ref;
-    int (*done2)(struct I*) = r2->vtable.done;
+    void (*next2)(struct GI*) = r2->vtable.next;
+    T* (*ref2)(struct GI*) = r2->vtable.ref;
+    int (*done2)(struct GI*) = r2->vtable.done;
 
     while (!JOIN(I, done)(r1))
     {
@@ -303,9 +303,9 @@ static inline A JOIN(A, difference)(A *a, A *b)
 static inline A JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    void (*next2)(struct I*) = r2->vtable.next;
-    T* (*ref2)(struct I*) = r2->vtable.ref;
-    int (*done2)(struct I*) = r2->vtable.done;
+    void (*next2)(struct GI*) = r2->vtable.next;
+    T* (*ref2)(struct GI*) = r2->vtable.ref;
+    int (*done2)(struct GI*) = r2->vtable.done;
 
     while (!JOIN(I, done)(r1))
     {
@@ -357,9 +357,9 @@ static inline A JOIN(A, symmetric_difference)(A *a, A *b)
 static inline bool JOIN(A, includes_range)(I *r1, GI *r2)
 {
     A *self = r1->container;
-    void (*next2)(struct I*) = r2->vtable.next;
-    T* (*ref2)(struct I*) = r2->vtable.ref;
-    int (*done2)(struct I*) = r2->vtable.done;
+    void (*next2)(struct GI*) = r2->vtable.next;
+    T* (*ref2)(struct GI*) = r2->vtable.ref;
+    int (*done2)(struct GI*) = r2->vtable.done;
 
     while (!done2(r2))
     {
@@ -573,9 +573,9 @@ static inline I JOIN(A, transform_it_range)(I *range, I *pos, I dest, T _binop(T
 // no push_back, but insert
 static inline A *JOIN(A, copy_range)(GI *range, A *out)
 {
-    void (*next)(struct I*) = range->vtable.next;
-    T* (*ref)(struct I*) = range->vtable.ref;
-    int (*done)(struct I*) = range->vtable.done;
+    void (*next)(struct GI*) = range->vtable.next;
+    T* (*ref)(struct GI*) = range->vtable.ref;
+    int (*done)(struct GI*) = range->vtable.done;
     while (!done(range))
     {
         JOIN(A, insert)(out, out->copy(ref(range)));
@@ -605,9 +605,9 @@ static inline void JOIN(A, inserter)(A *self, T value)
 static inline A JOIN(A, merge_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
-    void (*next2)(struct I*) = r2->vtable.next;
-    T* (*ref2)(struct I*) = r2->vtable.ref;
-    int (*done2)(struct I*) = r2->vtable.done;
+    void (*next2)(struct GI*) = r2->vtable.next;
+    T* (*ref2)(struct GI*) = r2->vtable.ref;
+    int (*done2)(struct GI*) = r2->vtable.done;
 
     while (!JOIN(I, done)(r1))
     {
@@ -714,9 +714,9 @@ static inline bool JOIN(A, mismatch)(I *range1, GI *range2)
 {
     A *self = range1->container;
     CTL_ASSERT_EQUAL
-    void (*next2)(struct I*) = range2->vtable.next;
-    T* (*ref2)(struct I*) = range2->vtable.ref;
-    int (*done2)(struct I*) = range2->vtable.done;
+    void (*next2)(struct GI*) = range2->vtable.next;
+    T* (*ref2)(struct GI*) = range2->vtable.ref;
+    int (*done2)(struct GI*) = range2->vtable.done;
 
     int done1 = JOIN(I, done)(range1);
     if (!done2(range2))
@@ -795,9 +795,9 @@ static inline size_t JOIN(A, count_if)(A *self, int _match(T *))
 // has better variants for STR and SET
 static inline bool JOIN(A, find_first_of_range)(I *range1, GI *range2)
 {
-    void (*next2)(struct I*) = range2->vtable.next;
-    T* (*ref2)(struct I*) = range2->vtable.ref;
-    int (*done2)(struct I*) = range2->vtable.done;
+    void (*next2)(struct GI*) = range2->vtable.next;
+    T* (*ref2)(struct GI*) = range2->vtable.ref;
+    int (*done2)(struct GI*) = range2->vtable.done;
 
     if (JOIN(I, done)(range1) || done2(range2))
         return false;
@@ -835,8 +835,8 @@ static inline I JOIN(A, find_first_of)(A *self, GI *range2)
 // Naive r1*r2 cost, no Boyer-Moore yet.
 static inline bool JOIN(A, search_range)(I *range1, GI *range2)
 {
-    T* (*ref2)(struct I*) = range2->vtable.ref;
-    int (*done2)(struct I*) = range2->vtable.done;
+    T* (*ref2)(struct GI*) = range2->vtable.ref;
+    int (*done2)(struct GI*) = range2->vtable.done;
 
     if (JOIN(I, done)(range1))
         return false;
@@ -854,7 +854,7 @@ static inline bool JOIN(A, search_range)(I *range1, GI *range2)
     }
 #else
     A *self = range1->container;
-    void (*next2)(struct I*) = range2->vtable.next;
+    void (*next2)(struct GI*) = range2->vtable.next;
     for (;; JOIN(I, next)(range1))
     {
         I it = *range1;
@@ -1029,9 +1029,9 @@ static inline bool JOIN(A, equal_range)(I *range1, GI *range2)
 {
     A *self = range1->container;
     CTL_ASSERT_EQUAL
-    void (*next2)(struct I*) = range2->vtable.next;
-    T* (*ref2)(struct I*) = range2->vtable.ref;
-    int (*done2)(struct I*) = range2->vtable.done;
+    void (*next2)(struct GI*) = range2->vtable.next;
+    T* (*ref2)(struct GI*) = range2->vtable.ref;
+    int (*done2)(struct GI*) = range2->vtable.done;
 
     while (!JOIN(I, done)(range1))
     {

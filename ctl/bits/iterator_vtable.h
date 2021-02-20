@@ -39,10 +39,22 @@
 
 struct I;
 
+#ifndef GI
+#define GI ctl_generic_it
+#endif
+
 // Iterator vtable
 typedef struct JOIN(I, vtable_t)
 {
-    void (*next)(struct I *);
-    T *(*ref)(struct I *);
-    int (*done)(struct I *);
+    void (*next)(struct GI *);
+    T *(*ref)(struct GI *);
+    int (*done)(struct GI *);
 } JOIN(I, vtable_t);
+
+// once
+#ifndef CTL_GENERIC_IT_DEFINED
+#define CTL_GENERIC_IT_DEFINED
+typedef struct ctl_generic_it {
+    CTL_T_ITER_FIELDS;
+} ctl_generic_it;
+#endif
