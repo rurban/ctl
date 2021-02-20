@@ -3,9 +3,18 @@
 #include <ctl/string.h> // MULTIPLE INCLUDES OKAY.
 #include <ctl/string.h>
 
+#ifdef POD
+// this breaks FREE_VALUE
+#error "POD leftover from ctl/string.h"
+#endif
+
 #define POD
 #define T int
 #include <ctl/unordered_set.h>
+
+#ifdef POD
+#error "POD leftover"
+#endif
 
 size_t int_hash(int *x)
 {
@@ -100,29 +109,57 @@ typedef char *charp;
 #define T int
 #include <ctl/stack.h>
 
+#ifdef POD
+#error "POD leftover"
+#endif
+
 #define POD
 #define T int
 #include <ctl/priority_queue.h>
+
+#ifdef POD
+#error "POD leftover"
+#endif
 
 #define POD
 #define T int
 #include <ctl/queue.h>
 
+#ifdef POD
+#error "POD leftover"
+#endif
+
 #define POD
 #define T int
 #include <ctl/list.h>
+
+#ifdef POD
+#error "POD leftover"
+#endif
 
 #define POD
 #define T int
 #include <ctl/deque.h>
 
+#ifdef POD
+#error "POD leftover"
+#endif
+
 #define POD
 #define T int
 #include <ctl/set.h>
 
+#ifdef POD
+#error "POD leftover"
+#endif
+
 #define POD
 #define T char
 #include <ctl/vector.h>
+
+#ifdef POD
+#error "POD leftover"
+#endif
 
 #define POD
 #define T int
@@ -145,6 +182,10 @@ typedef char *charp;
 #define T double
 #include <ctl/array.h>
 
+#ifdef POD
+#error "POD leftover"
+#endif
+
 typedef struct
 {
     int x;
@@ -155,6 +196,10 @@ typedef struct
 #define NOT_INTEGRAL
 #define T point
 #include <ctl/vector.h>
+
+#ifdef POD
+#error "POD leftover"
+#endif
 
 #define T str
 #include <ctl/vector.h>
