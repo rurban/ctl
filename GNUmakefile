@@ -5,7 +5,8 @@ VERSION := $(shell grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
 VERSION ?= 202102
 
 .SUFFIXES: .cc .c .i .o .md .3
-.PHONY: all man install clean doc images perf examples verify asan debug stress stress-long ALWAYS
+.PHONY: all check man install clean doc images perf examples verify cppcheck asan \
+        debug stress stress-long ALWAYS
 
 TRY_CXX20 := $(shell $(CXX) -std=c++20 -I. tests/func/test_deque.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
@@ -210,6 +211,9 @@ tests/verify/%-2 : tests/verify/%-2.c $(H)
          done; else true; fi
 
 verify: $(VERIFY)
+
+cppcheck:
+	cppcheck -j4 -I. tests/func/
 
 MANPAGES = $(patsubst docs/%.md,docs/man/%.h.3, $(wildcard docs/*.md))
 

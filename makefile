@@ -27,7 +27,8 @@ CXX += -std=c++11
 CC  += -std=c11
 
 .SUFFIXES: .o .i .3 .cc .c .md
-.PHONY: all man install clean doc images perf examples asan debug stress stress-long ALWAYS
+.PHONY: all man install clean doc images perf examples verify cppcheck asan \
+        debug stress stress-long ALWAYS
 
 #LONG ?= 0
 #SANITIZE ?= 0
@@ -250,6 +251,9 @@ ${srcc2} : ${srcc2}.c .cflags ${H}
 .endfor
 
 verify: ${VERIFY}
+
+cppcheck:
+	cppcheck -j4 -I. tests/func/
 
 #tests/func/%: tests/func/%.cc .cflags ${H}
 #	${CXX} ${CXXFLAGS} -o $@ $@.cc
