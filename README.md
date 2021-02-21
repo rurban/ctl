@@ -342,6 +342,7 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`load_factor`                    | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | -  | -  | -  |
 |`max_load_factor`                | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | -  | -  | -  |
 |`max_bucket_count`               | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | -  | -  | -  |
+|`bucket_count`                   | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | -  | -  | -  |
 |`bucket_size`                    | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | -  | -  | -  |
 |`rehash`                         | -  | -  | -  | -  | -  | -  | -  | ✓  | ✓  | -  | -  | -  |
 |`emplace`                        | x  |    | -  | ✓  | ✓  | x  | -  | ✓  | x  | ✓  | -  | -  |
@@ -561,7 +562,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 202000 (starting with `202102`),
 the old ctl is lower than 202000, starting with `1.0`.
 
-Added lots of missing methods. We have 145 methods in 755 stable variants.
+Added lots of missing methods. We have 146 methods in 757 stable variants.
 glouw has 63 methods in 196 stable variants.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.

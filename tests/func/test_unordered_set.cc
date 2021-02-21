@@ -98,8 +98,8 @@ static const char *test_names[] = {
             }                                                                                                          \
             assert(a_found == b_found);                                                                                \
             /* only if we use the very same policies                                                                   \
-            assert(_x.bucket_count == _y.bucket_count());                                                              \
-            for(size_t _i = 0; _i < _x.bucket_count; _i++)                                                             \
+            assert(_x.bucket_max + 1 == _y.bucket_count());                                                              \
+            for(size_t _i = 0; _i <= _x.bucket_max; _i++)                                                             \
                 assert(uset_digi_bucket_size(&_x, _i) == _y.bucket_size(_i));                                          \
             */                                                                                                         \
         }                                                                                                              \
@@ -183,7 +183,7 @@ int main(void)
             queue_int_pop(&tests);
         } else
             which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
-        LOG("TEST=%d %s (%zu, %zu)\n", which, test_names[which], a.size, a.bucket_count);
+        LOG("TEST=%d %s (%zu, %zu)\n", which, test_names[which], a.size, a.bucket_max);
         switch (which)
         {
         case TEST_SELF: {
@@ -278,7 +278,7 @@ int main(void)
         }
         case TEST_REHASH: {
             size_t size = uset_digi_size(&a);
-            LOG("size %lu -> %lu, cap: %lu\n", size, size * 2, a.bucket_count);
+            LOG("size %lu -> %lu, cap: %lu\n", size, size * 2, a.bucket_max + 1);
             print_uset(&a);
             print_unordered_set(b);
             b.rehash(size * 2);
@@ -303,7 +303,7 @@ int main(void)
                 LOG("copy\n");
                 print_uset(&aa);
                 uset_digi_reserve(&aa, reserve);
-                LOG("CTL reserve by %" PRId32 " %zu\n", reserve, aa.bucket_count);
+                LOG("CTL reserve by %" PRId32 " %zu\n", reserve, aa.bucket_max + 1);
                 print_uset(&aa);
                 CHECK(aa, bb);
                 uset_digi_free(&aa);

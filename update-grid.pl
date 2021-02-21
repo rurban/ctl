@@ -136,7 +136,7 @@ for my $c (qw(vec str arr deq list set map)) {
   }
 }
 for my $c (qw(uset umap)) {
-  for (qw(load_factor max_load_factor max_bucket_count bucket_size)) {
+  for (qw(load_factor max_load_factor max_bucket_count bucket_count bucket_size)) {
     $m->{$_}->{$c} = '✓';
   }
   # undefined iter methods

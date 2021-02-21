@@ -136,6 +136,11 @@ typedef struct I
 
 #include <ctl/bits/iterators.h>
 
+static inline size_t JOIN(A, bucket_count)(A *self)
+{
+    return self->buckets ? self->bucket_max + 1 : 0;
+}
+
 static inline size_t JOIN(I, index)(A *self, T value)
 {
 #ifdef CTL_USET_GROWTH_POWER2
@@ -637,16 +642,19 @@ static inline void JOIN(A, rehash)(A *self, size_t desired_count)
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
     JOIN(A, reserve)(&rehashed, desired_count);
-    B **b_last = &self->buckets[self->bucket_max];
-    for (B **b = self->buckets; b <= b_last; b++)
+    if (LIKELY(self->buckets && self->size)) // if desired_count 0
     {
-        B* node = *b;
-        while (node)
+        B **b_last = &self->buckets[self->bucket_max];
+        for (B **b = self->buckets; b <= b_last; b++)
         {
-            B* next = node->next;
-            B **buckets = JOIN(A, _cached_bucket)(&rehashed, node);
-            JOIN(B, push)(buckets, node);
-            node = next;
+            B* node = *b;
+            while (node)
+            {
+                B* next = node->next;
+                B **buckets = JOIN(A, _cached_bucket)(&rehashed, node);
+                JOIN(B, push)(buckets, node);
+                node = next;
+            }
         }
     }
     rehashed.size = self->size;
@@ -667,16 +675,19 @@ static inline void JOIN(A, _rehash)(A *self, size_t count)
     LOG("_rehash %zu => %zu\n", self->size, count);
     JOIN(A, _reserve)(&rehashed, count);
 
-    B **b_last = &self->buckets[self->bucket_max];
-    for (B **b = self->buckets; b <= b_last; b++)
+    if (LIKELY(self->buckets && self->size)) // if desired_count 0
     {
-        B* node = *b;
-        while (node)
+        B **b_last = &self->buckets[self->bucket_max];
+        for (B **b = self->buckets; b <= b_last; b++)
         {
-            B* next = node->next;
-            B **buckets = JOIN(A, _cached_bucket)(&rehashed, node);
-            JOIN(B, push)(buckets, node);
-            node = next;
+            B* node = *b;
+            while (node)
+            {
+                B* next = node->next;
+                B **buckets = JOIN(A, _cached_bucket)(&rehashed, node);
+                JOIN(B, push)(buckets, node);
+                node = next;
+            }
         }
     }
     rehashed.size = self->size;
