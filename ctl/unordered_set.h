@@ -464,29 +464,60 @@ static inline void JOIN(B, push)(B **bucketp, B *n)
 static inline B **JOIN(A, _cached_bucket)(A *self, B *node)
 {
 #ifdef CTL_USET_CACHED_HASH
-    size_t hash = node->cached_hash % self->bucket_count;
+# ifdef CTL_USET_GROWTH_POWER2
+    const size_t hash = node->cached_hash & (self->bucket_count - 1);
+# else
+    const size_t hash = ((uint64_t) node->cached_hash * (uint64_t) self->bucket_count) >> 32;
+    //const size_t hash = node->cached_hash % self->bucket_count;
+# endif
 #else
-    size_t hash = self->hash(&node->value) % self->bucket_count;
+# ifdef CTL_USET_GROWTH_POWER2
+    const size_t hash = self->hash(&node->value) & (self->bucket_count - 1);
+# else
+    const size_t hash = ((uint64_t) self->hash(&node->value) * (uint64_t) self->bucket_count) >> 32;
+    //const size_t hash = self->hash(&node->value) % self->bucket_count;
+# endif
 #endif
     // LOG ("hash -> buckets[%lu]\n", hash);
     return &self->buckets[hash];
 }
 
+#ifdef CTL_USET_CACHED_HASH
 static inline B **JOIN(A, _bucket_hash)(A *self, size_t hash)
 {
-    return &self->buckets[hash % self->bucket_count];
+#ifdef CTL_USET_GROWTH_POWER2
+    LOG ("buckets %lx %% %lu\n", hash, self->bucket_count);
+    return &self->buckets[hash & (self->bucket_count - 1)];
+#else
+    return &self->buckets[((uint64_t) hash * (uint64_t) self->bucket_count) >> 32];
+    //return &self->buckets[hash % self->bucket_count];
+#endif
 }
+
+#else
 
 static inline B **JOIN(A, _bucket)(A *self, T value)
 {
-    const size_t hash = self->hash(&value) % self->bucket_count;
-    // LOG ("hash -> buckets[%lu]\n", hash);
+#ifdef CTL_USET_GROWTH_POWER2
+    const size_t hash = self->hash(&value) & (self->bucket_count - 1);
+    LOG ("buckets %lx %% %lu => %zu\n", self->hash(&value), self->bucket_count, hash);
+#else
+    const size_t hash = ((uint64_t) self->hash(&value) * (uint64_t) self->bucket_count) >> 32 ;
+    //const size_t hash = self->hash(&value) % self->bucket_count;
+#endif
     return &self->buckets[hash];
 }
+#endif
 
 static inline size_t JOIN(A, bucket)(A *self, T value)
 {
-    return self->hash(&value) % self->bucket_count;
+#ifdef CTL_USET_GROWTH_POWER2
+    LOG ("buckets %lx %% %lu\n", self->hash(&value), self->bucket_count);
+    return self->hash(&value) & (self->bucket_count - 1);
+#else
+    return ((uint64_t) self->hash(&value) * (uint64_t) self->bucket_count) >> 32 ;
+    //const size_t hash = self->hash(&value) % self->bucket_count;
+#endif
 }
 
 static inline size_t JOIN(A, bucket_size)(A *self, size_t index)
