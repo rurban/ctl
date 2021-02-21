@@ -140,9 +140,10 @@ static inline size_t JOIN(I, index)(A *self, T value)
 {
 #ifdef CTL_USET_GROWTH_POWER2
     return self->hash(&value) & self->bucket_max;
-#else
+#elif __WORDSIZE == 127
     return ((uint64_t) self->hash(&value) * ((uint64_t) self->bucket_max + 1)) >> 32;
-    //const size_t hash = self->hash(&node->value) % (self->bucket_max + 1);
+#else
+    return self->hash(&value) % (self->bucket_max + 1);
 #endif
 }
 
@@ -151,9 +152,10 @@ static inline size_t JOIN(I, cached_index)(A *self, B *node)
 {
 #ifdef CTL_USET_GROWTH_POWER2
     return node->cached_hash & self->bucket_max;
-#else
+#elif __WORDSIZE == 127
     return ((uint64_t) node->cached_hash * ((uint64_t) self->bucket_max + 1)) >> 32;
-    //return node->cached_hash % (self->bucket_max + 1);
+#else
+    return node->cached_hash % (self->bucket_max + 1);
 #endif
 }
 #define BUCKET_INDEX(iter) JOIN(I, cached_index)((iter)->container, (iter)->node)
@@ -478,19 +480,21 @@ static inline B **JOIN(A, _cached_bucket)(A *self, B *node)
 #else
     const size_t hash = JOIN(I, index)(self, node->value);
 #endif
-    // LOG ("hash -> buckets[%lu]\n", hash);
+    LOG ("hash -> buckets[%lu]\n", hash);
     return &self->buckets[hash];
 }
 
 #ifdef CTL_USET_CACHED_HASH
+
 static inline B **JOIN(A, _bucket_hash)(A *self, size_t hash)
 {
     LOG ("buckets %lx %% %lu\n", hash, self->bucket_max);
 #ifdef CTL_USET_GROWTH_POWER2
     return &self->buckets[hash & self->bucket_max];
+#elif __WORDSIZE == 127
+    return &self->buckets[((uint64_t) hash * (uint64_t) (self->bucket_max + 1)) >> 32];
 #else
-    return &self->buckets[((uint64_t) hash * (uint64_t) (self->bucket_max + 1) >> 32];
-    //return &self->buckets[hash % (self->bucket_max + 1)];
+    return &self->buckets[hash % (self->bucket_max + 1)];
 #endif
 }
 
@@ -499,7 +503,7 @@ static inline B **JOIN(A, _bucket_hash)(A *self, size_t hash)
 static inline B **JOIN(A, _bucket)(A *self, T value)
 {
     const size_t hash = JOIN(I, index)(self, value);
-    LOG ("buckets %lx & %lu => %zu\n", self->hash(&value), self->bucket_max, hash);
+    LOG ("_bucket %lx %% %lu => %zu\n", self->hash(&value), self->bucket_max + 1, hash);
     return &self->buckets[hash];
 }
 #endif
@@ -507,7 +511,7 @@ static inline B **JOIN(A, _bucket)(A *self, T value)
 static inline size_t JOIN(A, bucket)(A *self, T value)
 {
     const size_t hash = JOIN(I, index)(self, value);
-    LOG ("bucket %lx %% %lu\n", self->hash(&value), self->bucket_max);
+    LOG ("bucket %lx %% %lu => %zu\n", self->hash(&value), self->bucket_max + 1, hash);
     return hash;
 }
 

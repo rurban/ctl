@@ -13,9 +13,9 @@ int main(void)
 {
     puts(__FILE__);
     srand(0xbeef);
+    uset_int c = uset_int_init(int_hash, int_equal);
     for(int run = 0; run < TEST_PERF_RUNS; run++)
     {
-        uset_int c = uset_int_init(int_hash, int_equal);
         unsigned int elems = TEST_PERF_CHUNKS * run;
         uset_int_reserve(&c, elems);
         for(unsigned int elem = 0; elem < elems; elem++)
@@ -26,6 +26,6 @@ int main(void)
             sum += *it.ref;
         long t1 = TEST_TIME();
         printf("%10d %10ld\n", elems, t1 - t0);
-        uset_int_free(&c);
     }
+    uset_int_free(&c);
 }
