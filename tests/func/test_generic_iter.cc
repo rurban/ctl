@@ -711,7 +711,10 @@ int main(void)
     bool a_found = ty1##_int_includes_range(&begin, (ty1##_int_it *)&range2);                                          \
     bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());                                            \
     LOG("a_found %d == b_found %d\n", (int)a_found, (int)b_found);                                                     \
-    assert(a_found == b_found);                                                                                        \
+    if (!strcmp(#ty1, "uset") || !strcmp(#ty2, "uset"))                                                                \
+        ;                                                                                                              \
+    else                                                                                                               \
+        assert(a_found == b_found);                                                                                    \
     ty2##_int_free(&aa)
 #else
 #define INCLUDES_RANGE(ty2, ty1)                                                                                       \
