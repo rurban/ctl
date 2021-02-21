@@ -5,7 +5,7 @@
 #error "Template type T undefined for <ctl/set.h>"
 #endif
 
-// TODO emplace, extract, extract_it, merge, equal_range
+// TODO emplace, extract, extract_it
 
 #define CTL_SET
 #define A JOIN(set, T)
@@ -1217,7 +1217,7 @@ static inline I JOIN(A, upper_bound)(A *self, T value);
 // lower_bound/upper_bound pair.
 static inline void JOIN(A, equal_range)(A *self, T key, I *lower_bound, I *upper_bound)
 {
-    *lower_bound = JOIN(A, lower_bound)(self, key);
+    *lower_bound = JOIN(A, lower_bound)(self, self->copy(&key));
     *upper_bound = JOIN(A, upper_bound)(self, key);
 }
 

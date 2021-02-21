@@ -944,6 +944,7 @@ static inline I *JOIN(A, lower_bound_range)(I *range, T value)
         size_t step = count / 2;
         it = *range;
         JOIN(I, advance)(&it, step);
+        // requires 2way compare
         if (self->compare(it.ref, &value))
         {
             JOIN(I, next)(&it);
@@ -969,6 +970,7 @@ static inline I *JOIN(A, upper_bound_range)(I *range, T value)
         size_t step = count / 2;
         it = *range;
         JOIN(I, advance)(&it, step);
+        // requires 2way compare
         if (!self->compare(&value, it.ref))
         {
             JOIN(I, next)(&it);
@@ -994,6 +996,7 @@ static inline I JOIN(A, lower_bound)(A *self, T value)
         size_t step = count / 2;
         it = range;
         JOIN(I, advance)(&it, step);
+        // requires 2way compare
         if (self->compare(it.ref, &value))
         {
             JOIN(I, next)(&it);
@@ -1019,6 +1022,7 @@ static inline I JOIN(A, upper_bound)(A *self, T value)
         size_t step = count / 2;
         it = range;
         JOIN(I, advance)(&it, step);
+        // requires 2way compare
         if (!self->compare(&value, it.ref))
         {
             JOIN(I, next)(&it);
@@ -1051,6 +1055,7 @@ static inline bool JOIN(A, binary_search_range)(I *range, T value)
         size_t step = count / 2;
         it = *range;
         JOIN(I, advance)(&it, step);
+        // requires 2way compare
         if (self->compare(it.ref, &value))
         {
             JOIN(I, next)(&it);
@@ -1084,6 +1089,7 @@ static inline bool JOIN(A, binary_search)(A *self, T value)
         size_t step = count / 2;
         it = range;
         JOIN(I, advance)(&it, step);
+        // requires 2way compare
         if (self->compare(it.ref, &value))
         {
             JOIN(I, next)(&it);
