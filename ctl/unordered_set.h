@@ -113,7 +113,7 @@ typedef struct A
     B **buckets;
     size_t size;
     // in STL as rehash_policy: growth_factor, max_load_factor, next_resize
-    size_t bucket_count;
+    size_t bucket_max; // index of last bucket. bucket_count - 1
     size_t max_bucket_count;
     float max_load_factor;
     void (*free)(T *);
@@ -138,13 +138,23 @@ typedef struct I
 
 static inline size_t JOIN(I, index)(A *self, T value)
 {
-    return self->hash(&value) % self->bucket_count;
+#ifdef CTL_USET_GROWTH_POWER2
+    return self->hash(&value) & self->bucket_max;
+#else
+    return ((uint64_t) self->hash(&value) * ((uint64_t) self->bucket_max + 1)) >> 32;
+    //const size_t hash = self->hash(&node->value) % (self->bucket_max + 1);
+#endif
 }
 
 #ifdef CTL_USET_CACHED_HASH
 static inline size_t JOIN(I, cached_index)(A *self, B *node)
 {
-    return node->cached_hash % self->bucket_count;
+#ifdef CTL_USET_GROWTH_POWER2
+    return node->cached_hash & self->bucket_max;
+#else
+    return ((uint64_t) node->cached_hash * ((uint64_t) self->bucket_max + 1)) >> 32;
+    //return node->cached_hash % (self->bucket_max + 1);
+#endif
 }
 #define BUCKET_INDEX(iter) JOIN(I, cached_index)((iter)->container, (iter)->node)
 
@@ -171,7 +181,7 @@ static inline void JOIN(I, update)(I *iter)
 {
     ASSERT(iter);
     ASSERT(iter->node);
-    ASSERT(iter->buckets - iter->container->buckets < (long)iter->container->bucket_count);
+    ASSERT(iter->buckets - iter->container->buckets <= (long)iter->container->bucket_max);
     iter->ref = &iter->node->value;
     //iter->next = iter->node->next;
 }
@@ -186,8 +196,8 @@ static inline void JOIN(I, next)(I *iter)
     if (!iter->node->next)
     {
         A *self = iter->container;
-        B **bend = &self->buckets[self->bucket_count];
-        for (B **b = ++iter->buckets; b < bend; b++)
+        B **b_last = &self->buckets[self->bucket_max];
+        for (B **b = ++iter->buckets; b <= b_last; b++)
         {
             if (*b)
             {
@@ -265,7 +275,7 @@ static inline B *JOIN(B, next)(A *container, B *node)
     else
     {
         size_t i = JOIN(I, index)(container, node->value) + 1;
-        for (; i < container->bucket_count; i++)
+        for (; i <= container->bucket_max; i++)
         {
             B *n = container->buckets[i];
             if (n)
@@ -320,8 +330,8 @@ static inline I JOIN(A, begin)(A *self)
     iter.vtable.next = JOIN(I, next);
     iter.vtable.ref = JOIN(I, ref);
     iter.vtable.done = JOIN(I, done);
-    B **bend = &self->buckets[self->bucket_count];
-    for (B **b = self->buckets; b < bend; b++)
+    B **b_last = &self->buckets[self->bucket_max];
+    for (B **b = self->buckets; b <= b_last; b++)
     {
         if (*b)
         {
@@ -464,19 +474,9 @@ static inline void JOIN(B, push)(B **bucketp, B *n)
 static inline B **JOIN(A, _cached_bucket)(A *self, B *node)
 {
 #ifdef CTL_USET_CACHED_HASH
-# ifdef CTL_USET_GROWTH_POWER2
-    const size_t hash = node->cached_hash & (self->bucket_count - 1);
-# else
-    const size_t hash = ((uint64_t) node->cached_hash * (uint64_t) self->bucket_count) >> 32;
-    //const size_t hash = node->cached_hash % self->bucket_count;
-# endif
+    const size_t hash = JOIN(I, cached_index)(self, node);
 #else
-# ifdef CTL_USET_GROWTH_POWER2
-    const size_t hash = self->hash(&node->value) & (self->bucket_count - 1);
-# else
-    const size_t hash = ((uint64_t) self->hash(&node->value) * (uint64_t) self->bucket_count) >> 32;
-    //const size_t hash = self->hash(&node->value) % self->bucket_count;
-# endif
+    const size_t hash = JOIN(I, index)(self, node->value);
 #endif
     // LOG ("hash -> buckets[%lu]\n", hash);
     return &self->buckets[hash];
@@ -485,12 +485,12 @@ static inline B **JOIN(A, _cached_bucket)(A *self, B *node)
 #ifdef CTL_USET_CACHED_HASH
 static inline B **JOIN(A, _bucket_hash)(A *self, size_t hash)
 {
+    LOG ("buckets %lx %% %lu\n", hash, self->bucket_max);
 #ifdef CTL_USET_GROWTH_POWER2
-    LOG ("buckets %lx %% %lu\n", hash, self->bucket_count);
-    return &self->buckets[hash & (self->bucket_count - 1)];
+    return &self->buckets[hash & self->bucket_max];
 #else
-    return &self->buckets[((uint64_t) hash * (uint64_t) self->bucket_count) >> 32];
-    //return &self->buckets[hash % self->bucket_count];
+    return &self->buckets[((uint64_t) hash * (uint64_t) (self->bucket_max + 1) >> 32];
+    //return &self->buckets[hash % (self->bucket_max + 1)];
 #endif
 }
 
@@ -498,26 +498,17 @@ static inline B **JOIN(A, _bucket_hash)(A *self, size_t hash)
 
 static inline B **JOIN(A, _bucket)(A *self, T value)
 {
-#ifdef CTL_USET_GROWTH_POWER2
-    const size_t hash = self->hash(&value) & (self->bucket_count - 1);
-    LOG ("buckets %lx %% %lu => %zu\n", self->hash(&value), self->bucket_count, hash);
-#else
-    const size_t hash = ((uint64_t) self->hash(&value) * (uint64_t) self->bucket_count) >> 32 ;
-    //const size_t hash = self->hash(&value) % self->bucket_count;
-#endif
+    const size_t hash = JOIN(I, index)(self, value);
+    LOG ("buckets %lx & %lu => %zu\n", self->hash(&value), self->bucket_max, hash);
     return &self->buckets[hash];
 }
 #endif
 
 static inline size_t JOIN(A, bucket)(A *self, T value)
 {
-#ifdef CTL_USET_GROWTH_POWER2
-    LOG ("buckets %lx %% %lu\n", self->hash(&value), self->bucket_count);
-    return self->hash(&value) & (self->bucket_count - 1);
-#else
-    return ((uint64_t) self->hash(&value) * (uint64_t) self->bucket_count) >> 32 ;
-    //const size_t hash = self->hash(&value) % self->bucket_count;
-#endif
+    const size_t hash = JOIN(I, index)(self, value);
+    LOG ("bucket %lx %% %lu\n", self->hash(&value), self->bucket_max);
+    return hash;
 }
 
 static inline size_t JOIN(A, bucket_size)(A *self, size_t index)
@@ -553,27 +544,31 @@ static inline size_t JOIN(A, max_bucket_count)(A *self)
 
 static inline float JOIN(A, load_factor)(A *self)
 {
-    return (float)self->size / (float)self->bucket_count;
+    return (float)self->size / (float)(self->bucket_max + 1);
 }
 
 // new_size must fit the growth policy: power2 or prime
 static inline void JOIN(A, _reserve)(A *self, const size_t new_size)
 {
-    if (self->bucket_count == new_size)
+    size_t bucket_count = self->bucket_max + 1;
+    if (bucket_count == new_size)
         return;
+#ifdef CTL_USET_GROWTH_POWER2
+    ASSERT((bucket_count & self->bucket_max) == 0);
+#endif
     if (self->buckets)
     {
         // LOG("_reserve %zu realloc => %zu\n", self->bucket_count, new_size);
         self->buckets = (B **)realloc(self->buckets, new_size * sizeof(B *));
-        if (new_size > self->bucket_count)
-            memset(&self->buckets[self->bucket_count], 0, (new_size - self->bucket_count) * sizeof(B *));
+        if (new_size > bucket_count)
+            memset(&self->buckets[bucket_count], 0, (new_size - bucket_count) * sizeof(B *));
     }
     else
     {
         // LOG("_reserve %zu calloc => %zu\n", self->bucket_count, new_size);
         self->buckets = (B **)calloc(new_size, sizeof(B *));
     }
-    self->bucket_count = new_size;
+    self->bucket_max = new_size - 1;
     if (self->size > 127)
         self->max_bucket_count = JOIN(A, max_bucket_count(self));
     else
@@ -589,12 +584,12 @@ static inline void JOIN(A, reserve)(A *self, size_t desired_count)
         return;
 #ifdef CTL_USET_GROWTH_POWER2
     const size_t new_size = JOIN(A, __next_power2)(desired_count);
-    // LOG("power2 growth policy %zu => %zu ", desired_count, new_size);
+    LOG("power2 growth policy %zu => %zu ", desired_count, new_size);
 #else
     const size_t new_size = JOIN(A, __next_prime)(desired_count);
-    // LOG("primed growth policy %zu => %zu ", desired_count, new_size);
+    LOG("primed growth policy %zu => %zu ", desired_count, new_size);
 #endif
-    if (new_size <= self->bucket_count)
+    if (new_size <= (self->bucket_max + 1))
         return;
     JOIN(A, _rehash)(self, new_size);
 }
@@ -634,12 +629,12 @@ static inline A JOIN(A, init_from)(A *copy)
 
 static inline void JOIN(A, rehash)(A *self, size_t desired_count)
 {
-    if (desired_count == self->bucket_count)
+    if (desired_count == (self->bucket_max + 1))
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
     JOIN(A, reserve)(&rehashed, desired_count);
-    B **bend = &self->buckets[self->bucket_count];
-    for (B **b = self->buckets; b < bend; b++)
+    B **b_last = &self->buckets[self->bucket_max];
+    for (B **b = self->buckets; b <= b_last; b++)
     {
         B* node = *b;
         while (node)
@@ -662,14 +657,14 @@ static inline void JOIN(A, rehash)(A *self, size_t desired_count)
 static inline void JOIN(A, _rehash)(A *self, size_t count)
 {
     // we do allow shrink here
-    if (count == self->bucket_count)
+    if (count == self->bucket_max + 1)
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
     LOG("_rehash %zu => %zu\n", self->size, count);
     JOIN(A, _reserve)(&rehashed, count);
 
-    B **bend = &self->buckets[self->bucket_count];
-    for (B **b = self->buckets; b < bend; b++)
+    B **b_last = &self->buckets[self->bucket_max];
+    for (B **b = self->buckets; b <= b_last; b++)
     {
         B* node = *b;
         while (node)
@@ -797,19 +792,19 @@ static inline B **JOIN(A, push_cached)(A *self, T *value)
 // the various growth polices before insert
 static inline void JOIN(A, _pre_insert_grow)(A *self)
 {
-    if (!self->bucket_count)
+    if (!self->bucket_max)
         JOIN(A, rehash)(self, 8);
     if (self->size + 1 > self->max_bucket_count)
     {
 #ifdef CTL_USET_GROWTH_POWER2
-        const size_t bucket_count = CTL_USET_GROWTH_FACTOR * self->bucket_count;
+        const size_t bucket_count = CTL_USET_GROWTH_FACTOR * (self->bucket_max + 1);
         // LOG ("rehash from %lu to %lu, load %f\n", self->size, self->bucket_count,
         //     JOIN(A, load_factor)(self));
         JOIN(A, _rehash)(self, bucket_count);
 #else
         // The natural growth factor is the golden ratio. libstc++ v3 and
         // libc++ use 2.0 here.
-        size_t const bucket_count = CTL_USET_GROWTH_FACTOR * (double)self->bucket_count;
+        size_t const bucket_count = CTL_USET_GROWTH_FACTOR * (double)(self->bucket_max + 1);
         JOIN(A, rehash)(self, bucket_count);
 #endif
     }
@@ -965,9 +960,9 @@ static inline I JOIN(A, emplace_hint)(I *pos, T *value)
 
 static inline void JOIN(A, clear)(A *self)
 {
-    if (LIKELY(self->bucket_count))
+    if (LIKELY(self->buckets))
     {
-        for (size_t i = 0; i < self->bucket_count; i++)
+        for (size_t i = 0; i <= self->bucket_max; i++)
         {
             B *next;
             B *n = self->buckets[i];
@@ -980,8 +975,8 @@ static inline void JOIN(A, clear)(A *self)
             }
             JOIN(A, _free_node)(self, n);
         }
-        memset(self->buckets, 0, self->bucket_count * sizeof(B *));
-        /* for(size_t i = 0; i < self->bucket_count; i++)
+        memset(self->buckets, 0, (self->bucket_max + 1) * sizeof(B *));
+        /* for(size_t i = 0; i <= self->bucket_max; i++)
            self->buckets[i] = NULL; */
     }
     self->size = 0;
@@ -990,11 +985,11 @@ static inline void JOIN(A, clear)(A *self)
 
 static inline void JOIN(A, free)(A *self)
 {
-    // LOG("free calloc %zu, %zu\n", self->bucket_count, self->size);
+    // LOG("free calloc %zu, %zu\n", self->bucket_max, self->size);
     JOIN(A, clear)(self);
     free(self->buckets);
     self->buckets = NULL;
-    self->bucket_count = 0;
+    self->bucket_max = 0;
 }
 
 static inline size_t JOIN(A, count)(A *self, T value)
@@ -1071,7 +1066,7 @@ static inline void JOIN(A, erase)(A *self, T value)
 static inline size_t JOIN(A, erase_if)(A *self, int (*_match)(T *))
 {
     size_t erases = 0;
-    for (size_t i = 0; i < self->bucket_count; i++)
+    for (size_t i = 0; i <= self->bucket_max; i++)
     {
         B **buckets = &self->buckets[i];
         B *prev = NULL;
@@ -1096,7 +1091,7 @@ static inline A JOIN(A, copy)(A *self)
 {
     // LOG ("copy\norig size: %lu\n", self->size);
     A other = JOIN(A, init)(self->hash, self->equal);
-    JOIN(A, _reserve)(&other, self->bucket_count);
+    JOIN(A, _reserve)(&other, self->bucket_max + 1);
     foreach (A, self, it)
     {
         // LOG ("size: %lu\n", other.size);
@@ -1135,7 +1130,7 @@ static inline void JOIN(A, erase_generic)(A* self, GI *range)
 static inline A JOIN(A, union)(A *a, A *b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
-    JOIN(A, _reserve)(&self, MAX(a->bucket_count, b->bucket_count));
+    JOIN(A, _reserve)(&self, 1 + MAX(a->bucket_max, b->bucket_max));
     foreach (A, a, it1)
         JOIN(A, insert)(&self, self.copy(it1.ref));
     foreach (A, b, it2)
