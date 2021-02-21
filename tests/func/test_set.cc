@@ -867,8 +867,9 @@ int main(void)
             set_digi_it first_a;
             std::set<DIGI>::iterator first_b, last_b;
             get_random_iters(&a, &first_a, b, first_b, last_b);
-            size_t off = std::distance(b.begin(), first_b);
-            size_t count = TEST_RAND(20 - off);
+            size_t off = std::distance(first_b, last_b);
+            size_t count = off > 20 ? TEST_RAND(off - 20) : TEST_RAND(off);
+            LOG("generate_n_range %zu\n", count);
             digi_generate_reset();
             set_digi_generate_n_range(&first_a, count, digi_generate);
             print_set(&a);

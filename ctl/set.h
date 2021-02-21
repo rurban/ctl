@@ -1098,10 +1098,7 @@ static inline void JOIN(A, generate_range)(I *range, T _gen(void))
 static inline void JOIN(A, generate_n)(A *self, size_t count, T _gen(void))
 {
     for (size_t i = 0; i < count; i++)
-    {
-        T tmp = _gen();
-        JOIN(A, insert)(self, tmp);
-    }
+        JOIN(A, insert)(self, _gen());
 }
 
 static inline void JOIN(A, generate_n_range)(I *range, size_t count, T _gen(void))
