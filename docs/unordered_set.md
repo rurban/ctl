@@ -3,9 +3,6 @@
 Defined in header **<ctl/unordered_set.h>**, CTL prefix **uset**,
 parent of [unordered_map](unordered_map.md)
 
-Implementation in work still. There needs to be more security policies,
-and better map/pair support.
-
 # SYNOPSIS
 
     size_t int_hash(int* x) { return abs(*x); }
@@ -242,8 +239,10 @@ Planned:
 - `CTL_USET_MOVE_TO_FRONT` moves a bucket in a chain not at the top
 position to the top in each access, such as find and contains, not only insert.
 
-`CTL_USET_SECURITY_COLLCOUNTING` **security policies** against DDOS attacks,
-overflowing the chained list:
+
+**Security policies**:
+
+`CTL_USET_SECURITY_COLLCOUNTING` against DDOS attacks, overflowing the chained list:
 
 A seeded hash might need a 2nd hash arg (esp. with threads), but random hash
 seeds are only security theatre.
@@ -324,3 +323,12 @@ Specialized set algorithm variants which do work here, unlike with the STL.
 Unlike with the STL, `generate_n` shrinks to n elements.
 
 See [algorithm](algorithm.md) for more.
+
+# Performance
+
+Compared to the STL, our `CTL_USET_GROWTH_POWER2` policy does not use the slow
+`%` modulo operator in the hot loop.  Using Lemire's fastmod hack turned out to
+be worse, so it's not yet enabled.  `CTL_USET_CACHED_HASH` is faster with high
+load factors.  Overall the STL `unordered_set` performance is bad, and our is
+also not much better.  That's why we will add better hash tables and a btree,
+with less stability guarantees.

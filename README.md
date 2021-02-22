@@ -66,7 +66,7 @@ In work:
 
 [ctl/forward_list.h](docs/slist.md),
 [ctl/u8string.h](docs/u8string.md),
-[ctl/u8ident.h](docs/u8ident.md), and better iterators.
+[ctl/u8ident.h](docs/u8ident.md).
 
 It is based on glouw's ctl, but with proper names, and using the incpath `ctl/` prefix.
 
@@ -137,16 +137,16 @@ Forgetting a compare method will assert with "compare undefined", if enabled.
 ## Iterators and Ranges
 
 The special iterator objects created by `begin`, `end` and returned by `next`,
-`advance` contain return the current and the end position for ranges
+`advance` contain the current and the end position for ranges, 3 vtable methods,
 and have more iterator specific fields contained within. Thus they are fat and
 safe iterators.
 
-Previous versions of the ctl (_with version numbers < 2020_) had different heavier
+Previous versions of the ctl (_with version numbers < 202000_) had different heavier
 and incompatible iterators, initialized by `each`. Our iterators are as in the
 STL initialized with `begin` or `end`, and for ranges with `range`.  Now they are
 compatible with the STL and are safer.
 
-We also support for certain algorithm methods generic iterators as 2nd range,
+We also support for certain algorithm methods **generic iterators** as 2nd range,
 abstracting different containers. So we can insert a vector into a deque, or use
 a mixed set algorithm with different container types. They are denoted as `GI*`,
 generic iters, and can be simply casted from container-specific iterators.
@@ -154,7 +154,7 @@ generic iters, and can be simply casted from container-specific iterators.
 See [iterators](docs/iterators.md).
 
 Range methods are suffixed with `_range`, taking a single iterator as range,
-similar to C++20 ranges, but they are heavy pairs.
+similar to C++20 ranges, but the STL uses a pair of two iterators. We are using one.
 
 ## Performance
 
@@ -558,8 +558,8 @@ Use the original long names, not three-letter abbrevations.
 
 `#define NOT_INTEGRAL` not `COMPARE`
 
-Our version number `CTL_VERSION` is greater than 2020 (starting with `202102`),
-the old ctl is lower than 2020, starting with `1.0`.
+Our version number `CTL_VERSION` is greater than 202000 (starting with `202102`),
+the old ctl is lower than 202000, starting with `1.0`.
 
 Added lots of missing methods. We have 145 methods in 755 stable variants.
 glouw has 63 methods in 196 stable variants.
@@ -606,35 +606,39 @@ much faster. Full generic iterator support is in `bits/iterator.h`,
 `bits/iterator_vtable.h`, `algorithm.h`, the extended `range` methods,
 and `foreach_range`, `foreach_n`, `foreach_n_range` macros.
 
-Reproducible tests with `SEED=n`,
+Reproducible tests with `SEED=n`, many more test improvements.
 Optimized test dependencies, time went from 25s to 3s even with ccache.
 
-Optimized hashmaps with two growth policies, about faster with the policy
-`CTL_USET_GROWTH_POWER2`, instead of the default `CTL_USET_GROWTH_PRIMED`.
-Added the `CTL_USET_CACHED_HASH` policy for faster unsuccessful finds with high
-load factors, but more memory.
+Optimized hashmaps with two growth policies and many security policies.  Faster
+and more insecure with the policy `CTL_USET_GROWTH_POWER2` instead of the
+default `CTL_USET_GROWTH_PRIMED`.  Added the `CTL_USET_CACHED_HASH` policy for
+faster unsuccessful finds with high load factors, but more memory.  The default
+`CTL_USET_SECURITY_COLLCOUNTING` policy is `2`, using a customizable `sleep()`
+call on DDOS attack.
 
-Flat hashmaps will be added with open addressing, thus no internal
+A flat `hashmap` will be added with open addressing, thus no internal
 bucket methods, and faster, but pointers into it are disallowed. Flat sets and
 maps as open hashmaps and btree will support no pointer stability, and no
 iterator stability.
 
-Optimized list, seperate connect before and after methods.
+Optimized `list`, seperate connect before and after methods.
 
 Implemented correct string and vector capacity policies, as in gcc libstdc++ and
 llvm libc++.  Tested also against the libc++ from llvm and the Windows MSVC STL,
 not just the GNU libstdc++ v3.
 
-Work is ongoing for all `algorithm.h`, `iterators` and `ranges` with proper
-iterators. `hashmap`, `btree_set`, `string_view` and `span` (i.e. _vector\_view_) not yet.
+Work is ongoing to finish the rest of `algorithm.h`, `numerics` and `memory`,
+add `pair` for map and `btree_set`, add proper string and identifier support.
+`string_view` and `span` (i.e. vector\_view) not yet planned.
 
 On errors, like `size > max_size` return silently. This avoids DDOS attacks.
 When assert is used, throw them. (when assert.h included, no NDEBUG. This is
 simlar to the no-exception abseil)
 glouw/ctl does not treat errors at all. There cannot be any.
 
-Added formal verification tests for many functions, via `cbmc`, which even caught
-a set.find error not caught by review, nor random testing nor sanitizers.
+Added formal verification tests for many functions, via `cbmc` for bounded loops
+and `satabs` for unbounded lists, which even caught a set.find error not caught
+by review, nor random testing nor sanitizers.
 
 Support not only GNU make, but also BSD make and MSVC nmake.
 `gen_images.sh` is not bash-only anymore, and supports updating single graphs.
@@ -644,19 +648,23 @@ clang with libc++), and Windows MSVC (default CL 19).
 
 ### Differences to the STL
 
-Our iterators are safe and fat with an end range. We work towards C++20
-ranges (single arg iterator), not begin/end pairs.  Not as safe as glouw/ctl
-iterators, but also not as slow. We need 2 assignments (currently. will be
-fixed), the STL needs one assignment, glouw/ctl needs three
+Our iterators are safe and fat with an `end` range. We supprt the equivalent of
+C++20 ranges (single arg iterator), not begin/end pairs.  Not as safe as
+glouw/ctl iterators, but also not as slow. We need 2 assignments
+(currently. will be fixed), the STL needs one assignment, glouw/ctl needs three
 assignments. glouw/ctl is safe for destructive operations (i.e. insert, erase)
 in a foreach loop, we and the STL are not.
 
 Our iterators are generic only for certain algorithm methods, where we use
-a 2nd range of any cntainer type on a typed container.
+a 2nd range of any container type on a typed container. C++ classes use two
+indirections on all vtable calls. We inline all our iterator vtables, which are very
+short, 3 pointers, so we a tiny initialization overhead of 3 copies vs 1, but
+have no call overhead, unlike with C++. Specific iterator calls are completely
+inlined, only generic iterator calls in rare cases go through the vtable.
 
 Our vector and string growth policies for multiple insertions are much better.
-E.g. in the set algos or insert_count.
-We reserve space at front, the STL piecewise in push_back/insert and this often
+E.g. in the set algos or `insert_count`.
+We reserve space at front, the STL piecewise in `push_back`/`insert` and this often
 leads to massive overallocation, hitting `* 2`. We try to mimic the upstream
 growth policies, but not its mistakes.
 
@@ -673,7 +681,7 @@ return the iterator and set a `int *foundp` value. Eg.
 
 Some algorithms and C++20 methods are still missing or are in work.
 
-**set** algorithms such as `set_union`, `set_difference`, `set_intersection`,
+STL **set** algorithms such as `set_union`, `set_difference`, `set_intersection`,
 `set_symmetric_difference` do not work with `unordered_set`, because the specs
 require them to be ordered.  The CTL set algorithms do work properly on
 `unordered_set`. Likewise we don't define any range iterators on unordered_set,
@@ -681,7 +689,7 @@ as this is unordered by default.
 
 hashmaps will not rely on chained lists with buckets, and can be either changed
 to open addressing or a better modern layout, such as Swiss tables (flat or
-node variants), the stanford hash or even the currently fastest
+node variants), the stanford hash for integers or even the currently fastest
 [greg7mdp/parallel-hashmap](https://github.com/greg7mdp/parallel-hashmap).
 Thus the bucket interface methods will not be defined for all hashmap variants,
 except maybe `max_bucket_count`. hashmap policies are compile-time defined via

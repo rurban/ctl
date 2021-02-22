@@ -38,7 +38,7 @@ support its methods.
 
 Some iterators advance on linked nodes (_"B iters"_), some others on value
 refs (_"T iters"_). The deque additionally holds the `index`, the unordered_set
-the `next` and `buckets` pointer.
+the `buckets` pointer.
 
 Each iterator also holds the end position so we can hold full ranges. And we
 added API's to work with the addional end position.
@@ -49,8 +49,7 @@ a mixed set algorithm with different container types. They are denoted as `GI*`,
 generic iters, and can be simply casted from container-specific iterators.
 
 We don't fully support **output iterators**, like `back_inserter` or `inserter` yet.
-They are currently only defined for `transform_range` and `transform_it_range`,
-which are not enabled yet, and problematic for `set`.
+They are currently only defined for some algorithms, and are problematic for `set`.
 
 We don't fully support `reverse_iterator` via `I prev` yet.
 
@@ -118,9 +117,7 @@ Returns the distance between range and `range->end`.
 # Performance
 
 Compared to the old ctl, our iterators are about twice as fast, just our
-`unordered_set` iterator is slower.
+`unordered_set` iterator is a bit slower.
 
-Compared to the STL, `unordered_set` is twice as slow, our `set` is O(1),
-whilst the STL set iterator is logarithmic, the rest is as fast as in the STL.
-
-The `unordered_set` iterator is still in work.
+Our `set` is O(1), whilst the STL set iterator is logarithmic, the rest is as
+fast as in the STL.
