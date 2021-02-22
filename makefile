@@ -8,6 +8,7 @@ CC ?= gcc
 CXX ?= g++
 VERSION!=(grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
 VERSION ?= 202102
+UNAME_P!=(uname -p)
 
 # probe for -std=c++20, 17 or 11
 TRY_CXX20!=(${CXX} -std=c++20 -I. tests/func/test_deque.cc -o /dev/null && echo -std=c++20) || true
@@ -36,8 +37,14 @@ SRAND ?= 1
 
 CFLAGS  = -I.
 CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
-CFLAGS += -march=native
 CFLAGS += -g
+.if ${UNAME_P} == "x86_64"
+CFLAGS += -march=native
+.elif ${UNAME_P} == "i686"
+CFLAGS += -march=native
+.elif ${UNAME_P} == "i386"
+CFLAGS += -march=native
+.endif
 
 .ifdef LONG
 CFLAGS += -Werror

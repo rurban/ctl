@@ -43,8 +43,19 @@ Os = 0
 
 CFLAGS  = -I.
 CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
-CFLAGS += -march=native
 CFLAGS += -g
+# only on intel
+UNAME_P := $(shell uname -p)
+ifeq ($(UNAME_P), x86_64)
+CFLAGS += -march=native
+else
+ifeq ($(UNAME_P), i686)
+CFLAGS += -march=native
+ifeq ($(UNAME_P), i386)
+CFLAGS += -march=native
+endif
+endif
+endif
 
 ifeq (1, $(LONG))
 CFLAGS += -Werror
