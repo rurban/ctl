@@ -3,8 +3,8 @@
 CTL is a fast compiling, type safe, header only, template-like
 container library for ISO C99/C11.
 
-[![GH Actions](https://github.com/rurban/ctl/workflows/Full%20C/C++%20CI/badge.svg)](https://github.com/rurban/ctl/)
-[![Cirrus CI](https://api.cirrus-ci.com/github/rurban/ctl.svg)]((https://cirrus-ci.com/github/rurban/))
+[![GH Actions](https://github.com/rurban/ctl/workflows/Full%20C/C++%20CI/badge.svg)](https://github.com/rurban/ctl/actions/)
+[![Cirrus CI](https://api.cirrus-ci.com/github/rurban/ctl.svg)](https://cirrus-ci.com/github/rurban/ctl/)
 
 ## Use
 
