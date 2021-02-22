@@ -44,4 +44,4 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
-    - run:  make CXX='c++ -std=c++2a'
+    - run:  make CXX='c++ -std=c++17'
