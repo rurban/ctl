@@ -44,17 +44,10 @@ Os = 0
 CFLAGS  = -I.
 CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
 CFLAGS += -g
-# only on intel
-UNAME_P := $(shell uname -p)
-ifeq ($(UNAME_P), x86_64)
+# only targetting intel
+TRY_MARCH_NATIVE := $(shell $(CC) $(CFLAGS) -march=native tests/func/test_c11.c -o /dev/null)
+ifeq ($(.SHELLSTATUS),0)
 CFLAGS += -march=native
-else
-ifeq ($(UNAME_P), i686)
-CFLAGS += -march=native
-ifeq ($(UNAME_P), i386)
-CFLAGS += -march=native
-endif
-endif
 endif
 
 ifeq (1, $(LONG))
