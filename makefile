@@ -151,7 +151,11 @@ PERFS_C  = ${patsubst %.c,%, ${wildcard tests/perf/*/perf*.c} \
 PERFS_CC = ${patsubst %.cc,%, ${wildcard tests/perf/*/perf*.cc} \
 	     $(wildcard tests/perf/arr/gen_*.cc) tests/perf/perf_compile_cc.cc}
 
-perf: ${PERFS_C} ${PERFS_CC}
+perf: ${PERFS_C} ${PERFS_CC} tests/perf/arr/perf_arr_generate
+
+tests/perf/arr/perf_arr_generate: tests/perf/arr/perf_arr_generate.c
+	$(CC) $(CFLAGS) -o $@ $@.c
+	tests/perf/arr/perf_arr_generate
 
 ${wildcard tests/perf/lst/perf*.cc?} : ${COMMON_H} ctl/list.h
 ${wildcard tests/perf/set/perf*.cc?} : ${COMMON_H} ctl/set.h
@@ -159,7 +163,7 @@ ${wildcard tests/perf/deq/perf*.cc?} : ${COMMON_H} ctl/deque.h
 ${wildcard tests/perf/pqu/perf*.cc?} : ${COMMON_H} ctl/priority_queue.h
 ${wildcard tests/perf/vec/perf*.cc?} : ${COMMON_H} ctl/vector.h
 ${wildcard tests/perf/uset/perf*.cc?}: ${COMMON_H} ctl/unordered_set.h
-${wildcard tests/perf/arr/gen*.cc?}: ${COMMON_H} ctl/unordered_set.h
+${wildcard tests/perf/arr/gen*.cc?}: ${COMMON_H} ctl/array.h
 ${wildcard tests/perf/str/perf*.cc?} : ${COMMON_H} ctl/vector.h ctl/string.h
 
 examples: ${EXAMPLES}
@@ -174,29 +178,23 @@ README.md: ${wildcard tests/func/test_*.cc}
 docs/index.md : README.md
 	./update-index.pl
 
+RONN_ARGS=--manual "CTL Manual $(VERSION)" --organization=rurban/ctl
+# FIXME
 docs/man/ctl.h.3: docs/index.md
 	@mkdir -p docs/man
-	ronn --manual "CTL Manual ${VERSION}" --organization=rurban/ctl < $< > $@
+	ronn ${RONN_ARGS} < $< > $@
+
 docs/man/%.h.3 : docs/%.md
 	@mkdir -p docs/man
-	ronn --manual "CTL Manual ${VERSION}" --organization=rurban/ctl < $< > $@
-
-install: man
-	-rm docs/man/index.h.3
-	mkdir -p $(DESTDIR)$(PREFIX)/include/ctl/bits
-	cp ctl/*.h $(DESTDIR)$(PREFIX)/include/ctl/
-	cp ctl/bits/*.h $(DESTDIR)$(PREFIX)/include/ctl/bits/
-	mkdir -p ${DESTDIR)${PREFIX)/share/man/man3
-	cp docs/man/* ${DESTDIR)${PREFIX)/share/man/man3/
-	mkdir -p ${DESTDIR)${PREFIX)/share/doc/ctl/images
-	cp docs/*.md ${DESTDIR)${PREFIX)/share/doc/ctl/
-	cp docs/images/*.log.png ${DESTDIR)${PREFIX)/share/doc/ctl/images/
+	ronn ${RONN_ARGS} < $< > $@
 
 clean:
 	@rm -f .cflags .cflags.tmp
 	@rm -f ${TESTS}
 	@rm -f ${EXAMPLES}
-	@rm -f ${PERFS_C} ${PERFS_CC}
+	@rm -f ${PERFS_C} ${PERFS_CC} ${VERIFIY}
+	@rm -f tests/perf/arr/perf_arr_generate
+	@rm -f tests/perf/*.log
 	@rm -f docs/man/ctl.h.3 ${MANPAGES}
 	@if test -d docs/man; then rmdir docs/man; fi
 
@@ -379,6 +377,19 @@ dist: man
 	tar cfz ctl-${VERSION}.tar.gz ctl-${VERSION}
 	tar cfJ ctl-${VERSION}.tar.xz ctl-${VERSION}
 	rm -rf ctl-${VERSION}
+
+install: man
+	-rm docs/man/index.h.3
+	-rm docs/man/memory.h.3
+	-rm docs/man/numeric.h.3
+	mkdir -p $(DESTDIR)$(PREFIX)/include/ctl/bits
+	cp ctl/*.h $(DESTDIR)$(PREFIX)/include/ctl/
+	cp ctl/bits/*.h $(DESTDIR)$(PREFIX)/include/ctl/bits/
+	mkdir -p ${DESTDIR)${PREFIX)/share/man/man3
+	cp docs/man/* ${DESTDIR)${PREFIX)/share/man/man3/
+	mkdir -p ${DESTDIR)${PREFIX)/share/doc/ctl/images
+	cp docs/*.md ${DESTDIR)${PREFIX)/share/doc/ctl/
+	cp docs/images/*.log.png ${DESTDIR)${PREFIX)/share/doc/ctl/images/
 
 ALWAYS:
 

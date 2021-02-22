@@ -181,14 +181,14 @@ $(wildcard tests/perf/pqu/perf*.cc?) : $(COMMON_H) ctl/priority_queue.h
 $(wildcard tests/perf/vec/perf*.cc?) : $(COMMON_H) ctl/vector.h
 $(wildcard tests/perf/uset/perf*.cc?): $(COMMON_H) ctl/unordered_set.h
 $(wildcard tests/perf/str/perf*.cc?): $(COMMON_H) ctl/string.h ctl/vector.h
-$(wildcard tests/perf/arr/*.cc?): $(COMMON_H) ctl/array.h
+$(wildcard tests/perf/arr/gen*.cc?): $(COMMON_H) ctl/array.h
 
-tests/perf/arr/gen_array0% : tests/perf/arr/gen_array0%.c \
+tests/perf/arr/gen_array0% : tests/perf/arr/gen_array0%.cc \
+  tests/perf/arr/perf_arr_generate .cflags $(COMMON_H) ctl/array.h
+	@$(CXX) $(CXXFLAGS) -o $@ $@.cc
+tests/perf/arr/gen_arr0% : tests/perf/arr/gen_arr0%.c \
   tests/perf/arr/perf_arr_generate .cflags $(COMMON_H) ctl/array.h
 	@$(CC) $(CFLAGS) -o $@ $@.c
-tests/perf/arr/gen_arr0% : tests/perf/arr/gen_arr0%.cc \
-  tests/perf/arr/perf_arr_generate .cflags $(COMMON_H) ctl/array.h
-	@$(CXX) $(CFLAGS) -o $@ $@.c
 
 compile_commands.json : $(H) GNUmakefile
 	make clean; bear make
@@ -231,8 +231,12 @@ docs/index.md : README.md ./update-index.pl
 	./update-index.pl
 
 man: docs/man/ctl.h.3 $(MANPAGES)
+	-rm docs/man/index.h.3
+	-rm docs/man/memory.h.3
+	-rm docs/man/numeric.h.3
 
 RONN_ARGS=--manual "CTL Manual $(VERSION)" --organization=rurban/ctl
+# FIXME
 docs/man/ctl.h.3: docs/index.md
 	@mkdir -p docs/man
 	ronn $(RONN_ARGS) < $< > $@
@@ -240,17 +244,6 @@ docs/man/ctl.h.3: docs/index.md
 docs/man/%.h.3 : docs/%.md
 	@mkdir -p docs/man
 	ronn $(RONN_ARGS) < $< > $@
-
-install: man
-	-rm docs/man/index.h.3
-	mkdir -p $(DESTDIR)$(PREFIX)/include/ctl/bits
-	cp ctl/*.h $(DESTDIR)$(PREFIX)/include/ctl/
-	cp ctl/bits/*.h $(DESTDIR)$(PREFIX)/include/ctl/bits/
-	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man3
-	cp docs/man/* $(DESTDIR)$(PREFIX)/share/man/man3/
-	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/ctl/images
-	cp docs/*.md $(DESTDIR)$(PREFIX)/share/doc/ctl/
-	cp docs/images/*.log.png $(DESTDIR)$(PREFIX)/share/doc/ctl/images/
 
 clean:
 	@rm -f .cflags .cflags.tmp
@@ -406,17 +399,30 @@ dist: man
 	tar cfJ ctl-${VERSION}.tar.xz ctl-${VERSION}
 	rm -rf ctl-${VERSION}
 
+install: man
+	-rm docs/man/index.h.3
+	-rm docs/man/memory.h.3
+	-rm docs/man/numeric.h.3
+	mkdir -p $(DESTDIR)$(PREFIX)/include/ctl/bits
+	cp ctl/*.h $(DESTDIR)$(PREFIX)/include/ctl/
+	cp ctl/bits/*.h $(DESTDIR)$(PREFIX)/include/ctl/bits/
+	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man3
+	cp docs/man/* $(DESTDIR)$(PREFIX)/share/man/man3/
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/ctl/images
+	cp docs/*.md $(DESTDIR)$(PREFIX)/share/doc/ctl/
+	cp docs/images/*.log.png $(DESTDIR)$(PREFIX)/share/doc/ctl/images/
+
 # emacs flymake-mode
 check-syntax:
 	case "$(CHK_SOURCES)" in \
-          *.c) \
-            nice $(CC) $(CFLAGS) -O0 -c ${CHK_SOURCES} ;; \
-          *.cc) \
-            nice $(CXX) $(CXXFLAGS) -O0 -c ${CHK_SOURCES} ;; \
           ctl/bits/*.h) \
             nice $(CXX) $(CXXFLAGS) -O0 -c tests/func/test_vector ;; \
           ctl/*.h) \
             nice $(CXX) $(CXXFLAGS) -O0 -c tests/func/test_$(subst .h,.cc,$(subst ctl/,,${CHK_SOURCES})) ;; \
+          *.c) \
+            nice $(CC) $(CFLAGS) -O0 -c ${CHK_SOURCES} ;; \
+          *.cc) \
+            nice $(CXX) $(CXXFLAGS) -O0 -c ${CHK_SOURCES} ;; \
         esac
 
 .PHONY: check-syntax
