@@ -19,7 +19,7 @@ int main(void)
         long t0 = TEST_TIME();
         volatile int sum = 0;
         foreach(deq_int, &c, it)
-            sum += *it.ref;
+            sum = sum + *it.ref;
         long t1 = TEST_TIME();
         printf("%10d %10ld\n", elems, t1 - t0);
         deq_int_free(&c);

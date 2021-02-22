@@ -17,7 +17,7 @@ int main()
         long t0 = TEST_TIME();
         volatile int sum = 0;
         for(auto& x : c)
-            sum += x;
+            sum = sum + x;
         long t1 = TEST_TIME();
         printf("%10d %10ld\n", elems, t1 - t0);
     }

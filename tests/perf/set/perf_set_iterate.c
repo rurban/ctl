@@ -21,7 +21,7 @@ int main(void)
         volatile int sum = 0;
         long t0 = TEST_TIME();
         list_foreach_ref(set_int, &c, it)
-            sum += *it.ref;
+            sum = sum + *it.ref;
         long t1 = TEST_TIME();
         printf("%10d %10ld\n", elems, t1 - t0);
         set_int_free(&c);

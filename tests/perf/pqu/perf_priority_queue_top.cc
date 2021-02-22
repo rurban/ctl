@@ -19,7 +19,7 @@ int main()
         volatile int sum = 0;
         long t0 = TEST_TIME();
         for(int elem = 0; elem < elems; elem++)
-            sum += c.top();
+            sum = sum + c.top();
         long t1 = TEST_TIME();
         printf("%10d %10ld\n", elems, t1 - t0);
     }

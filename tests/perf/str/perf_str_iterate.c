@@ -17,7 +17,7 @@ int main(void)
         long t0 = TEST_TIME();
         volatile int sum = 0;
         str_foreach(&c, ref)
-            sum += *ref;
+            sum = sum + *ref;
         long t1 = TEST_TIME();
         printf("%10d %10ld\n", elems, t1 - t0);
         str_free(&c);

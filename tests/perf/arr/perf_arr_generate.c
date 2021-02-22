@@ -38,7 +38,7 @@ void generate_c (const int n, const char* file, const int i)
         fprintf(f,
 "    volatile double sum = 0;\n"
 "    foreach(arr%d_double, &c, it)\n"
-"        sum += *it.ref;\n", n);
+"        sum = sum + *it.ref;\n", n);
     fprintf(f, "\n"
 "    long t1 = TEST_TIME();\n"
 "    printf(\"%%10d %%10ld\\n\", elems, t1 - t0);\n"
@@ -87,7 +87,7 @@ void generate_cc (const int n, const char* file, const int i)
         fprintf(f,
 "    volatile double sum = 0;\n"
 "    for(auto& x : c)\n"
-"        sum += x;\n");
+"        sum = sum + x;\n");
     fprintf(f, "\n"
 "    long t1 = TEST_TIME();\n"
 "    printf(\"%%10d %%10ld\\n\", elems, t1 - t0);\n"

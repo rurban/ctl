@@ -21,7 +21,7 @@ int main(void)
         volatile int sum = 0;
         long t0 = TEST_TIME();
         for(int elem = 0; elem < elems; elem++)
-            sum = *pqu_int_top(&c);
+            sum = sum + *pqu_int_top(&c);
         long t1 = TEST_TIME();
         printf("%10d %10ld\n", elems, t1 - t0);
         pqu_int_free(&c);
