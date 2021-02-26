@@ -33,6 +33,12 @@ digi_compare(digi* a, digi* b)
     return *a->value < *b->value;
 }
 
+static inline int
+digi_compare3(digi* a, digi* b)
+{
+  return *a->value < *b->value ? -1 : *a->value == *b->value ? 0 : 1;
+}
+
 static inline digi
 digi_copy(digi* self)
 {
@@ -150,6 +156,12 @@ static inline void
 digi_generate_reset()
 {
     _generator_state = 0;
+}
+
+static inline int
+DIGI_compare3(DIGI& a, DIGI& b)
+{
+  return *a.value < *b.value ? -1 : *a.value == *b.value ? 0 : 1;
 }
 
 static inline bool

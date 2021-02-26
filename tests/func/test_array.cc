@@ -63,7 +63,8 @@ OLD_MAIN
     TEST(LOWER_BOUND_RANGE)                                                                                            \
     TEST(UPPER_BOUND_RANGE)                                                                                            \
     TEST(BINARY_SEARCH)                                                                                                \
-    TEST(BINARY_SEARCH_RANGE)
+    TEST(BINARY_SEARCH_RANGE)                                                                                          \
+    TEST(LEXICOGRAPHICAL_COMPARE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(DIFFERENCE)                                                                                                   \
@@ -386,6 +387,20 @@ int main(void)
             if (same_a != same_b)
                 printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");
 #endif
+            arr100_digi_free(&aa);
+            break;
+        }
+        case TEST_LEXICOGRAPHICAL_COMPARE: {
+            arr100_digi aa = arr100_digi_copy(&a);
+            std::array<DIGI, 100> bb = b;
+            arr100_digi_it r1a, r2a;
+            std::array<DIGI, 100>::iterator r1b, last1_b, r2b, last2_b;
+            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            get_random_iters(&aa, &r2a, bb, r2b, last2_b);
+            bool same_a = arr100_digi_lexicographical_compare(&r1a, &r2a);
+            bool same_b = std::lexicographical_compare(r1b, last1_b, r2b, last2_b);
+            LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
+            assert(same_a == same_b);
             arr100_digi_free(&aa);
             break;
         }

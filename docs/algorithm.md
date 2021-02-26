@@ -473,15 +473,10 @@ determines if two sets of elements are the same.
 returns true if all elements match a specific key, or all other elements.
 Note: `equal_range` for `set` has a different API and functionality.
  
-    int lexicographical_compare
-    int lexicographical_compare_range
+    bool lexicographical_compare (I* range1, GI* range2)
  
-returns true if one range is lexicographically less than another. _(NYI)_
+returns true if one range is lexicographically less than another.
  
-    int lexicographical_compare_three_way
- 
-compares two ranges using three-way comparison. _(NYI)_
-
 ## Permutation operations
 
     bool is_permutation (C++11)

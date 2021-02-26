@@ -86,10 +86,12 @@ OLD_MAIN
     TEST(BINARY_SEARCH)                                                                                                \
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
     TEST(MERGE)                                                                                                        \
-    TEST(MERGE_RANGE)
+    TEST(MERGE_RANGE)                                                                                                  \
+    TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
+    TEST(LEXICOGRAPHICAL_COMPARE_THREE_WAY)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(EMPLACE) /* 75 */                                                                                             \
+    TEST(EMPLACE) /* 76 */                                                                                             \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(TRANSFORM_IT_RANGE)
@@ -258,7 +260,7 @@ int pick_random(vec_int *a)
 #define ASSERT_EQUAL_CAP(c, s)                                                                                         \
     if (s.capacity() != c.capacity)                                                                                    \
     {                                                                                                                  \
-        printf("capacity %zu vs %zu FAIL\n", c.capacity, s.capacity());                                                \
+        LOG("capacity %zu vs %zu FAIL\n", c.capacity, s.capacity());                                                   \
         fail++;                                                                                                        \
     }
 #endif
@@ -267,7 +269,7 @@ int pick_random(vec_int *a)
 #define ADJUST_CAP(m, c, s)                                                                                            \
     if (c.size == s.size() && c.capacity != s.capacity())                                                              \
     {                                                                                                                  \
-        printf("%s capacity %zu => %zu FAIL\n", m, c.capacity, s.capacity());                                          \
+        LOG("%s capacity %zu => %zu FAIL\n", m, c.capacity, s.capacity());                                          \
         vec_int_fit(&c, s.capacity());                                                                                 \
     }
 
@@ -1490,6 +1492,25 @@ int main(void)
                 vec_int_equal_range(&r1a, &r2a);
                 printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");
 #endif
+                vec_int_free(&aa);
+                break;
+            }
+            case TEST_LEXICOGRAPHICAL_COMPARE: {
+                vec_int aa = vec_int_copy(&a);
+                std::vector<int> bb = b;
+                vec_int_it r1a, r2a;
+                std::vector<int>::iterator r1b, last1_b, r2b, last2_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                get_random_iters(&aa, &r2a, bb, r2b, last2_b);
+//# if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
+                bool same_a = vec_int_lexicographical_compare(&r1a, &r2a);
+                bool same_b = std::lexicographical_compare(r1b, last1_b, r2b, last2_b);
+                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
+                assert(same_a == same_b);
+//# else
+//              vec_int_lexicographical_compare(&r1a, &r2a);
+//              printf("std::lexicographical_compare requires C++14 with robust_nonmodifying_seq_ops\n");
+//# endif
                 vec_int_free(&aa);
                 break;
             }

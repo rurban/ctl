@@ -83,7 +83,8 @@ OLD_MAIN
     TEST(BINARY_SEARCH)                                                                                                \
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
     TEST(MERGE)                                                                                                        \
-    TEST(MERGE_RANGE)
+    TEST(MERGE_RANGE)                                                                                                  \
+    TEST(LEXICOGRAPHICAL_COMPARE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(GENERATE_N_RANGE) /* 74 */                                                                                    \
@@ -670,6 +671,20 @@ int main(void)
                 if (same_a != same_b)
                     printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");
 #endif
+                str_free(&aa);
+                break;
+            }
+            case TEST_LEXICOGRAPHICAL_COMPARE: {
+                str aa = str_copy(&a);
+                std::string bb = b;
+                str_it r1a, r2a;
+                std::string::iterator r1b, last1_b, r2b, last2_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                get_random_iters(&aa, &r2a, bb, r2b, last2_b);
+                bool same_a = str_lexicographical_compare(&r1a, &r2a);
+                bool same_b = std::lexicographical_compare(r1b, last1_b, r2b, last2_b);
+                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
+                assert(same_a == same_b);
                 str_free(&aa);
                 break;
             }

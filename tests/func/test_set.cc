@@ -78,11 +78,14 @@ OLD_MAIN
     TEST(BINARY_SEARCH)                                                                                                \
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
     TEST(MERGE)                                                                                                        \
-    TEST(MERGE_RANGE)
+    TEST(MERGE_RANGE)                                                                                                  \
+    TEST(INCLUDES)                                                                                                     \
+    TEST(INCLUDES_RANGE)                                                                                               \
+    TEST(LEXICOGRAPHICAL_COMPARE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EQUAL_RANGE)                                                                                                  \
-    TEST(EMPLACE) /* 62 */                                                                                             \
+    TEST(EMPLACE) /* 68 */                                                                                             \
     TEST(EXTRACT)                                                                                                      \
     TEST(GENERATE_RANGE)
 
@@ -1318,6 +1321,47 @@ int main(void)
 #endif
             set_digi_free(&aa);
             set_digi_free(&aaa);
+            break;
+        }
+        case TEST_INCLUDES: {
+          set_digi aa;
+          std::set<DIGI> bb;
+          setup_sets(&aa, bb);
+          bool a_found = set_digi_includes(&a, &aa);
+          bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
+          LOG("a_found: %d b_found %d\n", (int)a_found, (int)b_found);
+          assert(a_found == b_found);
+          CHECK(aa, bb);
+          set_digi_free(&aa);
+          break;
+        }
+        case TEST_INCLUDES_RANGE: {
+          set_digi aa;
+          std::set<DIGI> bb;
+          setup_sets(&aa, bb);
+          set_digi_it r1a, r2a;
+          std::set<DIGI>::iterator r1b, last1_b, r2b, last2_b;
+          get_random_iters(&a, &r1a, b, r1b, last1_b);
+          get_random_iters(&aa, &r2a, bb, r2b, last2_b);
+          bool a_found = set_digi_includes_range(&r1a, &r2a);
+          bool b_found = std::includes(r1b, last1_b, r2b, last2_b);
+          LOG("a_found: %d b_found %d\n", (int)a_found, (int)b_found);
+          assert(a_found == b_found);
+          CHECK(aa, bb);
+          set_digi_free(&aa);
+          break;
+        }
+        case TEST_LEXICOGRAPHICAL_COMPARE: {
+            set_digi aa = set_digi_copy(&a);
+            std::set<DIGI> bb = b;
+            set_digi_it r1a, r2a;
+            std::set<DIGI>::iterator r1b, last1_b, r2b, last2_b;
+            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            get_random_iters(&aa, &r2a, bb, r2b, last2_b);
+            bool same_a = set_digi_lexicographical_compare(&r1a, &r2a);
+            bool same_b = std::lexicographical_compare(r1b, last1_b, r2b, last2_b);
+            assert(same_a == same_b);
+            set_digi_free(&aa);
             break;
         }
 

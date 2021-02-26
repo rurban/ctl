@@ -94,7 +94,8 @@ OLD_MAIN
     TEST(LOWER_BOUND_RANGE)                                                                                            \
     TEST(UPPER_BOUND_RANGE)                                                                                            \
     TEST(BINARY_SEARCH)                                                                                                \
-    TEST(BINARY_SEARCH_RANGE)
+    TEST(BINARY_SEARCH_RANGE)                                                                                          \
+    TEST(LEXICOGRAPHICAL_COMPARE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(ERASE_GENERIC)                                                                                                \
@@ -1724,6 +1725,20 @@ int main(void)
             bool found_b = binary_search(first_b, last_b, DIGI{key});
             LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
             assert(found_a == found_b);
+            break;
+        }
+        case TEST_LEXICOGRAPHICAL_COMPARE: {
+            list_digi aa = list_digi_copy(&a);
+            std::list<DIGI> bb = b;
+            list_digi_it r1a, r2a;
+            std::list<DIGI>::iterator r1b, last1_b, r2b, last2_b;
+            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            get_random_iters(&aa, &r2a, bb, r2b, last2_b);
+            bool same_a = list_digi_lexicographical_compare(&r1a, &r2a);
+            bool same_b = std::lexicographical_compare(r1b, last1_b, r2b, last2_b);
+            LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
+            assert(same_a == same_b);
+            list_digi_free(&aa);
             break;
         }
 

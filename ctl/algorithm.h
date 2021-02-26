@@ -651,6 +651,41 @@ static inline bool JOIN(A, mismatch)(I *range1, GI *range2)
         }
     return done1 ? false : true;
 }
+
+static inline bool JOIN(A, lexicographical_compare)(I *range1, GI *range2)
+{
+    A *self = range1->container;
+    CTL_ASSERT_COMPARE
+    void (*next2)(struct I*) = range2->vtable.next;
+    T* (*ref2)(struct I*) = range2->vtable.ref;
+    int (*done2)(struct I*) = range2->vtable.done;
+
+    for ( ; !JOIN(I, done)(range1) && !done2(range2); JOIN(I, next)(range1), next2(range2)) {
+        if (self->compare(range1->ref, ref2(range2))) return true;
+        if (self->compare(ref2(range2), range1->ref)) return false;
+    }
+    return JOIN(I, done)(range1) && !done2(range2);
+}
+
+#if 0
+static inline int (*compare)(T *, T *)
+JOIN(A, lexicographical_compare_three_way)(I *range1, GI *range2, int (*compare)(T *, T *))
+{
+    void (*next2)(struct I *) = range2->vtable.next;
+    T *(*ref2)(struct I *) = range2->vtable.ref;
+    int (*done2)(struct I *) = range2->vtable.done;
+
+    for (; !JOIN(I, done)(range1) && !done2(range2); JOIN(I, next)(range1), next2(range2))
+    {
+        int cmp = compare(range1->ref, ref2(range2));
+        if (cmp != 0)
+            return cmp;
+    }
+    return !JOIN(I, done)(range1) ? !compare(range1->ref, ref2(range2))
+                                  : !done2(range2) ? compare(range1->ref, ref2(range2)) : 0;
+}
+#endif
+
 #endif // USET
 
 //#if !defined(CTL_STR)

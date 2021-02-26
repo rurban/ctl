@@ -90,10 +90,11 @@ OLD_MAIN
     TEST(COPY_IF)                                                                                                      \
     TEST(COPY_IF_RANGE)                                                                                                \
     TEST(MERGE)                                                                                                        \
-    TEST(MERGE_RANGE)
+    TEST(MERGE_RANGE)                                                                                                  \
+    TEST(LEXICOGRAPHICAL_COMPARE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(EMPLACE) /* 78 */                                                                                             \
+    TEST(EMPLACE) /* 79 */                                                                                             \
     TEST(INSERT_GENERIC)                                                                                               \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_IT_RANGE)
@@ -227,7 +228,7 @@ int pick_random(vec_digi *a)
 #define ASSERT_EQUAL_CAP(c, s)                                                                                         \
     if (s.capacity() != c.capacity)                                                                                    \
     {                                                                                                                  \
-        printf("capacity %zu vs %zu FAIL\n", c.capacity, s.capacity());                                                \
+        LOG("capacity %zu vs %zu FAIL\n", c.capacity, s.capacity());                                                   \
         fail++;                                                                                                        \
     }
 #endif
@@ -237,7 +238,7 @@ int pick_random(vec_digi *a)
 #define ADJUST_CAP(m, c, s)                                                                                            \
     if (c.size == s.size() && c.capacity != s.capacity())                                                              \
     {                                                                                                                  \
-        printf("%s capacity %zu => %zu\n", m, c.capacity, s.capacity());                                               \
+        LOG("%s capacity %zu => %zu\n", m, c.capacity, s.capacity());                                                  \
         vec_digi_fit(&c, s.capacity());                                                                                \
     }
 
@@ -1546,6 +1547,20 @@ int main(void)
                 if (same_a != same_b)
                     printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");
 #endif
+                vec_digi_free(&aa);
+                break;
+            }
+            case TEST_LEXICOGRAPHICAL_COMPARE: {
+                vec_digi aa = vec_digi_copy(&a);
+                std::vector<DIGI> bb = b;
+                vec_digi_it r1a, r2a;
+                std::vector<DIGI>::iterator r1b, last1_b, r2b, last2_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                get_random_iters(&aa, &r2a, bb, r2b, last2_b);
+                bool same_a = vec_digi_lexicographical_compare(&r1a, &r2a);
+                bool same_b = std::lexicographical_compare(r1b, last1_b, r2b, last2_b);
+                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
+                assert(same_a == same_b);
                 vec_digi_free(&aa);
                 break;
             }
