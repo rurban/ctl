@@ -84,7 +84,9 @@ OLD_MAIN
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
     TEST(MERGE)                                                                                                        \
     TEST(MERGE_RANGE)                                                                                                  \
-    TEST(LEXICOGRAPHICAL_COMPARE)
+    TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
+    TEST(INCLUDES)                                                                                                     \
+    TEST(INCLUDES_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(GENERATE_N_RANGE) /* 74 */                                                                                    \
@@ -255,6 +257,7 @@ static void gen_strings(str *a, std::string &b, size_t size)
     char *_ta = create_test_string(size);
     *a = str_init(_ta);
     b = _ta;
+    str_fit(a, b.capacity());
     free(_ta);
 }
 
@@ -1489,6 +1492,51 @@ int main(void)
 #endif
                 str_free(&aa);
                 str_free(&aaa);
+                break;
+            }
+            case TEST_INCLUDES: {
+                str aa;
+                std::string bb;
+                gen_strings(&aa, bb, TEST_RAND(a.size));
+                str_sort(&a);
+                str_sort(&aa);
+                std::sort(b.begin(), b.end());
+                std::sort(bb.begin(), bb.end());
+                bool a_found = str_includes(&a, &aa);
+                bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
+                LOG("includes \"%.*s\", \"%.*s\" => %d\n", (int)a.size, a.vector, (int)aa.size, aa.vector, (int)a_found);
+                LOG("vs       \"%.*s\", \"%.*s\" => %d\n", (int)b.size(), b.c_str(), (int)bb.size(), bb.c_str(),
+                    (int)b_found);
+                assert(a_found == b_found);
+                CHECK(aa, bb);
+                str_free(&aa);
+                break;
+            }
+            case TEST_INCLUDES_RANGE: {
+                str aa;
+                std::string bb;
+                gen_strings(&aa, bb, TEST_RAND(a.size));
+                str_sort(&a);
+                str_sort(&aa);
+                std::sort(b.begin(), b.end());
+                std::sort(bb.begin(), bb.end());
+                str_it range_a1;
+                std::string::iterator first_b1, last_b1;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                str_it range_a2;
+                std::string::iterator first_b2, last_b2;
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+
+                bool a_found = str_includes_range(&range_a1, &range_a2);
+                std::string bbb;
+                bool b_found = std::includes(first_b1, last_b1, first_b2, last_b2);
+                LOG("includes_range   \"%.*s\", \"%.*s\" => %d\n", (int)(range_a1.end - range_a1.ref),
+                    range_a1.ref, (int)(range_a2.end - range_a2.ref), range_a2.ref, (int)a_found);
+                LOG("vs std::includes \"%.*s\", \"%.*s\" => %d\n", (int)(last_b1 - first_b1), &(*first_b1),
+                    (int)(last_b2 - first_b2), &(*first_b2), (int)b_found);
+                assert(a_found == b_found);
+                CHECK(aa, bb);
+                str_free(&aa);
                 break;
             }
 

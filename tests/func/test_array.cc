@@ -64,7 +64,9 @@ OLD_MAIN
     TEST(UPPER_BOUND_RANGE)                                                                                            \
     TEST(BINARY_SEARCH)                                                                                                \
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
-    TEST(LEXICOGRAPHICAL_COMPARE)
+    TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
+    TEST(INCLUDES)                                                                                                     \
+    TEST(INCLUDES_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(DIFFERENCE)                                                                                                   \
@@ -1002,6 +1004,51 @@ int main(void)
             assert(found_a == found_b);
             break;
         }
+        case TEST_INCLUDES: {
+            arr100_digi aa = arr100_digi_init_from(&a);
+            std::array<DIGI, 100> bb;
+            for (int i = 0; i < 100; i++)
+            {
+                bb[i] = DIGI{i};
+                aa.vector[i] = digi_init(i);
+            }
+            arr100_digi_sort(&a);
+            std::sort(b.begin(), b.end());
+            print_arr100(&a);
+            print_arr100(&aa);
+            //arr100_digi_it r2a = arr100_digi_begin(&aa);
+            //r2a.end = r2a.ref + 4;
+            bool a_found = arr100_digi_includes(&a, &aa);
+            bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
+            LOG("%d vs %d\n", (int)a_found, (int)b_found);
+            assert(a_found == b_found);
+            arr100_digi_free(&aa);
+            break;
+        }
+        case TEST_INCLUDES_RANGE: {
+            arr100_digi aa = arr100_digi_init_from(&a);
+            std::array<DIGI, 100> bb;
+            for (int i = 0; i < 100; i++)
+            {
+                bb[i] = DIGI{i};
+                aa.vector[i] = digi_init(i);
+            }
+            arr100_digi_sort(&a);
+            std::sort(b.begin(), b.end());
+            arr100_digi_it range_a1;
+            std::array<DIGI, 100>::iterator first_b1, last_b1;
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            arr100_digi_it range_a2;
+            std::array<DIGI, 100>::iterator first_b2, last_b2;
+            get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+            bool a_found = arr100_digi_includes_range(&range_a1, &range_a2);
+            bool b_found = std::includes(first_b1, last_b1, first_b2, last_b2);
+            LOG("%d vs %d\n", (int)a_found, (int)b_found);
+            assert(a_found == b_found);
+            arr100_digi_free(&aa);
+            break;
+        }
+
         default:
 #ifdef DEBUG
             printf("unhandled testcase %d %s\n", which, test_names[which]);
