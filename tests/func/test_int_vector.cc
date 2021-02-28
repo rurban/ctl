@@ -87,8 +87,7 @@ OLD_MAIN
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
     TEST(MERGE)                                                                                                        \
     TEST(MERGE_RANGE)                                                                                                  \
-    TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
-    TEST(LEXICOGRAPHICAL_COMPARE_THREE_WAY)
+    TEST(LEXICOGRAPHICAL_COMPARE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EMPLACE) /* 76 */                                                                                             \

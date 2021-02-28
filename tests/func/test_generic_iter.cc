@@ -39,7 +39,8 @@ OLD_MAIN
     TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
     TEST(SEARCH_RANGE)                                                                                                 \
     TEST(FIND_FIRST_OF_RANGE)                                                                                          \
-    TEST(FIND_END_RANGE)
+    TEST(FIND_END_RANGE)                                                                                               \
+    TEST(LEXICOGRAPHICAL_COMPARE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(DIFFERENCE_RANGE)                                                                                             \
@@ -1113,6 +1114,115 @@ int main(void)
                 } // switch t1
                 break;
 
+        case TEST_LEXICOGRAPHICAL_COMPARE:
+
+#define LEX_COMPARE(ty2, ty1)                                                                                          \
+    LOG("mismatch " #ty2 " with " #ty1 "\n");                                                                          \
+    ty1##_int_it r1a = ty1##_int_begin(&a);                                                                            \
+    bool same_a = ty1##_int_lexicographical_compare(&r1a, (ty1##_int_it *)&range2);                                    \
+    bool same_b = std::lexicographical_compare(b.begin(), b.end(), bb.begin(), bb.end());                              \
+    assert(same_a == same_b);                                                                                          \
+    ty2##_int_free(&aa)
+
+                switch (t1)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; LEX_COMPARE(vec, vec); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; LEX_COMPARE(arr25, vec); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; LEX_COMPARE(deq, vec); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; LEX_COMPARE(list, vec); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; LEX_COMPARE(set, vec); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    vec_int_free(&a); break;
+                }
+                case CTL_ARRAY : break;
+                case CTL_DEQUE : {
+                    SETUP_DEQ1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; LEX_COMPARE(vec, deq); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; LEX_COMPARE(arr25, deq); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; LEX_COMPARE(deq, deq); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; LEX_COMPARE(list, deq); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; LEX_COMPARE(set, deq); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    deq_int_free(&a); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; LEX_COMPARE(vec, list); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; LEX_COMPARE(arr25, list); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; LEX_COMPARE(deq, list); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; LEX_COMPARE(list, list); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; LEX_COMPARE(set, list); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    list_int_free(&a); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; LEX_COMPARE(vec, set); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; LEX_COMPARE(arr25, set); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; LEX_COMPARE(deq, set); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; LEX_COMPARE(list, set); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; LEX_COMPARE(set, set); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    set_int_free(&a); break;
+                }
+                case CTL_USET : break;
+                } // switch t1
+                break;
+            
         case TEST_UNION_RANGE:
 
 #ifndef _MSC_VER
