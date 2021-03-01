@@ -110,6 +110,14 @@ static inline bool JOIN(A, any_of_range)(I *range, int _match(T *))
 
 #endif // USET (ranges)
 
+static inline void JOIN(I, iter_swap)(I *a, I* b)
+{
+    //TODO: for integer literals we would need no temporaries
+    T tmp = *JOIN(I, ref)(a);
+    *JOIN(I, ref)(a) = *JOIN(I, ref)(b);
+    *JOIN(I, ref)(b) = tmp;
+}
+
 // set/uset have optimized implementations.
 #if defined(CTL_LIST) || defined(CTL_VEC) || defined(CTL_STR) || defined(CTL_DEQ)
 
@@ -1258,7 +1266,41 @@ static inline I JOIN(A, unique)(A *self)
 }
 #endif // LIST, ARR
 
+static inline void JOIN(A, reverse_range)(I *first)
+{
+    I last = *first;
+    JOIN(I, set_done)(&last);
+    while (!JOIN(I, done)(first))
+    {
+        JOIN(I, prev)(&last);
+        if (JOIN(I, ref)(first) == JOIN(I, ref)(&last))
+            break;
+        JOIN(I, iter_swap)(first, &last);
+        JOIN(I, next)(first);
+        if (JOIN(I, ref)(first) == JOIN(I, ref)(&last))
+            break;
+    }
+}
+
+#if !defined(CTL_LIST)
+// list has a specialized method
+static inline void JOIN(A, reverse)(A *a)
+{
+    I first = JOIN(A, begin)(a);
+    I last = JOIN(A, end)(a);
+    while (JOIN(I, ref)(&first) != JOIN(I, ref)(&last))
+    {
+        JOIN(I, prev)(&last);
+        if (JOIN(I, ref)(&first) == JOIN(I, ref)(&last))
+            break;
+        JOIN(I, iter_swap)(&first, &last);
+        JOIN(I, next)(&first);
+    }
+}
+#endif //!LIST
+
 #endif // USET, SET
+
 
 // TODO:
 // copy_n C++11

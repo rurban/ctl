@@ -480,14 +480,14 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`replace_copy_if_range`          |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`swap`                           | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | ✓  | ✓  | ✓  |
 |`swap_ranges`                    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`iter_swap`                      |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`reverse`                        |    |    |    |    | ✓  |    |    | -  | -  | -  | -  | -  |
-|`reverse_range`                  |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`reverse_copy`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`reverse_copy_range`             |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`rotate`                         |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`rotate_range`                   |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`rotate_copy`                    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`iter_swap`                      | ✓  | ✓  | ✓  | ✓  |    | -  | -  |    |    | -  | -  | -  |
+|`reverse`                        | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
+|`reverse_range`                  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
+|`reverse_copy`                   |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`reverse_copy_range`             |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`rotate`                         |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`rotate_range`                   |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`rotate_copy`                    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`rotate_copy_range`              |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`shift_left`                     |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`shift_right`                    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
@@ -562,7 +562,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 202000 (starting with `202102`),
 the old ctl is lower than 202000, starting with `1.0`.
 
-Added lots of missing methods. We have 150 methods in 790 stable variants.
+Added lots of missing methods. We have 152 methods in 803 stable variants.
 glouw has 63 methods in 196 stable variants.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.

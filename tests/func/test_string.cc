@@ -88,7 +88,9 @@ OLD_MAIN
     TEST(INCLUDES)                                                                                                     \
     TEST(INCLUDES_RANGE)                                                                                               \
     TEST(IS_SORTED)                                                                                                    \
-    TEST(IS_SORTED_UNTIL)
+    TEST(IS_SORTED_UNTIL)                                                                                              \
+    TEST(REVERSE)                                                                                                      \
+    TEST(REVERSE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(GENERATE_N_RANGE) /* 74 */                                                                                    \
@@ -1568,6 +1570,25 @@ int main(void)
                 CHECK_RANGE(*it, r1b, last1_b);
                 break;
             }
+            case TEST_REVERSE: {
+                LOG("%s\n", a.vector);
+                str_reverse(&a);
+                std::reverse(b.begin(), b.end());
+                LOG("%s\n", a.vector);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_REVERSE_RANGE: {
+                str_it r1a;
+                std::string::iterator r1b, last1_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                LOG("%s\n", a.vector);
+                str_reverse_range(&r1a);
+                std::reverse(r1b, last1_b);
+                LOG("%s\n", a.vector);
+                CHECK(a, b);
+                break;
+            }
 
             default:
 #ifdef DEBUG
@@ -1582,8 +1603,7 @@ int main(void)
             free(base);
         }
     }
-    while(tests.size)
-        queue_int_pop(&tests);    
+    queue_int_free(&tests);
     if (fail)
         TEST_FAIL(__FILE__);
     else

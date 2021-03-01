@@ -68,11 +68,13 @@ OLD_MAIN
     TEST(INCLUDES)                                                                                                     \
     TEST(INCLUDES_RANGE)                                                                                               \
     TEST(IS_SORTED)                                                                                                    \
-    TEST(IS_SORTED_UNTIL)
+    TEST(IS_SORTED_UNTIL)                                                                                              \
+    TEST(REVERSE)                                                                                                      \
+    TEST(REVERSE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(DIFFERENCE)                                                                                                   \
-    TEST(SYMMETRIC_DIFFERENCE) /* 49*/                                                                                 \
+    TEST(SYMMETRIC_DIFFERENCE) /* 56 */                                                                                \
     TEST(INTERSECTION)                                                                                                 \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_RANGE)                                                                                              \
@@ -1072,6 +1074,26 @@ int main(void)
             it = arr100_digi_is_sorted_until(&r1a, &r2a);
             r1b = std::is_sorted_until(r1b, last1_b);
             CHECK_ITER(*it, b, r1b);
+            break;
+        }
+        case TEST_REVERSE: {
+            print_arr100(&a);
+            arr100_digi_reverse(&a);
+            std::reverse(b.begin(), b.end());
+            print_arr100(&a);
+            print_array(b);
+            CHECK(a, b);
+            break;
+        }
+        case TEST_REVERSE_RANGE: {
+            arr100_digi_it r1a;
+            std::array<DIGI,100>::iterator r1b, last1_b;
+            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            print_arr100(&a);
+            arr100_digi_reverse_range(&r1a);
+            std::reverse(r1b, last1_b);
+            print_arr100(&a);
+            CHECK(a, b);
             break;
         }
 

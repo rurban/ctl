@@ -134,6 +134,9 @@ for my $c (qw(vec str arr deq list set map)) {
   if ($c ne 'set' and $c ne 'map') {
     $m->{copy_range}->{$c} = $m->{union}->{$c};
   }
+  if ($c ne 'list') {
+    $m->{iter_swap}->{$c} = $m->{reverse}->{$c};
+  }
 }
 for my $c (qw(uset umap)) {
   for (qw(load_factor max_load_factor max_bucket_count bucket_count bucket_size)) {

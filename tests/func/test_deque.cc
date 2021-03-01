@@ -99,7 +99,9 @@ OLD_MAIN
     TEST(MERGE_RANGE)                                                                                                  \
     TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
     TEST(IS_SORTED)                                                                                                    \
-    TEST(IS_SORTED_UNTIL)
+    TEST(IS_SORTED_UNTIL)                                                                                              \
+    TEST(REVERSE)                                                                                                      \
+    TEST(REVERSE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(UNIQUE) /* 71 */                                                                                              \
@@ -502,6 +504,12 @@ int main(void)
                 LOG("mode direct\n");
                 deq_digi_resize(&a, size, digi_init(0));
                 b.resize(size);
+                for (size_t i = 0; i < size; i++)
+                {
+                    const int value = TEST_RAND(TEST_MAX_VALUE);
+                    deq_digi_set(&a, i, digi_init(value));
+                    b[i] = DIGI{value};
+                }
             }
             if (mode == MODE_GROWTH)
             {
@@ -1999,6 +2007,24 @@ int main(void)
                     deq_digi_it_index(it), distance(b.begin(), r1b), !deq_digi_it_done(it) ? *it->ref->value : -1,
                     r1b != last1_b ? *r1b->value : -1);
                 CHECK_RANGE(*it, r1b, last1_b);
+                break;
+            }
+            case TEST_REVERSE: {
+                print_deq(&a);
+                deq_digi_reverse(&a);
+                reverse(b.begin(), b.end());
+                print_deq(&a);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_REVERSE_RANGE: {
+                deq_digi_it r1a;
+                std::deque<DIGI>::iterator r1b, last1_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                print_deq_range(r1a);
+                deq_digi_reverse_range(&r1a);
+                reverse(r1b, last1_b);
+                CHECK(a, b);
                 break;
             }
 
