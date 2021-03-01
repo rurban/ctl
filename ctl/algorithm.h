@@ -577,6 +577,27 @@ static inline A JOIN(A, merge)(A *a, A *b)
 #endif // LIST
 #endif // USET
 
+#if 0
+// TODO
+static inline A* JOIN(A, inplace_merge)(I *first, I *middle, I *last)
+{
+    //A* self = first->container;
+    if (JOIN(I, index)(first) == JOIN(I, index)(middle) ||
+        JOIN(I, index)(middle) == JOIN(I, index)(last))
+        return;
+    size_t len1 = JOIN(I, distance)(first, middle);
+    size_t len2 = JOIN(I, distance)(middle, last);
+    /* TODO */
+    if (JOIN(I, index)(first) == 0)
+    {
+    }
+    else
+    {
+    }
+    return NULL;
+}
+#endif
+
 static inline A JOIN(A, copy_if_range)(I *range, int _match(T*))
 {
     A out = JOIN(A, init_from)(range->container);

@@ -355,12 +355,11 @@ determines if an element exists in a sorted sequence.
 ## Other operations on sorted ranges
 
     A merge (A* self, A* other)
-    merge_range  (I* range1, GI* range2)
+    A merge_range  (I* range1, GI* range2)
  
 merges the 2nd container into the first.
 
-    inplace_merge
-    inplace_merge_range
+    inplace_merge (I *first, I *middle, I *last)
  
 merges two ordered ranges in-place. _(NYI)_
 

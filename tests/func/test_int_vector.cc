@@ -93,7 +93,8 @@ OLD_MAIN
     TEST(EMPLACE) /* 76 */                                                                                             \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_RANGE)                                                                                              \
-    TEST(TRANSFORM_IT_RANGE)
+    TEST(TRANSFORM_IT_RANGE)                                                                                           \
+    TEST(INPLACE_MERGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -1687,6 +1688,28 @@ int main(void)
                 vec_int_free(&aaa);
                 break;
             }
+#ifdef DEBUG
+            case TEST_INPLACE_MERGE: {
+                if (a->size < 3)
+                    return 0;
+                vec_int_it r1_a = vec_int_begin(&a);
+                vec_int_it r2_a = vec_int_begin(&a);
+                vec_int_it_advance(&r2_a, a.size/2);
+                vec_int_it r3_a = vec_int_end(&a);
+                std::vector<int>::iterator r1_b, r2_b, r3_b;
+                r1_b = b.begin();
+                r2_b = b.begin() + b.size() / 2;
+                r3_b = b.end();
+                print_vec (&a);
+                vec_int_inplace_merge(&r1_a, &r2_a, &r3_a);
+                inplace_merge(&r1_b, &r2_b, &r3_b);
+                LOG("inplace_merge:\n");
+                print_vec (&a);
+                print_vector (b);
+                CHECK(a, b);
+                break;
+            }
+#endif
 
             default:
 #ifdef DEBUG
