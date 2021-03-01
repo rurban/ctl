@@ -264,6 +264,12 @@ static inline void JOIN(I, set_end)(I *iter, I *last)
     (void)last; // ignore ranges
 }
 
+static inline void JOIN(I, set_pos)(I *iter, I* other)
+{
+    iter->node = other->node;
+    iter->buckets = other->buckets;
+}
+
 static inline void JOIN(I, set_done)(I *iter)
 {
     iter->node = NULL;

@@ -81,7 +81,9 @@ OLD_MAIN
     TEST(MERGE_RANGE)                                                                                                  \
     TEST(INCLUDES)                                                                                                     \
     TEST(INCLUDES_RANGE)                                                                                               \
-    TEST(LEXICOGRAPHICAL_COMPARE)
+    TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
+    TEST(IS_SORTED)                                                                                                    \
+    TEST(IS_SORTED_UNTIL)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EQUAL_RANGE)                                                                                                  \
@@ -126,21 +128,37 @@ static inline int digi_3way_compare(digi *a, digi *b)
 
 #ifndef DEBUG
 #define print_set(a)
+#define print_set_range(it)
 #define print_setpp(a)
 //# define TEST_MAX_VALUE INT_MAX
 #else
 void print_set(set_digi *a)
 {
-    int i = 0;
-    list_foreach_ref(set_digi, a, it) printf("[%d] %d\n", i++, *it.ref->value);
-    printf("--\n");
+    list_foreach_ref(set_digi, a, it) printf("%d, ", *it.ref->value);
+    printf("\n");
+}
+void print_set_range(set_digi_it it)
+{
+    set_digi *a = it.container;
+    if (!a->size)
+        return;
+    set_digi_node *n = set_digi_first(a);
+    set_digi_node *end = set_digi_last(a);
+    for(; n != it.node; n = set_digi_node_next(n))
+        printf("%d, ", *n->value.value);
+    printf("[");
+    for(; n != it.end; n = set_digi_node_next(n))
+        printf("%d, ", *n->value.value);
+    printf(") ");
+    for(; n != end; n = set_digi_node_next(n))
+        printf("%d, ", *n->value.value);
+    printf("\n");
 }
 void print_setpp(std::set<DIGI> &b)
 {
-    int i = 0;
     for (auto &d : b)
-        printf("[%d] %d\n", i++, *d.value);
-    printf("--\n");
+        printf("%d, ", *d.value);
+    printf("\n");
 }
 #endif
 
@@ -1358,10 +1376,36 @@ int main(void)
             std::set<DIGI>::iterator r1b, last1_b, r2b, last2_b;
             get_random_iters(&a, &r1a, b, r1b, last1_b);
             get_random_iters(&aa, &r2a, bb, r2b, last2_b);
+            print_set_range(r1a);
+            print_set_range(r2a);
             bool same_a = set_digi_lexicographical_compare(&r1a, &r2a);
             bool same_b = std::lexicographical_compare(r1b, last1_b, r2b, last2_b);
             assert(same_a == same_b);
             set_digi_free(&aa);
+            break;
+        }
+        case TEST_IS_SORTED: {
+            set_digi_it r1a;
+            std::set<DIGI>::iterator r1b, last1_b;
+            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            print_set_range(r1a);
+            bool a_yes = set_digi_is_sorted(&r1a);
+            bool b_yes = std::is_sorted(r1b, last1_b);
+            LOG("a_yes: %d b_yes %d\n", (int)a_yes, (int)b_yes);
+            assert(a_yes == b_yes);
+            break;
+        }
+        case TEST_IS_SORTED_UNTIL: {
+            set_digi_it r1a, r2a;
+            set_digi_it *it;
+            std::set<DIGI>::iterator r1b, last1_b;
+            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            print_set_range(r1a);
+            r2a = r1a;
+            r2a.node = r1a.end;
+            it = set_digi_is_sorted_until(&r1a, &r2a);
+            r1b = std::is_sorted_until(r1b, last1_b);
+            CHECK_RANGE(*it, r1b, last1_b);
             break;
         }
 

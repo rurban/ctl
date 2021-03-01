@@ -86,7 +86,9 @@ OLD_MAIN
     TEST(MERGE_RANGE)                                                                                                  \
     TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
     TEST(INCLUDES)                                                                                                     \
-    TEST(INCLUDES_RANGE)
+    TEST(INCLUDES_RANGE)                                                                                               \
+    TEST(IS_SORTED)                                                                                                    \
+    TEST(IS_SORTED_UNTIL)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(GENERATE_N_RANGE) /* 74 */                                                                                    \
@@ -1537,6 +1539,33 @@ int main(void)
                 assert(a_found == b_found);
                 CHECK(aa, bb);
                 str_free(&aa);
+                break;
+            }
+            case TEST_IS_SORTED: {
+                str_it r1a;
+                std::string::iterator r1b, last1_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                //print_str_range(r1a);
+                bool a_yes = str_is_sorted(&r1a);
+                bool b_yes = std::is_sorted(r1b, last1_b);
+                LOG("a_yes: %d b_yes %d\n", (int)a_yes, (int)b_yes);
+                assert(a_yes == b_yes);
+                break;
+            }
+            case TEST_IS_SORTED_UNTIL: {
+                str_it r1a, r2a;
+                str_it *it;
+                std::string::iterator r1b, last1_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                //print_str_range(r1a);
+                r2a = r1a;
+                r2a.ref = r1a.end;
+                it = str_is_sorted_until(&r1a, &r2a);
+                r1b = std::is_sorted_until(r1b, last1_b);
+                LOG("=> %s/%s, %ld/%ld: %c/%c\n", !str_it_done(it) ? "yes" : "no", r1b != last1_b ? "yes" : "no",
+                    str_it_index(it), distance(b.begin(), r1b), !str_it_done(it) ? *it->ref : -1,
+                    r1b != last1_b ? *r1b : -1);
+                CHECK_RANGE(*it, r1b, last1_b);
                 break;
             }
 

@@ -95,7 +95,9 @@ OLD_MAIN
     TEST(UPPER_BOUND_RANGE)                                                                                            \
     TEST(BINARY_SEARCH)                                                                                                \
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
-    TEST(LEXICOGRAPHICAL_COMPARE)
+    TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
+    TEST(IS_SORTED)                                                                                                    \
+    TEST(IS_SORTED_UNTIL)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(ERASE_GENERIC)                                                                                                \
@@ -128,30 +130,40 @@ static const char *test_names[] = {
 
 void print_lst(list_digi *a)
 {
-    int i = 0;
-    if (a->size)
-        list_foreach_ref(list_digi, a, it) printf("%d: %d\n", i++, *it.ref->value);
-    printf("====\n");
+    list_foreach_ref(list_digi, a, it) printf("%d, ", *it.ref->value);
+    printf("\n");
+}
+void print_lst_range(list_digi_it it)
+{
+    list_digi *a = it.container;
+    list_digi_node *n = a->head;
+    for(; n != it.node; n = n->next)
+        printf("%d, ", *n->value.value);
+    printf("[");
+    for(; n != it.end; n = n->next)
+        printf("%d, ", *n->value.value);
+    printf(") ");
+    for(; n != a->tail; n = n->next)
+        printf("%d, ", *n->value.value);
+    printf("\n");
 }
 
 void print_list(std::list<DIGI> &b)
 {
-    int i = 0;
-    if (b.size())
-        for (auto &d : b)
-            printf("%d: %d\n", i++, *d.value);
-    printf("----\n");
+    for (auto &d : b)
+        printf("%d, ", *d.value);
+    printf("\n");
 }
 
-#define print_lst_range(x)
 #ifdef DEBUG
 #define TEST_MAX_VALUE 15
 #ifndef LONG
 #undef TEST_MAX_SIZE
-#define TEST_MAX_SIZE 10
+#define TEST_MAX_SIZE 20
 #endif
 #else
 #define print_lst(x)
+#define print_lst_range(x)
 #define print_list(x)
 #define TEST_MAX_VALUE INT_MAX
 #endif
@@ -232,7 +244,7 @@ int pick_random(list_digi *a)
     else                                                                                                               \
         assert(_iter == b.end())
 #define CHECK_ITER(_it, b, _iter)                                                                                      \
-    if (!list_digi_it_done(&_it))                                                                                      \
+    if (!list_digi_it_done(&(_it)))                                                                                    \
     {                                                                                                                  \
         assert(_iter != b.end());                                                                                      \
         assert(*(_it).ref->value == *(*_iter).value);                                                                  \
@@ -240,7 +252,7 @@ int pick_random(list_digi *a)
     else                                                                                                               \
         assert(_iter == b.end())
 #define CHECK_RANGE(_it, _iter, b_end)                                                                                 \
-    if (!list_digi_it_done(&_it))                                                                                      \
+    if (!list_digi_it_done(&(_it)))                                                                                    \
     {                                                                                                                  \
         assert(_iter != b_end);                                                                                        \
         assert(*(_it).ref->value == *(*_iter).value);                                                                  \
@@ -1521,7 +1533,7 @@ int main(void)
             size_t count = TEST_RAND(4);
             int value = pick_random(&a);
             LOG("search_n_range %zu %d\n", count, value);
-            print_lst_range(&range);
+            print_lst_range(range);
             list_digi_it *aa = list_digi_search_n_range(&range, count, digi_init(value));
             auto bb = search_n(first_b, last_b, count, DIGI{value});
             CHECK_RANGE(*aa, bb, last_b);
@@ -1739,6 +1751,33 @@ int main(void)
             LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
             assert(same_a == same_b);
             list_digi_free(&aa);
+            break;
+        }
+        case TEST_IS_SORTED: {
+            list_digi_it r1a;
+            std::list<DIGI>::iterator r1b, last1_b;
+            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            print_lst_range(r1a);
+            bool a_yes = list_digi_is_sorted(&r1a);
+            bool b_yes = std::is_sorted(r1b, last1_b);
+            LOG("a_yes: %d b_yes %d\n", (int)a_yes, (int)b_yes);
+            assert(a_yes == b_yes);
+            break;
+        }
+        case TEST_IS_SORTED_UNTIL: {
+            list_digi_it r1a, r2a;
+            list_digi_it *it;
+            std::list<DIGI>::iterator r1b, last1_b;
+            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            print_lst_range(r1a);
+            r2a = r1a;
+            r2a.node = r1a.end;
+            it = list_digi_is_sorted_until(&r1a, &r2a);
+            r1b = std::is_sorted_until(r1b, last1_b);
+            LOG("=> %s/%s, %ld/%ld: %d/%d\n", !list_digi_it_done(it) ? "yes" : "no", r1b != last1_b ? "yes" : "no",
+                list_digi_it_index(it), distance(b.begin(), r1b), !list_digi_it_done(it) ? *it->ref->value : -1,
+                r1b != last1_b ? *r1b->value : -1);
+            CHECK_RANGE(*it, r1b, last1_b);
             break;
         }
 

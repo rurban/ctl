@@ -114,6 +114,11 @@ static inline void JOIN(I, range)(I *first, I *last)
     ASSERT(first->end >= first->ref);
 }
 
+static inline void JOIN(I, set_pos)(I *iter, I *other)
+{
+    iter->ref = other->ref;
+}
+
 static inline void JOIN(I, set_end)(I *iter, I *last)
 {
     iter->end = last->ref;

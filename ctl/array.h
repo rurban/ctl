@@ -120,6 +120,11 @@ static inline void JOIN(I, set_done)(I *iter)
     iter->ref = iter->end;
 }
 
+static inline void JOIN(I, set_pos)(I *iter, I* other)
+{
+    iter->ref = other->ref;
+}
+
 static inline void JOIN(I, next)(I *iter)
 {
     iter->ref++;

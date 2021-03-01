@@ -97,7 +97,9 @@ OLD_MAIN
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
     TEST(MERGE)                                                                                                        \
     TEST(MERGE_RANGE)                                                                                                  \
-    TEST(LEXICOGRAPHICAL_COMPARE)
+    TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
+    TEST(IS_SORTED)                                                                                                    \
+    TEST(IS_SORTED_UNTIL)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(UNIQUE) /* 71 */                                                                                              \
@@ -131,7 +133,24 @@ static const char *test_names[] = {
 void print_deq(deq_digi *a)
 {
     for (size_t i = 0; i < a->size; i++)
-        printf("%zu: %d\n", i, *deq_digi_at(a, i)->value);
+        printf("%d, ", *deq_digi_at(a, i)->value);
+    printf("\n");
+}
+
+void print_deq_range(deq_digi_it it)
+{
+    deq_digi *a = it.container;
+    size_t i;
+    size_t i1 = it.index;
+    size_t i2 = it.end;
+    for (i = 0; i < i1; i++)
+        printf("%d, ", *deq_digi_at(a, i)->value);
+    printf("[");
+    for (i = i1; i < i2; i++)
+        printf("%d, ", *deq_digi_at(a, i)->value);
+    printf(") ");
+    for (i = i2; i < a->size; i++)
+        printf("%d, ", *deq_digi_at(a, i)->value);
     printf("\n");
 }
 
@@ -142,9 +161,9 @@ void print_deque(std::deque<DIGI> &b)
         DIGI val = b.at(i);
         // DIGI.hh is not as stable as the CTL
         if (val.value)
-            printf("%zu: %d\n", i, *val.value);
+            printf("%d, ", *val.value);
         else
-            printf("%zu: NULL\n", i);
+            printf("NULL, ");
     }
     printf("\n");
 }
@@ -157,9 +176,9 @@ void print_deque(std::deque<DIGI> &b)
 #define TEST_MAX_VALUE INT_MAX
 #endif
 
-#define print_deq_range(x) print_deq(x.container)
 #ifndef DEBUG
 #define print_deq(x)
+#define print_deq_range(x)
 #define print_deque(x)
 
 #define CHECK(_x, _y)                                                                                                  \
@@ -1955,6 +1974,33 @@ int main(void)
                 deq_digi_free(&aaa);
                 break;
             }
+            case TEST_IS_SORTED: {
+                deq_digi_it r1a;
+                std::deque<DIGI>::iterator r1b, last1_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                print_deq_range(r1a);
+                bool a_yes = deq_digi_is_sorted(&r1a);
+                bool b_yes = std::is_sorted(r1b, last1_b);
+                LOG("a_yes: %d b_yes %d\n", (int)a_yes, (int)b_yes);
+                assert(a_yes == b_yes);
+                break;
+            }
+            case TEST_IS_SORTED_UNTIL: {
+                deq_digi_it r1a, r2a;
+                deq_digi_it *it;
+                std::deque<DIGI>::iterator r1b, last1_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                print_deq_range(r1a);
+                r2a = r1a;
+                r2a.index = r1a.end;
+                it = deq_digi_is_sorted_until(&r1a, &r2a);
+                r1b = std::is_sorted_until(r1b, last1_b);
+                LOG("=> %s/%s, %ld/%ld: %d/%d\n", !deq_digi_it_done(it) ? "yes" : "no", r1b != last1_b ? "yes" : "no",
+                    deq_digi_it_index(it), distance(b.begin(), r1b), !deq_digi_it_done(it) ? *it->ref->value : -1,
+                    r1b != last1_b ? *r1b->value : -1);
+                CHECK_RANGE(*it, r1b, last1_b);
+                break;
+            }
 
             default:
 #ifdef DEBUG
@@ -1971,6 +2017,7 @@ int main(void)
             deq_digi_free(&a);
         }
     }
+    queue_int_free(&tests);
     if (fail)
         TEST_FAIL(__FILE__);
     else

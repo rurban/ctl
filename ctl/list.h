@@ -105,6 +105,11 @@ static inline void JOIN(I, set_done)(I *iter)
     iter->node = iter->end;
 }
 
+static inline void JOIN(I, set_pos)(I *iter, I *other)
+{
+    iter->node = other->node;
+}
+
 static inline void JOIN(I, set_end)(I *iter, I *last)
 {
     iter->end = last->node;

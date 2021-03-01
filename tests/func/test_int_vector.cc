@@ -87,7 +87,9 @@ OLD_MAIN
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
     TEST(MERGE)                                                                                                        \
     TEST(MERGE_RANGE)                                                                                                  \
-    TEST(LEXICOGRAPHICAL_COMPARE)
+    TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
+    TEST(IS_SORTED)                                                                                                    \
+    TEST(IS_SORTED_UNTIL)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EMPLACE) /* 76 */                                                                                             \
@@ -1690,19 +1692,19 @@ int main(void)
             }
 #ifdef DEBUG
             case TEST_INPLACE_MERGE: {
-                if (a->size < 3)
+                if (a.size < 3)
                     return 0;
-                vec_int_it r1_a = vec_int_begin(&a);
+                //vec_int_it r1_a = vec_int_begin(&a);
                 vec_int_it r2_a = vec_int_begin(&a);
                 vec_int_it_advance(&r2_a, a.size/2);
-                vec_int_it r3_a = vec_int_end(&a);
+                //vec_int_it r3_a = vec_int_end(&a);
                 std::vector<int>::iterator r1_b, r2_b, r3_b;
                 r1_b = b.begin();
                 r2_b = b.begin() + b.size() / 2;
                 r3_b = b.end();
                 print_vec (&a);
-                vec_int_inplace_merge(&r1_a, &r2_a, &r3_a);
-                inplace_merge(&r1_b, &r2_b, &r3_b);
+                //vec_int_inplace_merge(&r1_a, &r2_a, &r3_a);
+                std::inplace_merge(&r1_b, &r2_b, &r3_b);
                 LOG("inplace_merge:\n");
                 print_vec (&a);
                 print_vector (b);
@@ -1710,6 +1712,31 @@ int main(void)
                 break;
             }
 #endif
+
+            case TEST_IS_SORTED: {
+                vec_int_it r1a;
+                std::vector<int>::iterator r1b, last1_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                print_vec(&a);
+                bool a_yes = vec_int_is_sorted(&r1a);
+                bool b_yes = std::is_sorted(r1b, last1_b);
+                LOG("a_yes: %d b_yes %d\n", (int)a_yes, (int)b_yes);
+                assert(a_yes == b_yes);
+                break;
+            }
+            case TEST_IS_SORTED_UNTIL: {
+                vec_int_it r1a, r2a;
+                vec_int_it *it;
+                std::vector<int>::iterator r1b, last1_b;
+                get_random_iters(&a, &r1a, b, r1b, last1_b);
+                print_vec_range(r1a);
+                r2a = r1a;
+                r2a.ref = r1a.end;
+                it = vec_int_is_sorted_until(&r1a, &r2a);
+                r1b = std::is_sorted_until(r1b, last1_b);
+                CHECK_RANGE(*it, r1b, last1_b);
+                break;
+            }
 
             default:
 #ifdef DEBUG

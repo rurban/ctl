@@ -370,12 +370,65 @@ static inline bool JOIN(A, includes)(A *a, A *b)
     JOIN(A, it) r2 = JOIN(A, begin)(b);
     return JOIN(A, includes_range)(&r1, &r2);
 }
+#else // !USET
+static inline bool JOIN(A, is_sorted)(I *range)
+{
+    (void)range;
+    return false;
+}
+static inline I* JOIN(A, is_sorted_until)(I *first, I *last)
+{
+    (void)last;
+    return first;
+}
 #endif // USET
+
+#ifdef CTL_SET
+static inline bool JOIN(A, is_sorted)(I *range)
+{
+    (void)range;
+    return true;
+}
+static inline I* JOIN(A, is_sorted_until)(I *first, I *last)
+{
+    (void)first;
+    return last;
+}
+#endif
 
 // generate and transform have no inserter support yet,
 // so we cannot yet use it for set nor uset. we want to call insert/push_back on them.
 // for list and vector we just set/replace the elements.
 #if !defined(CTL_USET) && !defined(CTL_SET)
+
+// not as range, just normal iters, ignoring their end
+static inline I* JOIN(A, is_sorted_until)(I *first, I *last)
+{
+    A* self = first->container;
+    JOIN(I, set_end)(first, last);
+    if (!JOIN(I, done)(first)) {
+        I next = *first;
+        JOIN(I, next)(&next);
+        while (!JOIN(I, done)(&next)) {
+            if (self->compare(next.ref, first->ref))
+            {
+                *first = next;
+                return first;
+            }
+            JOIN(I, next)(first);
+            JOIN(I, next)(&next);
+        }
+    }
+    JOIN(I, set_end)(last, last); // moves last->end to pos, so it's done
+    return last;
+}
+
+static inline bool JOIN(A, is_sorted)(I *range)
+{
+    I end = *range;
+    JOIN(I, set_done)(&end);
+    return JOIN(I, done)(JOIN(A, is_sorted_until)(range, &end));
+}
 
 static inline void JOIN(A, generate)(A *self, T _gen(void))
 {

@@ -66,7 +66,9 @@ OLD_MAIN
     TEST(BINARY_SEARCH_RANGE)                                                                                          \
     TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
     TEST(INCLUDES)                                                                                                     \
-    TEST(INCLUDES_RANGE)
+    TEST(INCLUDES_RANGE)                                                                                               \
+    TEST(IS_SORTED)                                                                                                    \
+    TEST(IS_SORTED_UNTIL)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(DIFFERENCE)                                                                                                   \
@@ -1046,6 +1048,30 @@ int main(void)
             LOG("%d vs %d\n", (int)a_found, (int)b_found);
             assert(a_found == b_found);
             arr100_digi_free(&aa);
+            break;
+        }
+        case TEST_IS_SORTED: {
+            arr100_digi_it r1a;
+            std::array<DIGI,100>::iterator r1b, last1_b;
+            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            // print_vec(&a);
+            bool a_yes = arr100_digi_is_sorted(&r1a);
+            bool b_yes = std::is_sorted(r1b, last1_b);
+            LOG("a_yes: %d b_yes %d\n", (int)a_yes, (int)b_yes);
+            assert(a_yes == b_yes);
+            break;
+        }
+        case TEST_IS_SORTED_UNTIL: {
+            arr100_digi_it r1a, r2a;
+            arr100_digi_it *it;
+            std::array<DIGI,100>::iterator r1b, last1_b;
+            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            // print_arr100_range(r1a);
+            r2a = r1a;
+            r2a.ref = r1a.end;
+            it = arr100_digi_is_sorted_until(&r1a, &r2a);
+            r1b = std::is_sorted_until(r1b, last1_b);
+            CHECK_ITER(*it, b, r1b);
             break;
         }
 

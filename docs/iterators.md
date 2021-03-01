@@ -90,6 +90,10 @@ algorithm iterators on ranges, as they make no sense for unordered containers.
 
 returns the value reference.
 
+    set_pos (I* iter, I* other)
+
+sets the position to the position of the other. Cheaper than copying the whole iterator.
+
     set_done (I* iter)
 
 sets the position to the end, so it's done.

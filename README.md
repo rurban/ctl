@@ -395,6 +395,7 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`end`                            | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`next`                           | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`done`                           | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
+|`set_pos`                        | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`set_done`                       | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`set_end`                        | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`iter`                           | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
@@ -508,10 +509,8 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`stable_partition_range`         |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`partition_point`                |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`partition_point_range`          |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`is_sorted`                      |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`is_sorted_range`                |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`is_sorted_until`                |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`is_sorted_until_range`          |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`is_sorted`                      | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|`is_sorted_until`                | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`sort`                           | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
 |`sort_range`                     |    |    |    | ✓  |    | -  | -  | -  | -  | -  | -  | -  |
 |`partial_sort`                   |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
@@ -563,7 +562,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 202000 (starting with `202102`),
 the old ctl is lower than 202000, starting with `1.0`.
 
-Added lots of missing methods. We have 147 methods in 769 stable variants.
+Added lots of missing methods. We have 150 methods in 790 stable variants.
 glouw has 63 methods in 196 stable variants.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.
