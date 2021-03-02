@@ -1511,10 +1511,12 @@ int main(void)
             long dist = std::distance(b.begin(), iter);
             if (found_b)
                 b.erase(iter, last_b1);
+            print_lst_range(first_a1);
+            print_list(b);
             LOG("found %s at %zu, ", found_a ? "yes" : "no", index);
             LOG("vs found %s at %ld\n", found_b ? "yes" : "no", dist);
             assert(found_a == found_b);
-            assert((long)index == dist);
+            assert((long)index == dist); // FIXME
             break;
         }
         case TEST_LOWER_BOUND: // 73
