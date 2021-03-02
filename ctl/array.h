@@ -450,6 +450,109 @@ static inline A JOIN(A, copy_if)(A *self, int _match(T*))
     return out;
 }
 
+static inline I JOIN(A, copy_range)(I *it, I *from)
+{
+    A* self = it->container;
+    while (!JOIN(I, done)(from))
+    {
+        *it->ref = self->copy(JOIN(I, ref)(from));
+        JOIN(I, next)(it);
+        JOIN(I, next)(from);
+    }
+    return *it;
+}
+
+// These three set algos return an iterator pointing to the end of the new
+// result container.
+static inline I JOIN(A, intersection_range)(I *r1, GI *r2)
+{
+    A self = JOIN(A, init_from)(r1->container);
+    I it = JOIN(A, begin)(&self);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    while (!JOIN(I, done)(r1) && !done2(r2))
+    {
+        if (self.compare(r1->ref, ref2(r2)))
+            JOIN(I, next)(r1);
+        else
+        {
+            if (!self.compare(ref2(r2), r1->ref))
+            {
+                *it.ref = self.copy(r1->ref);
+                JOIN(I, next)(&it);
+                JOIN(I, next)(r1);
+            }
+            next2(r2);
+        }
+    }
+    return it;
+}
+
+// Warning: fails with 3-way compare! And with generic r2 also.
+static inline I JOIN(A, difference_range)(I *r1, I *r2)
+{
+    A self = JOIN(A, init_from)(r1->container);
+    I it = JOIN(A, begin)(&self);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    while (!JOIN(I, done)(r1))
+    {
+        if (done2(r2))
+            return JOIN(A, copy_range)(&it, r1);
+        // r1 < r2 (fails with 3-way compare)
+        if (self.compare(r1->ref, ref2(r2)))
+        {
+            *it.ref = self.copy(r1->ref);
+            JOIN(I, next)(&it);
+            JOIN(I, next)(r1);
+        }
+        else
+        {
+            if (!self.compare(ref2(r2), r1->ref))
+                JOIN(I, next)(r1);
+            next2(r2);
+        }
+    }
+    return it;
+}
+
+static inline I JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
+{
+    A self = JOIN(A, init_from)(r1->container);
+    I it = JOIN(A, begin)(&self);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    while (!JOIN(I, done)(r1))
+    {
+        if (done2(r2))
+            return JOIN(A, copy_range)(&it, r1);
+        if (self.compare(r1->ref, ref2(r2)))
+        {
+            *it.ref = self.copy(r1->ref);
+            JOIN(I, next)(&it);
+            JOIN(I, next)(r1);
+        }
+        else
+        {
+            if (self.compare(ref2(r2), r1->ref))
+            {
+                *it.ref = self.copy(ref2(r2));
+                JOIN(I, next)(&it);
+            }
+            else
+                JOIN(I, next)(r1);
+            next2(r2);
+        }
+    }
+    return JOIN(A, copy_range)(&it, r2);
+}
+
 #undef A
 #undef I
 #undef GI

@@ -536,13 +536,13 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`inplace_merge_range`            |    |    |    |    |    |    |    |    |    | -  | -  | -  |
 |`includes`                       | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`includes_range`                 | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
-|`difference`                     | ✓  | ✓  | x  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
-|`intersection`                   | ✓  | ✓  | x  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
-|`symmetric_difference`           | ✓  | ✓  | x  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
+|`difference`                     | ✓  | ✓  | -  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
+|`intersection`                   | ✓  | ✓  | -  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
+|`symmetric_difference`           | ✓  | ✓  | -  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`union`                          | ✓  | ✓  | -  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
-|`difference_range`               | ✓  | ✓  |    | ✓  | ✓  |    |    |    |    | -  | -  | -  |
-|`intersection_range`             | ✓  | ✓  |    | ✓  | ✓  |    |    |    |    | -  | -  | -  |
-|`symmetric_difference_range`     | ✓  | ✓  |    | ✓  | ✓  |    |    |    |    | -  | -  | -  |
+|`difference_range`               | ✓  | ✓  | x  | ✓  | ✓  |    |    |    |    | -  | -  | -  |
+|`intersection_range`             | ✓  | ✓  | x  | ✓  | ✓  |    |    |    |    | -  | -  | -  |
+|`symmetric_difference_range`     | ✓  | ✓  | x  | ✓  | ✓  |    |    |    |    | -  | -  | -  |
 |`union_range`                    | ✓  | ✓  | -  | ✓  | ✓  |    |    |    |    | -  | -  | -  |
 |`lexicographical_compare`        | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|
