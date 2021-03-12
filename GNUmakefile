@@ -4,7 +4,7 @@ CXX ?= g++
 VERSION := $(shell grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
 VERSION ?= 202102
 
-.SUFFIXES: .cc .c .i .o .md .3
+.SUFFIXES: .cc .c .i .ii .o .md .3
 .PHONY: all check man install clean doc images perf examples verify cppcheck asan \
         debug stress stress-long ALWAYS
 
@@ -284,6 +284,8 @@ ctl/array.i:
 	@$(CC) $(CFLAGS) $< -E | clang-format -style=webkit
 %.i : %.cc
 	@$(CXX) $(CFLAGS) $< -E | clang-format -style=webkit
+%.ii : %.cc
+	@$(CXX) $(CFLAGS) $< -E -P | clang-format -style=webkit
 
 examples/% : examples/%.c .cflags $(H)
 	$(CC) $(CFLAGS) -o $@ $@.c

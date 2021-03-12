@@ -519,28 +519,30 @@ static inline I JOIN(A, copy_range)(I *it, GI *from)
 // These three set algos return an iterator pointing to the end of the new
 // result container.
 // All values starting with end are zeroe'd and invalid, esp. with non-POD values.
+// The resulting container is always heap-allocated, not stack.
 static inline I JOIN(A, intersection_range)(I *r1, GI *r2)
 {
-    A self = JOIN(A, init)();
+    A *self = (A*) calloc (1, sizeof(A));
     I it;
     void (*next2)(struct I*) = r2->vtable.next;
     T* (*ref2)(struct I*) = r2->vtable.ref;
     int (*done2)(struct I*) = r2->vtable.done;
-    self.free = r1->container->free;
-    self.copy = r1->container->copy;
-    self.compare = r1->container->compare;
-    self.equal = r1->container->equal;
-    it = JOIN(A, begin)(&self);
+    *self = JOIN(A, init)();
+    self->free = r1->container->free;
+    self->copy = r1->container->copy;
+    self->compare = r1->container->compare;
+    self->equal = r1->container->equal;
+    it = JOIN(A, begin)(self);
 
     while (!JOIN(I, done)(r1) && !done2(r2))
     {
-        if (self.compare(r1->ref, ref2(r2)))
+        if (self->compare(r1->ref, ref2(r2)))
             JOIN(I, next)(r1);
         else
         {
-            if (!self.compare(ref2(r2), r1->ref))
+            if (!self->compare(ref2(r2), r1->ref))
             {
-                *it.ref = self.copy(r1->ref);
+                *it.ref = self->copy(r1->ref);
                 JOIN(I, next)(&it);
                 JOIN(I, next)(r1);
             }
@@ -549,7 +551,7 @@ static inline I JOIN(A, intersection_range)(I *r1, GI *r2)
     }
     //JOIN(A, fill_zero)(&it);
     it.end = it.ref;
-    it.ref = &self.vector[0];
+    it.ref = &self->vector[0];
     //memset(it.end, 0, (N - (it.end - it.ref)) * sizeof(T));
     return it;
 }
@@ -557,70 +559,74 @@ static inline I JOIN(A, intersection_range)(I *r1, GI *r2)
 // Warning: fails with 3-way compare! And with generic r2 also.
 static inline I JOIN(A, difference_range)(I *r1, I *r2)
 {
-    A self = JOIN(A, init)();
+    // make the resulting container heap-allocated, not stack
+    A *self = (A*) calloc (1, sizeof(A));
     I it;
     void (*next2)(struct I*) = r2->vtable.next;
     T* (*ref2)(struct I*) = r2->vtable.ref;
     int (*done2)(struct I*) = r2->vtable.done;
-    self.free = r1->container->free;
-    self.copy = r1->container->copy;
-    self.compare = r1->container->compare;
-    self.equal = r1->container->equal;
-    it = JOIN(A, begin)(&self);
+    *self = JOIN(A, init)();
+    self->free = r1->container->free;
+    self->copy = r1->container->copy;
+    self->compare = r1->container->compare;
+    self->equal = r1->container->equal;
+    it = JOIN(A, begin)(self);
 
     while (!JOIN(I, done)(r1))
     {
         if (done2(r2))
             return JOIN(A, copy_range)(&it, r1);
         // r1 < r2 (fails with 3-way compare)
-        if (self.compare(r1->ref, ref2(r2)))
+        if (self->compare(r1->ref, ref2(r2)))
         {
-            *it.ref = self.copy(r1->ref);
+            *it.ref = self->copy(r1->ref);
             JOIN(I, next)(&it);
             JOIN(I, next)(r1);
         }
         else
         {
-            if (!self.compare(ref2(r2), r1->ref))
+            if (!self->compare(ref2(r2), r1->ref))
                 JOIN(I, next)(r1);
             next2(r2);
         }
     }
     //JOIN(A, fill_zero)(&it);
     it.end = it.ref;
-    it.ref = &self.vector[0];
+    it.ref = &self->vector[0];
     //memset(it.end, 0, (N - (it.end - it.ref)) * sizeof(T));
     return it;
 }
 
 static inline I JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
 {
-    A self = JOIN(A, init)();
+    // make the resulting container heap-allocated, not stack
+    A *self = (A*) calloc (1, sizeof(A));
     I it;
     void (*next2)(struct I*) = r2->vtable.next;
     T* (*ref2)(struct I*) = r2->vtable.ref;
     int (*done2)(struct I*) = r2->vtable.done;
-    self.free = r1->container->free;
-    self.copy = r1->container->copy;
-    self.compare = r1->container->compare;
-    self.equal = r1->container->equal;
-    it = JOIN(A, begin)(&self);
+    *self = JOIN(A, init)();
+    self->free = r1->container->free;
+    self->copy = r1->container->copy;
+    self->compare = r1->container->compare;
+    self->equal = r1->container->equal;
+    it = JOIN(A, begin)(self);
 
     while (!JOIN(I, done)(r1))
     {
         if (done2(r2))
             return JOIN(A, copy_range)(&it, r1);
-        if (self.compare(r1->ref, ref2(r2)))
+        if (self->compare(r1->ref, ref2(r2)))
         {
-            *it.ref = self.copy(r1->ref);
+            *it.ref = self->copy(r1->ref);
             JOIN(I, next)(&it);
             JOIN(I, next)(r1);
         }
         else
         {
-            if (self.compare(ref2(r2), r1->ref))
+            if (self->compare(ref2(r2), r1->ref))
             {
-                *it.ref = self.copy(ref2(r2));
+                *it.ref = self->copy(ref2(r2));
                 JOIN(I, next)(&it);
             }
             else

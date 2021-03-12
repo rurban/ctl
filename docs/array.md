@@ -32,9 +32,11 @@ means that elements can be accessed not only through iterators, but also using
 offsets to regular pointers to elements. This means that a pointer to an element
 of a vector may be passed to any function that expects a pointer to an element
 of an array.
+Small arrays (smaller than 2047 elements) are stack-allocated.
 
-The function names are composed of the prefix **arrN_**, the user-defined type
-**T** and the method name. E.g `arr128_int` with `#define T int` and `#define N 128`.
+The function names are composed of the prefix **arr**, the user-defined size
+**N**, "_", the user-defined type **T** and the method name. E.g `arr128_int`
+with `#define N 128` and `#define T int`.
 
 # Member types
 
@@ -51,6 +53,7 @@ There is no `B` node type.
 ## Member functions
 
     A init ()
+    A init_from (A* other)
 
 constructs the array.
 
@@ -98,9 +101,10 @@ constructs an iterator to the beginning.
 
 constructs an iterator to the end (one past the last element).
 
-    I* next (I* iter)
+    next (I* iter)
+    prev (I* iter)
 
-Advances the iterator by 1 forwards. There's no prev yet.
+Advances the iterator by 1 forwards and backwards.
 
     I* advance (I* iter, long i)
 
@@ -112,7 +116,7 @@ Constructs an iterator to an element.
 
     size_t index (I* iter)
 
-Returns the index of the iterator, which is just a `T* ref`.
+Returns the index of the iterator, the offset from the front.
 
 See [iterators](iterators.md) for more.
 
@@ -174,20 +178,13 @@ Returns the function that compares keys in objects of type value_type T. _(NYI)_
 
 specializes the swap algorithm.
 
-    I difference_range (I* range1, I* range2)
-
-Creates a range of the difference between two ordered ranges.
-All values starting with end of the result are zeroe'd and invalidated.
-
+    I difference_range (I* range1, GI* range2)
     I intersection_range (I* range1, GI* range2)
-
-Creates a range of the intersection of two ordered ranges.
-All values starting with end of the result are zeroe'd and invalidated.
- 
     I symmetric_difference_range (I* range1, GI* range2)
 
-Creates a range of the symmetric difference between two ordered ranges.
+Creates a range of the set operation between the two ordered ranges.
 All values starting with end of the result are zeroe'd and invalidated.
-
+The returned container of the iterator is heap-allocated, and must be free'd
+seperately. Like `arr100_int_free(it.container); free (it.container);`.
 
 See [algorithm](algorithm.md) for more.
