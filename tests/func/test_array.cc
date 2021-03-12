@@ -112,39 +112,29 @@ void print_arr100(arr100_digi *a)
     printf("\n");
 }
 
-void print_arr100_range(arr100_digi_it it)
+void print_arr100_range(arr100_digi_it *it)
 {
-    arr100_digi_it begin = arr100_digi_begin(it.container);
-    digi *ref = it.ref;
-    long i1 = it.ref - begin.ref;
-    long i2 = begin.end - it.ref;
-    if (i1)
+    digi* ref = &it->container->vector[0];
+    digi* end = &it->container->vector[N];
+    while (ref < it->ref && ref < end)
     {
-        while (begin.ref != it.ref)
-        {
-            printf("%d ", begin.ref->value ? *begin.ref->value : -1);
-            begin.ref++;
-        }
+        printf("%d ", ref->value ? *ref->value : -1);
+        ref++;
     }
     printf("[");
-    while (!arr100_digi_it_done(&it))
+    while (ref < it->end && ref < end)
     {
-        printf("%d ", it.ref->value ? *it.ref->value : -1);
-        arr100_digi_it_next(&it);
+        printf("%d ", ref->value ? *ref->value : -1);
+        ref++;
     }
     printf(") ");
-    if (i2)
+    while (ref < end)
     {
-        begin.ref = it.ref;
-        while (begin.ref != begin.end)
-        {
-            if (!begin.ref->value)
-                break;
-            printf("%d ", *begin.ref->value);
-            begin.ref++;
-        }
+        if (!ref->value)
+            break;
+        printf("%d ", *ref->value);
+        ref++;
     }
-    it.ref = ref;
     printf("\n");
 }
 
@@ -204,24 +194,28 @@ int pick_random(arr100_digi *a)
 
 #define CHECK(_x, _y)                                                                                                  \
     {                                                                                                                  \
-        assert(arr100_digi_size(&_x) == _y.size());                                                                    \
-        assert(arr100_digi_empty(&_x) == _y.empty());                                                                  \
-        assert(*_y.front().value == *arr100_digi_front(&_x)->value);                                                   \
-        assert(*_y.back().value == *arr100_digi_back(&_x)->value);                                                     \
+        assert(arr100_digi_size(&(_x)) == _y.size());                                                                  \
+        assert(arr100_digi_empty(&(_x)) == _y.empty());                                                                \
+        assert(*_y.front().value == *arr100_digi_front(&(_x))->value);                                                 \
+        assert(*_y.back().value == *arr100_digi_back(&(_x))->value);                                                   \
         std::array<DIGI, 100>::iterator _iter = _y.begin();                                                            \
-        foreach (arr100_digi, &_x, _it)                                                                                \
+        foreach (arr100_digi, &(_x), _it)                                                                              \
         {                                                                                                              \
+            if (!(_it.ref->value))                                                                                     \
+                break;                                                                                                 \
             assert(*_it.ref->value == *_iter->value);                                                                  \
             _iter++;                                                                                                   \
         }                                                                                                              \
-        digi *_ref = arr100_digi_front(&_x);                                                                           \
+        digi *_ref = arr100_digi_front(&(_x));                                                                         \
         for (auto &_d : _y)                                                                                            \
         {                                                                                                              \
+            if (!_ref || !_ref->value)                                                                                 \
+                break;                                                                                                 \
             assert(*(_ref->value) == *_d.value);                                                                       \
             _ref++;                                                                                                    \
         }                                                                                                              \
         for (size_t _i = 0; _i < _y.size(); _i++)                                                                      \
-            assert(*_y.at(_i).value == *arr100_digi_at(&_x, _i)->value);                                               \
+            assert(*_y.at(_i).value == *arr100_digi_at(&(_x), _i)->value);                                             \
     }
 
 #define CHECK_ITER(_it, b, _iter)                                                                                      \
@@ -839,7 +833,7 @@ int main(void)
                 arr100_digi_set(&aa, i, digi_init(0));
                 bb[i] = DIGI{0};
             }
-            print_arr100_range(needle);
+            print_arr100_range(&needle);
             range = arr100_digi_begin(&a);
             bool found = arr100_digi_search_range(&range, &needle);
             auto iter = std::search(b.begin(), b.end(), first_b, last_b);
@@ -872,7 +866,7 @@ int main(void)
             size_t count = TEST_RAND(4);
             int value = pick_random(&a);
             LOG("search_n_range %zu %d\n", count, value);
-            print_arr100_range(range);
+            print_arr100_range(&range);
             arr100_digi_it *aa = arr100_digi_search_n_range(&range, count, digi_init(value));
             auto bb = std::search_n(first_b, last_b, count, DIGI{value});
             CHECK_RANGE(*aa, bb, last_b);
@@ -1113,7 +1107,7 @@ int main(void)
             arr100_digi_it *it;
             std::array<DIGI,100>::iterator r1b, last1_b;
             get_random_iters(&a, &r1a, b, r1b, last1_b);
-            print_arr100_range(r1a);
+            print_arr100_range(&r1a);
             r2a = r1a;
             r2a.ref = r1a.end;
             it = arr100_digi_is_sorted_until(&r1a, &r2a);
@@ -1143,6 +1137,7 @@ int main(void)
         }
 #ifdef DEBUG
         case TEST_INTERSECTION_RANGE: {
+            arr100_digi *result;
             arr100_digi aa;
             std::array<DIGI,100> bb;
             gen_arrays(&aa, bb);
@@ -1158,11 +1153,13 @@ int main(void)
             get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
             LOG("CTL a + aa\n");
-            print_arr100_range(range_a1);
-            print_arr100_range(range_a2);
+            print_arr100_range(&range_a1);
+            print_arr100_range(&range_a2);
             arr100_digi_it it = arr100_digi_intersection_range(&range_a1, &range_a2);
-            LOG("CTL => it (%zu)\n", arr100_digi_it_index(&it));
-            print_arr100_range(it);
+            result = it.container;
+            size_t size_a = arr100_digi_it_distance_range(&it);
+            LOG("CTL => it (%zu)\n", size_a);
+            print_arr100_range(&it);
 
             std::array<DIGI,100> bbb;
             std::vector<DIGI> bbb_;
@@ -1176,14 +1173,17 @@ int main(void)
             for (auto &d : bbb_)
                 bbb[i++] = *d;
             print_array(bbb);
-            CHECK(aa, bb);
+            CHECK(*result, bbb);
             //CHECK(aaa, bbb);
 #endif
-            arr100_digi_free(it.container);
+            // FIXME it.container corruption
+            result->free = digi_free;
+            arr100_digi_free(result);
             arr100_digi_free(&aa);
             break;
         }
         case TEST_DIFFERENCE_RANGE: {
+            arr100_digi *result;
             arr100_digi aa;
             std::array<DIGI,100> bb;
             gen_arrays(&aa, bb);
@@ -1199,11 +1199,13 @@ int main(void)
             get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
             //LOG("CTL a (%zu) + aa (%zu)\n", a.size, aa.size);
-            print_arr100_range(range_a1);
-            print_arr100_range(range_a2);
+            print_arr100_range(&range_a1);
+            print_arr100_range(&range_a2);
             arr100_digi_it it = arr100_digi_difference_range(&range_a1, &range_a2);
-            LOG("CTL => it (%zu)\n", arr100_digi_it_index(&it));
-            print_arr100_range(it);
+            result = it.container;
+            size_t size_a = arr100_digi_it_distance_range(&it);
+            LOG("CTL => it (%zu)\n", size_a);
+            //print_arr100_range(&it);
 
             std::array<DIGI,100> bbb;
             std::vector<DIGI> bbb_;
@@ -1217,14 +1219,17 @@ int main(void)
             for (auto &d : bbb_)
                 bbb[i++] = *d;
             print_array(bbb);
-            CHECK(aa, bb);
+            CHECK(*result, bbb);
             //CHECK(aaa, bbb);
 #endif
-            arr100_digi_free(it.container);
+            // FIXME it.container corruption
+            result->free = digi_free;
+            arr100_digi_free(result);
             arr100_digi_free(&aa);
             break;
         }
         case TEST_SYMMETRIC_DIFFERENCE_RANGE: {
+            arr100_digi *result;
             arr100_digi aa;
             std::array<DIGI,100> bb;
             gen_arrays(&aa, bb);
@@ -1240,11 +1245,13 @@ int main(void)
             get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
             LOG("CTL a + aa\n");
-            print_arr100_range(range_a1);
-            print_arr100_range(range_a2);
+            print_arr100_range(&range_a1);
+            print_arr100_range(&range_a2);
             arr100_digi_it it = arr100_digi_symmetric_difference_range(&range_a1, &range_a2);
-            LOG("CTL => it (%zu)\n", arr100_digi_it_index(&it));
-            print_arr100_range(it);
+            result = it.container;
+            size_t size_a = arr100_digi_it_distance_range(&it);
+            LOG("CTL => it (%zu)\n", size_a);
+            print_arr100_range(&it);
 
             std::array<DIGI,100> bbb;
             std::vector<DIGI> bbb_;
@@ -1258,10 +1265,12 @@ int main(void)
             for (auto &d : bbb_)
                 bbb[i++] = *d;
             print_array(bbb);
-            CHECK(aa, bb);
+            CHECK(*result, bbb);
             //CHECK(aaa, bbb);
 #endif
-            arr100_digi_free(it.container);
+            // FIXME container corruption
+            result->free = digi_free;
+            arr100_digi_free(result);
             arr100_digi_free(&aa);
             break;
         }

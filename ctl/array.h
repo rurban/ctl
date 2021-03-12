@@ -182,8 +182,8 @@ static inline I JOIN(I, iter)(A *self, size_t index)
     static I zero;
     I iter = zero;
     iter.ref = &self->vector[index];
-    iter.end = &self->vector[N];
     iter.container = self;
+    iter.end = &self->vector[N];
     //iter.vtable = { JOIN(I, next), JOIN(I, ref), JOIN(I, done) };
     iter.vtable.next = JOIN(I, next);
     iter.vtable.ref = JOIN(I, ref);
@@ -339,6 +339,8 @@ static inline void JOIN(A, free)(A *self)
             T *ref = &self->vector[i];
             if (!JOIN(A, zero)(ref))
                 self->free(ref);
+            else
+                break;
         }
 #endif
         // for security reasons?
@@ -489,17 +491,25 @@ static inline A JOIN(A, copy_if)(A *self, int _match(T*))
 
 // Set algos return a custom range, not the full array.
 // Add to it and return the range, with it->end set.
-// All refs after end are invalidated.
-static inline I JOIN(A, copy_range)(I *it, I *from)
+// All refs after end are invalid.
+static inline I JOIN(A, copy_range)(I *it, GI *from)
 {
     A* self = it->container;
-    while (!JOIN(I, done)(from))
+    A* other = from->container;
+    void (*next2)(struct I*) = from->vtable.next;
+    T* (*ref2)(struct I*) = from->vtable.ref;
+    int (*done2)(struct I*) = from->vtable.done;
+
+    if (!JOIN(I, done)(it))
     {
-        *it->ref = self->copy(JOIN(I, ref)(from));
-        JOIN(I, next)(it);
-        JOIN(I, next)(from);
+        while (!done2(from))
+        {
+            *it->ref = other->copy(ref2(from));
+            JOIN(I, next)(it);
+            next2(from);
+        }
     }
-    JOIN(A, fill_zero)(it);
+    //JOIN(A, fill_zero)(it);
     it->end = it->ref;
     it->ref = &self->vector[0];
     // memset(it->end, 0, (N - (it->end - it->ref)) * sizeof(T));
@@ -512,7 +522,7 @@ static inline I JOIN(A, copy_range)(I *it, I *from)
 static inline I JOIN(A, intersection_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init)();
-    I it = JOIN(A, begin)(&self);
+    I it;
     void (*next2)(struct I*) = r2->vtable.next;
     T* (*ref2)(struct I*) = r2->vtable.ref;
     int (*done2)(struct I*) = r2->vtable.done;
@@ -520,6 +530,7 @@ static inline I JOIN(A, intersection_range)(I *r1, GI *r2)
     self.copy = r1->container->copy;
     self.compare = r1->container->compare;
     self.equal = r1->container->equal;
+    it = JOIN(A, begin)(&self);
 
     while (!JOIN(I, done)(r1) && !done2(r2))
     {
@@ -536,7 +547,7 @@ static inline I JOIN(A, intersection_range)(I *r1, GI *r2)
             next2(r2);
         }
     }
-    JOIN(A, fill_zero)(&it);
+    //JOIN(A, fill_zero)(&it);
     it.end = it.ref;
     it.ref = &self.vector[0];
     //memset(it.end, 0, (N - (it.end - it.ref)) * sizeof(T));
@@ -547,7 +558,7 @@ static inline I JOIN(A, intersection_range)(I *r1, GI *r2)
 static inline I JOIN(A, difference_range)(I *r1, I *r2)
 {
     A self = JOIN(A, init)();
-    I it = JOIN(A, begin)(&self);
+    I it;
     void (*next2)(struct I*) = r2->vtable.next;
     T* (*ref2)(struct I*) = r2->vtable.ref;
     int (*done2)(struct I*) = r2->vtable.done;
@@ -555,6 +566,7 @@ static inline I JOIN(A, difference_range)(I *r1, I *r2)
     self.copy = r1->container->copy;
     self.compare = r1->container->compare;
     self.equal = r1->container->equal;
+    it = JOIN(A, begin)(&self);
 
     while (!JOIN(I, done)(r1))
     {
@@ -574,7 +586,7 @@ static inline I JOIN(A, difference_range)(I *r1, I *r2)
             next2(r2);
         }
     }
-    JOIN(A, fill_zero)(&it);
+    //JOIN(A, fill_zero)(&it);
     it.end = it.ref;
     it.ref = &self.vector[0];
     //memset(it.end, 0, (N - (it.end - it.ref)) * sizeof(T));
@@ -584,7 +596,7 @@ static inline I JOIN(A, difference_range)(I *r1, I *r2)
 static inline I JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init)();
-    I it = JOIN(A, begin)(&self);
+    I it;
     void (*next2)(struct I*) = r2->vtable.next;
     T* (*ref2)(struct I*) = r2->vtable.ref;
     int (*done2)(struct I*) = r2->vtable.done;
@@ -592,6 +604,7 @@ static inline I JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
     self.copy = r1->container->copy;
     self.compare = r1->container->compare;
     self.equal = r1->container->equal;
+    it = JOIN(A, begin)(&self);
 
     while (!JOIN(I, done)(r1))
     {
