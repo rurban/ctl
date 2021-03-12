@@ -133,9 +133,14 @@ returns the maximum possible number of elements, i.e. N.
 ## Modifiers
 
     fill (A* self, T value)
+    fill_range (I* range, T value)
     fill_n (A* self, size_t n, T value)
 
 fill array with values. On invalid n do nothing.
+
+    fill_zero (I* range)
+
+fill range with invalid zero values.
 
     swap (A* self, A* other)
 
@@ -167,7 +172,22 @@ Returns the function that compares keys in objects of type value_type T. _(NYI)_
 
     swap (A* self, A* other)
 
-specializes the swap algorithm
+specializes the swap algorithm.
+
+    I difference_range (I* range1, I* range2)
+
+Creates a range of the difference between two ordered ranges.
+All values starting with end of the result are zeroe'd and invalidated.
+
+    I intersection_range (I* range1, GI* range2)
+
+Creates a range of the intersection of two ordered ranges.
+All values starting with end of the result are zeroe'd and invalidated.
+ 
+    I symmetric_difference_range (I* range1, GI* range2)
+
+Creates a range of the symmetric difference between two ordered ranges.
+All values starting with end of the result are zeroe'd and invalidated.
 
 
 See [algorithm](algorithm.md) for more.

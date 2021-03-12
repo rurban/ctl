@@ -261,6 +261,43 @@ static inline void JOIN(A, fill)(A *self, T value)
 #endif
 }
 
+static inline void JOIN(A, fill_range)(I *range, T value)
+{
+    size_t n = JOIN(I, distance_range)(range);
+#if defined(POD) && !defined(NOT_INTEGRAL)
+    if (sizeof(T) <= sizeof(char)) // only for bytes
+        memset(range->ref, value, n * sizeof(T));
+    else
+        for (I it = *range; it.ref < it.end; it.ref++)
+            *it.ref = value;
+#else
+    A *self = range->container;
+    for (size_t i = JOIN(I, index)(range); i < n; i++)
+        JOIN(A, set)(self, i, self->copy(&value));
+#endif
+#ifndef POD
+# ifdef NOT_INTEGRAL
+    A *self = range->container;
+# endif
+    if (self->free)
+        self->free(&value);
+#endif
+}
+
+static inline void JOIN(A, fill_zero)(I *range)
+{
+    static T zero;
+#ifdef POD
+    if (sizeof(T) <= sizeof(char)) // only for bytes
+    {
+        memset(range->ref, 0, JOIN(I, distance_range)(range) * sizeof(T));
+        return;
+    }
+#endif
+    for (I it = *range; it.ref < it.end; it.ref++)
+        *it.ref = zero;
+}
+
 static inline void JOIN(A, fill_n)(A *self, size_t n, T value)
 {
     if (n >= N)
@@ -450,6 +487,9 @@ static inline A JOIN(A, copy_if)(A *self, int _match(T*))
     return out;
 }
 
+// Set algos return a custom range, not the full array.
+// Add to it and return the range, with it->end set.
+// All refs after end are invalidated.
 static inline I JOIN(A, copy_range)(I *it, I *from)
 {
     A* self = it->container;
@@ -459,18 +499,27 @@ static inline I JOIN(A, copy_range)(I *it, I *from)
         JOIN(I, next)(it);
         JOIN(I, next)(from);
     }
+    JOIN(A, fill_zero)(it);
+    it->end = it->ref;
+    it->ref = &self->vector[0];
+    // memset(it->end, 0, (N - (it->end - it->ref)) * sizeof(T));
     return *it;
 }
 
 // These three set algos return an iterator pointing to the end of the new
 // result container.
+// All values starting with end are zeroe'd and invalid, esp. with non-POD values.
 static inline I JOIN(A, intersection_range)(I *r1, GI *r2)
 {
-    A self = JOIN(A, init_from)(r1->container);
+    A self = JOIN(A, init)();
     I it = JOIN(A, begin)(&self);
     void (*next2)(struct I*) = r2->vtable.next;
     T* (*ref2)(struct I*) = r2->vtable.ref;
     int (*done2)(struct I*) = r2->vtable.done;
+    self.free = r1->container->free;
+    self.copy = r1->container->copy;
+    self.compare = r1->container->compare;
+    self.equal = r1->container->equal;
 
     while (!JOIN(I, done)(r1) && !done2(r2))
     {
@@ -487,17 +536,25 @@ static inline I JOIN(A, intersection_range)(I *r1, GI *r2)
             next2(r2);
         }
     }
+    JOIN(A, fill_zero)(&it);
+    it.end = it.ref;
+    it.ref = &self.vector[0];
+    //memset(it.end, 0, (N - (it.end - it.ref)) * sizeof(T));
     return it;
 }
 
 // Warning: fails with 3-way compare! And with generic r2 also.
 static inline I JOIN(A, difference_range)(I *r1, I *r2)
 {
-    A self = JOIN(A, init_from)(r1->container);
+    A self = JOIN(A, init)();
     I it = JOIN(A, begin)(&self);
     void (*next2)(struct I*) = r2->vtable.next;
     T* (*ref2)(struct I*) = r2->vtable.ref;
     int (*done2)(struct I*) = r2->vtable.done;
+    self.free = r1->container->free;
+    self.copy = r1->container->copy;
+    self.compare = r1->container->compare;
+    self.equal = r1->container->equal;
 
     while (!JOIN(I, done)(r1))
     {
@@ -517,16 +574,24 @@ static inline I JOIN(A, difference_range)(I *r1, I *r2)
             next2(r2);
         }
     }
+    JOIN(A, fill_zero)(&it);
+    it.end = it.ref;
+    it.ref = &self.vector[0];
+    //memset(it.end, 0, (N - (it.end - it.ref)) * sizeof(T));
     return it;
 }
 
 static inline I JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
 {
-    A self = JOIN(A, init_from)(r1->container);
+    A self = JOIN(A, init)();
     I it = JOIN(A, begin)(&self);
     void (*next2)(struct I*) = r2->vtable.next;
     T* (*ref2)(struct I*) = r2->vtable.ref;
     int (*done2)(struct I*) = r2->vtable.done;
+    self.free = r1->container->free;
+    self.copy = r1->container->copy;
+    self.compare = r1->container->compare;
+    self.equal = r1->container->equal;
 
     while (!JOIN(I, done)(r1))
     {
