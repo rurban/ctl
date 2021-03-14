@@ -7,21 +7,22 @@ on:
       - 'temp*'
       - master
     paths-ignore:
-      - 'images/*'
+      - 'docs/*'
   pull_request:
     paths-ignore:
-      - 'images/*'
+      - 'docs/*'
     branches-ignore:
       - master
 
 jobs:
   linux:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         MAKE:
-          - make -j4 SANITIZE=1
+          - make -j4 SANITIZE=1 O0=1
           - make -j4 CC='gcc -std=c99'
           - make -j4 CC='gcc -std=c11'
           - make -j4 CXX='clang++ -std=c++2a -stdlib=libc++'

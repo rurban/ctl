@@ -65,6 +65,11 @@ ifeq (1, $(SANITIZE))
 CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
 endif
 
+ifeq (1, $(GCOV))
+Og = 1
+CFLAGS += -fprofile-arcs -ftest-coverage -lgcov
+endif
+
 ifeq (1, $(Og))
 CFLAGS += -Og
 else
@@ -104,10 +109,6 @@ else
 ifneq ($(SEED),)
 CFLAGS += -DSRAND -DSEED=$(SEED)
 endif
-endif
-
-ifeq (1, $(GCOV))
-CFLAGS += -fprofile-arcs -ftest-coverage -lgcov
 endif
 
 CXXFLAGS += $(CFLAGS)

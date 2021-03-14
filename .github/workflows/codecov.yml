@@ -1,0 +1,32 @@
+# See https://codecov.io/gh/rurban/ctl/
+name: "codecov"
+
+on:
+  push:
+    branches: [ master, staging ]
+    paths-ignore:
+      - 'docs/*'
+      - 'tests/perf/*'
+      - 'tests/verify/*'
+      - 'examples/*'
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ master, staging ]
+    paths-ignore:
+      - 'docs/*'
+      - 'tests/perf/*'
+      - 'tests/verify/*'
+      - 'examples/*'
+  schedule:
+    - cron: '29 6 * * 6'
+
+jobs:
+  codecov:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - run:  make gcov
+    - name: Upload
+      run: |
+        bash <(curl -s https://codecov.io/bash)

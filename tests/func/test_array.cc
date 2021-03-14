@@ -330,6 +330,7 @@ int main(void)
         }
         else
             which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
+        RECORD_WHICH;
         LOG("TEST=%d %s\n", which, test_names[which]);
         switch (which)
         {
@@ -1275,12 +1276,7 @@ int main(void)
         CHECK(a, b);
     }
     arr100_digi_free(&a);
-    queue_int_free(&tests);
-
-    if (fail)
-        TEST_FAIL(__FILE__);
-    else
-        TEST_PASS(__FILE__);
+    FINISH_TEST(__FILE__);
 }
 
 #endif // C++11

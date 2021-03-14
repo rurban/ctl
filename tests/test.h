@@ -25,6 +25,9 @@
 #define POD
 #define T int
 #include <ctl/queue.h>
+#define POD
+#define T short
+#include <ctl/vector.h>
 #include <ctl/string.h>
 
 #ifdef LONG
@@ -76,32 +79,78 @@ static inline long TEST_TIME(void)
 #define INIT_SRAND
 #endif
 
+// FIXME: ensure we have all cases covered
 #define INIT_TEST_LOOPS(n)                                                                                             \
-    size_t loops = TEST_RAND(TEST_MAX_LOOPS);                                                                          \
+    size_t loops = 10 + TEST_RAND(TEST_MAX_LOOPS - 10);                                                                \
+    vec_short covvec = vec_short_init();                                                                               \
     queue_int tests = queue_int_init();                                                                                \
     static int test = -1;                                                                                              \
     char *env = getenv("TEST");                                                                                        \
+    vec_short_resize(&covvec, TEST_TOTAL, 0);                                                                          \
     if (env)                                                                                                           \
         parse_TEST(env, &test, &tests, number_ok);                                                                     \
     if (tests.size)                                                                                                    \
     {                                                                                                                  \
+        /* loop a single TEST=20 n times (=10) */                                                                      \
         loops = tests.size == 1 ? n : tests.size;                                                                      \
         LOG("LOOPS: %zu\n", loops);                                                                                    \
     }                                                                                                                  \
     if ((env = getenv("LOOPS")))                                                                                       \
-        sscanf(env, "%zu", &loops)
+    {                                                                                                                  \
+        sscanf(env, "%zu", &loops);                                                                                    \
+    }                                                                                                                  \
+    loops:
+
+#define RECORD_WHICH covvec.vector[which]++
+
+#define FINISH_TEST(FILE)                                                                                              \
+    /* check if we covered all tests. If not redo the missing */                                                       \
+    int redo = 0;                                                                                                      \
+    LOG("Test stats: ");                                                                                               \
+    foreach (vec_short, &covvec, it)                                                                                   \
+    {                                                                                                                  \
+        int w = vec_short_it_index(&it);                                                                               \
+        int c = *it.ref;                                                                                               \
+        if (!c && w < number_ok)                                                                                       \
+        {                                                                                                              \
+            redo = 1;                                                                                                  \
+            printf("Missing test %d\n", w);                                                                            \
+            queue_int_push(&tests, w);                                                                                 \
+            queue_int_push(&tests, w);                                                                                 \
+            queue_int_push(&tests, w);                                                                                 \
+            queue_int_push(&tests, w);                                                                                 \
+        }                                                                                                              \
+        else                                                                                                           \
+        {                                                                                                              \
+            LOG("%d: %dx, ", w, c);                                                                                     \
+        }                                                                                                              \
+    }                                                                                                                  \
+    LOG("\n");                                                                                                         \
+    if (redo)                                                                                                          \
+    {                                                                                                                  \
+        printf("Redo missing tests\n");                                                                                \
+        loops = tests.size;                                                                                            \
+        redo = 0;                                                                                                      \
+        goto loops;                                                                                                    \
+    }                                                                                                                  \
+    queue_int_free(&tests);                                                                                            \
+    vec_short_free(&covvec);                                                                                           \
+    if (fail)                                                                                                          \
+        TEST_FAIL(FILE);                                                                                               \
+    else                                                                                                               \
+        TEST_PASS(FILE);
 
 /*
   TEST=OK tests all stable tests even with DEBUG
   TEST=1-10 or TEST=1,5,7,8-10 tests ranges.
 */
-void parse_TEST(char* env, int *test, queue_int *tests, const int number_ok)
+void parse_TEST(char *env, int *test, queue_int *tests, const int number_ok)
 {
     if (!strcmp(env, "OK"))
     {
-        for (int j=0; j<number_ok; j++)
+        for (int j = 0; j < number_ok; j++)
             queue_int_push(tests, j);
-        LOG("TEST OK: 0-%d\n", number_ok-1);
+        LOG("TEST OK: 0-%d\n", number_ok - 1);
         return;
     }
     sscanf(env, "%d", test);

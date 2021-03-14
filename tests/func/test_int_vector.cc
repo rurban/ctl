@@ -446,6 +446,7 @@ int main(void)
                     which = 0;
             }
             LOG("TEST=%d %s (size %zu, cap %zu)\n", which, test_names[which], a.size, a.capacity);
+            RECORD_WHICH;
             switch (which)
             {
             case TEST_PUSH_BACK: {
@@ -1769,11 +1770,7 @@ int main(void)
             vec_int_free(&a);
         }
     }
-    queue_int_free(&tests);
-    if (fail)
-        TEST_FAIL(__FILE__);
-    else
-        TEST_PASS(__FILE__);
+    FINISH_TEST(__FILE__);
 }
 
 #endif // C++11

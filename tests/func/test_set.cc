@@ -299,7 +299,7 @@ static void setup_sets(set_digi *a, std::set<DIGI> &b)
 
 int main(void)
 {
-    int errors = 0;
+    int fail = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(20);
     for (size_t loop = 0; loop < loops; loop++)
@@ -316,6 +316,7 @@ int main(void)
         else
             which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
         LOG("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
+        RECORD_WHICH;
         switch (which)
         {
         case TEST_SELF: {
@@ -670,7 +671,7 @@ int main(void)
                 print_set(&a);
                 print_setpp(b);
                 printf("%d != %d FAIL\n", (int)numa, (int)numb);
-                errors++;
+                fail++;
             }
             assert(numa == numb); // off by one, counted one too much
             break;
@@ -692,7 +693,7 @@ int main(void)
                 print_set(&a);
                 print_setpp(b);
                 printf("%d != %d is_odd\n", (int)aa, (int)bb);
-                errors++;
+                fail++;
             }
             assert(aa == bb);
             break;
@@ -714,7 +715,7 @@ int main(void)
                 print_set(&a);
                 print_setpp(b);
                 printf("%d != %d is_odd\n", (int)aa, (int)bb);
-                errors++;
+                fail++;
             }
             assert(aa == bb);
             break;
@@ -736,7 +737,7 @@ int main(void)
                 print_set(&a);
                 print_setpp(b);
                 printf("%d != %d is_odd\n", (int)aa, (int)bb);
-                errors++;
+                fail++;
             }
             assert(aa == bb);
             break;
@@ -1422,11 +1423,7 @@ int main(void)
         CHECK(a, b);
         set_digi_free(&a);
     }
-    queue_int_free(&tests);
-    if (errors)
-        TEST_FAIL(__FILE__);
-    else
-        TEST_PASS(__FILE__);
+    FINISH_TEST(__FILE__);
 }
 
 #endif // C++11

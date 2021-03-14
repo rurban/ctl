@@ -57,6 +57,11 @@ CFLAGS += -DDEBUG
 CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
 .endif
 
+.ifdef GCOV
+Og = 1
+CFLAGS += -fprofile-arcs -ftest-coverage -lgcov
+.endif
+
 .ifdef Og
 CFLAGS += -Og
 .elifdef O0

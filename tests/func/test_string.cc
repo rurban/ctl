@@ -93,7 +93,7 @@ OLD_MAIN
     TEST(REVERSE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(GENERATE_N_RANGE) /* 74 */                                                                                    \
+    TEST(GENERATE_N_RANGE) /* 81 */                                                                                    \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(UNIQUE)                                                                                                       \
     TEST(UNIQUE_RANGE)
@@ -116,7 +116,6 @@ static const int number_ok = sizeof(test_ok_names)/sizeof(char*);
 #ifdef DEBUG
 static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GENERATE_NAME) ""};
 #endif
-
 
 #define MIN_STR_SIZE (30) // NO SUPPORT FOR SMALL STRINGS yet
 #define ALPHA_LETTERS (23)
@@ -315,7 +314,7 @@ int main(void)
 {
     int fail = 0;
     INIT_SRAND;
-    INIT_TEST_LOOPS(10);
+    INIT_TEST_LOOPS(10)
     for (size_t loop = 0; loop < loops; loop++)
     {
         size_t str_size = TEST_RAND(TEST_MAX_SIZE);
@@ -356,11 +355,13 @@ int main(void)
             if (tests.size)
             {
                 which = *queue_int_front(&tests);
-                if (mode == MODE_TOTAL-1)
+                if (mode == MODE_TOTAL - 1) // pop only at 2nd growth mode
                     queue_int_pop(&tests);
-            } else
+            }
+            else
                 which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
             LOG("TEST=%d %s (size %zu, cap %zu)\n", which, test_names[which], a.size, a.capacity);
+            RECORD_WHICH;
             switch (which)
             {
             case TEST_PUSH_BACK: {
@@ -1603,11 +1604,7 @@ int main(void)
             free(base);
         }
     }
-    queue_int_free(&tests);
-    if (fail)
-        TEST_FAIL(__FILE__);
-    else
-        TEST_PASS(__FILE__);
+    FINISH_TEST(__FILE__);
 }
 
 #endif // C++11

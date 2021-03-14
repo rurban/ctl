@@ -129,6 +129,7 @@ int main(void)
         else
             which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
         LOG("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
+        RECORD_WHICH;
         switch (which)
         {
         case TEST_INSERT: {
@@ -329,30 +330,11 @@ int main(void)
             map_strint_free(&aaa);
             break;
         }
-#ifdef DEBUG // algorithm
-        case TEST_EQUAL_RANGE:
-        case TEST_FIND_RANGE:
-        case TEST_FIND_IF:
-        case TEST_FIND_IF_NOT:
-        case TEST_FIND_IF_RANGE:
-        case TEST_FIND_IF_NOT_RANGE:
-        case TEST_ALL_OF:
-        case TEST_ANY_OF:
-        case TEST_NONE_OF:
-        case TEST_ALL_OF_RANGE:
-        case TEST_ANY_OF_RANGE:
-        case TEST_NONE_OF_RANGE:
-        case TEST_COUNT_IF:
-        case TEST_COUNT_IF_RANGE:
-        case TEST_COUNT_RANGE:
-            break;
-#endif
         }
         CHECK(a, b);
         map_strint_free(&a);
     }
-    queue_int_free(&tests);
-    TEST_PASS(__FILE__);
+    FINISH_TEST(__FILE__);
 }
 
 #endif // C++11

@@ -334,7 +334,7 @@ void print_uset(uset_int *a)
 
 int main(void)
 {
-    int errors = 0;
+    int fail = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
     for (size_t loop = 0; loop < loops; loop++)
@@ -353,6 +353,7 @@ int main(void)
         else
             which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
         LOG("TEST %s %d\n", test_names[which], which);
+        RECORD_WHICH;
         switch (which)
         {
 
@@ -2339,11 +2340,7 @@ int main(void)
             break;
         }
     }
-    queue_int_free(&tests);
-    if (errors)
-        TEST_FAIL(__FILE__);
-    else
-        TEST_PASS(__FILE__);
+    FINISH_TEST(__FILE__);
 }
 
 #endif // C++11

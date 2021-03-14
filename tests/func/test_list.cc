@@ -331,7 +331,7 @@ static void get_random_iters(list_digi *a, list_digi_it *first_a, std::list<DIGI
 
 int main(void)
 {
-    int errors = 0;
+    int fail = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
     for (size_t loop = 0; loop < loops; loop++)
@@ -357,6 +357,7 @@ int main(void)
         } else
             which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
         LOG("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
+        RECORD_WHICH;
         switch (which)
         {
         case TEST_PUSH_FRONT: {
@@ -662,7 +663,7 @@ int main(void)
                 print_lst(&a);
                 print_list(b);
                 printf("%d != %d is_odd FAIL\n", (int)found_a, (int)found_b);
-                errors++;
+                fail++;
             }
             assert(found_a == found_b);
             break;
@@ -801,7 +802,7 @@ int main(void)
                 print_lst(&a);
                 print_list(b);
                 printf("%d != %d FAIL\n", (int)numa, (int)numb);
-                errors++;
+                fail++;
             }
             assert(numa == numb); // fails. off by one, counts one too much
             break;
@@ -1651,11 +1652,7 @@ int main(void)
         CHECK(a, b);
         list_digi_free(&a);
     }
-    queue_int_free(&tests);
-    if (errors)
-        TEST_FAIL(__FILE__);
-    else
-        TEST_PASS(__FILE__);
+    FINISH_TEST(__FILE__);
 }
 
 #endif // C++11

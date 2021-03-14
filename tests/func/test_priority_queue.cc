@@ -50,6 +50,7 @@ static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GEN
 
 int main(void)
 {
+    int fail = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
     for (size_t loop = 0; loop < loops; loop++)
@@ -71,6 +72,7 @@ int main(void)
         } else
             which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
         LOG("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
+        RECORD_WHICH;
         switch (which)
         {
         case TEST_TOP: {
@@ -122,8 +124,7 @@ int main(void)
         CHECK(a, b);
         pqu_digi_free(&a);
     }
-    queue_int_free(&tests);
-    TEST_PASS(__FILE__);
+    FINISH_TEST(__FILE__);
 }
 
 #endif // C++11

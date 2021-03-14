@@ -168,6 +168,7 @@ static void test_small_size(void)
 
 int main(void)
 {
+    int fail = 0;
     INIT_SRAND;
     test_small_size();
     INIT_TEST_LOOPS(10);
@@ -184,6 +185,7 @@ int main(void)
         } else
             which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
         LOG("TEST=%d %s (%zu, %zu)\n", which, test_names[which], a.size, a.bucket_max);
+        RECORD_WHICH;
         switch (which)
         {
         case TEST_SELF: {
@@ -717,13 +719,12 @@ int main(void)
         CHECK(a, b);
         uset_digi_free(&a);
     }
-    queue_int_free(&tests);
 #if defined CTL_USET_GROWTH_POWER2
-    TEST_PASS("tests/func/test_unordered_set_power2");
+    FINISH_TEST("tests/func/test_unordered_set_power2");
 #elif defined CTL_USET_CACHED_HASH
-    TEST_PASS("tests/func/test_unordered_set_cached");
+    FINISH_TEST("tests/func/test_unordered_set_cached");
 #else
-    TEST_PASS(__FILE__);
+    FINISH_TEST(__FILE__);
 #endif
 }
 

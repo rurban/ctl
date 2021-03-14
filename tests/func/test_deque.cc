@@ -531,6 +531,7 @@ int main(void)
             else
                 which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
             LOG("TEST %s %d (size %zu)\n", test_names[which], which, a.size);
+            RECORD_WHICH;
             switch (which)
             {
             case TEST_PUSH_BACK: {
@@ -2043,11 +2044,7 @@ int main(void)
             deq_digi_free(&a);
         }
     }
-    queue_int_free(&tests);
-    if (fail)
-        TEST_FAIL(__FILE__);
-    else
-        TEST_PASS(__FILE__);
+    FINISH_TEST(__FILE__);
 }
 
 #endif // C++11
