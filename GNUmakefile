@@ -32,6 +32,7 @@ CC += -std=c11
 LONG = 0
 SANITIZE = 0
 SRAND = 1
+GCOV = 0
 
 O0 = 0
 O1 = 0
@@ -103,6 +104,10 @@ else
 ifneq ($(SEED),)
 CFLAGS += -DSRAND -DSEED=$(SEED)
 endif
+endif
+
+ifeq (1, $(GCOV))
+CFLAGS += -fprofile-arcs -ftest-coverage -lgcov
 endif
 
 CXXFLAGS += $(CFLAGS)
@@ -250,6 +255,7 @@ clean:
 	@rm -f $(TESTS)
 	@rm -f $(EXAMPLES)
 	@rm -f $(PERFS_C) $(PERFS_CC) $(VERIFY)
+	@rm -f *.gcov *.gcda *.gcno
 	@rm -f tests/perf/arr/perf_arr_generate
 	@rm -f tests/perf/*.log
 	@rm -f docs/man/ctl.h.3 $(MANPAGES)
@@ -352,6 +358,8 @@ asan:
 	$(MAKE) SANITIZE=1
 debug:
 	$(MAKE) DEBUG=1
+gcov: clean
+	${MAKE} GCOV=1
 stress:
 	if test -n "$(CTL)"; then timeout 10m sh -c "while $(MAKE) -s SANITIZE=1 \
 	        tests/func/test_$(CTL) && tests/func/test_$(CTL); do true; done"; \
