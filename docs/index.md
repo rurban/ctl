@@ -5,6 +5,7 @@ container library for ISO C99/C11.
 
 [![GH Actions](https://github.com/rurban/ctl/workflows/Full%20C/C++%20CI/badge.svg)](https://github.com/rurban/ctl/actions/)
 [![Cirrus CI](https://api.cirrus-ci.com/github/rurban/ctl.svg)](https://cirrus-ci.com/github/rurban/ctl/)
+[![Codecov](https://codecov.io/gh/rurban/ctl/branch/master/graph/badge.svg?token=l04y4zWBIb)](https://codecov.io/gh/rurban/ctl)
 
 ## Use
 
