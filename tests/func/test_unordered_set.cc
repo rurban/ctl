@@ -83,10 +83,10 @@ static const char *test_names[] = {
         {                                                                                                              \
             size_t a_found = 0;                                                                                        \
             size_t b_found = 0;                                                                                        \
-            foreach (uset_digi, &_x, it)                                                                               \
+            foreach (uset_digi, &_x, _it)                                                                               \
             {                                                                                                          \
-                auto found = _y.find(DIGI(*it.ref->value));                                                            \
-                assert(found != _y.end());                                                                             \
+                auto _found = _y.find(DIGI(*_it.ref->value));                                                            \
+                assert(_found != _y.end());                                                                             \
                 a_found++;                                                                                             \
             }                                                                                                          \
             for (auto x : _y)                                                                                          \
@@ -174,8 +174,13 @@ int main(void)
     INIT_TEST_LOOPS(10);
     for (size_t loop = 0; loop < loops; loop++)
     {
-        uset_digi a;
-        std::unordered_set<DIGI, DIGI_hash> b;
+        uset_digi a, aa, aaa;
+        std::unordered_set<DIGI, DIGI_hash> b, bb, bbb;
+        uset_digi_it first, found, it;
+        std::unordered_set<DIGI>::iterator iter;
+        size_t num_a, num_b;
+        bool is_a, is_b;
+        const int value = TEST_RAND(TEST_MAX_VALUE);
         setup_sets(&a, b);
         int which;
         if (tests.size)
@@ -189,17 +194,18 @@ int main(void)
         switch (which)
         {
         case TEST_SELF: {
-            uset_digi aa = uset_digi_copy(&a);
+            aa = uset_digi_copy(&a);
             LOG("before\n");
             print_uset(&a);
-            list_foreach_ref(uset_digi, &aa, it)
+            list_foreach_ref(uset_digi, &aa, it1)
             {
                 // LOG("find %d [%zu]\n", *ref->value, it.bucket_index);
-                uset_digi_it found = uset_digi_find(&a, *it.ref);
+                found = uset_digi_find(&a, *it1.ref);
                 assert(!uset_digi_it_done(&found));
             }
             LOG("all found\n");
-            list_foreach_ref(uset_digi, &a, it2) uset_digi_erase(&aa, *it2.ref);
+            list_foreach_ref(uset_digi, &a, it2)
+                uset_digi_erase(&aa, *it2.ref);
             LOG("all erased\n");
             print_uset(&a);
             assert(uset_digi_empty(&aa));
@@ -207,16 +213,15 @@ int main(void)
             break;
         }
         case TEST_INSERT: {
-            const int vb = TEST_RAND(TEST_MAX_VALUE);
-            uset_digi_insert(&a, digi_init(vb));
-            b.insert(DIGI{vb});
+            uset_digi_insert(&a, digi_init(value));
+            b.insert(DIGI{value});
             break;
         }
         case TEST_INSERT_FOUND: {
-            uset_digi_it first = uset_digi_begin(&a);
+            first = uset_digi_begin(&a);
             const int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : first.ref ? *first.ref->value : 0;
             int a_found;
-            uset_digi_it it = uset_digi_insert_found(&a, digi_init(vb), &a_found);
+            it = uset_digi_insert_found(&a, digi_init(vb), &a_found);
 #if __cplusplus >= 201103L
             // C++11
             std::pair<std::unordered_set<DIGI, DIGI_hash>::iterator, bool> pair;
@@ -231,13 +236,13 @@ int main(void)
             break;
         }
         case TEST_ERASE_IF: {
-            size_t a_erases = uset_digi_erase_if(&a, digi_is_odd);
+            num_a = uset_digi_erase_if(&a, digi_is_odd);
 #if __cpp_lib_erase_if >= 202002L
-            size_t b_erases = std::erase_if(b, DIGIc_is_odd); // C++20
+            num_b = std::erase_if(b, DIGIc_is_odd); // C++20
 #else
-            size_t b_erases = 0;
+            num_b = 0;
             {
-                auto iter = b.begin();
+                iter = b.begin();
                 auto end = b.end();
                 while (iter != end)
                 {
@@ -251,18 +256,17 @@ int main(void)
                 }
             }
 #endif
-            assert(a_erases == b_erases);
+            assert(num_a == num_b);
             break;
         }
         case TEST_CONTAINS: {
-            const int vb = TEST_RAND(TEST_MAX_VALUE);
-            bool a_has = uset_digi_contains(&a, digi_init(vb));
+            is_a = uset_digi_contains(&a, digi_init(value));
 #if __cpp_lib_erase_if >= 202002L
-            bool b_has = b.contains(DIGI{vb}); // C++20
+            is_b = b.contains(DIGI{value}); // C++20
 #else
-            bool b_has = b.count(DIGI{vb}) == 1;
+            is_b = b.count(DIGI{value}) == 1;
 #endif
-            assert(a_has == b_has);
+            assert(is_a == is_b);
             break;
         }
         case TEST_ERASE: {
@@ -292,7 +296,7 @@ int main(void)
         case TEST_RESERVE: {
             size_t size = uset_digi_size(&a);
             float load = uset_digi_load_factor(&a);
-            std::unordered_set<DIGI, DIGI_hash> bb = b;
+            bb = b;
             const int32_t reserve = size * 2 / load;
             LOG("load %f\n", load);
             if (reserve > 0) // avoid std::bad_alloc
@@ -301,7 +305,7 @@ int main(void)
                 LOG("STL reserve by %" PRId32 " %zu\n", reserve, bb.bucket_count());
                 LOG("before\n");
                 print_uset(&a);
-                uset_digi aa = uset_digi_copy(&a);
+                aa = uset_digi_copy(&a);
                 LOG("copy\n");
                 print_uset(&aa);
                 uset_digi_reserve(&aa, reserve);
@@ -313,10 +317,9 @@ int main(void)
             break;
         }
         case TEST_SWAP: {
-            uset_digi aa = uset_digi_copy(&a);
-            uset_digi aaa = uset_digi_init(digi_hash, digi_equal);
-            std::unordered_set<DIGI, DIGI_hash> bb = b;
-            std::unordered_set<DIGI, DIGI_hash> bbb;
+            aa = uset_digi_copy(&a);
+            aaa = uset_digi_init(digi_hash, digi_equal);
+            bb = b;
             uset_digi_swap(&aaa, &aa);
             std::swap(bb, bbb);
             CHECK(aaa, bbb);
@@ -326,22 +329,22 @@ int main(void)
         }
         case TEST_COUNT: {
             int key = TEST_RAND(TEST_MAX_SIZE);
-            int aa = uset_digi_count(&a, digi_init(key));
-            int bb = b.count(DIGI{key});
-            assert(aa == bb);
+            num_a = uset_digi_count(&a, digi_init(key));
+            num_b = b.count(DIGI{key});
+            assert(num_a == num_b);
             break;
         }
         case TEST_FIND: {
-            uset_digi_it first = uset_digi_begin(&a);
+            first = uset_digi_begin(&a);
             const int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : first.ref ? *first.ref->value : 0;
             digi key = digi_init(vb);
             // find is special, it doesnt free the key
-            uset_digi_it aa = uset_digi_find(&a, key);
-            auto bb = b.find(DIGI{vb});
-            if (bb == b.end())
-                assert(uset_digi_it_done(&aa));
+            it = uset_digi_find(&a, key);
+            iter= b.find(DIGI{vb});
+            if (iter == b.end())
+                assert(uset_digi_it_done(&it));
             else
-                assert(*bb->value == *aa.ref->value);
+                assert(*iter->value == *it.ref->value);
             digi_free(&key);
             break;
         }
@@ -351,15 +354,15 @@ int main(void)
             break;
         }
         case TEST_COPY: { // C++20
-            uset_digi aa = uset_digi_copy(&a);
-            std::unordered_set<DIGI, DIGI_hash> bb = b;
+            aa = uset_digi_copy(&a);
+            bb = b;
             CHECK(aa, bb);
             uset_digi_free(&aa);
             break;
         }
         case TEST_EQUAL: {
-            uset_digi aa = uset_digi_copy(&a);
-            std::unordered_set<DIGI, DIGI_hash> bb = b;
+            aa = uset_digi_copy(&a);
+            bb = b;
             print_uset(&aa);
             print_unordered_set(bb);
             assert(uset_digi_equal(&a, &aa));
@@ -369,11 +372,9 @@ int main(void)
         }
 #ifdef DEBUG
         case TEST_INSERT_GENERIC: {
-            uset_digi aa;
-            std::unordered_set<DIGI, DIGI_hash> bb;
             setup_sets(&aa, bb);
-            uset_digi_it range2 = uset_digi_begin(&a);
-            uset_digi_insert_generic(&a, &range2);
+            first = uset_digi_begin(&a);
+            uset_digi_insert_generic(&a, &first);
             b.insert(bb.begin(), bb.end());
             print_uset(&a);
             print_unordered_set(b);
@@ -383,11 +384,8 @@ int main(void)
         }
 #endif
         case TEST_UNION: {
-            uset_digi aa;
-            std::unordered_set<DIGI, DIGI_hash> bb;
             setup_sets(&aa, bb);
-            uset_digi aaa = uset_digi_union(&a, &aa);
-            std::unordered_set<DIGI, DIGI_hash> bbb;
+            aaa = uset_digi_union(&a, &aa);
 #if 0 // If the STL would be actually usable
             std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
                                std::inserter(bbb, std::next(bbb.begin())));
@@ -409,11 +407,8 @@ int main(void)
             break;
         }
         case TEST_INTERSECTION: {
-            uset_digi aa;
-            std::unordered_set<DIGI, DIGI_hash> bb;
             setup_sets(&aa, bb);
-            uset_digi aaa = uset_digi_intersection(&a, &aa);
-            std::unordered_set<DIGI, DIGI_hash> bbb;
+            aaa = uset_digi_intersection(&a, &aa);
 #if 0 // If the STL would be actually usable
             std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
                                       std::inserter(bbb, std::next(bbb.begin())));
@@ -431,13 +426,10 @@ int main(void)
             break;
         }
         case TEST_DIFFERENCE: {
-            uset_digi aa;
-            std::unordered_set<DIGI, DIGI_hash> bb;
             setup_sets(&aa, bb);
             LOG("uset a\n");
             print_uset(&a);
-            uset_digi aaa = uset_digi_difference(&a, &aa);
-            std::unordered_set<DIGI, DIGI_hash> bbb;
+            aaa = uset_digi_difference(&a, &aa);
 #if 0
             // Note: the STL cannot do this simple task, because it requires
             // both sets to be ordered.
@@ -463,12 +455,9 @@ int main(void)
             break;
         }
         case TEST_SYMMETRIC_DIFFERENCE: {
-            uset_digi aa;
-            std::unordered_set<DIGI, DIGI_hash> bb;
             setup_sets(&aa, bb);
-            uset_digi aaa = uset_digi_symmetric_difference(&a, &aa);
+            aaa = uset_digi_symmetric_difference(&a, &aa);
             print_uset(&aaa);
-            std::unordered_set<DIGI, DIGI_hash> bbb;
 #if 0 // If the STL would be actually usable
             std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
                                           std::inserter(bbb, std::next(bbb.begin())));
@@ -496,7 +485,7 @@ int main(void)
         }
         case TEST_EMPLACE: // 24
         {
-            uset_digi_it first = uset_digi_begin(&a);
+            first = uset_digi_begin(&a);
             const int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : first.ref ? *first.ref->value : 0;
             digi key = digi_init(vb);
             uset_digi_emplace(&a, &key);
@@ -504,11 +493,11 @@ int main(void)
             break;
         }
         case TEST_EMPLACE_FOUND: {
-            uset_digi_it first = uset_digi_begin(&a);
+            first = uset_digi_begin(&a);
             const int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : first.ref ? *first.ref->value : 0;
             digi key = digi_init(vb);
             int a_found;
-            uset_digi_it it = uset_digi_emplace_found(&a, &key, &a_found);
+            it = uset_digi_emplace_found(&a, &key, &a_found);
 #if __cplusplus >= 201103L
             // C++11
             std::pair<std::unordered_set<DIGI, DIGI_hash>::iterator, bool> pair;
@@ -517,70 +506,70 @@ int main(void)
             assert((!a_found) == (int)pair.second);
             CHECK_ITER(it, b, pair.first);
 #else
-            auto iter = b.insert(DIGI{vb});
+            iter = b.insert(DIGI{vb});
             CHECK_ITER(it, b, iter);
 #endif
             break;
         }
         case TEST_EMPLACE_HINT: {
             // makes not much sense for uset, only set
-            uset_digi_it first = uset_digi_begin(&a);
+            first = uset_digi_begin(&a);
             const int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : first.ref ? *first.ref->value : 0;
             digi key = digi_init(vb);
-            uset_digi_it pos = uset_digi_find(&a, key);
-            uset_digi_it it = uset_digi_emplace_hint(&pos, &key);
+            found = uset_digi_find(&a, key);
+            it = uset_digi_emplace_hint(&found, &key);
 #if __cplusplus >= 201103L
             // C++11
             auto hint = b.find(DIGI{vb});
-            auto iter = b.emplace_hint(hint, DIGI{vb});
+            iter = b.emplace_hint(hint, DIGI{vb});
             CHECK_ITER(it, b, iter);
 #else
-            auto iter = b.insert(DIGI{vb});
+            iter = b.insert(DIGI{vb});
             CHECK_ITER(it, b, iter.first);
 #endif
             break;
         }
         // algorithm
         case TEST_FIND_IF: {
-            uset_digi_it aa = uset_digi_find_if(&a, digi_is_odd);
-            auto bb = std::find_if(b.begin(), b.end(), DIGIc_is_odd);
-            if (bb == b.end())
-                assert(!aa.node);
+            it = uset_digi_find_if(&a, digi_is_odd);
+            iter = std::find_if(b.begin(), b.end(), DIGIc_is_odd);
+            if (iter == b.end())
+                assert(!it.node);
             else
-                assert(*bb->value % 2);
+                assert(*iter->value % 2);
             break;
         }
         case TEST_FIND_IF_NOT: {
-            uset_digi_it aa = uset_digi_find_if_not(&a, digi_is_odd);
-            auto bb = std::find_if_not(b.begin(), b.end(), DIGIc_is_odd);
-            if (bb == b.end())
-                assert(!aa.node);
+            it = uset_digi_find_if_not(&a, digi_is_odd);
+            iter = std::find_if_not(b.begin(), b.end(), DIGIc_is_odd);
+            if (iter == b.end())
+                assert(!it.node);
             else
-                assert(!(*bb->value % 2));
+                assert(!(*iter->value % 2));
             break;
         }
         case TEST_ALL_OF: {
-            bool is_a = uset_digi_all_of(&a, digi_is_odd);
-            bool is_b = std::all_of(b.begin(), b.end(), DIGIc_is_odd);
+            is_a = uset_digi_all_of(&a, digi_is_odd);
+            is_b = std::all_of(b.begin(), b.end(), DIGIc_is_odd);
             assert(is_a == is_b);
             break;
         }
         case TEST_ANY_OF: {
-            bool is_a = uset_digi_any_of(&a, digi_is_odd);
-            bool is_b = std::any_of(b.begin(), b.end(), DIGIc_is_odd);
+            is_a = uset_digi_any_of(&a, digi_is_odd);
+            is_b = std::any_of(b.begin(), b.end(), DIGIc_is_odd);
             assert(is_a == is_b);
             break;
         }
         case TEST_NONE_OF: {
-            bool is_a = uset_digi_none_of(&a, digi_is_odd);
-            bool is_b = std::none_of(b.begin(), b.end(), DIGIc_is_odd);
+            is_a = uset_digi_none_of(&a, digi_is_odd);
+            is_b = std::none_of(b.begin(), b.end(), DIGIc_is_odd);
             assert(is_a == is_b);
             break;
         }
         case TEST_COUNT_IF: {
-            int count_a = uset_digi_count_if(&a, digi_is_odd);
-            int count_b = std::count_if(b.begin(), b.end(), DIGIc_is_odd);
-            assert(count_a == count_b);
+            num_a = uset_digi_count_if(&a, digi_is_odd);
+            num_b = std::count_if(b.begin(), b.end(), DIGIc_is_odd);
+            assert(num_a == num_b);
             break;
         }
         /* Need some C++ help here.
@@ -595,7 +584,6 @@ int main(void)
             print_uset(&a);
             digi_generate_reset();
             // std::generate(b.begin(), b.end(), DIGIc_generate);
-            std::unordered_set<DIGI, DIGI_hash> bb;
             // FIXME: need operator!= for insert_operator<set<DIGI>>
             // std::generate(std::inserter(b, b.begin()), std::inserter(bb, bb.begin()),
             //              DIGI_generate);
@@ -630,8 +618,7 @@ int main(void)
         }
         case TEST_TRANSFORM: {
             print_uset(&a);
-            uset_digi aa = uset_digi_transform(&a, digi_untrans);
-            std::unordered_set<DIGI, DIGI_hash> bb;
+            aa = uset_digi_transform(&a, digi_untrans);
             std::transform(b.begin(), b.end(), std::inserter(bb, bb.end()), DIGI_untrans);
             print_uset(&aa);
             print_unordered_set(bb);
@@ -642,8 +629,7 @@ int main(void)
         }
         case TEST_COPY_IF: {
             print_uset(&a);
-            uset_digi aa = uset_digi_copy_if(&a, digi_is_odd);
-            std::unordered_set<DIGI, DIGI_hash> bb;
+            aa = uset_digi_copy_if(&a, digi_is_odd);
 #if __cplusplus >= 201103L
             std::copy_if(b.begin(), b.end(), std::inserter(bb, bb.begin()), DIGIc_is_odd);
 #else
@@ -657,12 +643,11 @@ int main(void)
             break;
         }
         case TEST_MERGE: {
-            uset_digi aa = uset_digi_init_from(&a);
-            std::unordered_set<DIGI, DIGI_hash> bb;
+            aa = uset_digi_init_from(&a);
             setup_sets(&aa, bb);
             print_uset(&a);
             print_uset(&aa);
-            uset_digi aaa = uset_digi_merge(&a, &aa);
+            aaa = uset_digi_merge(&a, &aa);
 #if __cpp_lib_node_extract >= 201606L
             b.merge(bb); // C++17
             print_uset(&aaa);
@@ -671,7 +656,6 @@ int main(void)
             b.clear();
             uset_digi_clear(&a);
 #else
-            std::unordered_set<DIGI, DIGI_hash> bbb;
             merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
             CHECK(aaa, bbb);
 #endif
@@ -683,16 +667,14 @@ int main(void)
             uset_digi_it range_a1, range_a2;
             //std::unordered_set<DIGI>::iterator first_b1, last_b1, first_b2, last_b2;
             //get_random_iters(&a, &range_a1, b, first_b1, last_b1);
-            uset_digi aa = uset_digi_init_from(&a);
-            std::unordered_set<DIGI, DIGI_hash> bb;
+            aa = uset_digi_init_from(&a);
             setup_sets(&aa, bb);
             range_a1 = uset_digi_begin(&a);
             range_a2 = uset_digi_begin(&aa);
             //get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
-            uset_digi aaa = uset_digi_merge_range(&range_a1, &range_a2);
+            aaa = uset_digi_merge_range(&range_a1, &range_a2);
 #if !defined(_MSC_VER)
-            std::unordered_set<DIGI, DIGI_hash> bbb;
             merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
             CHECK(aaa, bbb);
 #endif
@@ -719,6 +701,7 @@ int main(void)
         CHECK(a, b);
         uset_digi_free(&a);
     }
+
 #if defined CTL_USET_GROWTH_POWER2
     FINISH_TEST("tests/func/test_unordered_set_power2");
 #elif defined CTL_USET_CACHED_HASH
