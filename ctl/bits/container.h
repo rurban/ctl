@@ -28,7 +28,7 @@ static inline size_t JOIN(A, size)(A *self)
     return self->size;
 }
 
-static inline size_t JOIN(A, max_size)()
+static inline size_t JOIN(A, max_size)(void)
 {
     return 4294967296 / sizeof(T); // 32bit at most. avoid DDOS
 }

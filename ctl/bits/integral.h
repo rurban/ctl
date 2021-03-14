@@ -62,7 +62,7 @@ static inline size_t _JOIN(A, _default_string_hash)(T *key)
 #define CTL_STRINGIFY(n) CTL_STRINGIFY_HELPER(n)
 #define _strEQcc(s1c, s2c) !strcmp(s1c "", s2c "")
 
-static inline bool _JOIN(A, _type_is_integral)()
+static inline bool _JOIN(A, _type_is_integral)(void)
 {
     return _strEQcc(CTL_STRINGIFY(T), "int") || _strEQcc(CTL_STRINGIFY(T), "long") ||
            _strEQcc(CTL_STRINGIFY(T), "bool") || _strEQcc(CTL_STRINGIFY(T), "char") ||

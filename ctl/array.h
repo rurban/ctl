@@ -59,7 +59,7 @@ static inline int JOIN(A, empty)(A *self)
     return N == 0;
 }
 
-static inline size_t JOIN(A, max_size)()
+static inline size_t JOIN(A, max_size)(void)
 {
     return N;
 }
