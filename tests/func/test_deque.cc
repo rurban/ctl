@@ -304,6 +304,7 @@ int pick_random(deq_digi *a)
         return TEST_RAND(TEST_MAX_VALUE);
     }
     assert(0);
+    return 0;
 }
 
 static void get_random_iters(deq_digi *a, deq_digi_it *first_a, std::deque<DIGI> &b,
@@ -480,7 +481,7 @@ int main(void)
     test_random_work_load();
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
-    for (size_t loop = 0; loop < loops; loop++)
+    for (unsigned loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
         LOG("loop %zu, size %zu\n", loop, size);

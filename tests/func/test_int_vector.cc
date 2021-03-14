@@ -387,7 +387,7 @@ int main(void)
     INIT_TEST_LOOPS(10);
     int log = getenv("LOG") ? 1 : 0;
     int SAFE_DEBUG = getenv("SAFE_DEBUG") ? 1 : 0;
-    for (size_t loop = 0; loop < loops; loop++)
+    for (unsigned loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
         enum

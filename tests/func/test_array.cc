@@ -320,7 +320,7 @@ int main(void)
         a.vector[i] = digi_init(value);
     }
 
-    for (size_t loop = 0; loop < loops; loop++)
+    for (unsigned loop = 0; loop < loops; loop++)
     {
         int which;
         if (tests.size)

@@ -337,7 +337,7 @@ int main(void)
     int fail = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
-    for (size_t loop = 0; loop < loops; loop++)
+    for (unsigned loop = 0; loop < loops; loop++)
     {
         const types_t t1 = pick_type();
         LOG("main type: %d, ", t1);

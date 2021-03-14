@@ -45,7 +45,7 @@
 #endif
 #define CTL_ASSERT_COMPARE ASSERT(self->compare || !"compare undefined");
 
-#if __GNUC__ >= 3
+#if __GNUC__ >= 3 && !defined _WIN32
 #define LIKELY(x) __builtin_expect((long)(x) != 0, 1)
 #define UNLIKELY(x) __builtin_expect((long)(x) != 0, 0)
 #else

@@ -237,7 +237,7 @@ int main(void)
     int fail = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
-    for (size_t loop = 0; loop < loops; loop++)
+    for (unsigned loop = 0; loop < loops; loop++)
     {
         arr20_double a = arr20_double_init();
         std::array<double, 20> b;

@@ -172,7 +172,7 @@ int main(void)
     INIT_SRAND;
     test_small_size();
     INIT_TEST_LOOPS(10);
-    for (size_t loop = 0; loop < loops; loop++)
+    for (unsigned loop = 0; loop < loops; loop++)
     {
         uset_digi a, aa, aaa;
         std::unordered_set<DIGI, DIGI_hash> b, bb, bbb;
@@ -249,7 +249,7 @@ int main(void)
                     if ((int)*iter->value % 2)
                     {
                         iter = b.erase(iter);
-                        b_erases += 1;
+                        num_b += 1;
                     }
                     else
                         iter++;

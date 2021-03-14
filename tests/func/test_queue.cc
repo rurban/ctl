@@ -49,7 +49,7 @@ int main(void)
     int fail = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
-    for (size_t loop = 0; loop < loops; loop++)
+    for (unsigned loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
         queue_digi a = queue_digi_init();

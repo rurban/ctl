@@ -122,8 +122,8 @@ static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GEN
 
 // mark functions which need 16 align
 #define LOG_CAP(a, b)                                                                                                  \
-    LOG("ctl capacity %zu (0x%lx) vs %zu (0x%lx) %s\n", a.capacity, a.capacity, b.capacity(), b.capacity(),            \
-        a.capacity == b.capacity() ? "" : "FAIL")
+    LOG("ctl capacity %u (0x%lx) vs %u (0x%lx) %s\n", (unsigned)a.capacity, a.capacity, (unsigned)b.capacity(),        \
+        b.capacity(), a.capacity == b.capacity() ? "" : "FAIL")
 
 // tested variants
 #if (defined _GLIBCXX_RELEASE && __cplusplus >= 201103L && _GLIBCXX_RELEASE < 11)
@@ -135,7 +135,7 @@ static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GEN
 #define ASSERT_EQUAL_CAP(c, s)                                                                                         \
     if (s.capacity() != c.capacity)                                                                                    \
     {                                                                                                                  \
-        printf("capacity %zu vs %zu FAIL\n", c.capacity, s.capacity());                                                \
+        printf("capacity %u vs %u FAIL\n", (unsigned)c.capacity, (unsigned)s.capacity());                              \
         fail++;                                                                                                        \
     }
 #endif
@@ -145,7 +145,7 @@ static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GEN
 #define ADJUST_CAP(m, c, s)                                                                                            \
     if (c.size == s.size() && c.capacity != s.capacity())                                                              \
     {                                                                                                                  \
-        printf("%s capacity %zu => %zu\n", m, c.capacity, s.capacity());                                               \
+        printf("%s capacity %u => %u\n", m, (unsigned)c.capacity, (unsigned)s.capacity());                             \
         str_fit(&c, s.capacity());                                                                                     \
     }
 
@@ -271,7 +271,7 @@ static void get_random_iters(str *a, str_it *first_a, std::string &b, std::strin
     size_t r1 = TEST_RAND(a->size / 2);
     const size_t rnd = TEST_RAND(a->size / 2);
     size_t r2 = MIN(r1 + rnd, a->size);
-    LOG("iters %zu, %zu of %zu\n", r1, r2, a->size);
+    LOG("iters %u, %u of %u\n", (unsigned)r1, (unsigned)r2, (unsigned)a->size);
     if (a->size)
     {
         str_it it1 = str_it_begin(a);
@@ -315,7 +315,7 @@ int main(void)
     int fail = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(10)
-    for (size_t loop = 0; loop < loops; loop++)
+    for (unsigned loop = 0; loop < loops; loop++)
     {
         size_t str_size = TEST_RAND(TEST_MAX_SIZE);
         if (str_size < MIN_STR_SIZE)

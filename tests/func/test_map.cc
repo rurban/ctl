@@ -115,7 +115,7 @@ int main(void)
 {
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
-    for (size_t loop = 0; loop < loops; loop++)
+    for (unsigned loop = 0; loop < loops; loop++)
     {
         map_strint a;
         std::map<std::string, int> b;

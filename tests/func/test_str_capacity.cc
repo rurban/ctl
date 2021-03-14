@@ -42,8 +42,8 @@ int main(void)
 #else
     fprintf(stderr, "unknown libc++: __cplusplus %d\n", (int)__cplusplus);
 #endif
-    const size_t loops = TEST_RAND(TEST_MAX_LOOPS);
-    for (size_t loop = 0; loop < loops; loop++)
+    const unsigned loops = TEST_RAND(TEST_MAX_LOOPS);
+    for (unsigned loop = 0; loop < loops; loop++)
     {
         char value = TEST_RAND(256);
         // guarantee short string coverage

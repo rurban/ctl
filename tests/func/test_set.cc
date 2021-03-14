@@ -302,7 +302,7 @@ int main(void)
     int fail = 0;
     INIT_SRAND;
     INIT_TEST_LOOPS(20);
-    for (size_t loop = 0; loop < loops; loop++)
+    for (unsigned loop = 0; loop < loops; loop++)
     {
         set_digi a, aa, aaa;
         std::set<DIGI> b, bb, bbb;

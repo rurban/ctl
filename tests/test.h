@@ -81,7 +81,7 @@ static inline long TEST_TIME(void)
 
 // FIXME: ensure we have all cases covered
 #define INIT_TEST_LOOPS(n)                                                                                             \
-    size_t loops = 10 + TEST_RAND(TEST_MAX_LOOPS - 10);                                                                \
+    unsigned loops = 10 + TEST_RAND(TEST_MAX_LOOPS - 10);                                                                \
     vec_short covvec = vec_short_init();                                                                               \
     queue_int tests = queue_int_init();                                                                                \
     static int test = -1;                                                                                              \
@@ -93,11 +93,11 @@ static inline long TEST_TIME(void)
     {                                                                                                                  \
         /* loop a single TEST=20 n times (=10) */                                                                      \
         loops = tests.size == 1 ? n : tests.size;                                                                      \
-        LOG("LOOPS: %zu\n", loops);                                                                                    \
+        LOG("LOOPS: %u\n", loops);                                                                                     \
     }                                                                                                                  \
     if ((env = getenv("LOOPS")))                                                                                       \
     {                                                                                                                  \
-        sscanf(env, "%zu", &loops);                                                                                    \
+        sscanf(env, "%u", &loops);                                                                                     \
     }                                                                                                                  \
     loops:
 
