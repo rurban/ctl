@@ -338,8 +338,6 @@ int main(void)
     {
         list_digi a, aa, aaa;
         std::list<DIGI> b, bb, bbb;
-        //list_digi_it first_a, it;
-        //std::list<DIGI>::iterator first_b, last_b, iter;
         list_digi_it first_a1, first_a2, it;
         list_digi_it *pos;
         std::list<DIGI>::iterator first_b1, last_b1, first_b2, last_b2, iter;
@@ -469,10 +467,10 @@ int main(void)
             CHECK(a, b);
             break;
         }
-        case TEST_REMOVE: {
-            digi *v = list_digi_front(&a);
-            if (value) // not empty
+        case TEST_REMOVE:
+            if (a.size) // not empty
             {
+                digi *v = list_digi_front(&a);
                 int vb = *v->value;
                 LOG("before remove %d\n", vb);
                 print_lst(&a);
@@ -494,7 +492,6 @@ int main(void)
                 CHECK(a, b);
             }
             break;
-        }
         case TEST_EMPLACE: {
             digi key = digi_init(value);
             if (a.size < 2)
