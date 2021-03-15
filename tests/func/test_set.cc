@@ -544,15 +544,15 @@ int main(void)
                 std::advance(iter, size1);
                 b.erase(iter, b.end());
             }
-            get_random_iters(&a, &first_a1, b, first_b2, last_b2);
+            get_random_iters(&a, &first_a1, b, first_b1, last_b1);
             int value = a.size ? *a.root->value.value : 0;
             LOG("equal_value %d\n", value);
             print_set(&a);
             bool same_a = set_digi_equal_value(&first_a1, digi_init(value));
-            bool same_b = first_b2 != last_b2;
-            for (; first_b2 != last_b2; first_b2++)
+            bool same_b = first_b1 != last_b1;
+            for (; first_b1 != last_b1; first_b1++)
             {
-                if (value != *(*first_b2).value)
+                if (value != *(*first_b1).value)
                 {
                     same_b = false;
                     break;
@@ -1268,7 +1268,7 @@ int main(void)
         }
         case TEST_INCLUDES_RANGE: {
           setup_sets(&aa, bb);
-          get_random_iters(&a, &first_a1, b, first_b2, last_b2);
+          get_random_iters(&a, &first_a1, b, first_b1, last_b1);
           get_random_iters(&aa, &first_a2, bb, first_b2, last_b2);
           is_a = set_digi_includes_range(&first_a1, &first_a2);
           is_b = std::includes(first_b1, last_b1, first_b2, last_b2);
@@ -1292,22 +1292,22 @@ int main(void)
             break;
         }
         case TEST_IS_SORTED: {
-            get_random_iters(&a, &first_a1, b, first_b2, last_b2);
+            get_random_iters(&a, &first_a1, b, first_b1, last_b1);
             print_set_range(first_a1);
             is_a = set_digi_is_sorted(&first_a1);
-            is_b = std::is_sorted(first_b2, last_b2);
+            is_b = std::is_sorted(first_b1, last_b1);
             LOG("a_yes: %d b_yes %d\n", (int)is_a, (int)is_b);
             assert(is_a == is_b);
             break;
         }
         case TEST_IS_SORTED_UNTIL: {
-            get_random_iters(&a, &first_a1, b, first_b2, last_b2);
+            get_random_iters(&a, &first_a1, b, first_b1, last_b1);
             print_set_range(first_a1);
             first_a2 = first_a1;
             first_a2.node = first_a1.end;
             pos = set_digi_is_sorted_until(&first_a1, &first_a2);
-            first_b2 = std::is_sorted_until(first_b2, last_b2);
-            CHECK_RANGE(*pos, first_b2, last_b2);
+            first_b1 = std::is_sorted_until(first_b1, last_b1);
+            CHECK_RANGE(*pos, first_b1, last_b1);
             break;
         }
 
