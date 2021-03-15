@@ -177,7 +177,7 @@ int main(void)
         uset_digi a, aa, aaa;
         std::unordered_set<DIGI, DIGI_hash> b, bb, bbb;
         uset_digi_it first, found, it;
-        std::unordered_set<DIGI>::iterator iter;
+        std::unordered_set<DIGI, DIGI_hash>::iterator iter;
         size_t num_a, num_b;
         bool is_a, is_b;
         const int value = TEST_RAND(TEST_MAX_VALUE);
