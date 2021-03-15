@@ -81,7 +81,7 @@ static inline long TEST_TIME(void)
 
 // FIXME: ensure we have all cases covered
 #define INIT_TEST_LOOPS(n)                                                                                             \
-    unsigned loops = 10 + TEST_RAND(TEST_MAX_LOOPS - 10);                                                                \
+    unsigned loops = 10 + TEST_RAND(TEST_MAX_LOOPS - 10);                                                              \
     vec_short covvec = vec_short_init();                                                                               \
     queue_int tests = queue_int_init();                                                                                \
     static int test = -1;                                                                                              \
@@ -103,34 +103,60 @@ static inline long TEST_TIME(void)
 
 #define RECORD_WHICH covvec.vector[which]++
 
+/* check if we covered all tests. If not redo the missing tests. */
+static inline int check_redo(vec_short *covvec, queue_int *tests, const int number_ok)
+{
+    queue_int todo = queue_int_init();
+    const char* env = getenv("TEST");
+    LOG("Test stats: ");
+    foreach (vec_short, covvec, it)
+    {
+        int w = vec_short_it_index(&it);
+        int c = *it.ref;
+        if (!c && w < number_ok)
+        {
+            if (!env)
+            {
+                queue_int_push(&todo, w);
+                queue_int_push(tests, w);
+                queue_int_push(tests, w);
+                queue_int_push(tests, w);
+                queue_int_push(tests, w);
+            }
+        }
+        else
+        {
+            LOG("%d: %dx, ", w, c);
+            if (!((w + 1) % 12))
+            {
+                LOG("\n");
+            }
+        }
+    }
+    LOG("\n");
+    if (todo.size)
+    {
+        int i = 0;
+        printf("Redo missing tests: ");
+        while (todo.size)
+        {
+            printf("%d ", *queue_int_front(&todo));
+            if (!(++i % 20))
+                printf("\n");
+            queue_int_pop(&todo);
+        }
+        printf("\n");
+        queue_int_free(&todo);
+        return 1;
+    }
+    queue_int_free(&todo);
+    return 0;
+}
+
 #define FINISH_TEST(FILE)                                                                                              \
-    /* check if we covered all tests. If not redo the missing */                                                       \
-    int redo = 0;                                                                                                      \
-    LOG("Test stats: ");                                                                                               \
-    foreach (vec_short, &covvec, it)                                                                                   \
+    if (check_redo(&covvec, &tests, number_ok))                                                                        \
     {                                                                                                                  \
-        int w = vec_short_it_index(&it);                                                                               \
-        int c = *it.ref;                                                                                               \
-        if (!c && w < number_ok)                                                                                       \
-        {                                                                                                              \
-            redo = 1;                                                                                                  \
-            printf("Missing test %d\n", w);                                                                            \
-            queue_int_push(&tests, w);                                                                                 \
-            queue_int_push(&tests, w);                                                                                 \
-            queue_int_push(&tests, w);                                                                                 \
-            queue_int_push(&tests, w);                                                                                 \
-        }                                                                                                              \
-        else                                                                                                           \
-        {                                                                                                              \
-            LOG("%d: %dx, ", w, c);                                                                                     \
-        }                                                                                                              \
-    }                                                                                                                  \
-    LOG("\n");                                                                                                         \
-    if (redo)                                                                                                          \
-    {                                                                                                                  \
-        printf("Redo missing tests\n");                                                                                \
         loops = tests.size;                                                                                            \
-        redo = 0;                                                                                                      \
         goto loops;                                                                                                    \
     }                                                                                                                  \
     queue_int_free(&tests);                                                                                            \
