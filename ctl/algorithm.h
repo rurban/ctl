@@ -118,8 +118,20 @@ static inline void JOIN(I, iter_swap)(I *a, I* b)
     *JOIN(I, ref)(b) = tmp;
 }
 
-// set/uset have optimized implementations.
-#if defined(CTL_LIST) || defined(CTL_VEC) || defined(CTL_STR) || defined(CTL_DEQ)
+#if !defined(CTL_ARR)
+// default inserter (add at front, back or middle)
+static inline void JOIN(A, inserter)(A *self, T value)
+{
+#if defined CTL_LIST || defined CTL_VEC || defined CTL_ARR || defined CTL_DEQ
+    JOIN(A, push_back)(self, value);
+#elif defined CTL_SET || defined CTL_MAP || defined CTL_USET || defined CTL_UMAP
+    JOIN(A, insert)(self, value);
+#elif defined CTL_SLIST
+    JOIN(A, push_front)(self, value);
+#elif defined CTL_PQU || defined CTL_STACK || defined CTL_QUEUE
+    JOIN(A, push)(self, value);
+#endif
+}
 
 static inline A *JOIN(A, copy_range)(GI *range, A *out)
 {
@@ -128,11 +140,15 @@ static inline A *JOIN(A, copy_range)(GI *range, A *out)
     int (*done)(struct I*) = range->vtable.done;
     while (!done(range))
     {
-        JOIN(A, push_back)(out, out->copy(ref(range)));
+        JOIN(A, inserter)(out, out->copy(ref(range)));
         next(range);
     }
     return out;
 }
+#endif // ARR
+
+#if defined(CTL_LIST) || defined(CTL_VEC) || defined(CTL_STR) || defined(CTL_DEQ)
+// set/uset have optimized implementations.
 
 static inline int JOIN(A, _found)(A *a, T *ref)
 {
@@ -159,12 +175,12 @@ JOIN(A, union)(A* a, A* b)
             return *JOIN(A, copy_range)(&it1, &self);
         if (self.compare(it2.ref, it1.ref))
         {
-            JOIN(A, push_back)(&self, self.copy(it2.ref));
+            JOIN(A, inserter)(&self, self.copy(it2.ref));
             JOIN(I, next)(&it2);
         }
         else
         {
-            JOIN(A, push_back)(&self, self.copy(it1.ref));
+            JOIN(A, inserter)(&self, self.copy(it1.ref));
             if (!self.compare(it1.ref, it2.ref))
                 JOIN(I, next)(&it2);
             JOIN(I, next)(&it1);
@@ -187,12 +203,12 @@ static inline A JOIN(A, union_range)(I *r1, GI *r2)
             return *JOIN(A, copy_range)(r1, &self);
         if (self.compare(ref2(r2), r1->ref))
         {
-            JOIN(A, push_back)(&self, self.copy(ref2(r2)));
+            JOIN(A, inserter)(&self, self.copy(ref2(r2)));
             next2(r2);
         }
         else
         {
-            JOIN(A, push_back)(&self, self.copy(r1->ref));
+            JOIN(A, inserter)(&self, self.copy(r1->ref));
             if (!self.compare(r1->ref, ref2(r2)))
                 next2(r2);
             JOIN(I, next)(r1);
@@ -228,7 +244,7 @@ static inline A JOIN(A, intersection_range)(I *r1, GI *r2)
         {
             if (!self.compare(ref2(r2), r1->ref))
             {
-                JOIN(A, push_back)(&self, self.copy(r1->ref));
+                JOIN(A, inserter)(&self, self.copy(r1->ref));
                 JOIN(I, next)(r1);
             }
             next2(r2);
@@ -248,7 +264,7 @@ static inline A JOIN(A, intersection)(A *a, A *b)
     A self = JOIN(A, init_from)(a);
     foreach(A, a, it)
         if(JOIN(A, _found)(b, it.ref))
-            JOIN(A, push_back)(&self, self.copy(it.ref));
+            JOIN(A, inserter)(&self, self.copy(it.ref));
     return self;
 #else
     JOIN(A, it) r1 = JOIN(A, begin)(a);
@@ -272,7 +288,7 @@ static inline A JOIN(A, difference_range)(I *r1, I *r2)
         // r1 < r2 (fails with 3-way compare)
         if (self.compare(r1->ref, ref2(r2)))
         {
-            JOIN(A, push_back)(&self, self.copy(r1->ref));
+            JOIN(A, inserter)(&self, self.copy(r1->ref));
             JOIN(I, next)(r1);
         }
         else
@@ -291,7 +307,7 @@ static inline A JOIN(A, difference)(A *a, A *b)
     A self = JOIN(A, init_from)(a);
     foreach(A, a, it)
         if(!JOIN(A, _found)(b, it.ref))
-            JOIN(A, push_back)(&self, self.copy(it.ref));
+            JOIN(A, inserter)(&self, self.copy(it.ref));
     return self;
 #else
     JOIN(A, it) r1 = JOIN(A, begin)(a);
@@ -314,13 +330,13 @@ static inline A JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
 
         if (self.compare(r1->ref, ref2(r2)))
         {
-            JOIN(A, push_back)(&self, self.copy(r1->ref));
+            JOIN(A, inserter)(&self, self.copy(r1->ref));
             JOIN(I, next)(r1);
         }
         else
         {
             if (self.compare(ref2(r2), r1->ref))
-                JOIN(A, push_back)(&self, self.copy(ref2(r2)));
+                JOIN(A, inserter)(&self, self.copy(ref2(r2)));
             else
                 JOIN(I, next)(r1);
             next2(r2);
@@ -339,10 +355,10 @@ static inline A JOIN(A, symmetric_difference)(A *a, A *b)
     A self = JOIN(A, init_from)(a);
     foreach(A, a, it1)
         if(!JOIN(A, _found)(b, it1.ref))
-            JOIN(A, push_back)(&self, self.copy(it1.ref));
+            JOIN(A, inserter)(&self, self.copy(it1.ref));
     foreach(A, b, it2)
         if(!JOIN(A, _found)(a, it2.ref))
-            JOIN(A, push_back)(&self, self.copy(it2.ref));
+            JOIN(A, inserter)(&self, self.copy(it2.ref));
     return self;
 #else
     JOIN(A, it) r1 = JOIN(A, begin)(a);
@@ -405,7 +421,7 @@ static inline I* JOIN(A, is_sorted_until)(I *first, I *last)
 #endif
 
 // generate and transform have no inserter support yet,
-// so we cannot yet use it for set nor uset. we want to call insert/push_back on them.
+// so we cannot yet use it for set nor uset. we want to call inserter/push_back on them.
 // for list and vector we just set/replace the elements.
 #if !defined(CTL_USET) && !defined(CTL_SET)
 
@@ -495,7 +511,7 @@ static inline A JOIN(A, transform_it)(A *self, I *pos, T _binop(T *, T *))
         if (JOIN(I, done)(pos))
             break;
         T tmp = _binop(i.ref, pos->ref);
-        JOIN(A, push_back)(&other, tmp);
+        JOIN(A, inserter)(&other, tmp);
         JOIN(I, next)(pos);
     }
 #if defined(CTL_VEC) && !defined(CTL_STR)
@@ -568,39 +584,11 @@ static inline I JOIN(A, transform_it_range)(I *range, I *pos, I dest, T _binop(T
     }
     return dest;
 }
-
-#else  // USET/SET
-// no push_back, but insert
-static inline A *JOIN(A, copy_range)(GI *range, A *out)
-{
-    void (*next)(struct I*) = range->vtable.next;
-    T* (*ref)(struct I*) = range->vtable.ref;
-    int (*done)(struct I*) = range->vtable.done;
-    while (!done(range))
-    {
-        JOIN(A, insert)(out, out->copy(ref(range)));
-        next(range);
-    }
-    return out;
-}
 #endif // USET/SET inserter
 
 #if !defined(CTL_ARR)
 
 #if !defined(CTL_USET) && !defined(CTL_UMAP)
-// need to match the uset API
-static inline void JOIN(A, inserter)(A *self, T value)
-{
-#if defined(CTL_DEQ) || defined(CTL_LIST) || defined(CTL_VEC) || defined(CTL_STR)
-    JOIN(A, push_back)(self, value);
-#elif defined(CTL_SET) || defined(CTL_MAP)
-    JOIN(A, insert)(self, value);
-#else
-    // uset and array have its own
-    #error "no inserter for this container"
-#endif
-}
-
 // both are better be sorted
 static inline A JOIN(A, merge_range)(I *r1, GI *r2)
 {

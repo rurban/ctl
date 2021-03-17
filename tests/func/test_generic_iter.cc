@@ -1245,10 +1245,10 @@ int main(void)
     LOG("union " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
-    std::cppty bbb;                                                                                                    \
-    std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                         \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
+    std::cppty bbb;                                                                                                    \
+    std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));                         \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -1579,7 +1579,6 @@ int main(void)
 
             case TEST_SYMMETRIC_DIFFERENCE_RANGE:
 
-#ifndef _MSC_VER
 #define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty)                                                                \
     LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
@@ -1591,6 +1590,7 @@ int main(void)
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
+#ifndef _MSC_VER
 #define SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                    \
     LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
@@ -1611,7 +1611,7 @@ int main(void)
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
-#define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty) SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)
+//#define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty) SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)
 #endif
 
                 switch (t1)
@@ -1693,9 +1693,7 @@ int main(void)
                     } // switch t2
                     list_int_free(&a); break;
                 }
-                case CTL_SET : break; // nyi
-#if 0
-                {
+                case CTL_SET : {
                     SETUP_SET1;
                     switch (t2)
                     {
@@ -1720,7 +1718,6 @@ int main(void)
                     } // switch t2
                     set_int_free(&a); break;
                 }
-#endif 
                 case CTL_USET : break; // nyi
 #if 0
                 {

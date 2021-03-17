@@ -331,7 +331,7 @@ static inline int JOIN(A, _equal)(A *self, T *a, T *b)
 static inline A JOIN(A, init_from)(A *copy);
 static inline A JOIN(A, copy)(A *self);
 static inline void JOIN(A, insert)(A *self, T value);
-static inline bool JOIN(A, inserter)(A *self, T value);
+static inline void JOIN(A, inserter)(A *self, T value);
 
 #include <ctl/bits/container.h>
 
@@ -599,10 +599,10 @@ static inline void JOIN(A, reserve)(A *self, size_t desired_count)
         return;
 #ifdef CTL_USET_GROWTH_POWER2
     const size_t new_size = JOIN(A, __next_power2)(desired_count);
-    LOG("power2 growth policy %zu => %zu ", desired_count, new_size);
+    // LOG("power2 growth policy %zu => %zu ", desired_count, new_size);
 #else
     const size_t new_size = JOIN(A, __next_prime)(desired_count);
-    LOG("primed growth policy %zu => %zu ", desired_count, new_size);
+    // LOG("primed growth policy %zu => %zu ", desired_count, new_size);
 #endif
     if (new_size <= (self->bucket_max + 1))
         return;
@@ -1250,23 +1250,6 @@ static inline void JOIN(A, swap)(A *self, A *other)
     A temp = *self;
     *self = *other;
     *other = temp;
-}
-
-static inline bool JOIN(A, inserter)(A *self, T value)
-{
-    if (JOIN(A, find_node)(self, value))
-    {
-        // already exists: keep
-        if (self->free)
-            self->free(&value);
-        return false;
-    }
-    else
-    {
-        //JOIN(A, erase)(self, value);
-        JOIN(A, insert)(self, value);
-        return true;
-    }
 }
 
 // i.e. insert_range

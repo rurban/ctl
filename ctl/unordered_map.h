@@ -15,6 +15,7 @@
 #define CTL_UMAP
 #define HOLD
 #define uset umap
+
 #include <ctl/unordered_set.h>
 
 static inline I JOIN(A, insert_or_assign)(A *self, T value)

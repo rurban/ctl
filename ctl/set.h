@@ -210,7 +210,9 @@ static inline size_t JOIN(I, index)(I *iter)
 
 static inline A JOIN(A, init_from)(A *copy);
 static inline A JOIN(A, copy)(A *self);
+static inline A *JOIN(A, copy_range)(GI *range, A *out);
 static inline B *JOIN(A, insert)(A *self, T key);
+static inline void JOIN(A, inserter)(A *self, T value);
 static inline bool JOIN(A, find_first_of_range)(I *range1, I *range2);
 
 #include <ctl/bits/container.h>
@@ -1041,6 +1043,36 @@ static inline A JOIN(A, symmetric_difference)(A *a, A *b)
             JOIN(A, insert)(&self, self.copy(&node->value));
         node = next;
     }
+    return self;
+}
+
+static inline A JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
+{
+    A self = JOIN(A, init_from)(r1->container);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+
+    while (!JOIN(I, done)(r1))
+    {
+        if (done2(r2))
+            return *JOIN(A, copy_range)(r1, &self);
+
+        if (self.compare(r1->ref, ref2(r2)))
+        {
+            JOIN(A, inserter)(&self, self.copy(r1->ref));
+            JOIN(I, next)(r1);
+        }
+        else
+        {
+            if (self.compare(ref2(r2), r1->ref))
+                JOIN(A, inserter)(&self, self.copy(ref2(r2)));
+            else
+                JOIN(I, next)(r1);
+            next2(r2);
+        }
+    }
+    JOIN(A, copy_range)(r2, &self);
     return self;
 }
 
