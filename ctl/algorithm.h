@@ -272,9 +272,12 @@ static inline A JOIN(A, intersection)(A *a, A *b)
     return JOIN(A, intersection_range)(&r1, &r2);
 #endif
 }
+#endif // LIST, VEC, STR, DEQ
+
+#if !defined(CTL_ARR) && !defined(CTL_USET)
 
 // Warning: fails with 3-way compare! And with generic r2 also.
-static inline A JOIN(A, difference_range)(I *r1, I *r2)
+static inline A JOIN(A, difference_range)(I *r1, GI *r2)
 {
     A self = JOIN(A, init_from)(r1->container);
     void (*next2)(struct I*) = r2->vtable.next;
@@ -299,21 +302,6 @@ static inline A JOIN(A, difference_range)(I *r1, I *r2)
         }
     }
     return self;
-}
-
-static inline A JOIN(A, difference)(A *a, A *b)
-{
-#if 0
-    A self = JOIN(A, init_from)(a);
-    foreach(A, a, it)
-        if(!JOIN(A, _found)(b, it.ref))
-            JOIN(A, inserter)(&self, self.copy(it.ref));
-    return self;
-#else
-    JOIN(A, it) r1 = JOIN(A, begin)(a);
-    JOIN(A, it) r2 = JOIN(A, begin)(b);
-    return JOIN(A, difference_range)(&r1, &r2);
-#endif
 }
 
 static inline A JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
@@ -348,7 +336,23 @@ static inline A JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
 #endif
     return self;
 }
+#endif // !ARR, USET
 
+#if defined(CTL_LIST) || defined(CTL_VEC) || defined(CTL_STR) || defined(CTL_DEQ)
+static inline A JOIN(A, difference)(A *a, A *b)
+{
+#if 0
+    A self = JOIN(A, init_from)(a);
+    foreach(A, a, it)
+        if(!JOIN(A, _found)(b, it.ref))
+            JOIN(A, inserter)(&self, self.copy(it.ref));
+    return self;
+#else
+    JOIN(A, it) r1 = JOIN(A, begin)(a);
+    JOIN(A, it) r2 = JOIN(A, begin)(b);
+    return JOIN(A, difference_range)(&r1, &r2);
+#endif
+}
 static inline A JOIN(A, symmetric_difference)(A *a, A *b)
 {
 #if 0

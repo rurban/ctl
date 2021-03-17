@@ -1046,36 +1046,6 @@ static inline A JOIN(A, symmetric_difference)(A *a, A *b)
     return self;
 }
 
-static inline A JOIN(A, symmetric_difference_range)(I *r1, GI *r2)
-{
-    A self = JOIN(A, init_from)(r1->container);
-    void (*next2)(struct I*) = r2->vtable.next;
-    T* (*ref2)(struct I*) = r2->vtable.ref;
-    int (*done2)(struct I*) = r2->vtable.done;
-
-    while (!JOIN(I, done)(r1))
-    {
-        if (done2(r2))
-            return *JOIN(A, copy_range)(r1, &self);
-
-        if (self.compare(r1->ref, ref2(r2)))
-        {
-            JOIN(A, inserter)(&self, self.copy(r1->ref));
-            JOIN(I, next)(r1);
-        }
-        else
-        {
-            if (self.compare(ref2(r2), r1->ref))
-                JOIN(A, inserter)(&self, self.copy(ref2(r2)));
-            else
-                JOIN(I, next)(r1);
-            next2(r2);
-        }
-    }
-    JOIN(A, copy_range)(r2, &self);
-    return self;
-}
-
 static inline bool JOIN(A, _inserter)(A *self, B *node, T *value)
 {
     if (JOIN(A, _equal)(self, &node->value, value))
