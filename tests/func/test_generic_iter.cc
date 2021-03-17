@@ -1,8 +1,9 @@
-#include "../test.h"
 #if __cplusplus < 201103L
 #pragma warning "Can only test against C++11 compilers"
 OLD_MAIN
 #else
+
+#include "../test.h"
 
 /* generate lists out of various containers */
 // pick one to be the target container
@@ -44,7 +45,7 @@ OLD_MAIN
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(DIFFERENCE_RANGE)                                                                                             \
-    //TEST(REMOVE_RANGE)
+    //TEST(REMOVE_RANGE) /* 14. max 16? (5 bits) */
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -65,7 +66,6 @@ static const char *test_names[] = { FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GE
 #endif
 // clang-format on
 
-
 typedef enum types_t
 {
     CTL_VECTOR,
@@ -73,7 +73,7 @@ typedef enum types_t
     CTL_DEQUE,
     CTL_LIST,
     CTL_SET,
-    CTL_USET /* 5 */
+    CTL_USET /* 5. max 8 (4 bits) */
 } types_t;
 static const types_t types[] = {CTL_VECTOR, CTL_ARRAY, CTL_DEQUE, CTL_LIST, CTL_SET, CTL_USET};
 
@@ -323,7 +323,7 @@ void print_uset(uset_int *a)
 #define SETUP_USET2                                                                                                    \
     uset_int aa = uset_int_init(NULL, NULL);                                                                           \
     std::unordered_set<int> bb;                                                                                        \
-    for (int i = 0; i < TEST_RAND(25); i++)                                                                 \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
         const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
         uset_int_insert(&aa, vb);                                                                                      \
@@ -335,25 +335,39 @@ void print_uset(uset_int *a)
 int main(void)
 {
     int fail = 0;
+    const union gen_cov_u max_w = { .u = { .w1 = TEST_TOTAL, .t1 = CTL_USET, .t2 = CTL_USET } };
     INIT_SRAND;
     INIT_TEST_LOOPS(10);
+    vec_u16_resize(&covvec, max_w.w, 0); // 5 types, ff methods
     for (unsigned loop = 0; loop < loops; loop++)
     {
-        const types_t t1 = pick_type();
+        types_t t1 = pick_type();
         LOG("main type: %d, ", t1);
-        const types_t t2 = pick_type();
+        types_t t2 = pick_type();
         LOG("2nd type: %d\n", t2);
 
         int which;
-        if (tests.size)
+        union gen_cov_u wu;
+        if (!tests.size) // random testing
+        {
+            which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
+            wu.u.w1 = which;
+            wu.u.t1 = t1;
+            wu.u.t2 = t2;
+        }
+        else // or work the test queue
         {
             which = *queue_int_front(&tests);
             queue_int_pop(&tests);
+            wu.w = which;
+            //int w1 = (which >> 8) & 0xff;
+            t1 = (types_t)wu.u.t1;
+            t2 = (types_t)wu.u.t2;
+            which = wu.u.w1;
         }
-        else
-            which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
-        LOG("TEST %s %d\n", test_names[which], which);
-        RECORD_WHICH;
+        LOG("TEST %s %d (0x%x)\n", test_names[which], which, (unsigned)wu.w);
+        assert(wu.w < covvec.size);
+        covvec.vector[wu.w]++;
         switch (which)
         {
 

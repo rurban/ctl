@@ -25,10 +25,21 @@
 #define POD
 #define T int
 #include <ctl/queue.h>
+typedef uint16_t u16;
 #define POD
-#define T short
+#define T u16
 #include <ctl/vector.h>
 #include <ctl/string.h>
+
+// coverage counter for generic_iter: bitmask of 3 values
+union gen_cov_u {
+    struct {
+        unsigned w1:8;
+        unsigned t1:4;
+        unsigned t2:4;
+    } u;
+    u16 w;
+};
 
 #ifdef LONG
 #define TEST_MAX_SIZE (4096)
@@ -82,11 +93,11 @@ static inline long TEST_TIME(void)
 // FIXME: ensure we have all cases covered
 #define INIT_TEST_LOOPS(n)                                                                                             \
     unsigned loops = 10 + TEST_RAND(TEST_MAX_LOOPS - 10);                                                              \
-    vec_short covvec = vec_short_init();                                                                               \
+    vec_u16 covvec = vec_u16_init();                                                                                   \
     queue_int tests = queue_int_init();                                                                                \
     static int test = -1;                                                                                              \
     char *env = getenv("TEST");                                                                                        \
-    vec_short_resize(&covvec, TEST_TOTAL, 0);                                                                          \
+    vec_u16_resize(&covvec, TEST_TOTAL, 0);                                                                            \
     if (env)                                                                                                           \
         parse_TEST(env, &test, &tests, number_ok);                                                                     \
     if (tests.size)                                                                                                    \
@@ -104,16 +115,27 @@ static inline long TEST_TIME(void)
 #define RECORD_WHICH covvec.vector[which]++
 
 /* check if we covered all tests. If not redo the missing tests. */
-static inline int check_redo(vec_short *covvec, queue_int *tests, const int number_ok)
+static inline int check_redo(vec_u16 *covvec, queue_int *tests, const int number_ok)
 {
     queue_int todo = queue_int_init();
     const char* env = getenv("TEST");
+    int i = 0;
     LOG("Test stats: ");
-    foreach (vec_short, covvec, it)
+    foreach (vec_u16, covvec, it)
     {
-        int w = vec_short_it_index(&it);
-        int c = *it.ref;
-        if (!c && w < number_ok)
+        union gen_cov_u wu;
+        int w = vec_u16_it_index(&it); // which test
+        wu.w = w;
+        int c = *it.ref;               // test coverage count 
+        if (!c && covvec->capacity > 1024)
+        {
+            // different validity. normally it is !c
+            if (wu.u.w1 > number_ok ||
+                wu.u.t1 > 5 ||
+                wu.u.t2 > 5)
+                continue;
+        }
+        if (!c && (wu.u.w1 < number_ok))
         {
             if (!env)
             {
@@ -121,13 +143,21 @@ static inline int check_redo(vec_short *covvec, queue_int *tests, const int numb
                 queue_int_push(tests, w);
                 queue_int_push(tests, w);
                 queue_int_push(tests, w);
-                queue_int_push(tests, w);
+                //queue_int_push(tests, w);
             }
         }
-        else
+        else if (covvec->capacity <= 1024) // not generic_iter
         {
             LOG("%d: %dx, ", w, c);
-            if (!((w + 1) % 12))
+            if (!(++i % 12))
+            {
+                LOG("\n");
+            }
+        }
+        else // generic_iter
+        {
+            LOG("%d-%d-%d: %dx, ", wu.u.w1, wu.u.t1, wu.u.t2, c);
+            if (!(++i % 8))
             {
                 LOG("\n");
             }
@@ -136,13 +166,25 @@ static inline int check_redo(vec_short *covvec, queue_int *tests, const int numb
     LOG("\n");
     if (todo.size)
     {
-        int i = 0;
+        i = 0;
         printf("Redo missing tests: ");
         while (todo.size)
         {
-            printf("%d ", *queue_int_front(&todo));
-            if (!(++i % 20))
-                printf("\n");
+            if (covvec->capacity > 1024) // 0x5514 or so
+            {
+                union gen_cov_u wu;
+                wu.w = *queue_int_front(&todo);
+                printf("%d-%d-%d ", wu.u.w1, wu.u.t1, wu.u.t2);
+                //printf("0x%x ", *queue_int_front(&todo));
+                if (!(++i % 12))
+                    printf("\n");
+            }
+            else
+            {
+                printf("%d ", *queue_int_front(&todo));
+                if (!(++i % 20))
+                    printf("\n");
+            }
             queue_int_pop(&todo);
         }
         printf("\n");
@@ -160,7 +202,7 @@ static inline int check_redo(vec_short *covvec, queue_int *tests, const int numb
         goto loops;                                                                                                    \
     }                                                                                                                  \
     queue_int_free(&tests);                                                                                            \
-    vec_short_free(&covvec);                                                                                           \
+    vec_u16_free(&covvec);                                                                                             \
     if (fail)                                                                                                          \
         TEST_FAIL(FILE);                                                                                               \
     else                                                                                                               \

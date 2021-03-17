@@ -491,7 +491,7 @@ static inline B **JOIN(A, _cached_bucket)(A *self, B *node)
 #else
     const size_t hash = JOIN(I, index)(self, node->value);
 #endif
-    LOG ("hash -> buckets[%lu]\n", hash);
+    //LOG ("hash -> buckets[%lu]\n", hash);
     return &self->buckets[hash];
 }
 
@@ -499,7 +499,7 @@ static inline B **JOIN(A, _cached_bucket)(A *self, B *node)
 
 static inline B **JOIN(A, _bucket_hash)(A *self, size_t hash)
 {
-    LOG ("buckets %lx %% %lu\n", hash, self->bucket_max);
+    //LOG ("buckets %lx %% %lu\n", hash, self->bucket_max);
 #ifdef CTL_USET_GROWTH_POWER2
     return &self->buckets[hash & self->bucket_max];
 #elif __WORDSIZE == 127
@@ -514,7 +514,7 @@ static inline B **JOIN(A, _bucket_hash)(A *self, size_t hash)
 static inline B **JOIN(A, _bucket)(A *self, T value)
 {
     const size_t hash = JOIN(I, index)(self, value);
-    LOG ("_bucket %lx %% %lu => %zu\n", self->hash(&value), self->bucket_max + 1, hash);
+    //LOG ("_bucket %lx %% %lu => %zu\n", self->hash(&value), self->bucket_max + 1, hash);
     return &self->buckets[hash];
 }
 #endif
@@ -522,7 +522,7 @@ static inline B **JOIN(A, _bucket)(A *self, T value)
 static inline size_t JOIN(A, bucket)(A *self, T value)
 {
     const size_t hash = JOIN(I, index)(self, value);
-    LOG ("bucket %lx %% %lu => %zu\n", self->hash(&value), self->bucket_max + 1, hash);
+    //LOG ("bucket %lx %% %lu => %zu\n", self->hash(&value), self->bucket_max + 1, hash);
     return hash;
 }
 
@@ -678,7 +678,7 @@ static inline void JOIN(A, _rehash)(A *self, size_t count)
     if (count == self->bucket_max + 1)
         return;
     A rehashed = JOIN(A, init)(self->hash, self->equal);
-    LOG("_rehash %zu => %zu\n", self->size, count);
+    //LOG("_rehash %zu => %zu\n", self->size, count);
     JOIN(A, _reserve)(&rehashed, count);
 
     if (LIKELY(self->buckets && self->size)) // if desired_count 0
@@ -697,8 +697,8 @@ static inline void JOIN(A, _rehash)(A *self, size_t count)
         }
     }
     rehashed.size = self->size;
-    LOG ("_rehash from %lu to %lu, load %f\n", rehashed.size, count,
-         JOIN(A, load_factor)(self));
+    //LOG ("_rehash from %lu to %lu, load %f\n", rehashed.size, count,
+    //     JOIN(A, load_factor)(self));
     free(self->buckets);
     *self = rehashed;
 }
