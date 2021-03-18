@@ -43,6 +43,7 @@ union gen_cov_u {
 
 #ifdef LONG
 #define TEST_MAX_SIZE (4096)
+#undef TEST_MAX_LOOPS
 #define TEST_MAX_LOOPS (8096)
 #else
 #define TEST_MAX_SIZE (512)

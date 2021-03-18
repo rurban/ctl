@@ -29,10 +29,20 @@ jobs:
           - make -j4 Ofast=1 LONG=1
           - make -j4 CC=gcc\ -std=c99
           - make -j4 CC=gcc\ -std=c11
-          - make -j4 CC='clang -std=c11' CXX='clang++ -stdlib=libc++'
+          - make -j4 CC='clang -std=c11' CXX='clang++-9 -stdlib=libc++'
           - make examples SANITIZE=1
           - make perf
     steps:
+    # needed for libc++ since the Ubuntu 20.04.2 update (image version 20210315.1)
+    # https://askubuntu.com/questions/1211743/clang-doesnt-find-c-stdlib-on-my-ubuntu-18-04-but-it-does-on-a-brand-new-ins
+    # variant 1: downgrade clang++ to matching g++ (= 9)
+    - if: matric.MAKE == "make -j4 CC='clang -std=c11' CXX='clang++-9 -stdlib=libc++'"
+      run: |
+        sudo apt-get install clang++-9 libc++-9-dev libc++abi-9-dev
+        clang++ --version
+        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-9 100
+        clang++ --version
+        g++ --version
     - uses: actions/checkout@v2
     - run:  ${{ matrix.MAKE }}
   windows:
