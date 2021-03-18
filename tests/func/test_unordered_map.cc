@@ -135,7 +135,7 @@ int main(void)
 {
     int fail = 0;
     INIT_SRAND;
-    INIT_TEST_LOOPS(10);
+    INIT_TEST_LOOPS(10,false);
     for (unsigned loop = 0; loop < loops; loop++)
     {
         umap_strint a;

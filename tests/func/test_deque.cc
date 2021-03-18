@@ -480,7 +480,7 @@ int main(void)
     test_capacity_edge_case();
     test_random_work_load();
     INIT_SRAND;
-    INIT_TEST_LOOPS(10);
+    INIT_TEST_LOOPS(10,false);
     for (unsigned loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);

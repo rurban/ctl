@@ -305,7 +305,7 @@ int main(void)
 {
     int fail = 0;
     INIT_SRAND;
-    INIT_TEST_LOOPS(20);
+    INIT_TEST_LOOPS(20,false);
     for (unsigned loop = 0; loop < loops; loop++)
     {
         set_digi a, aa, aaa;

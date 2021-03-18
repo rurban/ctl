@@ -338,20 +338,19 @@ int main(void)
     int fail = 0;
     const union gen_cov_u max_w = { .u = { .w1 = TEST_TOTAL, .t1 = CTL_USET, .t2 = CTL_USET } };
     INIT_SRAND;
-    INIT_TEST_LOOPS(10);
+    INIT_TEST_LOOPS(10, true);
     vec_u16_resize(&covvec, max_w.w, 0); // 5 types, ff methods
     for (unsigned loop = 0; loop < loops; loop++)
     {
-        types_t t1 = pick_type();
-        LOG("main type: %d, ", t1);
-        types_t t2 = pick_type();
-        LOG("2nd type: %d\n", t2);
-
+        types_t t1, t2;
         int which;
         union gen_cov_u wu;
         if (!tests.size) // random testing
         {
             which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
+            t1 = pick_type();
+            t2 = pick_type();
+            LOG("main type: %d, 2nd type: %d\n", t1, t2);
             wu.u.w1 = which;
             wu.u.t1 = t1;
             wu.u.t2 = t2;
@@ -361,9 +360,13 @@ int main(void)
             which = *queue_int_front(&tests);
             queue_int_pop(&tests);
             wu.w = which;
-            //int w1 = (which >> 8) & 0xff;
             t1 = (types_t)wu.u.t1;
             t2 = (types_t)wu.u.t2;
+            //if (!t1 && !t2)
+            //{
+            //    wu.u.t1 = t1 = pick_type();
+            //    wu.u.t2 = t2 = pick_type();
+            //}
             which = wu.u.w1;
         }
         LOG("TEST %s %d (0x%x)\n", test_names[which], which, (unsigned)wu.w);

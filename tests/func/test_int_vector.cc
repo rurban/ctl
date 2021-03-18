@@ -384,7 +384,7 @@ int main(void)
 {
     int fail = 0;
     INIT_SRAND;
-    INIT_TEST_LOOPS(10);
+    INIT_TEST_LOOPS(10,false);
     int log = getenv("LOG") ? 1 : 0;
     int SAFE_DEBUG = getenv("SAFE_DEBUG") ? 1 : 0;
     for (unsigned loop = 0; loop < loops; loop++)

@@ -171,7 +171,7 @@ int main(void)
     int fail = 0;
     INIT_SRAND;
     test_small_size();
-    INIT_TEST_LOOPS(10);
+    INIT_TEST_LOOPS(10,false);
     for (unsigned loop = 0; loop < loops; loop++)
     {
         uset_digi a, aa, aaa;

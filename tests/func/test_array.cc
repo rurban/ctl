@@ -307,7 +307,7 @@ int main(void)
 {
     int fail = 0;
     INIT_SRAND;
-    INIT_TEST_LOOPS(15);
+    INIT_TEST_LOOPS(15,false);
 
     arr100_digi a = arr100_digi_init();
     a.compare = digi_compare;

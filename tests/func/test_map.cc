@@ -114,7 +114,7 @@ static void setup_sets(map_strint *a, std::map<std::string, int> &b)
 int main(void)
 {
     INIT_SRAND;
-    INIT_TEST_LOOPS(10);
+    INIT_TEST_LOOPS(10,false);
     for (unsigned loop = 0; loop < loops; loop++)
     {
         map_strint a;

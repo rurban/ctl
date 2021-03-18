@@ -92,15 +92,17 @@ static inline long TEST_TIME(void)
 #define INIT_SRAND
 #endif
 
-#define INIT_TEST_LOOPS(n)                                                                                             \
+#define INIT_TEST_LOOPS(n, generic)                                                                                    \
     unsigned loops = TEST_TOTAL + TEST_RAND(TEST_MAX_LOOPS - TEST_TOTAL);                                              \
     vec_u16 covvec = vec_u16_init();                                                                                   \
     queue_int tests = queue_int_init();                                                                                \
     static int test = -1;                                                                                              \
     char *env = getenv("TEST");                                                                                        \
     vec_u16_resize(&covvec, TEST_TOTAL, 0);                                                                            \
+    if (generic)                                                                                                       \
+        loops *= 4;                                                                                                    \
     if (env)                                                                                                           \
-        parse_TEST(env, &test, &tests, number_ok);                                                                     \
+        parse_TEST(env, &test, &tests, number_ok, generic);                                                            \
     if (tests.size)                                                                                                    \
     {                                                                                                                  \
         /* loop a single TEST=20 n times (=10) */                                                                      \
@@ -213,12 +215,26 @@ static inline int check_redo(vec_u16 *covvec, queue_int *tests, const int number
   TEST=OK tests all stable tests even with DEBUG
   TEST=1-10 or TEST=1,5,7,8-10 tests ranges.
 */
-void parse_TEST(char *env, int *test, queue_int *tests, const int number_ok)
+void parse_TEST(char *env, int *test, queue_int *tests, const int number_ok, bool generic)
 {
     if (!strcmp(env, "OK"))
     {
         for (int j = 0; j < number_ok; j++)
-            queue_int_push(tests, j);
+        {
+            if (generic)
+            {
+                union gen_cov_u wu;
+                for (int k=0; k<4; k++)
+                {
+                    wu.u.t1 = TEST_RAND(6);
+                    wu.u.t2 = TEST_RAND(6);
+                    wu.u.w1 = j;
+                    queue_int_push(tests, wu.w);
+                }
+            }
+            else
+                queue_int_push(tests, j);
+        }
         LOG("TEST OK: 0-%d\n", number_ok - 1);
         return;
     }
