@@ -3,6 +3,7 @@
 OLD_MAIN
 #else
 
+#define TEST_MAX_LOOPS 1024
 #include "../test.h"
 
 /* generate lists out of various containers */

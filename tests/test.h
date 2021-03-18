@@ -46,7 +46,9 @@ union gen_cov_u {
 #define TEST_MAX_LOOPS (8096)
 #else
 #define TEST_MAX_SIZE (512)
-#define TEST_MAX_LOOPS (512)
+#ifndef TEST_MAX_LOOPS
+# define TEST_MAX_LOOPS (512)
+#endif
 #endif
 
 #define TEST_SIGN(a) ((a < 0) ? (-1) : (a > 0) ? (1) : (0))
@@ -90,9 +92,8 @@ static inline long TEST_TIME(void)
 #define INIT_SRAND
 #endif
 
-// FIXME: ensure we have all cases covered
 #define INIT_TEST_LOOPS(n)                                                                                             \
-    unsigned loops = 10 + TEST_RAND(TEST_MAX_LOOPS - 10);                                                              \
+    unsigned loops = TEST_TOTAL + TEST_RAND(TEST_MAX_LOOPS - TEST_TOTAL);                                              \
     vec_u16 covvec = vec_u16_init();                                                                                   \
     queue_int tests = queue_int_init();                                                                                \
     static int test = -1;                                                                                              \
