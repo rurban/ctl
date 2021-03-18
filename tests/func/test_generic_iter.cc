@@ -160,21 +160,25 @@ void print_uset(uset_int *a)
         if (strcmp(#ty1, "uset") && strcmp(#ty2, "uset"))                                                              \
         {                                                                                                              \
             if (_x.size != _y.size())                                                                                  \
-                printf("CTL size %zu != STL %zu\n", _x.size, _y.size());                                               \
+            {                                                                                                          \
+                LOG("CTL size %zu != STL %zu\n", _x.size, _y.size());                                                  \
+            }                                                                                                          \
             assert(_x.size == _y.size());                                                                              \
             assert(ty1##_int_empty(&_x) == _y.empty());                                                                \
             ty1##_int_it _it1 = ty1##_int_begin(&_x);                                                                  \
             print_stl(_y, cppty);                                                                                      \
+            LOG("\n");                                                                                                 \
             int i = 0;                                                                                                 \
             for (auto &_d : _y)                                                                                        \
             {                                                                                                          \
                 i++;                                                                                                   \
                 if (*_it1.ref != _d)                                                                                   \
-                    printf("[%d]: CTL %d != STL %d\n", i, *_it1.ref, _d);                                              \
+                {                                                                                                      \
+                    LOG("[%d]: CTL %d != STL %d\n", i, *_it1.ref, _d);                                                 \
+                }                                                                                                      \
                 /*assert(*_it1.ref == _d);*/                                                                           \
                 ty1##_int_it_next(&_it1);                                                                              \
             }                                                                                                          \
-            LOG("\n");                                                                                                 \
             std::cppty::iterator _iter = _y.begin();                                                                   \
             foreach (ty1##_int, &_x, _it2)                                                                             \
             {                                                                                                          \
