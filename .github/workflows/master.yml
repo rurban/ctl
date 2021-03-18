@@ -36,7 +36,7 @@ jobs:
     # needed for libc++ since the Ubuntu 20.04.2 update (image version 20210315.1)
     # https://askubuntu.com/questions/1211743/clang-doesnt-find-c-stdlib-on-my-ubuntu-18-04-but-it-does-on-a-brand-new-ins
     # variant 1: downgrade clang++ to matching g++ (= 9)
-    - if: matrix.MAKE == "make -j4 CC='clang -std=c11' CXX='clang++-9 -stdlib=libc++'"
+    - if: matrix.MAKE == 'make -j4 CC=\'clang -std=c11\' CXX=\'clang++-9 -stdlib=libc++\''
       run: |
         sudo apt-get install clang++-9 libc++-9-dev libc++abi-9-dev
         clang++ --version
