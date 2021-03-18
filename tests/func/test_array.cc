@@ -309,19 +309,29 @@ int main(void)
     INIT_SRAND;
     INIT_TEST_LOOPS(15,false);
 
-    arr100_digi a = arr100_digi_init();
+    arr100_digi a, aa, aaa;
+    std::array<DIGI, 100> b, bb, bbb;
+    arr100_digi_it range_a1, range_a2, it;
+    arr100_digi_it* pos;
+    std::array<DIGI,100>::iterator first_b1, last_b1, first_b2, last_b2, iter;
+    const int n = TEST_RAND(N);
+    bool found_a, found_b;
+    size_t num_a, num_b;
+
+    a = arr100_digi_init();
     a.compare = digi_compare;
     a.equal = digi_equal;
-    std::array<DIGI, 100> b;
+
     for (int i = 0; i < N; i++)
     {
-        const int value = TEST_RAND(TEST_MAX_VALUE);
+        int value = TEST_RAND(TEST_MAX_VALUE);
         b[i] = DIGI{value};
         a.vector[i] = digi_init(value);
     }
 
     for (unsigned loop = 0; loop < loops; loop++)
     {
+        int value = TEST_RAND(TEST_MAX_VALUE);
         int which;
         if (tests.size)
         {
@@ -337,7 +347,7 @@ int main(void)
         case TEST_SELF: {
             for (int i = 0; i < N; i++)
             {
-                int value = TEST_RAND(TEST_MAX_VALUE);
+                value = TEST_RAND(TEST_MAX_VALUE);
                 b[i] = DIGI{value};
                 arr100_digi_set(&a, i, digi_init(value));
             }
@@ -352,14 +362,11 @@ int main(void)
             }
 #endif
         case TEST_FILL: {
-            const int value = TEST_RAND(TEST_MAX_VALUE);
             b.fill(DIGI{value});
             arr100_digi_fill(&a, digi_init(value));
             break;
         }
         case TEST_FILL_N: {
-            const int n = TEST_RAND(N);
-            const int value = TEST_RAND(TEST_MAX_VALUE);
             std::fill_n(b.begin(), n, DIGI{value});
             arr100_digi_fill_n(&a, n, digi_init(value));
             break;
@@ -370,14 +377,13 @@ int main(void)
             break;
         }
         case TEST_COPY: {
-            arr100_digi aa = arr100_digi_copy(&a);
-            std::array<DIGI, 100> bb = b;
+            aa = arr100_digi_copy(&a);
+            bb = b;
             CHECK(aa, bb);
             arr100_digi_free(&aa);
             break;
         }
         case TEST_ASSIGN: {
-            const int value = TEST_RAND(TEST_MAX_VALUE);
             size_t assign_size = TEST_RAND(N - 1);
             arr100_digi_assign(&a, assign_size, digi_init(value));
             for (size_t i = 0; i < assign_size; i++)
@@ -385,10 +391,9 @@ int main(void)
             break;
         }
         case TEST_SWAP: {
-            arr100_digi aa = arr100_digi_copy(&a);
-            arr100_digi aaa = arr100_digi_init_from(&a);
-            std::array<DIGI, 100> bb = b;
-            std::array<DIGI, 100> bbb;
+            aa = arr100_digi_copy(&a);
+            aaa = arr100_digi_init_from(&a);
+            bb = b;
             arr100_digi_swap(&aaa, &aa);
             std::swap(bb, bbb);
             CHECK(aaa, bbb);
@@ -396,244 +401,218 @@ int main(void)
             break;
         }
         case TEST_EQUAL: {
-            arr100_digi aa = arr100_digi_copy(&a);
-            std::array<DIGI, 100> bb = b;
+            aa = arr100_digi_copy(&a);
+            bb = b;
             assert(arr100_digi_equal(&a, &aa));
             assert(b == bb);
             arr100_digi_free(&aa);
             break;
         }
         case TEST_EQUAL_VALUE: {
-            arr100_digi_it r1a;
-            std::array<DIGI, 100>::iterator r1b, last1_b;
-            get_random_iters(&a, &r1a, b, r1b, last1_b);
-            size_t index = TEST_RAND(N);
-            int value = *a.vector[index].value;
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            value = *a.vector[n].value;
             LOG("equal_value %d\n", value);
             print_arr100(&a);
-            bool same_a = arr100_digi_equal_value(&r1a, digi_init(value));
-            bool same_b = r1b != last1_b;
-            for (; r1b != last1_b; r1b++)
+            found_a = arr100_digi_equal_value(&range_a1, digi_init(value));
+            found_b = first_b1 != last_b1;
+            for (; first_b1 != last_b1; first_b1++)
             {
-                if (value != *(*r1b).value)
+                if (value != *(*first_b1).value)
                 {
-                    same_b = false;
+                    found_b = false;
                     break;
                 }
             }
-            LOG("same_a: %d same_b: %d\n", (int)same_a, (int)same_b);
-            assert(same_a == same_b);
+            LOG("same_a: %d same_b: %d\n", (int)found_a, (int)found_b);
+            assert(found_a == found_b);
             break;
         }
         case TEST_EQUAL_RANGE: {
-            arr100_digi aa = arr100_digi_copy(&a);
-            std::array<DIGI, 100> bb = b;
-            arr100_digi_it r1a, r2a;
-            std::array<DIGI, 100>::iterator r1b, last1_b, r2b, last2_b;
-            get_random_iters(&a, &r1a, b, r1b, last1_b);
-            get_random_iters(&aa, &r2a, bb, r2b, last2_b);
-            bool same_a = arr100_digi_equal_range(&r1a, &r2a);
+            aa = arr100_digi_copy(&a);
+            bb = b;
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+            found_a = arr100_digi_equal_range(&range_a1, &range_a2);
 #if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
-            bool same_b = std::equal(r1b, last1_b, r2b, last2_b);
-            LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
-            assert(same_a == same_b);
+            found_b = std::equal(first_b1, last_b1, first_b2, last_b2);
+            LOG("same_a: %d same_b %d\n", (int)found_a, (int)found_b);
+            assert(found_a == found_b);
 #else
-            bool same_b = std::equal(r1b, last1_b, r2b);
-            LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
-            if (same_a != same_b)
+            found_b = std::equal(first_b1, last_b1, first_b2);
+            LOG("same_a: %d same_b %d\n", (int)found_a, (int)found_b);
+            if (found_a != found_b)
                 printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");
 #endif
             arr100_digi_free(&aa);
             break;
         }
         case TEST_LEXICOGRAPHICAL_COMPARE: {
-            arr100_digi aa = arr100_digi_copy(&a);
-            std::array<DIGI, 100> bb = b;
-            arr100_digi_it r1a, r2a;
-            std::array<DIGI, 100>::iterator r1b, last1_b, r2b, last2_b;
-            get_random_iters(&a, &r1a, b, r1b, last1_b);
-            get_random_iters(&aa, &r2a, bb, r2b, last2_b);
-            bool same_a = arr100_digi_lexicographical_compare(&r1a, &r2a);
-            bool same_b = std::lexicographical_compare(r1b, last1_b, r2b, last2_b);
-            LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
-            assert(same_a == same_b);
+            aa = arr100_digi_copy(&a);
+            bb = b;
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+            found_a = arr100_digi_lexicographical_compare(&range_a1, &range_a2);
+            found_b = std::lexicographical_compare(first_b1, last_b1, first_b2, last_b2);
+            LOG("same_a: %d same_b %d\n", (int)found_a, (int)found_b);
+            assert(found_a == found_b);
             arr100_digi_free(&aa);
             break;
         }
         case TEST_FIND: {
-            const size_t index = TEST_RAND(N);
-            int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : *arr100_digi_at(&a, index)->value;
+            value = TEST_RAND(2) ? value : *arr100_digi_at(&a, n)->value;
             digi key = digi_init(value);
-            digi *aa = arr100_digi_find(&a, key);
-            auto bb = std::find(b.begin(), b.end(), DIGI{value});
-            bool found_a = aa != NULL;
-            bool found_b = bb != b.end();
+            digi *ref = arr100_digi_find(&a, key);
+            iter = std::find(b.begin(), b.end(), DIGI{value});
+            found_a = ref != NULL;
+            found_b = iter != b.end();
             assert(found_a == found_b);
             if (found_a && found_b)
-                assert(*aa->value == *bb->value);
-            digi_free(&key);
+                assert(*ref->value == *iter->value);
+            digi_free(&key); // special
             break;
         }
         case TEST_FIND_RANGE: {
-            int vb = pick_random(&a);
-            digi key = digi_init(vb);
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            bool found_a = arr100_digi_find_range(&first_a, key);
-            auto it = std::find(first_b, last_b, vb);
-            LOG("%d at [%ld]\n", *first_a.ref->value, first_a.ref - a.vector);
+            value = pick_random(&a);
+            digi key = digi_init(value);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            found_a = arr100_digi_find_range(&range_a1, key);
+            iter = std::find(first_b1, last_b1, DIGI{value});
+            LOG("%d at [%ld]\n", *range_a1.ref->value, range_a1.ref - a.vector);
             if (found_a)
-                assert(it != last_b);
+                assert(iter != last_b1);
             else
-                assert(it == last_b);
-            CHECK_RANGE(first_a, it, last_b);
+                assert(iter == last_b1);
+            CHECK_RANGE(range_a1, iter, last_b1);
             digi_free(&key); // special
             CHECK(a, b);
             break;
         }
         case TEST_FIND_IF_RANGE: {
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            arr100_digi_it i = arr100_digi_find_if_range(&first_a, digi_is_odd);
-            auto it = std::find_if(first_b, last_b, DIGI_is_odd);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            it = arr100_digi_find_if_range(&range_a1, digi_is_odd);
+            iter = std::find_if(first_b1, last_b1, DIGI_is_odd);
             print_arr100(&a);
             print_array(b);
-            LOG("%d at [%ld]\n", *i.ref->value, i.ref - a.vector);
-            CHECK_RANGE(i, it, last_b);
+            LOG("%d at [%ld]\n", *it.ref->value, it.ref - a.vector);
+            CHECK_RANGE(it, iter, last_b1);
             break;
         }
         case TEST_FIND_IF_NOT_RANGE: {
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            arr100_digi_it i = arr100_digi_find_if_not_range(&first_a, digi_is_odd);
-            auto it = std::find_if_not(first_b, last_b, DIGI_is_odd);
-            LOG("%d at [%ld]\n", *i.ref->value, i.ref - a.vector);
-            CHECK_RANGE(i, it, last_b);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            it = arr100_digi_find_if_not_range(&range_a1, digi_is_odd);
+            iter = std::find_if_not(first_b1, last_b1, DIGI_is_odd);
+            LOG("%d at [%ld]\n", *it.ref->value, it.ref - a.vector);
+            CHECK_RANGE(it, iter, last_b1);
             break;
         }
         case TEST_ALL_OF_RANGE: {
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            bool aa = arr100_digi_all_of_range(&first_a, digi_is_odd);
-            bool bb = std::all_of(first_b, last_b, DIGI_is_odd);
-            /*if (aa != bb)
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            found_a = arr100_digi_all_of_range(&range_a1, digi_is_odd);
+            found_b = std::all_of(first_b1, last_b1, DIGI_is_odd);
+            /*if (found_a != found_b)
             {
                 print_arr100(&a);
                 print_array(b);
-                printf ("%d != %d is_odd\n", (int)aa, (int)bb);
+                printf ("%d != %d is_odd\n", (int)found_a, (int)found_b);
             }*/
-            assert(aa == bb);
+            assert(found_a == found_b);
             break;
         }
         case TEST_NONE_OF_RANGE: {
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            bool aa = arr100_digi_none_of_range(&first_a, digi_is_odd);
-            bool bb = std::none_of(first_b, last_b, DIGI_is_odd);
-            if (aa != bb)
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            found_a = arr100_digi_none_of_range(&range_a1, digi_is_odd);
+            found_b = std::none_of(first_b1, last_b1, DIGI_is_odd);
+            if (found_a != found_b)
             {
                 print_arr100(&a);
                 print_array(b);
-                printf("%d != %d is_odd\n", (int)aa, (int)bb);
+                printf("%d != %d is_odd\n", (int)found_a, (int)found_b);
             }
-            assert(aa == bb);
+            assert(found_a == found_b);
             break;
         }
         case TEST_COUNT_IF_RANGE: {
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            size_t numa = arr100_digi_count_if_range(&first_a, digi_is_odd);
-            size_t numb = std::count_if(first_b, last_b, DIGI_is_odd);
-            if (numa != numb)
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            num_a = arr100_digi_count_if_range(&range_a1, digi_is_odd);
+            num_b = std::count_if(first_b1, last_b1, DIGI_is_odd);
+            if (num_a != num_b)
             {
                 print_arr100(&a);
                 print_array(b);
-                printf("%d != %d FAIL\n", (int)numa, (int)numb);
+                printf("%d != %d FAIL\n", (int)num_a, (int)num_b);
                 fail++;
             }
-            assert(numa == numb); // fails. off by one, counts one too much
+            assert(num_a == num_b); // fails. off by one, counts one too much
             break;
         }
         case TEST_COUNT_RANGE: {
-            int test_value = 0;
-            int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : test_value;
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
+            value = TEST_RAND(2) ? value : 0;
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
             // used to fail with 0,0 of 0
-            size_t numa = arr100_digi_count_range(&first_a, digi_init(v));
-            size_t numb = std::count(first_b, last_b, DIGI{v});
-            assert(numa == numb);
+            num_a = arr100_digi_count_range(&range_a1, digi_init(value));
+            num_b = std::count(first_b1, last_b1, DIGI{value});
+            assert(num_a == num_b);
             break;
         }
         case TEST_ANY_OF: {
-            bool is_a = arr100_digi_any_of(&a, digi_is_odd);
-            bool is_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
-            assert(is_a == is_b);
+            found_a = arr100_digi_any_of(&a, digi_is_odd);
+            found_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
+            assert(found_a == found_b);
             break;
         }
         case TEST_ANY_OF_RANGE: {
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            bool aa = arr100_digi_any_of_range(&first_a, digi_is_odd);
-            bool bb = std::any_of(first_b, last_b, DIGI_is_odd);
-            if (aa != bb)
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            found_a = arr100_digi_any_of_range(&range_a1, digi_is_odd);
+            found_b = std::any_of(first_b1, last_b1, DIGI_is_odd);
+            if (found_a != found_b)
             {
                 print_arr100(&a);
                 print_array(b);
-                printf("%d != %d is_odd\n", (int)aa, (int)bb);
+                printf("%d != %d is_odd\n", (int)found_a, (int)found_b);
             }
-            assert(aa == bb);
+            assert(found_a == found_b);
             break;
         }
         case TEST_FIND_IF: {
-            arr100_digi_it aa = arr100_digi_find_if(&a, digi_is_odd);
-            auto bb = std::find_if(b.begin(), b.end(), DIGI_is_odd);
-            if (bb == b.end())
-                assert(arr100_digi_it_done(&aa));
+            it = arr100_digi_find_if(&a, digi_is_odd);
+            iter = std::find_if(b.begin(), b.end(), DIGI_is_odd);
+            if (iter == b.end())
+                assert(arr100_digi_it_done(&it));
             else
-                assert(*(aa.ref->value) == *bb->value);
+                assert(*(it.ref->value) == *iter->value);
             break;
         }
         case TEST_FIND_IF_NOT: {
-            arr100_digi_it aa = arr100_digi_find_if_not(&a, digi_is_odd);
-            auto bb = std::find_if_not(b.begin(), b.end(), DIGI_is_odd);
-            if (bb == b.end())
-                assert(arr100_digi_it_done(&aa));
+            it = arr100_digi_find_if_not(&a, digi_is_odd);
+            iter = std::find_if_not(b.begin(), b.end(), DIGI_is_odd);
+            if (iter == b.end())
+                assert(arr100_digi_it_done(&it));
             else
-                assert(*(aa.ref->value) == *bb->value);
+                assert(*(it.ref->value) == *iter->value);
             break;
         }
         case TEST_ALL_OF: {
-            bool is_a = arr100_digi_all_of(&a, digi_is_odd);
-            bool is_b = std::all_of(b.begin(), b.end(), DIGI_is_odd);
-            assert(is_a == is_b);
+            found_a = arr100_digi_all_of(&a, digi_is_odd);
+            found_b = std::all_of(b.begin(), b.end(), DIGI_is_odd);
+            assert(found_a == found_b);
             break;
         }
         case TEST_NONE_OF: {
-            bool is_a = arr100_digi_none_of(&a, digi_is_odd);
-            bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
-            assert(is_a == is_b);
+            found_a = arr100_digi_none_of(&a, digi_is_odd);
+            found_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
+            assert(found_a == found_b);
             break;
         }
         case TEST_COUNT: {
-            int key = TEST_RAND(TEST_MAX_SIZE);
-            int aa = arr100_digi_count(&a, digi_init(key));
-            int bb = std::count(b.begin(), b.end(), DIGI{key});
-            assert(aa == bb);
+            num_a = arr100_digi_count(&a, digi_init(value));
+            num_b = std::count(b.begin(), b.end(), DIGI{value});
+            assert(num_a == num_b);
             break;
         }
         case TEST_COUNT_IF: {
-            size_t count_a = arr100_digi_count_if(&a, digi_is_odd);
-            size_t count_b = std::count_if(b.begin(), b.end(), DIGI_is_odd);
-            assert(count_a == count_b);
+            num_a = arr100_digi_count_if(&a, digi_is_odd);
+            num_b = std::count_if(b.begin(), b.end(), DIGI_is_odd);
+            assert(num_a == num_b);
             break;
         }
         case TEST_GENERATE: {
@@ -645,19 +624,16 @@ int main(void)
             break;
         }
         case TEST_GENERATE_RANGE: {
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
             digi_generate_reset();
-            arr100_digi_generate_range(&first_a, digi_generate);
+            arr100_digi_generate_range(&range_a1, digi_generate);
             digi_generate_reset();
-            std::generate(first_b, last_b, DIGI_generate);
+            std::generate(first_b1, last_b1, DIGI_generate);
             CHECK(a, b);
             break;
         }
         case TEST_TRANSFORM: {
-            arr100_digi aa = arr100_digi_transform(&a, digi_untrans);
-            std::array<DIGI, 100> bb;
+            aa = arr100_digi_transform(&a, digi_untrans);
             std::transform(b.begin(), b.end(), bb.begin(), DIGI_untrans);
             CHECK(aa, bb);
             CHECK(a, b);
@@ -666,15 +642,16 @@ int main(void)
         }
         case TEST_TRANSFORM_IT: {
             print_arr100(&a);
-            arr100_digi_it pos = arr100_digi_begin(&a);
-            arr100_digi_it_advance(&pos, 1);
-            arr100_digi aa = arr100_digi_transform_it(&a, &pos, digi_bintrans);
+            it = arr100_digi_begin(&a);
+            arr100_digi_it_advance(&it, 1);
+            aa = arr100_digi_transform_it(&a, &it, digi_bintrans);
             // the last one is unitialized
-            arr100_digi_set(&aa, 99, digi_init(0));
-            print_arr100(&aa);
-            std::array<DIGI, 100> bb;
             std::transform(b.begin(), b.end() - 1, b.begin() + 1, bb.begin(), DIGI_bintrans);
+            LOG("STL => ");
             print_array(bb);
+            arr100_digi_set(&aa, 99, digi_init(*bb[99].value));
+            LOG("CTL => ");
+            print_arr100(&aa);
             CHECK(aa, bb);
             CHECK(a, b);
             arr100_digi_free(&aa);
@@ -696,28 +673,23 @@ int main(void)
 #ifdef DEBUG
         case TEST_GENERATE_N_RANGE: // TEST=32
         {
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            size_t off = first_b - b.begin();
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            size_t off = first_b1 - b.begin();
             size_t count = TEST_RAND(20 - off);
             digi_generate_reset();
-            arr100_digi_generate_n_range(&first_a, count, digi_generate);
+            arr100_digi_generate_n_range(&range_a1, count, digi_generate);
             digi_generate_reset();
-            std::generate_n(first_b, count, DIGI_generate);
+            std::generate_n(first_b1, count, DIGI_generate);
             CHECK(a, b);
             break;
         }
         case TEST_TRANSFORM_RANGE: {
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            arr100_digi aa = arr100_digi_init_from(&a);
-            arr100_digi_it dest = arr100_digi_begin(&aa);
-            arr100_digi_it it = arr100_digi_transform_range(&first_a, dest, digi_untrans);
-            std::array<DIGI, 100> bb;
-            auto iter = std::transform(first_b, last_b, b.begin() + 1, bb.begin(), DIGI_bintrans);
-            CHECK_RANGE(it, iter, last_b);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            aa = arr100_digi_init_from(&a);
+            range_a2 = arr100_digi_begin(&aa);
+            it = arr100_digi_transform_range(&range_a1, range_a2, digi_untrans);
+            iter = std::transform(first_b1, last_b1, b.begin() + 1, bb.begin(), DIGI_bintrans);
+            CHECK_RANGE(it, iter, last_b1);
             // CHECK_ITER(it, bb, iter);
             CHECK(aa, bb);
             // heap use-after-free
@@ -726,8 +698,8 @@ int main(void)
             break;
         }
         case TEST_COPY_IF: {
-            arr100_digi aa = arr100_digi_copy_if(&a, digi_is_odd);
-            std::array<DIGI, 100> bb = b;
+            aa = arr100_digi_copy_if(&a, digi_is_odd);
+            bb = b;
             size_t i = 0;
             for (auto &d : b)
             {
@@ -741,12 +713,10 @@ int main(void)
             break;
         }
         case TEST_COPY_IF_RANGE: {
-            arr100_digi_it range;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &range, b, first_b, last_b);
-            arr100_digi aa = arr100_digi_copy_if_range(&range, digi_is_odd);
-            size_t i = arr100_digi_it_index(&range);
-            std::array<DIGI, 100> bb = b;
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            aa = arr100_digi_copy_if_range(&range_a1, digi_is_odd);
+            size_t i = arr100_digi_it_index(&range_a1);
+            bb = b;
             for (auto &d : b)
             {
                 if (DIGI_is_odd(d))
@@ -759,24 +729,21 @@ int main(void)
         }
 #endif // DEBUG
         case TEST_MISMATCH: {
-            arr100_digi aa = arr100_digi_init_from(&a);
-            std::array<DIGI, 100> bb;
+            aa = arr100_digi_init_from(&a);
             gen_arrays(&aa, bb);
             arr100_digi_it b1, b2;
             b1 = arr100_digi_begin(&a);
             b2 = arr100_digi_begin(&aa);
-            arr100_digi_it r1a, r2a;
-            std::array<DIGI, 100>::iterator r1b, last1_b, r2b, last2_b;
-            get_random_iters(&a, &r1a, b, r1b, last1_b);
-            get_random_iters(&aa, &r2a, bb, r2b, last2_b);
-            /*bool found_a = */ arr100_digi_mismatch(&r1a, &r2a);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+            /* found_a = */ arr100_digi_mismatch(&range_a1, &range_a2);
 #if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
-            auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
+            auto pair = std::mismatch(first_b1, last_b1, first_b2, last_b2);
 #else
-            auto pair = std::mismatch(r1b, last1_b, r2b);
+            auto pair = std::mismatch(first_b1, last_b1, first_b2);
 #endif
-            int d1a = arr100_digi_it_distance(&b1, &r1a);
-            int d2a = arr100_digi_it_distance(&b2, &r2a);
+            int d1a = arr100_digi_it_distance(&b1, &range_a1);
+            int d2a = arr100_digi_it_distance(&b2, &range_a2);
             LOG("iter1 %d, iter2 %d\n", d1a, d2a);
             // TODO check found_a against iter results
             assert(d1a == std::distance(b.begin(), pair.first));
@@ -786,114 +753,103 @@ int main(void)
         }
         case TEST_ADJACENT_FIND: {
             print_arr100(&a);
-            arr100_digi_it aa = arr100_digi_adjacent_find(&a);
-            auto bb = std::adjacent_find(b.begin(), b.end());
-            CHECK_ITER(aa, b, bb);
-            LOG("found %s\n", arr100_digi_it_done(&aa) ? "no" : "yes");
+            it = arr100_digi_adjacent_find(&a);
+            iter = std::adjacent_find(b.begin(), b.end());
+            CHECK_ITER(it, b, iter);
+            LOG("found %s\n", arr100_digi_it_done(&it) ? "no" : "yes");
             break;
         }
         case TEST_ADJACENT_FIND_RANGE: {
-            arr100_digi_it range;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &range, b, first_b, last_b);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
             print_arr100(&a);
-            arr100_digi_it *aa = arr100_digi_adjacent_find_range(&range);
-            auto bb = std::adjacent_find(first_b, last_b);
-            CHECK_RANGE(*aa, bb, last_b);
+            pos = arr100_digi_adjacent_find_range(&range_a1);
+            iter = std::adjacent_find(first_b1, last_b1);
+            CHECK_RANGE(*pos, iter, last_b1);
             // CHECK_ITER(*aa, b, bb);
-            LOG("found %s\n", arr100_digi_it_done(aa) ? "no" : "yes");
+            LOG("found %s\n", arr100_digi_it_done(pos) ? "no" : "yes");
             break;
         }
         case TEST_SEARCH: // 42
         {
             print_arr100(&a);
-            arr100_digi aa = arr100_digi_copy(&a);
-            std::array<DIGI, 100> bb = b;
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&aa, &first_a, bb, first_b, last_b);
+            aa = arr100_digi_copy(&a);
+            bb = b;
+            get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
             if (TEST_RAND(2))
             { // 50% unsuccessful
-                size_t i = first_b - bb.begin();
+                size_t i = first_b2 - bb.begin();
                 arr100_digi_set(&aa, i, digi_init(0));
                 bb[i] = DIGI{0};
             }
             // print_arr100(aa);
-            arr100_digi_it found_a = arr100_digi_search(&a, &first_a);
-            auto found_b = std::search(b.begin(), b.end(), first_b, last_b);
-            LOG("found a: %s\n", arr100_digi_it_done(&found_a) ? "no" : "yes");
-            LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
-            CHECK_RANGE(found_a, found_b, b.end());
+            it = arr100_digi_search(&a, &range_a2);
+            iter = std::search(b.begin(), b.end(), first_b2, last_b2);
+            LOG("found a: %s\n", arr100_digi_it_done(&it) ? "no" : "yes");
+            LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
+            CHECK_RANGE(it, iter, b.end());
             arr100_digi_free(&aa);
             break;
         }
         case TEST_SEARCH_RANGE: {
-            arr100_digi aa = arr100_digi_copy(&a);
-            std::array<DIGI, 100> bb = b;
-            arr100_digi_it needle, range;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&aa, &needle, bb, first_b, last_b);
+            aa = arr100_digi_copy(&a);
+            bb = b;
+            get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
             if (TEST_RAND(2))
             { // 50% unsuccessful
-                size_t i = first_b - bb.begin();
+                size_t i = first_b2 - bb.begin();
                 arr100_digi_set(&aa, i, digi_init(0));
                 bb[i] = DIGI{0};
             }
-            print_arr100_range(&needle);
-            range = arr100_digi_begin(&a);
-            bool found = arr100_digi_search_range(&range, &needle);
-            auto iter = std::search(b.begin(), b.end(), first_b, last_b);
-            LOG("found a: %s\n", found ? "yes" : "no");
+            print_arr100_range(&range_a2);
+            range_a1 = arr100_digi_begin(&a);
+            found_a = arr100_digi_search_range(&range_a1, &range_a2);
+            iter = std::search(b.begin(), b.end(), first_b2, last_b2);
+            LOG("found a: %s\n", found_a ? "yes" : "no");
             LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
-            assert(found == !arr100_digi_it_done(&range));
-            if (found)
+            assert(found_a == !arr100_digi_it_done(&range_a1));
+            if (found_a)
                 assert(iter != b.end());
             else
                 assert(iter == b.end());
-            CHECK_ITER(range, b, iter);
+            CHECK_ITER(range_a1, b, iter);
             arr100_digi_free(&aa);
             break;
         }
         case TEST_SEARCH_N: {
             print_arr100(&a);
             size_t count = TEST_RAND(4);
-            int value = pick_random(&a);
+            value = pick_random(&a);
             LOG("search_n %zu %d\n", count, value);
-            arr100_digi_it aa = arr100_digi_search_n(&a, count, digi_init(value));
-            auto bb = std::search_n(b.begin(), b.end(), count, DIGI{value});
-            CHECK_ITER(aa, b, bb);
-            LOG("found %s at %zu\n", arr100_digi_it_done(&aa) ? "no" : "yes", arr100_digi_it_index(&aa));
+            it = arr100_digi_search_n(&a, count, digi_init(value));
+            iter = std::search_n(b.begin(), b.end(), count, DIGI{value});
+            CHECK_ITER(it, b, iter);
+            LOG("found %s at %zu\n", arr100_digi_it_done(&it) ? "no" : "yes", arr100_digi_it_index(&it));
             break;
         }
         case TEST_SEARCH_N_RANGE: {
-            arr100_digi_it range;
-            std::array<DIGI,100>::iterator first_b, last_b;
-            get_random_iters(&a, &range, b, first_b, last_b);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
             size_t count = TEST_RAND(4);
-            int value = pick_random(&a);
+            value = pick_random(&a);
             LOG("search_n_range %zu %d\n", count, value);
-            print_arr100_range(&range);
-            arr100_digi_it *aa = arr100_digi_search_n_range(&range, count, digi_init(value));
-            auto bb = std::search_n(first_b, last_b, count, DIGI{value});
-            CHECK_RANGE(*aa, bb, last_b);
-            LOG("found %s at %zu\n", arr100_digi_it_done(aa) ? "no" : "yes", arr100_digi_it_index(aa));
+            print_arr100_range(&range_a1);
+            pos = arr100_digi_search_n_range(&range_a1, count, digi_init(value));
+            iter = std::search_n(first_b1, last_b1, count, DIGI{value});
+            CHECK_RANGE(*pos, iter, last_b1);
+            LOG("found %s at %zu\n", arr100_digi_it_done(pos) ? "no" : "yes", arr100_digi_it_index(pos));
             break;
         }
         case TEST_FIND_FIRST_OF: {
             print_arr100(&a);
-            arr100_digi aa = arr100_digi_init_from(&a);
-            std::array<DIGI, 100> bb;
+            aa = arr100_digi_init_from(&a);
             for (int i = 0; i < N; i++)
             {
-                int value = TEST_RAND(TEST_MAX_VALUE);
+                value = TEST_RAND(TEST_MAX_VALUE);
                 bb[i] = DIGI{value};
                 aa.vector[i] = digi_init(value);
             }
-            arr100_digi_it s_first;
-            std::array<DIGI, 100>::iterator s_first_b, s_last_b;
-            get_random_iters(&aa, &s_first, bb, s_first_b, s_last_b);
-            arr100_digi_it it = arr100_digi_find_first_of(&a, &s_first);
-            auto iter = std::find_first_of(b.begin(), b.end(), s_first_b, s_last_b);
+            get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+            it = arr100_digi_find_first_of(&a, &range_a2);
+            iter = std::find_first_of(b.begin(), b.end(), first_b2, last_b2);
             print_arr100(&aa);
             LOG("=> %zu vs %ld\n", arr100_digi_it_index(&it), iter - b.begin());
             CHECK_ITER(it, b, iter);
@@ -901,49 +857,46 @@ int main(void)
             break;
         }
         case TEST_FIND_FIRST_OF_RANGE: {
-            arr100_digi aa = arr100_digi_init_from(&a);
-            std::array<DIGI, 100> bb;
+            aa = arr100_digi_init_from(&a);
             for (int i = 0; i < N; i++)
             {
-                int value = TEST_RAND(TEST_MAX_VALUE);
+                value = TEST_RAND(TEST_MAX_VALUE);
                 bb[i] = DIGI{value};
                 aa.vector[i] = digi_init(value);
             }
-            arr100_digi_it first_a, s_first;
-            std::array<DIGI, 100>::iterator first_b, last_b, s_first_b, s_last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
             print_arr100(&a);
-            get_random_iters(&aa, &s_first, bb, s_first_b, s_last_b);
+            get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
             print_arr100(&aa);
 
-            bool found_a = arr100_digi_find_first_of_range(&first_a, &s_first);
-            auto it = std::find_first_of(first_b, last_b, s_first_b, s_last_b);
-            LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", it != last_b ? "yes" : "no", first_a.ref - a.vector,
-                it - b.begin());
+            found_a = arr100_digi_find_first_of_range(&range_a1, &range_a2);
+            iter = std::find_first_of(first_b1, last_b1, first_b2, last_b2);
+            LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no",
+                iter != last_b1 ? "yes" : "no", range_a1.ref - a.vector,
+                iter - b.begin());
             if (found_a)
-                assert(it != last_b);
+                assert(iter != last_b1);
             else
-                assert(it == last_b);
-            // CHECK_RANGE(first_a, it, last_b);
+                assert(iter == last_b1);
+            // CHECK_RANGE(range_a1, it, last_b);
             arr100_digi_free(&aa);
             break;
         }
         case TEST_FIND_END: {
-            arr100_digi aa = arr100_digi_init_from(&a);
-            std::array<DIGI, 100> bb;
+            aa = arr100_digi_init_from(&a);
             for (int i = 0; i < 4; i++)
             {
                 bb[i] = DIGI{i};
                 aa.vector[i] = digi_init(i);
             }
-            arr100_digi_it s_first = arr100_digi_begin(&aa);
+            range_a2 = arr100_digi_begin(&aa);
             print_arr100(&a);
             print_arr100(&aa);
-            s_first.end = s_first.ref + 4;
-            arr100_digi_it it = arr100_digi_find_end(&a, &s_first);
-            auto iter = std::find_end(b.begin(), b.end(), bb.begin(), bb.begin() + 34);
-            bool found_a = !arr100_digi_it_done(&it);
-            bool found_b = iter != b.end();
+            range_a2.end = range_a2.ref + 4;
+            it = arr100_digi_find_end(&a, &range_a2);
+            iter = std::find_end(b.begin(), b.end(), bb.begin(), bb.begin() + 34);
+            found_a = !arr100_digi_it_done(&it);
+            found_b = iter != b.end();
             LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", found_b ? "yes" : "no", it.ref - a.vector,
                 iter - b.begin());
             CHECK_ITER(it, b, iter);
@@ -952,22 +905,19 @@ int main(void)
             break;
         }
         case TEST_FIND_END_RANGE: {
-            arr100_digi_it first_a, s_first;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            arr100_digi aa = arr100_digi_init_from(&a);
-            std::array<DIGI, 100> bb;
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            aa = arr100_digi_init_from(&a);
             for (int i = 0; i < 4; i++)
             {
                 bb[i] = DIGI{i};
                 aa.vector[i] = digi_init(i);
             }
-            s_first = arr100_digi_begin(&aa);
-            s_first.end = s_first.ref + 4;
+            range_a2 = arr100_digi_begin(&aa);
+            range_a2.end = range_a2.ref + 4;
 #if __cpp_lib_erase_if >= 202002L
-            first_a = arr100_digi_find_end_range(&first_a, &s_first);
-            auto it = std::find_end(first_b, last_b, bb.begin(), bb.begin() + 4);
-            CHECK_ITER(first_a, b, it);
+            it = arr100_digi_find_end_range(&range_a1, &range_a2);
+            iter = std::find_end(first_b1, last_b1, bb.begin(), bb.begin() + 4);
+            CHECK_ITER(it, b, iter);
 #endif
             arr100_digi_free(&aa);
             break;
@@ -975,87 +925,80 @@ int main(void)
         case TEST_LOWER_BOUND: {
             arr100_digi_sort(&a);
             std::sort(b.begin(), b.end());
-            int key = pick_random(&a);
-            arr100_digi_it aa = arr100_digi_lower_bound(&a, digi_init(key));
-            auto bb = std::lower_bound(b.begin(), b.end(), DIGI{key});
-            if (bb != b.end())
+            value = pick_random(&a);
+            it = arr100_digi_lower_bound(&a, digi_init(value));
+            iter = std::lower_bound(b.begin(), b.end(), DIGI{value});
+            if (iter != b.end())
             {
-                LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                LOG("%d: %d vs %d\n", value, *it.ref->value, *iter->value);
             }
-            CHECK_ITER(aa, b, bb);
+            CHECK_ITER(it, b, iter);
             break;
         }
         case TEST_UPPER_BOUND: {
             arr100_digi_sort(&a);
             std::sort(b.begin(), b.end());
-            int key = pick_random(&a);
-            arr100_digi_it aa = arr100_digi_upper_bound(&a, digi_init(key));
-            auto bb = std::upper_bound(b.begin(), b.end(), DIGI{key});
-            if (bb != b.end())
+            value = pick_random(&a);
+            it = arr100_digi_upper_bound(&a, digi_init(value));
+            iter = std::upper_bound(b.begin(), b.end(), DIGI{value});
+            if (iter != b.end())
             {
-                LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                LOG("%d: %d vs %d\n", value, *it.ref->value, *iter->value);
             }
-            CHECK_ITER(aa, b, bb);
+            CHECK_ITER(it, b, iter);
             break;
         }
         case TEST_LOWER_BOUND_RANGE: {
             arr100_digi_sort(&a);
             std::sort(b.begin(), b.end());
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            int key = pick_random(&a);
-            arr100_digi_it *aa = arr100_digi_lower_bound_range(&first_a, digi_init(key));
-            std::array<DIGI, 100>::iterator bb = std::lower_bound(first_b, last_b, DIGI{key});
-            if (bb != last_b)
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            value = pick_random(&a);
+            pos = arr100_digi_lower_bound_range(&range_a1, digi_init(value));
+            iter = std::lower_bound(first_b1, last_b1, DIGI{value});
+            if (iter != last_b1)
             {
-                LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                LOG("%d: %d vs %d\n", value, *pos->ref->value, *iter->value);
             }
-            CHECK_RANGE(*aa, bb, last_b);
+            CHECK_RANGE(*pos, iter, last_b1);
             break;
         }
         case TEST_UPPER_BOUND_RANGE: {
             arr100_digi_sort(&a);
             std::sort(b.begin(), b.end());
-            arr100_digi_it first_a;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &first_a, b, first_b, last_b);
-            int key = pick_random(&a);
-            arr100_digi_it *aa = arr100_digi_upper_bound_range(&first_a, digi_init(key));
-            std::array<DIGI, 100>::iterator bb = std::upper_bound(first_b, last_b, DIGI{key});
-            if (bb != last_b)
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            value = pick_random(&a);
+            pos = arr100_digi_upper_bound_range(&range_a1, digi_init(value));
+            iter = std::upper_bound(first_b1, last_b1, DIGI{value});
+            if (iter != last_b1)
             {
-                LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                LOG("%d: %d vs %d\n", value, *pos->ref->value, *iter->value);
             }
-            CHECK_RANGE(*aa, bb, last_b);
+            CHECK_RANGE(*pos, iter, last_b1);
             break;
         }
         case TEST_BINARY_SEARCH: {
             arr100_digi_sort(&a);
             std::sort(b.begin(), b.end());
-            int key = pick_random(&a);
-            bool found_a = arr100_digi_binary_search(&a, digi_init(key));
-            bool found_b = std::binary_search(b.begin(), b.end(), DIGI{key});
-            LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+            value = pick_random(&a);
+            found_a = arr100_digi_binary_search(&a, digi_init(value));
+            found_b = std::binary_search(b.begin(), b.end(), DIGI{value});
+            LOG("%d: %d vs %d\n", value, (int)found_a, (int)found_b);
             assert(found_a == found_b);
             break;
         }
         case TEST_BINARY_SEARCH_RANGE: {
             arr100_digi_sort(&a);
             std::sort(b.begin(), b.end());
-            arr100_digi_it range;
-            std::array<DIGI, 100>::iterator first_b, last_b;
-            get_random_iters(&a, &range, b, first_b, last_b);
-            int key = pick_random(&a);
-            bool found_a = arr100_digi_binary_search_range(&range, digi_init(key));
-            bool found_b = std::binary_search(first_b, last_b, DIGI{key});
-            LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            value = pick_random(&a);
+            found_a = arr100_digi_binary_search_range(&range_a1, digi_init(value));
+            found_b = std::binary_search(first_b1, last_b1, DIGI{value});
+            LOG("%d: %d vs %d\n", value, (int)found_a, (int)found_b);
             assert(found_a == found_b);
             break;
         }
         case TEST_INCLUDES: {
-            arr100_digi aa = arr100_digi_init_from(&a);
-            std::array<DIGI, 100> bb;
+            aa = arr100_digi_init_from(&a);
             for (int i = 0; i < 100; i++)
             {
                 bb[i] = DIGI{i};
@@ -1065,18 +1008,17 @@ int main(void)
             std::sort(b.begin(), b.end());
             print_arr100(&a);
             print_arr100(&aa);
-            //arr100_digi_it r2a = arr100_digi_begin(&aa);
-            //r2a.end = r2a.ref + 4;
-            bool a_found = arr100_digi_includes(&a, &aa);
-            bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
-            LOG("%d vs %d\n", (int)a_found, (int)b_found);
-            assert(a_found == b_found);
+            //arr100_digi_it range_a2 = arr100_digi_begin(&aa);
+            //range_a2.end = range_a2.ref + 4;
+            found_a = arr100_digi_includes(&a, &aa);
+            found_b = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
+            LOG("%d vs %d\n", (int)found_a, (int)found_b);
+            assert(found_a == found_b);
             arr100_digi_free(&aa);
             break;
         }
         case TEST_INCLUDES_RANGE: {
-            arr100_digi aa = arr100_digi_init_from(&a);
-            std::array<DIGI, 100> bb;
+            aa = arr100_digi_init_from(&a);
             for (int i = 0; i < 100; i++)
             {
                 bb[i] = DIGI{i};
@@ -1084,41 +1026,32 @@ int main(void)
             }
             arr100_digi_sort(&a);
             std::sort(b.begin(), b.end());
-            arr100_digi_it range_a1;
-            std::array<DIGI, 100>::iterator first_b1, last_b1;
             get_random_iters(&a, &range_a1, b, first_b1, last_b1);
-            arr100_digi_it range_a2;
-            std::array<DIGI, 100>::iterator first_b2, last_b2;
             get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
-            bool a_found = arr100_digi_includes_range(&range_a1, &range_a2);
-            bool b_found = std::includes(first_b1, last_b1, first_b2, last_b2);
-            LOG("%d vs %d\n", (int)a_found, (int)b_found);
-            assert(a_found == b_found);
+            found_a = arr100_digi_includes_range(&range_a1, &range_a2);
+            found_b = std::includes(first_b1, last_b1, first_b2, last_b2);
+            LOG("%d vs %d\n", (int)found_a, (int)found_b);
+            assert(found_a == found_b);
             arr100_digi_free(&aa);
             break;
         }
         case TEST_IS_SORTED: {
-            arr100_digi_it r1a;
-            std::array<DIGI,100>::iterator r1b, last1_b;
-            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
             print_arr100(&a);
-            bool a_yes = arr100_digi_is_sorted(&r1a);
-            bool b_yes = std::is_sorted(r1b, last1_b);
-            LOG("a_yes: %d b_yes %d\n", (int)a_yes, (int)b_yes);
-            assert(a_yes == b_yes);
+            found_a = arr100_digi_is_sorted(&range_a1);
+            found_b = std::is_sorted(first_b1, last_b1);
+            LOG("a_yes: %d b_yes %d\n", (int)found_a, (int)found_b);
+            assert(found_a == found_b);
             break;
         }
         case TEST_IS_SORTED_UNTIL: {
-            arr100_digi_it r1a, r2a;
-            arr100_digi_it *it;
-            std::array<DIGI,100>::iterator r1b, last1_b;
-            get_random_iters(&a, &r1a, b, r1b, last1_b);
-            print_arr100_range(&r1a);
-            r2a = r1a;
-            r2a.ref = r1a.end;
-            it = arr100_digi_is_sorted_until(&r1a, &r2a);
-            r1b = std::is_sorted_until(r1b, last1_b);
-            CHECK_ITER(*it, b, r1b);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            print_arr100_range(&range_a1);
+            range_a2 = range_a1;
+            range_a2.ref = range_a1.end;
+            pos = arr100_digi_is_sorted_until(&range_a1, &range_a2);
+            iter = std::is_sorted_until(first_b1, last_b1);
+            CHECK_ITER(*pos, b, iter);
             break;
         }
         case TEST_REVERSE: {
@@ -1131,39 +1064,30 @@ int main(void)
             break;
         }
         case TEST_REVERSE_RANGE: {
-            arr100_digi_it r1a;
-            std::array<DIGI,100>::iterator r1b, last1_b;
-            get_random_iters(&a, &r1a, b, r1b, last1_b);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
             print_arr100(&a);
-            arr100_digi_reverse_range(&r1a);
-            std::reverse(r1b, last1_b);
+            arr100_digi_reverse_range(&range_a1);
+            std::reverse(first_b1, last_b1);
             print_arr100(&a);
             CHECK(a, b);
             break;
         }
         case TEST_INTERSECTION_RANGE: {
-            arr100_digi aa;
-            std::array<DIGI,100> bb;
             gen_arrays(&aa, bb);
             arr100_digi_sort(&a);
             arr100_digi_sort(&aa);
             std::sort(b.begin(), b.end());
             std::sort(bb.begin(), bb.end());
-            arr100_digi_it range_a1;
-            std::array<DIGI,100>::iterator first_b1, last_b1;
             get_random_iters(&a, &range_a1, b, first_b1, last_b1);
-            arr100_digi_it range_a2;
-            std::array<DIGI,100>::iterator first_b2, last_b2;
             get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
             LOG("CTL a + aa\n");
             print_arr100_range(&range_a1);
             print_arr100_range(&range_a2);
-            arr100_digi_it it = arr100_digi_intersection_range(&range_a1, &range_a2);
+            it = arr100_digi_intersection_range(&range_a1, &range_a2);
             LOG("CTL => it (%zu)\n", arr100_digi_it_distance_range(&it));
             print_arr100_range(&it);
 
-            std::array<DIGI,100> bbb;
             std::vector<DIGI> bbb_;
             LOG("STL b + bb\n");
             print_array(b);
@@ -1183,28 +1107,21 @@ int main(void)
             break;
         }
         case TEST_DIFFERENCE_RANGE: {
-            arr100_digi aa;
-            std::array<DIGI,100> bb;
             gen_arrays(&aa, bb);
             arr100_digi_sort(&a);
             arr100_digi_sort(&aa);
             std::sort(b.begin(), b.end());
             std::sort(bb.begin(), bb.end());
-            arr100_digi_it range_a1;
-            std::array<DIGI,100>::iterator first_b1, last_b1;
             get_random_iters(&a, &range_a1, b, first_b1, last_b1);
-            arr100_digi_it range_a2;
-            std::array<DIGI,100>::iterator first_b2, last_b2;
             get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
             //LOG("CTL a (%zu) + aa (%zu)\n", a.size, aa.size);
             print_arr100_range(&range_a1);
             print_arr100_range(&range_a2);
-            arr100_digi_it it = arr100_digi_difference_range(&range_a1, &range_a2);
+            it = arr100_digi_difference_range(&range_a1, &range_a2);
             LOG("CTL => it (%zu)\n", arr100_digi_it_distance_range(&it));
             print_arr100_range(&it);
 
-            std::array<DIGI,100> bbb;
             std::vector<DIGI> bbb_;
             LOG("STL b (%zu) + bb (%zu)\n", b.size(), bb.size());
             print_array(b);
@@ -1224,28 +1141,21 @@ int main(void)
             break;
         }
         case TEST_SYMMETRIC_DIFFERENCE_RANGE: {
-            arr100_digi aa;
-            std::array<DIGI,100> bb;
             gen_arrays(&aa, bb);
             arr100_digi_sort(&a);
             arr100_digi_sort(&aa);
             std::sort(b.begin(), b.end());
             std::sort(bb.begin(), bb.end());
-            arr100_digi_it range_a1;
-            std::array<DIGI,100>::iterator first_b1, last_b1;
             get_random_iters(&a, &range_a1, b, first_b1, last_b1);
-            arr100_digi_it range_a2;
-            std::array<DIGI,100>::iterator first_b2, last_b2;
             get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
             LOG("CTL a + aa\n");
             print_arr100_range(&range_a1);
             print_arr100_range(&range_a2);
-            arr100_digi_it it = arr100_digi_symmetric_difference_range(&range_a1, &range_a2);
+            it = arr100_digi_symmetric_difference_range(&range_a1, &range_a2);
             LOG("CTL => it (%zu)\n", arr100_digi_it_distance_range(&it));
             print_arr100_range(&it);
 
-            std::array<DIGI,100> bbb;
             std::vector<DIGI> bbb_;
             LOG("STL b + bb\n");
             print_array(b);
