@@ -775,6 +775,15 @@ int main(void)
                 if (a.size != b.size())
                     fail++;
                 CHECK(a, b);
+
+                // for coverage: the 2nd case
+                LOG("insert_range at end:\n");
+                it = deq_digi_end(&a);
+                deq_digi_insert_range(&it, &range_a2);
+                b.insert(b.end(), first_b2, last_b2);
+                print_deq(&a);
+                CHECK(a, b);
+
                 deq_digi_free(&aa);
                 break;
             }
