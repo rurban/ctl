@@ -427,12 +427,12 @@ static inline I *JOIN(A, erase)(I *pos)
 
 static inline void JOIN(A, insert_index)(A *self, size_t index, T value)
 {
+#ifndef POD
+    void (*saved)(T *) = self->free;
+    self->free = NULL;
+#endif
     if (self->size > 0)
     {
-#ifndef POD
-        void (*saved)(T *) = self->free;
-        self->free = NULL;
-#endif
         if (index < self->size / 2)
         {
             JOIN(A, push_front)(self, *JOIN(A, at)(self, 0));
@@ -446,12 +446,12 @@ static inline void JOIN(A, insert_index)(A *self, size_t index, T value)
                 *JOIN(A, at)(self, i) = *JOIN(A, at)(self, i - 1);
         }
         *JOIN(A, at)(self, index) = value;
-#ifndef POD
-        self->free = saved;
-#endif
     }
     else
         JOIN(A, push_back)(self, value);
+#ifndef POD
+    self->free = saved;
+#endif
 }
 
 static inline void JOIN(A, insert)(I *pos, T value)

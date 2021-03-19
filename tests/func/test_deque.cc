@@ -104,7 +104,7 @@ OLD_MAIN
     TEST(REVERSE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(UNIQUE) /* 71 */                                                                                              \
+    TEST(UNIQUE)                                                                                                       \
     TEST(UNIQUE_RANGE)                                                                                                 \
     TEST(INSERT_GENERIC)
 
@@ -171,8 +171,8 @@ void print_deque(std::deque<DIGI> &b)
 }
 
 #ifdef DEBUG
-#undef TEST_MAX_SIZE
-#define TEST_MAX_SIZE 15
+//#undef TEST_MAX_SIZE
+//#define TEST_MAX_SIZE 15
 #define TEST_MAX_VALUE 1000
 #else
 #define TEST_MAX_VALUE INT_MAX
@@ -485,9 +485,6 @@ int main(void)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
         LOG("loop %u, size %zu\n", loop, size);
-#if defined(DEBUG) && !defined(LONG)
-        size = 10;
-#endif
         enum
         {
             MODE_DIRECT,
@@ -841,32 +838,33 @@ int main(void)
                 digi key = digi_init(value);
                 if (a.size < 1)
                 {
-                    deq_digi_push_front(&a, key);
-                    b.push_front(DIGI{value});
+                    int v = TEST_RAND(TEST_MAX_VALUE);
+                    deq_digi_push_front(&a, digi_init(v));
+                    b.push_front(DIGI{v});
                 }
-#ifdef DEBUG
-                if (a.size > 10)
-                {
-                    deq_digi_resize(&a, 10, digi_init(0));
-                    b.resize(10);
-                }
+#if defined DEBUG && !defined LONG
+                //if (a.size > 10)
+                //{
+                //    deq_digi_resize(&a, 10, digi_init(0));
+                //    b.resize(10);
+                //}
                 LOG("before emplace\n");
                 print_deq(&a);
 #endif
                 assert(a.size > 0);
                 it = deq_digi_begin(&a);
-                deq_digi_it_advance(&it, 1);
-                LOG("CTL emplace 1 %d\n", *it.ref->value);
+                deq_digi_it_advance(&it, index);
+                LOG("CTL emplace 1 %d\n", a.size > index ? *it.ref->value : -1);
                 deq_digi_emplace(&it, &key);
                 print_deq(&a);
                 LOG("STL emplace begin++ %d\n", *DIGI{value});
                 assert(b.size() > 0);
-                b.emplace(b.begin() + 1, DIGI{value});
+                b.emplace(b.begin() + index, DIGI{value});
                 print_deque(b);
                 if (!b.front().value)
                     fprintf(stderr, "!b.front().value size=%zu, index 1\n", b.size());
                 if (!deq_digi_front(&a)->value)
-                    fprintf(stderr, "!deq_digi_front(&a)->value size=%zu, index %zu\n", a.size, 1UL);
+                    fprintf(stderr, "!deq_digi_front(&a)->value size=%zu, index %zu\n", a.size, index);
                 // b.front might fail with size=2, STL bug
                 if (b.size() == 2 && !*b.front().value)
                 {
@@ -876,7 +874,7 @@ int main(void)
                 }
                 CHECK(a, b);
                 // may not delete, as emplace does not copy
-                // digi_free(&aa);
+                // digi_free(&key);
                 break;
             }
             case TEST_EMPLACE_FRONT: {
@@ -1906,7 +1904,7 @@ int main(void)
                 break;
             }
 #ifdef DEBUG
-            if (which < TEST_EQUAL_RANGE)
+            if (which < number_ok)
 #endif
                 CHECK(a, b);
             deq_digi_free(&a);
