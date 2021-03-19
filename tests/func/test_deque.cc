@@ -484,7 +484,7 @@ int main(void)
     for (unsigned loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
-        LOG("loop %zu, size %zu\n", loop, size);
+        LOG("loop %u, size %zu\n", loop, size);
 #if defined(DEBUG) && !defined(LONG)
         size = 10;
 #endif
@@ -496,10 +496,20 @@ int main(void)
         };
         for (size_t mode = MODE_DIRECT; mode < MODE_TOTAL; mode++)
         {
-            deq_digi a = deq_digi_init();
+            deq_digi a, aa, aaa;
+            std::deque<DIGI> b, bb, bbb;
+            deq_digi_it range_a1, range_a2, it;
+            deq_digi_it *pos;
+            std::deque<DIGI>::iterator first_b1, last_b1, first_b2, last_b2, iter;
+            bool found_a, found_b;
+            size_t num_a, num_b;
+            int value = TEST_RAND(TEST_MAX_VALUE);
+            const size_t index = TEST_RAND(size);
+
+            a = deq_digi_init();
             a.compare = digi_compare;
             a.equal = digi_equal;
-            std::deque<DIGI> b;
+
             if (mode == MODE_DIRECT)
             {
                 LOG("mode direct\n");
@@ -507,7 +517,7 @@ int main(void)
                 b.resize(size);
                 for (size_t i = 0; i < size; i++)
                 {
-                    const int value = TEST_RAND(TEST_MAX_VALUE);
+                    value = TEST_RAND(TEST_MAX_VALUE);
                     deq_digi_set(&a, i, digi_init(value));
                     b[i] = DIGI{value};
                 }
@@ -517,7 +527,7 @@ int main(void)
                 LOG("mode growth\n");
                 for (size_t pushes = 0; pushes < size; pushes++)
                 {
-                    const int value = TEST_RAND(TEST_MAX_VALUE);
+                    value = TEST_RAND(TEST_MAX_VALUE);
                     deq_digi_push_back(&a, digi_init(value));
                     b.push_back(DIGI{value});
                 }
@@ -536,7 +546,6 @@ int main(void)
             switch (which)
             {
             case TEST_PUSH_BACK: {
-                const int value = TEST_RAND(TEST_MAX_VALUE);
                 b.push_back(DIGI{value});
                 deq_digi_push_back(&a, digi_init(value));
                 CHECK(a, b);
@@ -552,7 +561,6 @@ int main(void)
                 break;
             }
             case TEST_PUSH_FRONT: {
-                const int value = TEST_RAND(TEST_MAX_VALUE);
                 b.push_front(DIGI{value});
                 deq_digi_push_front(&a, digi_init(value));
                 CHECK(a, b);
@@ -576,17 +584,16 @@ int main(void)
             case TEST_ERASE: {
                 if (a.size > 0)
                 {
-                    const size_t index = TEST_RAND(a.size);
-                    deq_digi_it pos = deq_digi_begin(&a);
-                    deq_digi_it_advance(&pos, index);
+                    it = deq_digi_begin(&a);
+                    deq_digi_it_advance(&it, index);
                     b.erase(b.begin() + index);
-                    deq_digi_erase(&pos);
+                    deq_digi_erase(&it);
                 }
                 CHECK(a, b);
                 break;
             }
             case TEST_RESIZE: {
-                const size_t resize = 3 * TEST_RAND(a.size) + 1;
+                const size_t resize = 3 * index + 1;
                 b.resize(resize);
                 deq_digi_resize(&a, resize, digi_init(0));
                 CHECK(a, b);
@@ -642,18 +649,17 @@ int main(void)
                 break;
             }
             case TEST_COPY: {
-                deq_digi aa = deq_digi_copy(&a);
-                std::deque<DIGI> bb = b;
+                aa = deq_digi_copy(&a);
+                bb = b;
                 CHECK(aa, bb);
                 deq_digi_free(&aa);
                 CHECK(a, b);
                 break;
             }
             case TEST_SWAP: {
-                deq_digi aa = deq_digi_copy(&a);
-                deq_digi aaa = deq_digi_init();
-                std::deque<DIGI> bb = b;
-                std::deque<DIGI> bbb;
+                aa = deq_digi_copy(&a);
+                aaa = deq_digi_init();
+                bb = b;
                 deq_digi_swap(&aaa, &aa);
                 std::swap(bb, bbb);
                 CHECK(aaa, bbb);
@@ -665,11 +671,10 @@ int main(void)
                 size_t amount = TEST_RAND(512);
                 for (size_t count = 0; count < amount; count++)
                 {
-                    const int value = TEST_RAND(INT_MAX);
-                    const size_t index = TEST_RAND(a.size);
-                    deq_digi_it pos = deq_digi_begin(&a);
-                    deq_digi_it_advance(&pos, index);
-                    deq_digi_insert(&pos, digi_init(value));
+                    value = TEST_RAND(INT_MAX);
+                    it = deq_digi_begin(&a);
+                    deq_digi_it_advance(&it, index);
+                    deq_digi_insert(&it, digi_init(value));
                     b.insert(b.begin() + index, DIGI{value});
                 }
                 CHECK(a, b);
@@ -679,13 +684,13 @@ int main(void)
                 size_t amount = TEST_RAND(512);
                 for (size_t count = 0; count < amount; count++)
                 {
-                    const int value = TEST_RAND(TEST_MAX_VALUE);
-                    const size_t index = TEST_RAND(a.size);
-                    deq_digi_insert_index(&a, index, digi_init(value));
+                    value = TEST_RAND(TEST_MAX_VALUE);
+                    const size_t idx = TEST_RAND(a.size);
+                    deq_digi_insert_index(&a, idx, digi_init(value));
 #ifdef DEBUG
-                    std::deque<DIGI>::iterator iter =
+                    iter =
 #endif
-                        b.insert(b.begin() + index, DIGI{value});
+                        b.insert(b.begin() + idx, DIGI{value});
                     LOG("STL insert %d at %ld:\n", value, std::distance(b.begin(), iter));
                 }
                 CHECK(a, b);
@@ -697,22 +702,20 @@ int main(void)
 #else
                 size_t amount = TEST_RAND(10);
 #endif
-                const int value = TEST_RAND(TEST_MAX_VALUE);
-                const size_t index = TEST_RAND(a.size); // allow end()
-                deq_digi_it pos = deq_digi_begin(&a);
-                deq_digi_it_advance(&pos, index);
-                if (!deq_digi_insert_count(&pos, amount, digi_init(value)))
+                it = deq_digi_begin(&a);
+                deq_digi_it_advance(&it, index);
+                if (!deq_digi_insert_count(&it, amount, digi_init(value)))
                 {
                     fprintf(stderr, "overflow size %zu + amount %zu\n", a.size, amount);
                     break;
                 }
-                LOG("CTL insert_count at %zu, %zux %d:\n", pos.index, amount, value);
+                LOG("CTL insert_count at %zu, %zux %d:\n", it.index, amount, value);
                 print_deq(&a);
 
                 if (amount)
                 {
 #ifdef DEBUG
-                    std::deque<DIGI>::iterator iter =
+                    iter =
 #endif
                         b.insert(b.begin() + index, amount, DIGI{value});
                     LOG("STL insert %zux %d at %ld:\n", amount, value, std::distance(b.begin(), iter));
@@ -725,7 +728,6 @@ int main(void)
             case TEST_ERASE_INDEX: // 25
                 if (a.size > 0)
                 {
-                    const size_t index = TEST_RAND(a.size);
                     LOG("erase_index %zu from %zu\n", index, a.size);
                     deq_digi_erase_index(&a, index);
                     b.erase(b.begin() + index);
@@ -736,38 +738,34 @@ int main(void)
             case TEST_INSERT_RANGE: // 54
             {
                 size_t size2 = TEST_RAND(TEST_MAX_SIZE);
-                deq_digi aa = deq_digi_init_from(&a);
-                std::deque<DIGI> bb;
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
+                aa = deq_digi_init_from(&a);
                 for (int i = 0; i < (int)size2; i++)
                 {
                     deq_digi_push_back(&aa, digi_init(i));
                     bb.push_back(DIGI{i});
                 }
                 print_deq(&a);
-                get_random_iters(&aa, &first_a, bb, first_b, last_b);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
                 // libstdc++  fails on empty (uninitialized) front or back
                 // values. It cannot deal with empty insert ranges,
-                // i.e. first_b == last_b. We can.
-                if (first_b == last_b)
+                // i.e. first_b2 == last_b2. We can.
+                if (first_b2 == last_b2)
                 {
                     deq_digi_free(&aa);
                     break;
                 }
                 // print_deq(&aa);
-                const size_t index = TEST_RAND(a.size);
-                deq_digi_it pos = deq_digi_begin(&a);
-                deq_digi_it_advance(&pos, index);
+                it = deq_digi_begin(&a);
+                deq_digi_it_advance(&it, index);
                 LOG("insert_range 0-%zu at %zu:\n", size2 - 1, index);
-                deq_digi_insert_range(&pos, &first_a);
-                b.insert(b.begin() + index, first_b, last_b);
+                deq_digi_insert_range(&it, &range_a2);
+                b.insert(b.begin() + index, first_b2, last_b2);
 #if 0
-                    std::vector<DIGI> cc;
-                    LOG("add vector (%zu)\n", size2);
-                    for(int i = 0; i < (int)size2; i++)
-                        cc.push_back(DIGI{i});
-                    b.insert(b.begin() + index, cc.begin(), cc.end());
+                std::vector<DIGI> cc;
+                LOG("add vector (%zu)\n", size2);
+                for(int i = 0; i < (int)size2; i++)
+                    cc.push_back(DIGI{i});
+                b.insert(b.begin() + index, cc.begin(), cc.end());
 #endif
 
                 LOG("CTL =>\n");
@@ -783,16 +781,14 @@ int main(void)
 #ifdef DEBUG
             case TEST_INSERT_GENERIC:
             {
-                deq_digi aa = deq_digi_init_from(&a);
-                std::deque<DIGI> bb;
+                aa = deq_digi_init_from(&a);
                 setup_deque(&aa, bb);
                 print_deq(&aa);
-                const size_t index = TEST_RAND(a.size);
-                deq_digi_it pos = deq_digi_begin(&a);
-                deq_digi_it range2 = deq_digi_begin(&aa);
-                deq_digi_it_advance(&pos, index);
+                it = deq_digi_begin(&a);
+                range_a2 = deq_digi_begin(&aa);
+                deq_digi_it_advance(&it, index);
                 LOG("insert_range %zu at %zu:\n", aa.size, index);
-                deq_digi_insert_generic(&pos, &range2);
+                deq_digi_insert_generic(&it, &range_a2);
                 b.insert(b.begin() + index, bb.begin(), bb.end());
                 LOG("CTL =>\n");
                 print_deq(&a);
@@ -806,27 +802,26 @@ int main(void)
             }
 #endif
             case TEST_ERASE_RANGE: {
-                int value = TEST_RAND(TEST_MAX_VALUE);
                 if (a.size < 4)
                 {
                     deq_digi_resize(&a, 10, digi_init(value));
                     b.resize(10, DIGI{value});
                 }
-                deq_digi_it range;
-                const size_t index = TEST_RAND(a.size / 2);
-                const size_t iend = index + TEST_RAND(a.size - index);
-                range = deq_digi_begin(&a);
-                deq_digi_it_advance(&range, index);
-                range.end = iend;
-                LOG("erase_range %zu of %zu\n", index, a.size);
-                deq_digi_erase_range(&range);
-                LOG("CTL erase_range [%lu - %lu):\n", index, iend);
+                const size_t idx = TEST_RAND(a.size / 2);
+                const size_t iend = idx + TEST_RAND(a.size - idx);
+                range_a1 = deq_digi_begin(&a);
+                deq_digi_it_advance(&range_a1, idx);
+                range_a1.end = iend;
+                print_deq_range(range_a1);
+                LOG("erase_range %zu of %zu\n", idx, a.size);
+                deq_digi_erase_range(&range_a1);
+                LOG("CTL erase_range [%lu - %lu):\n", idx, iend);
                 print_deq(&a);
 
-                auto b_from = b.begin() + index;
-                auto b_end = b.begin() + iend;
+                first_b1 = b.begin() + idx;
+                last_b1 = b.begin() + iend;
                 /*auto iter =*/
-                b.erase(b_from, b_end);
+                b.erase(first_b1, last_b1);
                 // LOG ("STL erase [%ld, %ld):\n", std::distance(b.begin(), iter), iend);
                 print_deque(b);
                 // CHECK_RANGE (range, iter, b_end);
@@ -834,11 +829,10 @@ int main(void)
                 break;
             }
             case TEST_EMPLACE: {
-                int value = TEST_RAND(TEST_MAX_VALUE);
-                digi aa = digi_init(value);
+                digi key = digi_init(value);
                 if (a.size < 1)
                 {
-                    deq_digi_push_front(&a, digi_init(value));
+                    deq_digi_push_front(&a, key);
                     b.push_front(DIGI{value});
                 }
 #ifdef DEBUG
@@ -851,10 +845,10 @@ int main(void)
                 print_deq(&a);
 #endif
                 assert(a.size > 0);
-                deq_digi_it pos = deq_digi_begin(&a);
-                deq_digi_it_advance(&pos, 1);
-                LOG("CTL emplace 1 %d\n", *aa.value);
-                deq_digi_emplace(&pos, &aa);
+                it = deq_digi_begin(&a);
+                deq_digi_it_advance(&it, 1);
+                LOG("CTL emplace 1 %d\n", *it.ref->value);
+                deq_digi_emplace(&it, &key);
                 print_deq(&a);
                 LOG("STL emplace begin++ %d\n", *DIGI{value});
                 assert(b.size() > 0);
@@ -877,23 +871,20 @@ int main(void)
                 break;
             }
             case TEST_EMPLACE_FRONT: {
-                int value = TEST_RAND(TEST_MAX_VALUE);
-                digi aa = digi_init(value);
-                deq_digi_emplace_front(&a, &aa);
+                digi key = digi_init(value);
+                deq_digi_emplace_front(&a, &key);
                 b.emplace_front(DIGI{value});
                 CHECK(a, b);
                 break;
             }
             case TEST_EMPLACE_BACK: {
-                int value = TEST_RAND(TEST_MAX_VALUE);
-                digi aa = digi_init(value);
-                deq_digi_emplace_back(&a, &aa);
+                digi key = digi_init(value);
+                deq_digi_emplace_back(&a, &key);
                 b.emplace_back(DIGI{value});
                 CHECK(a, b);
                 break;
             }
             case TEST_ASSIGN: {
-                const int value = TEST_RAND(TEST_MAX_VALUE);
                 size_t assign_size = TEST_RAND(a.size) + 1;
                 deq_digi_assign(&a, assign_size, digi_init(value));
                 b.assign(assign_size, DIGI{value});
@@ -910,8 +901,8 @@ int main(void)
             }
             case TEST_ERASE_IF: {
 #if __cpp_lib_erase_if >= 202002L
-                size_t num_a = deq_digi_erase_if(&a, digi_is_odd);
-                size_t num_b = std::erase_if(b, DIGI_is_odd);
+                num_a = deq_digi_erase_if(&a, digi_is_odd);
+                num_b = std::erase_if(b, DIGI_is_odd);
                 assert(num_a == num_b);
 #else
                 deq_digi_erase_if(&a, digi_is_odd);
@@ -921,8 +912,8 @@ int main(void)
                 break;
             }
             case TEST_EQUAL: {
-                deq_digi aa = deq_digi_copy(&a);
-                std::deque<DIGI> bb = b;
+                aa = deq_digi_copy(&a);
+                bb = b;
                 assert(deq_digi_equal(&a, &aa));
                 assert(b == bb);
                 deq_digi_free(&aa);
@@ -932,23 +923,22 @@ int main(void)
             case TEST_FIND: {
                 if (a.size > 0)
                 {
-                    const size_t index = TEST_RAND(a.size);
-                    int value = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : *deq_digi_at(&a, index)->value;
+                    value = TEST_RAND(2) ? value : *deq_digi_at(&a, index)->value;
                     digi key = digi_init(value);
-                    deq_digi_it aa = deq_digi_find(&a, key);
-                    auto bb = find(b.begin(), b.end(), DIGI{value});
-                    bool found_a = !deq_digi_it_done(&aa);
-                    bool found_b = bb != b.end();
+                    it = deq_digi_find(&a, key);
+                    iter = find(b.begin(), b.end(), DIGI{value});
+                    found_a = !deq_digi_it_done(&it);
+                    found_b = iter != b.end();
                     assert(found_a == found_b);
                     if (found_a && found_b)
-                        assert(*aa.ref->value == *bb->value);
+                        assert(*it.ref->value == *iter->value);
 
                     a.equal = NULL;
-                    aa = deq_digi_find(&a, key);
-                    found_a = !deq_digi_it_done(&aa);
+                    it = deq_digi_find(&a, key);
+                    found_a = !deq_digi_it_done(&it);
                     assert(found_a == found_b);
                     if (found_a && found_b)
-                        assert(*aa.ref->value == *bb->value);
+                        assert(*it.ref->value == *iter->value);
 
                     digi_free(&key);
                     CHECK(a, b);
@@ -956,219 +946,189 @@ int main(void)
                 break;
             }
             case TEST_FIND_IF: {
-                deq_digi_it it = deq_digi_find_if(&a, digi_is_odd);
-                auto bb = std::find_if(b.begin(), b.end(), DIGI_is_odd);
-                if (bb == b.end())
+                it = deq_digi_find_if(&a, digi_is_odd);
+                iter = std::find_if(b.begin(), b.end(), DIGI_is_odd);
+                if (iter == b.end())
                     assert(deq_digi_it_done(&it));
                 else
-                    assert(*(it.ref->value) == *bb->value);
+                    assert(*(it.ref->value) == *iter->value);
                 break;
             }
             case TEST_FIND_IF_NOT: {
-                deq_digi_it aa = deq_digi_find_if_not(&a, digi_is_odd);
-                auto bb = std::find_if_not(b.begin(), b.end(), DIGI_is_odd);
+                it = deq_digi_find_if_not(&a, digi_is_odd);
+                iter = std::find_if_not(b.begin(), b.end(), DIGI_is_odd);
                 print_deq(&a);
                 print_deque(b);
-                CHECK_ITER(aa, b, bb);
-                if (bb == b.end())
-                    assert(deq_digi_it_done(&aa));
+                CHECK_ITER(it, b, iter);
+                if (iter == b.end())
+                    assert(deq_digi_it_done(&it));
                 else
-                    assert(*(aa.ref->value) == *bb->value);
+                    assert(*(it.ref->value) == *iter->value);
                 break;
             }
             case TEST_ALL_OF: {
-                bool is_a = deq_digi_all_of(&a, digi_is_odd);
-                bool is_b = std::all_of(b.begin(), b.end(), DIGI_is_odd);
-                assert(is_a == is_b);
+                found_a = deq_digi_all_of(&a, digi_is_odd);
+                found_b = std::all_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_ANY_OF: {
-                bool is_a = deq_digi_any_of(&a, digi_is_odd);
-                bool is_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
-                assert(is_a == is_b);
+                found_a = deq_digi_any_of(&a, digi_is_odd);
+                found_b = std::any_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_NONE_OF: {
-                bool is_a = deq_digi_none_of(&a, digi_is_odd);
-                bool is_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
-                assert(is_a == is_b);
+                found_a = deq_digi_none_of(&a, digi_is_odd);
+                found_b = std::none_of(b.begin(), b.end(), DIGI_is_odd);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_COUNT: {
-                int key = TEST_RAND(TEST_MAX_SIZE);
-                int aa = deq_digi_count(&a, digi_init(key));
-                int bb = std::count(b.begin(), b.end(), DIGI{key});
-                assert(aa == bb);
+                num_a = deq_digi_count(&a, digi_init((int)index));
+                num_b = std::count(b.begin(), b.end(), DIGI{(int)index});
+                assert(num_a == num_b);
                 break;
             }
             case TEST_COUNT_IF: {
-                size_t count_a = deq_digi_count_if(&a, digi_is_odd);
-                size_t count_b = std::count_if(b.begin(), b.end(), DIGI_is_odd);
-                assert(count_a == count_b);
+                num_a = deq_digi_count_if(&a, digi_is_odd);
+                num_b = std::count_if(b.begin(), b.end(), DIGI_is_odd);
+                assert(num_a == num_b);
                 break;
             }
             case TEST_FIND_RANGE: {
-                int vb = pick_random(&a);
-                digi key = digi_init(vb);
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                bool found_a = deq_digi_find_range(&first_a, key);
-                auto it = find(first_b, last_b, vb);
+                value = pick_random(&a);
+                digi key = digi_init(value);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                found_a = deq_digi_find_range(&range_a1, key);
+                iter = find(first_b1, last_b1, DIGI{value});
                 if (found_a)
-                    assert(it != last_b);
+                    assert(iter != last_b1);
                 else
-                    assert(it == last_b);
-                CHECK_RANGE(first_a, it, last_b);
+                    assert(iter == last_b1);
+                CHECK_RANGE(range_a1, iter, last_b1);
                 digi_free(&key); // special
                 CHECK(a, b);
                 break;
             }
             case TEST_FIND_IF_RANGE: {
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                first_a = deq_digi_find_if_range(&first_a, digi_is_odd);
-                auto it = find_if(first_b, last_b, DIGI_is_odd);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                it = deq_digi_find_if_range(&range_a1, digi_is_odd);
+                iter = find_if(first_b1, last_b1, DIGI_is_odd);
                 print_deq(&a);
                 print_deque(b);
-                CHECK_ITER(first_a, b, it);
+                CHECK_ITER(it, b, iter);
                 break;
             }
             case TEST_FIND_IF_NOT_RANGE: {
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                first_a = deq_digi_find_if_not_range(&first_a, digi_is_odd);
-                auto it = find_if_not(first_b, last_b, DIGI_is_odd);
-                CHECK_ITER(first_a, b, it);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                it = deq_digi_find_if_not_range(&range_a1, digi_is_odd);
+                iter = find_if_not(first_b1, last_b1, DIGI_is_odd);
+                CHECK_ITER(it, b, iter);
                 break;
             }
             case TEST_ALL_OF_RANGE: {
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                bool aa = deq_digi_all_of_range(&first_a, digi_is_odd);
-                bool bb = std::all_of(first_b, last_b, DIGI_is_odd);
-                if (aa != bb)
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                found_a = deq_digi_all_of_range(&range_a1, digi_is_odd);
+                found_b = std::all_of(first_b1, last_b1, DIGI_is_odd);
+                if (found_a != found_b)
                 {
                     print_deq(&a);
                     print_deque(b);
-                    printf("%d != %d is_odd\n", (int)aa, (int)bb);
+                    printf("%d != %d is_odd\n", (int)found_a, (int)found_b);
                 }
-                assert(aa == bb);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_ANY_OF_RANGE: {
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                bool aa = deq_digi_any_of_range(&first_a, digi_is_odd);
-                bool bb = std::any_of(first_b, last_b, DIGI_is_odd);
-                if (aa != bb)
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                found_a = deq_digi_any_of_range(&range_a1, digi_is_odd);
+                found_b = std::any_of(first_b1, last_b1, DIGI_is_odd);
+                if (found_a != found_b)
                 {
                     print_deq(&a);
                     print_deque(b);
-                    printf("%d != %d is_odd\n", (int)aa, (int)bb);
+                    printf("%d != %d is_odd\n", (int)found_a, (int)found_b);
                 }
-                assert(aa == bb);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_NONE_OF_RANGE: {
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                bool aa = deq_digi_none_of_range(&first_a, digi_is_odd);
-                bool bb = none_of(first_b, last_b, DIGI_is_odd);
-                if (aa != bb)
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                found_a = deq_digi_none_of_range(&range_a1, digi_is_odd);
+                found_b = none_of(first_b1, last_b1, DIGI_is_odd);
+                if (found_a != found_b)
                 {
                     print_deq(&a);
                     print_deque(b);
-                    printf("%d != %d is_odd\n", (int)aa, (int)bb);
+                    printf("%d != %d is_odd\n", (int)found_a, (int)found_b);
                 }
-                assert(aa == bb);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_COUNT_IF_RANGE: {
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                size_t numa = deq_digi_count_if_range(&first_a, digi_is_odd);
-                size_t numb = count_if(first_b, last_b, DIGI_is_odd);
-                if (numa != numb)
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                num_a = deq_digi_count_if_range(&range_a1, digi_is_odd);
+                num_b = count_if(first_b1, last_b1, DIGI_is_odd);
+                if (num_a != num_b)
                 {
                     print_deq(&a);
                     print_deque(b);
-                    printf("%d != %d FAIL\n", (int)numa, (int)numb);
+                    printf("%d != %d FAIL\n", (int)num_a, (int)num_b);
                     fail++;
                 }
-                assert(numa == numb); // fails. off by one, counts one too much
+                assert(num_a == num_b);
                 break;
             }
             case TEST_COUNT_RANGE: {
-                int test_value = 0;
-                int v = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : test_value;
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                // used to fail with 0,0 of 0
-                size_t numa = deq_digi_count_range(&first_a, digi_init(v));
-                size_t numb = count(first_b, last_b, DIGI{v});
-                assert(numa == numb);
+                int v = TEST_RAND(2) ? value : 0;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                num_a = deq_digi_count_range(&range_a1, digi_init(v));
+                num_b = count(first_b1, last_b1, DIGI{v});
+                assert(num_a == num_b);
                 break;
             }
             case TEST_INCLUDES: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_sort(&a);
                 deq_digi_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                bool a_found = deq_digi_includes(&a, &aa);
-                bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
-                assert(a_found == b_found);
+                found_a = deq_digi_includes(&a, &aa);
+                found_b = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
+                assert(found_a == found_b);
                 CHECK(aa, bb);
                 deq_digi_free(&aa);
                 break;
             }
             case TEST_INCLUDES_RANGE: // 51
             {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_sort(&a);
                 deq_digi_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                deq_digi_it first_a1;
-                std::deque<DIGI>::iterator first_b1, last_b1;
-                get_random_iters(&a, &first_a1, b, first_b1, last_b1);
-                deq_digi_it first_a2;
-                std::deque<DIGI>::iterator first_b2, last_b2;
-                get_random_iters(&aa, &first_a2, bb, first_b2, last_b2);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
                 print_deq(&a);
                 print_deq(&aa);
 
                 // deviates with aa: 0,0 of 1
-                bool a_found = deq_digi_includes_range(&first_a1, &first_a2);
-                bool b_found = std::includes(first_b1, last_b1, first_b2, last_b2);
-                assert(a_found == b_found);
+                found_a = deq_digi_includes_range(&range_a1, &range_a2);
+                found_b = std::includes(first_b1, last_b1, first_b2, last_b2);
+                assert(found_a == found_b);
                 CHECK(aa, bb);
                 deq_digi_free(&aa);
                 break;
             }
             case TEST_UNION: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_sort(&a);
                 deq_digi_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                deq_digi aaa = deq_digi_union(&a, &aa);
+                aaa = deq_digi_union(&a, &aa);
 #ifndef _MSC_VER
-                std::deque<DIGI> bbb;
                 std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
                 CHECK(aaa, bbb);
 #endif
@@ -1178,16 +1138,13 @@ int main(void)
                 break;
             }
             case TEST_INTERSECTION: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_sort(&a);
                 deq_digi_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                deq_digi aaa = deq_digi_intersection(&a, &aa);
+                aaa = deq_digi_intersection(&a, &aa);
 #ifndef _MSC_VER
-                std::deque<DIGI> bbb;
                 std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
                 CHECK(aaa, bbb);
 #endif
@@ -1197,16 +1154,13 @@ int main(void)
                 break;
             }
             case TEST_SYMMETRIC_DIFFERENCE: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_sort(&a);
                 deq_digi_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                deq_digi aaa = deq_digi_symmetric_difference(&a, &aa);
+                aaa = deq_digi_symmetric_difference(&a, &aa);
 #ifndef _MSC_VER
-                std::deque<DIGI> bbb;
                 std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
                 CHECK(aaa, bbb);
 #endif
@@ -1216,17 +1170,14 @@ int main(void)
                 break;
             }
             case TEST_DIFFERENCE: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_sort(&a);
                 deq_digi_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
                 print_deq(&a);
-                deq_digi aaa = deq_digi_difference(&a, &aa);
+                aaa = deq_digi_difference(&a, &aa);
 #ifndef _MSC_VER
-                std::deque<DIGI> bbb;
                 std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
                 CHECK(aaa, bbb);
 #endif
@@ -1236,28 +1187,21 @@ int main(void)
                 break;
             }
             case TEST_UNION_RANGE: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_sort(&a);
                 deq_digi_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                deq_digi_it first_a1;
-                std::deque<DIGI>::iterator first_b1, last_b1;
-                get_random_iters(&a, &first_a1, b, first_b1, last_b1);
-                deq_digi_it first_a2;
-                std::deque<DIGI>::iterator first_b2, last_b2;
-                get_random_iters(&aa, &first_a2, bb, first_b2, last_b2);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
                 LOG("CTL a + aa\n");
-                print_deq_range(first_a1);
-                print_deq_range(first_a2);
-                deq_digi aaa = deq_digi_union_range(&first_a1, &first_a2);
+                print_deq_range(range_a1);
+                print_deq_range(range_a2);
+                aaa = deq_digi_union_range(&range_a1, &range_a2);
                 LOG("CTL => aaa\n");
                 print_deq(&aaa);
 
-                std::deque<DIGI> bbb;
                 LOG("STL b + bb\n");
                 print_deque(b);
                 print_deque(bb);
@@ -1274,28 +1218,21 @@ int main(void)
                 break;
             }
             case TEST_INTERSECTION_RANGE: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_sort(&a);
                 deq_digi_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                deq_digi_it first_a1;
-                std::deque<DIGI>::iterator first_b1, last_b1;
-                get_random_iters(&a, &first_a1, b, first_b1, last_b1);
-                deq_digi_it first_a2;
-                std::deque<DIGI>::iterator first_b2, last_b2;
-                get_random_iters(&aa, &first_a2, bb, first_b2, last_b2);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
                 LOG("CTL a + aa\n");
-                print_deq_range(first_a1);
-                print_deq_range(first_a2);
-                deq_digi aaa = deq_digi_intersection_range(&first_a1, &first_a2);
+                print_deq_range(range_a1);
+                print_deq_range(range_a2);
+                aaa = deq_digi_intersection_range(&range_a1, &range_a2);
                 LOG("CTL => aaa\n");
                 print_deq(&aaa);
 
-                std::deque<DIGI> bbb;
                 LOG("STL b + bb\n");
                 print_deque(b);
                 print_deque(bb);
@@ -1312,28 +1249,21 @@ int main(void)
                 break;
             }
             case TEST_DIFFERENCE_RANGE: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_sort(&a);
                 deq_digi_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                deq_digi_it first_a1;
-                std::deque<DIGI>::iterator first_b1, last_b1;
-                get_random_iters(&a, &first_a1, b, first_b1, last_b1);
-                deq_digi_it first_a2;
-                std::deque<DIGI>::iterator first_b2, last_b2;
-                get_random_iters(&aa, &first_a2, bb, first_b2, last_b2);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
                 LOG("CTL a (%zu) + aa (%zu)\n", a.size, aa.size);
-                print_deq_range(first_a1);
-                print_deq_range(first_a2);
-                deq_digi aaa = deq_digi_difference_range(&first_a1, &first_a2);
+                print_deq_range(range_a1);
+                print_deq_range(range_a2);
+                aaa = deq_digi_difference_range(&range_a1, &range_a2);
                 LOG("CTL => aaa (%zu)\n", aa.size);
                 print_deq(&aaa);
 
-                std::deque<DIGI> bbb;
                 LOG("STL b (%zu) + bb (%zu)\n", b.size(), bb.size());
                 print_deque(b);
                 print_deque(bb);
@@ -1350,28 +1280,21 @@ int main(void)
                 break;
             }
             case TEST_SYMMETRIC_DIFFERENCE_RANGE: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_sort(&a);
                 deq_digi_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                deq_digi_it first_a1;
-                std::deque<DIGI>::iterator first_b1, last_b1;
-                get_random_iters(&a, &first_a1, b, first_b1, last_b1);
-                deq_digi_it first_a2;
-                std::deque<DIGI>::iterator first_b2, last_b2;
-                get_random_iters(&aa, &first_a2, bb, first_b2, last_b2);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
                 LOG("CTL a + aa\n");
-                print_deq_range(first_a1);
-                print_deq_range(first_a2);
-                deq_digi aaa = deq_digi_symmetric_difference_range(&first_a1, &first_a2);
+                print_deq_range(range_a1);
+                print_deq_range(range_a2);
+                aaa = deq_digi_symmetric_difference_range(&range_a1, &range_a2);
                 LOG("CTL => aaa\n");
                 print_deq(&aaa);
 
-                std::deque<DIGI> bbb;
                 LOG("STL b + bb\n");
                 print_deque(b);
                 print_deque(bb);
@@ -1396,19 +1319,16 @@ int main(void)
                 break;
             }
             case TEST_GENERATE_RANGE: {
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 digi_generate_reset();
-                deq_digi_generate_range(&first_a, digi_generate);
+                deq_digi_generate_range(&range_a1, digi_generate);
                 digi_generate_reset();
-                std::generate(first_b, last_b, DIGI_generate);
+                std::generate(first_b1, last_b1, DIGI_generate);
                 CHECK(a, b);
                 break;
             }
             case TEST_TRANSFORM: {
-                deq_digi aa = deq_digi_transform(&a, digi_untrans);
-                std::deque<DIGI> bb;
+                aa = deq_digi_transform(&a, digi_untrans);
                 bb.resize(b.size());
                 std::transform(b.begin(), b.end(), bb.begin(), DIGI_untrans);
                 CHECK(aa, bb);
@@ -1435,22 +1355,20 @@ int main(void)
                 break;
             }
             case TEST_GENERATE_N_RANGE: {
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                size_t off = first_b - b.begin();
-                size_t len = last_b - first_b;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                size_t off = first_b1 - b.begin();
+                size_t len = last_b1 - first_b1;
                 size_t count = TEST_RAND(20 - off);
                 LOG("generate_n_range %zu\n", count);
 #ifndef _MSC_VER
                 digi_generate_reset();
-                deq_digi_generate_n_range(&first_a, count, digi_generate);
+                deq_digi_generate_n_range(&range_a1, count, digi_generate);
                 print_deq(&a);
                 digi_generate_reset();
                 int n = MIN(MIN(count, b.size()), len);
-                b.erase(first_b, first_b + n);
-                first_b = b.begin() + off;
-                std::generate_n(std::inserter(b, first_b), n, DIGI_generate);
+                b.erase(first_b1, first_b1 + n);
+                first_b1 = b.begin() + off;
+                std::generate_n(std::inserter(b, first_b1), n, DIGI_generate);
                 print_deque(b);
                 CHECK(a, b);
 #endif
@@ -1459,13 +1377,12 @@ int main(void)
             case TEST_TRANSFORM_IT: {
                 if (a.size < 2)
                     break;
-                deq_digi_it pos = deq_digi_begin(&a);
-                deq_digi_it_advance(&pos, 1);
+                it = deq_digi_begin(&a);
+                deq_digi_it_advance(&it, 1);
                 print_deq(&a);
-                deq_digi aa = deq_digi_transform_it(&a, &pos, digi_bintrans);
+                aa = deq_digi_transform_it(&a, &it, digi_bintrans);
                 print_deq(&aa);
 #ifndef _MSC_VER
-                std::deque<DIGI> bb;
                 std::transform(b.begin(), b.end() - 1, b.begin() + 1, std::back_inserter(bb), DIGI_bintrans);
                 print_deque(bb);
                 CHECK(aa, bb);
@@ -1476,17 +1393,14 @@ int main(void)
             }
             case TEST_TRANSFORM_RANGE: {
                 print_deq(&a);
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                deq_digi aa = deq_digi_init();
-                deq_digi_resize(&aa, last_b - first_b, digi_init(0));
-                deq_digi_it dest = deq_digi_begin(&aa);
-                deq_digi_transform_range(&first_a, dest, digi_untrans);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                aa = deq_digi_init_from(&a);
+                deq_digi_resize(&aa, last_b1 - first_b1, digi_init(0));
+                range_a2 = deq_digi_begin(&aa);
+                deq_digi_transform_range(&range_a1, range_a2, digi_untrans);
                 print_deq(&aa);
 #ifndef _MSC_VER
-                std::deque<DIGI> bb;
-                std::transform(first_b, last_b, std::back_inserter(bb), DIGI_untrans);
+                std::transform(first_b1, last_b1, std::back_inserter(bb), DIGI_untrans);
                 print_deque(bb);
                 CHECK(aa, bb);
 #endif
@@ -1496,19 +1410,16 @@ int main(void)
             }
             case TEST_TRANSFORM_IT_RANGE: {
                 print_deq(&a);
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                deq_digi_it pos = deq_digi_begin(&a);
-                deq_digi_it_advance(&pos, 1);
-                deq_digi aa = deq_digi_init();
-                deq_digi_resize(&aa, last_b - first_b, digi_init(0));
-                deq_digi_it dest = deq_digi_begin(&aa);
-                deq_digi_transform_it_range(&first_a, &pos, dest, digi_bintrans);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                it = deq_digi_begin(&a);
+                deq_digi_it_advance(&it, 1);
+                aa = deq_digi_init_from(&a);
+                deq_digi_resize(&aa, last_b1 - first_b1, digi_init(0));
+                range_a2 = deq_digi_begin(&aa);
+                deq_digi_transform_it_range(&range_a1, &it, range_a2, digi_bintrans);
                 print_deq(&aa);
 #ifndef _MSC_VER
-                std::deque<DIGI> bb;
-                std::transform(first_b, last_b, b.begin() + 1, std::back_inserter(bb), DIGI_bintrans);
+                std::transform(first_b1, last_b1, b.begin() + 1, std::back_inserter(bb), DIGI_bintrans);
                 print_deque(bb);
                 CHECK(aa, bb);
 #endif
@@ -1517,7 +1428,7 @@ int main(void)
                 break;
             }
             case TEST_COPY_IF: {
-                deq_digi aa = deq_digi_copy_if(&a, digi_is_odd);
+                aa = deq_digi_copy_if(&a, digi_is_odd);
 /*
 #if __cplusplus >= 202002L
                 auto bb = a | std::ranges::views::filter(DIGI_is_odd);
@@ -1526,7 +1437,6 @@ int main(void)
                 CHECK(aa, bb);
 #endif
 */
-                std::deque<DIGI> bb;
 #if __cplusplus >= 201103L && !defined(_MSC_VER)
                 std::copy_if(b.begin(), b.end(), std::back_inserter(bb), DIGI_is_odd);
 #else
@@ -1542,14 +1452,11 @@ int main(void)
                 break;
             }
             case TEST_COPY_IF_RANGE: {
-                deq_digi_it range;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
-                deq_digi aa = deq_digi_copy_if_range(&range, digi_is_odd);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                aa = deq_digi_copy_if_range(&range_a1, digi_is_odd);
 #ifndef _MSC_VER
 #if __cplusplus >= 201103L
-                std::deque<DIGI> bb;
-                std::copy_if(first_b, last_b, std::back_inserter(bb), DIGI_is_odd);
+                std::copy_if(first_b1, last_b1, std::back_inserter(bb), DIGI_is_odd);
                 ADJUST_CAP("copy_if_range", aa, bb);
                 CHECK(aa, bb);
 #endif
@@ -1561,30 +1468,26 @@ int main(void)
             case TEST_MISMATCH: {
                 if (a.size < 2)
                     break;
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_it b1, b2;
                 b1 = deq_digi_begin(&a);
                 b2 = deq_digi_begin(&aa);
-                deq_digi_it r1a, r2a;
-                std::deque<DIGI>::iterator r1b, last1_b, r2b, last2_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                get_random_iters(&aa, &r2a, bb, r2b, last2_b);
-                /*bool found_a = */ deq_digi_mismatch(&r1a, &r2a);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+                /*found_a = */ deq_digi_mismatch(&range_a1, &range_a2);
 #if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
-                auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
+                auto pair = std::mismatch(first_b1, last_b1, first_b2, last_b2);
 #else
-                if (!bb.size() || !distance(r2b, last2_b))
+                if (!bb.size() || !distance(first_b2, last_b2))
                 {
                     printf("skip std::mismatch with empty 2nd range. use C++14\n");
                     deq_digi_free(&aa);
                     break;
                 }
-                auto pair = std::mismatch(r1b, last1_b, r2b);
+                auto pair = std::mismatch(first_b1, last_b1, first_b2);
 #endif
-                int d1a = deq_digi_it_distance(&b1, &r1a);
-                int d2a = deq_digi_it_distance(&b2, &r2a);
+                int d1a = deq_digi_it_distance(&b1, &range_a1);
+                int d2a = deq_digi_it_distance(&b2, &range_a2);
                 LOG("iter1 %d, iter2 %d\n", d1a, d2a);
                 // TODO check found_a against iter results
                 assert(d1a == distance(b.begin(), pair.first));
@@ -1595,108 +1498,99 @@ int main(void)
             case TEST_SEARCH: // 51
             {
                 print_deq(&a);
-                deq_digi aa = deq_digi_copy(&a);
-                std::deque<DIGI> bb = b;
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&aa, &first_a, bb, first_b, last_b);
+                aa = deq_digi_copy(&a);
+                bb = b;
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
                 if (aa.size && TEST_RAND(2))
                 { // 50% unsuccessful
-                    size_t i = std::distance(bb.begin(), first_b);
+                    long i = std::distance(bb.begin(), first_b2);
                     deq_digi_set(&aa, i, digi_init(0));
                     bb[i] = DIGI{0};
                 }
-                print_deq_range(first_a);
-                deq_digi_it found_a = deq_digi_search(&a, &first_a);
-                auto found_b = search(b.begin(), b.end(), first_b, last_b);
-                LOG("found a: %s\n", deq_digi_it_done(&found_a) ? "no" : "yes");
-                LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
-                CHECK_ITER(found_a, b, found_b);
+                print_deq_range(range_a2);
+                it = deq_digi_search(&a, &range_a2);
+                iter = search(b.begin(), b.end(), first_b2, last_b2);
+                LOG("found a: %s\n", deq_digi_it_done(&it) ? "no" : "yes");
+                LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
+                CHECK_ITER(it, b, iter);
                 deq_digi_free(&aa);
                 break;
             }
             case TEST_SEARCH_RANGE: {
-                deq_digi aa = deq_digi_copy(&a);
-                std::deque<DIGI> bb = b;
-                deq_digi_it needle, range;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&aa, &needle, bb, first_b, last_b);
+                aa = deq_digi_copy(&a);
+                bb = b;
+                print_deq(&a);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
                 if (aa.size && TEST_RAND(2))
                 { // 50% unsuccessful
-                    size_t i = std::distance(bb.begin(), first_b);
+                    long i = std::distance(bb.begin(), first_b2);
                     deq_digi_set(&aa, i, digi_init(0));
                     bb[i] = DIGI{0};
                 }
-                print_deq_range(needle);
-                range = deq_digi_begin(&a);
-                bool found = deq_digi_search_range(&range, &needle);
-                auto iter = search(b.begin(), b.end(), first_b, last_b);
-                LOG("found a: %s\n", found ? "yes" : "no");
+                print_deq_range(range_a2);
+                range_a1 = deq_digi_begin(&a);
+                found_a = deq_digi_search_range(&range_a1, &range_a2);
+                iter = search(b.begin(), b.end(), first_b2, last_b2);
+                LOG("found a: %s\n", found_a ? "yes" : "no");
                 LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
-                assert(found == !deq_digi_it_done(&range));
-                CHECK_ITER(range, b, iter);
+                assert(found_a == !deq_digi_it_done(&range_a1));
+                CHECK_ITER(range_a1, b, iter);
                 deq_digi_free(&aa);
                 break;
             }
             case TEST_SEARCH_N: {
                 print_deq(&a);
                 size_t count = TEST_RAND(4);
-                int value = pick_random(&a);
+                value = pick_random(&a);
                 LOG("search_n %zu %d\n", count, value);
-                deq_digi_it aa = deq_digi_search_n(&a, count, digi_init(value));
-                auto bb = search_n(b.begin(), b.end(), count, DIGI{value});
-                CHECK_ITER(aa, b, bb);
-                LOG("found %s at %zu\n", deq_digi_it_done(&aa) ? "no" : "yes",
-                    deq_digi_it_index(&aa));
+                it = deq_digi_search_n(&a, count, digi_init(value));
+                iter = search_n(b.begin(), b.end(), count, DIGI{value});
+                CHECK_ITER(it, b, iter);
+                LOG("found %s at %zu\n", deq_digi_it_done(&it) ? "no" : "yes",
+                    deq_digi_it_index(&it));
                 break;
             }
             case TEST_SEARCH_N_RANGE: {
-                deq_digi_it range;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 size_t count = TEST_RAND(4);
-                int value = pick_random(&a);
+                value = pick_random(&a);
                 LOG("search_n_range %zu %d\n", count, value);
-                print_deq_range(range);
-                deq_digi_it *aa = deq_digi_search_n_range(&range, count, digi_init(value));
-                auto bb = search_n(first_b, last_b, count, DIGI{value});
-                CHECK_RANGE(*aa, bb, last_b);
-                LOG("found %s at %zu\n", deq_digi_it_done(aa) ? "no" : "yes",
-                    deq_digi_it_index(aa));
+                print_deq_range(range_a1);
+                pos = deq_digi_search_n_range(&range_a1, count, digi_init(value));
+                iter = search_n(first_b1, last_b1, count, DIGI{value});
+                CHECK_RANGE(*pos, iter, last_b1);
+                LOG("found %s at %zu\n", deq_digi_it_done(pos) ? "no" : "yes",
+                    deq_digi_it_index(pos));
                 break;
             }
             case TEST_ADJACENT_FIND: {
                 print_deq(&a);
-                deq_digi_it aa = deq_digi_adjacent_find(&a);
-                auto bb = adjacent_find(b.begin(), b.end());
-                CHECK_ITER(aa, b, bb);
-                LOG("found %s\n", deq_digi_it_done(&aa) ? "no" : "yes");
+                it = deq_digi_adjacent_find(&a);
+                iter = adjacent_find(b.begin(), b.end());
+                CHECK_ITER(it, b, iter);
+                LOG("found %s\n", deq_digi_it_done(&it) ? "no" : "yes");
                 break;
             }
             case TEST_ADJACENT_FIND_RANGE: {
-                deq_digi_it range;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
-                print_deq_range(range);
-                deq_digi_it *aa = deq_digi_adjacent_find_range(&range);
-                auto bb = adjacent_find(first_b, last_b);
-                CHECK_ITER(*aa, b, bb);
-                LOG("found %s\n", deq_digi_it_done(aa) ? "no" : "yes");
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                print_deq_range(range_a1);
+                pos = deq_digi_adjacent_find_range(&range_a1);
+                iter = adjacent_find(first_b1, last_b1);
+                CHECK_ITER(*pos, b, iter);
+                LOG("found %s\n", deq_digi_it_done(pos) ? "no" : "yes");
                 break;
             }
             case TEST_FIND_FIRST_OF: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
-                std::deque<DIGI>::iterator bb_last = bb.end();
-                deq_digi_it range2 = deq_digi_begin(&aa);
-                if (range2.index + 5 < aa.size)
+                last_b2 = bb.end();
+                range_a2 = deq_digi_begin(&aa);
+                if (range_a2.index + 5 < aa.size)
                 {
-                    range2.end = range2.index + 5;
-                    bb_last = bb.begin() + 5;
+                    range_a2.end = range_a2.index + 5;
+                    last_b2 = bb.begin() + 5;
                 }
-                deq_digi_it it = deq_digi_find_first_of(&a, &range2);
-                auto iter = std::find_first_of(b.begin(), b.end(), bb.begin(), bb_last);
+                it = deq_digi_find_first_of(&a, &range_a2);
+                iter = std::find_first_of(b.begin(), b.end(), bb.begin(), last_b2);
                 print_deq(&a);
                 print_deq(&aa);
                 LOG("=> %zu vs %ld\n", deq_digi_it_index(&it), iter - b.begin());
@@ -1705,39 +1599,34 @@ int main(void)
                 break;
             }
             case TEST_FIND_FIRST_OF_RANGE: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
-                deq_digi_it first_a, s_first;
-                std::deque<DIGI>::iterator first_b, last_b, s_first_b, s_last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                get_random_iters(&aa, &s_first, bb, s_first_b, s_last_b);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
-                bool found_a = deq_digi_find_first_of_range(&first_a, &s_first);
-                auto it = std::find_first_of(first_b, last_b, s_first_b, s_last_b);
-                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", it != last_b ? "yes" : "no",
-                    deq_digi_it_index(&first_a), it - b.begin());
+                found_a = deq_digi_find_first_of_range(&range_a1, &range_a2);
+                iter = std::find_first_of(first_b1, last_b1, first_b2, last_b2);
+                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", iter != last_b1 ? "yes" : "no",
+                    deq_digi_it_index(&range_a1), iter - b.begin());
                 if (found_a)
-                    assert(it != last_b);
+                    assert(iter != last_b1);
                 else
-                    assert(it == last_b);
+                    assert(iter == last_b1);
                 deq_digi_free(&aa);
                 break;
             }
             case TEST_FIND_END: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 deq_digi_resize(&aa, 4, digi_init(0));
                 bb.resize(4);
-                deq_digi_it s_first = deq_digi_begin(&aa);
+                range_a2 = deq_digi_begin(&aa);
                 print_deq(&a);
                 print_deq(&aa);
-                deq_digi_it it = deq_digi_find_end(&a, &s_first);
-                auto iter = find_end(b.begin(), b.end(), bb.begin(), bb.end());
-                bool found_a = !deq_digi_it_done(&it);
-                bool found_b = iter != b.end();
-                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", found_b ? "yes" : "no", deq_digi_it_index(&it),
+                it = deq_digi_find_end(&a, &range_a2);
+                iter = find_end(b.begin(), b.end(), bb.begin(), bb.end());
+                found_a = !deq_digi_it_done(&it);
+                found_b = iter != b.end();
+                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no",
+                    found_b ? "yes" : "no", deq_digi_it_index(&it),
                     std::distance(b.begin(), iter));
                 assert(found_a == found_b);
                 CHECK_RANGE(it, iter, b.end());
@@ -1745,24 +1634,21 @@ int main(void)
                 break;
             }
             case TEST_FIND_END_RANGE: {
-                deq_digi_it first_a, s_first;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                deq_digi aa;
-                std::deque<DIGI> bb;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 setup_deque(&aa, bb);
                 deq_digi_resize(&aa, 4, digi_init(0));
                 bb.resize(4);
-                s_first = deq_digi_begin(&aa);
+                range_a2 = deq_digi_begin(&aa);
 #if __cpp_lib_erase_if >= 202002L
-                first_a = deq_digi_find_end_range(&first_a, &s_first);
-                auto iter = find_end(first_b, last_b, bb.begin(), bb.end());
-                bool found_a = !deq_digi_it_done(&first_a);
-                bool found_b = iter != last_b;
-                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", found_b ? "yes" : "no", deq_digi_it_index(&first_a),
+                it = deq_digi_find_end_range(&range_a1, &range_a2);
+                iter = find_end(first_b1, last_b1, bb.begin(), bb.end());
+                found_a = !deq_digi_it_done(&it);
+                found_b = iter != last_b1;
+                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no",
+                    found_b ? "yes" : "no", deq_digi_it_index(&it),
                     std::distance(b.begin(), iter));
                 assert(found_a == found_b);
-                CHECK_RANGE(first_a, iter, last_b);
+                CHECK_RANGE(it, iter, last_b1);
 #endif
                 deq_digi_free(&aa);
                 break;
@@ -1771,193 +1657,175 @@ int main(void)
                 size_t size1 = MIN(TEST_RAND(a.size), 5);
                 deq_digi_resize(&a, size1, digi_init(0));
                 b.resize(size1);
-                deq_digi_it r1a;
-                std::deque<DIGI>::iterator r1b, last1_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                size_t index = TEST_RAND(a.size - 1);
-                int value = a.size ? *deq_digi_at(&a, index)->value : 0;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                size_t idx = TEST_RAND(a.size - 1);
+                value = a.size ? *deq_digi_at(&a, idx)->value : 0;
                 LOG("equal_value %d\n", value);
-                print_deq_range(r1a);
-                bool same_a = deq_digi_equal_value(&r1a, digi_init(value));
-                bool same_b = r1b != last1_b;
-                for (; r1b != last1_b; r1b++)
+                print_deq_range(range_a1);
+                found_a = deq_digi_equal_value(&range_a1, digi_init(value));
+                found_b = first_b1 != last_b1;
+                for (; first_b1 != last_b1; first_b1++)
                 {
-                    if (value != *(*r1b).value)
+                    if (value != *(*first_b1).value)
                     {
-                        same_b = false;
+                        found_b = false;
                         break;
                     }
                 }
-                LOG("same_a: %d same_b: %d\n", (int)same_a, (int)same_b);
-                assert(same_a == same_b);
+                LOG("same_a: %d same_b: %d\n", (int)found_a, (int)found_b);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_EQUAL_RANGE: {
-                deq_digi aa = deq_digi_copy(&a);
-                std::deque<DIGI> bb = b;
-                deq_digi_it r1a, r2a;
-                std::deque<DIGI>::iterator r1b, last1_b, r2b, last2_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                get_random_iters(&aa, &r2a, bb, r2b, last2_b);
-                bool same_a = deq_digi_equal_range(&r1a, &r2a);
+                aa = deq_digi_copy(&a);
+                bb = b;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+                found_a = deq_digi_equal_range(&range_a1, &range_a2);
 #if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
-                bool same_b = std::equal(r1b, last1_b, r2b, last2_b);
-                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
-                assert(same_a == same_b);
+                found_b = std::equal(first_b1, last_b1, first_b2, last_b2);
+                LOG("same_a: %d same_b %d\n", (int)found_a, (int)found_b);
+                assert(found_a == found_b);
 #else
-                bool same_b = std::equal(r1b, last1_b, r2b);
-                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
-                if (same_a != same_b)
+                found_b = std::equal(first_b1, last_b1, first_b2);
+                LOG("same_a: %d same_b %d\n", (int)found_a, (int)found_b);
+                if (found_a != found_b)
                     printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");
 #endif
                 deq_digi_free(&aa);
                 break;
             }
             case TEST_LEXICOGRAPHICAL_COMPARE: {
-                deq_digi aa = deq_digi_copy(&a);
-                std::deque<DIGI> bb = b;
-                deq_digi_it r1a, r2a;
-                std::deque<DIGI>::iterator r1b, last1_b, r2b, last2_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                get_random_iters(&aa, &r2a, bb, r2b, last2_b);
-                bool same_a = deq_digi_lexicographical_compare(&r1a, &r2a);
-                bool same_b = std::lexicographical_compare(r1b, last1_b, r2b, last2_b);
-                LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
-                assert(same_a == same_b);
+                aa = deq_digi_copy(&a);
+                bb = b;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+                found_a = deq_digi_lexicographical_compare(&range_a1, &range_a2);
+                found_b = std::lexicographical_compare(first_b1, last_b1, first_b2, last_b2);
+                LOG("same_a: %d same_b %d\n", (int)found_a, (int)found_b);
+                assert(found_a == found_b);
                 deq_digi_free(&aa);
                 break;
             }
 #ifdef DEBUG
             case TEST_UNIQUE: {
                 print_deq(&a);
-                deq_digi_it aa = deq_digi_unique(&a);
-                bool found_a = aa.end < a.size;
-                size_t index = deq_digi_it_index(&aa);
+                it = deq_digi_unique(&a);
+                found_a = it.end < a.size;
+                size_t idx = deq_digi_it_index(&it);
                 print_deq(&a);
                 // C++ is special here with its move hack
-                auto bb = unique(b.begin(), b.end());
-                bool found_b = bb != b.end();
-                long dist = std::distance(b.begin(), bb);
+                iter = unique(b.begin(), b.end());
+                found_b = iter != b.end();
+                long dist = std::distance(b.begin(), iter);
                 b.resize(dist);
-                LOG("found %s at %zu, ", found_a ? "yes" : "no", index);
+                LOG("found %s at %zu, ", found_a ? "yes" : "no", idx);
                 LOG("vs found %s at %ld\n", found_b ? "yes" : "no", dist);
                 print_deque(b);
                 assert(found_a == found_b);
-                assert((long)index == dist);
+                assert((long)idx == dist);
                 break;
             }
             case TEST_UNIQUE_RANGE: {
-                deq_digi_it range;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
-                print_deq_range(range);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                print_deq_range(range_a1);
                 size_t orig_size = a.size;
-                deq_digi_it aa = deq_digi_unique_range(&range);
-                bool found_a = a.size < orig_size;
-                size_t index = deq_digi_it_index(&aa);
-                auto bb = unique(first_b, last_b);
-                bool found_b = bb != last_b;
-                long dist = std::distance(b.begin(), bb);
+                it = deq_digi_unique_range(&range_a1);
+                found_a = a.size < orig_size;
+                size_t idx = deq_digi_it_index(&it);
+                iter = unique(first_b1, last_b1);
+                found_b = iter != last_b1;
+                long dist = std::distance(b.begin(), iter);
                 if (found_b)
-                    b.erase(bb, last_b);
-                LOG("found %s at %zu, ", found_a ? "yes" : "no", index);
+                    b.erase(iter, last_b1);
+                LOG("found %s at %zu, ", found_a ? "yes" : "no", idx);
                 LOG("vs found %s at %ld\n", found_b ? "yes" : "no", dist);
                 print_deq(&a);
                 print_deque(b);
                 assert(found_a == found_b);
-                assert((long)index == dist);
+                assert((long)idx == dist);
                 break;
             }
 #endif // DEBUG
             case TEST_LOWER_BOUND: {
                 deq_digi_sort(&a);
                 std::sort(b.begin(), b.end());
-                int key = pick_random(&a);
-                deq_digi_it aa = deq_digi_lower_bound(&a, digi_init(key));
-                auto bb = lower_bound(b.begin(), b.end(), DIGI{key});
-                if (bb != b.end())
+                value = pick_random(&a);
+                it = deq_digi_lower_bound(&a, digi_init(value));
+                iter = lower_bound(b.begin(), b.end(), DIGI{value});
+                if (iter != b.end())
                 {
-                    LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                    LOG("%d: %d vs %d\n", value, *it.ref->value, *iter->value);
                 }
-                CHECK_ITER(aa, b, bb);
+                CHECK_ITER(it, b, iter);
                 break;
             }
             case TEST_UPPER_BOUND: {
                 deq_digi_sort(&a);
                 std::sort(b.begin(), b.end());
-                int key = pick_random(&a);
-                deq_digi_it aa = deq_digi_upper_bound(&a, digi_init(key));
-                auto bb = upper_bound(b.begin(), b.end(), DIGI{key});
-                if (bb != b.end())
+                value = pick_random(&a);
+                it = deq_digi_upper_bound(&a, digi_init(value));
+                iter = upper_bound(b.begin(), b.end(), DIGI{value});
+                if (iter != b.end())
                 {
-                    LOG("%d: %d vs %d\n", key, *aa.ref->value, *bb->value);
+                    LOG("%d: %d vs %d\n", value, *it.ref->value, *iter->value);
                 }
-                CHECK_ITER(aa, b, bb);
+                CHECK_ITER(it, b, iter);
                 break;
             }
             case TEST_LOWER_BOUND_RANGE: {
                 deq_digi_sort(&a);
                 std::sort(b.begin(), b.end());
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                int key = pick_random(&a);
-                deq_digi_it *aa = deq_digi_lower_bound_range(&first_a, digi_init(key));
-                std::deque<DIGI>::iterator bb = lower_bound(first_b, last_b, DIGI{key});
-                if (bb != last_b)
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                value = pick_random(&a);
+                pos = deq_digi_lower_bound_range(&range_a1, digi_init(value));
+                iter = lower_bound(first_b1, last_b1, DIGI{value});
+                if (iter != last_b1)
                 {
-                    LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                    LOG("%d: %d vs %d\n", value, *pos->ref->value, *iter->value);
                 }
-                CHECK_RANGE(*aa, bb, last_b);
+                CHECK_RANGE(*pos, iter, last_b1);
                 break;
             }
             case TEST_UPPER_BOUND_RANGE: {
                 deq_digi_sort(&a);
                 std::sort(b.begin(), b.end());
-                deq_digi_it first_a;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                int key = pick_random(&a);
-                deq_digi_it *aa = deq_digi_upper_bound_range(&first_a, digi_init(key));
-                std::deque<DIGI>::iterator bb = upper_bound(first_b, last_b, DIGI{key});
-                if (bb != last_b)
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                value = pick_random(&a);
+                pos = deq_digi_upper_bound_range(&range_a1, digi_init(value));
+                iter = upper_bound(first_b1, last_b1, DIGI{value});
+                if (iter != last_b1)
                 {
-                    LOG("%d: %d vs %d\n", key, *aa->ref->value, *bb->value);
+                    LOG("%d: %d vs %d\n", value, *pos->ref->value, *iter->value);
                 }
-                CHECK_RANGE(*aa, bb, last_b);
+                CHECK_RANGE(*pos, iter, last_b1);
                 break;
             }
             case TEST_BINARY_SEARCH: {
                 deq_digi_sort(&a);
                 std::sort(b.begin(), b.end());
-                int key = pick_random(&a);
-                bool found_a = deq_digi_binary_search(&a, digi_init(key));
-                bool found_b = binary_search(b.begin(), b.end(), DIGI{key});
-                LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                value = pick_random(&a);
+                found_a = deq_digi_binary_search(&a, digi_init(value));
+                found_b = binary_search(b.begin(), b.end(), DIGI{value});
+                LOG("%d: %d vs %d\n", value, (int)found_a, (int)found_b);
                 assert(found_a == found_b);
                 break;
             }
             case TEST_BINARY_SEARCH_RANGE: {
                 deq_digi_sort(&a);
                 std::sort(b.begin(), b.end());
-                deq_digi_it range;
-                std::deque<DIGI>::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
-                int key = pick_random(&a);
-                bool found_a = deq_digi_binary_search_range(&range, digi_init(key));
-                bool found_b = binary_search(first_b, last_b, DIGI{key});
-                LOG("%d: %d vs %d\n", key, (int)found_a, (int)found_b);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                value = pick_random(&a);
+                found_a = deq_digi_binary_search_range(&range_a1, digi_init(value));
+                found_b = binary_search(first_b1, last_b1, DIGI{value});
+                LOG("%d: %d vs %d\n", value, (int)found_a, (int)found_b);
                 assert(found_a == found_b);
                 break;
             }
             case TEST_MERGE: {
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
-
-                deq_digi aaa = deq_digi_merge(&a, &aa);
+                aaa = deq_digi_merge(&a, &aa);
 #ifndef _MSC_VER
-                std::deque<DIGI> bbb;
                 merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
                 CHECK(aaa, bbb);
 #endif
@@ -1966,17 +1834,12 @@ int main(void)
                 break;
             }
             case TEST_MERGE_RANGE: {
-                deq_digi_it range_a1, range_a2;
-                std::deque<DIGI>::iterator first_b1, last_b1, first_b2, last_b2;
                 get_random_iters(&a, &range_a1, b, first_b1, last_b1);
-                deq_digi aa;
-                std::deque<DIGI> bb;
                 setup_deque(&aa, bb);
                 get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
-                deq_digi aaa = deq_digi_merge_range(&range_a1, &range_a2);
+                aaa = deq_digi_merge_range(&range_a1, &range_a2);
 #ifndef _MSC_VER
-                std::deque<DIGI> bbb;
                 merge(first_b1, last_b1, first_b2, last_b2, std::back_inserter(bbb));
                 CHECK(aaa, bbb);
 #endif
@@ -1985,30 +1848,27 @@ int main(void)
                 break;
             }
             case TEST_IS_SORTED: {
-                deq_digi_it r1a;
-                std::deque<DIGI>::iterator r1b, last1_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                print_deq_range(r1a);
-                bool a_yes = deq_digi_is_sorted(&r1a);
-                bool b_yes = std::is_sorted(r1b, last1_b);
-                LOG("a_yes: %d b_yes %d\n", (int)a_yes, (int)b_yes);
-                assert(a_yes == b_yes);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                print_deq_range(range_a1);
+                found_a = deq_digi_is_sorted(&range_a1);
+                found_b = std::is_sorted(first_b1, last_b1);
+                LOG("found_a: %d found_b %d\n", (int)found_a, (int)found_b);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_IS_SORTED_UNTIL: {
-                deq_digi_it r1a, r2a;
-                deq_digi_it *it;
-                std::deque<DIGI>::iterator r1b, last1_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                print_deq_range(r1a);
-                r2a = r1a;
-                r2a.index = r1a.end;
-                it = deq_digi_is_sorted_until(&r1a, &r2a);
-                r1b = std::is_sorted_until(r1b, last1_b);
-                LOG("=> %s/%s, %ld/%ld: %d/%d\n", !deq_digi_it_done(it) ? "yes" : "no", r1b != last1_b ? "yes" : "no",
-                    deq_digi_it_index(it), distance(b.begin(), r1b), !deq_digi_it_done(it) ? *it->ref->value : -1,
-                    r1b != last1_b ? *r1b->value : -1);
-                CHECK_RANGE(*it, r1b, last1_b);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                print_deq_range(range_a1);
+                range_a2 = range_a1;
+                range_a2.index = range_a1.end;
+                pos = deq_digi_is_sorted_until(&range_a1, &range_a2);
+                iter = std::is_sorted_until(first_b1, last_b1);
+                LOG("=> %s/%s, %ld/%ld: %d/%d\n", !deq_digi_it_done(pos) ? "yes" : "no",
+                    iter != last_b1 ? "yes" : "no",
+                    deq_digi_it_index(pos), distance(b.begin(), first_b1),
+                    !deq_digi_it_done(pos) ? *pos->ref->value : -1,
+                    iter != last_b1 ? *iter->value : -1);
+                CHECK_RANGE(*pos, iter, last_b1);
                 break;
             }
             case TEST_REVERSE: {
@@ -2020,12 +1880,10 @@ int main(void)
                 break;
             }
             case TEST_REVERSE_RANGE: {
-                deq_digi_it r1a;
-                std::deque<DIGI>::iterator r1b, last1_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                print_deq_range(r1a);
-                deq_digi_reverse_range(&r1a);
-                reverse(r1b, last1_b);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                print_deq_range(range_a1);
+                deq_digi_reverse_range(&range_a1);
+                reverse(first_b1, last_b1);
                 CHECK(a, b);
                 break;
             }
