@@ -34,6 +34,9 @@ static const char *test_ok_names[] = { FOREACH_METH(GENERATE_NAME) };
 static const int number_ok = sizeof(test_ok_names)/sizeof(char*);
 #ifdef DEBUG
 static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GENERATE_NAME) ""};
+#define TEST_MAX_VALUE 100
+#else
+#define TEST_MAX_VALUE INT_MAX
 #endif
 
 #define CHECK(_x, _y)                                                                                                  \
@@ -56,13 +59,19 @@ int main(void)
     for (unsigned loop = 0; loop < loops; loop++)
     {
         size_t size = TEST_RAND(TEST_MAX_SIZE);
-        pqu_digi a = pqu_digi_init(digi_compare);
-        std::priority_queue<DIGI> b;
+        digi v1, *v1p;
+        DIGI v2;
+        pqu_digi a, aa, aaa;
+        std::priority_queue<DIGI> b, bb, bbb;
+        const int value = TEST_RAND(TEST_MAX_VALUE);
+
+        a = pqu_digi_init(digi_compare);
+
         for (size_t pushes = 0; pushes < size; pushes++)
         {
-            const int value = TEST_RAND(INT_MAX);
-            pqu_digi_push(&a, digi_init(value));
-            b.push(DIGI{value});
+            const int v = TEST_RAND(TEST_MAX_VALUE);
+            pqu_digi_push(&a, digi_init(v));
+            b.push(DIGI{v});
         }
         int which;
         if (tests.size)
@@ -78,14 +87,13 @@ int main(void)
         case TEST_TOP: {
             if (a.size > 0)
             {
-                DIGI bb = b.top();
-                digi *aa = pqu_digi_top(&a);
-                assert(*bb.value == *aa->value);
+                v1p = pqu_digi_top(&a);
+                v2 = b.top();
+                assert(*v1p->value == *v2.value);
             }
             break;
         }
         case TEST_PUSH: {
-            const int value = TEST_RAND(INT_MAX);
             b.push(DIGI{value});
             pqu_digi_push(&a, digi_init(value));
             break;
@@ -99,10 +107,9 @@ int main(void)
             break;
         }
         case TEST_SWAP: {
-            pqu_digi aa = pqu_digi_copy(&a);
-            pqu_digi aaa = pqu_digi_init(digi_compare);
-            std::priority_queue<DIGI> bb = b;
-            std::priority_queue<DIGI> bbb;
+            aa = pqu_digi_copy(&a);
+            aaa = pqu_digi_init(digi_compare);
+            bb = b;
             pqu_digi_swap(&aaa, &aa);
             std::swap(bb, bbb);
             CHECK(aaa, bbb);
@@ -110,14 +117,13 @@ int main(void)
             break;
         }
         case TEST_EMPLACE: {
-            const int value = TEST_RAND(INT_MAX);
-            digi bb = digi_init(value);
+            v1 = digi_init(value);
 #if __cpp_lib_erase_if >= 202002L
             b.emplace(DIGI{value});
 #else
             b.push(DIGI{value});
 #endif
-            pqu_digi_emplace(&a, &bb);
+            pqu_digi_emplace(&a, &v1);
             break;
         }
         }
