@@ -138,7 +138,8 @@ TESTS = \
 	tests/func/test_integral_c11 \
 	tests/func/test_c11 \
 	tests/func/test_container_composing \
-	tests/func/test_generic_iter
+	tests/func/test_generic_iter \
+	tests/func/test_generic_iter2
 
 ifneq ($(DEBUG),)
 TESTS += \

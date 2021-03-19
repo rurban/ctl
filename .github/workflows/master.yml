@@ -2,9 +2,9 @@ name: Full C/C++ CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, smoke ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, smoke ]
 
 jobs:
   full:
