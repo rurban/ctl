@@ -84,7 +84,7 @@ static inline long TEST_TIME(void)
     fflush(stdout)
 #else
 #define INIT_SRAND                                                                                                     \
-    unsigned int seed = rand() ^ clock() ^ getpid();                                                                   \
+    const unsigned int seed = (rand() * (clock() & 0xffff)) ^ getpid();                                                \
     srand(seed);                                                                                                       \
     printf("SEED=%u ", seed);                                                                                          \
     fflush(stdout)
