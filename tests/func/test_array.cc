@@ -645,7 +645,7 @@ int main(void)
             it = arr100_digi_begin(&a);
             arr100_digi_it_advance(&it, 1);
             aa = arr100_digi_transform_it(&a, &it, digi_bintrans);
-            // the last one is unitialized
+            // the last one is uninitialized
             std::transform(b.begin(), b.end() - 1, b.begin() + 1, bb.begin(), DIGI_bintrans);
             LOG("STL => ");
             print_array(bb);
