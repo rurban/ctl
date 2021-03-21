@@ -23,21 +23,34 @@ typedef enum types_t
     CTL_ARRAY,
     CTL_DEQUE,
     CTL_LIST,
+    CTL_SLIST,
     CTL_SET,
-    CTL_USET /* 5. max 8 (4 bits) */
+    CTL_USET /* 6. max 8 (4 bits) */
 } types_t;
-static const types_t types[] = {CTL_VECTOR, CTL_ARRAY, CTL_DEQUE, CTL_LIST, CTL_SET, CTL_USET};
+static const types_t types[] = {CTL_VECTOR, CTL_ARRAY, CTL_DEQUE, CTL_LIST, CTL_SLIST, CTL_SET, CTL_USET};
 static const int num_types = sizeof(types)/sizeof(types[0]);
 
 #include <vector>
 #include <array>
 #include <deque>
 #include <list>
+#include <forward_list>
 #include <set>
 #include <unordered_set>
 #include <algorithm>
 
-template <size_t N> using arrint = std::array<int,N>;
+template <size_t N> using arrint = std::array<int, N>;
+
+template <typename T> size_t size(const std::forward_list<T> &list)
+{
+    size_t i = 0;
+    for (const auto &x : list)
+    {
+        (void)x;
+        i++;
+    }
+    return i;
+}
 
 types_t pick_type(void) {
     const int LEN = len(types);
@@ -66,6 +79,12 @@ void print_list(list_int *a)
 {
     printf("%-15s: ", "list");
     list_foreach_ref(list_int, a, it) printf("%d, ", *it.ref);
+    printf("\n");
+}
+void print_slist(slist_int *a)
+{
+    printf("%-15s: ", "slist");
+    foreach (slist_int, a, it) printf("%d, ", *it.ref);
     printf("\n");
 }
 void print_set(set_int *a)
@@ -98,6 +117,7 @@ void print_uset(uset_int *a)
 #define print_arr25(x)
 #define print_deq(x)
 #define print_list(x)
+#define print_slist(x)
 #define print_set(x)
 #define print_uset(x)
 #undef print_stl
@@ -105,16 +125,28 @@ void print_uset(uset_int *a)
 #define TEST_MAX_VALUE 25
 #endif
 
-// from or to uset is unordered, all C++ set algorithms on uset are considered broken.
+// from or to uset is unordered, all C++ set algorithms on uset are considered
+// broken.
 #define CHECK(ty1, ty2, cppty, _x, _y)                                                                                 \
     {                                                                                                                  \
         if (strcmp(#ty1, "uset") && strcmp(#ty2, "uset"))                                                              \
         {                                                                                                              \
-            if (_x.size != _y.size())                                                                                  \
+            if (strcmp(#ty2, "slist"))                                                                                 \
             {                                                                                                          \
-                LOG("CTL size %zu != STL %zu\n", _x.size, _y.size());                                                  \
+                if (ty1##_int_size(&_x) != _y.size())                                                                  \
+                {                                                                                                      \
+                    LOG("CTL size %zu != STL %zu\n", ty1##_int_size(&_x), _y.size());                                  \
+                }                                                                                                      \
+                assert(_x.size == _y.size());                                                                          \
             }                                                                                                          \
-            assert(_x.size == _y.size());                                                                              \
+        }                                                                                                              \
+        CHECK_SLIST(ty1, ty2, cppty, _x, _y);                                                                          \
+    }
+// forward_list has no size(), not even length()
+#define CHECK_SLIST(ty1, ty2, cppty, _x, _y)                                                                           \
+    {                                                                                                                  \
+        if (strcmp(#ty1, "uset") && strcmp(#ty2, "uset"))                                                              \
+        {                                                                                                              \
             assert(ty1##_int_empty(&_x) == _y.empty());                                                                \
             ty1##_int_it _it1 = ty1##_int_begin(&_x);                                                                  \
             print_stl(_y, cppty);                                                                                      \
@@ -165,6 +197,33 @@ void print_uset(uset_int *a)
     bb.sort();                                                                                                         \
     list_int_it range2 = list_int_begin(&aa);                                                                          \
     print_list(&aa)
+
+#define SETUP_SLIST1                                                                                                   \
+    slist_int a = slist_int_init();                                                                                    \
+    std::forward_list<int> b;                                                                                          \
+    for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
+    {                                                                                                                  \
+        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        slist_int_push_front(&a, vb);                                                                                  \
+        b.push_front(vb);                                                                                              \
+    }                                                                                                                  \
+    slist_int_sort(&a);                                                                                                \
+    b.sort();                                                                                                          \
+    print_slist(&a)
+
+#define SETUP_SLIST2                                                                                                   \
+    slist_int aa = slist_int_init();                                                                                   \
+    std::forward_list<int> bb;                                                                                         \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
+    {                                                                                                                  \
+        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        slist_int_push_front(&aa, vb);                                                                                 \
+        bb.push_front(vb);                                                                                             \
+    }                                                                                                                  \
+    slist_int_sort(&aa);                                                                                               \
+    bb.sort();                                                                                                         \
+    slist_int_it range2 = slist_int_begin(&aa);                                                                        \
+    print_slist(&aa)
 
 #define SETUP_VEC1                                                                                                     \
     vec_int a = vec_int_init();                                                                                        \

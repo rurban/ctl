@@ -13,6 +13,9 @@ OLD_MAIN
 #include <ctl/list.h>
 #define POD
 #define T int
+#include <ctl/forward_list.h>
+#define POD
+#define T int
 #define N 25
 #include <ctl/array.h>
 #define POD
@@ -108,6 +111,17 @@ int main(void)
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
+#define UNION_RANGE_SLIST(ty2, ty1, cppty)                                                                             \
+    LOG("union " #ty2 " into " #ty1 "\n");                                                                             \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_union_range(&begin, (ty1##_int_it *)&range2);                                            \
+    LOG("=> ");                                                                                                        \
+    print_##ty1(&aaa);                                                                                                 \
+    std::cppty bbb;                                                                                                    \
+    std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::front_inserter(bbb));                                \
+    CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
 #define UNION_RANGE(ty2, ty1, cppty)                                                                                   \
     LOG("union " #ty2 " into " #ty1 "\n");                                                                             \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
@@ -149,6 +163,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; UNION_RANGE(list, vec, vector<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; UNION_RANGE(slist, vec, vector<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; UNION_RANGE(set, vec, vector<int>); break;
                     }
@@ -175,6 +192,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; UNION_RANGE(list, deq, deque<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; UNION_RANGE(slist, deq, deque<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; UNION_RANGE(set, deq, deque<int>); break;
                     }
@@ -200,6 +220,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; UNION_RANGE(list, list, list<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; UNION_RANGE(slist, list, list<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; UNION_RANGE(set, list, list<int>); break;
                     }
@@ -208,6 +231,34 @@ int main(void)
                     }
                     } // switch t2
                     list_int_free(&a); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; UNION_RANGE_SLIST(vec, slist, forward_list<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; UNION_RANGE_SLIST(arr25, slist, forward_list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; UNION_RANGE_SLIST(deq, slist, forward_list<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; UNION_RANGE_SLIST(list, slist, forward_list<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; UNION_RANGE_SLIST(slist, slist, forward_list<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; UNION_RANGE_SLIST(set, slist, forward_list<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; UNION_RANGE_SLIST(uset, slist, forward_list<int>); break;
+                    }
+                    } // switch t2
+                    slist_int_free(&a); break;
                 }
                 case CTL_SET : {
                     SETUP_SET1;
@@ -224,6 +275,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; UNION_RANGE_SET(list, set, set<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; UNION_RANGE_SET(slist, set, set<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; UNION_RANGE_SET(set, set, set<int>); break;
@@ -249,6 +303,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; UNION_RANGE_SET(list, uset, unordered_set<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; UNION_RANGE_SET(slist, uset, unordered_set<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; UNION_RANGE_SET(set, uset, unordered_set<int>); break;
@@ -276,6 +333,17 @@ int main(void)
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
+#define INTERSECTION_RANGE_SLIST(ty2, ty1, cppty)                                                                      \
+    LOG("intersection " #ty2 " with " #ty1 "\n");                                                                      \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_intersection_range(&begin, (ty1##_int_it *)&range2);                                     \
+    LOG("=> ");                                                                                                        \
+    print_##ty1(&aaa);                                                                                                 \
+    std::cppty bbb;                                                                                                    \
+    std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(), std::front_inserter(bbb));                         \
+    CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
 #define INTERSECTION_RANGE(ty2, ty1, cppty)                                                                            \
     LOG("intersection " #ty2 " with " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
@@ -297,6 +365,7 @@ int main(void)
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define INTERSECTION_RANGE_SET(ty2, ty1, cppty) INTERSECTION_RANGE(ty2, ty1, cppty)
+#define INTERSECTION_RANGE_SLIST(ty2, ty1, cppty) INTERSECTION_RANGE(ty2, ty1, cppty)
 #endif
 
                 switch (t1)
@@ -316,6 +385,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; INTERSECTION_RANGE(list, vec, vector<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INTERSECTION_RANGE(slist, vec, vector<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; INTERSECTION_RANGE(set, vec, vector<int>); break;
@@ -343,6 +415,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; INTERSECTION_RANGE(list, deq, deque<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INTERSECTION_RANGE(slist, deq, deque<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; INTERSECTION_RANGE(set, deq, deque<int>); break;
                     }
@@ -368,6 +443,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; INTERSECTION_RANGE(list, list, list<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INTERSECTION_RANGE(slist, list, list<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; INTERSECTION_RANGE(set, list, list<int>); break;
                     }
@@ -376,6 +454,34 @@ int main(void)
                     }
                     } // switch t2
                     list_int_free(&a); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; INTERSECTION_RANGE_SLIST(vec, slist, forward_list<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; INTERSECTION_RANGE_SLIST(arr25, slist, forward_list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; INTERSECTION_RANGE_SLIST(deq, slist, forward_list<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; INTERSECTION_RANGE_SLIST(list, slist, forward_list<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INTERSECTION_RANGE_SLIST(slist, slist, forward_list<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; INTERSECTION_RANGE_SLIST(set, slist, forward_list<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; INTERSECTION_RANGE_SLIST(uset, slist, forward_list<int>); break;
+                    }
+                    } // switch t2
+                    slist_int_free(&a); break;
                 }
                 case CTL_SET : {
                     SETUP_SET1;
@@ -395,6 +501,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; INTERSECTION_RANGE_SET(list, set, set<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INTERSECTION_RANGE_SET(slist, set, set<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; INTERSECTION_RANGE_SET(set, set, set<int>); break;
@@ -421,6 +530,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; INTERSECTION_RANGE_SET(list, uset, unordered_set<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INTERSECTION_RANGE_SET(slist, uset, unordered_set<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; INTERSECTION_RANGE_SET(set, uset, unordered_set<int>); break;
                     }
@@ -446,6 +558,17 @@ int main(void)
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
+#define SYMMETRIC_DIFFERENCE_RANGE_SLIST(ty2, ty1, cppty)                                                              \
+    LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_symmetric_difference_range(&begin, (ty1##_int_it *)&range2);                             \
+    LOG("=> ");                                                                                                        \
+    print_##ty1(&aaa);                                                                                                 \
+    std::cppty bbb;                                                                                                    \
+    std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::front_inserter(bbb));                 \
+    CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
 #ifndef _MSC_VER
 #define SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                    \
     LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
@@ -467,7 +590,8 @@ int main(void)
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
-//#define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty) SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)
+//#define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty) SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cpp
+//#define SYMMETRIC_DIFFERENCE_RANGE_SLIST(ty2, ty1, cppty) SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cpp
 #endif
 
                 switch (t1)
@@ -487,6 +611,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; SYMMETRIC_DIFFERENCE_RANGE(list, vec, vector<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; SYMMETRIC_DIFFERENCE_RANGE(slist, vec, vector<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; SYMMETRIC_DIFFERENCE_RANGE(set, vec, vector<int>); break;
@@ -514,6 +641,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; SYMMETRIC_DIFFERENCE_RANGE(list, deq, deque<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; SYMMETRIC_DIFFERENCE_RANGE(slist, deq, deque<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; SYMMETRIC_DIFFERENCE_RANGE(set, deq, deque<int>); break;
                     }
@@ -537,8 +667,10 @@ int main(void)
                         SETUP_DEQ2; SYMMETRIC_DIFFERENCE_RANGE(deq, list, list<int>); break;
                     }
                     case CTL_LIST : {
-                        SETUP_LIST2; 
-                        SYMMETRIC_DIFFERENCE_RANGE(list, list, list<int>); break;
+                        SETUP_LIST2;  SYMMETRIC_DIFFERENCE_RANGE(list, list, list<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2;  SYMMETRIC_DIFFERENCE_RANGE(slist, list, list<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; SYMMETRIC_DIFFERENCE_RANGE(set, list, list<int>); break;
@@ -548,6 +680,34 @@ int main(void)
                     }
                     } // switch t2
                     list_int_free(&a); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SYMMETRIC_DIFFERENCE_RANGE_SLIST(vec, slist, forward_list<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SYMMETRIC_DIFFERENCE_RANGE_SLIST(arr25, slist, forward_list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SYMMETRIC_DIFFERENCE_RANGE_SLIST(deq, slist, forward_list<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2;  SYMMETRIC_DIFFERENCE_RANGE_SLIST(list, slist, forward_list<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2;  SYMMETRIC_DIFFERENCE_RANGE_SLIST(slist, slist, forward_list<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; SYMMETRIC_DIFFERENCE_RANGE_SLIST(set, slist, forward_list<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; SYMMETRIC_DIFFERENCE_RANGE_SLIST(uset, slist, forward_list<int>); break;
+                    }
+                    } // switch t2
+                    slist_int_free(&a); break;
                 }
                 case CTL_SET : {
                     SETUP_SET1;
@@ -564,6 +724,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; SYMMETRIC_DIFFERENCE_RANGE_SET(list, set, set<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; SYMMETRIC_DIFFERENCE_RANGE_SET(slist, set, set<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; SYMMETRIC_DIFFERENCE_RANGE_SET(set, set, set<int>); break;
@@ -592,6 +755,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; SYMMETRIC_DIFFERENCE_RANGE_SET(list, uset, unordered_set<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; SYMMETRIC_DIFFERENCE_RANGE_SET(slist, uset, unordered_set<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; SYMMETRIC_DIFFERENCE_RANGE_SET(set, uset, unordered_set<int>); break;
                     }
@@ -619,6 +785,16 @@ int main(void)
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
+#define DIFFERENCE_RANGE_SLIST(ty2, ty1, cppty)                                                                        \
+    LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_difference_range(&begin, (ty1##_int_it *)&range2);                                       \
+    print_##ty1(&aaa);                                                                                                 \
+    std::cppty bbb;                                                                                                    \
+    std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::front_inserter(bbb));                           \
+    CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
 #define DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                              \
     LOG("difference " #ty2 " from " #ty1 "\n");                                                                        \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
@@ -640,6 +816,7 @@ int main(void)
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define DIFFERENCE_RANGE_SET(ty2, ty1, cppty) DIFFERENCE_RANGE(ty2, ty1, cppty)
+#define DIFFERENCE_RANGE_SLIST(ty2, ty1, cppty) DIFFERENCE_RANGE(ty2, ty1, cppty)
 #endif
 
                 switch (t1)
@@ -659,6 +836,9 @@ int main(void)
                     }
                     case CTL_LIST: {
                         SETUP_LIST2; DIFFERENCE_RANGE(list, vec, vector<int>); break;
+                    }
+                    case CTL_SLIST: {
+                        SETUP_SLIST2; DIFFERENCE_RANGE(slist, vec, vector<int>); break;
                     }
                     case CTL_SET: {
                         SETUP_SET2; DIFFERENCE_RANGE(set, vec, vector<int>); break;
@@ -688,6 +868,9 @@ int main(void)
                     case CTL_LIST: {
                         SETUP_LIST2; DIFFERENCE_RANGE(list, deq, deque<int>); break;
                     }
+                    case CTL_SLIST: {
+                        SETUP_SLIST2; DIFFERENCE_RANGE(slist, deq, deque<int>); break;
+                    }
                     case CTL_SET: {
                         SETUP_SET2; DIFFERENCE_RANGE(set, deq, deque<int>); break;
                     }
@@ -713,6 +896,9 @@ int main(void)
                     case CTL_LIST: {
                         SETUP_LIST2; DIFFERENCE_RANGE(list, list, list<int>); break;
                     }
+                    case CTL_SLIST: {
+                        SETUP_SLIST2; DIFFERENCE_RANGE(slist, list, list<int>); break;
+                    }
                     case CTL_SET: {
                         SETUP_SET2; DIFFERENCE_RANGE(set, list, list<int>); break;
                     }
@@ -721,6 +907,34 @@ int main(void)
                     }
                     } // switch t2
                     list_int_free(&a); break;
+                }
+                case CTL_SLIST: {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR: {
+                        SETUP_VEC2; DIFFERENCE_RANGE_SLIST(vec, slist, forward_list<int>); break;
+                    }
+                    case CTL_ARRAY: {
+                        SETUP_ARR2; DIFFERENCE_RANGE_SLIST(arr25, slist, forward_list<int>); break;
+                    }
+                    case CTL_DEQUE: {
+                        SETUP_DEQ2; DIFFERENCE_RANGE_SLIST(deq, slist, forward_list<int>); break;
+                    }
+                    case CTL_LIST: {
+                        SETUP_LIST2; DIFFERENCE_RANGE_SLIST(list, slist, forward_list<int>); break;
+                    }
+                    case CTL_SLIST: {
+                        SETUP_SLIST2; DIFFERENCE_RANGE_SLIST(slist, slist, forward_list<int>); break;
+                    }
+                    case CTL_SET: {
+                        SETUP_SET2; DIFFERENCE_RANGE_SLIST(set, slist, forward_list<int>); break;
+                    }
+                    case CTL_USET: {
+                        SETUP_USET2; DIFFERENCE_RANGE_SLIST(uset, slist, forward_list<int>); break;
+                    }
+                    } // switch t2
+                    slist_int_free(&a); break;
                 }
                 case CTL_SET:
                     break; // nyi
@@ -740,6 +954,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; DIFFERENCE_RANGE_SET(list, set, set<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; DIFFERENCE_RANGE_SET(slist, set, set<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; DIFFERENCE_RANGE_SET(set, set, set<int>); break;
@@ -769,6 +986,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; DIFFERENCE_RANGE_SET(list, uset, unordered_set<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; DIFFERENCE_RANGE_SET(slist, uset, unordered_set<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; DIFFERENCE_RANGE_SET(set, uset, unordered_set<int>); break;
@@ -817,6 +1037,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; SEARCH_RANGE(list, vec, vector<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; SEARCH_RANGE(slist, vec, vector<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; SEARCH_RANGE(set, vec, vector<int>); break;
                     }
@@ -840,6 +1063,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; SEARCH_RANGE(list, arr25, arrint<25>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; SEARCH_RANGE(slist, arr25, arrint<25>); break;
+                    }
                     case CTL_SET : break;
                     case CTL_USET : break;
                     } // switch t2
@@ -860,6 +1086,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; SEARCH_RANGE(list, deq, deque<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; SEARCH_RANGE(slist, deq, deque<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; SEARCH_RANGE(set, deq, deque<int>); break;
@@ -884,12 +1113,41 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; SEARCH_RANGE(list, list, list<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; SEARCH_RANGE(slist, list, list<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; SEARCH_RANGE(set, list, list<int>); break;
                     }
                     case CTL_USET : break;
                     } // switch t2
                     list_int_free(&a); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; SEARCH_RANGE(vec, slist, forward_list<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; SEARCH_RANGE(arr25, slist, forward_list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; SEARCH_RANGE(deq, slist, forward_list<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; SEARCH_RANGE(list, slist, forward_list<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; SEARCH_RANGE(slist, slist, forward_list<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; SEARCH_RANGE(set, slist, forward_list<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    slist_int_free(&a); break;
                 }
                 case CTL_SET : {
                     SETUP_SET1;
@@ -906,6 +1164,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; SEARCH_RANGE(list, set, set<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; SEARCH_RANGE(slist, set, set<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; SEARCH_RANGE(set, set, set<int>); break;
@@ -951,6 +1212,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; FIND_FIRST_OF_RANGE(list, vec, vector<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_FIRST_OF_RANGE(slist, vec, vector<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; FIND_FIRST_OF_RANGE(set, vec, vector<int>); break;
                     }
@@ -974,6 +1238,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; FIND_FIRST_OF_RANGE(list, arr25, arrint<25>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_FIRST_OF_RANGE(slist, arr25, arrint<25>); break;
+                    }
                     case CTL_SET : break;
                     case CTL_USET : break;
                     } // switch t2
@@ -994,6 +1261,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; FIND_FIRST_OF_RANGE(list, deq, deque<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_FIRST_OF_RANGE(slist, deq, deque<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; FIND_FIRST_OF_RANGE(set, deq, deque<int>); break;
@@ -1018,12 +1288,41 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; FIND_FIRST_OF_RANGE(list, list, list<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_FIRST_OF_RANGE(slist, list, list<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; FIND_FIRST_OF_RANGE(set, list, list<int>); break;
                     }
                     case CTL_USET : break;
                     } // switch t2
                     list_int_free(&a); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_FIRST_OF_RANGE(vec, slist, forward_list<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_FIRST_OF_RANGE(arr25, slist, forward_list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_FIRST_OF_RANGE(deq, slist, forward_list<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_FIRST_OF_RANGE(list, slist, forward_list<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_FIRST_OF_RANGE(slist, slist, forward_list<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; FIND_FIRST_OF_RANGE(set, slist, forward_list<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    slist_int_free(&a); break;
                 }
                 case CTL_SET : {
                     SETUP_SET1;
@@ -1043,6 +1342,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; FIND_FIRST_OF_RANGE(list, set, set<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_FIRST_OF_RANGE(slist, set, set<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; FIND_FIRST_OF_RANGE(set, set, set<int>); break;
@@ -1097,6 +1399,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; FIND_END_RANGE(list, vec, vector<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_END_RANGE(slist, vec, vector<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; FIND_END_RANGE(set, vec, vector<int>); break;
                     }
@@ -1120,6 +1425,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; FIND_END_RANGE(list, arr25, arrint<25>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_END_RANGE(slist, arr25, arrint<25>); break;
+                    }
                     case CTL_SET : break;
                     case CTL_USET : break;
                     } // switch t2
@@ -1140,6 +1448,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; FIND_END_RANGE(list, deq, deque<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_END_RANGE(slist, deq, deque<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; FIND_END_RANGE(set, deq, deque<int>); break;
@@ -1164,12 +1475,41 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; FIND_END_RANGE(list, list, list<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_END_RANGE(slist, list, list<int>); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; FIND_END_RANGE(set, list, list<int>); break;
                     }
                     case CTL_USET : break;
                     } // switch t2
                     list_int_free(&a); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; FIND_END_RANGE(vec, slist, forward_list<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; FIND_END_RANGE(arr25, slist, forward_list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; FIND_END_RANGE(deq, slist, forward_list<int>); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; FIND_END_RANGE(list, slist, forward_list<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_END_RANGE(slist, slist, forward_list<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; FIND_END_RANGE(set, slist, forward_list<int>); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    slist_int_free(&a); break;
                 }
                 case CTL_SET : {
                     SETUP_SET1;
@@ -1186,6 +1526,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; FIND_END_RANGE(list, set, set<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; FIND_END_RANGE(slist, set, set<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; FIND_END_RANGE(set, set, set<int>); break;

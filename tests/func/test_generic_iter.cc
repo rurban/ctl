@@ -13,6 +13,9 @@ OLD_MAIN
 #include <ctl/list.h>
 #define POD
 #define T int
+#include <ctl/forward_list.h>
+#define POD
+#define T int
 #define N 25
 #include <ctl/array.h>
 #define POD
@@ -37,7 +40,8 @@ OLD_MAIN
     TEST(MISMATCH)                                                                                                     \
     TEST(LEXICOGRAPHICAL_COMPARE)
 
-#define FOREACH_DEBUG(TEST) \
+#define FOREACH_DEBUG(TEST)
+    //TEST(COPY_GENERIC)
     //TEST(REMOVE_RANGE) /* 14. max 16? (5 bits) */
 
 // over in iter2:
@@ -104,6 +108,15 @@ int main(void)
     LOG("=> ");                                                                                                        \
     print_##ty1(&a);                                                                                                   \
     ty2##_int_free(&aa)
+#define INSERT_INTO_SLIST(ty2, ty1, cppty)                                                                             \
+    LOG("insert " #ty2 " into " #ty1 "\n");                                                                            \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int_insert_generic(&begin, (ty1##_int_it *)&range2);                                                         \
+    b.insert_after(b.begin(), bb.begin(), bb.end());                                                                   \
+    LOG("=> ");                                                                                                        \
+    print_##ty1(&a);                                                                                                   \
+    CHECK_SLIST(ty1, ty2, cppty, a, b);                                                                                \
+    ty2##_int_free(&aa)
 #define INSERT_INTO(ty2, ty1, cppty)                                                                                   \
     LOG("insert " #ty2 " into " #ty1 "\n");                                                                            \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
@@ -137,6 +150,9 @@ int main(void)
                 case CTL_LIST : {
                     SETUP_LIST2; INSERT_INTO(list, vec, vector<int>); break;
                 }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; INSERT_INTO(slist, vec, vector<int>); break;
+                }
                 case CTL_SET : {
                     SETUP_SET2; INSERT_INTO(set, vec, vector<int>); break;
                 }
@@ -164,6 +180,9 @@ int main(void)
                 }
                 case CTL_LIST : {
                     SETUP_LIST2; INSERT_INTO(list, deq, deque<int>); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; INSERT_INTO(slist, deq, deque<int>); break;
                 }
                 case CTL_SET : {
                     SETUP_SET2; INSERT_INTO(set, deq, deque<int>); break;
@@ -193,6 +212,9 @@ int main(void)
                 case CTL_LIST : {
                     SETUP_LIST2; INSERT_INTO(list, list, list<int>); break;
                 }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; INSERT_INTO(slist, list, list<int>); break;
+                }
                 case CTL_SET : {
                     SETUP_SET2; INSERT_INTO(set, list, list<int>); break;
                 }
@@ -201,6 +223,37 @@ int main(void)
                 }
                 } // switch t2
                 list_int_free(&a); break;
+            }
+            case CTL_SLIST : {
+                SETUP_SLIST1;
+                switch (t2)
+                {
+                case CTL_ARRAY : {
+#ifdef DEBUG
+                    SETUP_ARR2; INSERT_INTO_SLIST(arr25, slist, forward_list<int>);
+#endif
+                    break;
+                }
+                case CTL_VECTOR : {
+                    SETUP_VEC2; INSERT_INTO_SLIST(vec, slist, forward_list<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; INSERT_INTO_SLIST(deq, slist, forward_list<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; INSERT_INTO_SLIST(list, slist, forward_list<int>); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; INSERT_INTO_SLIST(slist, slist, forward_list<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; INSERT_INTO_SLIST(set, slist, forward_list<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; INSERT_INTO_SLIST(uset, slist, forward_list<int>); break;
+                }
+                } // switch t2
+                slist_int_free(&a); break;
             }
             // C++ cannot insert into set. CTL can
             case CTL_SET : {
@@ -221,6 +274,9 @@ int main(void)
                 }
                 case CTL_LIST : {
                     SETUP_LIST2; INSERT_INTO_SET(list, set, set<int>); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; INSERT_INTO_SET(slist, set, set<int>); break;
                 }
                 case CTL_SET : {
                     SETUP_SET2; INSERT_INTO_SET(set, set, set<int>); break;
@@ -249,6 +305,9 @@ int main(void)
                 case CTL_LIST : {
                     SETUP_LIST2; INSERT_INTO_SET(list, uset, unordered_set<int>); break;
                 }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; INSERT_INTO_SET(slist, uset, unordered_set<int>); break;
+                }
                 case CTL_DEQUE : {
                     SETUP_DEQ2; INSERT_INTO_SET(deq, uset, unordered_set<int>); break;
                 }
@@ -274,13 +333,22 @@ int main(void)
     LOG("=> ");                                                                                                        \
     print_##ty1(&a);                                                                                                   \
     ty2##_int_free(&aa)
+// slist has no size
+#define ASSIGN_GENERIC_SLIST(ty2, ty1, cppty)                                                                          \
+    LOG("assign " #ty2 " into " #ty1 "\n");                                                                            \
+    ty1##_int_assign_generic(&a, (ty1##_int_it *)&range2);                                                             \
+    b.assign(bb.begin(), bb.end());                                                                                    \
+    LOG("=> ");                                                                                                        \
+    print_##ty1(&a);                                                                                                   \
+    CHECK_SLIST(ty1, ty2, cppty, a, b)                                                                                 \
+    ty2##_int_free(&aa)
 #define ASSIGN_GENERIC(ty2, ty1, cppty)                                                                                \
     LOG("assign " #ty2 " into " #ty1 "\n");                                                                            \
     ty1##_int_assign_generic(&a, (ty1##_int_it *)&range2);                                                             \
     b.assign(bb.begin(), bb.end());                                                                                    \
     LOG("=> ");                                                                                                        \
     print_##ty1(&a);                                                                                                   \
-    CHECK(ty1, ty2, cppty, a, b);                                                                                      \
+    CHECK(ty1, ty2, cppty, a, b)                                                                                       \
     ty2##_int_free(&aa)
 
             switch (t1)
@@ -300,6 +368,9 @@ int main(void)
                 }
                 case CTL_LIST : {
                     SETUP_LIST2; ASSIGN_GENERIC_ARRAY(list, arr25); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; ASSIGN_GENERIC_ARRAY(slist, arr25); break;
                 }
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC_ARRAY(set, arr25); break;
@@ -326,6 +397,9 @@ int main(void)
                 case CTL_LIST : {
                     SETUP_LIST2; ASSIGN_GENERIC(list, vec, vector<int>); break;
                 }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; ASSIGN_GENERIC(slist, vec, vector<int>); break;
+                }
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC(set, vec, vector<int>); break;
                 }
@@ -350,6 +424,9 @@ int main(void)
                 }
                 case CTL_LIST : {
                     SETUP_LIST2; ASSIGN_GENERIC(list, deq, deque<int>); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; ASSIGN_GENERIC(slist, deq, deque<int>); break;
                 }
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC(set, deq, deque<int>); break;
@@ -376,6 +453,9 @@ int main(void)
                 case CTL_LIST : {
                     SETUP_LIST2; ASSIGN_GENERIC(list, list, list<int>); break;
                 }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; ASSIGN_GENERIC(slist, list, list<int>); break;
+                }
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC(set, list, list<int>); break;
                 }
@@ -384,6 +464,34 @@ int main(void)
                 }
                 } // switch t2
                 list_int_free(&a); break;
+            }
+            case CTL_SLIST : {
+                SETUP_SLIST1;
+                switch (t2)
+                {
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ASSIGN_GENERIC_SLIST(arr25, slist, forward_list<int>); break;
+                }
+                case CTL_VECTOR : {
+                    SETUP_VEC2; ASSIGN_GENERIC_SLIST(vec, slist, forward_list<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ASSIGN_GENERIC_SLIST(deq, slist, forward_list<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ASSIGN_GENERIC_SLIST(list, slist, forward_list<int>); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; ASSIGN_GENERIC_SLIST(slist, slist, forward_list<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ASSIGN_GENERIC_SLIST(set, slist, forward_list<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ASSIGN_GENERIC_SLIST(uset, slist, forward_list<int>); break;
+                }
+                } // switch t2
+                slist_int_free(&a); break;
             }
             // cannot mass-assign unordered_set yet. STL cannot
             case CTL_SET : break;
@@ -404,6 +512,9 @@ int main(void)
                 }
                 case CTL_LIST : {
                     SETUP_LIST2; ASSIGN_GENERIC_SET(list, set, set<int>); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; ASSIGN_GENERIC_SET(slist, set, set<int>); break;
                 }
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC_SET(set, set, set<int>); break;
@@ -431,6 +542,9 @@ int main(void)
                 }
                 case CTL_LIST : {
                     SETUP_LIST2; ASSIGN_GENERIC_SET(list, uset, unordered_set<int>); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST2; ASSIGN_GENERIC_SET(slist, uset, unordered_set<int>); break;
                 }
                 case CTL_DEQUE : {
                     SETUP_DEQ2; ASSIGN_GENERIC_SET(deq, uset, unordered_set<int>); break;
@@ -460,6 +574,17 @@ int main(void)
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
     CHECK(ty1, ty2, cppty, aaa, bbb);                                                                                  \
+    ty1##_int_free(&aaa);                                                                                              \
+    ty2##_int_free(&aa)
+#define MERGE_INTO_SLIST(ty2, ty1, cppty)                                                                              \
+    LOG("merge " #ty2 " into " #ty1 "\n");                                                                             \
+    ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
+    std::cppty bbb;                                                                                                    \
+    std::merge(b.begin(), b.end(), bb.begin(), bb.end(), std::front_inserter(bbb));                                    \
+    LOG("=> ");                                                                                                        \
+    print_##ty1(&aaa);                                                                                                 \
+    CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define MERGE_INTO_SET(ty2, ty1, cppty)                                                                                \
@@ -502,6 +627,9 @@ int main(void)
                         list_int_free(&aaa);
                         break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; MERGE_INTO(slist, list, list<int>); break;
+                    }
                     case CTL_VECTOR : {
                         SETUP_VEC2; MERGE_INTO(vec, list, list<int>); break;
                     }
@@ -520,6 +648,42 @@ int main(void)
                     } // switch t2
                     list_int_free(&a); break;
                 } // LIST
+                case CTL_SLIST : {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_SLIST : {
+                        SETUP_SLIST2;
+                        LOG("merge slist into slist\n");
+                        slist_int_it begin = slist_int_begin(&a);
+                        slist_int aaa = slist_int_merge_range(&begin, &range2);
+                        b.merge(bb);
+                        CHECK_SLIST(slist, slist, forward_list<int>, aaa, b);
+                        slist_int_free(&aa);
+                        slist_int_free(&aaa);
+                        break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; MERGE_INTO_SLIST(list, slist, forward_list<int>); break;
+                    }
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; MERGE_INTO_SLIST(vec, slist, forward_list<int>); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; MERGE_INTO_SLIST(arr25, slist, forward_list<int>); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; MERGE_INTO_SLIST(deq, slist, forward_list<int>); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; MERGE_INTO_SLIST(set, slist, forward_list<int>); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; MERGE_INTO_SLIST(uset, slist, forward_list<int>); break;
+                    }
+                    } // switch t2
+                    slist_int_free(&a); break;
+                } // SLIST
                 case CTL_VECTOR : {
                     SETUP_VEC1;
                     switch (t2)
@@ -535,6 +699,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; MERGE_INTO(list, vec, vector<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; MERGE_INTO(slist, vec, vector<int>); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; MERGE_INTO(set, vec, vector<int>); break;
@@ -559,6 +726,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; MERGE_INTO(list, deq, deque<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; MERGE_INTO(slist, deq, deque<int>); break;
                     }
                     case CTL_DEQUE : {
                         SETUP_DEQ2; MERGE_INTO(deq, deq, deque<int>); break;
@@ -585,6 +755,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; MERGE_INTO_SET(list, set, set<int>); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; MERGE_INTO_SET(slist, set, set<int>); break;
+                    }
                     case CTL_DEQUE : {
                         SETUP_DEQ2; MERGE_INTO_SET(deq, set, set<int>); break;
                     }
@@ -609,6 +782,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; MERGE_INTO_SET(list, uset, unordered_set<int>); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; MERGE_INTO_SET(slist, uset, unordered_set<int>); break;
                     }
                     case CTL_DEQUE : {
                         SETUP_DEQ2; MERGE_INTO_SET(deq, uset, unordered_set<int>); break;
@@ -669,6 +845,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; INCLUDES_RANGE(list, vec); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INCLUDES_RANGE(slist, vec); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; INCLUDES_RANGE(set, vec); break;
                     }
@@ -693,6 +872,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; INCLUDES_RANGE(list, arr25); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INCLUDES_RANGE(slist, arr25); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; INCLUDES_RANGE(set, arr25); break;
@@ -719,6 +901,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; INCLUDES_RANGE(list, deq); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INCLUDES_RANGE(slist, deq); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; INCLUDES_RANGE(set, deq); break;
                     }
@@ -744,6 +929,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; INCLUDES_RANGE(list, list); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INCLUDES_RANGE(slist, list); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; INCLUDES_RANGE(set, list); break;
                     }
@@ -752,6 +940,34 @@ int main(void)
                     }
                     } // switch t2
                     list_int_free(&a); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; INCLUDES_RANGE(vec, slist); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; INCLUDES_RANGE(arr25, slist); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; INCLUDES_RANGE(deq, slist); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; INCLUDES_RANGE(list, slist); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INCLUDES_RANGE(slist, slist); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; INCLUDES_RANGE(set, slist); break;
+                    }
+                    case CTL_USET : {
+                        SETUP_USET2; INCLUDES_RANGE(uset, slist); break;
+                    }
+                    } // switch t2
+                    slist_int_free(&a); break;
                 }
                 case CTL_SET : {
                     SETUP_SET1;
@@ -768,6 +984,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; INCLUDES_RANGE(list, set); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; INCLUDES_RANGE(slist, set); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; INCLUDES_RANGE(set, set); break;
@@ -828,6 +1047,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; EQUAL_RANGE(list, vec); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; EQUAL_RANGE(slist, vec); break;
+                    }
                     case CTL_SET : break;
                     case CTL_USET : break;
                     } // switch t2
@@ -848,6 +1070,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; EQUAL_RANGE(list, arr25); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; EQUAL_RANGE(slist, arr25); break;
                     }
                     case CTL_SET : break;
                     case CTL_USET : break;
@@ -870,6 +1095,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; EQUAL_RANGE(list, deq); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; EQUAL_RANGE(slist, deq); break;
+                    }
                     case CTL_SET : break;
                     case CTL_USET : break;
                     } // switch t2
@@ -891,10 +1119,37 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; EQUAL_RANGE(list, list); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; EQUAL_RANGE(slist, list); break;
+                    }
                     case CTL_SET : break;
                     case CTL_USET : break;
                     } // switch t2
                     list_int_free(&a); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; EQUAL_RANGE(vec, slist); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; EQUAL_RANGE(arr25, slist); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; EQUAL_RANGE(deq, slist); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; EQUAL_RANGE(list, slist); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; EQUAL_RANGE(slist, slist); break;
+                    }
+                    case CTL_SET : break;
+                    case CTL_USET : break;
+                    } // switch t2
+                    slist_int_free(&a); break;
                 }
                 case CTL_SET : break;
                 case CTL_USET : break;
@@ -955,6 +1210,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; MISMATCH(list, vec); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; MISMATCH(slist, vec); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; MISMATCH(set, vec); break;
                     }
@@ -979,6 +1237,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; MISMATCH(list, deq); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; MISMATCH(slist, deq); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; MISMATCH(set, deq); break;
                     }
@@ -1002,12 +1263,41 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; MISMATCH(list, list); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; MISMATCH(slist, list); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; MISMATCH(set, list); break;
                     }
                     case CTL_USET : break;
                     } // switch t2
                     list_int_free(&a); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; MISMATCH(vec, slist); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; MISMATCH(arr25, slist); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; MISMATCH(deq, slist); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; MISMATCH(list, slist); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; MISMATCH(slist, slist); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; MISMATCH(set, slist); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    slist_int_free(&a); break;
                 }
                 case CTL_SET : {
                     SETUP_SET1;
@@ -1024,6 +1314,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; MISMATCH(list, set); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; MISMATCH(slist, set); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; MISMATCH(set, set); break;
@@ -1064,6 +1357,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; LEX_COMPARE(list, vec); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; LEX_COMPARE(slist, vec); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; LEX_COMPARE(set, vec); break;
                     }
@@ -1088,6 +1384,9 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; LEX_COMPARE(list, deq); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; LEX_COMPARE(slist, deq); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; LEX_COMPARE(set, deq); break;
                     }
@@ -1111,12 +1410,41 @@ int main(void)
                     case CTL_LIST : {
                         SETUP_LIST2; LEX_COMPARE(list, list); break;
                     }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; LEX_COMPARE(slist, list); break;
+                    }
                     case CTL_SET : {
                         SETUP_SET2; LEX_COMPARE(set, list); break;
                     }
                     case CTL_USET : break;
                     } // switch t2
                     list_int_free(&a); break;
+                }
+                case CTL_SLIST : {
+                    SETUP_SLIST1;
+                    switch (t2)
+                    {
+                    case CTL_VECTOR : {
+                        SETUP_VEC2; LEX_COMPARE(vec, slist); break;
+                    }
+                    case CTL_ARRAY : {
+                        SETUP_ARR2; LEX_COMPARE(arr25, slist); break;
+                    }
+                    case CTL_DEQUE : {
+                        SETUP_DEQ2; LEX_COMPARE(deq, slist); break;
+                    }
+                    case CTL_LIST : {
+                        SETUP_LIST2; LEX_COMPARE(list, slist); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; LEX_COMPARE(slist, slist); break;
+                    }
+                    case CTL_SET : {
+                        SETUP_SET2; LEX_COMPARE(set, slist); break;
+                    }
+                    case CTL_USET : break;
+                    } // switch t2
+                    slist_int_free(&a); break;
                 }
                 case CTL_SET : {
                     SETUP_SET1;
@@ -1133,6 +1461,9 @@ int main(void)
                     }
                     case CTL_LIST : {
                         SETUP_LIST2; LEX_COMPARE(list, set); break;
+                    }
+                    case CTL_SLIST : {
+                        SETUP_SLIST2; LEX_COMPARE(slist, set); break;
                     }
                     case CTL_SET : {
                         SETUP_SET2; LEX_COMPARE(set, set); break;

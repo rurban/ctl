@@ -379,16 +379,16 @@ main(void)
             break;
         }
 #ifdef DEBUG
-        case TEST_ASSIGN: {
-            size_t width = TEST_RAND(size);
-            if (width > 2)
+        case TEST_ASSIGN:
+            if (index > 2)
             {
-                slist_digi_assign(&a, width, digi_init(value));
-                b.assign(width, DIGI{value});
+                slist_digi_assign(&a, index, digi_init(value));
+                b.assign(index, DIGI{value});
             }
             CHECK(a, b);
             break;
-        }
+        //case TEST_ASSIGN_GENERIC: { // ie from vector
+        // }
 #endif // DEBUG
         case TEST_SWAP:
             aa = slist_digi_copy(&a);

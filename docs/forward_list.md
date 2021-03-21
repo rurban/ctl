@@ -72,8 +72,9 @@ constructs the list.
 destructs the list.
 
     assign (A* self, size_t count, T value)
+    assign_generic (A* self, GI* range)
 
-resizes and sets count elements to the value
+resizes and sets count elements to the value.
 
     A copy (A* self)
 
@@ -130,7 +131,8 @@ inserts value after pos.
 
 inserts count values after pos.
 
-    insert_range (A* self, I* pos, GI* range)
+    insert_range (I* pos, GI* range)
+    insert_generic (I* pos, GI* range)
 
 inserts values after pos from first to last.
 
