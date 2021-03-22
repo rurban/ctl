@@ -414,7 +414,7 @@ static inline void JOIN(A, assign)(A *self, size_t size, T value)
 
 static inline void JOIN(A, assign_generic)(A *self, GI *range)
 {
-    A *other = range->container;
+    //A *other = range->container;
     B *node;
     void (*next2)(struct I*) = range->vtable.next;
     T* (*ref2)(struct I*) = range->vtable.ref;
@@ -423,7 +423,7 @@ static inline void JOIN(A, assign_generic)(A *self, GI *range)
     JOIN(A, clear)(self);
     while (!done2(range))
     {
-        node = JOIN(B, init)(other->copy(ref2(range)));
+        node = JOIN(B, init)(self->copy(ref2(range)));
         JOIN(A, connect_after)(self, self->tail, node);
         next2(range);
     }

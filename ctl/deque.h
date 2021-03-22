@@ -602,30 +602,30 @@ static inline void JOIN(A, assign)(A *self, size_t size, T value)
 
 static inline void JOIN(A, assign_generic)(A *self, GI *range)
 {
-    size_t count = JOIN(I, distance_range)(range);
     void (*next)(struct I*) = range->vtable.next;
     T* (*ref)(struct I*) = range->vtable.ref;
     int (*done)(struct I*) = range->vtable.done;
     size_t i = 0;
-    size_t orig_size = self->size;
-    if (count < self->size)
-        while (count != self->size)
-            JOIN(A, pop_back)(self);
+    const size_t orig_size = self->size;
     while (!done(range))
     {
-        if (i >= orig_size)
+        if (i >= orig_size) // grow
             JOIN(A, push_back)(self, self->copy(ref(range)));
         else
         {
-            T *sref = JOIN(A, at)(self, i++);
+            T *sref = JOIN(A, at)(self, i);
 #ifndef POD
-            if (self->free && sref)
+            if (self->free && i < orig_size && sref)
                 self->free(sref);
 #endif
-            *sref = self->copy(ref(range));
+            *sref = self->copy(ref(range)); // replace
         }
         next(range);
+        i++;
     }
+    if (i < orig_size) // shrink
+        while (i != self->size)
+            JOIN(A, pop_back)(self);
 }
 
 // including to

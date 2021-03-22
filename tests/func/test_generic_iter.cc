@@ -30,14 +30,14 @@ OLD_MAIN
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(INSERT_GENERIC)                                                                                               \
+    TEST(ASSIGN_GENERIC)                                                                                               \
     TEST(MERGE_RANGE)                                                                                                  \
     TEST(INCLUDES_RANGE)                                                                                               \
     TEST(EQUAL_RANGE)                                                                                                  \
     TEST(MISMATCH)                                                                                                     \
     TEST(LEXICOGRAPHICAL_COMPARE)
 
-#define FOREACH_DEBUG(TEST)
-    //TEST(COPY_GENERIC)
+#define FOREACH_DEBUG(TEST) \
     //TEST(REMOVE_RANGE) /* 14. max 16? (5 bits) */
 
 // over in iter2:
@@ -262,6 +262,189 @@ int main(void)
                 uset_int_free(&a); break;
             }
 //#endif // DEBUG
+            } // switch t1
+            break;
+
+        case TEST_ASSIGN_GENERIC:
+
+// STL has no array.assign, only we have
+#define ASSIGN_GENERIC_ARRAY(ty2, ty1)                                                                                 \
+    LOG("assign " #ty2 " into " #ty1 "\n");                                                                            \
+    ty1##_int_assign_generic(&a, (ty1##_int_it *)&range2);                                                             \
+    LOG("=> ");                                                                                                        \
+    print_##ty1(&a);                                                                                                   \
+    ty2##_int_free(&aa)
+#define ASSIGN_GENERIC(ty2, ty1, cppty)                                                                                \
+    LOG("assign " #ty2 " into " #ty1 "\n");                                                                            \
+    ty1##_int_assign_generic(&a, (ty1##_int_it *)&range2);                                                             \
+    b.assign(bb.begin(), bb.end());                                                                                    \
+    LOG("=> ");                                                                                                        \
+    print_##ty1(&a);                                                                                                   \
+    CHECK(ty1, ty2, cppty, a, b);                                                                                      \
+    ty2##_int_free(&aa)
+
+            switch (t1)
+            {
+            case CTL_ARRAY : {
+                SETUP_ARR1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; ASSIGN_GENERIC_ARRAY(vec, arr25); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ASSIGN_GENERIC_ARRAY(arr25, arr25); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ASSIGN_GENERIC_ARRAY(deq, arr25); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ASSIGN_GENERIC_ARRAY(list, arr25); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ASSIGN_GENERIC_ARRAY(set, arr25); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ASSIGN_GENERIC_ARRAY(uset, arr25); break;
+                }
+                } // switch t2
+                arr25_int_free(&a); break;
+            }
+            case CTL_VECTOR : {
+                SETUP_VEC1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; ASSIGN_GENERIC(vec, vec, vector<int>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ASSIGN_GENERIC(arr25, vec, vector<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ASSIGN_GENERIC(deq, vec, vector<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ASSIGN_GENERIC(list, vec, vector<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ASSIGN_GENERIC(set, vec, vector<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ASSIGN_GENERIC(uset, vec, vector<int>); break;
+                }
+                } // switch t2
+                vec_int_free(&a); break;
+            }
+            case CTL_DEQUE : {
+                SETUP_DEQ1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; ASSIGN_GENERIC(vec, deq, deque<int>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ASSIGN_GENERIC(arr25, deq, deque<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ASSIGN_GENERIC(deq, deq, deque<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ASSIGN_GENERIC(list, deq, deque<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ASSIGN_GENERIC(set, deq, deque<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ASSIGN_GENERIC(uset, deq, deque<int>); break;
+                }
+                } // switch t2
+                deq_int_free(&a); break;
+            }
+            case CTL_LIST : {
+                SETUP_LIST1;
+                switch (t2)
+                {
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ASSIGN_GENERIC(arr25, list, list<int>); break;
+                }
+                case CTL_VECTOR : {
+                    SETUP_VEC2; ASSIGN_GENERIC(vec, list, list<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ASSIGN_GENERIC(deq, list, list<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ASSIGN_GENERIC(list, list, list<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ASSIGN_GENERIC(set, list, list<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ASSIGN_GENERIC(uset, list, list<int>); break;
+                }
+                } // switch t2
+                list_int_free(&a); break;
+            }
+            // cannot mass-assign unordered_set yet. STL cannot
+            case CTL_SET : break;
+#if 0
+            {
+                SETUP_SET1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; ASSIGN_GENERIC_SET(vec, set, set<int>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ASSIGN_GENERIC_SET(arr25, set, set<int>);
+                    break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ASSIGN_GENERIC_SET(deq, set, set<int>); break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ASSIGN_GENERIC_SET(list, set, set<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ASSIGN_GENERIC_SET(set, set, set<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ASSIGN_GENERIC_SET(uset, set, set<int>); break;
+                }
+                } // switch t2
+                set_int_free(&a); break;
+            }
+#endif // 0
+            // cannot mass-assign unordered_set yet. STL cannot
+            case CTL_USET: break;
+#if 0
+            {
+                SETUP_USET1;
+                switch (t2)
+                {
+                case CTL_VECTOR : {
+                    SETUP_VEC2; ASSIGN_GENERIC_SET(vec, uset, unordered_set<int>); break;
+                }
+                case CTL_ARRAY : {
+                    SETUP_ARR2; ASSIGN_GENERIC_SET(arr25, uset, unordered_set<int>);
+                    break;
+                }
+                case CTL_LIST : {
+                    SETUP_LIST2; ASSIGN_GENERIC_SET(list, uset, unordered_set<int>); break;
+                }
+                case CTL_DEQUE : {
+                    SETUP_DEQ2; ASSIGN_GENERIC_SET(deq, uset, unordered_set<int>); break;
+                }
+                case CTL_SET : {
+                    SETUP_SET2; ASSIGN_GENERIC_SET(set, uset, unordered_set<int>); break;
+                }
+                case CTL_USET : {
+                    SETUP_USET2; ASSIGN_GENERIC_SET(uset, uset, unordered_set<int>); break;
+                }
+                } // switch t2
+                uset_int_free(&a); break;
+            }
+#endif // 0
             } // switch t1
             break;
 

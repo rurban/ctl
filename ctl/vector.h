@@ -424,31 +424,28 @@ static inline void JOIN(A, assign_range)(A *self, T *from, T *last)
 
 static inline void JOIN(A, assign_generic)(A *self, GI *range)
 {
-    long count = JOIN(I, distance_range)(range);
     void (*next)(struct I*) = range->vtable.next;
     T* (*ref)(struct I*) = range->vtable.ref;
     int (*done)(struct I*) = range->vtable.done;
     size_t i = 0;
-    size_t orig_size = 0;
-    assert(count >= 0);
-    // optimized resize: free only existing values
-    if ((size_t)count < self->size)
-        JOIN(A, wipe)(self, self->size - (size_t)count);
-    else
-    {
-        orig_size = self->size;
-        JOIN(A, fit)(self, count);
-    }
-    self->size = count;
+    const size_t orig_size = self->size;
     while(!done(range))
     {
-        T *sref = &self->vector[i];
-        if (self->free && i < orig_size)
-            self->free(sref);
-        *sref = self->copy(ref(range));
+        if (i >= orig_size) // grow
+            JOIN(A, push_back)(self, self->copy(ref(range)));
+        else
+        {
+            T *sref = &self->vector[i];
+            if (self->free && i < orig_size)
+                self->free(sref); // replace
+            *sref = self->copy(ref(range));
+        }
         next(range);
         i++;
     }
+    if (i < orig_size) // shrink
+        while (i != self->size)
+            JOIN(A, pop_back)(self);
 }
 
 static inline void JOIN(A, shrink_to_fit)(A *self)
