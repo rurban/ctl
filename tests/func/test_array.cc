@@ -74,13 +74,15 @@ OLD_MAIN
     TEST(REVERSE_RANGE)                                                                                                \
     TEST(DIFFERENCE_RANGE)                                                                                             \
     TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
-    TEST(INTERSECTION_RANGE)
+    TEST(INTERSECTION_RANGE)                                                                                           \
+    TEST(ASSIGN_RANGE)                                                                                                 \
+    TEST(ASSIGN_GENERIC)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(GENERATE_N_RANGE) /* 56 */                                                                                    \
+    TEST(GENERATE_N_RANGE) /* 58 */                                                                                    \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(COPY_IF)                                                                                                      \
-    TEST(COPY_IF_RANGE)
+    TEST(COPY_IF_RANGE)                                                                                                \
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -354,12 +356,12 @@ int main(void)
             break;
         }
 #if 0 // invalid for non-POD's
-            case TEST_CLEAR:
-            {
-                b.fill(DIGI{0});
-                arr100_digi_clear(&a);
-                break;
-            }
+        case TEST_CLEAR:
+        {
+            b.fill(DIGI{0});
+            arr100_digi_clear(&a);
+            break;
+        }
 #endif
         case TEST_FILL: {
             b.fill(DIGI{value});
@@ -668,6 +670,39 @@ int main(void)
             std::generate_n(b.begin(), count, DIGI_generate);
             print_array(b);
             CHECK(a, b);
+            break;
+        }
+        case TEST_ASSIGN_RANGE: {
+            aa = arr100_digi_init_from(&a);
+            digi_generate_reset();
+            arr100_digi_generate(&a, digi_generate);
+            print_arr100(&aa);
+            digi_generate_reset();
+            // STL has no assign method
+            std::generate(b.begin(), b.end(), DIGI_generate);
+            range_a2 = arr100_digi_begin(&aa);
+            arr100_digi_assign_range(&a, &aa.vector[0], &aa.vector[N-1]);
+            CHECK(a, b);
+            arr100_digi_free(&aa);
+            break;
+        }
+        case TEST_ASSIGN_GENERIC: {
+            aa = arr100_digi_init_from(&a);
+            digi_generate_reset();
+            arr100_digi_generate(&aa, digi_generate);
+            print_arr100(&aa);
+            digi_generate_reset();
+            std::generate(b.begin(), b.end(), DIGI_generate);
+            range_a2 = arr100_digi_begin(&aa);
+            arr100_digi_assign_generic(&a, &range_a2);
+            // STL has no assign method
+            // b.assign(bb.begin(), bb.end());
+            //LOG("CTL =>\n");
+            print_arr100(&a);
+            //LOG("STL =>\n");
+            //print_array(b);
+            CHECK(a, b);
+            arr100_digi_free(&aa);
             break;
         }
 #ifdef DEBUG

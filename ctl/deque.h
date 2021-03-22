@@ -540,8 +540,7 @@ static inline void JOIN(A, emplace_back)(A *self, T *value)
     JOIN(A, push_back)(self, *value);
 }
 
-static inline void /* I* */
-    JOIN(A, insert_range)(I *pos, I *range)
+static inline void JOIN(A, insert_range)(I *pos, I *range)
 {
     A *self = pos->container;
     size_t index = pos->index;
@@ -599,6 +598,34 @@ static inline void JOIN(A, assign)(A *self, size_t size, T value)
         JOIN(A, set)(self, i, self->copy(&value));
     if (self->free)
         self->free(&value);
+}
+
+static inline void JOIN(A, assign_generic)(A *self, GI *range)
+{
+    size_t count = JOIN(I, distance_range)(range);
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+    size_t i = 0;
+    size_t orig_size = self->size;
+    if (count < self->size)
+        while (count != self->size)
+            JOIN(A, pop_back)(self);
+    while (!done(range))
+    {
+        if (i >= orig_size)
+            JOIN(A, push_back)(self, self->copy(ref(range)));
+        else
+        {
+            T *sref = JOIN(A, at)(self, i++);
+#ifndef POD
+            if (self->free && sref)
+                self->free(sref);
+#endif
+            *sref = self->copy(ref(range));
+        }
+        next(range);
+    }
 }
 
 // including to

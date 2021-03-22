@@ -98,7 +98,9 @@ OLD_MAIN
     TEST(REVERSE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(EMPLACE) /* 79 */                                                                                             \
+    TEST(EMPLACE) /* 83 */                                                                                             \
+    TEST(ASSIGN_RANGE)                                                                                                 \
+    TEST(ASSIGN_GENERIC)                                                                                               \
     TEST(INSERT_GENERIC)                                                                                               \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_IT_RANGE)
@@ -545,6 +547,37 @@ int main(void)
                 break;
             }
 #ifdef DEBUG
+            case TEST_ASSIGN_RANGE: {
+                print_vec(&a);
+                aa = vec_digi_init_from(&a);
+                gen_vectors(&aa, bb, TEST_RAND(a.size + 5));
+                //print_vec(&aa);
+                range_a2 = vec_digi_begin(&aa);
+                // TEST grow or shrink
+                vec_digi_assign_range(&a, range_a2.ref, range_a2.end); // FIXME leak
+                b.assign(bb.begin(), bb.end());
+                ADJUST_CAP("assign_range", a, b);
+                print_vec(&a);
+                //print_vector(b);
+                CHECK(a, b);
+                vec_digi_free(&aa);
+                break;
+            }
+            case TEST_ASSIGN_GENERIC: {
+                print_vec(&a);
+                aa = vec_digi_init_from(&a);
+                gen_vectors(&aa, bb, TEST_RAND(a.size));
+                //print_vec(&aa);
+                range_a2 = vec_digi_begin(&aa);
+                vec_digi_assign_generic(&a, &range_a2); // FIXME leak
+                b.assign(bb.begin(), bb.end());
+                ADJUST_CAP("assign_generic", a, b);
+                print_vec(&a);
+                //print_vector(b);
+                CHECK(a, b);
+                vec_digi_free(&aa);
+                break;
+            }
             case TEST_INSERT_GENERIC: {
                 print_vec(&a);
                 aa = vec_digi_init_from(&a);
@@ -556,7 +589,7 @@ int main(void)
                 b.insert(b.begin(), bb.begin(), bb.end());
                 ADJUST_CAP("insert", a, b);
                 print_vec(&a);
-                print_vector(b);
+                //print_vector(b);
                 CHECK(a, b);
                 vec_digi_free(&aa);
                 break;

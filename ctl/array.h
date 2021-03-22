@@ -366,8 +366,24 @@ static inline void JOIN(A, assign)(A *self, size_t count, T value)
 static inline void JOIN(A, assign_range)(A *self, T *from, T *last)
 {
     size_t l = last - JOIN(A, front)(self);
+    if (l >= N)
+        l = N;
     for (size_t i = from - JOIN(A, front)(self); i < l; i++)
         JOIN(A, set)(self, i, *JOIN(A, at)(self, i));
+}
+
+static inline void JOIN(A, assign_generic)(A *self, GI *range)
+{
+    size_t i = 0;
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+
+    while(!done(range) && i < N)
+    {
+        JOIN(A, set)(self, i++, self->copy(ref(range)));
+        next(range);
+    }
 }
 
 static inline T *JOIN(A, data)(A *self)

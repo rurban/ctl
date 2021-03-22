@@ -65,9 +65,10 @@ destructs the array.
 
 replaces the contents of the container.
 
-    assign_range (A* self, T* range2)
+    assign_range (A* self, T* from, T* last)
+    assign_generic (A* self, GI* range)
 
-replaces the contents of the container with the values from range.
+replaces the contents of the container with the values from the iterator.
 
     A copy (A* self)
 

@@ -22,13 +22,14 @@ OLD_MAIN
     TEST(CLEAR)                                                                                                        \
     TEST(RESIZE)                                                                                                       \
     TEST(ASSIGN)                                                                                                       \
+    TEST(ASSIGN_GENERIC)                                                                                               \
     TEST(SWAP)                                                                                                         \
     TEST(COPY)                                                                                                         \
     TEST(REVERSE)                                                                                                      \
     TEST(REMOVE)                                                                                                       \
     TEST(EMPLACE)                                                                                                      \
     TEST(EMPLACE_FRONT)                                                                                                \
-    TEST(EMPLACE_BACK) /* 15 */                                                                                        \
+    TEST(EMPLACE_BACK) /* 16 */                                                                                        \
     TEST(REMOVE_IF)                                                                                                    \
     TEST(ERASE_IF)                                                                                                     \
     TEST(INSERT_GENERIC)                                                                                               \
@@ -58,7 +59,7 @@ OLD_MAIN
     TEST(FIND_RANGE)                                                                                                   \
     TEST(FIND_IF_RANGE)                                                                                                \
     TEST(FIND_IF_NOT_RANGE)                                                                                            \
-    TEST(INSERT_COUNT) /* 41 */                                                                                        \
+    TEST(INSERT_COUNT) /* 42 */                                                                                        \
     TEST(INSERT_RANGE)                                                                                                 \
     TEST(ERASE_RANGE)                                                                                                  \
     TEST(INCLUDES)                                                                                                     \
@@ -102,7 +103,7 @@ OLD_MAIN
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(ERASE_GENERIC)                                                                                                \
-    TEST(GENERATE_N_RANGE) /* 70 */                                                                                    \
+    TEST(GENERATE_N_RANGE) /* 88 */                                                                                    \
     TEST(TRANSFORM_IT)                                                                                                 \
     TEST(TRANSFORM_RANGE)
 
@@ -895,6 +896,19 @@ int main(void)
             print_lst(&aa);
             b.insert(b.begin(), bb.begin(), bb.end());
             list_digi_insert_generic(&first_a1, &first_a2);
+            print_lst(&a);
+            print_list(b);
+            CHECK(a, b);
+            list_digi_free(&aa);
+            break;
+        }
+        case TEST_ASSIGN_GENERIC: {
+            print_lst(&a);
+            setup_lists(&aa, bb, TEST_RAND(TEST_MAX_SIZE), NULL);
+            first_a2 = list_digi_begin(&aa);
+            print_lst(&aa);
+            b.assign(bb.begin(), bb.end());
+            list_digi_assign_generic(&a, &first_a2);
             print_lst(&a);
             print_list(b);
             CHECK(a, b);

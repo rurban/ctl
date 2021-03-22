@@ -115,6 +115,10 @@ returns the maximum possible number of elements, hard-coded to 2GB (32bit).
 
 resizes and sets count elements to the value
 
+    assign_generic (A* self, GI* range)
+
+resizes and sets elements to copies of values from the generic iterator.
+
     clear (A* self)
 
 clears the contents

@@ -101,7 +101,8 @@ OLD_MAIN
     TEST(IS_SORTED)                                                                                                    \
     TEST(IS_SORTED_UNTIL)                                                                                              \
     TEST(REVERSE)                                                                                                      \
-    TEST(REVERSE_RANGE)
+    TEST(REVERSE_RANGE)                                                                                                \
+    TEST(ASSIGN_GENERIC)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(UNIQUE)                                                                                                       \
@@ -135,7 +136,7 @@ static const char *test_names[] = {
 void print_deq(deq_digi *a)
 {
     for (size_t i = 0; i < a->size; i++)
-        printf("%d, ", *deq_digi_at(a, i)->value);
+        printf("%d ", *deq_digi_at(a, i)->value);
     printf("\n");
 }
 
@@ -146,13 +147,13 @@ void print_deq_range(deq_digi_it it)
     size_t i1 = it.index;
     size_t i2 = it.end;
     for (i = 0; i < i1; i++)
-        printf("%d, ", *deq_digi_at(a, i)->value);
+        printf("%d ", *deq_digi_at(a, i)->value);
     printf("[");
     for (i = i1; i < i2; i++)
-        printf("%d, ", *deq_digi_at(a, i)->value);
+        printf("%d ", *deq_digi_at(a, i)->value);
     printf(") ");
     for (i = i2; i < a->size; i++)
-        printf("%d, ", *deq_digi_at(a, i)->value);
+        printf("%d ", *deq_digi_at(a, i)->value);
     printf("\n");
 }
 
@@ -163,7 +164,7 @@ void print_deque(std::deque<DIGI> &b)
         DIGI val = b.at(i);
         // DIGI.hh is not as stable as the CTL
         if (val.value)
-            printf("%d, ", *val.value);
+            printf("%d ", *val.value);
         else
             printf("NULL, ");
     }
@@ -171,8 +172,8 @@ void print_deque(std::deque<DIGI> &b)
 }
 
 #ifdef DEBUG
-//#undef TEST_MAX_SIZE
-//#define TEST_MAX_SIZE 15
+#undef TEST_MAX_SIZE
+#define TEST_MAX_SIZE 15
 #define TEST_MAX_VALUE 1000
 #else
 #define TEST_MAX_VALUE INT_MAX
@@ -781,6 +782,21 @@ int main(void)
                 print_deq(&a);
                 CHECK(a, b);
 
+                deq_digi_free(&aa);
+                break;
+            }
+            case TEST_ASSIGN_GENERIC:
+            {
+                print_deq(&a);
+                aa = deq_digi_init_from(&a);
+                setup_deque(&aa, bb);
+                range_a2 = deq_digi_begin(&aa);
+                deq_digi_assign_generic(&a, &range_a2);
+                b.assign(bb.begin(), bb.end());
+                print_deq(&a);
+                if (a.size != b.size())
+                    fail++;
+                CHECK(a, b);
                 deq_digi_free(&aa);
                 break;
             }

@@ -412,6 +412,23 @@ static inline void JOIN(A, assign)(A *self, size_t size, T value)
     FREE_VALUE(self, value);
 }
 
+static inline void JOIN(A, assign_generic)(A *self, GI *range)
+{
+    A *other = range->container;
+    B *node;
+    void (*next2)(struct I*) = range->vtable.next;
+    T* (*ref2)(struct I*) = range->vtable.ref;
+    int (*done2)(struct I*) = range->vtable.done;
+
+    JOIN(A, clear)(self);
+    while (!done2(range))
+    {
+        node = JOIN(B, init)(other->copy(ref2(range)));
+        JOIN(A, connect_after)(self, self->tail, node);
+        next2(range);
+    }
+}
+
 static inline void JOIN(A, reverse)(A *self)
 {
     if (self->size < 2)

@@ -146,9 +146,14 @@ reduces memory usage by freeing unused memory.
 
 ## Modifiers
 
-    assign (A* self, size_t count, T default_value)
+    assign (A* self, size_t count, T value)
 
-resizes and sets count elements to the default value.
+resizes and sets count elements to the value.
+
+    assign_generic (A* self, GI *range)
+
+resizes and replaces the contents of the container with copies of the values from the
+generic iter.
 
     clear (A* self)
 

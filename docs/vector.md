@@ -68,6 +68,7 @@ destructs the vector.
 replaces the contents of the container.
 
     assign_range (A* self, T* first, T* last)
+    assign_generic (A* self, GI *range)
 
 replaces the contents of the container with the values from range.
 

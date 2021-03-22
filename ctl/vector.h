@@ -378,8 +378,8 @@ static inline void JOIN(A, resize)(A *self, size_t size, T value)
 #else // different vector growth policy. double or just grow as needed.
             size_t capacity;
             size_t n = size > self->size ? size - self->size : 0;
-            LOG("  grow vector by %zu with size %zu\n", n, self->size);
             capacity = self->size + (self->size > n ? self->size : n);
+            LOG("  grow vector by %zu with size %zu to %zu\n", n, self->size, capacity);
             JOIN(A, fit)(self, capacity);
 #endif
         }
@@ -402,9 +402,53 @@ static inline void JOIN(A, assign)(A *self, size_t count, T value)
 static inline void JOIN(A, assign_range)(A *self, T *from, T *last)
 {
     size_t count = last - from;
-    JOIN(A, resize)(self, count, self->copy(self->vector)); // TODO
-    for (size_t i = 0; i < self->size; i++)
-        JOIN(A, set)(self, i, *JOIN(A, at)(self, i));
+    size_t i = 0;
+    size_t orig_size = self->size;
+    assert(last >= from);
+    // FIXME leaks
+    // optimized resize: free only existing values
+    if (count < self->size)
+        JOIN(A, wipe)(self, self->size - count);
+    else
+        JOIN(A, fit)(self, count);
+    self->size = count;
+    while(from != last)
+    {
+        T *ref = &self->vector[i];
+        if (self->free && i < orig_size)
+            self->free(ref);
+        *ref = self->copy(from++);
+        i++;
+    }
+}
+
+static inline void JOIN(A, assign_generic)(A *self, GI *range)
+{
+    long count = JOIN(I, distance_range)(range);
+    void (*next)(struct I*) = range->vtable.next;
+    T* (*ref)(struct I*) = range->vtable.ref;
+    int (*done)(struct I*) = range->vtable.done;
+    size_t i = 0;
+    size_t orig_size = 0;
+    assert(count >= 0);
+    // optimized resize: free only existing values
+    if ((size_t)count < self->size)
+        JOIN(A, wipe)(self, self->size - (size_t)count);
+    else
+    {
+        orig_size = self->size;
+        JOIN(A, fit)(self, count);
+    }
+    self->size = count;
+    while(!done(range))
+    {
+        T *sref = &self->vector[i];
+        if (self->free && i < orig_size)
+            self->free(sref);
+        *sref = self->copy(ref(range));
+        next(range);
+        i++;
+    }
 }
 
 static inline void JOIN(A, shrink_to_fit)(A *self)
