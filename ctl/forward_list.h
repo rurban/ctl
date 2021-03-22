@@ -467,10 +467,10 @@ static inline void JOIN(A, reverse_range)(I *range)
 
 static inline void JOIN(A, reverse)(A *self)
 {
-    if (self->head)
+    B *cur = self->head;
+    if (cur && cur->next)
     {
         B *prev = NULL;
-        B *cur = self->head;
         B *next = self->head;
         while (cur)
         {
@@ -525,20 +525,22 @@ static inline void JOIN(A, assign)(A *self, size_t size, T value)
 
 static inline void JOIN(A, assign_generic)(A *self, GI *range)
 {
-    A *other = range->container;
-    B *node;
     void (*next2)(struct I*) = range->vtable.next;
     T* (*ref2)(struct I*) = range->vtable.ref;
     int (*done2)(struct I*) = range->vtable.done;
 
     JOIN(A, clear)(self);
-    while (!done2(range))
+    if (!done2(range))
     {
-        node = JOIN(B, init)(other->copy(ref2(range)));
-        JOIN(A, connect_before)(self, self->head, node);
+        self->head = JOIN(B, init)(self->copy(ref2(range)));
         next2(range);
     }
-    JOIN(A, reverse)(self);
+    for (B* prev = self->head; !done2(range); next2(range))
+    {
+        // TODO: maybe skip clear and reuse most nodes, just change values
+        prev->next = JOIN(B, init)(self->copy(ref2(range)));
+        prev = prev->next;
+    }
 }
 
 static inline size_t JOIN(A, remove)(A *self, T value)
