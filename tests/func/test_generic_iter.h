@@ -179,7 +179,7 @@ void print_uset(uset_int *a)
     std::list<int> b;                                                                                                  \
     for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         list_int_push_back(&a, vb);                                                                                    \
         b.push_back(vb);                                                                                               \
     }                                                                                                                  \
@@ -192,7 +192,7 @@ void print_uset(uset_int *a)
     std::list<int> bb;                                                                                                 \
     for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         list_int_push_back(&aa, vb);                                                                                   \
         bb.push_back(vb);                                                                                              \
     }                                                                                                                  \
@@ -206,7 +206,7 @@ void print_uset(uset_int *a)
     std::forward_list<int> b;                                                                                          \
     for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         slist_int_push_front(&a, vb);                                                                                  \
         b.push_front(vb);                                                                                              \
     }                                                                                                                  \
@@ -219,7 +219,7 @@ void print_uset(uset_int *a)
     std::forward_list<int> bb;                                                                                         \
     for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         slist_int_push_front(&aa, vb);                                                                                 \
         bb.push_front(vb);                                                                                             \
     }                                                                                                                  \
@@ -233,7 +233,7 @@ void print_uset(uset_int *a)
     std::vector<int> b;                                                                                                \
     for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         vec_int_push_back(&a, vb);                                                                                     \
         b.push_back(vb);                                                                                               \
     }                                                                                                                  \
@@ -245,7 +245,7 @@ void print_uset(uset_int *a)
     std::vector<int> bb;                                                                                               \
     for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         vec_int_push_back(&aa, vb);                                                                                    \
         bb.push_back(vb);                                                                                              \
     }                                                                                                                  \
@@ -261,7 +261,7 @@ void print_uset(uset_int *a)
     std::array<int, 25> b;                                                                                             \
     for (int i = 0; i < 25; i++)                                                                                       \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         a.vector[i] = vb;                                                                                              \
         b[i] = vb;                                                                                                     \
     }                                                                                                                  \
@@ -271,7 +271,7 @@ void print_uset(uset_int *a)
     std::array<int, 25> bb;                                                                                            \
     for (int i = 0; i < 25; i++)                                                                                       \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         aa.vector[i] = vb;                                                                                             \
         bb[i] = vb;                                                                                                    \
     }                                                                                                                  \
@@ -285,7 +285,7 @@ void print_uset(uset_int *a)
     std::deque<int> b;                                                                                                 \
     for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         deq_int_push_back(&a, vb);                                                                                     \
         b.push_back(vb);                                                                                               \
     }                                                                                                                  \
@@ -297,7 +297,7 @@ void print_uset(uset_int *a)
     std::deque<int> bb;                                                                                                \
     for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         deq_int_push_back(&aa, vb);                                                                                    \
         bb.push_back(vb);                                                                                              \
     }                                                                                                                  \
@@ -311,7 +311,7 @@ void print_uset(uset_int *a)
     std::set<int> b;                                                                                                   \
     for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         set_int_insert(&a, vb);                                                                                        \
         b.insert(vb);                                                                                                  \
     }                                                                                                                  \
@@ -319,9 +319,9 @@ void print_uset(uset_int *a)
 #define SETUP_SET2                                                                                                     \
     set_int aa = set_int_init(NULL);                                                                                   \
     std::set<int> bb;                                                                                                  \
-    for (int i = 0; i < TEST_RAND(25); i++)                                                                 \
+    for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         set_int_insert(&aa, vb);                                                                                       \
         bb.insert(vb);                                                                                                 \
     }                                                                                                                  \
@@ -333,7 +333,7 @@ void print_uset(uset_int *a)
     std::unordered_set<int> b;                                                                                         \
     for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         uset_int_insert(&a, vb);                                                                                       \
         b.insert(vb);                                                                                                  \
     }                                                                                                                  \
@@ -343,7 +343,7 @@ void print_uset(uset_int *a)
     std::unordered_set<int> bb;                                                                                        \
     for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \
-        const int vb = TEST_RAND(TEST_MAX_VALUE);                                                                      \
+        vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         uset_int_insert(&aa, vb);                                                                                      \
         bb.insert(vb);                                                                                                 \
     }                                                                                                                  \

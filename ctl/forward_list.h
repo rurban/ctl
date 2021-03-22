@@ -739,6 +739,54 @@ static inline B* JOIN(B, merge)(A* self, B* a, B* b)
     return result;
 }
 
+// not the fast inplace_merge as above
+static inline A JOIN(A, merge_range)(I *r1, GI *r2)
+{
+    A self = JOIN(A, init_from)(r1->container);
+    void (*next2)(struct I*) = r2->vtable.next;
+    T* (*ref2)(struct I*) = r2->vtable.ref;
+    int (*done2)(struct I*) = r2->vtable.done;
+    /*
+    if (next2 == JOIN(I, next))
+    {
+        // do the native destructive merge?
+        self.head = JOIN(B, merge)(&self, r1->node, r2->node);
+        return self;
+    }
+    */
+    B* node = self.head;
+    while (!JOIN(I, done)(r1))
+    {
+        B* next;
+        if (done2(r2))
+            return *JOIN(A, copy_range)(r1, &self);
+        if (self.compare(ref2(r2), r1->ref))
+        {
+            next = JOIN(B, init)(self.copy(ref2(r2)));
+            next2(r2);
+        }
+        else
+        {
+            next = JOIN(B, init)(self.copy(r1->ref));
+            JOIN(I, next)(r1);
+        }
+
+        if (UNLIKELY(!node)) // empty head
+        {
+            node = next;
+            if (!self.head)
+                self.head = node;
+        }
+        else
+        {
+            node->next = next;
+            node = next;
+        }
+    }
+    JOIN(A, copy_range)(r2, &self);
+    return self;
+}
+
 static inline void JOIN(A, merge)(A *self, A *other)
 {
     CTL_ASSERT_COMPARE;
@@ -816,18 +864,26 @@ static inline I JOIN(A, find)(A *self, T key)
 
 static inline A* JOIN(A, copy_range)(GI *range, A *out)
 {
-    void (*next)(struct I*) = range->vtable.next;
+    void (*next1)(struct I*) = range->vtable.next;
     T* (*ref)(struct I*) = range->vtable.ref;
     int (*done)(struct I*) = range->vtable.done;
-    // push to temp, reverse temp, and link to end of out
-    I outrange = JOIN(A, begin)(out);
+    B* tail = JOIN(A, tail)(out);
     while (!done(range))
     {
-        JOIN(A, push_front)(out, out->copy(ref(range)));
-        next(range);
+        B* next = JOIN(B, init)(out->copy(ref(range)));
+        if (!tail)
+        {
+            tail = next;
+            if (!out->head)
+                out->head = tail;
+        }
+        else
+        {
+            tail->next = next;
+            tail = next;
+        }
+        next1(range);
     }
-    outrange.node = out->head;
-    JOIN(A, reverse_range)(&outrange);
     return out;
 }
 
@@ -849,6 +905,14 @@ static inline A *JOIN(A, move_range)(I *range, A *out)
 {
     A *self = range->container;
     B *node = range->node;
+    B* tail = JOIN(A, tail)(self);
+    while (node != range->end)
+    {
+        JOIN(A, connect_after)(self, tail, node);
+        tail = tail->next;
+        node = node->next;
+    }
+    /*
     I outrange = JOIN(A, begin)(out);
     while (node != range->end)
     {
@@ -858,6 +922,7 @@ static inline A *JOIN(A, move_range)(I *range, A *out)
     }
     outrange.node = out->head;
     JOIN(A, reverse_range)(&outrange);
+    */
     return out;
 }
 

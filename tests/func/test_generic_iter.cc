@@ -66,6 +66,7 @@ int main(void)
     vec_u16_resize(&covvec, max_w.w, 0); // 5 types, ff methods
     for (unsigned loop = 0; loop < loops; loop++)
     {
+        int vb;
         types_t t1, t2;
         int which;
         union gen_cov_u wu;
@@ -170,7 +171,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; INSERT_INTO(set, vec, vector<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; INSERT_INTO(uset, vec, vector<int>); break;
                 }
                 } // switch t2
@@ -201,7 +202,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; INSERT_INTO(set, deq, deque<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; INSERT_INTO(uset, deq, deque<int>); break;
                 }
                 } // switch t2
@@ -232,7 +233,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; INSERT_INTO(set, list, list<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; INSERT_INTO(uset, list, list<int>); break;
                 }
                 } // switch t2
@@ -263,7 +264,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; INSERT_INTO_SLIST(set, slist, forward_list<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; INSERT_INTO_SLIST(uset, slist, forward_list<int>); break;
                 }
                 } // switch t2
@@ -295,7 +296,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; INSERT_INTO_SET(set, set, set<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; INSERT_INTO_SET(uset, set, set<int>); break;
                 }
                 } // switch t2
@@ -328,7 +329,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; INSERT_INTO_SET(set, uset, unordered_set<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; INSERT_INTO_SET(uset, uset, unordered_set<int>); break;
                 }
                 } // switch t2
@@ -389,7 +390,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC_ARRAY(set, arr25); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; ASSIGN_GENERIC_ARRAY(uset, arr25); break;
                 }
                 } // switch t2
@@ -417,7 +418,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC(set, vec, vector<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; ASSIGN_GENERIC(uset, vec, vector<int>); break;
                 }
                 } // switch t2
@@ -445,7 +446,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC(set, deq, deque<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; ASSIGN_GENERIC(uset, deq, deque<int>); break;
                 }
                 } // switch t2
@@ -473,7 +474,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC(set, list, list<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; ASSIGN_GENERIC(uset, list, list<int>); break;
                 }
                 } // switch t2
@@ -501,7 +502,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC_SLIST(set, slist, forward_list<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; ASSIGN_GENERIC_SLIST(uset, slist, forward_list<int>); break;
                 }
                 } // switch t2
@@ -533,7 +534,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC_SET(set, set, set<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; ASSIGN_GENERIC_SET(uset, set, set<int>); break;
                 }
                 } // switch t2
@@ -566,7 +567,7 @@ int main(void)
                 case CTL_SET : {
                     SETUP_SET2; ASSIGN_GENERIC_SET(set, uset, unordered_set<int>); break;
                 }
-                case CTL_USET : {
+                case CTL_USET : { // random order!
                     SETUP_USET2; ASSIGN_GENERIC_SET(uset, uset, unordered_set<int>); break;
                 }
                 } // switch t2
@@ -596,9 +597,10 @@ int main(void)
     ty1##_int aaa = ty1##_int_merge_range(&begin, (ty1##_int_it *)&range2);                                            \
     std::cppty bbb;                                                                                                    \
     std::merge(b.begin(), b.end(), bb.begin(), bb.end(), std::front_inserter(bbb));                                    \
+    bbb.reverse();                                                                                                     \
+    CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
     LOG("=> ");                                                                                                        \
     print_##ty1(&aaa);                                                                                                 \
-    CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define MERGE_INTO_SET(ty2, ty1, cppty)                                                                                \
@@ -622,6 +624,7 @@ int main(void)
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define MERGE_INTO_SET(ty2, ty1, cppty)  MERGE_INTO(ty2, ty1, cppty)
+#define MERGE_INTO_SLIST(ty2, ty1, cppty, ok)  MERGE_INTO(ty2, ty1, cppty)
 #endif
 
                 switch (t1)
@@ -635,7 +638,7 @@ int main(void)
                         LOG("merge list into list\n");
                         list_int_it begin = list_int_begin(&a);
                         list_int aaa = list_int_merge_range(&begin, &range2);
-                        b.merge(bb);
+                        b.merge(bb); // test the native destructive merge
                         CHECK(list, list, list<int>, aaa, b);
                         list_int_free(&aa);
                         list_int_free(&aaa);
@@ -656,7 +659,7 @@ int main(void)
                     case CTL_SET : {
                         SETUP_SET2; MERGE_INTO(set, list, list<int>); break;
                     }
-                    case CTL_USET : {
+                    case CTL_USET : { // random order!
                         SETUP_USET2; MERGE_INTO(uset, list, list<int>); break;
                     }
                     } // switch t2
@@ -671,7 +674,8 @@ int main(void)
                         LOG("merge slist into slist\n");
                         slist_int_it begin = slist_int_begin(&a);
                         slist_int aaa = slist_int_merge_range(&begin, &range2);
-                        b.merge(bb);
+                        print_slist(&aaa);
+                        b.merge(bb); // test the native destructive merge
                         CHECK_SLIST(slist, slist, forward_list<int>, aaa, b);
                         slist_int_free(&aa);
                         slist_int_free(&aaa);
@@ -720,7 +724,7 @@ int main(void)
                     case CTL_SET : {
                         SETUP_SET2; MERGE_INTO(set, vec, vector<int>); break;
                     }
-                    case CTL_USET : {
+                    case CTL_USET : { // random order!
                         SETUP_USET2; MERGE_INTO(uset, vec, vector<int>); break;
                     }
                     } // switch t2
@@ -750,7 +754,7 @@ int main(void)
                     case CTL_SET : {
                         SETUP_SET2; MERGE_INTO(set, deq, deque<int>); break;
                     }
-                    case CTL_USET : {
+                    case CTL_USET : { // random order!
                         SETUP_USET2; MERGE_INTO(uset, deq, deque<int>); break;
                     }
                     } // switch t2
@@ -778,7 +782,7 @@ int main(void)
                     case CTL_SET : {
                         SETUP_SET2; MERGE_INTO_SET(set, set, set<int>); break;
                     }
-                    case CTL_USET : {
+                    case CTL_USET : { // random order!
                         SETUP_USET2; MERGE_INTO_SET(uset, set, set<int>); break;
                     }
                     } // switch t2
@@ -806,7 +810,7 @@ int main(void)
                     case CTL_SET : {
                         SETUP_SET2; MERGE_INTO_SET(set, uset, unordered_set<int>); break;
                     }
-                    case CTL_USET : {
+                    case CTL_USET : { // random order!
                         SETUP_USET2; MERGE_INTO_SET(uset, uset, unordered_set<int>); break;
                     }
                     } // switch t2

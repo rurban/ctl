@@ -64,6 +64,7 @@ int main(void)
     vec_u16_resize(&covvec, max_w.w, 0); // 5 types, ff methods
     for (unsigned loop = 0; loop < loops; loop++)
     {
+        int vb;
         types_t t1, t2;
         int which;
         union gen_cov_u wu;

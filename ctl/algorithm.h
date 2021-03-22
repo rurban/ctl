@@ -620,7 +620,7 @@ static inline I JOIN(A, transform_it_range)(I *range, I *pos, I dest, T _binop(T
 
 #if !defined(CTL_ARR)
 
-#if !defined(CTL_USET) && !defined(CTL_UMAP)
+#if !defined(CTL_USET) && !defined(CTL_UMAP) && !defined(CTL_SLIST)
 // both are better be sorted
 static inline A JOIN(A, merge_range)(I *r1, GI *r2)
 {
@@ -648,7 +648,7 @@ static inline A JOIN(A, merge_range)(I *r1, GI *r2)
     return self;
 }
 
-#if !defined(CTL_LIST) && !defined(CTL_SLIST)
+#if !defined(CTL_LIST)
 static inline A JOIN(A, merge)(A *a, A *b)
 {
     JOIN(A, it) r1 = JOIN(A, begin)(a);
@@ -656,7 +656,7 @@ static inline A JOIN(A, merge)(A *a, A *b)
     return JOIN(A, merge_range)(&r1, &r2);
 }
 #endif // LIST
-#endif // USET
+#endif // USET,SLIST
 
 #if 0
 // TODO
