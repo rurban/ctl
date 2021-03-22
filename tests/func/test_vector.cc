@@ -30,6 +30,8 @@ OLD_MAIN
     TEST(COPY)                                                                                                         \
     TEST(SWAP)                                                                                                         \
     TEST(ASSIGN)                                                                                                       \
+    TEST(ASSIGN_RANGE)                                                                                                 \
+    TEST(ASSIGN_GENERIC)                                                                                               \
     TEST(REMOVE_IF)                                                                                                    \
     TEST(ERASE_IF)                                                                                                     \
     TEST(EQUAL)                                                                                                        \
@@ -99,8 +101,6 @@ OLD_MAIN
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EMPLACE) /* 83 */                                                                                             \
-    TEST(ASSIGN_RANGE)                                                                                                 \
-    TEST(ASSIGN_GENERIC)                                                                                               \
     TEST(INSERT_GENERIC)                                                                                               \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_IT_RANGE)
@@ -546,7 +546,6 @@ int main(void)
                 }
                 break;
             }
-#ifdef DEBUG
             case TEST_ASSIGN_RANGE: {
                 print_vec(&a);
                 aa = vec_digi_init_from(&a);
@@ -578,6 +577,7 @@ int main(void)
                 vec_digi_free(&aa);
                 break;
             }
+#ifdef DEBUG
             case TEST_INSERT_GENERIC: {
                 print_vec(&a);
                 aa = vec_digi_init_from(&a);

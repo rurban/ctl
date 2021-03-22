@@ -371,8 +371,8 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
 |`push_front`                     | -  | -  | -  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
 |`clear`                          | ✓  | ✓  |    | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  |
 |`assign`                         | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
-|`assign_range`                   | x  | -  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  | -  |
-|`assign_generic`                 | x  | -  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
+|`assign_range`                   | ✓  | -  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  | -  |
+|`assign_generic`                 | ✓  | -  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
 |`resize`                         | ✓  | ✓  | -  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
 |`shrink_to_fit`                  | ✓  | ✓  | -  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  |
 |`data`                           |    |    |    | -  | -  | -  | -  | -  | -  | -  | -  | -  |
@@ -565,7 +565,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 202000 (starting with `202102`),
 the old ctl is lower than 202000, starting with `1.0`.
 
-Added lots of missing methods. We have 154 methods in 811 stable variants.
+Added lots of missing methods. We have 154 methods in 813 stable variants.
 glouw has 63 methods in 196 stable variants.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.

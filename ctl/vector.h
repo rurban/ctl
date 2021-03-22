@@ -401,25 +401,26 @@ static inline void JOIN(A, assign)(A *self, size_t count, T value)
 
 static inline void JOIN(A, assign_range)(A *self, T *from, T *last)
 {
-    size_t count = last - from;
     size_t i = 0;
-    size_t orig_size = self->size;
+    const size_t orig_size = self->size;
     assert(last >= from);
-    // FIXME leaks
-    // optimized resize: free only existing values
-    if (count < self->size)
-        JOIN(A, wipe)(self, self->size - count);
-    else
-        JOIN(A, fit)(self, count);
-    self->size = count;
     while(from != last)
     {
-        T *ref = &self->vector[i];
-        if (self->free && i < orig_size)
-            self->free(ref);
-        *ref = self->copy(from++);
+        if (i >= orig_size) // grow
+            JOIN(A, push_back)(self, self->copy(from));
+        else
+        {
+            T *ref = &self->vector[i];
+            if (self->free && i < orig_size)
+                self->free(ref);
+            *ref = self->copy(from);
+        }
+        from++;
         i++;
     }
+    if (i < orig_size) // shrink
+        while (i != self->size)
+            JOIN(A, pop_back)(self);
 }
 
 static inline void JOIN(A, assign_generic)(A *self, GI *range)
