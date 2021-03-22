@@ -113,6 +113,7 @@ int main(void)
 
         case TEST_INSERT_GENERIC:
 
+// TODO std::inserter
 #define INSERT_INTO_SET(ty2, ty1, cppty)                                                                               \
     LOG("insert " #ty2 " into " #ty1 "\n");                                                                            \
     /* C++ cannot insert generic iters into set/uset */                                                                \
@@ -123,8 +124,9 @@ int main(void)
 #define INSERT_INTO_SLIST(ty2, ty1, cppty)                                                                             \
     LOG("insert " #ty2 " into " #ty1 "\n");                                                                            \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
+    begin.node = NULL; /* == b.before_begin() */                                                                       \
     ty1##_int_insert_generic(&begin, (ty1##_int_it *)&range2);                                                         \
-    b.insert_after(b.begin(), bb.begin(), bb.end());                                                                   \
+    b.insert_after(b.before_begin(), bb.begin(), bb.end());                                                            \
     LOG("=> ");                                                                                                        \
     print_##ty1(&a);                                                                                                   \
     CHECK_SLIST(ty1, ty2, cppty, a, b);                                                                                \

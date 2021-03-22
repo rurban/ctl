@@ -332,30 +332,32 @@ static inline void JOIN(A, insert_after)(I *iter, T value)
         node->next->next = next;
 }
 
-// On !iter->node (aka before_begin()) insert before.
-// FIXME reverse? splice copy?
+// On !iter->node (aka before_begin()) and empty slist insert before. all other insert_after.
 static inline void JOIN(A, insert_range)(I *iter, GI* range)
 {
     A *self = iter->container;
-    A *other = range->container;
+    //A *other = range->container;
     void (*next2)(struct I*) = range->vtable.next;
     T* (*ref2)(struct I*) = range->vtable.ref;
     int (*done2)(struct I*) = range->vtable.done;
     B* node = iter->node;
-    if (!node) // push_front
+    B* next;
+    if (done2(range))
+        return;
+    next = node ? iter->node->next : self->head;
+    if (!node) // before_begin() => push_front
     {
-        node = JOIN(B, init)(other->copy(ref2(range)));
-        JOIN(A, connect_before)(self, self->head, node);
+        self->head = node = JOIN(B, init)(self->copy(ref2(range)));
         next2(range);
     }
-    B* next = node->next;
     while (!done2(range))
     {
-        node->next = JOIN(B, init)(other->copy(ref2(range)));
-        if (next)
-            node->next->next = next;
+        node->next = JOIN(B, init)(self->copy(ref2(range)));
+        node = node->next;
         next2(range);
     }
+    if (next)
+        node->next = next;
 }
 
 static inline void JOIN(A, insert_generic)(I *iter, GI* range)

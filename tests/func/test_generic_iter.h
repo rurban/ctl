@@ -125,31 +125,34 @@ void print_uset(uset_int *a)
 #define TEST_MAX_VALUE 25
 #endif
 
-// from or to uset is unordered, all C++ set algorithms on uset are considered
-// broken.
 #define CHECK(ty1, ty2, cppty, _x, _y)                                                                                 \
     {                                                                                                                  \
-        if (strcmp(#ty1, "uset") && strcmp(#ty2, "uset"))                                                              \
+        if (ty1##_int_size(&_x) != _y.size())                                                                          \
         {                                                                                                              \
-            if (strcmp(#ty2, "slist"))                                                                                 \
-            {                                                                                                          \
-                if (ty1##_int_size(&_x) != _y.size())                                                                  \
-                {                                                                                                      \
-                    LOG("CTL size %zu != STL %zu\n", ty1##_int_size(&_x), _y.size());                                  \
-                }                                                                                                      \
-                assert(_x.size == _y.size());                                                                          \
-            }                                                                                                          \
+            LOG("CTL size %zu != STL %zu\n", ty1##_int_size(&_x), _y.size());                                          \
         }                                                                                                              \
-        CHECK_SLIST(ty1, ty2, cppty, _x, _y);                                                                          \
+        assert(_x.size == _y.size());                                                                                  \
+        CHECK_COMMON(ty1, ty2, cppty, _x, _y);                                                                         \
     }
 // forward_list has no size(), not even length()
 #define CHECK_SLIST(ty1, ty2, cppty, _x, _y)                                                                           \
     {                                                                                                                  \
+        if (ty1##_int_size(&_x) != size(_y))                                                                           \
+        {                                                                                                              \
+            LOG("CTL size %zu != STL %zu\n", ty1##_int_size(&_x), size(_y));                                           \
+        }                                                                                                              \
+        assert(ty1##_int_size(&_x) == size(_y));                                                                       \
+        CHECK_COMMON(ty1, ty2, cppty, _x, _y);                                                                         \
+    }
+// from or to uset is unordered, all C++ set algorithms on uset are considered
+// broken.
+#define CHECK_COMMON(ty1, ty2, cppty, _x, _y)                                                                          \
+    {                                                                                                                  \
+        print_stl(_y, cppty);                                                                                          \
         if (strcmp(#ty1, "uset") && strcmp(#ty2, "uset"))                                                              \
         {                                                                                                              \
             assert(ty1##_int_empty(&_x) == _y.empty());                                                                \
             ty1##_int_it _it1 = ty1##_int_begin(&_x);                                                                  \
-            print_stl(_y, cppty);                                                                                      \
             LOG("\n");                                                                                                 \
             int i = 0;                                                                                                 \
             for (auto &_d : _y)                                                                                        \
