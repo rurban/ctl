@@ -70,8 +70,17 @@ int main(void)
         if (!tests.size) // random testing
         {
             which = (test >= 0 ? test : TEST_RAND(TEST_TOTAL));
-            t1 = pick_type();
-            t2 = pick_type();
+            if (test >= 0x1000)
+            {
+                wu.w = test;
+                t1 = (types_t)wu.u.t1;
+                t2 = (types_t)wu.u.t2;
+            }
+            else
+            {
+                t1 = pick_type();
+                t2 = pick_type();
+            }
             LOG("main type: %d, 2nd type: %d\n", t1, t2);
             wu.u.w1 = which;
             wu.u.t1 = t1;
@@ -91,10 +100,14 @@ int main(void)
             //}
             which = wu.u.w1;
         }
-        LOG("TEST %s %d (0x%x)\n", test_names[which], which, (unsigned)wu.w);
+        assert(wu.w < covvec.size);
+#ifdef DEBUG
+        assert(wu.u.w1 < len(test_names));
+#endif
+        LOG("TEST %s %d (0x%x)\n", test_names[wu.u.w1], which, (unsigned)wu.w);
         assert(wu.w < covvec.size);
         covvec.vector[wu.w]++;
-        switch (which)
+        switch (wu.u.w1)
         {
             
         case TEST_UNION_RANGE:
@@ -1543,7 +1556,7 @@ int main(void)
                 
         default:
 #ifdef DEBUG
-            printf("unhandled testcase %d %s\n", which, test_names[which]);
+            printf("unhandled testcase %d %s\n", which, test_names[wu.u.w1]);
 #else
             printf("unhandled testcase %d\n", which);
 #endif

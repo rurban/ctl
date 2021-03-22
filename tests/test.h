@@ -242,7 +242,9 @@ void parse_TEST(char *env, int *test, queue_int *tests, const int number_ok, boo
     sscanf(env, "%d", test);
     if (!strchr(env, '-') && !strchr(env, ','))
         return;
-    if (*test >= 0)
+    if (*test >= 0 && *test < number_ok)
+        queue_int_push(tests, *test);
+    else if (generic && *test >= 0 && *test <= 0x6615)
         queue_int_push(tests, *test);
     str s = str_init(env);
     str_it r1 = str_it_begin(&s);
