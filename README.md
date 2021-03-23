@@ -66,11 +66,10 @@ the following STL containers in ISO C99/C11:
 
 In work:
 
-[ctl/forward_list.h](docs/slist.md),
 [ctl/u8string.h](docs/u8string.md),
 [ctl/u8ident.h](docs/u8ident.md).
 
-map, forward_list and many C++ methods, ranges and many algorithms are in work still.
+map (with pairs), and some C++ methods, algorithms are in work still.
 
 It is based on glouw's ctl, but with proper names, and using the incpath `ctl/` prefix.
 

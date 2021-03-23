@@ -2,8 +2,6 @@
 
 Defined in header **<ctl/forward_list.h>**, CTL prefix **slist**.
 
-This is still in development.
-
 ## SYNOPSIS
 
     bool int_eq(int* a, int* b) {
@@ -38,9 +36,9 @@ This is still in development.
 ## DESCRIPTION
 
 forward_list, a singly-linked list, is a container that supports fast insertion
-and removal of elements from anywhere in the container. Fast random access is
-not supported. Compared to list this container provides more space efficient
-storage when bidirectional iteration is not needed.
+of elements in the container. Fast random access is not supported. Compared to
+list this container provides more space efficient storage when bidirectional
+iteration is not needed.
 
 Adding, removing and moving the elements within the list, or across several
 lists, does not invalidate the iterators currently referring to other elements
@@ -74,7 +72,7 @@ destructs the list.
     assign (A* self, size_t count, T value)
     assign_generic (A* self, GI* range)
 
-resizes and sets count elements to the value.
+resizes and sets count elements to the value. (NY)
 
     A copy (A* self)
 
@@ -131,7 +129,7 @@ inserts value after pos.
 
 inserts count values after pos.
 
-    insert_range (I* pos, GI* range)
+    insert_range (I* pos, GI* range) (NY)
     insert_generic (I* pos, GI* range)
 
 inserts values after pos from first to last.
@@ -146,6 +144,7 @@ erases the element after node. If `node == NULL`, erases the head; similar to
 the STL `before_begin()` iterator.
 
     erase_range (A* self, I* range)
+    erase_generic (A* self, GI* range) (NY)
 
 erases ell elements after `range->node` until before `range->end`.
 
@@ -192,10 +191,11 @@ Removes all elements binary equal to the value.
 Removes all elements satisfying specific criteria.
 
     reverse (A* self)
+    reverse_range (I* range) (NY)
 
 reverse the list elements in place.
 
-   sort (A* self)`
+    sort (A* self)`
 
 sorts the list.
 
@@ -211,7 +211,7 @@ finds element with specific value
 
     erase_if (A* self, int T_match(T*))
 
-erases all elements satisfying specific criteria (C++20) _(NYI)_
+erases all elements satisfying specific criteria. (C++20)
 
     int equal (A* self, A* other)
 
