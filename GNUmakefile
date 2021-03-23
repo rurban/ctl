@@ -62,7 +62,7 @@ CFLAGS += -DDEBUG
 endif
 
 ifeq (1, $(SANITIZE))
-CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
+CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer -DHAVE_ASAN
 endif
 
 ifeq (1, $(GCOV))

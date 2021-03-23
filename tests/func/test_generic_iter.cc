@@ -4,6 +4,11 @@
 OLD_MAIN
 #else
 
+// O2,O3,Ofast time out during compilation
+#if defined __GNUC__ && defined HAVE_ASAN && !defined DEBUG
+#pragma GCC optimize ("O1")
+#endif
+
 /* generate lists out of various containers */
 // pick one to be the target container
 // pick another to be the 2nd range
@@ -57,6 +62,9 @@ OLD_MAIN
 
 #include "./test_generic_iter.h"
 
+#if defined __GNUC__ && defined HAVE_ASAN
+__attribute__((optimize(1)))
+#endif
 int main(void)
 {
     int fail = 0;
@@ -1509,9 +1517,6 @@ int main(void)
             break;
         }
     }
-#ifdef __GNUC__
-    #pragma message "Done parsing"
-#endif
     FINISH_TEST(__FILE__);
 }
 

@@ -54,7 +54,7 @@ CFLAGS += -DDEBUG
 .endif
 
 .ifdef SANITIZE
-CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
+CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer -DHAVE_ASAN
 .endif
 
 .ifdef GCOV
