@@ -583,7 +583,7 @@ int main(void)
             } // switch t1
             break;
 
-            case TEST_MERGE_RANGE:
+        case TEST_MERGE_RANGE:
 
 #ifndef _MSC_VER
 #define MERGE_INTO(ty2, ty1, cppty)                                                                                    \
@@ -825,7 +825,7 @@ int main(void)
                 } // switch t1
                 break;
 
-            case TEST_INCLUDES_RANGE:
+        case TEST_INCLUDES_RANGE:
 
 #if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
 #define INCLUDES_RANGE(ty2, ty1)                                                                                       \
@@ -1025,7 +1025,7 @@ int main(void)
                 } // switch t1
                 break;
 
-            case TEST_EQUAL_RANGE:
+        case TEST_EQUAL_RANGE:
 
 #if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
 #define EQUAL_RANGE(ty2, ty1)                                                                                          \
@@ -1509,6 +1509,9 @@ int main(void)
             break;
         }
     }
+#ifdef __GNUC__
+    #pragma message "Done parsing"
+#endif
     FINISH_TEST(__FILE__);
 }
 

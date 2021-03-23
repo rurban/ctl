@@ -117,7 +117,7 @@ int main(void)
         covvec.vector[wu.w]++;
         switch (wu.u.w1)
         {
-            
+
         case TEST_UNION_RANGE:
 
 #ifndef _MSC_VER
@@ -342,7 +342,7 @@ int main(void)
                 } // switch t1
                 break;
 
-            case TEST_INTERSECTION_RANGE:
+        case TEST_INTERSECTION_RANGE:
 
 #ifndef _MSC_VER
 #define INTERSECTION_RANGE_SET(ty2, ty1, cppty)                                                                        \
@@ -569,7 +569,7 @@ int main(void)
                 } // switch t1
                 break;
 
-            case TEST_SYMMETRIC_DIFFERENCE_RANGE:
+        case TEST_SYMMETRIC_DIFFERENCE_RANGE:
 
 #ifndef _MSC_VER
 #define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty)                                                                \
@@ -796,7 +796,7 @@ int main(void)
                 } // switch t1
                 break;
 
-            case TEST_DIFFERENCE_RANGE:
+        case TEST_DIFFERENCE_RANGE:
 
 #ifndef _MSC_VER
 #define DIFFERENCE_RANGE_SET(ty2, ty1, cppty)                                                                          \
@@ -1028,7 +1028,7 @@ int main(void)
                 } // switch t1
                 break;
 
-            case TEST_SEARCH_RANGE:
+        case TEST_SEARCH_RANGE:
 
 #define SEARCH_RANGE(ty2, ty1, cppty)                                                                                  \
     LOG("search_range " #ty2 " in " #ty1 "\n");                                                                        \
@@ -1381,11 +1381,11 @@ int main(void)
                 } // switch t1
                 break;
                 
-            case TEST_FIND_END_RANGE:
+        case TEST_FIND_END_RANGE:
 
 #if __cpp_lib_erase_if >= 202002L
 #define FIND_END_RANGE(ty2, ty1, cppty)                                                                                \
-    LOG("find_end_range " #ty2 " in " #ty1 "\n");                                                                    \
+    LOG("find_end_range " #ty2 " in " #ty1 "\n");                                                                      \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     ty1##_int_it it = ty1##_int_find_end_range(&begin, (ty1##_int_it *)&range2);                                       \
     auto iter = std::find_end(b.begin(), b.end(), bb.begin(), bb.end());                                               \
@@ -1574,6 +1574,9 @@ int main(void)
             break;
         }
     }
+#ifdef __GNUC__
+    #pragma message "Done parsing"
+#endif
     FINISH_TEST(__FILE__);
 }
 

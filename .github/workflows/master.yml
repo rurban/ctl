@@ -17,10 +17,10 @@ jobs:
           - lscpu
           - make -j4 O0=1 SANITIZE=1 LONG=1
           - make -j4 O1=1 SANITIZE=1 LONG=1
-          - make -j4 O2=1 SANITIZE=1 LONG=1
-          - make -j4 O3=1 SANITIZE=1 LONG=1
           - make -j4 Os=1 SANITIZE=1 LONG=1
-          - make -j4 Ofast=1 SANITIZE=1 LONG=1
+          #- make -j4 O2=1 SANITIZE=1
+          #- make -j4 O3=1 SANITIZE=1
+          #- make -j4 Ofast=1 SANITIZE=1
           - make -j4 O0=1 LONG=1
           - make -j4 O1=1 LONG=1
           - make -j4 O2=1 LONG=1
@@ -45,6 +45,7 @@ jobs:
         g++ --version
     - uses: actions/checkout@v2
     - run:  ${{ matrix.MAKE }}
+      timeout-minutes: 30
   windows:
     runs-on: windows-latest
     steps:
