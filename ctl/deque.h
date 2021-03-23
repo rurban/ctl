@@ -574,7 +574,11 @@ static inline I *JOIN(A, insert_count)(I *pos, size_t count, T value)
     A *self = pos->container;
     // detect overflows, esp. silent signed conversions, like -1
     size_t index = pos->index;
-    if (self->size + count < self->size || index + count < count || self->size + count > JOIN(A, max_size)())
+    if (self->size + count < self->size || index + count < count
+#ifndef CBMC
+        || self->size + count > JOIN(A, max_size)()
+#endif
+        )
     {
         ASSERT(self->size + count >= self->size || !"count overflow");
         ASSERT(index + count >= count || !"pos overflow");

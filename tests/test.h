@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef CBMC
 #include <time.h>
 #ifndef _WIN32
 #include <sys/time.h>
@@ -21,6 +22,7 @@
 #endif
 #undef NDEBUG
 #include <assert.h>
+#endif
 
 // deprecated in clang with C++14
 #if defined _LIBCPP_STD_VER && __cplusplus < 201402L
@@ -42,6 +44,7 @@
 #define CLANG_DIAG_RESTORE
 #endif
 
+#ifndef CBMC
 #define POD
 #define T int
 #include <ctl/queue.h>
@@ -52,6 +55,7 @@ typedef uint16_t u16;
 #define INCLUDE_ALGORITHM
 #define INCLUDE_NUMERIC
 #include <ctl/string.h>
+#endif
 
 // coverage counter for generic_iter: bitmask of 3 values
 union gen_cov_u {
@@ -64,13 +68,13 @@ union gen_cov_u {
 };
 
 #ifdef LONG
-#define TEST_MAX_SIZE (4096)
+#define TEST_MAX_SIZE 4096
 #undef TEST_MAX_LOOPS
-#define TEST_MAX_LOOPS (8096)
+#define TEST_MAX_LOOPS 8096
 #else
-#define TEST_MAX_SIZE (512)
+#define TEST_MAX_SIZE 512
 #ifndef TEST_MAX_LOOPS
-# define TEST_MAX_LOOPS (512)
+# define TEST_MAX_LOOPS 512
 #endif
 #endif
 
@@ -79,7 +83,16 @@ union gen_cov_u {
 #define TEST_PASS(f) printf("%s: PASS\n", f)
 #define TEST_FAIL(f) printf("%s: FAIL\n", f)
 
+#ifndef CBMC
 #define TEST_RAND(max) (((max) == 0) ? 0 : (int)(rand() % (max)))
+#else
+# define DEQ_BUCKET_SIZE 4
+# undef TEST_MAX_SIZE
+# undef TEST_MAX_LOOPS
+# define TEST_MAX_SIZE 4
+# define TEST_MAX_LOOPS 1
+# define TEST_RAND(max) (((max) == 0) ? 0 : nondet_int())
+#endif
 
 #define TEST_PERF_RUNS (100)
 #define TEST_PERF_CHUNKS (256)
@@ -116,6 +129,7 @@ static inline long TEST_TIME(void)
 #define INIT_SRAND const unsigned int seed = 0;
 #endif
 
+#ifndef CBMC
 #define INIT_TEST_LOOPS(n, generic)                                                                                    \
     unsigned loops = TEST_TOTAL + TEST_RAND(TEST_MAX_LOOPS - TEST_TOTAL);                                              \
     vec_u16 covvec = vec_u16_init();                                                                                   \
@@ -138,7 +152,14 @@ static inline long TEST_TIME(void)
         sscanf(env, "%u", &loops);                                                                                     \
     }                                                                                                                  \
     loops:
+#else
+#define INIT_TEST_LOOPS(n, generic)                                                                                    \
+    unsigned loops = TEST_TOTAL;                                                                                       \
+    static int test = -1;
+#define FINISH_TEST(FILE)
+#endif
 
+#ifndef CBMC
 #define RECORD_WHICH covvec.vector[(u16)which]++
 
 /* check if we covered all tests. If not redo the missing tests. */
@@ -289,7 +310,8 @@ void parse_TEST(char *env, int *test, queue_int *tests, const int number_ok, boo
     str_free(&alts);
 }
 
-#endif
+#endif // CBMC
+#endif // TEST_H
 
 #ifndef MAX
 #define MAX(a, b) (a) > (b) ? (a) : (b)

@@ -183,6 +183,12 @@ void print_list(std::list<DIGI> &b)
 #define print_list(x)
 #define TEST_MAX_VALUE INT_MAX
 #endif
+#ifdef CBMC
+# undef TEST_MAX_SIZE
+# undef TEST_MAX_LOOPS
+# define TEST_MAX_SIZE 4
+# define TEST_MAX_LOOPS 1
+#endif
 
 int middle(list_digi *a)
 {
