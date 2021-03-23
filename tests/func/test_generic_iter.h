@@ -90,13 +90,15 @@ void print_slist(slist_int *a)
 void print_set(set_int *a)
 {
     printf("%-15s: ", "set");
-    foreach (set_int, a, it) printf("%d, ", *it.ref);
+    if (a->size)
+        foreach (set_int, a, it) printf("%d, ", *it.ref);
     printf("\n");
 }
 void print_uset(uset_int *a)
 {
     printf("%-15s: ", "uset");
-    foreach (uset_int, a, it) printf("%d, ", *it.ref);
+    if (a->size)
+        foreach (uset_int, a, it) printf("%d, ", *it.ref);
     printf("\n");
 }
 
@@ -127,32 +129,39 @@ void print_uset(uset_int *a)
 
 #define CHECK(ty1, ty2, cppty, _x, _y)                                                                                 \
     {                                                                                                                  \
+        print_stl(_y, cppty);                                                                                          \
         if (ty1##_int_size(&_x) != _y.size())                                                                          \
         {                                                                                                              \
             LOG("CTL size %zu != STL %zu\n", ty1##_int_size(&_x), _y.size());                                          \
         }                                                                                                              \
-        assert(_x.size == _y.size());                                                                                  \
+        if (strcmp(#ty1, "uset") && strcmp(#ty2, "uset"))                                                              \
+        {                                                                                                              \
+            assert(_x.size == _y.size());                                                                              \
+        }                                                                                                              \
         CHECK_COMMON(ty1, ty2, cppty, _x, _y);                                                                         \
     }
 // forward_list has no size(), not even length()
 #define CHECK_SLIST(ty1, ty2, cppty, _x, _y)                                                                           \
     {                                                                                                                  \
+        print_stl(_y, cppty);                                                                                          \
         if (ty1##_int_size(&_x) != size(_y))                                                                           \
         {                                                                                                              \
             LOG("CTL size %zu != STL %zu\n", ty1##_int_size(&_x), size(_y));                                           \
         }                                                                                                              \
-        assert(ty1##_int_size(&_x) == size(_y));                                                                       \
+        if (strcmp(#ty2, "uset"))                                                                                      \
+        {                                                                                                              \
+            assert(ty1##_int_size(&_x) == size(_y));                                                                   \
+        }                                                                                                              \
         CHECK_COMMON(ty1, ty2, cppty, _x, _y);                                                                         \
     }
 // from or to uset is unordered, all C++ set algorithms on uset are considered
-// broken.
+// broken. we'd really need to sort every uset iterator if used genericly
 #define CHECK_COMMON(ty1, ty2, cppty, _x, _y)                                                                          \
     {                                                                                                                  \
-        print_stl(_y, cppty);                                                                                          \
         if (strcmp(#ty1, "uset") && strcmp(#ty2, "uset"))                                                              \
         {                                                                                                              \
-            assert(ty1##_int_empty(&_x) == _y.empty());                                                                \
             ty1##_int_it _it1 = ty1##_int_begin(&_x);                                                                  \
+            assert(ty1##_int_empty(&_x) == _y.empty());                                                                \
             LOG("\n");                                                                                                 \
             int i = 0;                                                                                                 \
             for (auto &_d : _y)                                                                                        \
@@ -309,7 +318,7 @@ void print_uset(uset_int *a)
 #define SETUP_SET1                                                                                                     \
     set_int a = set_int_init(NULL);                                                                                    \
     std::set<int> b;                                                                                                   \
-    for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
+    for (int i = 0; i < 1 + TEST_RAND(TEST_MAX_SIZE - 1); i++)                                                         \
     {                                                                                                                  \
         vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         set_int_insert(&a, vb);                                                                                        \
@@ -331,7 +340,7 @@ void print_uset(uset_int *a)
 #define SETUP_USET1                                                                                                    \
     uset_int a = uset_int_init(NULL, NULL);                                                                            \
     std::unordered_set<int> b;                                                                                         \
-    for (int i = 0; i < TEST_RAND(TEST_MAX_SIZE); i++)                                                                 \
+    for (int i = 0; i < 1 + TEST_RAND(TEST_MAX_SIZE - 1); i++)                                                         \
     {                                                                                                                  \
         vb = 1 + TEST_RAND(TEST_MAX_VALUE - 1);                                                                        \
         uset_int_insert(&a, vb);                                                                                       \

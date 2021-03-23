@@ -356,6 +356,12 @@ tests/func/test_array:   .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl
 tests/func/test_double_array:   .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/array.h \
                           tests/func/test_double_array.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
+tests/func/test_generic_iter: .cflags $(H) tests/test.h tests/func/test_generic_iter.h \
+                          tests/func/test_generic_iter.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
+tests/func/test_generic_iter2: .cflags $(H) tests/test.h tests/func/test_generic_iter.h \
+                          tests/func/test_generic_iter2.cc
+	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/%: tests/func/%.c .cflags $(H) tests/test.h
 	$(CC) $(CFLAGS) -o $@ $@.c
 tests/func/%: tests/func/%.cc .cflags $(H) tests/test.h

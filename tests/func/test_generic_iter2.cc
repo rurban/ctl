@@ -34,24 +34,25 @@ OLD_MAIN
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(UNION_RANGE)                                                                                                  \
     TEST(INTERSECTION_RANGE)                                                                                           \
+    TEST(DIFFERENCE_RANGE)                                                                                             \
     TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
     TEST(SEARCH_RANGE)                                                                                                 \
     TEST(FIND_FIRST_OF_RANGE)                                                                                          \
     TEST(FIND_END_RANGE)
-#define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(DIFFERENCE_RANGE)
+#define FOREACH_DEBUG(TEST)
 
 // over in iter
 #define FOREACH_METH1(TEST)                                                                                            \
     TEST(INSERT_GENERIC)                                                                                               \
+    TEST(ASSIGN_GENERIC)                                                                                               \
     TEST(MERGE_RANGE)                                                                                                  \
     TEST(INCLUDES_RANGE)                                                                                               \
     TEST(EQUAL_RANGE)                                                                                                  \
     TEST(MISMATCH)                                                                                                     \
     TEST(LEXICOGRAPHICAL_COMPARE)
 #define FOREACH_DEBUG1(TEST)                                                                                           \
-    //TEST(REMOVE_GENERIC)
     //TEST(COPY_GENERIC)
+    //TEST(ERASE_GENERIC)
 
 #include "./test_generic_iter.h"
 
@@ -61,7 +62,7 @@ int main(void)
     const union gen_cov_u max_w = { .u = { .w1 = TEST_TOTAL, .t1 = CTL_USET, .t2 = CTL_USET } };
     INIT_SRAND;
     INIT_TEST_LOOPS(10, true);
-    vec_u16_resize(&covvec, max_w.w, 0); // 5 types, ff methods
+    vec_u16_resize(&covvec, max_w.w, 0); // 6 types, ff methods
     for (unsigned loop = 0; loop < loops; loop++)
     {
         int vb;
@@ -133,6 +134,7 @@ int main(void)
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::front_inserter(bbb));                                \
+    bbb.reverse();                                                                                                     \
     CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -355,6 +357,7 @@ int main(void)
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(), std::front_inserter(bbb));                         \
+    bbb.reverse();                                                                                                     \
     CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -580,6 +583,7 @@ int main(void)
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::front_inserter(bbb));                 \
+    bbb.reverse();                                                                                                     \
     CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -785,7 +789,6 @@ int main(void)
                 } // switch t1
                 break;
 
-#ifdef DEBUG
             case TEST_DIFFERENCE_RANGE:
 
 #ifndef _MSC_VER
@@ -806,6 +809,7 @@ int main(void)
     print_##ty1(&aaa);                                                                                                 \
     std::cppty bbb;                                                                                                    \
     std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::front_inserter(bbb));                           \
+    bbb.reverse();                                                                                                     \
     CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
@@ -1016,7 +1020,6 @@ int main(void)
 #endif
                 } // switch t1
                 break;
-#endif // DEBUG
 
             case TEST_SEARCH_RANGE:
 

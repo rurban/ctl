@@ -42,18 +42,18 @@ OLD_MAIN
 
 #define FOREACH_DEBUG(TEST)
     //TEST(COPY_GENERIC)
-    //TEST(REMOVE_RANGE) /* 14. max 16? (5 bits) */
+    //TEST(ERASE_GENERIC) /* 14. max 16? (5 bits) */
 
 // over in iter2:
 #define FOREACH_METH2(TEST)                                                                                            \
     TEST(UNION_RANGE)                                                                                                  \
     TEST(INTERSECTION_RANGE)                                                                                           \
+    TEST(DIFFERENCE_RANGE)                                                                                             \
     TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
     TEST(SEARCH_RANGE)                                                                                                 \
     TEST(FIND_FIRST_OF_RANGE)                                                                                          \
     TEST(FIND_END_RANGE)
-#define FOREACH_DEBUG2(TEST)                                                                                           \
-    TEST(DIFFERENCE_RANGE)
+#define FOREACH_DEBUG2(TEST)
 
 #include "./test_generic_iter.h"
 
@@ -63,7 +63,7 @@ int main(void)
     const union gen_cov_u max_w = { .u = { .w1 = TEST_TOTAL, .t1 = CTL_USET, .t2 = CTL_USET } };
     INIT_SRAND;
     INIT_TEST_LOOPS(10, true);
-    vec_u16_resize(&covvec, max_w.w, 0); // 5 types, ff methods
+    vec_u16_resize(&covvec, max_w.w, 0); // 6 types, ff methods
     for (unsigned loop = 0; loop < loops; loop++)
     {
         int vb;
