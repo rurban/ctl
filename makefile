@@ -7,7 +7,7 @@ PREFIX ?= /usr/local
 CC ?= gcc
 CXX ?= g++
 VERSION!=(grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
-VERSION ?= 202102
+VERSION ?= 202103
 
 # probe for -std=c++20, 17 or 11
 TRY_CXX20!=(${CXX} -std=c++20 -I. tests/func/test_deque.cc -o /dev/null && echo -std=c++20) || true

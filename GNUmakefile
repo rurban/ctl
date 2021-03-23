@@ -2,7 +2,7 @@ PREFIX = /usr/local
 CC ?= gcc
 CXX ?= g++
 VERSION := $(shell grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
-VERSION ?= 202102
+VERSION ?= 202103
 
 .SUFFIXES: .cc .c .i .ii .o .md .3
 .PHONY: all check man install clean doc images perf examples verify cppcheck asan \
