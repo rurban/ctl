@@ -159,6 +159,7 @@ int main(void)
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
 #define UNION_RANGE_SET(ty2, ty1, cppty) UNION_RANGE(ty2, ty1, cppty)
+#define UNION_RANGE_SLIST(ty2, ty1, cppty) UNION_RANGE(ty2, ty1, cppty)
 #endif
 
                 switch (t1)
@@ -564,6 +565,7 @@ int main(void)
 
             case TEST_SYMMETRIC_DIFFERENCE_RANGE:
 
+#ifndef _MSC_VER
 #define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty)                                                                \
     LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
@@ -587,7 +589,6 @@ int main(void)
     CHECK_SLIST(ty1, ty2, cppty, aaa, bbb);                                                                            \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
-#ifndef _MSC_VER
 #define SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cppty)                                                                    \
     LOG("symmetric_difference " #ty2 " with " #ty1 "\n");                                                              \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
@@ -608,8 +609,8 @@ int main(void)
     print_##ty1(&aaa);                                                                                                 \
     ty1##_int_free(&aaa);                                                                                              \
     ty2##_int_free(&aa)
-//#define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty) SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cpp
-//#define SYMMETRIC_DIFFERENCE_RANGE_SLIST(ty2, ty1, cppty) SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cpp
+#define SYMMETRIC_DIFFERENCE_RANGE_SET(ty2, ty1, cppty) SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cpp)
+#define SYMMETRIC_DIFFERENCE_RANGE_SLIST(ty2, ty1, cppty) SYMMETRIC_DIFFERENCE_RANGE(ty2, ty1, cpp)
 #endif
 
                 switch (t1)

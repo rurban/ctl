@@ -1035,7 +1035,7 @@ int main(void)
     LOG("equal_range " #ty2 " with " #ty1 "\n");                                                                       \
     ty1##_int_it begin = ty1##_int_begin(&a);                                                                          \
     bool same_a = ty1##_int_equal_range(&begin, (ty1##_int_it *)&range2);                                              \
-    if (!b.size() || !bb.size() || !std::distance(bb.begin(), bb.end()))                                               \
+    if (b.empty() || bb.empty() || !std::distance(bb.begin(), bb.end()))                                               \
     {                                                                                                                  \
         printf("skip std::equal with empty range. use C++14\n");                                                       \
         ty2##_int_free(&aa);                                                                                           \
@@ -1196,7 +1196,7 @@ int main(void)
     ty2##_int_it b2 = ty2##_int_begin(&aa);                                                                            \
     ty1##_int_it r1a = ty1##_int_begin(&a);                                                                            \
     /*bool same_a = */ ty1##_int_mismatch(&r1a, (ty1##_int_it *)&range2);                                              \
-    if (!bb.size() || !std::distance(bb.begin(), bb.end()))                                                            \
+    if (bb.empty() || !std::distance(bb.begin(), bb.end()))                                                            \
     {                                                                                                                  \
         printf("skip std::mismatch with empty 2nd range. use C++14\n");                                                \
         ty2##_int_free(&aa);                                                                                           \
