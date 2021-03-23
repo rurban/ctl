@@ -60,7 +60,13 @@ OLD_MAIN
 int main(void)
 {
     int fail = 0;
+#if __cplusplus > 201703L
     const union gen_cov_u max_w = { .u = { .w1 = TEST_TOTAL, .t1 = CTL_USET, .t2 = CTL_USET } };
+#else
+    union gen_cov_u max_w;
+    max_w.u.w1 = TEST_TOTAL;
+    max_w.u.t1 = max_w.u.t2 = CTL_USET;
+#endif
     INIT_SRAND;
     INIT_TEST_LOOPS(10, true);
     vec_u16_resize(&covvec, max_w.w, 0); // 6 types, ff methods
