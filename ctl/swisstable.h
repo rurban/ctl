@@ -27,6 +27,7 @@
 
 #define CTL_HMAP
 #define CTL_UMAP
+#define CTL_USET
 #define A JOIN(hmap, TK)
 #define B JOIN(A, node)
 #define I JOIN(A, it)
@@ -105,6 +106,7 @@ typedef union u_hmap_hash
     size_t		s;
 } t_hmap_hash;
 
+//#include <ctl/pair.h>
 #include <ctl/bits/iterator_vtable.h>
 
 typedef struct I
@@ -114,12 +116,21 @@ typedef struct I
 
 #include <ctl/bits/iterators.h>
 
-static inline I
-JOIN(I, iter)(A* self, T* ref)
+static inline I JOIN(I, iter)(A* self, T* ref)
 {
     static I zero;
     I iter = zero;
     iter.ref = ref;
+    iter.end = &self->values[self->size]; // 1 past the end
+    iter.container = self;
+    return iter;
+}
+
+static inline I JOIN(I, iter_index)(A* self, size_t index)
+{
+    static I zero;
+    I iter = zero;
+    iter.ref = &self->values[index];
     iter.end = &self->values[self->size]; // 1 past the end
     iter.container = self;
     return iter;
@@ -204,8 +215,7 @@ static inline A JOIN(A, copy)(A *self);
 static inline void JOIN(A, insert)(A *self, T value);
 static inline void JOIN(A, inserter)(A *self, T value);
 
-//LATER
-//#include <ctl/bits/container.h>
+#include <ctl/bits/container.h>
 
 // No huge hash tables with wordsize 64. We support only 32bit max_size.
 static inline uint32_t
@@ -288,6 +298,9 @@ JOIN(A, _reserve)(A* self, const size_t new_size)
     {
         B* groups;
         int r = posix_memalign((void**)&groups, 32, self->num_groups * sizeof(B));
+#if !defined(_ASSERT_H) || defined(NDEBUG)
+	(void)r;
+#endif
         ASSERT(!r && "posix_memalign in hmap");
         memmove(&groups, &self->groups, old_bucket_count * sizeof(B));
         size_t i = self->num_groups;
@@ -311,6 +324,9 @@ JOIN(A, _reserve)(A* self, const size_t new_size)
     else
     {
         int r = posix_memalign((void**)&self->groups, 32, self->num_groups * sizeof(B));
+#if !defined(_ASSERT_H) || defined(NDEBUG)
+	(void)r;
+#endif
         ASSERT(!r && "posix_memalign in hmap");
         size_t i = self->num_groups;
 #ifdef __SSE2__
@@ -344,6 +360,11 @@ JOIN(A, reserve)(A* self, size_t desired_count)
     JOIN(A, _rehash)(self, new_size);
 }
 
+static inline TK JOIN(A, implicit_copy_key)(TK *key)
+{
+    return *key;
+}
+
 static inline A
 JOIN(A, init)(size_t (*_hash)(TK*), int (*_equal)(TK*, TK*))
 {
@@ -361,12 +382,18 @@ JOIN(A, init)(size_t (*_hash)(TK*), int (*_equal)(TK*, TK*))
     self.equal = _equal;
 #ifdef POD
     self.copy = JOIN(A, implicit_copy);
-    _JOIN(A, _set_default_methods)(&self);
 #else
     self.free = JOIN(T, free);
     self.copy = JOIN(T, copy);
 #endif
-    self.max_load_factor = (HMAP_LOAD_FACTOR)f;
+#ifdef PODK
+    self.copy_key = JOIN(A, implicit_copy_key);
+#else
+    self.free_key = JOIN(TK, free);
+    self.copy_key = JOIN(TK, copy);
+#endif
+    _JOIN(A, _set_default_methods)(&self);
+    self.max_load_factor = HMAP_LOAD_FACTOR;
     self.num_groups = HMAP_GROUP_SIZE;
     size_t i = self.num_groups;
 #ifdef __SSE2__
@@ -386,12 +413,10 @@ JOIN(A, init_from)(A* copy)
 {
     static A zero;
     A self = zero;
-#ifdef POD
-    self.copy = JOIN(A, implicit_copy);
-#else
-    self.free = JOIN(T, free);
-    self.copy = JOIN(T, copy);
-#endif
+    self.copy_key = copy->copy_key;
+    self.free_key = copy->free_key;
+    self.free = copy->free;
+    self.copy = copy->copy;
     self.hash = copy->hash;
     self.equal = copy->equal;
     self.max_load_factor = copy->max_load_factor;
@@ -466,9 +491,10 @@ static inline int JOIN(B, _get_match_mask)(char byte, t_hmap_i128 control)
 #endif
 
 /* Don't consume (free) the key. The user must free it by himself.
+ * Returns self->num_groups if not found.
  */
-static inline T*
-JOIN(A, find_node)(A* self, TK key)
+static inline size_t
+JOIN(A, find_index)(A* self, TK key)
 {
     if (self->size)
     {
@@ -495,21 +521,27 @@ JOIN(A, find_node)(A* self, TK key)
 #endif
             while (++i < HMAP_CONTROL_SIZE)
                 if (match & (1 << i) && LIKELY(self->equal(&g.key[i], &key)))
-                    return &self->values[gi * HMAP_CONTROL_SIZE + i];
+                    return gi * HMAP_CONTROL_SIZE + i;
             if (LIKELY(match != 0b1111111111111111))
-                return NULL;
+                return self->num_groups;
             gi = (gi + 1) % self->num_groups;
         }
     }
-    return NULL;
+    return self->num_groups;
+}
+
+static inline bool
+_JOIN(A, find_bool)(A* self, TK key)
+{
+  return JOIN(A, find_index)(self, key) < self->num_groups;
 }
 
 static inline I
 JOIN(A, find)(A* self, TK key)
 {
-    T* ref = JOIN(A, find_node)(self, key);
-    if (ref)
-        return JOIN(I, iter)(self, ref);
+    size_t index = JOIN(A, find_index)(self, key);
+    if (index < self->num_groups)
+        return JOIN(I, iter_index)(self, index);
     else
         return JOIN(A, end)(self);
 }
@@ -592,32 +624,32 @@ JOIN(A, insert_found)(A* self, TK key, T value, int* foundp)
 static inline I
 JOIN(A, emplace)(A* self, T* value)
 {
-    B* node;
-    if ((node = JOIN(A, find_node)(self, *value)))
+    size_t index = JOIN(A, find_index)(self, *value);
+    if ((index < self->num_groups)
     {
         FREE_VALUE(self, *value);
-        return JOIN(I, iter)(self, node);
+        return JOIN(I, iter_index)(self, index);
     }
 
     JOIN(A, _pre_insert_grow)(self);
-    node = *JOIN(A, push_cached)(self, value);
+    node = *JOIN(A, push_cached)(self, value); //??
     return JOIN(I, iter)(self, node);
 }
 
 static inline I
 JOIN(A, emplace_found)(A* self, T* value, int* foundp)
 {
-    B* node;
-    if ((node = JOIN(A, find_node)(self, *value)))
+    size_t index = JOIN(A, find_index)(self, *value);
+    if ((index < self->num_groups)
     {
         *foundp = 1;
         FREE_VALUE(self, *value);
-        return JOIN(I, iter)(self, node);
+        return JOIN(I, iter_index)(self, index);
     }
 
     JOIN(A, _pre_insert_grow)(self);
     *foundp = 0;
-    node = *JOIN(A, push_cached)(self, value);
+    node = *JOIN(A, push_cached)(self, value); //??
     return JOIN(I, iter)(self, node);
 }
 
@@ -701,7 +733,7 @@ JOIN(A, free)(A* self)
 static inline size_t
 JOIN(A, count)(A* self, TK key)
 {
-    if (JOIN(A, find_node)(self, key))
+    if (_JOIN(A, find_bool)(self, key))
         return 1UL;
     else
         return 0UL;
@@ -711,7 +743,7 @@ JOIN(A, count)(A* self, TK key)
 static inline bool
 JOIN(A, contains)(A* self, TK key)
 {
-    if (JOIN(A, find_node)(self, key))
+    if (_JOIN(A, find_bool)(self, key))
         return true;
     else
         return false;
@@ -791,7 +823,7 @@ JOIN(A, intersection)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
     foreach(A, a, it)
-        if(JOIN(A, find_node)(b, *it.ref))
+        if (_JOIN(A, find_bool)(b, *it.ref))
             JOIN(A, insert)(&self, self.copy(it.ref));
     return self;
 }
@@ -801,7 +833,7 @@ JOIN(A, difference)(A* a, A* b)
 {
     A self = JOIN(A, init)(a->hash, a->equal);
     foreach(A, a, it)
-        if(!JOIN(A, find_node)(b, *it.ref))
+        if (!_JOIN(A, find_bool)(b, *it.ref))
             JOIN(A, insert)(&self, self.copy(it.ref));
     A self = JOIN(A, copy)(a);
     foreach(A, b, it)
@@ -814,7 +846,7 @@ JOIN(A, symmetric_difference)(A* a, A* b)
 {
     A self = JOIN(A, union)(a, b);
     foreach(A, a, it)
-        if(JOIN(A, find_node)(b, *it.ref))
+        if (_JOIN(A, find_bool)(b, *it.ref))
             JOIN(A, erase)(&self, *it.ref);
     return self;
 }
@@ -827,10 +859,10 @@ JOIN(A, equal)(A* self, A* other)
     size_t count_b = 0;
     // TODO: check equality of key AND value!
     foreach(A, self, it)
-        if(JOIN(A, find_node)(self, *it.ref))
+        if(_JOIN(A, find_bool)(self, *it.ref))
             count_a += 1;
     foreach(A, other, it2)
-        if(JOIN(A, find_node)(other, *it2.ref))
+        if(_JOIN(A, find_bool)(other, *it2.ref))
             count_b += 1;
     return count_a == count_b;
 }
@@ -847,7 +879,7 @@ JOIN(A, swap)(A* self, A* other)
 static inline bool
 JOIN(A, inserter)(A* self, TK key, T value)
 {
-    if(JOIN(A, find_node)(self, key))
+    if(_JOIN(A, find_bool)(self, key))
     {
         // already exists: keep
         if (self->free)
@@ -909,6 +941,7 @@ JOIN(A, transform)(A* self, T _unop(T*))
 */
 
 #undef POD
+#undef PODK
 #ifndef HOLD
 #undef A
 #undef B

@@ -8,7 +8,9 @@
 // TODO emplace, extract, extract_it
 
 #define CTL_SET
+#if !defined A && !defined CTL_MAP
 #define A JOIN(set, T)
+#endif
 #define B JOIN(A, node)
 #define I JOIN(A, it)
 #define GI JOIN(A, it)
@@ -31,6 +33,10 @@ typedef struct A
     size_t size;
     void (*free)(T *);
     T (*copy)(T *);
+#ifdef CTL_MAP
+    void (*free_key)(TK *);
+    TK (*copy_key)(TK *);
+#endif
     int (*compare)(T *, T *); // 2-way operator<
     int (*equal)(T *, T *);
 } A;
@@ -238,6 +244,15 @@ static inline A JOIN(A, init)(int _compare(T *, T *))
     static A zero;
     A self = zero;
     self.compare = _compare;
+#ifdef CTL_MAP
+# ifdef PODK
+    self.copy_key = JOIN(A, implicit_copy);
+    _JOIN(A, _set_default_methods)(&self);
+# else
+    self.free_key = JOIN(TK, free);
+    self.copy_key = JOIN(TK, copy);
+# endif
+#endif
 #ifdef POD
     self.copy = JOIN(A, implicit_copy);
     _JOIN(A, _set_default_methods)(&self);
@@ -252,12 +267,12 @@ static inline A JOIN(A, init_from)(A *copy)
 {
     static A zero;
     A self = zero;
-#ifdef POD
-    self.copy = JOIN(A, implicit_copy);
-#else
-    self.free = JOIN(T, free);
-    self.copy = JOIN(T, copy);
+#ifdef CTL_MAP
+    self.copy_key = copy->copy_key;
+    self.free_key = copy->free_key;
 #endif
+    self.free = copy->free;
+    self.copy = copy->copy;
     self.compare = copy->compare;
     self.equal = copy->equal;
     return self;

@@ -7,7 +7,10 @@
  */
 
 #ifndef T
-#error "Template struct type T undefined for <ctl/unordered_map.h>"
+#error "Template value type T undefined for <ctl/unordered_map.h>"
+#endif
+#ifndef TK
+#error "Template key type TK undefined for <ctl/unordered_map.h>"
 #endif
 
 #include <ctl/ctl.h>
@@ -15,6 +18,11 @@
 #define CTL_UMAP
 #define HOLD
 #define uset umap
+
+static inline TK JOIN(A, implicit_copy_key)(TK *key)
+{
+    return *key;
+}
 
 #include <ctl/unordered_set.h>
 
@@ -53,7 +61,10 @@ static inline I JOIN(A, insert_or_assign_found)(A *self, T value, int *foundp)
 #undef CTL_UMAP
 #undef uset
 #undef T
+#undef TK
 #undef A
 #undef B
 #undef I
 #undef GI
+#undef POD
+#undef PODK

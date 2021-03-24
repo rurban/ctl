@@ -7,7 +7,8 @@ OLD_MAIN
 #include "strint.hh"
 
 #define USE_INTERNAL_VERIFY
-#define T strint
+#define T int
+#define TK str
 #define INCLUDE_ALGORITHM
 #include <ctl/unordered_map.h>
 
