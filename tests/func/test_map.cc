@@ -9,7 +9,8 @@ OLD_MAIN
 #define USE_INTERNAL_VERIFY
 #define INCLUDE_ALGORITHM
 #define INCLUDE_NUMERIC
-#define T strint
+#define T int
+#define TK str
 #include <ctl/map.h>
 
 #include <algorithm>

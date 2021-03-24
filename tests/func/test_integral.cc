@@ -30,6 +30,9 @@ typedef unsigned char unsigned_char;
 #define T uint8_t
 #include <ctl/stack.h>
 
+#include "charpint.hh"
+typedef char *charp;
+#define TK charp
 #define POD
 #define T float
 #include <ctl/map.h>
@@ -133,11 +136,11 @@ int main(void)
         stack_uint8_t_free(&a);
     }
     {
-        map_float a = map_float_init(NULL);
-        map_float_insert(&a, 1.f); // compare
-        map_float_it found = map_float_find(&a, 1.f);
-        assert(!map_float_it_done(&found)); // equal
-        map_float_free(&a);
+        map_charpfloat a = map_charpfloat_init(NULL);
+        map_charpfloat_insert(&a, 1.f); // compare
+        map_charpfloat_it found = map_charpfloat_find(&a, 1.f);
+        assert(!map_charpfloat_it_done(&found)); // equal
+        map_charpfloat_free(&a);
     }
     TEST_LIST(vec_double, 1.0, 2.0);
     {

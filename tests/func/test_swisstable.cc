@@ -4,26 +4,28 @@
 OLD_MAIN
 #else
 
-#include "strint.hh"
+#include "charpint.hh"
 
 #define USE_INTERNAL_VERIFY
-#define POD
+typedef char* charp;
+#undef PODK
 #define TK charp
+#define POD
 #define T int
+//#define INCLUDE_ALGORITHM
 #include <ctl/swisstable.h>
 
-#include <algorithm>
 #include <inttypes.h>
+#include <algorithm>
 #include <iterator>
 #include <unordered_set>
+#include <unordered_map>
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(SELF)                                                                                                         \
     TEST(INSERT)                                                                                                       \
     TEST(INSERT_FOUND)                                                                                                 \
     TEST(CONTAINS)                                                                                                     \
-    TEST(ERASE)                                                                                                        \
-    TEST(ERASE_IF)                                                                                                     \
     TEST(CLEAR)                                                                                                        \
     TEST(SWAP)                                                                                                         \
     TEST(COUNT)                                                                                                        \
@@ -36,6 +38,8 @@ OLD_MAIN
     TEST(FIND_IF_NOT)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
+    TEST(ERASE)                                                                                                        \
+    TEST(ERASE_IF)                                                                                                     \
     TEST(ALL_OF)                                                                                                       \
     TEST(ANY_OF)                                                                                                       \
     TEST(NONE_OF)                                                                                                      \
@@ -85,7 +89,7 @@ static const char *test_names[] = {
         {                                                                                                              \
             size_t a_found = 0;                                                                                        \
             size_t b_found = 0;                                                                                        \
-            foreach (hmap_charp_int, &_x, _it)                                                                            \
+            foreach (hmap_charp, &_x, _it)                                                                            \
             {                                                                                                          \
                 str *_key = &_it.ref->key;                                                                             \
                 auto _found = _y.find(str_c_str(_key));                                                                \
@@ -95,8 +99,8 @@ static const char *test_names[] = {
             for (auto x : _y)                                                                                          \
             {                                                                                                          \
                 const char *_key = x.first.c_str();                                                                    \
-                hmap_charp_int_it _found = hmap_charp_int_find(&_x, key);                                                    \
-                assert(!hmap_charp_int_it_done(&_found));                                                                 \
+                hmap_charp_it _found = hmap_charp_find(&_x, key);                                                    \
+                assert(!hmap_charp_it_done(&_found));                                                                 \
                 strint_free(&d);                                                                                       \
                 b_found++;                                                                                             \
             }                                                                                                          \
@@ -105,7 +109,7 @@ static const char *test_names[] = {
     }
 
 #define CHECK_ITER(_it, b, _iter)                                                                                      \
-    if (!hmap_charp_int_it_done(&_it))                                                                                    \
+    if (!hmap_charp_it_done(&_it))                                                                                    \
     {                                                                                                                  \
         assert(_iter != b.end());                                                                                      \
         assert(*_it.ref->value == *(*_iter).value);                                                                    \
@@ -114,15 +118,14 @@ static const char *test_names[] = {
         assert(_iter == b.end())
 
 #ifdef DEBUG
-
-void print_hmap(hmap_charp_int *a)
+void print_hmap(hmap_charp *a)
 {
     int i = 0;
-    foreach (hmap_charp_int, a, it)
+    foreach (hmap_charp, a, it)
         printf("%d: %d [%ld]\n", i++, *it.ref->value, it.buckets - a->buckets);
     printf("--\n");
 }
-void print_unordered_map(std::unordered_map<STRINT, STRINT_hash> &b)
+void print_unordered_map(std::unordered_map<char*, int> &b)
 {
     int i = 0;
     for (auto &x : b)
@@ -149,18 +152,18 @@ static char *new_rand_str()
     return c_char;
 }
 
-static void setup_sets(hmap_charp_int *a, std::unordered_map<STRINT, STRINT_hash> &b)
+static void setup_hmaps(hmap_charp *a, std::unordered_map<char*,int> &b)
 {
     size_t size = TEST_RAND(TEST_MAX_SIZE);
     LOG("\nsetup_hmap %lu\n", size);
-    *a = hmap_charp_int_init(NULL, NULL);
-    hmap_charp_int_rehash(a, size);
+    *a = hmap_charp_init(charp_hash, charp_equal);
+    hmap_charp_rehash(a, size);
     for (size_t inserts = 0; inserts < size; inserts++)
     {
         char *key = new_rand_str();
         const int vb = TEST_RAND(TEST_MAX_VALUE);
-        hmap_charp_int_insert_or_assign(a, key, vb);
-        b.insert(STRINT{key, vb});
+        hmap_charp_insert(a, key, vb);
+        b.insert(CHARPINT{key, vb});
         free (key);
     }
 }
@@ -169,19 +172,19 @@ int main(void)
 {
     int fail = 0;
     INIT_SRAND;
-    test_small_size();
+    //test_small_size();
     INIT_TEST_LOOPS(10,false);
     for (unsigned loop = 0; loop < loops; loop++)
     {
-        hmap_charp_int a, aa, aaa;
+        hmap_charp a, aa, aaa;
         std::unordered_map<char*, int> b, bb, bbb;
-        hmap_charp_int_it first, found, it;
+        hmap_charp_it first, found, it;
         std::unordered_map<char*, int>::iterator iter;
         size_t num_a, num_b;
         bool is_a, is_b;
         char *key = new_rand_str();
         int value = TEST_RAND(TEST_MAX_VALUE);
-        setup_sets(&a, b);
+        setup_hmaps(&a, b);
         int which;
         if (tests.size)
         {
@@ -194,52 +197,61 @@ int main(void)
         switch (which)
         {
         case TEST_SELF: {
-            aa = hmap_charp_int_copy(&a);
+            aa = hmap_charp_copy(&a);
             LOG("before\n");
             print_hmap(&a);
-            list_foreach_ref(hmap_charp_int, &aa, it1)
+            foreach(hmap_charp, &aa, it1)
             {
                 // LOG("find %d [%zu]\n", *ref->value, it.bucket_index);
-                found = hmap_charp_int_find(&a, *it1.ref);
-                assert(!hmap_charp_int_it_done(&found));
+                size_t index = it1.ref - aa.values;
+                hmap_charp_node *node = &aa.groups[index];
+                found = hmap_charp_find(&a, node->key[index]);
+                assert(!hmap_charp_it_done(&found));
             }
             LOG("all found\n");
-            list_foreach_ref(hmap_charp_int, &a, it2)
-                hmap_charp_int_erase(&aa, *it2.ref);
+#if 0
+            foreach(hmap_charp, &a, it2)
+            {
+                size_t index = it2.ref - a.values;
+                hmap_charp_node *node = &aa.groups[index];
+                hmap_charp_erase(&aa, node);
+            }
             LOG("all erased\n");
+            assert(hmap_charp_empty(&aa));
+#endif
             print_hmap(&a);
-            assert(hmap_charp_int_empty(&aa));
-            hmap_charp_int_free(&aa);
+            hmap_charp_free(&aa);
             break;
         }
         case TEST_INSERT: {
-            hmap_charp_int_insert(&a, key, value);
-            b.insert(STRINT{key, value});
+            hmap_charp_insert(&a, key, value);
+            b.insert(CHARPINT{key, value});
             break;
         }
 #if 0
         case TEST_INSERT_FOUND: {
-            first = hmap_charp_int_begin(&a);
-            const int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : first.ref ? *first.ref->value : 0;
+            first = hmap_charp_begin(&a);
+            //const int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : first.ref ? *first.ref->value : 0;
             int a_found;
-            it = hmap_charp_int_insert_found(&a, strint_init(vb), &a_found);
+            it = hmap_charp_insert_found(&a, key, value, &a_found);
 #if __cplusplus >= 201103L
             // C++11
-            std::pair<std::unordered_map<STRINT, STRINT_hash>::iterator, bool> pair;
-            pair = b.insert(STRINT{vb});
+            std::pair<std::unordered_map<char*, int>::iterator, bool> pair;
+            pair = b.insert(CHARPINT{key, value});
             // STL returns true if not found, and freshly inserted
             assert((!a_found) == (int)pair.second);
             CHECK_ITER(it, b, pair.first);
 #else
-            auto iter = b.insert(STRINT{vb});
+            auto iter = b.insert(CHARPINT{key, vb});
             CHECK_ITER(it, b, iter);
 #endif
             break;
         }
+#if 0
         case TEST_ERASE_IF: {
-            num_a = hmap_charp_int_erase_if(&a, strint_is_odd);
+            num_a = hmap_charp_erase_if(&a, strint_is_odd);
 #if __cpp_lib_erase_if >= 202002L
-            num_b = std::erase_if(b, STRINTc_is_odd); // C++20
+            num_b = std::erase_if(b, CHARPINTc_is_odd); // C++20
 #else
             num_b = 0;
             {
@@ -260,16 +272,18 @@ int main(void)
             assert(num_a == num_b);
             break;
         }
+#endif
         case TEST_CONTAINS: {
-            is_a = hmap_charp_int_contains(&a, strint_init(value));
+            is_a = hmap_charp_contains(&a, strint_init(value));
 #if __cpp_lib_erase_if >= 202002L
-            is_b = b.contains(STRINT{value}); // C++20
+            is_b = b.contains(CHARPINT{key, value}); // C++20
 #else
-            is_b = b.count(STRINT{value}) == 1;
+            is_b = b.count(CHARPINT{key, value}) == 1;
 #endif
             assert(is_a == is_b);
             break;
         }
+#if 0
         case TEST_ERASE: {
             const size_t erases = TEST_RAND(TEST_MAX_SIZE) / 4;
             for (size_t i = 0; i < erases; i++)
@@ -277,26 +291,27 @@ int main(void)
                 {
                     const int key = TEST_RAND(TEST_MAX_SIZE);
                     strint kd = strint_init(key);
-                    hmap_charp_int_erase(&a, kd);
-                    b.erase(STRINT{key});
+                    hmap_charp_erase(&a, kd);
+                    b.erase(CHARPINT{key});
                     strint_free(&kd);
                 }
             break;
         }
+#endif
         case TEST_REHASH: {
-            size_t size = hmap_charp_int_size(&a);
+            size_t size = hmap_charp_size(&a);
             LOG("size %lu -> %lu, cap: %lu\n", size, size * 2, a.bucket_max + 1);
             print_hmap(&a);
             print_unordered_map(b);
             b.rehash(size * 2);
             LOG("STL size: %lu, cap: %lu\n", b.size(), b.bucket_count());
-            hmap_charp_int_rehash(&a, size * 2);
+            hmap_charp_rehash(&a, size * 2);
             print_hmap(&a);
             break;
         }
         case TEST_RESERVE: {
-            size_t size = hmap_charp_int_size(&a);
-            float load = hmap_charp_int_load_factor(&a);
+            size_t size = hmap_charp_size(&a);
+            float load = hmap_charp_load_factor(&a);
             bb = b;
             const int32_t reserve = size * 2 / load;
             LOG("load %f\n", load);
@@ -306,44 +321,44 @@ int main(void)
                 LOG("STL reserve by %" PRId32 " %zu\n", reserve, bb.bucket_count());
                 LOG("before\n");
                 print_hmap(&a);
-                aa = hmap_charp_int_copy(&a);
+                aa = hmap_charp_copy(&a);
                 LOG("copy\n");
                 print_hmap(&aa);
-                hmap_charp_int_reserve(&aa, reserve);
+                hmap_charp_reserve(&aa, reserve);
                 LOG("CTL reserve by %" PRId32 " %zu\n", reserve, aa.bucket_max + 1);
                 print_hmap(&aa);
                 CHECK(aa, bb);
-                hmap_charp_int_free(&aa);
+                hmap_charp_free(&aa);
             }
             break;
         }
         case TEST_SWAP: {
-            aa = hmap_charp_int_copy(&a);
-            aaa = hmap_charp_int_init(NULL, NULL);
+            aa = hmap_charp_copy(&a);
+            aaa = hmap_charp_init(NULL, NULL);
             bb = b;
-            hmap_charp_int_swap(&aaa, &aa);
+            hmap_charp_swap(&aaa, &aa);
             std::swap(bb, bbb);
             CHECK(aaa, bbb);
-            hmap_charp_int_free(&aa);
-            hmap_charp_int_free(&aaa);
+            hmap_charp_free(&aa);
+            hmap_charp_free(&aaa);
             break;
         }
         case TEST_COUNT: {
             int key = TEST_RAND(TEST_MAX_SIZE);
-            num_a = hmap_charp_int_count(&a, strint_init(key));
-            num_b = b.count(STRINT{key});
+            num_a = hmap_charp_count(&a, strint_init(key));
+            num_b = b.count(CHARPINT{key});
             assert(num_a == num_b);
             break;
         }
         case TEST_FIND: {
-            first = hmap_charp_int_begin(&a);
+            first = hmap_charp_begin(&a);
             const int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : first.ref ? *first.ref->value : 0;
             strint key = strint_init(vb);
             // find is special, it doesnt free the key
-            it = hmap_charp_int_find(&a, key);
-            iter= b.find(STRINT{vb});
+            it = hmap_charp_find(&a, key);
+            iter= b.find(CHARPINT{vb});
             if (iter == b.end())
-                assert(hmap_charp_int_it_done(&it));
+                assert(hmap_charp_it_done(&it));
             else
                 assert(*iter->value == *it.ref->value);
             strint_free(&key);
@@ -351,42 +366,42 @@ int main(void)
         }
         case TEST_CLEAR: {
             b.clear();
-            hmap_charp_int_clear(&a);
+            hmap_charp_clear(&a);
             break;
         }
         case TEST_COPY: { // C++20
-            aa = hmap_charp_int_copy(&a);
+            aa = hmap_charp_copy(&a);
             bb = b;
             CHECK(aa, bb);
-            hmap_charp_int_free(&aa);
+            hmap_charp_free(&aa);
             break;
         }
         case TEST_EQUAL: {
-            aa = hmap_charp_int_copy(&a);
+            aa = hmap_charp_copy(&a);
             bb = b;
             print_hmap(&aa);
             print_unordered_map(bb);
-            assert(hmap_charp_int_equal(&a, &aa));
+            assert(hmap_charp_equal(&a, &aa));
             assert(b == bb);
-            hmap_charp_int_free(&aa);
+            hmap_charp_free(&aa);
             break;
         }
 #ifdef DEBUG
         case TEST_INSERT_GENERIC: {
-            setup_sets(&aa, bb);
-            first = hmap_charp_int_begin(&a);
-            hmap_charp_int_insert_generic(&a, &first);
+            setup_hmaps(&aa, bb);
+            first = hmap_charp_begin(&a);
+            //hmap_charp_insert_generic(&a, &first);
             b.insert(bb.begin(), bb.end());
             print_hmap(&a);
             print_unordered_map(b);
             CHECK(a, b);
-            hmap_charp_int_free(&aa);
+            hmap_charp_free(&aa);
             break;
         }
 #endif
         case TEST_UNION: {
-            setup_sets(&aa, bb);
-            aaa = hmap_charp_int_union(&a, &aa);
+            setup_hmaps(&aa, bb);
+            aaa = hmap_charp_union(&a, &aa);
 #if 0 // If the STL would be actually usable
             std::set_union(b.begin(), b.end(), bb.begin(), bb.end(),
                                std::inserter(bbb, std::next(bbb.begin())));
@@ -403,34 +418,34 @@ int main(void)
             print_hmap(&aaa);
             print_unordered_map(bbb);
             CHECK(aaa, bbb);
-            hmap_charp_int_free(&aa);
-            hmap_charp_int_free(&aaa);
+            hmap_charp_free(&aa);
+            hmap_charp_free(&aaa);
             break;
         }
         case TEST_INTERSECTION: {
-            setup_sets(&aa, bb);
-            aaa = hmap_charp_int_intersection(&a, &aa);
+            setup_hmaps(&aa, bb);
+            aaa = hmap_charp_intersection(&a, &aa);
 #if 0 // If the STL would be actually usable
             std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(),
                                       std::inserter(bbb, std::next(bbb.begin())));
 #else
             for (const auto &elem : b)
             {
-                if (bb.find(STRINT(*elem.value)) != bb.end())
+                if (bb.find(CHARPINT(*elem.value)) != bb.end())
                     bbb.insert(elem);
             }
 #endif
             CHECK(aa, bb);
-            hmap_charp_int_free(&aa);
+            hmap_charp_free(&aa);
             CHECK(aaa, bbb);
-            hmap_charp_int_free(&aaa);
+            hmap_charp_free(&aaa);
             break;
         }
         case TEST_DIFFERENCE: {
-            setup_sets(&aa, bb);
+            setup_hmaps(&aa, bb);
             LOG("uset a\n");
             print_hmap(&a);
-            aaa = hmap_charp_int_difference(&a, &aa);
+            aaa = hmap_charp_difference(&a, &aa);
 #if 0
             // Note: the STL cannot do this simple task, because it requires
             // both sets to be ordered.
@@ -447,17 +462,17 @@ int main(void)
             print_hmap(&aa);
             print_unordered_map(bb);
             CHECK(aa, bb);
-            hmap_charp_int_free(&aa);
+            hmap_charp_free(&aa);
             LOG("uset difference (a-b)\n");
             print_hmap(&aaa);
             print_unordered_map(bbb);
             CHECK(aaa, bbb);
-            hmap_charp_int_free(&aaa);
+            hmap_charp_free(&aaa);
             break;
         }
         case TEST_SYMMETRIC_DIFFERENCE: {
-            setup_sets(&aa, bb);
-            aaa = hmap_charp_int_symmetric_difference(&a, &aa);
+            setup_hmaps(&aa, bb);
+            aaa = hmap_charp_symmetric_difference(&a, &aa);
             print_hmap(&aaa);
 #if 0 // If the STL would be actually usable
             std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(),
@@ -473,67 +488,67 @@ int main(void)
             // intersection: b - bb
             for (const auto &elem : b)
             {
-                if (bb.find(STRINT(*elem.value)) != bb.end())
+                if (bb.find(CHARPINT(*elem.value)) != bb.end())
                     bbb.erase(elem);
             }
             print_unordered_map(bbb);
 #endif
             CHECK(aa, bb);
-            hmap_charp_int_free(&aa);
+            hmap_charp_free(&aa);
             CHECK(aaa, bbb); // fails
-            hmap_charp_int_free(&aaa);
+            hmap_charp_free(&aaa);
             break;
         }
         case TEST_EMPLACE: // 24
         {
-            first = hmap_charp_int_begin(&a);
+            first = hmap_charp_begin(&a);
             const int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : first.ref ? *first.ref->value : 0;
             strint key = strint_init(vb);
-            hmap_charp_int_emplace(&a, &key);
-            b.emplace(STRINT{vb});
+            hmap_charp_emplace(&a, &key);
+            b.emplace(CHARPINT{vb});
             break;
         }
         case TEST_EMPLACE_FOUND: {
-            first = hmap_charp_int_begin(&a);
+            first = hmap_charp_begin(&a);
             const int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : first.ref ? *first.ref->value : 0;
             strint key = strint_init(vb);
             int a_found;
-            it = hmap_charp_int_emplace_found(&a, &key, &a_found);
+            it = hmap_charp_emplace_found(&a, &key, &a_found);
 #if __cplusplus >= 201103L
             // C++11
-            std::pair<std::unordered_map<STRINT, STRINT_hash>::iterator, bool> pair;
-            pair = b.emplace(STRINT{vb});
+            std::pair<std::unordered_map<char*, int>::iterator, bool> pair;
+            pair = b.emplace(CHARPINT{vb});
             // STL returns true if not found, and freshly inserted
             assert((!a_found) == (int)pair.second);
             CHECK_ITER(it, b, pair.first);
 #else
-            iter = b.insert(STRINT{vb});
+            iter = b.insert(CHARPINT{vb});
             CHECK_ITER(it, b, iter);
 #endif
             break;
         }
         case TEST_EMPLACE_HINT: {
             // makes not much sense for uset, only set
-            first = hmap_charp_int_begin(&a);
+            first = hmap_charp_begin(&a);
             const int vb = TEST_RAND(2) ? TEST_RAND(TEST_MAX_VALUE) : first.ref ? *first.ref->value : 0;
             strint key = strint_init(vb);
-            found = hmap_charp_int_find(&a, key);
-            it = hmap_charp_int_emplace_hint(&found, &key);
+            found = hmap_charp_find(&a, key);
+            it = hmap_charp_emplace_hint(&found, &key);
 #if __cplusplus >= 201103L
             // C++11
-            auto hint = b.find(STRINT{vb});
-            iter = b.emplace_hint(hint, STRINT{vb});
+            auto hint = b.find(CHARPINT{vb});
+            iter = b.emplace_hint(hint, CHARPINT{vb});
             CHECK_ITER(it, b, iter);
 #else
-            iter = b.insert(STRINT{vb});
+            iter = b.insert(CHARPINT{vb});
             CHECK_ITER(it, b, iter.first);
 #endif
             break;
         }
         // algorithm
         case TEST_FIND_IF: {
-            it = hmap_charp_int_find_if(&a, strint_is_odd);
-            iter = std::find_if(b.begin(), b.end(), STRINTc_is_odd);
+            it = hmap_charp_find_if(&a, strint_is_odd);
+            iter = std::find_if(b.begin(), b.end(), CHARPINTc_is_odd);
             if (iter == b.end())
                 assert(!it.node);
             else
@@ -541,8 +556,8 @@ int main(void)
             break;
         }
         case TEST_FIND_IF_NOT: {
-            it = hmap_charp_int_find_if_not(&a, strint_is_odd);
-            iter = std::find_if_not(b.begin(), b.end(), STRINTc_is_odd);
+            it = hmap_charp_find_if_not(&a, strint_is_odd);
+            iter = std::find_if_not(b.begin(), b.end(), CHARPINTc_is_odd);
             if (iter == b.end())
                 assert(!it.node);
             else
@@ -550,26 +565,26 @@ int main(void)
             break;
         }
         case TEST_ALL_OF: {
-            is_a = hmap_charp_int_all_of(&a, strint_is_odd);
-            is_b = std::all_of(b.begin(), b.end(), STRINTc_is_odd);
+            is_a = hmap_charp_all_of(&a, strint_is_odd);
+            is_b = std::all_of(b.begin(), b.end(), CHARPINTc_is_odd);
             assert(is_a == is_b);
             break;
         }
         case TEST_ANY_OF: {
-            is_a = hmap_charp_int_any_of(&a, strint_is_odd);
-            is_b = std::any_of(b.begin(), b.end(), STRINTc_is_odd);
+            is_a = hmap_charp_any_of(&a, strint_is_odd);
+            is_b = std::any_of(b.begin(), b.end(), CHARPINTc_is_odd);
             assert(is_a == is_b);
             break;
         }
         case TEST_NONE_OF: {
-            is_a = hmap_charp_int_none_of(&a, strint_is_odd);
-            is_b = std::none_of(b.begin(), b.end(), STRINTc_is_odd);
+            is_a = hmap_charp_none_of(&a, strint_is_odd);
+            is_b = std::none_of(b.begin(), b.end(), CHARPINTc_is_odd);
             assert(is_a == is_b);
             break;
         }
         case TEST_COUNT_IF: {
-            num_a = hmap_charp_int_count_if(&a, strint_is_odd);
-            num_b = std::count_if(b.begin(), b.end(), STRINTc_is_odd);
+            num_a = hmap_charp_count_if(&a, strint_is_odd);
+            num_b = std::count_if(b.begin(), b.end(), CHARPINTc_is_odd);
             assert(num_a == num_b);
             break;
         }
@@ -580,20 +595,20 @@ int main(void)
         case TEST_GENERATE: {
             print_hmap(&a);
             strint_generate_reset();
-            hmap_charp_int_generate(&a, strint_generate);
+            hmap_charp_generate(&a, strint_generate);
             LOG("=>\n");
             print_hmap(&a);
             strint_generate_reset();
-            // std::generate(b.begin(), b.end(), STRINTc_generate);
-            // FIXME: need operator!= for insert_operator<set<STRINT>>
+            // std::generate(b.begin(), b.end(), CHARPINTc_generate);
+            // FIXME: need operator!= for insert_operator<set<CHARPINT>>
             // std::generate(std::inserter(b, b.begin()), std::inserter(bb, bb.begin()),
-            //              STRINT_generate);
+            //              CHARPINT_generate);
             // LOG("b\n");
             // print_unordered_map(b);
             size_t n = b.size();
             b.clear();
             for (size_t i = 0; i < n; i++)
-                b.insert(STRINT_generate());
+                b.insert(CHARPINT_generate());
             LOG("=>\n");
             print_unordered_map(b);
             CHECK(a, b);
@@ -605,82 +620,82 @@ int main(void)
             size_t count = TEST_RAND(20);
             LOG("=> %zu\n", count);
             strint_generate_reset();
-            hmap_charp_int_generate_n(&a, count, strint_generate);
+            hmap_charp_generate_n(&a, count, strint_generate);
             print_hmap(&a);
             strint_generate_reset();
             // This is a joke
-            // std::generate_n(std::inserter(b, b.begin()), count, STRINT_generate);
+            // std::generate_n(std::inserter(b, b.begin()), count, CHARPINT_generate);
             b.clear();
             for (size_t i = 0; i < count; i++)
-                b.insert(STRINT_generate());
+                b.insert(CHARPINT_generate());
             print_unordered_map(b);
             CHECK(a, b);
             break;
         }
         case TEST_TRANSFORM: {
             print_hmap(&a);
-            aa = hmap_charp_int_transform(&a, strint_untrans);
-            std::transform(b.begin(), b.end(), std::inserter(bb, bb.end()), STRINT_untrans);
+            aa = hmap_charp_transform(&a, strint_untrans);
+            std::transform(b.begin(), b.end(), std::inserter(bb, bb.end()), CHARPINT_untrans);
             print_hmap(&aa);
             print_unordered_map(bb);
             CHECK(aa, bb);
             CHECK(a, b);
-            hmap_charp_int_free(&aa);
+            hmap_charp_free(&aa);
             break;
         }
         case TEST_COPY_IF: {
             print_hmap(&a);
-            aa = hmap_charp_int_copy_if(&a, strint_is_odd);
+            aa = hmap_charp_copy_if(&a, strint_is_odd);
 #if __cplusplus >= 201103L
-            std::copy_if(b.begin(), b.end(), std::inserter(bb, bb.begin()), STRINTc_is_odd);
+            std::copy_if(b.begin(), b.end(), std::inserter(bb, bb.begin()), CHARPINTc_is_odd);
 #else
             for (auto &d : b)
-                if (STRINT_is_odd(d))
+                if (CHARPINT_is_odd(d))
                     bb.insert(d);
 #endif
             CHECK(aa, bb);
-            hmap_charp_int_free(&aa);
+            hmap_charp_free(&aa);
             CHECK(a, b);
             break;
         }
         case TEST_MERGE: {
-            aa = hmap_charp_int_init_from(&a);
-            setup_sets(&aa, bb);
+            aa = hmap_charp_init_from(&a);
+            setup_hmaps(&aa, bb);
             print_hmap(&a);
             print_hmap(&aa);
-            aaa = hmap_charp_int_merge(&a, &aa);
+            aaa = hmap_charp_merge(&a, &aa);
 #if __cpp_lib_node_extract >= 201606L
             b.merge(bb); // C++17
             print_hmap(&aaa);
             print_unordered_map(b);
             CHECK(aaa, b);
             b.clear();
-            hmap_charp_int_clear(&a);
+            hmap_charp_clear(&a);
 #else
             merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
             CHECK(aaa, bbb);
 #endif
-            hmap_charp_int_free(&aa);
-            hmap_charp_int_free(&aaa);
+            hmap_charp_free(&aa);
+            hmap_charp_free(&aaa);
             break;
         }
         case TEST_MERGE_RANGE: {
-            hmap_charp_int_it range_a1, range_a2;
-            //std::unordered_map<STRINT>::iterator first_b1, last_b1, first_b2, last_b2;
+            hmap_charp_it range_a1, range_a2;
+            //std::unordered_map<CHARPINT>::iterator first_b1, last_b1, first_b2, last_b2;
             //get_random_iters(&a, &range_a1, b, first_b1, last_b1);
-            aa = hmap_charp_int_init_from(&a);
-            setup_sets(&aa, bb);
-            range_a1 = hmap_charp_int_begin(&a);
-            range_a2 = hmap_charp_int_begin(&aa);
+            aa = hmap_charp_init_from(&a);
+            setup_hmaps(&aa, bb);
+            range_a1 = hmap_charp_begin(&a);
+            range_a2 = hmap_charp_begin(&aa);
             //get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
-            aaa = hmap_charp_int_merge_range(&range_a1, &range_a2);
+            aaa = hmap_charp_merge_range(&range_a1, &range_a2);
 #if !defined(_MSC_VER)
             merge(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
             CHECK(aaa, bbb);
 #endif
-            hmap_charp_int_free(&aa);
-            hmap_charp_int_free(&aaa);
+            hmap_charp_free(&aa);
+            hmap_charp_free(&aaa);
             break;
         }
 
@@ -702,7 +717,7 @@ int main(void)
         }
         CHECK(a, b);
         free (key);
-        hmap_charp_int_free(&a);
+        hmap_charp_free(&a);
     }
 
     FINISH_TEST(__FILE__);

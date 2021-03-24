@@ -26,59 +26,7 @@ int int_equal(int *a, int *b)
     return *a == *b;
 }
 
-size_t FNV1a(const char *key)
-{
-    size_t h;
-    h = 2166136261u;
-    for (unsigned i = 0; i < strlen(key); i++)
-    {
-        h ^= (unsigned char)key[i];
-        h *= 16777619;
-    }
-    return h;
-}
-
-/* TODO: make that simpler as with STL pairs, treating them seperately */
-typedef struct
-{
-    char *key;
-    int value;
-} charint;
-
-static inline size_t charint_hash(charint *a)
-{
-    return FNV1a(a->key);
-}
-static inline int charint_equal(charint *a, charint *b)
-{
-    return strcmp(a->key, b->key) == 0;
-}
-static inline int charint_cmp(charint *a, charint *b)
-{
-    return strcmp(a->key, b->key);
-}
-static inline void charint_free(charint *a)
-{
-    free(a->key);
-}
-static inline charint charint_copy(charint *self)
-{
-    char *copy_key = (char *)malloc(strlen(self->key) + 1);
-    strcpy(copy_key, self->key);
-    charint copy = {
-        copy_key,
-        self->value,
-    };
-    return copy;
-}
-
-#undef POD
-#define T charint
-#include <ctl/unordered_map.h>
-
-#undef POD
-#define T charint
-#include <ctl/map.h>
+#include "charpint.hh"
 
 size_t _str_hash(str *s)
 {
@@ -98,12 +46,38 @@ int _str_cmp(str *a, str *b)
 #define T str
 #include <ctl/set.h>
 
+#ifdef POD
+#error "POD leftover"
+#endif
+
 // we known about this special case
 #define POD
 #define NOT_INTEGRAL
 typedef char *charp;
 #define T charp
 #include <ctl/set.h>
+
+#ifdef POD
+#error "POD leftover"
+#endif
+
+#define PODK
+#define TK charp
+#define T int
+#include <ctl/unordered_map.h>
+
+#ifdef PODK
+#error "PODK leftover"
+#endif
+
+#define PODK
+#define TK charp
+#define T int
+#include <ctl/map.h>
+
+#ifdef PODK
+#error "PODK leftover"
+#endif
 
 #define POD
 #define T int
@@ -353,48 +327,48 @@ int main(void)
         uset_int_free(&a);
     }
     {
-        umap_charint a = umap_charint_init(charint_hash, charint_equal);
-        // TODO a.equal = charint_equal
+        umap_charpint a = umap_charpint_init(charpint_hash, charpint_equal);
+        // TODO a.equal = charpint_equal
         char c_char[36];
         for (int i = 0; i < 1000; i++)
         {
             snprintf(c_char, 36, "%c%d", 48 + (rand() % 74), rand());
-            charint copy = charint_copy(&(charint){c_char, i});
+            charpint copy = charpint_copy(&(charpint){c_char, i});
             // str s = (str){.value = c_char};
-            umap_charint_insert(&a, copy);
+            umap_charpint_insert(&a, copy);
         }
-        foreach (umap_charint, &a, it)
+        foreach (umap_charpint, &a, it)
         {
             strcpy(c_char, it.ref->key);
         }
         printf("last key \"%s\", ", c_char);
-        foreach (umap_charint, &a, it)
+        foreach (umap_charpint, &a, it)
         {
-            umap_charint_node_bucket_size(it.node);
+            umap_charpint_node_bucket_size(it.node);
         }
-        printf("umap_charint load_factor: %f\n", umap_charint_load_factor(&a));
-        umap_charint_free(&a);
+        printf("umap_charpint load_factor: %f\n", umap_charpint_load_factor(&a));
+        umap_charpint_free(&a);
     }
 #endif
     {
-        map_charint a = map_charint_init(charint_cmp);
+        map_charpint a = map_charpint_init(charpint_cmp);
         char c_char[36];
         for (int i = 0; i < 1000; i++)
         {
             snprintf(c_char, 36, "%c%d", 48 + (rand() % 74), rand());
             // str s = (str){.value = c_char};
-            map_charint_insert(&a, charint_copy(&(charint){c_char, i}));
+            map_charpint_insert(&a, charpint_copy(&(charpint){c_char, i}));
         }
-        foreach (map_charint, &a, it)
+        foreach (map_charpint, &a, it)
         {
             strcpy(c_char, it.ref->key);
         }
         printf("last key \"%s\", ", c_char);
-        map_charint_it it = map_charint_begin(&a);
+        map_charpint_it it = map_charpint_begin(&a);
         printf("min {\"%s\", %d} ", it.ref->key, it.ref->value);
-        map_charint_node *b = map_charint_node_max(it.node);
+        map_charpint_node *b = map_charpint_node_max(it.node);
         printf("max {\"%s\", %d}\n", b->value.key, b->value.value);
-        map_charint_free(&a);
+        map_charpint_free(&a);
     }
     TEST_PASS(__FILE__);
 }

@@ -292,11 +292,13 @@ help:
 ctl/string.i:
 	$(call expand,$(subst .i,,$@))
 ctl/map.i:
-	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
-ctl/unordered_map.i:
-	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
+	$(call expand,$(subst .i,,$@),-DTK=charp -DT=int -DPOD)
 ctl/array.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DN=128 -DPOD)
+ctl/unordered_map.i:
+	$(call expand,$(subst .i,,$@),-DTK=charp -DT=int -DPOD)
+ctl/swisstable.i:
+	$(call expand,$(subst .i,,$@),-DTK=charp -DT=int -DPOD)
 
 %.i : %.h
 	@$(CC) $(CFLAGS) -DT=int -DPOD $< -E | clang-format -style=webkit
@@ -343,10 +345,10 @@ tests/func/test_unordered_set_cached: .cflags $(COMMON_H) tests/test.h tests/fun
 tests/func/test_unordered_set_sleep: .cflags $(COMMON_H) tests/test.h ctl/unordered_set.h \
                           tests/func/test_unordered_set_sleep.c
 	$(CC) $(CFLAGS) -O3 -finline tests/func/test_unordered_set_sleep.c -o $@
-tests/func/test_unordered_map: .cflags $(H) tests/test.h tests/func/strint.hh \
+tests/func/test_unordered_map: .cflags $(COMMON_H) tests/test.h tests/func/strint.hh \
                           tests/func/test_unordered_map.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
-tests/func/test_swisstable: .cflags $(H) tests/test.h tests/func/strint.hh \
+tests/func/test_swisstable: .cflags $(COMMON_H) tests/test.h tests/func/strint.hh \
                           tests/func/test_swisstable.cc
 	$(CXX) $(CXXFLAGS) -o $@ $@.cc
 tests/func/test_stack:    .cflags $(COMMON_H) tests/test.h tests/func/digi.hh ctl/stack.h ctl/deque.h \

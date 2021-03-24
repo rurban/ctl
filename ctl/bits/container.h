@@ -15,6 +15,14 @@
 #endif
 // clang-format on
 
+#ifdef TK
+typedef int (*JOIN(A, compare_fn))(TK *, TK *);
+typedef int (*JOIN(A, equal_fn))(TK *, TK *);
+#else
+typedef int (*JOIN(A, compare_fn))(T *, T *);
+typedef int (*JOIN(A, equal_fn))(T *, T *);
+#endif
+
 // FIXME once per A
 //#ifndef CAT(HAVE, JOIN(T, it_vtable))
 //#define CAT(HAVE, JOIN(T, it_vtable))

@@ -2,7 +2,10 @@
    SPDX-License-Identifier: MIT */
 
 #ifndef T
-#error "Template struct type T undefined for <ctl/map.h>"
+#error "Template value type T undefined for <ctl/map.h>"
+#endif
+#ifndef TK
+#error "Template key type TK undefined for <ctl/map.h>"
 #endif
 
 #include <ctl/ctl.h>
@@ -11,9 +14,15 @@
 
 #define CTL_MAP
 #define HOLD
-#define C map
 #define set map
 #define _set _map
+#define A JOIN(map, TK)
+
+static inline TK JOIN(A, implicit_copy_key)(TK *key)
+{
+    return *key;
+}
+
 #include <ctl/set.h>
 
 static inline I JOIN(A, insert_or_assign)(A *self, T key)
@@ -117,8 +126,11 @@ static inline I JOIN(A, insert_or_assign_found)(A *self, T key, int *foundp)
 #undef _set
 #undef set
 #undef T
+#undef TK
 #undef A
 #undef B
 #undef I
 #undef GI
+#undef POD
+#undef PODK
 #undef CTL_MAP

@@ -17,8 +17,8 @@
 #error "Template type T undefined for <ctl/bits/iterators.h>"
 #endif
 
-#if defined CTL_LIST || defined CTL_SET || defined CTL_MAP || \
-    defined CTL_USET || defined CTL_UMAP || defined CTL_SLIST
+#if (defined CTL_LIST || defined CTL_SET || defined CTL_MAP ||		\
+  defined CTL_USET || defined CTL_UMAP || defined CTL_SLIST) && !defined(CTL_HMAP)
 
 #define CTL_B_ITER
 //# undef IT

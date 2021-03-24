@@ -118,6 +118,10 @@ typedef struct A
     float max_load_factor;
     void (*free)(T *);
     T (*copy)(T *);
+#ifdef CTL_UMAP
+    void (*free_key)(TK *);
+    TK (*copy_key)(TK *);
+#endif
     size_t (*hash)(T *);
     int (*equal)(T *, T *);
 #if CTL_USET_SECURITY_COLLCOUNTING == 4
@@ -619,6 +623,16 @@ static inline A JOIN(A, init)(size_t (*_hash)(T *), int (*_equal)(T *, T *))
     A self = zero;
     self.hash = _hash;
     self.equal = _equal;
+
+#ifdef CTL_UMAP
+# ifdef PODK
+    self.copy_key = JOIN(A, implicit_copy);
+    _JOIN(A, _set_default_methods)(&self);
+# else
+    self.free_key = JOIN(TK, free);
+    self.copy_key = JOIN(TK, copy);
+# endif
+#endif
 #ifdef POD
     self.copy = JOIN(A, implicit_copy);
     _JOIN(A, _set_default_methods)(&self);
@@ -635,12 +649,12 @@ static inline A JOIN(A, init_from)(A *copy)
 {
     static A zero;
     A self = zero;
-#ifdef POD
-    self.copy = JOIN(A, implicit_copy);
-#else
-    self.free = JOIN(T, free);
-    self.copy = JOIN(T, copy);
+#ifdef CTL_UMAP
+    self.copy_key = copy->copy_key;
+    self.free_key = copy->free_key;
 #endif
+    self.free = copy->free;
+    self.copy = copy->copy;
     self.hash = copy->hash;
     self.equal = copy->equal;
     return self;

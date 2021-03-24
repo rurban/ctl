@@ -41,8 +41,6 @@ typedef struct I
 
 #include <ctl/bits/iterators.h>
 
-typedef int (*JOIN(A, compare_fn))(T *, T *);
-
 static inline T *JOIN(A, front)(A *self)
 {
     return self->head ? &self->head->value : NULL;

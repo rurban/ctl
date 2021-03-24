@@ -34,8 +34,6 @@ typedef struct A
     size_t capacity;
 } A;
 
-typedef int (*JOIN(A, compare_fn))(T *, T *);
-
 #include <ctl/bits/iterator_vtable.h>
 
 typedef struct I
