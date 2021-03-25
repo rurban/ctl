@@ -5,28 +5,28 @@
 #error "Template struct type T undefined for <ctl/map.h>"
 #endif
 
-// TODO C++17: emplace, try_emplace, extract, merge
+// TODO C++17: emplace, try_emplace, extract, merge, pair
 
 #include <ctl/ctl.h>
 
 #define CTL_MAP
 #define HOLD
-#define C map
 #define set map
 #define _set _map
+#define A JOIN(map, JOIN(T, T_VALUE))
+
 #include <ctl/set.h>
 
-#include <ctl/pair.h>
-
-static inline I JOIN(A, insert_or_assign)(A *self, T key)
+static inline I JOIN(A, insert_or_assign)(A *self, T key, T_VALUE value)
 {
-    B *insert = JOIN(B, init)(key, 0);
+    PAIR pair = JOIN(PAIR, make_pair)(key, value);
+    B *insert = JOIN(B, init)(pair, 0);
     if (self->root)
     {
         B *node = self->root;
         while (1)
         {
-            int diff = self->compare(&key, &node->value);
+            int diff = self->compare(&key, &((PAIR)node->value).first);
             if (diff == 0)
             {
                 JOIN(A, free_node)(self, node);
@@ -68,13 +68,14 @@ static inline I JOIN(A, insert_or_assign)(A *self, T key)
 
 static inline I JOIN(A, insert_or_assign_found)(A *self, T key, int *foundp)
 {
-    B *insert = JOIN(B, init)(key, 0);
+    PAIR pair = JOIN(PAIR, make_pair)(key, value);
+    B *insert = JOIN(B, init)(pair, 0);
     if (self->root)
     {
         B *node = self->root;
         while (1)
         {
-            int diff = self->compare(&key, &node->value);
+            int diff = self->compare(&key, &((PAIR)node->value).first);
             if (diff == 0)
             {
                 JOIN(A, free_node)(self, node);
@@ -119,8 +120,10 @@ static inline I JOIN(A, insert_or_assign_found)(A *self, T key, int *foundp)
 #undef _set
 #undef set
 #undef T
+#undef T_VALUE
 #undef A
 #undef B
 #undef I
 #undef GI
+#undef PAIR
 #undef CTL_MAP
