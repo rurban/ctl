@@ -44,7 +44,7 @@ https://github.com/glouw/ctl/wiki for the original sample with three-letter name
 ## Motivation
 
 CTL aims to improve ISO C99/C11 developer productivity by implementing
-the following STL containers in ISO C99/C11:
+all containers in ISO C99/C11:
 
 | CTL                                            | = C++ STL            | C prefix |
 |:-----------------------------------------------|:---------------------|----------|
@@ -66,12 +66,20 @@ the following STL containers in ISO C99/C11:
 
 In work:
 
+[ctl/pair.h](pair.md),
+[ctl/hashmap.h](hashmap.md),
+[ctl/swisstable.h](swisstable.md),
+[ctl/btree.h](btree.md),
 [ctl/u8string.h](u8string.md),
 [ctl/u8ident.h](u8ident.md).
 
 map (with pairs), and some C++ methods, algorithms are in work still.
 
 It is based on glouw's ctl, but with proper names, and using the incpath `ctl/` prefix.
+
+multiset and multimap can be composed by set and list. Better open
+flat hashmap's are in work as stanford hash variant for integer keys, and
+swisstable for string keys, both with the `unordered_map` API.
 
 ## Memory Ownership
 
@@ -215,11 +223,12 @@ sequences only. The STL does nothing against it, we try to detect this at least 
 set core methods.
 
 The CTL is **formally verified** via cbmc and satabs models for most core functions, the
-STL not. Several STL bugs and limitations have been found by our test suite. See
+STL not. Several STL bugs and limitations have been found by our extensive test suite. See
 also [cprover.org/stl/](http://www.cprover.org/stl/) for <vector> and <list> verifications.
 
 Proper unicode security practices are in work. The STL and most other libraries ignore
-it. Esp. for identifiers, which need to be identifiable, but are not.
+it. Esp. for identifiers, which need to be identifiable, but are not. But the
+STL cannot even compare, i.e. find strings, only byte buffers.
 
 ## Running Tests
 
@@ -275,6 +284,8 @@ make ctl/array.i
 make ctl/map.i
 make ctl/unordered_set.i
 make ctl/unordered_map.i
+make ctl/hashmap.i
+make ctl/swisstable.i
 make tests/func/test_c11.i
 make tests/func/test_list.i
 ```
@@ -294,13 +305,52 @@ iterators changed from upstream.
 Also implemented are type utilities to omit default compare, equal and hash methods
 for POD integral types.
 
-See [Differences](#differences) below.
+In planning are also `small_vector` (stack-allocated for performance),
+`sorted_vector` and parallel, thread-safe variants in `pctl`.
 
-The other header-only STL variant in C is [pottery](https://github.com/ludocode/pottery),
-which also sucks less and also fairly complete and decent.
-More STL attempts in C are [glib](http://suckless.org/sucks/), and
-partially [libmowgli](https://github.com/atheme/libmowgli-2),
-[libulz](https://github.com/rofl0r/libulz).
+See also [Differences](#differences) below.
+
+Many other header-only STL variants in C exist:
+* [pottery](https://github.com/ludocode/pottery) which also sucks less and also
+  fairly complete and decent,
+* [matrixjoeq/c_container](https://github.com/matrixjoeq/c_container) which is even better,
+* [mlib](https://github.com/P-p-H-d/mlib) good stuff, but maybe a bit over-engineered,
+* [Gena](https://github.com/cher-nov/Gena)
+* [OpenCSTL](https://github.com/springkim/OpenCSTL)
+* https://github.com/bkthomps/Containers
+* https://github.com/MichaelJWelsh/cdsa
+* https://github.com/LeoVen/C-Macro-Collections
+* https://github.com/concurrencykit/ck
+
+In its infancies:
+* [CSTL](https://github.com/brliron/CSTL)
+* https://github.com/yaowen369/STL_Container_with_C/
+* [libmowgli](https://github.com/atheme/libmowgli-2)
+* [libulz](https://github.com/rofl0r/libulz)
+* https://github.com/hstefan/htlib
+* https://github.com/SLukasDE/scf
+
+And in its grandiosity (esp. not header-only):
+* [glib](http://suckless.org/sucks/),
+* https://github.com/attractivechaos/klib,
+* http://libcello.org/
+* https://github.com/mgrosvenor/libchaste
+* https://bitbucket.org/manvscode/libcollections/
+* https://github.com/fmela/libdict
+* https://github.com/fredrikwidlund/libdynamic
+* https://www.liblfds.org/
+* https://github.com/faragon/libsrt
+* https://github.com/ned14/nedtries
+* http://wolkykim.github.io/qlibc/
+* http://sglib.sourceforge.net/
+* [Smart pointer for GNUC](https://github.com/Snaipe/libcsptr)
+* [STB stretchy buffer](https://github.com/nothings/stb)
+* https://github.com/tylov/C99Containers
+* https://github.com/amadvance/tommyds
+* https://github.com/2cats/cstl-lite
+* https://github.com/ljianhui/libcontainer
+* http://troydhanson.github.io/uthash/
+* https://github.com/rurban/safeclib by yours truly
 
 ## Base Implementation Details
 
@@ -317,7 +367,9 @@ partially [libmowgli](https://github.com/atheme/libmowgli-2),
     set.h:              red black tree
     map.h:              set.h
     unordered_set.h:    hashed forward linked lists
-    unordered_map.h:    unordered_set.h (without pair convenience yet)
+    unordered_map.h:    unordered_set.h (pair in work)
+    hashmap.h:          stanford hash for integer keys, intel only.
+    swisstable.h:       abseil flat_hash_map for string keys, with non-intel fallbacks.
 
     ✓  stable and tested
     x  implemented, but broken or untested
@@ -625,10 +677,10 @@ faster unsuccessful finds with high load factors, but more memory.  The default
 `CTL_USET_SECURITY_COLLCOUNTING` policy is `2`, using a customizable `sleep()`
 call on DDOS attack.
 
-A flat `hashmap` will be added with open addressing, thus no internal
-bucket methods, and faster, but pointers into it are disallowed. Flat sets and
-maps as open hashmaps and btree will support no pointer stability, and no
-iterator stability.
+A flat `hashmap` and `swisstable` will be added with open addressing, thus no
+internal bucket methods, and faster, but pointers into it are disallowed. Flat
+sets and maps as open hashmaps and btree will support no pointer stability, and
+no iterator stability.
 
 Optimized `list`, seperate connect before and after methods.
 
@@ -702,7 +754,7 @@ node variants), the stanford hash for integers or even the currently fastest
 [greg7mdp/parallel-hashmap](https://github.com/greg7mdp/parallel-hashmap).
 Thus the bucket interface methods will not be defined for all hashmap variants,
 except maybe `max_bucket_count`. hashmap policies are compile-time defined via
-`#define CTL_USET_...`
+`#define CTL_USET_...` and `#define CTL_HMAP_...`
 
 **u8string** will get proper utf-8/unicode support, exceeding C++ STL.
 compare will check u8strings normalized to NFD.
