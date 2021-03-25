@@ -1,10 +1,14 @@
 # numeric - CTL - C Container Template library
 
-Defined in header **<ctl/numeric.h>** (NYI)
+Defined in header **<ctl/algorithm.h>**
 
 ## SYNOPSIS
 
-_TODO_
+    arr20_double a = arr20_double_init();
+
+    arr20_double_iota(&a, 0);
+
+    arr20_double_free(&a);
 
 ## DESCRIPTION
 
@@ -13,9 +17,11 @@ well as optimized numeric arrays and support for random number generation.
 
 ## Numeric operations
 
-    iota (C++11)
+    iota (A* self, T value)
+    iota_range (I* range, T value)
  
-fills a range with successive increments of the starting value
+fills a range with successive increments of the POD starting value. No struct
+support with `T_inc` methods yet.
 
     accumulate
  

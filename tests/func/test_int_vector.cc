@@ -10,6 +10,7 @@ OLD_MAIN
 
 #include <algorithm>
 #include <vector>
+#include <numeric>
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(PUSH_BACK)                                                                                                    \
@@ -95,6 +96,8 @@ OLD_MAIN
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EMPLACE) /* 76 */                                                                                             \
+    TEST(IOTA)                                                                                                         \
+    TEST(IOTA_RANGE)                                                                                                   \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(TRANSFORM_IT_RANGE)                                                                                           \
@@ -1106,6 +1109,21 @@ int main(void)
                 std::generate_n(std::inserter(b, b.begin()), n, int_generate);
                 print_vector(b);
 #endif
+                CHECK(a, b);
+                break;
+            }
+            case TEST_IOTA:
+            {
+                vec_int_iota(&a, 0);
+                std::iota(b.begin(), b.end(), 0);
+                CHECK(a, b);
+                break;
+            }
+            case TEST_IOTA_RANGE:
+            {
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                vec_int_iota_range(&range_a1, 0);
+                std::iota(first_b1, last_b1, 0);
                 CHECK(a, b);
                 break;
             }

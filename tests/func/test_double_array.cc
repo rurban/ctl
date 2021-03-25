@@ -12,6 +12,7 @@ OLD_MAIN
 #include <algorithm>
 #include <array>
 #include <vector>
+#include <numeric>
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(SELF)                                                                                                         \
@@ -46,6 +47,8 @@ OLD_MAIN
     TEST(GENERATE)                                                                                                     \
     TEST(GENERATE_RANGE)                                                                                               \
     TEST(GENERATE_N)                                                                                                   \
+    TEST(IOTA)                                                                                                         \
+    TEST(IOTA_RANGE)                                                                                                   \
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
@@ -630,6 +633,19 @@ int main(void)
             arr20_double_generate_n(&a, n, double_generate);
             double_generate_reset();
             std::generate_n(b.begin(), n, double_generate);
+            CHECK(a, b);
+            break;
+        }
+        case TEST_IOTA: {
+            arr20_double_iota(&a, 0);
+            std::iota(b.begin(), b.end(), 0);
+            CHECK(a, b);
+            break;
+        }
+        case TEST_IOTA_RANGE: {
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            arr20_double_iota_range(&range_a1, 0);
+            std::iota(first_b1, last_b1, 0);
             CHECK(a, b);
             break;
         }

@@ -616,6 +616,25 @@ static inline I JOIN(A, transform_it_range)(I *range, I *pos, I dest, T _binop(T
     }
     return dest;
 }
+
+#ifdef POD
+static inline void JOIN(A, iota)(A *self, T value)
+{
+    foreach(A, self, i)
+    {
+        *i.ref = value++;
+    }
+}
+
+static inline void JOIN(A, iota_range)(I *range, T value)
+{
+    foreach_range_(A, i, range)
+    {
+        *i.ref = value++;
+    }
+}
+#endif // POD
+
 #endif // USET/SET inserter
 
 #if !defined(CTL_ARR)
