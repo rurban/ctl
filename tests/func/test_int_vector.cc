@@ -6,6 +6,8 @@ OLD_MAIN
 
 #define POD
 #define T int
+#define INCLUDE_ALGORITHM
+#define INCLUDE_NUMERIC
 #include <ctl/vector.h>
 
 #include <algorithm>

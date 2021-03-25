@@ -7,6 +7,8 @@ OLD_MAIN
 #include "strint.hh"
 
 #define USE_INTERNAL_VERIFY
+#define INCLUDE_ALGORITHM
+#define INCLUDE_NUMERIC
 #define T strint
 #include <ctl/map.h>
 

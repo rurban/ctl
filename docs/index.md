@@ -63,6 +63,7 @@ all containers in ISO C99/C11:
 | [ctl/unordered_set.h](unordered_set.md)   | std::unordered_set   | uset     |
 |------------------------------------------------|----------------------|
 | [ctl/algorithm.h](algorithm.md)           | `<algorithm>`        |
+| [ctl/numeric.h](numeric.md)               | `<numeric>`          |
 
 In work:
 
@@ -603,6 +604,9 @@ And in its grandiosity (esp. not header-only):
 |`symmetric_difference_range`     | ✓  | ✓  | ✓  | ✓  | ✓  | x  | ✓  |    |    |    | -  | -  | -  |
 |`union_range`                    | ✓  | ✓  | -  | ✓  | ✓  | x  | ✓  |    |    |    | -  | -  | -  |
 |`lexicographical_compare`        | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|----|
+|                                 |vec |str |arr |deq |list|slst|set |map |uset|umap|pqu |que |stk |
+|---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|----|
 |`gcd`                            |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`lcm`                            |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`midpoint`                       |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
@@ -648,6 +652,8 @@ the old ctl is lower than 202000, starting with `1.0`.
 
 Added lots of missing methods. We have 156 methods in 925 stable variants.
 glouw has 63 methods in 196 stable variants.
+
+inclusion of numeric via `#define INCLUDE_NUMERIC`. For now algorithm is always loaded.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.
 Fallback to c++2a, c++17 or c++11.
@@ -712,7 +718,7 @@ Implemented correct string and vector capacity policies, as in gcc libstdc++ and
 llvm libc++.  Tested also against the libc++ from llvm and the Windows MSVC STL,
 not just the GNU libstdc++ v3.
 
-Work is ongoing to finish the rest of `algorithm.h`, `numerics` and `memory`,
+Work is ongoing to finish the rest of `algorithm.h`, `numerics.h` and `memory.h`,
 add `pair` for map and `btree_set`, add proper string and identifier support.
 `string_view` and `span` (i.e. vector\_view) not yet planned.
 

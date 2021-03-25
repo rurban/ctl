@@ -207,7 +207,7 @@ for (@m) {
   #push @x, "|\n";
   printf $s;
   push @n, $s;
-  if (/^(key_compare|range)$/) {
+  if (/^(key_compare|range|lexicographical_compare)$/) {
     line();
     hdr();
     line();

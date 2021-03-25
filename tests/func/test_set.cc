@@ -8,6 +8,8 @@ OLD_MAIN
 
 #define USE_INTERNAL_VERIFY
 #define T digi
+#define INCLUDE_ALGORITHM
+//#define INCLUDE_NUMERIC
 #include <ctl/set.h>
 
 #include <algorithm>

@@ -12,6 +12,7 @@
 #define I JOIN(A, it)
 #define GI JOIN(A, it)
 
+#include <assert.h>
 #include <ctl/ctl.h>
 
 // only for short strings, not vec_uint8_t

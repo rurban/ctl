@@ -8,6 +8,7 @@ OLD_MAIN
 
 #define USE_INTERNAL_VERIFY
 #define T strint
+#define INCLUDE_ALGORITHM
 #include <ctl/unordered_map.h>
 
 #include <algorithm>

@@ -6,6 +6,8 @@ OLD_MAIN
 #include "digi.hh"
 
 #define T digi
+#define INCLUDE_ALGORITHM
+#define INCLUDE_NUMERIC
 #include <ctl/forward_list.h>
 
 #include <forward_list>

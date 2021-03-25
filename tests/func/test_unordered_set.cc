@@ -8,6 +8,7 @@ OLD_MAIN
 
 #define USE_INTERNAL_VERIFY
 #define T digi
+#define INCLUDE_ALGORITHM
 #include <ctl/unordered_set.h>
 
 #include <algorithm>

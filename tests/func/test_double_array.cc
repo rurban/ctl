@@ -7,6 +7,8 @@ OLD_MAIN
 #define POD
 #define T double
 #define N 20
+#define INCLUDE_ALGORITHM
+#define INCLUDE_NUMERIC
 #include <ctl/array.h>
 
 #include <algorithm>

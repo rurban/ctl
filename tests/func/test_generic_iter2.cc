@@ -15,25 +15,32 @@ OLD_MAIN
 
 #define POD
 #define T int
+#define INCLUDE_ALGORITHM
 #include <ctl/list.h>
 #define POD
 #define T int
+#define INCLUDE_ALGORITHM
 #include <ctl/forward_list.h>
 #define POD
 #define T int
 #define N 25
+#define INCLUDE_ALGORITHM
 #include <ctl/array.h>
 #define POD
 #define T int
+#define INCLUDE_ALGORITHM
 #include <ctl/deque.h>
 #define POD
 #define T int
+#define INCLUDE_ALGORITHM
 #include <ctl/set.h>
 #define POD
 #define T int
+#define INCLUDE_ALGORITHM
 #include <ctl/vector.h>
 #define POD
 #define T int
+#define INCLUDE_ALGORITHM
 #include <ctl/unordered_set.h>
 
 #define FOREACH_METH(TEST)                                                                                             \

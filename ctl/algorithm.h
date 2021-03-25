@@ -617,44 +617,6 @@ static inline I JOIN(A, transform_it_range)(I *range, I *pos, I dest, T _binop(T
     return dest;
 }
 
-#ifndef CTL_PQU
-
-static inline void JOIN(A, iota)(A *self, T value)
-{
-    foreach(A, self, i)
-    {
-#ifdef POD
-        *i.ref = value;
-        value += 1;
-#else
-        if (self->free)
-            self->free(i.ref);
-        // inc already copies the value
-        *i.ref = JOIN(T, inc)(&value);
-        //value = self->copy(&value);
-#endif
-    }
-}
-
-static inline void JOIN(A, iota_range)(I *range, T value)
-{
-#ifndef POD
-    A* self = range->container;
-#endif
-    foreach_range_(A, i, range)
-    {
-#ifdef POD
-        *i.ref = value;
-        value += 1;
-#else
-        if (self->free)
-            self->free(i.ref);
-        *i.ref = JOIN(T, inc)(&value);
-#endif
-    }
-}
-#endif // PQU
-
 #if defined CTL_ARR || defined CTL_VEC || defined CTL_DEQ
 
 static inline void JOIN(A, shuffle)(A *self)
@@ -1401,6 +1363,11 @@ static inline void JOIN(A, reverse)(A *a)
 
 #endif // USET, SET
 
+#ifdef INCLUDE_NUMERIC
+#include <ctl/numeric.h>
+#endif
+#undef INCLUDE_NUMERIC
+#undef INCLUDE_ALGORITHM
 
 // TODO:
 // copy_n C++11

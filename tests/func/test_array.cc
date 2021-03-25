@@ -8,6 +8,8 @@ OLD_MAIN
 
 #define T digi
 #define N 100
+#define INCLUDE_ALGORITHM
+#define INCLUDE_NUMERIC
 #include <ctl/array.h>
 
 #include <algorithm>

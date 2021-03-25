@@ -8,19 +8,19 @@ VERSION ?= 202103
 .PHONY: all check man install clean doc images perf examples verify cppcheck asan \
         debug stress stress-long ALWAYS
 
-TRY_CXX20 := $(shell $(CXX) -std=c++20 -I. tests/func/test_deque.cc -o /dev/null)
+TRY_CXX20 := $(shell $(CXX) -std=c++20 -I. tests/perf/lst/perf_list_push_back.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
 CXX += -std=c++20
 else
-TRY_CXX2a := $(shell $(CXX) -std=c++2a -I. tests/func/test_deque.cc -o /dev/null)
+TRY_CXX2a := $(shell $(CXX) -std=c++2a -I. tests/perf/lst/perf_list_push_back.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
 CXX += -std=c++2a
 else
-TRY_CXX17 := $(shell $(CXX) -std=c++17 -I. tests/func/test_deque.cc -o /dev/null)
+TRY_CXX17 := $(shell $(CXX) -std=c++17 -I. tests/perf/lst/perf_list_push_back.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
 CXX += -std=c++17
 else
-TRY_CXX11 := $(shell $(CXX) -std=c++11 -I. tests/func/test_deque.cc -o /dev/null)
+TRY_CXX11 := $(shell $(CXX) -std=c++11 -I. tests/perf/lst/perf_list_push_back.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
 CXX += -std=c++11
 endif
@@ -46,7 +46,7 @@ CFLAGS  = -I.
 CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
 CFLAGS += -g
 # only targetting intel
-TRY_MARCH_NATIVE := $(shell $(CC) $(CFLAGS) -march=native tests/func/test_c11.c -o /dev/null)
+TRY_MARCH_NATIVE := $(shell $(CC) $(CFLAGS) -march=native tests/verify/vector-1.c -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
 CFLAGS += -march=native
 endif
