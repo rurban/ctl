@@ -133,7 +133,7 @@ static inline void JOIN(I, next)(I *iter)
     iter->ref = iter->node ? &iter->node->value : NULL;
 }
 
-/* seems to be pretty costly, or?
+/* seems to be pretty costly? not at all
 static inline I*
 JOIN(I, prev)(I* node)
 {
@@ -210,9 +210,9 @@ static inline size_t JOIN(I, index)(I *iter)
 
 static inline A JOIN(A, init_from)(A *copy);
 static inline A JOIN(A, copy)(A *self);
-static inline A *JOIN(A, copy_range)(GI *range, A *out);
+//static inline A *JOIN(A, copy_range)(GI *range, A *out);
 static inline B *JOIN(A, insert)(A *self, T key);
-static inline void JOIN(A, inserter)(A *self, T value);
+//static inline void JOIN(A, inserter)(A *self, T value);
 static inline bool JOIN(A, find_first_of_range)(I *range1, I *range2);
 
 #include <ctl/bits/container.h>
@@ -1212,24 +1212,11 @@ not_found:
     return false;
 }
 
-#ifdef CTL_MAP
-static inline I JOIN(A, lower_bound)(A *self, T value);
-static inline I JOIN(A, upper_bound)(A *self, T value);
-#endif
-
-// set.equal_range does interval search for key, returning the
-// lower_bound/upper_bound pair.
-static inline void JOIN(A, equal_range)(A *self, T key, I *lower_bound, I *upper_bound)
-{
-    *lower_bound = JOIN(A, lower_bound)(self, self->copy(&key));
-    *upper_bound = JOIN(A, upper_bound)(self, key);
-}
-
 // TODO join (aka bulk insert)
 //      and split (aka bulk erase)
 //      lower_bound, upper_bound
 
-#if defined(CTL_MAP)
+#if defined CTL_MAP && defined INCLUDE_ALGORITHM
 #include <ctl/algorithm.h>
 #endif
 

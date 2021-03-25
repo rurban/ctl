@@ -742,8 +742,6 @@ static inline void JOIN(A, insert_generic)(I *pos, GI *range)
     }
 }
 
-//#include <ctl/algorithm.h>
-
 #undef T
 #undef A
 #undef B

@@ -119,7 +119,7 @@ static inline int JOIN(A, _equal)(A *self, T *a, T *b)
 #define _IS_PARENT_CHILD_FOLLOWS
 #endif
 
-#ifndef _IS_PARENT_CHILD_FOLLOWS
+#if !defined _IS_PARENT_CHILD_FOLLOWS && defined INCLUDE_ALGORITHM
 #include <ctl/algorithm.h>
 //#else
 //# pragma message "_IS_PARENT_CHILD_FOLLOWS defined"

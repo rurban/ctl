@@ -760,9 +760,16 @@ static inline A *JOIN(A, move_range)(I *range, A *out)
     return out;
 }
 
-#if defined(CTL_STR) || defined(CTL_U8STR)
+// For now we always include string algorithms, as it is hard to include
+// it a 2nd time. string.h is the only one which is only loaded once.
+//#ifdef INCLUDE_ALGORITHM
+//#pragma message "vector: INCLUDE_ALGORITHM"
+#if (defined(CTL_STR) || defined(CTL_U8STR)) && !defined CTL_ALGORITHM
 #include <ctl/algorithm.h>
 #endif
+//#else
+//#pragma message "vector: no INCLUDE_ALGORITHM"
+//#endif
 
 #undef A
 #undef I

@@ -6,6 +6,11 @@
 #ifdef T
 #error "Template type T defined for <ctl/string.h>"
 #endif
+//#ifdef INCLUDE_ALGORITHM
+//#pragma message "string.h: INCLUDE_ALGORITHM"
+//#else
+//#pragma message "string.h: no INCLUDE_ALGORITHM"
+//#endif
 
 #define CTL_STR
 #define HOLD
@@ -280,5 +285,30 @@ static inline int str_equal(str *self, str *other)
 #undef HOLD
 #endif
 #undef CTL_STR
+
+#else
+
+// someone requested string.h without ALGORITHM before. but now we need it 
+//#if defined INCLUDE_ALGORITHM && !defined CTL_ALGORITHM
+//#pragma message "2nd string.h: want INCLUDE_ALGORITHM"
+//#define CTL_VEC
+//#define CTL_STR
+//#define POD
+//#define T char
+//#define vec_char str
+//#define MUST_ALIGN_16(T) 1
+//#define INIT_SIZE 15
+//#define A str
+//#define I JOIN(A, it)
+//#define GI JOIN(A, it)
+//
+//#include <ctl/algorithm.h>
+//
+//#undef POD
+//#undef vec_char
+//#undef T
+//#undef CTL_STR
+//#undef CTL_VEC
+//#endif
 
 #endif // once

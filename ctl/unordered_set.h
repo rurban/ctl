@@ -331,7 +331,11 @@ static inline int JOIN(A, _equal)(A *self, T *a, T *b)
 static inline A JOIN(A, init_from)(A *copy);
 static inline A JOIN(A, copy)(A *self);
 static inline void JOIN(A, insert)(A *self, T value);
-static inline void JOIN(A, inserter)(A *self, T value);
+
+static inline void JOIN(A, inserter)(A *self, T value)
+{
+    JOIN(A, insert)(self, value);
+}
 
 #include <ctl/bits/container.h>
 
@@ -1313,7 +1317,7 @@ static inline A JOIN(A, transform)(A *self, T _unop(T *))
 
 // transform_it with binop makes no sense with random ordering.
 
-#if defined(CTL_UMAP)
+#if defined CTL_UMAP && defined INCLUDE_ALGORITHM
 #include <ctl/algorithm.h>
 #endif
 

@@ -1,5 +1,5 @@
 // Optional generic algorithms
-// DO NOT STANDALONE INCLUDE, need container included before.
+// requested via #define INCLUDE_ALGORITHM before loading the container
 // SPDX-License-Identifier: MIT
 //
 // Might only be included once. By the child. not the parent.
@@ -18,6 +18,9 @@
     !defined CTL_STACK && \
     !defined CTL_QUEUE && \
     !defined CTL_PQU && \
+    !defined CTL_STR && \
+    !defined CTL_U8STR && \
+    !defined CTL_HMAP && \
     !defined CTL_MAP && \
     !defined CTL_UMAP
 # error "No CTL container defined for <ctl/algorithm.h>"
@@ -142,12 +145,15 @@ static inline void JOIN(I, iter_swap)(I *a, I* b)
 }
 
 #if !defined(CTL_ARR)
+#if !(defined CTL_USET || defined CTL_UMAP)
+
 // default inserter (add at front, back or middle)
 static inline void JOIN(A, inserter)(A *self, T value)
 {
 #if defined CTL_LIST || defined CTL_VEC || defined CTL_ARR || defined CTL_DEQ
     JOIN(A, push_back)(self, value);
-#elif defined CTL_SET || defined CTL_MAP || defined CTL_USET || defined CTL_UMAP
+#elif defined CTL_SET || defined CTL_MAP
+    // USET natively
     JOIN(A, insert)(self, value);
 #elif defined CTL_SLIST
     JOIN(A, push_front)(self, value);
@@ -157,6 +163,7 @@ static inline void JOIN(A, inserter)(A *self, T value)
     #error "undefined container"
 #endif
 }
+#endif // USET/UMAP have their own outside of algorithm
 
 #if !defined CTL_SLIST
 // slist needs to do some reversing
@@ -1283,6 +1290,18 @@ static inline bool JOIN(A, binary_search)(A *self, T value)
 }
 
 #endif // USET
+
+#ifdef CTL_SET
+
+// set.equal_range does interval search for key, returning the
+// lower_bound/upper_bound pair.
+static inline void JOIN(A, equal_range)(A *self, T key, I *lower_bound, I *upper_bound)
+{
+    *lower_bound = JOIN(A, lower_bound)(self, self->copy(&key));
+    *upper_bound = JOIN(A, upper_bound)(self, key);
+}
+
+#endif // SET
 
 // uset, set don't need it.
 #if !defined CTL_USET && !defined CTL_SET

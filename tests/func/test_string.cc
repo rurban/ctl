@@ -4,6 +4,7 @@
 OLD_MAIN
 #else
 
+#define INCLUDE_ALGORITHM
 #include <ctl/string.h>
 
 #include <algorithm>
