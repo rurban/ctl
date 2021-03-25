@@ -5,10 +5,12 @@
 #error "Template type T undefined for <ctl/set.h>"
 #endif
 
-// TODO emplace, extract, extract_it
+// TODO emplace, extract, extract_it, pair
 
 #define CTL_SET
+#ifndef A
 #define A JOIN(set, T)
+#endif
 #define B JOIN(A, node)
 #define I JOIN(A, it)
 #define GI JOIN(A, it)
@@ -35,6 +37,9 @@ typedef struct A
     int (*equal)(T *, T *);
 } A;
 
+#ifdef CTL_MAP
+#include <ctl/pair.h>
+#endif
 #include <ctl/bits/iterator_vtable.h>
 
 typedef struct I

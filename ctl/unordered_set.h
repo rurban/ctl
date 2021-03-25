@@ -92,7 +92,9 @@ position to the top in each access, such as find and contains, not only insert.
 #endif
 
 #define CTL_USET
+#ifndef A
 #define A JOIN(uset, T)
+#endif
 #define B JOIN(A, node)
 #define I JOIN(A, it)
 #define GI JOIN(A, it)
@@ -127,6 +129,9 @@ typedef struct A
 #endif
 } A;
 
+#ifdef CTL_UMAP
+#include <ctl/pair.h>
+#endif
 #include <ctl/bits/iterator_vtable.h>
 
 typedef struct I

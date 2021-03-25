@@ -36,6 +36,12 @@ typedef unsigned char unsigned_char;
 #include <ctl/map.h>
 
 #define POD
+typedef char* charp;
+#define T charp
+#define T_VALUE int
+#include <ctl/unordered_map.h>
+
+#define POD
 #define T double
 #include <ctl/vector.h>
 
