@@ -550,8 +550,8 @@ And in its grandiosity (esp. not header-only):
 |`rotate_copy_range`              |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`shift_left`                     |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`shift_right`                    |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`shuffle`                        |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`shuffle_range`                  |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
+|`shuffle`                        |    |    |    |    | -  | -  | -  | -  | -  | -  | -  | -  | -  |
+|`shuffle_range`                  |    |    |    |    | -  | -  | -  | -  | -  | -  | -  | -  | -  |
 |`sample`                         |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`sample_range`                   |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`unique`                         | ✓  | x  | -  | x  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
@@ -603,6 +603,30 @@ And in its grandiosity (esp. not header-only):
 |`symmetric_difference_range`     | ✓  | ✓  | ✓  | ✓  | ✓  | x  | ✓  |    |    |    | -  | -  | -  |
 |`union_range`                    | ✓  | ✓  | -  | ✓  | ✓  | x  | ✓  |    |    |    | -  | -  | -  |
 |`lexicographical_compare`        | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|`gcd`                            |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`lcm`                            |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`midpoint`                       |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`lerp`                           |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`iota`                           | ✓  |    | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
+|`iota_range`                     | ✓  |    | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
+|`accumulate`                     |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`accumulate_range`               |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`reduce`                         |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`reduce_range`                   |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`transform_reduce`               |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`transform_reduce_range`         |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`inner_product`                  |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`inner_product_range`            |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`adjacent_difference`            |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`adjacent_difference_range`      |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`partial_sum`                    |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`partial_sum_range`              |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`inclusive_scan`                 |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`inclusive_scan_range`           |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`exclusive_scan`                 |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`exclusive_scan_range`           |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`transform_inclusive_scan`       |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
+|`transform_exclusive_scan`       |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |---------------------------------|----|----|----|----|----|----|----|----|----|----|----|----|----|
 |                                 |vec |str |arr |deq |list|slst|set |map |uset|umap|pqu |que |stk |
 ```
@@ -622,7 +646,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 202000 (starting with `202102`),
 the old ctl is lower than 202000, starting with `1.0`.
 
-Added lots of missing methods. We have 154 methods in 915 stable variants.
+Added lots of missing methods. We have 156 methods in 925 stable variants.
 glouw has 63 methods in 196 stable variants.
 
 Probe for -std=c++20 c++ support and use this for testing against the STL.

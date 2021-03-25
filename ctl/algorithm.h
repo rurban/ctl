@@ -617,12 +617,15 @@ static inline I JOIN(A, transform_it_range)(I *range, I *pos, I dest, T _binop(T
     return dest;
 }
 
+#ifndef CTL_PQU
+
 static inline void JOIN(A, iota)(A *self, T value)
 {
     foreach(A, self, i)
     {
 #ifdef POD
-        *i.ref = value++;
+        *i.ref = value;
+        value += 1;
 #else
         if (self->free)
             self->free(i.ref);
@@ -641,7 +644,8 @@ static inline void JOIN(A, iota_range)(I *range, T value)
     foreach_range_(A, i, range)
     {
 #ifdef POD
-        *i.ref = value++;
+        *i.ref = value;
+        value += 1;
 #else
         if (self->free)
             self->free(i.ref);
@@ -649,8 +653,38 @@ static inline void JOIN(A, iota_range)(I *range, T value)
 #endif
     }
 }
+#endif // PQU
 
-#endif // USET/SET inserter
+#if defined CTL_ARR || defined CTL_VEC || defined CTL_DEQ
+
+static inline void JOIN(A, shuffle)(A *self)
+{
+    size_t n = JOIN(A, size)(self);
+    for (size_t i = n-1; i > 0; i--)
+    {
+        int r = rand() % (i+1);
+        T tmp = *JOIN(A, at)(self, i);
+        *JOIN(A, at)(self, i) = *JOIN(A, at)(self, r);
+        *JOIN(A, at)(self, r) = tmp;
+    }
+}
+
+static inline void JOIN(A, shuffle_range)(I *range)
+{
+    A* self = range->container;
+    size_t f = JOIN(I, index)(range);
+    size_t n = f + JOIN(I, distance_range)(range);
+    for (size_t i = n-1; i > f; i--)
+    {
+        int r = rand() % (i+1);
+        T tmp = *JOIN(A, at)(self, i);
+        *JOIN(A, at)(self, i) = *JOIN(A, at)(self, r);
+        *JOIN(A, at)(self, r) = tmp;
+    }
+}
+#endif // with at
+
+#endif // USET,SET
 
 #if !defined(CTL_ARR)
 
