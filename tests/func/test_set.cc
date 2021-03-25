@@ -11,6 +11,7 @@ OLD_MAIN
 #include <ctl/set.h>
 
 #include <algorithm>
+#include <numeric>
 #include <iterator>
 #include <set>
 
@@ -1039,6 +1040,29 @@ int main(void)
             set_digi_free(&aa);
             break;
         }
+/* undefined for set. rather use generate_n instead
+        //case TEST_IOTA: {
+            digi key = digi_init(0);
+            set_digi_iota(&a, key);
+            print_set(&a);
+            std::iota(b.begin(), b.end(), DIGI{0});
+            print_setpp(b);
+            CHECK(a, b);
+            digi_free(&key);
+            break;
+        }
+        //case TEST_IOTA_RANGE: {
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            digi key = digi_init(0);
+            set_digi_iota_range(&range_a1, key);
+            print_set_range(range_a1);
+            std::iota(first_b1, last_b1, DIGI{0});
+            print_setpp(b);
+            CHECK(a, b);
+            digi_free(&key);
+            break;
+        }
+*/
         case TEST_COPY_IF: {
             aa = set_digi_copy_if(&a, digi_is_odd);
 #if __cplusplus >= 201103L

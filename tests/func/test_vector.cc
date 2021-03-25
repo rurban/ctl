@@ -10,6 +10,7 @@ OLD_MAIN
 #include <ctl/vector.h>
 
 #include <algorithm>
+#include <numeric>
 #include <vector>
 
 #define FOREACH_METH(TEST)                                                                                             \
@@ -69,6 +70,8 @@ OLD_MAIN
     TEST(TRANSFORM)                                                                                                    \
     TEST(TRANSFORM_IT)                                                                                                 \
     TEST(TRANSFORM_RANGE)                                                                                              \
+    TEST(IOTA)                                                                                                         \
+    TEST(IOTA_RANGE)                                                                                                   \
     TEST(EMPLACE_BACK)                                                                                                 \
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH)                                                                                                       \
@@ -100,7 +103,7 @@ OLD_MAIN
     TEST(REVERSE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(EMPLACE) /* 83 */                                                                                             \
+    TEST(EMPLACE) /* 85 */                                                                                             \
     TEST(INSERT_GENERIC)                                                                                               \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_IT_RANGE)
@@ -1284,6 +1287,29 @@ int main(void)
                 print_vector(b);
                 CHECK(a, b);
 #endif
+                break;
+            }
+            case TEST_IOTA:
+            {
+                digi key = digi_init(0);
+                vec_digi_iota(&a, key);
+                print_vec(&a);
+                std::iota(b.begin(), b.end(), DIGI{0});
+                print_vector(b);
+                CHECK(a, b);
+                digi_free(&key);
+                break;
+            }
+            case TEST_IOTA_RANGE:
+            {
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                digi key = digi_init(0);
+                vec_digi_iota_range(&range_a1, key);
+                print_vec_range(range_a1);
+                std::iota(first_b1, last_b1, DIGI{0});
+                print_vector(b);
+                CHECK(a, b);
+                digi_free(&key);
                 break;
             }
 #ifdef DEBUG

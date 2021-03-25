@@ -120,6 +120,17 @@ struct DIGI
     {
         return *value == *a.value;
     }
+    DIGI operator++(int)
+    {
+        DIGI old = *this;
+        (*value)++;
+        return old;
+    }
+    DIGI& operator++()
+    {
+        ++(*value);
+        return *this;
+    }
     int operator*() const
     {
         return *value;
@@ -137,6 +148,14 @@ public:
         return (size_t)int_hash_func(*a.value);
     }
 };
+
+static inline digi
+digi_inc(digi* a)
+{
+    digi old = digi_init(*a->value);
+    (*a->value)++;
+    return old;
+}
 
 static int _generator_state = 0;
 static inline digi

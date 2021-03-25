@@ -10,6 +10,7 @@ OLD_MAIN
 #include <ctl/deque.h>
 
 #include <algorithm>
+#include <numeric>
 #include <deque>
 #include <vector>
 
@@ -76,6 +77,8 @@ OLD_MAIN
     TEST(TRANSFORM_IT)                                                                                                 \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(TRANSFORM_IT_RANGE)                                                                                           \
+    TEST(IOTA)                                                                                           \
+    TEST(IOTA_RANGE)                                                                                           \
     TEST(COPY_IF)                                                                                                      \
     TEST(COPY_IF_RANGE)                                                                                                \
     TEST(MISMATCH)                                                                                                     \
@@ -1448,6 +1451,29 @@ int main(void)
 #endif
                 CHECK(a, b);
                 deq_digi_free(&aa);
+                break;
+            }
+            case TEST_IOTA:
+            {
+                digi key = digi_init(0);
+                deq_digi_iota(&a, key);
+                print_deq(&a);
+                std::iota(b.begin(), b.end(), DIGI{0});
+                print_deque(b);
+                CHECK(a, b);
+                digi_free(&key);
+                break;
+            }
+            case TEST_IOTA_RANGE:
+            {
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                digi key = digi_init(0);
+                deq_digi_iota_range(&range_a1, key);
+                print_deq_range(range_a1);
+                std::iota(first_b1, last_b1, DIGI{0});
+                print_deque(b);
+                CHECK(a, b);
+                digi_free(&key);
                 break;
             }
             case TEST_COPY_IF: {

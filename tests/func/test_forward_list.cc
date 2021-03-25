@@ -10,6 +10,7 @@ OLD_MAIN
 
 #include <forward_list>
 #include <algorithm>
+#include <numeric>
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(PUSH_FRONT)                                                                                                   \
@@ -41,6 +42,8 @@ OLD_MAIN
     TEST(COUNT_IF_RANGE)                                                                                               \
     TEST(EQUAL_VALUE)                                                                                                  \
     TEST(EQUAL_RANGE)                                                                                                  \
+    TEST(IOTA)                                                                                                         \
+    TEST(IOTA_RANGE)                                                                                                   \
     TEST(COPY_IF)                                                                                                      \
     TEST(COPY_IF_RANGE)                                                                                                \
     TEST(GENERATE)                                                                                                     \
@@ -1056,6 +1059,27 @@ main(void)
 #endif
             slist_digi_free(&aa);
             break;
+        case TEST_IOTA: {
+            digi key = digi_init(0);
+            slist_digi_iota(&a, key);
+            print_slist(&a);
+            std::iota(b.begin(), b.end(), DIGI{0});
+            print_fwlist(b);
+            CHECK(a, b);
+            digi_free(&key);
+            break;
+        }
+        case TEST_IOTA_RANGE: {
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            digi key = digi_init(0);
+            slist_digi_iota_range(&range_a1, key);
+            print_slist_range(range_a1);
+            std::iota(first_b1, last_b1, DIGI{0});
+            print_fwlist(b);
+            CHECK(a, b);
+            digi_free(&key);
+            break;
+        }
 #ifdef DEBUG
         case TEST_GENERATE_N: // TEST=63
         {

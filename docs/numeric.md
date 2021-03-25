@@ -20,8 +20,26 @@ well as optimized numeric arrays and support for random number generation.
     iota (A* self, T value)
     iota_range (I* range, T value)
  
-fills a range with successive increments of the POD starting value. No struct
-support with `T_inc` methods yet.
+fills a range with successive increments of the starting value. When T is a
+struct, you need to define a `T_inc` postfix increment method, as in `tests/func/digi.hh`,
+returning an old copy:
+
+    static digi
+    digi_inc(digi* a)
+    {
+        digi old = digi_init(*a->value);
+        (*a->value)++;
+        return old;
+    }
+
+equivalent to the matching C++ postfix increment operator:
+
+    DIGI operator++(int)
+    {
+        DIGI old = *this;
+        (*value)++;
+        return old;
+    }
 
     accumulate
  

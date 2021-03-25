@@ -67,6 +67,8 @@ OLD_MAIN
     TEST(GENERATE_N)                                                                                                   \
     TEST(TRANSFORM)                                                                                                    \
     TEST(TRANSFORM_IT)                                                                                                 \
+    TEST(IOTA)                                                                                                         \
+    TEST(IOTA_RANGE)                                                                                                   \
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
@@ -96,8 +98,6 @@ OLD_MAIN
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
     TEST(EMPLACE) /* 76 */                                                                                             \
-    TEST(IOTA)                                                                                                         \
-    TEST(IOTA_RANGE)                                                                                                   \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(TRANSFORM_IT_RANGE)                                                                                           \

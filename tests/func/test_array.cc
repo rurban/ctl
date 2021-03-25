@@ -11,6 +11,7 @@ OLD_MAIN
 #include <ctl/array.h>
 
 #include <algorithm>
+#include <numeric>
 #include <array>
 #include <vector>
 
@@ -49,6 +50,8 @@ OLD_MAIN
     TEST(GENERATE_N)                                                                                                   \
     TEST(TRANSFORM)                                                                                                    \
     TEST(TRANSFORM_IT)                                                                                                 \
+    TEST(IOTA)                                                                                                 \
+    TEST(IOTA_RANGE)                                                                                                 \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
     TEST(SEARCH_N)                                                                                                     \
@@ -705,6 +708,27 @@ int main(void)
             arr100_digi_free(&aa);
             break;
         }
+        case TEST_IOTA: {
+            digi key = digi_init(0);
+            arr100_digi_iota(&a, key);
+            print_arr100(&a);
+            std::iota(b.begin(), b.end(), DIGI{0});
+            print_array(b);
+            CHECK(a, b);
+            digi_free(&key);
+            break;
+        }
+        case TEST_IOTA_RANGE: {
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            digi key = digi_init(0);
+            arr100_digi_iota_range(&range_a1, key);
+            print_arr100_range(&range_a1);
+            std::iota(first_b1, last_b1, DIGI{0});
+            print_array(b);
+            CHECK(a, b);
+            digi_free(&key);
+            break;
+        }
 #ifdef DEBUG
         case TEST_GENERATE_N_RANGE: // TEST=32
         {
@@ -934,7 +958,9 @@ int main(void)
             found_b = iter != b.end();
             LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", found_b ? "yes" : "no", it.ref - a.vector,
                 iter - b.begin());
+#ifdef DEBUG
             CHECK_ITER(it, b, iter);
+#endif
             assert(found_a == found_b);
             arr100_digi_free(&aa);
             break;

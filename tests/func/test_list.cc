@@ -10,6 +10,7 @@ OLD_MAIN
 #include <ctl/list.h>
 
 #include <algorithm>
+#include <numeric>
 #include <list>
 
 #define FOREACH_METH(TEST)                                                                                             \
@@ -76,6 +77,8 @@ OLD_MAIN
     TEST(GENERATE_RANGE)                                                                                               \
     TEST(GENERATE_N)                                                                                                   \
     TEST(TRANSFORM)                                                                                                    \
+    TEST(IOTA)                                                                                                         \
+    TEST(IOTA_RANGE)                                                                                                   \
     TEST(COPY_IF)                                                                                                      \
     TEST(COPY_IF_RANGE)                                                                                                \
     TEST(MISMATCH)                                                                                                     \
@@ -954,6 +957,27 @@ int main(void)
             CHECK(aa, bb);
             CHECK(a, b);
             list_digi_free(&aa);
+            break;
+        }
+        case TEST_IOTA: {
+            digi key = digi_init(0);
+            list_digi_iota(&a, key);
+            print_lst(&a);
+            std::iota(b.begin(), b.end(), DIGI{0});
+            print_list(b);
+            CHECK(a, b);
+            digi_free(&key);
+            break;
+        }
+        case TEST_IOTA_RANGE: {
+            get_random_iters(&a, &first_a1, b, first_b1, last_b1);
+            digi key = digi_init(0);
+            list_digi_iota_range(&first_a1, key);
+            print_lst_range(first_a1);
+            std::iota(first_b1, last_b1, DIGI{0});
+            print_list(b);
+            CHECK(a, b);
+            digi_free(&key);
             break;
         }
         case TEST_COPY_IF: {
