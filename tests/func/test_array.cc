@@ -955,21 +955,21 @@ int main(void)
             print_arr100(&aa);
             range_a2.end = range_a2.ref + 4;
             it = arr100_digi_find_end(&a, &range_a2);
-            iter = std::find_end(b.begin(), b.end(), bb.begin(), bb.begin() + 34);
+            iter = std::find_end(b.begin(), b.end(), bb.begin(), bb.begin() + 4);
             found_a = !arr100_digi_it_done(&it);
             found_b = iter != b.end();
             LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", found_b ? "yes" : "no", it.ref - a.vector,
                 iter - b.begin());
-#ifdef DEBUG
+//#ifdef DEBUG
             CHECK_ITER(it, b, iter);
-            assert(found_a == found_b); // FIXME
-#else
-            if (found_a != found_b)
-                printf("=> %s/%s, %ld/%ld FAIL\n",
-                       found_a ? "yes" : "no",
-                       found_b ? "yes" : "no", it.ref - a.vector,
-                       iter - b.begin());
-#endif
+            assert(found_a == found_b);
+//#else
+//            if (found_a != found_b)
+//                printf("arr100_digi_find_end => %s/%s, %ld/%ld FAIL\n",
+//                       found_a ? "yes" : "no",
+//                       found_b ? "yes" : "no", it.ref - a.vector,
+//                       iter - b.begin());
+//#endif
             arr100_digi_free(&aa);
             break;
         }
