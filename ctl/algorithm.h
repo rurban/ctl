@@ -629,6 +629,8 @@ static inline I JOIN(A, transform_it_range)(I *range, I *pos, I dest, T _binop(T
 static inline void JOIN(A, shuffle)(A *self)
 {
     size_t n = JOIN(A, size)(self);
+    if (n < 2)
+        return;
     for (size_t i = n-1; i > 0; i--)
     {
         int r = rand() % (i+1);
@@ -641,11 +643,13 @@ static inline void JOIN(A, shuffle)(A *self)
 static inline void JOIN(A, shuffle_range)(I *range)
 {
     A* self = range->container;
-    size_t f = JOIN(I, index)(range);
-    size_t n = f + JOIN(I, distance_range)(range);
-    for (size_t i = n-1; i > f; i--)
+    if (JOIN(I, done)(range))
+        return;
+    const size_t b = JOIN(I, index)(range);
+    const size_t e = b + JOIN(I, distance_range)(range);
+    for (size_t i = e-1; i > b; i--)
     {
-        int r = rand() % (i+1);
+        int r = b + (rand() % ((i-b)+1));
         T tmp = *JOIN(A, at)(self, i);
         *JOIN(A, at)(self, i) = *JOIN(A, at)(self, r);
         *JOIN(A, at)(self, r) = tmp;

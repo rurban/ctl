@@ -250,11 +250,10 @@ copies and rotate a range of elements. _(NYI)_
  
 shifts elements in a range. _(NYI)_
 
-    random_shuffle (until C++17)
-    shuffle (C++11)
-    shuffle_range
+    shuffle (A* self)
+    shuffle_range (I* range)
 
-randomly re-orders elements in a range. _(NYI)_
+randomly re-orders elements in a range, via rand() and slow value swap.
 
     sample (C++17)
     sample_range

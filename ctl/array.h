@@ -107,7 +107,7 @@ static inline T *JOIN(I, ref)(I *iter)
 
 static inline size_t JOIN(I, index)(I *iter)
 {
-    return (iter->ref - JOIN(A, front)(iter->container)) / sizeof(T);
+    return iter->ref - JOIN(A, front)(iter->container);
 }
 
 static inline int JOIN(I, done)(I *iter)

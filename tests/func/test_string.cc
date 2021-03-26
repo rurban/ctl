@@ -5,10 +5,16 @@ OLD_MAIN
 #else
 
 #define INCLUDE_ALGORITHM
+#define INCLUDE_NUMERIC
 #include <ctl/string.h>
 
 #include <algorithm>
+#include <numeric>
 #include <string>
+#include <string>
+#if __cplusplus >= 201703L
+#include <random>
+#endif
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(PUSH_BACK)                                                                                                    \
@@ -91,10 +97,14 @@ OLD_MAIN
     TEST(IS_SORTED)                                                                                                    \
     TEST(IS_SORTED_UNTIL)                                                                                              \
     TEST(REVERSE)                                                                                                      \
-    TEST(REVERSE_RANGE)
+    TEST(REVERSE_RANGE)                                                                                                \
+    TEST(IOTA)                                                                                                         \
+    TEST(IOTA_RANGE)                                                                                                   \
+    TEST(SHUFFLE)                                                                                                      \
+    TEST(SHUFFLE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(GENERATE_N_RANGE) /* 81 */                                                                                    \
+    TEST(GENERATE_N_RANGE) /* 83 */                                                                                    \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(UNIQUE)                                                                                                       \
     TEST(UNIQUE_RANGE)
@@ -335,6 +345,10 @@ int main(void)
             char *base = create_test_string(str_size);
             str a;
             std::string b;
+#if __cplusplus >= 201703L
+            std::default_random_engine rng {seed};
+#endif
+
             if (mode == MODE_DIRECT)
             {
                 LOG("mode DIRECT\n");
@@ -435,9 +449,9 @@ int main(void)
                 std::string::iterator first_b, last_b;
                 get_random_iters(&a, &first_a, b, first_b, last_b);
                 str aa = str_init(temp);
-                free(temp);
                 range2 = str_it_begin(&aa);
                 LOG("str_find_first_of_range(\"%.*s\", [%s])\n", (int)(last_b - first_b), first_a.ref, temp);
+                free(temp);
                 bool found_a = str_find_first_of_range(&first_a, &range2);
                 auto it = std::find_first_of(first_b, last_b, bb.begin(), bb.end());
                 LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", it != last_b ? "yes" : "no", first_a.ref - a.vector,
@@ -1120,6 +1134,61 @@ int main(void)
 #endif
                 str_free(&aaa);
                 str_free(&aa);
+                break;
+            }
+            case TEST_IOTA: {
+                str_iota(&a, 'a');
+                LOG("%s\n", str_c_str(&a));
+                std::iota(b.begin(), b.end(), 'a');
+                LOG("%s\n", b.c_str());
+                CHECK(a, b);
+                break;
+            }
+            case TEST_IOTA_RANGE: {
+                str_it range_a1;
+                std::string::iterator first_b1, last_b1;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                str_iota_range(&range_a1, 'a');
+                LOG("%s\n", str_c_str(&a));
+                LOG("\"%.*s\"\n", (int)(last_b1 - first_b1), range_a1.ref);
+                std::iota(first_b1, last_b1, 'a');
+                LOG("%s\n", b.c_str());
+                CHECK(a, b);
+                break;
+            }
+            case TEST_SHUFFLE: {
+                LOG("%s\n", str_c_str(&a));
+                str_shuffle(&a);
+                LOG("%s\n", str_c_str(&a));
+#if __cplusplus < 201703L
+                std::random_shuffle(b.begin(), b.end());
+#else
+                std::shuffle(b.begin(), b.end(), rng);
+#endif
+                LOG("%s\n", b.c_str());
+                str_sort(&a);
+                std::sort(b.begin(), b.end());
+                CHECK(a, b);
+                break;
+            }
+            case TEST_SHUFFLE_RANGE: {
+                str_it first_a1;
+                std::string::iterator first_b1, last_b1;
+                LOG("%s\n", str_c_str(&a));
+                get_random_iters(&a, &first_a1, b, first_b1, last_b1);
+                str_shuffle_range(&first_a1);
+                LOG("\"%.*s\"\n", (int)(last_b1 - first_b1), first_a1.ref);
+#if __cplusplus < 201703L
+                std::random_shuffle(first_b1, last_b1);
+#else
+                std::shuffle(first_b1, last_b1, rng);
+#endif
+                // TODO check that the ranges before and after range are still
+                // sorted, and untouched.
+                LOG("%s\n", b.c_str());
+                str_sort(&a);
+                std::sort(b.begin(), b.end());
+                CHECK(a, b);
                 break;
             }
 #ifdef DEBUG

@@ -16,6 +16,9 @@ OLD_MAIN
 #include <numeric>
 #include <array>
 #include <vector>
+#if __cplusplus >= 201703L
+#include <random>
+#endif
 
 #define N 100
 
@@ -52,8 +55,10 @@ OLD_MAIN
     TEST(GENERATE_N)                                                                                                   \
     TEST(TRANSFORM)                                                                                                    \
     TEST(TRANSFORM_IT)                                                                                                 \
-    TEST(IOTA)                                                                                                 \
-    TEST(IOTA_RANGE)                                                                                                 \
+    TEST(IOTA)                                                                                                         \
+    TEST(IOTA_RANGE)                                                                                                   \
+    TEST(SHUFFLE)                                                                                                      \
+    TEST(SHUFFLE_RANGE)                                                                                                \
     TEST(SEARCH)                                                                                                       \
     TEST(SEARCH_RANGE)                                                                                                 \
     TEST(SEARCH_N)                                                                                                     \
@@ -87,7 +92,7 @@ OLD_MAIN
     TEST(GENERATE_N_RANGE) /* 58 */                                                                                    \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(COPY_IF)                                                                                                      \
-    TEST(COPY_IF_RANGE)                                                                                                \
+    TEST(COPY_IF_RANGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -324,6 +329,9 @@ int main(void)
     const int n = TEST_RAND(N);
     bool found_a, found_b;
     size_t num_a, num_b;
+#if __cplusplus >= 201703L
+    std::default_random_engine rng(seed);
+#endif
 
     a = arr100_digi_init();
     a.compare = digi_compare;
@@ -729,6 +737,39 @@ int main(void)
             print_array(b);
             CHECK(a, b);
             digi_free(&key);
+            break;
+        }
+        case TEST_SHUFFLE: {
+            print_arr100(&a);
+            arr100_digi_shuffle(&a);
+            print_arr100(&a);
+#if __cplusplus < 201703L
+            std::random_shuffle(b.begin(), b.end());
+#else
+            std::shuffle(first_b1, last_b1, rng);
+#endif
+            print_array(b);
+            arr100_digi_sort(&a);
+            std::sort(b.begin(), b.end());
+            CHECK(a, b);
+            break;
+        }
+        case TEST_SHUFFLE_RANGE: {
+            print_arr100(&a);
+            get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+            arr100_digi_shuffle_range(&range_a1);
+            print_arr100_range(&range_a1);
+#if __cplusplus < 201703L
+            std::random_shuffle(first_b1, last_b1);
+#else
+            std::shuffle(first_b1, last_b1, rng);
+#endif
+            // TODO check that the ranges before and after range are still
+            // sorted, and untouched.
+            print_array(b);
+            arr100_digi_sort(&a);
+            std::sort(b.begin(), b.end());
+            CHECK(a, b);
             break;
         }
 #ifdef DEBUG

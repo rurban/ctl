@@ -9,6 +9,7 @@
 #define DEQ_BUCKET_SIZE 4
 #define POD
 #define T int
+#define INCLUDE_ALGORITHM
 #include "ctl/deque.h"
 
 int main()

@@ -554,8 +554,8 @@ And in its grandiosity (esp. not header-only):
 |`rotate_copy_range`              |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`shift_left`                     |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`shift_right`                    |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`shuffle`                        |    |    |    |    | -  | -  | -  | -  | -  | -  | -  | -  | -  |
-|`shuffle_range`                  |    |    |    |    | -  | -  | -  | -  | -  | -  | -  | -  | -  |
+|`shuffle`                        | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  | -  |
+|`shuffle_range`                  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  | -  |
 |`sample`                         |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`sample_range`                   |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`unique`                         | ✓  | x  | -  | x  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
@@ -614,8 +614,8 @@ And in its grandiosity (esp. not header-only):
 |`lcm`                            |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`midpoint`                       |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`lerp`                           |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
-|`iota`                           | ✓  |    | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
-|`iota_range`                     | ✓  |    | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
+|`iota`                           | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
+|`iota_range`                     | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
 |`accumulate`                     |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`accumulate_range`               |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
 |`reduce`                         |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
@@ -652,7 +652,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 202000 (starting with `202102`),
 the old ctl is lower than 202000, starting with `1.0`.
 
-Added lots of missing methods. We have 156 methods in 925 stable variants.
+Added lots of missing methods. We have 158 methods in 935 stable variants.
 glouw has 63 methods in 196 stable variants.
 
 inclusion of numeric via `#define INCLUDE_NUMERIC`. For now algorithm is always loaded.

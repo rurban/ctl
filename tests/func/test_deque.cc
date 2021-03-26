@@ -15,6 +15,9 @@ OLD_MAIN
 #include <numeric>
 #include <deque>
 #include <vector>
+#if __cplusplus >= 201703L
+#include <random>
+#endif
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(PUSH_BACK)                                                                                                    \
@@ -79,8 +82,10 @@ OLD_MAIN
     TEST(TRANSFORM_IT)                                                                                                 \
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(TRANSFORM_IT_RANGE)                                                                                           \
-    TEST(IOTA)                                                                                           \
-    TEST(IOTA_RANGE)                                                                                           \
+    TEST(IOTA)                                                                                                         \
+    TEST(IOTA_RANGE)                                                                                                   \
+    TEST(SHUFFLE)                                                                                                      \
+    TEST(SHUFFLE_RANGE)                                                                                                \
     TEST(COPY_IF)                                                                                                      \
     TEST(COPY_IF_RANGE)                                                                                                \
     TEST(MISMATCH)                                                                                                     \
@@ -508,6 +513,9 @@ int main(void)
             size_t num_a, num_b;
             int value = TEST_RAND(TEST_MAX_VALUE);
             const size_t index = TEST_RAND(size);
+#if __cplusplus >= 201703L
+            std::default_random_engine rng {seed};
+#endif
 
             a = deq_digi_init();
             a.compare = digi_compare;
@@ -1478,6 +1486,40 @@ int main(void)
                 digi_free(&key);
                 break;
             }
+            case TEST_SHUFFLE: {
+                print_deq(&a);
+                deq_digi_shuffle(&a);
+                print_deq(&a);
+#if __cplusplus < 201703L
+                std::random_shuffle(b.begin(), b.end());
+#else
+                std::shuffle(b.begin(), b.end(), rng);
+#endif
+                print_deque(b);
+                deq_digi_sort(&a);
+                std::sort(b.begin(), b.end());
+                CHECK(a, b);
+                break;
+            }
+            case TEST_SHUFFLE_RANGE: {
+                print_deq(&a);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                deq_digi_shuffle_range(&range_a1);
+                print_deq_range(range_a1);
+#if __cplusplus < 201703L
+                std::random_shuffle(first_b1, last_b1);
+#else
+                std::shuffle(first_b1, last_b1, rng);
+#endif
+                // TODO check that the ranges before and after range are still
+                // sorted, and untouched.
+                print_deque(b);
+                deq_digi_sort(&a);
+                std::sort(b.begin(), b.end());
+                CHECK(a, b);
+                break;
+            }
+
             case TEST_COPY_IF: {
                 aa = deq_digi_copy_if(&a, digi_is_odd);
 /*

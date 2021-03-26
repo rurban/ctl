@@ -29,6 +29,8 @@ typedef uint16_t u16;
 #define POD
 #define T u16
 #include <ctl/vector.h>
+#define INCLUDE_ALGORITHM
+#define INCLUDE_NUMERIC
 #include <ctl/string.h>
 
 // coverage counter for generic_iter: bitmask of 3 values
@@ -81,6 +83,7 @@ static inline long TEST_TIME(void)
 #define INIT_SRAND                                                                                                     \
     srand(SEED);                                                                                                       \
     printf("-DSEED=%u ", (unsigned)SEED);                                                                              \
+    const unsigned int seed = SEED;                                                                                    \
     fflush(stdout)
 #else
 #define INIT_SRAND                                                                                                     \
@@ -90,7 +93,7 @@ static inline long TEST_TIME(void)
     fflush(stdout)
 #endif
 #else
-#define INIT_SRAND
+#define INIT_SRAND const unsigned int seed = 0;
 #endif
 
 #define INIT_TEST_LOOPS(n, generic)                                                                                    \

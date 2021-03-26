@@ -14,6 +14,9 @@ OLD_MAIN
 #include <algorithm>
 #include <numeric>
 #include <vector>
+#if __cplusplus >= 201703L
+#include <random>
+#endif
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(PUSH_BACK)                                                                                                    \
@@ -74,6 +77,8 @@ OLD_MAIN
     TEST(TRANSFORM_RANGE)                                                                                              \
     TEST(IOTA)                                                                                                         \
     TEST(IOTA_RANGE)                                                                                                   \
+    TEST(SHUFFLE)                                                                                                      \
+    TEST(SHUFFLE_RANGE)                                                                                                \
     TEST(EMPLACE_BACK)                                                                                                 \
     TEST(MISMATCH)                                                                                                     \
     TEST(SEARCH)                                                                                                       \
@@ -384,6 +389,9 @@ int main(void)
             size_t num_a, num_b;
             int value = TEST_RAND(TEST_MAX_VALUE);
             const size_t index = TEST_RAND(size);
+#if __cplusplus >= 201703L
+            std::default_random_engine rng {seed};
+#endif
             
             a = vec_digi_init();
             a.compare = digi_compare;
@@ -1312,6 +1320,39 @@ int main(void)
                 print_vector(b);
                 CHECK(a, b);
                 digi_free(&key);
+                break;
+            }
+            case TEST_SHUFFLE: {
+                print_vec(&a);
+                vec_digi_shuffle(&a);
+                print_vec(&a);
+#if __cplusplus < 201703L
+                std::random_shuffle(b.begin(), b.end());
+#else
+                std::shuffle(b.begin(), b.end(), rng);
+#endif
+                print_vector(b);
+                vec_digi_sort(&a);
+                std::sort(b.begin(), b.end());
+                CHECK(a, b);
+                break;
+            }
+            case TEST_SHUFFLE_RANGE: {
+                print_vec(&a);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                vec_digi_shuffle_range(&range_a1);
+                print_vec_range(range_a1);
+#if __cplusplus < 201703L
+                std::random_shuffle(first_b1, last_b1);
+#else
+                std::shuffle(first_b1, last_b1, rng);
+#endif
+                // TODO check that the ranges before and after range are still
+                // sorted, and untouched.
+                print_vector(b);
+                vec_digi_sort(&a);
+                std::sort(b.begin(), b.end());
+                CHECK(a, b);
                 break;
             }
 #ifdef DEBUG
