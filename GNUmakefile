@@ -223,10 +223,10 @@ tests/verify/%-2 : tests/verify/%-2.c $(H)
 	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
 	if which cbmc; then cbmc $(CBMC_CHECKS) --compact-trace --depth 6 \
 	                    --unwind 6 -I. $@.c; else true; fi
-	if which satabs; then for c in `satabs --show-claims -I. $@.c | \
-                   perl -lne'/Claim (main.\d+):/ && print $$1'`; do \
-             timeout 5m satabs --concurrency --max-threads 4 --iterations 24 --claim $$c -I. $@.c; \
-         done; else true; fi
+	if which satabs; then for c in `tests/verify/all_claims.sh $@.c`; do \
+            echo satabs --claim "$$c" -I. $@.c; \
+            timeout 5m satabs --concurrency --max-threads 4 --iterations 24 --claim "$$c" -I. $@.c; \
+          done; else true; fi
 
 verify: $(VERIFY)
 

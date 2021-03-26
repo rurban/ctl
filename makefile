@@ -252,9 +252,9 @@ ${srcc1} : ${srcc1}.c .cflags ${H}
 ${srcc2} : ${srcc2}.c .cflags ${H}
 	${CC} ${CFLAGS} -o $@ $@.c && ./$@
 	-cbmc --unwind 6 -I. $@.c
-	-for c in `satabs --show-claims -I. $@.c | \
-                   perl -lne'/Claim (main.\d+):/ && print $$1'`; do \
-             timeout 5m satabs --concurrency --max-threads 4 --iterations 24 --claim $$c -I. $@.c; \
+	-for c in `tests/verify/all_claims.sh $@.c`; do \
+	     echo satabs --claim "$$c" -I. $@.c; \
+             timeout 5m satabs --concurrency --max-threads 4 --iterations 24 --claim "$$c" -I. $@.c; \
          done
 .endfor
 
