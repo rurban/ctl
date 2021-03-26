@@ -55,6 +55,8 @@ OLD_MAIN
     TEST(NONE_OF)                                                                                                      \
     TEST(FIND_IF)                                                                                                      \
     TEST(FIND_IF_NOT)                                                                                                  \
+    TEST(FIND_END)                                                                                                     \
+    TEST(FIND_END_RANGE)                                                                                               \
     TEST(FIND_RANGE)                                                                                                   \
     TEST(FIND_IF_RANGE)                                                                                                \
     TEST(FIND_IF_NOT_RANGE)                                                                                            \
@@ -758,6 +760,42 @@ int main(void)
                 str_it first_a = str_find_if_not(&a, is_upper);
                 auto bb = std::find_if_not(b.begin(), b.end(), STL_is_upper);
                 CHECK_ITER(first_a, b, bb);
+                break;
+            }
+            case TEST_FIND_END: {
+                str aa;
+                std::string bb;
+                gen_strings(&aa, bb, TEST_RAND(4));
+                str_it range_a2 = str_it_begin(&aa);
+                //print_vec(&a);
+                //print_vec(&aa);
+                str_it it = str_find_end(&a, &range_a2);
+                auto iter = find_end(b.begin(), b.end(), bb.begin(), bb.end());
+                bool found_a = !str_it_done(&it);
+                bool found_b = iter != b.end();
+                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", found_b ? "yes" : "no", it.ref - a.vector,
+                    iter - b.begin());
+                CHECK_ITER(it, b, iter);
+                assert(found_a == found_b);
+                str_free(&aa);
+                break;
+            }
+            case TEST_FIND_END_RANGE: {
+                str aa;
+                std::string bb;
+                str_it range_a1;
+                std::string::iterator first_b1, last_b1;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                gen_strings(&aa, bb, TEST_RAND(4));
+                str_it range_a2 = str_it_begin(&aa);
+#if __cpp_lib_erase_if >= 202002L
+                str_it it = str_find_end_range(&range_a1, &range_a2);
+                auto iter = find_end(first_b1, last_b1, bb.begin(), bb.end());
+                LOG("%s in %s\n", range_a2.ref, range_a1.ref);
+                LOG("vs %s in %s\n", bb.c_str(), b.c_str());
+                CHECK_ITER(it, b, iter);
+#endif
+                str_free(&aa);
                 break;
             }
             case TEST_FIND_RANGE: {

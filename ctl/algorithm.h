@@ -912,8 +912,11 @@ static inline bool JOIN(A, search_range)(I *range1, GI *range2)
 #ifdef CTL_STR
     // Note: strstr is easily beatable. See
     // http://0x80.pl/articles/simd-strfind.html
-    if ((range1->ref = strstr(range1->ref, ref2(range2))))
+    if ((range1->ref = strstr(range1->ref, ref2(range2)))
+        && range1->ref < range1->end)
+    {
         return true;
+    }
     else
     {
         range1->ref = range1->end;
@@ -957,7 +960,7 @@ static inline I JOIN(A, search)(A *self, I *subseq)
 
 static inline I JOIN(A, find_end_range)(I *range1, GI *range2)
 {
-    if (range2->vtable.done(range2))
+    if (range2->vtable.done(range2) || JOIN(I, done)(range1))
     {
         JOIN(I, set_done)(range1);
         return *range1;

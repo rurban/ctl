@@ -494,8 +494,8 @@ And in its grandiosity (esp. not header-only):
 |`find_range`                     | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
 |`find_if_range`                  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
 |`find_if_not_range`              | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
-|`find_end`                       | ✓  |    | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
-|`find_end_range`                 | ✓  |    | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|`find_end`                       | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
+|`find_end_range`                 | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`find_first_of`                  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    |    |    | -  | -  | -  |
 |`find_first_of_range`            | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
 |`adjacent_find`                  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
@@ -654,7 +654,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 202000 (starting with `202102`),
 the old ctl is lower than 202000, starting with `1.0`.
 
-Added lots of missing methods. We have 158 methods in 937 stable variants.
+Added lots of missing methods. We have 158 methods in 939 stable variants.
 glouw has 63 methods in 196 stable variants.
 
 inclusion of numeric via `#define INCLUDE_NUMERIC`. For now algorithm is always loaded.
