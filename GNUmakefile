@@ -173,9 +173,11 @@ images:
 	./gen_images.sh
 
 PERFS_C  = $(patsubst %.c,%, $(wildcard tests/perf/*/perf_*.c) \
-           $(wildcard tests/perf/arr/gen_*.c) tests/perf/perf_compile_c11.c)
+           $(wildcard tests/perf/arr/gen_*.c) tests/perf/perf_compile_c11.c) \
+           tests/perf/perf_compile_c11_algorithm
 PERFS_CC = $(patsubst %.cc,%, $(wildcard tests/perf/*/perf_*.cc) \
-	   $(wildcard tests/perf/arr/gen_*.cc) tests/perf/perf_compile_cc.cc)
+	   $(wildcard tests/perf/arr/gen_*.cc) tests/perf/perf_compile_cc.cc) \
+           tests/perf/perf_compile_cc_algorithm
 
 tests/perf/arr/perf_arr_generate: tests/perf/arr/perf_arr_generate.c
 	$(CC) $(CFLAGS) -o $@ $@.c
@@ -197,6 +199,10 @@ tests/perf/arr/gen_array0% : tests/perf/arr/gen_array0%.cc \
 tests/perf/arr/gen_arr0% : tests/perf/arr/gen_arr0%.c \
   tests/perf/arr/perf_arr_generate .cflags $(COMMON_H) ctl/array.h
 	@$(CC) $(CFLAGS) -o $@ $@.c
+tests/perf/perf_compile_c11_algorithm: $(H) tests/perf/perf_compile_c11.c
+	$(CC) $(CFLAGS) -DALGORITHM -o $@ tests/perf/perf_compile_c11.c
+tests/perf/perf_compile_cc_algorithm: tests/perf/perf_compile_cc.cc
+	$(CXX) $(CXXFLAGS) -DALGORITHM -o $@ tests/perf/perf_compile_cc.cc
 
 compile_commands.json : $(H) GNUmakefile
 	make clean; bear make
@@ -404,7 +410,6 @@ endef
 dist: man
 	-rm docs/man/index.h.3
 	-rm docs/man/memory.h.3
-	-rm docs/man/numeric.h.3
 	rm -rf ctl-${VERSION}
 	mkdir ctl-${VERSION}
 	mkdir -p ctl-${VERSION}/ctl/bits

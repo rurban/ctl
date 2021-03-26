@@ -1,13 +1,16 @@
+#ifdef ALGORITHM
 #include <algorithm>
-#include <array>
+#endif
 #include <deque>
+#include <vector>
 #include <list>
-#include <queue>
+#include <forward_list>
+#include <queue> // with priority_queue
 #include <set>
 #include <stack>
 #include <string>
+#include <array>
 #include <unordered_set>
-#include <vector>
 
 #define N 1024
 
@@ -16,6 +19,7 @@ void A()
     std::deque<int> a;
     std::vector<int> b;
     std::list<int> c;
+    std::forward_list<int> c1;
     std::queue<int> d;
     std::set<int> e;
     std::stack<int> f;
@@ -31,6 +35,7 @@ void A()
         b.push_back(el);
         c.push_back(el);
         c.push_front(el);
+        c1.push_front(el);
         d.push(el);
         e.insert(el);
         f.push(el);
@@ -45,6 +50,7 @@ void A()
     b.pop_back();
     c.pop_back();
     c.pop_front();
+    c1.pop_front();
     d.pop();
     e.erase(1);
     f.pop();
@@ -53,18 +59,23 @@ void A()
     j[0] = 0;
     k.erase(1);
 
+    c.sort();
+    c1.sort();
+
+#ifdef ALGORITHM
     sort(a.begin(), a.end());
     std::count(a.begin(), a.end(), 0);
     sort(b.begin(), b.end());
     std::count(b.begin(), b.end(), 0);
-    c.sort();
     std::count(c.begin(), c.end(), 0);
+    std::count(c1.begin(), c1.end(), 0);
     std::count(e.begin(), e.end(), 0);
     std::sort(g.begin(), g.end());
     std::count(g.begin(), g.end(), 'A');
     std::sort(j.begin(), j.end());
     std::count(j.begin(), j.end(), 0);
     std::count(k.begin(), k.end(), 0);
+#endif
 }
 
 void B()
@@ -72,6 +83,7 @@ void B()
     std::deque<short> a;
     std::vector<short> b;
     std::list<short> c;
+    std::forward_list<short> c1;
     std::queue<short> d;
     std::set<short> e;
     std::stack<short> f;
@@ -83,6 +95,7 @@ void B()
     b.push_back(1);
     c.push_back(1);
     c.push_front(1);
+    c1.push_front(1);
     d.push(1);
     e.insert(1);
     f.push(1);
@@ -93,6 +106,7 @@ void B()
     b.pop_back();
     c.pop_back();
     c.pop_front();
+    c1.pop_front();
     d.pop();
     e.erase(1);
     f.pop();
@@ -104,6 +118,7 @@ void C()
     std::deque<float> a;
     std::vector<float> b;
     std::list<float> c;
+    std::forward_list<float> c1;
     std::queue<float> d;
     std::set<float> e;
     std::stack<float> f;
@@ -115,6 +130,7 @@ void C()
     b.push_back(1.0);
     c.push_back(1.0);
     c.push_front(1.0);
+    c1.push_front(1.0);
     d.push(1.0);
     e.insert(1.0);
     f.push(1.0);
@@ -125,6 +141,7 @@ void C()
     b.pop_back();
     c.pop_back();
     c.pop_front();
+    c1.pop_front();
     d.pop();
     e.erase(1.0);
     f.pop();
@@ -136,6 +153,7 @@ void D()
     std::deque<double> a;
     std::vector<double> b;
     std::list<double> c;
+    std::forward_list<double> c1;
     std::queue<double> d;
     std::set<double> e;
     std::stack<double> f;
@@ -147,6 +165,7 @@ void D()
     b.push_back(1.0);
     c.push_back(1.0);
     c.push_front(1.0);
+    c1.push_front(1.0);
     d.push(1.0);
     e.insert(1.0);
     f.push(1.0);
@@ -157,6 +176,7 @@ void D()
     b.pop_back();
     c.pop_back();
     c.pop_front();
+    c1.pop_front();
     d.pop();
     e.erase(1.0);
     f.pop();

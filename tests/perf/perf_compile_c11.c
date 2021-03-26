@@ -1,10 +1,23 @@
 #define POD
 #define T int
+#ifdef ALGORITHM
+#define INCLUDE_ALGORITHM
+#endif
 #include <ctl/deque.h>
 
 #define POD
 #define T int
+#ifdef ALGORITHM
+#define INCLUDE_ALGORITHM
+#endif
 #include <ctl/list.h>
+
+#define POD
+#define T int
+#ifdef ALGORITHM
+#define INCLUDE_ALGORITHM
+#endif
+#include <ctl/forward_list.h>
 
 #define POD
 #define T int
@@ -12,6 +25,9 @@
 
 #define POD
 #define T int
+#ifdef ALGORITHM
+#define INCLUDE_ALGORITHM
+#endif
 #include <ctl/set.h>
 
 #define POD
@@ -20,21 +36,33 @@
 
 #define POD
 #define T int
+#ifdef ALGORITHM
+#define INCLUDE_ALGORITHM
+#endif
 #include <ctl/vector.h>
 
 #define POD
 #define T int
 #include <ctl/priority_queue.h>
 
+#ifdef ALGORITHM
+#define INCLUDE_ALGORITHM
+#endif
 #include <ctl/string.h>
 
 #define POD
 #define T int
 #define N 1024
+#ifdef ALGORITHM
+#define INCLUDE_ALGORITHM
+#endif
 #include <ctl/array.h>
 
 #define POD
 #define T int
+#ifdef ALGORITHM
+#define INCLUDE_ALGORITHM
+#endif
 #include <ctl/unordered_set.h>
 
 #define POD
@@ -47,6 +75,10 @@
 
 #define POD
 #define T short
+#include <ctl/forward_list.h>
+
+#define POD
+#define T short
 #include <ctl/queue.h>
 
 #define POD
@@ -77,6 +109,10 @@
 
 #define POD
 #define T float
+#include <ctl/forward_list.h>
+
+#define POD
+#define T float
 #include <ctl/queue.h>
 
 #define POD
@@ -104,6 +140,10 @@
 #define POD
 #define T double
 #include <ctl/list.h>
+
+#define POD
+#define T double
+#include <ctl/forward_list.h>
 
 #define POD
 #define T double
@@ -184,6 +224,7 @@ void A(void)
     deq_int a = deq_int_init();
     vec_int b = vec_int_init();
     list_int c = list_int_init();
+    slist_int c1 = slist_int_init();
     queue_int d = queue_int_init();
     set_int e = set_int_init(compare_key_int);
     stack_int f = stack_int_init();
@@ -199,6 +240,7 @@ void A(void)
         vec_int_push_back(&b, el);
         list_int_push_back(&c, el);
         list_int_push_front(&c, el);
+        slist_int_push_front(&c1, el);
         queue_int_push(&d, el);
         set_int_insert(&e, el);
         stack_int_push(&f, el);
@@ -212,6 +254,7 @@ void A(void)
     vec_int_pop_back(&b);
     list_int_pop_back(&c);
     list_int_pop_front(&c);
+    slist_int_pop_front(&c1);
     queue_int_pop(&d);
     set_int_erase(&e, 1);
     stack_int_pop(&f);
@@ -219,22 +262,28 @@ void A(void)
     arr1024_int_set(&j, 0, 0);
     uset_int_erase(&k, 1);
 
-    deq_int_sort(&a);
-    deq_int_count(&a, 0);
-    vec_int_sort(&b);
-    vec_int_count(&b, 0);
     list_int_sort(&c);
+    slist_int_sort(&c1);
+
+#ifdef ALGORITHM
+    deq_int_sort(&a);
+    vec_int_sort(&b);
+    deq_int_count(&a, 0);
+    vec_int_count(&b, 0);
     list_int_count(&c, 0);
+    slist_int_count(&c1, 0);
     set_int_count(&e, 0);
     str_sort(&g);
     str_count(&g, 'A');
     arr1024_int_sort(&j);
     arr1024_int_count(&j, 0);
     uset_int_count(&k, 0);
+#endif
 
     deq_int_free(&a);
-    list_int_free(&c);
     vec_int_free(&b);
+    list_int_free(&c);
+    slist_int_free(&c1);
     queue_int_free(&d);
     set_int_free(&e);
     stack_int_free(&f);
@@ -249,6 +298,7 @@ void B(void)
     deq_short a = deq_short_init();
     vec_short b = vec_short_init();
     list_short c = list_short_init();
+    slist_short c1 = slist_short_init();
     queue_short d = queue_short_init();
     set_short e = set_short_init(compare_key_short);
     stack_short f = stack_short_init();
@@ -260,6 +310,7 @@ void B(void)
     vec_short_push_back(&b, 1);
     list_short_push_back(&c, 1);
     list_short_push_front(&c, 1);
+    slist_short_push_front(&c1, 1);
     queue_short_push(&d, 1);
     set_short_insert(&e, 1);
     stack_short_push(&f, 1);
@@ -270,14 +321,16 @@ void B(void)
     vec_short_pop_back(&b);
     list_short_pop_back(&c);
     list_short_pop_front(&c);
+    slist_short_pop_front(&c1);
     queue_short_pop(&d);
     set_short_erase(&e, 1);
     stack_short_pop(&f);
     pqu_short_pop(&i);
 
     deq_short_free(&a);
-    list_short_free(&c);
     vec_short_free(&b);
+    list_short_free(&c);
+    slist_short_free(&c1);
     queue_short_free(&d);
     set_short_free(&e);
     stack_short_free(&f);
@@ -290,6 +343,7 @@ void C(void)
     deq_float a = deq_float_init();
     vec_float b = vec_float_init();
     list_float c = list_float_init();
+    slist_float c1 = slist_float_init();
     queue_float d = queue_float_init();
     set_float e = set_float_init(compare_key_float);
     stack_float f = stack_float_init();
@@ -301,6 +355,7 @@ void C(void)
     vec_float_push_back(&b, 1.0);
     list_float_push_back(&c, 1.0);
     list_float_push_front(&c, 1.0);
+    slist_float_push_front(&c1, 1.0);
     queue_float_push(&d, 1.0);
     set_float_insert(&e, 1.0);
     stack_float_push(&f, 1.0);
@@ -311,14 +366,16 @@ void C(void)
     vec_float_pop_back(&b);
     list_float_pop_back(&c);
     list_float_pop_front(&c);
+    slist_float_pop_front(&c1);
     queue_float_pop(&d);
     set_float_erase(&e, 1.0);
     stack_float_pop(&f);
     pqu_float_pop(&i);
 
     deq_float_free(&a);
-    list_float_free(&c);
     vec_float_free(&b);
+    list_float_free(&c);
+    slist_float_free(&c1);
     queue_float_free(&d);
     set_float_free(&e);
     stack_float_free(&f);
@@ -331,6 +388,7 @@ void D(void)
     deq_double a = deq_double_init();
     vec_double b = vec_double_init();
     list_double c = list_double_init();
+    slist_double c1 = slist_double_init();
     queue_double d = queue_double_init();
     set_double e = set_double_init(compare_key_double);
     stack_double f = stack_double_init();
@@ -342,6 +400,7 @@ void D(void)
     vec_double_push_back(&b, 1.0);
     list_double_push_back(&c, 1.0);
     list_double_push_front(&c, 1.0);
+    slist_double_push_front(&c1, 1.0);
     queue_double_push(&d, 1.0);
     set_double_insert(&e, 1.0);
     stack_double_push(&f, 1.0);
@@ -352,14 +411,16 @@ void D(void)
     vec_double_pop_back(&b);
     list_double_pop_back(&c);
     list_double_pop_front(&c);
+    slist_double_pop_front(&c1);
     queue_double_pop(&d);
     set_double_erase(&e, 1.0);
     stack_double_pop(&f);
     pqu_double_pop(&i);
 
     deq_double_free(&a);
-    list_double_free(&c);
     vec_double_free(&b);
+    list_double_free(&c);
+    slist_double_free(&c1);
     queue_double_free(&d);
     set_double_free(&e);
     stack_double_free(&f);

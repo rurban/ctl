@@ -962,8 +962,14 @@ int main(void)
                 iter - b.begin());
 #ifdef DEBUG
             CHECK_ITER(it, b, iter);
+            assert(found_a == found_b); // FIXME
+#else
+            if (found_a != found_b)
+                printf("=> %s/%s, %ld/%ld FAIL\n",
+                       found_a ? "yes" : "no",
+                       found_b ? "yes" : "no", it.ref - a.vector,
+                       iter - b.begin());
 #endif
-            assert(found_a == found_b);
             arr100_digi_free(&aa);
             break;
         }

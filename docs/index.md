@@ -201,6 +201,10 @@ libstdc++ uses POWER2 by default, libc++ supports both, depending on the initial
 This trades memory for faster unsuccessful searches, such as with insert with
 high load factor.
 
+C is rougly comparable to C++ included, but note that most of the
+C++ functions are dynaloaded from `libstdc++.so.6`, whilst the C versions are
+directly in the binary.
+
 ## Security
 
 The CTL is more opinionated on security than the STL.
@@ -718,7 +722,7 @@ Implemented correct string and vector capacity policies, as in gcc libstdc++ and
 llvm libc++.  Tested also against the libc++ from llvm and the Windows MSVC STL,
 not just the GNU libstdc++ v3.
 
-Work is ongoing to finish the rest of `algorithm.h`, `numerics.h` and `memory.h`,
+Work is ongoing to finish the rest of `algorithm.h`, `numeric.h` and `memory.h`,
 add `pair` for map and `btree_set`, add proper string and identifier support.
 `string_view` and `span` (i.e. vector\_view) not yet planned.
 

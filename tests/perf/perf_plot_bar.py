@@ -8,13 +8,15 @@ if __name__ == '__main__':
     time_b = sys.argv[4]
     size_a = sys.argv[5]
     size_b = sys.argv[6]
-    name_a = sys.argv[7]
-    name_b = sys.argv[8]
+    mem_a = sys.argv[7]
+    mem_b = sys.argv[8]
+    name_a = sys.argv[9]
+    name_b = sys.argv[10]
     compiler=[name_a, name_b]
     y = [float(time_a), float(time_b)]
     sizes = [
-        str(int(size_a) / 1000) + ' KB',
-        str(int(size_b) / 1000) + ' KB',
+        str(int(size_a) / 1000) + " KB  " + str(int(mem_a)) + 'k RSS',
+        str(int(size_b) / 1000) + " KB  " + str(int(mem_b)) + 'k RSS',
     ]
     colors = ['crimson', 'darkslateblue']
     fig = go.Figure([go.Bar(x=compiler, y=y, text=sizes, textposition='auto', marker_color=colors)])

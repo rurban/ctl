@@ -33,22 +33,36 @@ perf_graph()
 perf_compile_two_bar()
 {
     KEY='stamp'
-    TIMEFORMAT="$KEY %R"
-    LOG=$1
-    TITLE=$2
-    A=$3
-    B=$4
+    TIME="$KEY %e %M"
+    LOG="$1"
+    TITLE="$2"
+    A="$3"
+    B="$4"
+    DEF="$5"
     AA=bina
     BB=binb
     echo "$LOG"
     # allow glob expansion of CFLAGS
     # shellcheck disable=SC2086
-    X=$( (time $CC  -o $AA $CFLAGS "$A" -I.) 2>&1 | grep $KEY | cut -d ' ' -f 2)
+    echo time $CC  -o $AA $CFLAGS $DEF "$A" -I.
+    # warmup
+    $CC -o $AA $CFLAGS $DEF "$A" -I. 2>&1
+    X=$(/bin/time -f "$TIME" $CC  -o $AA $CFLAGS $DEF "$A" -I. 2>&1 | grep $KEY)
+    TIME_A=$(echo $X | cut -d ' ' -f 2)
+    MEM_A=$(echo $X | cut -d ' ' -f 3)
+    strip $AA
+    SIZE_A=$(stat --printf="%s" $AA)
+    echo "$X: $TIME_A sec $MEM_A k RSS $SIZE_A KB"
     # shellcheck disable=SC2086
-    Y=$( (time $CXX -o $BB $CFLAGS "$B")     2>&1 | grep $KEY | cut -d ' ' -f 2)
-    I=$(stat --printf="%s" $AA)
-    J=$(stat --printf="%s" $BB)
-    python3 tests/perf/perf_plot_bar.py "$LOG" "$TITLE" "$X" "$Y" "$I" "$J" "$A" "$B" &&
+    echo time $CXX -o $BB $CFLAGS $DEF "$B"
+    Y=$(/bin/time -f "$TIME" $CXX -o $BB $CFLAGS $DEF "$B" 2>&1 | grep $KEY)
+    TIME_B=$(echo $Y | cut -d ' ' -f 2)
+    MEM_B=$(echo $Y | cut -d ' ' -f 3)
+    strip $BB
+    SIZE_B=$(stat --printf="%s" $BB)
+    echo "$Y: $TIME_B sec $MEM_B k RSS $SIZE_B KB"
+    python3 tests/perf/perf_plot_bar.py "$LOG" "$TITLE" "$TIME_A" "$TIME_B" \
+      "$SIZE_A" "$SIZE_B" "$MEM_A" "$MEM_B" "$A" "$B" &&
       (mv "$LOG.png" docs/images/; rm -- "./$AA" "./$BB")
 }
 
@@ -233,7 +247,13 @@ compile() {
     'compile.log' \
     "CTL vs STL Compilation ($CFLAGS) ($VERSION)" \
     'tests/perf/perf_compile_c11.c' \
-    'tests/perf/perf_compile_cc.cc'
+    'tests/perf/perf_compile_cc.cc' ''
+
+  perf_compile_two_bar \
+    'compile_algorithm.log' \
+    "CTL vs STL Compilation w/algorithm ($CFLAGS -DALGORITHM) ($VERSION)" \
+    'tests/perf/perf_compile_c11.c' \
+    'tests/perf/perf_compile_cc.cc' '-DALGORITHM'
 }
 
 for png in $PNG; do

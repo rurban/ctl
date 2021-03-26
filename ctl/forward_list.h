@@ -11,6 +11,7 @@
 #define I JOIN(A, it)
 #define GI JOIN(A, it)
 
+#include <assert.h>
 #include <ctl/ctl.h>
 
 typedef struct B

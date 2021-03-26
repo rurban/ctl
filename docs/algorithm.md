@@ -501,3 +501,15 @@ See [numeric](numeric.md)
 
 See [memory](memory.md)
 
+## PERFORMANCE
+
+C is rougly comparable to C++ with algorithm included. But note that most of the
+C++ functions are dynaloaded from `libstdc++.so.6`, whilst the C versions are directly in the binary.
+(Only used are count and sort for all container).
+
+* 40% less compiler memory used
+* 4-5% faster execution
+* 30% bigger executable
+
+![](images/compile_algorithm.log.png)
+
