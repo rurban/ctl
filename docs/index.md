@@ -544,7 +544,7 @@ And in its grandiosity (esp. not header-only):
 |`replace_copy_if_range`          |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`swap`                           | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | ✓  | ✓  | ✓  |
 |`swap_ranges`                    |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`iter_swap`                      | ✓  | ✓  | ✓  | ✓  |    | ✓  | -  | -  |    |    | -  | -  | -  |
+|`iter_swap`                      | ✓  | ✓  | ✓  | ✓  | x  | ✓  | -  | -  |    |    | -  | -  | -  |
 |`reverse`                        | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  |
 |`reverse_range`                  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  | -  | -  |
 |`reverse_copy`                   |    |    |    |    |    |    | -  | -  | -  | -  | -  | -  | -  |
@@ -555,7 +555,7 @@ And in its grandiosity (esp. not header-only):
 |`rotate_copy_range`              |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`shift_left`                     |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`shift_right`                    |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
-|`shuffle`                        | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  | -  |
+|`shuffle`                        | ✓  | ✓  | ✓  | ✓  | x  | x  | -  | -  | -  | -  | -  | -  | -  |
 |`shuffle_range`                  | ✓  | ✓  | ✓  | ✓  | -  | -  | -  | -  | -  | -  | -  | -  | -  |
 |`sample`                         |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |
 |`sample_range`                   |    |    |    |    |    |    |    |    | -  | -  | -  | -  | -  |

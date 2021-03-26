@@ -226,6 +226,14 @@ sorts the list in-place.
 
 removes consecutive duplicates.
 
+    shuffle (A* self)
+
+randomly shuffles the list elements. Not in the STL. O(2.5n)
+
+    iter_swap (I* iter1, I* iter)
+
+swaps the two elements.
+
 ## Non-member functions
 
     I find (A* self, T value, int equal(T*,T*))
@@ -239,6 +247,8 @@ erases all elements satisfying specific criteria (C++20)
     int equal (A* self, A* other, int equal(T*,T*))
 
 Returns 0 or 1 if all elements are equal.
+
+
 
 
 See [algorithm](algorithm.md) for more.

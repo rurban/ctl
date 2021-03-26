@@ -203,6 +203,14 @@ sorts the list.
 
 removes consecutive duplicates.
 
+    shuffle (A* self)
+
+randomly shuffles the list elements. Not in the STL. O(2.5n)
+
+    iter_swap (I* iter1, I* iter)
+
+swaps the two elements.
+
 ## Non-member functions
 
     I find (A* self, T value)

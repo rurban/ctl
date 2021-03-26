@@ -137,6 +137,8 @@ for my $c (qw(vec str arr deq list slst set map)) {
   }
   if ($c ne 'list') {
     $m->{iter_swap}->{$c} = $m->{reverse}->{$c};
+  } else {
+    $m->{iter_swap}->{$c} = $m->{shuffle}->{$c};
   }
 }
 for my $c (qw(uset umap)) {

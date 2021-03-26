@@ -1097,6 +1097,35 @@ static inline A JOIN(A, symmetric_difference)(A *a, A *b)
     return JOIN(A, symmetric_difference_range)(&r1, &r2);
 }
 
+// untested
+static inline void JOIN(A, iter_swap)(I *iter1, I *iter2)
+{
+    ASSERT(iter1->node);
+    ASSERT(iter2->node);
+    JOIN(A, transfer_before)(iter1->container, iter2->container, iter1->node, iter2->node);
+}
+
+// O(2n) without i. with i: O(n+(n*n/2))
+static inline void JOIN(A, shuffle)(A *self)
+{
+    size_t n = JOIN(A, length)(self);
+    size_t i = 0;
+    I iter = JOIN(A, begin)(self);
+    while (!JOIN(I, done)(&iter) && n > 1)
+    {
+        size_t pick = rand() % (n - 1);
+        B *next = iter.node->next;
+        if (pick)
+        {
+            I iter2 = JOIN(A, begin)(self); // need a copy
+            JOIN(I, advance)(&iter2, i + pick);
+            JOIN(A, iter_swap)(&iter, &iter2);
+        }
+        i++;
+        n--;
+        iter.node = next;
+    }
+}
 
 #undef POD
 #undef NOT_INTEGRAL

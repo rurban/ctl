@@ -11,9 +11,9 @@ OLD_MAIN
 #define INCLUDE_NUMERIC
 #include <ctl/deque.h>
 
+#include <deque>
 #include <algorithm>
 #include <numeric>
-#include <deque>
 #include <vector>
 #if __cplusplus >= 201703L
 #include <random>

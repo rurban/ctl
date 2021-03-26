@@ -11,9 +11,15 @@ OLD_MAIN
 #define INCLUDE_NUMERIC
 #include <ctl/list.h>
 
+#include <list>
 #include <algorithm>
 #include <numeric>
-#include <list>
+#if __cplusplus >= 201703L
+#include <random>
+#endif
+#ifdef DEBUG
+#include <vector>
+#endif
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(PUSH_BACK)                                                                                                    \
@@ -107,6 +113,7 @@ OLD_MAIN
     TEST(REVERSE_RANGE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
+    TEST(SHUFFLE) /* not in the STL*/                                                                                  \
     TEST(ERASE_GENERIC)                                                                                                \
     TEST(GENERATE_N_RANGE) /* 88 */                                                                                    \
     TEST(TRANSFORM_IT)                                                                                                 \
@@ -137,7 +144,7 @@ static const char *test_names[] = {
 
 void print_lst(list_digi *a)
 {
-    list_foreach_ref(list_digi, a, it) printf("%d, ", *it.ref->value);
+    list_foreach_ref(list_digi, a, it) printf("%d ", *it.ref->value);
     printf("\n");
 }
 void print_lst_range(list_digi_it it)
@@ -145,20 +152,20 @@ void print_lst_range(list_digi_it it)
     list_digi *a = it.container;
     list_digi_node *n = a->head;
     for(; n != it.node; n = n->next)
-        printf("%d, ", *n->value.value);
+        printf("%d ", *n->value.value);
     printf("[");
     for(; n != it.end; n = n->next)
-        printf("%d, ", *n->value.value);
+        printf("%d ", *n->value.value);
     printf(") ");
     for(; n != a->tail; n = n->next)
-        printf("%d, ", *n->value.value);
+        printf("%d ", *n->value.value);
     printf("\n");
 }
 
 void print_list(std::list<DIGI> &b)
 {
     for (auto &d : b)
-        printf("%d, ", *d.value);
+        printf("%d ", *d.value);
     printf("\n");
 }
 
@@ -226,7 +233,7 @@ int pick_random(list_digi *a)
         int i = 0;                                                                                                     \
         list_foreach_ref(list_digi, &_x, _it)                                                                          \
         {                                                                                                              \
-            LOG("%d: %d, ", i, *_it.ref->value);                                                                       \
+            LOG("%d ", *_it.ref->value);                                                                       \
             assert(*_it.ref->value == *_iter->value);                                                                  \
             i++;                                                                                                       \
             _iter++;                                                                                                   \
@@ -353,6 +360,10 @@ int main(void)
         const size_t size = TEST_RAND(TEST_MAX_SIZE);
         setup_lists(&a, b, size, &max_value);
         size_t index = TEST_RAND(a.size);
+#if __cplusplus >= 201703L
+        std::default_random_engine rng {seed};
+#endif
+
         int which;
         if (tests.size)
         {
@@ -982,6 +993,31 @@ int main(void)
             digi_free(&key);
             break;
         }
+#ifdef DEBUG
+        case TEST_SHUFFLE: {
+            print_lst(&a);
+            list_digi_shuffle(&a);
+            print_lst(&a);
+            std::vector<DIGI> bv;
+            bv.assign(b.begin(), b.end());
+#if __cplusplus < 201703L
+            // invalid for list
+            //std::random_shuffle(b.begin(), b.end());
+            std::random_shuffle(bv.begin(), bv.end());
+#else
+            // invalid until C++20 at least. maybe Boost?
+            //std::shuffle(b.begin(), b.end(), rng);
+            std::shuffle(bv.begin(), bv.end(), rng);
+#endif
+            b.assign(bv.begin(), bv.end());
+            LOG("shuffle => ");
+            print_list(b);
+            list_digi_sort(&a);
+            b.sort();
+            CHECK(a, b);
+            break;
+        }
+#endif
         case TEST_COPY_IF: {
             aa = list_digi_copy_if(&a, digi_is_odd);
 #if __cplusplus >= 201103L && !defined(_MSC_VER)

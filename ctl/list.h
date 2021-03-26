@@ -673,12 +673,24 @@ static inline void JOIN(A, splice_range)(I *pos, I *range2)
     }
 }
 
-// only needed for merge and move
+// only needed for merge, move and iter_swap (shuffle)
 static inline void JOIN(A, transfer_after)(A *self, A *other, B *position, B *node)
 {
     ASSERT(other->size);
     JOIN(A, disconnect)(other, node);
     JOIN(A, connect_after)(self, position, node);
+}
+
+static inline void JOIN(A, iter_swap)(I *iter1, I *iter2)
+{
+    A* self = iter1->container;
+    A* other = iter2->container;
+    B* node1 = iter1->node;
+    B* node2 = iter2->node;
+    ASSERT(node1);
+    ASSERT(node2);
+    JOIN(A, transfer_after)(self, other, node1->prev ? node1->prev : self->head, node2);
+    JOIN(A, transfer_after)(self, other, node2->prev ? node2->prev : other->head, node1);
 }
 
 // move elements from range to the end of out
@@ -776,8 +788,63 @@ static inline void JOIN(A, unique)(A *self)
 
 static inline I JOIN(A, find)(A *self, T key)
 {
-    list_foreach_ref(A, self, it) if (JOIN(A, _equal)(self, it.ref, &key)) return it;
+    list_foreach_ref(A, self, it)
+    {
+        if (JOIN(A, _equal)(self, it.ref, &key))
+            return it;
+    }
     return JOIN(A, end)(self);
+}
+
+// O(n) without i, with i: O(n + n/2)
+static inline void JOIN(A, shuffle)(A *self)
+{
+#if 0
+    size_t n = self->size;
+    size_t i = 0; // the slower but safer variant. restart pick from afresh
+    I iter = JOIN(A, begin)(self);
+    while (iter.node != NULL && n > 1)
+    {
+        size_t pick = rand() % (n - 1);
+        B *next = iter.node->next;
+        LOG("swap i=%lu, n=%lu with pick=%lu", i, n, pick);
+        if (pick && i + pick < self->size)
+        {
+            I iter2 = JOIN(A, begin)(self);
+            assert(i + pick < self->size);
+            JOIN(I, advance)(&iter2, i + pick);
+            if (iter2.node)
+                JOIN(A, iter_swap)(&iter, &iter2);
+            else
+                LOG(" .. wrong pick\n");
+        }
+        LOG("\n");
+        i++;
+        n--;
+        iter.node = next;
+    }
+#else
+    size_t n = self->size - 1;
+    I iter = JOIN(A, begin)(self);
+    while (iter.node != NULL && n > 0)
+    {
+        size_t pick = rand() % n;
+        B *next = iter.node->next;
+        if (pick)
+        {
+            I iter2 = iter;
+            LOG("swap n=%lu with pick=%lu\n", n, pick);
+            assert(pick < n);
+            JOIN(I, advance)(&iter2, pick);
+            if (iter2.node)
+                JOIN(A, iter_swap)(&iter, &iter2);
+            else
+                LOG(" .. wrong pick\n");
+        }
+        n--;
+        iter.node = next;
+    }
+#endif
 }
 
 #undef POD
