@@ -53,6 +53,8 @@ OLD_MAIN
     TEST(ALL_OF)                                                                                                       \
     TEST(ANY_OF)                                                                                                       \
     TEST(NONE_OF)                                                                                                      \
+    TEST(FIND_IF)                                                                                                      \
+    TEST(FIND_IF_NOT)                                                                                                  \
     TEST(FIND_RANGE)                                                                                                   \
     TEST(FIND_IF_RANGE)                                                                                                \
     TEST(FIND_IF_NOT_RANGE)                                                                                            \
@@ -744,6 +746,18 @@ int main(void)
                 str_generate_reset();
                 std::generate_n(b.begin(), count, STR_generate);
                 CHECK(a, b);
+                break;
+            }
+            case TEST_FIND_IF: {
+                str_it first_a = str_find_if(&a, is_upper);
+                auto bb = std::find_if(b.begin(), b.end(), STL_is_upper);
+                CHECK_ITER(first_a, b, bb);
+                break;
+            }
+            case TEST_FIND_IF_NOT: {
+                str_it first_a = str_find_if_not(&a, is_upper);
+                auto bb = std::find_if_not(b.begin(), b.end(), STL_is_upper);
+                CHECK_ITER(first_a, b, bb);
                 break;
             }
             case TEST_FIND_RANGE: {

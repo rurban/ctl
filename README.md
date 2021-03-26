@@ -488,8 +488,8 @@ And in its grandiosity (esp. not header-only):
 |`count_if`                       | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | ✓  | x  | -  | -  | -  |
 |`count_if_range`                 | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
 |`mismatch`                       | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  |    | -  | -  | -  | -  | -  |
-|`find_if`                        | ✓  |    | ✓  | ✓  | ✓  | ✓  | ✓  | x  | ✓  | x  | -  | -  | -  |
-|`find_if_not`                    | ✓  |    | ✓  | ✓  | ✓  | ✓  | ✓  | x  | ✓  | x  | -  | -  | -  |
+|`find_if`                        | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | ✓  | x  | -  | -  | -  |
+|`find_if_not`                    | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | ✓  | x  | -  | -  | -  |
 |`find_range`                     | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
 |`find_if_range`                  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
 |`find_if_not_range`              | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | ✓  | x  | -  | -  | -  | -  | -  |
@@ -652,7 +652,7 @@ Use the original long names, not three-letter abbrevations.
 Our version number `CTL_VERSION` is greater than 202000 (starting with `202102`),
 the old ctl is lower than 202000, starting with `1.0`.
 
-Added lots of missing methods. We have 158 methods in 935 stable variants.
+Added lots of missing methods. We have 158 methods in 937 stable variants.
 glouw has 63 methods in 196 stable variants.
 
 inclusion of numeric via `#define INCLUDE_NUMERIC`. For now algorithm is always loaded.
