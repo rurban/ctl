@@ -228,11 +228,12 @@ removes consecutive duplicates.
 
     shuffle (A* self)
 
-randomly shuffles the list elements. Not in the STL. O(2.5n)
+randomly shuffles the list elements. Not in the STL. O(n)
+(via ptr swap, not value swap)
 
     iter_swap (I* iter1, I* iter)
 
-swaps the two elements.
+swaps the two elements ptrs.
 
 ## Non-member functions
 

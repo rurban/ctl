@@ -6,6 +6,7 @@ OLD_MAIN
 
 #include "digi.hh"
 
+#define USE_INTERNAL_VERIFY
 #define T digi
 #define INCLUDE_ALGORITHM
 #define INCLUDE_NUMERIC
@@ -110,10 +111,10 @@ OLD_MAIN
     TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
     TEST(IS_SORTED)                                                                                                    \
     TEST(IS_SORTED_UNTIL)                                                                                              \
-    TEST(REVERSE_RANGE)
+    TEST(REVERSE_RANGE)                                                                                                \
+    TEST(SHUFFLE) /* not in the STL*/
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(SHUFFLE) /* not in the STL*/                                                                                  \
     TEST(ERASE_GENERIC)                                                                                                \
     TEST(GENERATE_N_RANGE) /* 88 */                                                                                    \
     TEST(TRANSFORM_IT)                                                                                                 \
@@ -993,7 +994,6 @@ int main(void)
             digi_free(&key);
             break;
         }
-#ifdef DEBUG
         case TEST_SHUFFLE: {
             print_lst(&a);
             list_digi_shuffle(&a);
@@ -1017,7 +1017,6 @@ int main(void)
             CHECK(a, b);
             break;
         }
-#endif
         case TEST_COPY_IF: {
             aa = list_digi_copy_if(&a, digi_is_odd);
 #if __cplusplus >= 201103L && !defined(_MSC_VER)
@@ -1722,6 +1721,7 @@ int main(void)
 #endif
             break;
         }
+        list_digi_verify(&a);
         CHECK(a, b);
         list_digi_free(&a);
     }

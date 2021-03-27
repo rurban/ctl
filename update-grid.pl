@@ -135,10 +135,10 @@ for my $c (qw(vec str arr deq list slst set map)) {
   if ($c ne 'set' and $c ne 'map') {
     $m->{copy_range}->{$c} = $m->{union}->{$c};
   }
-  if ($c ne 'list') {
-    $m->{iter_swap}->{$c} = $m->{reverse}->{$c};
-  } else {
+  if ($c =~ /list/) {
     $m->{iter_swap}->{$c} = $m->{shuffle}->{$c};
+  } else {
+    $m->{iter_swap}->{$c} = $m->{reverse}->{$c};
   }
 }
 for my $c (qw(uset umap)) {

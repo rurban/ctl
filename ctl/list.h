@@ -202,6 +202,9 @@ static inline A JOIN(A, init_from)(A *copy);
 static inline void JOIN(A, push_back)(A *self, T value);
 static inline I JOIN(A, find)(A *self, T key);
 static inline A *JOIN(A, move_range)(I *range, A *out);
+#ifdef USE_INTERNAL_VERIFY
+static inline void JOIN(A, verify)(A *self);
+#endif
 
 #include <ctl/bits/container.h>
 
@@ -310,6 +313,9 @@ static inline void JOIN(A, erase)(I *it)
 {
     if (LIKELY(it->node))
         JOIN(A, erase_node)(it->container, it->node);
+#ifdef USE_INTERNAL_VERIFY
+    JOIN(A, verify)(it->container);
+#endif
 }
 
 static inline void JOIN(A, pop_back)(A *self)
@@ -328,6 +334,9 @@ static inline I *JOIN(A, insert)(I *pos, T value)
     JOIN(A, connect_before)(pos->container, pos->node, node);
     pos->node = node;
     pos->ref = &node->value;
+#ifdef USE_INTERNAL_VERIFY
+    JOIN(A, verify)(pos->container);
+#endif
     return pos;
 }
 
@@ -352,7 +361,7 @@ static inline void JOIN(A, connect_after)(A *self, B *position, B *node)
     if (JOIN(A, empty)(self))
     {
         self->head = self->tail = node;
-        self->size += 1;
+        self->size++;
     }
     else if (LIKELY(self->size < JOIN(A, max_size)()))
     {
@@ -363,7 +372,7 @@ static inline void JOIN(A, connect_after)(A *self, B *position, B *node)
         position->next = node;
         if (position == self->tail)
             self->tail = node;
-        self->size += 1;
+        self->size++;
     }
     /* error handling? silent ignore or stderr or assert or customizable. */
     else
@@ -446,6 +455,9 @@ static inline void JOIN(A, reverse)(A *self)
     }
     self->tail = head;
     self->head = tail;
+#ifdef USE_INTERNAL_VERIFY
+    JOIN(A, verify)(self);
+#endif
 }
 
 static inline size_t JOIN(A, remove)(A *self, T value)
@@ -681,16 +693,29 @@ static inline void JOIN(A, transfer_after)(A *self, A *other, B *position, B *no
     JOIN(A, connect_after)(self, position, node);
 }
 
+//#ifdef DEBUG
+//void p_lst(A *a)
+//{
+//    list_foreach_ref(A, a, it) printf("%d ", *it.ref->value);
+//    printf("\n");
+//}
+//#endif
+
 static inline void JOIN(A, iter_swap)(I *iter1, I *iter2)
 {
     A* self = iter1->container;
     A* other = iter2->container;
     B* node1 = iter1->node;
-    B* node2 = iter2->node;
     ASSERT(node1);
-    ASSERT(node2);
-    JOIN(A, transfer_after)(self, other, node1->prev ? node1->prev : self->head, node2);
-    JOIN(A, transfer_after)(self, other, node2->prev ? node2->prev : other->head, node1);
+    ASSERT(iter2->node);
+    JOIN(A, transfer_after)(self, other, node1->prev ? node1->prev : self->head, iter2->node);
+    iter1->node = iter2->node;
+    iter1->ref = iter2->ref;
+#ifdef USE_INTERNAL_VERIFY
+    JOIN(A, verify)(self);
+    if (self != other)
+        JOIN(A, verify)(other);
+#endif
 }
 
 // move elements from range to the end of out
@@ -796,56 +821,109 @@ static inline I JOIN(A, find)(A *self, T key)
     return JOIN(A, end)(self);
 }
 
-// O(n) without i, with i: O(n + n/2)
+// O(n) without i (n/2 * n/2)
+// (with i: O(n + n/2))
 static inline void JOIN(A, shuffle)(A *self)
 {
-#if 0
-    size_t n = self->size;
-    size_t i = 0; // the slower but safer variant. restart pick from afresh
+#ifdef DEBUG
+    size_t n = self->size - 1;
+    size_t i = 0; // the slower but safer variant. for DEBUG only
     I iter = JOIN(A, begin)(self);
     while (iter.node != NULL && n > 1)
     {
-        size_t pick = rand() % (n - 1);
-        B *next = iter.node->next;
-        LOG("swap i=%lu, n=%lu with pick=%lu", i, n, pick);
-        if (pick && i + pick < self->size)
-        {
-            I iter2 = JOIN(A, begin)(self);
-            assert(i + pick < self->size);
-            JOIN(I, advance)(&iter2, i + pick);
-            if (iter2.node)
-                JOIN(A, iter_swap)(&iter, &iter2);
-            else
-                LOG(" .. wrong pick\n");
-        }
-        LOG("\n");
-        i++;
-        n--;
-        iter.node = next;
-    }
-#else
-    size_t n = self->size - 1;
-    I iter = JOIN(A, begin)(self);
-    while (iter.node != NULL && n > 0)
-    {
         size_t pick = rand() % n;
-        B *next = iter.node->next;
+        LOG("swap i=%lu, n=%lu with pick=%lu\n", i, n, pick);
         if (pick)
         {
+            //I iter2 = JOIN(A, begin)(self);
             I iter2 = iter;
-            LOG("swap n=%lu with pick=%lu\n", n, pick);
-            assert(pick < n);
+            assert(i + pick < self->size);
             JOIN(I, advance)(&iter2, pick);
             if (iter2.node)
                 JOIN(A, iter_swap)(&iter, &iter2);
             else
-                LOG(" .. wrong pick\n");
+                { LOG(" .. wrong pick\n"); }
+#ifdef DEBUG
+            //p_lst(self);
+#endif
         }
+        i++;
         n--;
-        iter.node = next;
+        n--;
+        iter.node = iter.node->next;
+    }
+#else
+    size_t n = self->size - 1;
+    I iter = JOIN(A, begin)(self);
+    while (iter.node != NULL && n > 1)
+    {
+        size_t pick = rand() % n;
+        if (pick)
+        {
+            I iter2 = iter;
+            JOIN(I, advance)(&iter2, pick);
+            if (iter2.node) // needed?
+            {
+                JOIN(A, iter_swap)(&iter, &iter2);
+                iter.node = iter2.node;
+            }
+        }
+        n--; n--;
+        iter.node = iter.node->next;
     }
 #endif
+#ifdef USE_INTERNAL_VERIFY
+    JOIN(A, verify)(self);
+#endif
 }
+
+#ifdef USE_INTERNAL_VERIFY
+// TODO check prev and tail pointers, also size.
+static inline void JOIN(B, verify_size)(A *self)
+{
+    size_t size = self->size;
+    if (!size)
+    {
+        assert(!self->head);
+        assert(!self->tail);
+    }
+    else
+    {
+        assert(self->head);
+        assert(self->tail);
+        assert(!self->head->prev);
+        assert(!self->tail->next);
+        if (size == 1)
+        {
+            assert(self->head == self->tail);
+            assert(!self->head->next);
+            assert(!self->tail->prev);
+        }
+    }
+}
+
+static inline void JOIN(A, verify)(A *self)
+{
+    B *slow, *fast, *prev;
+    slow = fast = prev = self->head;
+    JOIN(B, verify_size)(self); // and head
+    // verify prev and cycles
+    while (slow && fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        assert (slow != fast); // cycle
+        assert (prev == slow->prev);
+        prev = prev->next;
+    }
+    // verify tail
+    while (slow)
+    {
+        prev = slow;
+        slow = slow->next;
+    }
+    assert(prev == self->tail);
+}
+#endif
 
 #undef POD
 #undef NOT_INTEGRAL
