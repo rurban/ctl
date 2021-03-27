@@ -231,9 +231,9 @@ removes consecutive duplicates.
 randomly shuffles the list elements. Not in the STL. O(n)
 (via ptr swap, not value swap)
 
-    iter_swap (I* iter1, I* iter)
+    iter_swap (I* iter1, I* iter2)
 
-swaps the two elements ptrs.
+swaps the two element ptrs.
 
 ## Non-member functions
 

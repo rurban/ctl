@@ -207,9 +207,9 @@ removes consecutive duplicates.
 
 randomly shuffles the list elements. Not in the STL. O(2.5n)
 
-    iter_swap (I* iter1, I* iter)
+    iter_swap (I* iter1, I* iter2)
 
-swaps the two elements.
+swaps iter2 with the element after iter1.
 
 ## Non-member functions
 
