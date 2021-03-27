@@ -817,6 +817,31 @@ No exceptions or errors. Just ignore or return NULL. If assert is included, use
 it, with a proper error message.
 No bloat and not many indirect calls (only compare and equal).
 
+## History
+
+List of added, changed. removed features:
+
+* 202104 Apr ?? 2021
+
+  * Added forward_list/slist.
+  * Added generic iterators (GI) for insert_generic, assign_generic, merge_range,
+    includes_range, equal_range, mismatch, lexicographical_compare, union_range,
+    intersection_range, difference_range, symmetric_difference_range,
+    search_range, find_first_of_range, find_end_range.
+  * Added numeric: iota, iota_range.
+  * algorithm: Added shuffle, iter_swap, reverse, reverse_range,
+    lexicographical_compare, is_sorted, is_sorted_until.
+    Requires now INCLUDE_ALGORITHM
+  * array: Added difference, intersection, symmetric_difference, assign_range.
+  * set: Added includes, includes_range.
+  * string: Added find_if, find_if_not, find_if_range, find_if_not_range, includes,
+    includes_range.
+
+* 202102 Feb 22 2021
+
+  * Moved to ctl/ subdir. Use long names.
+  * Added unordered_set, map, unordered_map, array.
+
 ## Acknowledgements
 
 Thank you https://github.com/glouw/ctl for the initial three-letter variant.
