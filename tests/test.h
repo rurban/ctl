@@ -32,6 +32,16 @@
 #define NEED_RANDOM_ENGINE
 #endif
 
+#if defined(__clang__) || defined(__clang)
+#define CLANG_DIAG_PRAGMA(x) _Pragma (#x)
+#define CLANG_DIAG_IGNORE(x) _Pragma("clang diagnostic push") \
+                             CLANG_DIAG_PRAGMA(clang diagnostic ignored #x)
+#define CLANG_DIAG_RESTORE _Pragma("clang diagnostic pop")
+#else
+#define CLANG_DIAG_IGNORE(x)
+#define CLANG_DIAG_RESTORE
+#endif
+
 #define POD
 #define T int
 #include <ctl/queue.h>

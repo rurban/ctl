@@ -125,12 +125,18 @@ enum
 #endif
     TEST_TOTAL
 };
-// clang-format on
+CLANG_DIAG_IGNORE(-Wunneeded-internal-declaration)
+// only needed for the size
 static const char *test_ok_names[] = { FOREACH_METH(GENERATE_NAME) };
 static const int number_ok = sizeof(test_ok_names)/sizeof(char*);
+CLANG_DIAG_RESTORE
 #ifdef DEBUG
-static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GENERATE_NAME) ""};
+static const char *test_names[] = {
+    FOREACH_METH(GENERATE_NAME)
+    FOREACH_DEBUG(GENERATE_NAME)
+    ""};
 #endif
+// clang-format on
 
 #define MIN_STR_SIZE (30) // NO SUPPORT FOR SMALL STRINGS yet
 #define ALPHA_LETTERS (23)

@@ -17,7 +17,6 @@ OLD_MAIN
     TEST(POP)                                                                                                          \
     TEST(EMPLACE)                                                                                                      \
     TEST(SWAP)
-#define FOREACH_DEBUG(TEST)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -25,15 +24,12 @@ OLD_MAIN
 enum
 {
     FOREACH_METH(GENERATE_ENUM)
-#ifdef DEBUG
-    FOREACH_DEBUG(GENERATE_ENUM)
-#endif
     TEST_TOTAL
 };
-static const char *test_ok_names[] = { FOREACH_METH(GENERATE_NAME) };
-static const int number_ok = sizeof(test_ok_names)/sizeof(char*);
+static const int number_ok = (int)TEST_TOTAL;
 #ifdef DEBUG
 static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GENERATE_NAME) ""};
+
 #define TEST_MAX_VALUE 100
 #else
 #define TEST_MAX_VALUE INT_MAX

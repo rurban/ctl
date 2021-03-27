@@ -110,8 +110,11 @@ enum
 #endif
     TEST_TOTAL
 };
+CLANG_DIAG_IGNORE(-Wunneeded-internal-declaration)
+// only needed for the size
 static const char *test_ok_names[] = { FOREACH_METH(GENERATE_NAME) };
 static const int number_ok = sizeof(test_ok_names)/sizeof(char*);
+CLANG_DIAG_RESTORE
 #ifdef DEBUG
 static const char *test_names[] = {
     FOREACH_METH(GENERATE_NAME)
