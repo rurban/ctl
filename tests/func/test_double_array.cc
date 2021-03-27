@@ -108,7 +108,7 @@ static const char *test_names[] = {
     FOREACH_DEBUG(GENERATE_NAME)
     ""};
 #endif
-// clang-format on        
+// clang-format on
 
 int double_is_odd(double *d)
 {
