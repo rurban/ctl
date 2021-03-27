@@ -22,6 +22,16 @@
 #undef NDEBUG
 #include <assert.h>
 
+// deprecated in clang with C++14
+#if defined _LIBCPP_STD_VER && __cplusplus < 201402L
+#undef NEED_RANDOM_ENGINE
+// in g++ later
+#elif defined _GLIBCXX_RELEASE && __cplusplus < 201703L
+#undef NEED_RANDOM_ENGINE
+#else
+#define NEED_RANDOM_ENGINE
+#endif
+
 #define POD
 #define T int
 #include <ctl/queue.h>

@@ -5,6 +5,7 @@ on:
     branches-ignore:
       - 'ignore*'
       - 'temp*'
+      - smoke
       - master
     paths-ignore:
       - 'docs/*'
@@ -12,6 +13,7 @@ on:
     paths-ignore:
       - 'docs/*'
     branches-ignore:
+      - smoke
       - master
 
 jobs:

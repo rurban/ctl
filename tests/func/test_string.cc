@@ -12,7 +12,7 @@ OLD_MAIN
 #include <numeric>
 #include <string>
 #include <string>
-#if __cplusplus >= 201703L
+#ifdef NEED_RANDOM_ENGINE
 #include <random>
 #endif
 
@@ -349,7 +349,7 @@ int main(void)
             char *base = create_test_string(str_size);
             str a;
             std::string b;
-#if __cplusplus >= 201703L
+#ifdef NEED_RANDOM_ENGINE
             std::default_random_engine rng {seed};
 #endif
 
@@ -1212,7 +1212,7 @@ int main(void)
                 LOG("%s\n", str_c_str(&a));
                 str_shuffle(&a);
                 LOG("%s\n", str_c_str(&a));
-#if __cplusplus < 201703L
+#ifndef NEED_RANDOM_ENGINE
                 std::random_shuffle(b.begin(), b.end());
 #else
                 std::shuffle(b.begin(), b.end(), rng);
@@ -1230,7 +1230,7 @@ int main(void)
                 get_random_iters(&a, &first_a1, b, first_b1, last_b1);
                 str_shuffle_range(&first_a1);
                 LOG("\"%.*s\"\n", (int)(last_b1 - first_b1), first_a1.ref);
-#if __cplusplus < 201703L
+#ifndef NEED_RANDOM_ENGINE
                 std::random_shuffle(first_b1, last_b1);
 #else
                 std::shuffle(first_b1, last_b1, rng);

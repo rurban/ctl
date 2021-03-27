@@ -13,8 +13,8 @@ OLD_MAIN
 #include <forward_list>
 #include <algorithm>
 #include <numeric>
-#if __cplusplus >= 201703L
-#  include <random>
+#ifdef NEED_RANDOM_ENGINE
+#include <random>
 #endif
 #include <vector>
 
@@ -290,7 +290,7 @@ main(void)
         std::forward_list<DIGI>::iterator first_b1, last_b1, first_b2, last_b2, iter;
         size_t num_a, num_b;
         bool found_a, found_b;
-#if __cplusplus >= 201703L
+#ifdef NEED_RANDOM_ENGINE
         std::default_random_engine rng {seed};
 #endif
 
@@ -1097,7 +1097,7 @@ main(void)
             print_slist(&a);
             std::vector<DIGI> bv;
             bv.assign(b.begin(), b.end());
-#if __cplusplus < 201703L
+#ifndef NEED_RANDOM_ENGINE
             // invalid for list
             //std::random_shuffle(b.begin(), b.end());
             std::random_shuffle(bv.begin(), bv.end());

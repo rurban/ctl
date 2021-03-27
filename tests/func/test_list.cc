@@ -15,12 +15,10 @@ OLD_MAIN
 #include <list>
 #include <algorithm>
 #include <numeric>
-#if __cplusplus >= 201703L
+#ifdef NEED_RANDOM_ENGINE
 #include <random>
 #endif
-#ifdef DEBUG
 #include <vector>
-#endif
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(PUSH_BACK)                                                                                                    \
@@ -361,7 +359,7 @@ int main(void)
         const size_t size = TEST_RAND(TEST_MAX_SIZE);
         setup_lists(&a, b, size, &max_value);
         size_t index = TEST_RAND(a.size);
-#if __cplusplus >= 201703L
+#ifdef NEED_RANDOM_ENGINE
         std::default_random_engine rng {seed};
 #endif
 
@@ -1000,7 +998,7 @@ int main(void)
             print_lst(&a);
             std::vector<DIGI> bv;
             bv.assign(b.begin(), b.end());
-#if __cplusplus < 201703L
+#ifndef NEED_RANDOM_ENGINE
             // invalid for list
             //std::random_shuffle(b.begin(), b.end());
             std::random_shuffle(bv.begin(), bv.end());

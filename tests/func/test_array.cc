@@ -16,7 +16,7 @@ OLD_MAIN
 #include <numeric>
 #include <array>
 #include <vector>
-#if __cplusplus >= 201703L
+#ifdef NEED_RANDOM_ENGINE
 #include <random>
 #endif
 
@@ -329,7 +329,7 @@ int main(void)
     const int n = TEST_RAND(N);
     bool found_a, found_b;
     size_t num_a, num_b;
-#if __cplusplus >= 201703L
+#ifdef NEED_RANDOM_ENGINE
     std::default_random_engine rng(seed);
 #endif
 
@@ -743,7 +743,7 @@ int main(void)
             print_arr100(&a);
             arr100_digi_shuffle(&a);
             print_arr100(&a);
-#if __cplusplus < 201703L
+#ifndef NEED_RANDOM_ENGINE
             std::random_shuffle(b.begin(), b.end());
 #else
             std::shuffle(first_b1, last_b1, rng);
@@ -759,7 +759,7 @@ int main(void)
             get_random_iters(&a, &range_a1, b, first_b1, last_b1);
             arr100_digi_shuffle_range(&range_a1);
             print_arr100_range(&range_a1);
-#if __cplusplus < 201703L
+#ifndef NEED_RANDOM_ENGINE
             std::random_shuffle(first_b1, last_b1);
 #else
             std::shuffle(first_b1, last_b1, rng);
