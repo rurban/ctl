@@ -399,13 +399,15 @@ static inline size_t JOIN(A, length)(A *self)
     B *slow, *fast;
     slow = fast = self->head;
     while (slow && fast && fast->next) {
-        size++;
+        size += 2;
         slow = slow->next;
         fast = fast->next->next;
         if (slow == fast) {
             return 0;
         }
     }
+    if (fast)
+        size += !fast->next ? 1 : -1;
     return size;
 }
 
@@ -1097,33 +1099,64 @@ static inline A JOIN(A, symmetric_difference)(A *a, A *b)
     return JOIN(A, symmetric_difference_range)(&r1, &r2);
 }
 
-// untested
+//#ifdef DEBUG
+//void p_slist(A *a)
+//{
+//    foreach(A, a, it) printf("%d ", *it.ref->value);
+//    printf("\n");
+//}
+//#else
+//#define p_slist(a)
+//#endif
+
 static inline void JOIN(A, iter_swap)(I *iter1, I *iter2)
 {
     ASSERT(iter1->node);
     ASSERT(iter2->node);
-    JOIN(A, transfer_before)(iter1->container, iter2->container, iter1->node, iter2->node);
+    JOIN(A, transfer_after)(iter1->container, iter2->container, iter1->node, iter2->node);
+    iter1->node = iter2->node;
+    iter1->ref = iter2->ref;
 }
 
-// O(2n) without i. with i: O(n+(n*n/2))
+// O(n)
 static inline void JOIN(A, shuffle)(A *self)
 {
-    size_t n = JOIN(A, length)(self);
-    size_t i = 0;
+    long n = JOIN(A, length)(self);
     I iter = JOIN(A, begin)(self);
+    // swap head also
+    if (n > 1)
+    {
+        long pick = rand() % n;
+        I iter2 = iter;
+        JOIN(I, advance)(&iter2, pick);
+        LOG("swap i=%ld, n=%ld with pick=%ld\n", JOIN(I, index)(&iter), n, pick);
+        if (pick && iter2.node)
+            JOIN(A, transfer_before)(self, self, iter.node, iter2.node);
+#ifdef DEBUG
+        assert(!JOIN(A, has_cycle)(self));
+        //p_slist(self);
+#endif
+    }
     while (!JOIN(I, done)(&iter) && n > 1)
     {
-        size_t pick = rand() % (n - 1);
-        B *next = iter.node->next;
+        long pick = rand() % (n - 1); // does this swap 50% out of 2?
+        LOG("swap i=%ld, n=%ld with pick=%ld\n", JOIN(I, index)(&iter), n, pick);
         if (pick)
         {
-            I iter2 = JOIN(A, begin)(self); // need a copy
-            JOIN(I, advance)(&iter2, i + pick);
-            JOIN(A, iter_swap)(&iter, &iter2);
+            I iter2 = iter; // need a copy
+            JOIN(I, advance)(&iter2, pick);
+            if (iter2.node)
+                JOIN(A, iter_swap)(&iter, &iter2);
+            else
+                iter.node = iter.node->next;
         }
-        i++;
+        else
+            iter.node = iter.node->next;
+#ifdef DEBUG
+        assert(!JOIN(A, has_cycle)(self));
+        //p_slist(self);
+#endif
         n--;
-        iter.node = next;
     }
 }
 

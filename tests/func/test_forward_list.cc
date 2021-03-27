@@ -13,12 +13,10 @@ OLD_MAIN
 #include <forward_list>
 #include <algorithm>
 #include <numeric>
-#ifdef DEBUG
 #if __cplusplus >= 201703L
 #  include <random>
 #endif
 #include <vector>
-#endif
 
 #define FOREACH_METH(TEST)                                                                                             \
     TEST(PUSH_FRONT)                                                                                                   \
@@ -82,10 +80,10 @@ OLD_MAIN
     TEST(LOWER_BOUND_RANGE)                                                                                            \
     TEST(UPPER_BOUND_RANGE)                                                                                            \
     TEST(BINARY_SEARCH)                                                                                                \
-    TEST(BINARY_SEARCH_RANGE)
+    TEST(BINARY_SEARCH_RANGE)                                                                                          \
+    TEST(SHUFFLE) /* not in the STL*/
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(ASSIGN)                                                                                                       \
     TEST(ASSIGN)                                                                                                       \
     TEST(SPLICE_AFTER)                                                                                                 \
     TEST(SORT_RANGE)                                                                                                   \
@@ -100,7 +98,6 @@ OLD_MAIN
     TEST(DIFFERENCE_RANGE)                                                                                             \
     TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
     TEST(UNIQUE_RANGE)                                                                                                 \
-    TEST(SHUFFLE) /* not in the STL*/                                                                                  \
     TEST(GENERATE_N)                                                                                                   \
     TEST(GENERATE_N_RANGE)                                                                                             \
     TEST(TRANSFORM_IT)                                                                                                 \
@@ -293,14 +290,12 @@ main(void)
         std::forward_list<DIGI>::iterator first_b1, last_b1, first_b2, last_b2, iter;
         size_t num_a, num_b;
         bool found_a, found_b;
-#ifdef DEBUG
 #if __cplusplus >= 201703L
         std::default_random_engine rng {seed};
 #endif
-#endif
 
         int max_value = 0;
-        setup_lists(&a, b, size, &max_value);
+        setup_lists(&a, b, 2/*size*/, &max_value);
 
         u16 which;
         if (tests.size)
@@ -1095,10 +1090,10 @@ main(void)
             digi_free(&key);
             break;
         }
-#ifdef DEBUG
         case TEST_SHUFFLE: {
             print_slist(&a);
             slist_digi_shuffle(&a);
+            LOG("=>\n");
             print_slist(&a);
             std::vector<DIGI> bv;
             bv.assign(b.begin(), b.end());
@@ -1112,13 +1107,13 @@ main(void)
             std::shuffle(bv.begin(), bv.end(), rng);
 #endif
             b.assign(bv.begin(), bv.end());
-            LOG("shuffle => ");
-            print_slist(b);
+            print_fwlist(b);
             slist_digi_sort(&a);
             b.sort();
             CHECK(a, b);
             break;
         }
+#ifdef DEBUG
         case TEST_GENERATE_N: // TEST=63
         {
             size_t count = TEST_RAND(20);
