@@ -322,10 +322,7 @@ Many other header-only STL variants in C exist:
 * [mlib](https://github.com/P-p-H-d/mlib) good stuff, but maybe a bit over-engineered,
 * [Gena](https://github.com/cher-nov/Gena)
 * [OpenCSTL](https://github.com/springkim/OpenCSTL)
-* https://github.com/bkthomps/Containers
-* https://github.com/MichaelJWelsh/cdsa
 * https://github.com/LeoVen/C-Macro-Collections
-* https://github.com/concurrencykit/ck
 
 In its infancies:
 * [CSTL](https://github.com/brliron/CSTL)
@@ -339,6 +336,9 @@ And in its grandiosity (esp. not header-only):
 * [glib](http://suckless.org/sucks/),
 * https://github.com/attractivechaos/klib,
 * http://libcello.org/
+* https://github.com/bkthomps/Containers
+* https://github.com/MichaelJWelsh/cdsa
+* https://github.com/concurrencykit/ck
 * https://github.com/mgrosvenor/libchaste
 * https://bitbucket.org/manvscode/libcollections/
 * https://github.com/fmela/libdict
