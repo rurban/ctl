@@ -26,9 +26,7 @@
 #define insert __INSERT
 #define erase __ERASE
 #define sort __SORT
-#define step __STEP
 #define range __RANGE
-#define each __EACH
 #define remove_if __REMOVE_IF
 
 #define CTL_PQU

@@ -11,7 +11,7 @@
 
 #define CTL_MAP
 #define HOLD
-#define C map
+//#define C map
 #define set map
 #define _set _map
 #include <ctl/set.h>

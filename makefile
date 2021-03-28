@@ -122,7 +122,8 @@ TESTS = \
 
 .ifdef DEBUG
 TESTS += \
-	tests/func/test_map     \
+	tests/func/test_sorted_vector \
+	tests/func/test_map \
 	tests/func/test_unordered_map
 .endif
 
