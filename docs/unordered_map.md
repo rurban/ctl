@@ -13,7 +13,7 @@ Implementation in work still. Esp. lookup should be key only.
     } charint;
     
     static inline size_t
-    charint_hash(charint *a) { return FNV1a(a->key); }
+    charint_hash(charint *a) { return ctl_string_hash(a->key); }
 
     static inline int
     charint_equal(charint *a, charint *b) { return strcmp(a->key, b->key) == 0; }
@@ -35,8 +35,8 @@ Implementation in work still. Esp. lookup should be key only.
     #define T charint
     #include <ctl/unordered_map.h>
 
-    umap_charint a = umap_charint_init(1000, charint_hash, charint_equal);
-    
+    umap_charint a = umap_charint_init();
+
     char c_char[36];
     for (int i=0; i<1000; i++) {
         snprintf(c_char, 36, "%c%d", 48 + (rand() % 74), rand());

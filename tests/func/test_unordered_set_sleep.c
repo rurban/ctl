@@ -1,6 +1,13 @@
 // Test that we detect DDOS attacks
 #include "../test.h"
 
+static inline size_t
+int_hash(int* a)
+{
+    (void)a;
+    return 0;
+}
+
 // default CTL_USET_SECURITY_COLLCOUNTING 2
 #define POD
 #define T int
@@ -26,18 +33,19 @@ inline void Sleep(uint32_t milliseconds)
 }
 #endif
 
-static inline size_t
-broken_hash(int* a)
+/*static inline int
+int_equal(int* a, int* b)
 {
     (void)a;
+    (void)b;
     return 0;
-}
+}*/
 
 int main(void)
 {
     srand(0xbebe);
     const int size = 148;
-    uset_int a = uset_int_init(broken_hash, NULL);
+    uset_int a = uset_int_init();
     uset_int_rehash(&a, size);
     for (int i = 0; i < size; i++)
     {

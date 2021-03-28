@@ -118,8 +118,6 @@ typedef struct A
     float max_load_factor;
     void (*free)(T *);
     T (*copy)(T *);
-    size_t (*hash)(T *);
-    int (*equal)(T *, T *);
 #if CTL_USET_SECURITY_COLLCOUNTING == 4
     bool is_sorted_vector;
 #elif CTL_USET_SECURITY_COLLCOUNTING == 5
@@ -144,11 +142,11 @@ static inline size_t JOIN(A, bucket_count)(A *self)
 static inline size_t JOIN(I, index)(A *self, T value)
 {
 #ifdef CTL_USET_GROWTH_POWER2
-    return self->hash(&value) & self->bucket_max;
+    return JOIN(T, hash)(&value) & self->bucket_max;
 #elif __WORDSIZE == 127
-    return ((uint64_t) self->hash(&value) * ((uint64_t) self->bucket_max + 1)) >> 32;
+    return ((uint64_t) JOIN(T, hash)(&value) * ((uint64_t) self->bucket_max + 1)) >> 32;
 #else
-    return self->hash(&value) % (self->bucket_max + 1);
+    return JOIN(T, hash)(&value) % (self->bucket_max + 1);
 #endif
 }
 
@@ -322,10 +320,12 @@ JOIN(I, range)(A* container, I* begin, I* end)
 }
 */
 
+// needed for algorithm
 static inline int JOIN(A, _equal)(A *self, T *a, T *b)
 {
-    ASSERT(self->equal || !"equal undefined");
-    return self->equal(a, b);
+    //ASSERT(JOIN(T, equal) || !"equal undefined");
+    (void)self;
+    return JOIN(T, equal)(a, b);
 }
 
 static inline A JOIN(A, init_from)(A *copy);
@@ -518,7 +518,7 @@ static inline B **JOIN(A, _bucket_hash)(A *self, size_t hash)
 static inline B **JOIN(A, _bucket)(A *self, T value)
 {
     const size_t hash = JOIN(I, index)(self, value);
-    //LOG ("_bucket %lx %% %lu => %zu\n", self->hash(&value), self->bucket_max + 1, hash);
+    //LOG ("_bucket %lx %% %lu => %zu\n", JOIN(T, hash)(&value), self->bucket_max + 1, hash);
     return &self->buckets[hash];
 }
 #endif
@@ -526,7 +526,7 @@ static inline B **JOIN(A, _bucket)(A *self, T value)
 static inline size_t JOIN(A, bucket)(A *self, T value)
 {
     const size_t hash = JOIN(I, index)(self, value);
-    //LOG ("bucket %lx %% %lu => %zu\n", self->hash(&value), self->bucket_max + 1, hash);
+    //LOG ("bucket %lx %% %lu => %zu\n", JOIN(T, hash)(&value), self->bucket_max + 1, hash);
     return hash;
 }
 
@@ -613,12 +613,10 @@ static inline void JOIN(A, reserve)(A *self, size_t desired_count)
     JOIN(A, _rehash)(self, new_size);
 }
 
-static inline A JOIN(A, init)(size_t (*_hash)(T *), int (*_equal)(T *, T *))
+static inline A JOIN(A, init)(void)
 {
     static A zero;
     A self = zero;
-    self.hash = _hash;
-    self.equal = _equal;
 #ifdef POD
     self.copy = JOIN(A, implicit_copy);
     _JOIN(A, _set_default_methods)(&self);
@@ -633,16 +631,8 @@ static inline A JOIN(A, init)(size_t (*_hash)(T *), int (*_equal)(T *, T *))
 
 static inline A JOIN(A, init_from)(A *copy)
 {
-    static A zero;
-    A self = zero;
-#ifdef POD
-    self.copy = JOIN(A, implicit_copy);
-#else
-    self.free = JOIN(T, free);
-    self.copy = JOIN(T, copy);
-#endif
-    self.hash = copy->hash;
-    self.equal = copy->equal;
+    A self = JOIN(A, init)();
+    JOIN(A, _reserve)(&self, copy->bucket_max + 1);
     return self;
 }
 
@@ -650,7 +640,7 @@ static inline void JOIN(A, rehash)(A *self, size_t desired_count)
 {
     if (desired_count == (self->bucket_max + 1))
         return;
-    A rehashed = JOIN(A, init)(self->hash, self->equal);
+    A rehashed = JOIN(A, init)();
     JOIN(A, reserve)(&rehashed, desired_count);
     if (LIKELY(self->buckets && self->size)) // if desired_count 0
     {
@@ -681,7 +671,7 @@ static inline void JOIN(A, _rehash)(A *self, size_t count)
     // we do allow shrink here
     if (count == self->bucket_max + 1)
         return;
-    A rehashed = JOIN(A, init)(self->hash, self->equal);
+    A rehashed = JOIN(A, init)();
     //LOG("_rehash %zu => %zu\n", self->size, count);
     JOIN(A, _reserve)(&rehashed, count);
 
@@ -714,7 +704,7 @@ static inline B *JOIN(A, find_node)(A *self, T value)
     if (self->size)
     {
 #ifdef CTL_USET_CACHED_HASH
-        size_t hash = self->hash(&value);
+        size_t hash = JOIN(T, hash)(&value);
         B **buckets = JOIN(A, _bucket_hash)(self, hash);
 #else
         B **buckets = JOIN(A, _bucket)(self, value);
@@ -739,7 +729,7 @@ static inline B *JOIN(A, find_node)(A *self, T value)
             if (n->cached_hash != hash)
                 continue;
 #endif
-            if (self->equal(&value, &n->value))
+            if (JOIN(T, equal)(&value, &n->value))
             {
 #if 0 // not yet
                 // speedup subsequent read accesses?
@@ -802,7 +792,7 @@ static inline B **JOIN(A, push_cached)(A *self, T *value)
 #endif
 
 #ifdef CTL_USET_CACHED_HASH
-    size_t hash = self->hash(value);
+    size_t hash = JOIN(T, hash)(value);
     B **buckets = JOIN(A, _bucket_hash)(self, hash);
     JOIN(B, push)(buckets, JOIN(B, init_cached)(*value, hash));
 #else
@@ -899,7 +889,7 @@ static inline I JOIN(A, emplace_hint)(I *pos, T *value)
     if (!JOIN(I, done)(pos))
     {
 #ifdef CTL_USET_CACHED_HASH
-        size_t hash = self->hash(value);
+        size_t hash = JOIN(T, hash)(value);
         B **buckets = JOIN(A, _bucket_hash)(self, hash);
 #else
         B **buckets = JOIN(A, _bucket)(self, *value);
@@ -924,7 +914,7 @@ static inline I JOIN(A, emplace_hint)(I *pos, T *value)
             if (n->cached_hash != hash)
                 continue;
 #endif
-            if (self->equal(value, &n->value))
+            if (JOIN(T, equal)(value, &n->value))
             {
                 FREE_VALUE(self, *value);
                 return JOIN(I, iter)(self, n);
@@ -1060,7 +1050,7 @@ static inline void JOIN(A, _linked_erase)(A *self, B **bucket, B *n, B *prev, B 
 static inline void JOIN(A, erase)(A *self, T value)
 {
 #ifdef CTL_USET_CACHED_HASH
-    size_t hash = self->hash(&value);
+    size_t hash = JOIN(T, hash)(&value);
     B **buckets = JOIN(A, _bucket_hash)(self, hash);
 #else
     B **buckets = JOIN(A, _bucket)(self, value);
@@ -1078,7 +1068,7 @@ static inline void JOIN(A, erase)(A *self, T value)
             continue;
         }
 #endif
-        if (self->equal(&value, &n->value))
+        if (JOIN(T, equal)(&value, &n->value))
         {
             JOIN(A, _linked_erase)(self, buckets, n, prev, next);
             break;
@@ -1115,7 +1105,7 @@ static inline size_t JOIN(A, erase_if)(A *self, int (*_match)(T *))
 static inline A JOIN(A, copy)(A *self)
 {
     // LOG ("copy\norig size: %lu\n", self->size);
-    A other = JOIN(A, init)(self->hash, self->equal);
+    A other = JOIN(A, init)();
     JOIN(A, _reserve)(&other, self->bucket_max + 1);
     foreach (A, self, it)
     {
@@ -1154,7 +1144,7 @@ static inline void JOIN(A, erase_generic)(A* self, GI *range)
 
 static inline A JOIN(A, union)(A *a, A *b)
 {
-    A self = JOIN(A, init)(a->hash, a->equal);
+    A self = JOIN(A, init)();
     JOIN(A, _reserve)(&self, 1 + MAX(a->bucket_max, b->bucket_max));
     foreach (A, a, it1)
         JOIN(A, insert)(&self, self.copy(it1.ref));
@@ -1182,7 +1172,7 @@ static inline A JOIN(A, union_range)(I *r1, GI *r2)
 
 static inline A JOIN(A, intersection)(A *a, A *b)
 {
-    A self = JOIN(A, init)(a->hash, a->equal);
+    A self = JOIN(A, init)();
     foreach (A, a, it)
         if (JOIN(A, find_node)(b, *it.ref))
             JOIN(A, insert)(&self, self.copy(it.ref));
@@ -1192,7 +1182,7 @@ static inline A JOIN(A, intersection)(A *a, A *b)
 static inline A JOIN(A, intersection_range)(I *r1, GI *r2)
 {
     A *a = r1->container;
-    A self = JOIN(A, init)(a->hash, a->equal);
+    A self = JOIN(A, init)();
     void (*next2)(struct I*) = r2->vtable.next;
     T* (*ref2)(struct I*) = r2->vtable.ref;
     int (*done2)(struct I*) = r2->vtable.done;
@@ -1214,7 +1204,7 @@ static inline A JOIN(A, intersection_range)(I *r1, GI *r2)
 
 static inline A JOIN(A, difference)(A *a, A *b)
 {
-    A self = JOIN(A, init)(a->hash, a->equal);
+    A self = JOIN(A, init)();
     foreach (A, a, it)
         if (!JOIN(A, find_node)(b, *it.ref))
             JOIN(A, insert)(&self, self.copy(it.ref));

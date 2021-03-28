@@ -31,18 +31,6 @@ strint_free(strint* self)
     str_free(&self->key);
 }
 
-static size_t
-FNV1a(const char *key)
-{
-  size_t h;
-  h = 2166136261u;
-  for (unsigned i = 0; i < strlen(key); i++) {
-    h ^= (unsigned char)key[i];
-    h *= 16777619;
-  }
-  return h;
-}
-
 static inline int
 strint_compare(strint* a, strint* b)
 {
@@ -53,7 +41,7 @@ static inline size_t
 strint_hash(strint* a)
 {
     const char* key = a->key.vector;
-    return key && *key ? (size_t)FNV1a(key) : 0UL;
+    return key && *key ? ctl_string_hash(key) : 0UL;
 }
 
 static inline strint

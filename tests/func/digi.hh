@@ -59,19 +59,10 @@ digi_equal(digi* a, digi* b)
     return *a->value == *b->value;
 }
 
-static inline uint32_t
-int_hash_func (uint32_t key)
-{
-  key = ((key >> 16) ^ key) * 0x45d9f3b;
-  key = ((key >> 16) ^ key) * 0x45d9f3b;
-  key = (key >> 16) ^ key;
-  return key;
-}
-
 static inline size_t
 digi_hash(digi* a)
 {
-    return (size_t)int_hash_func(*a->value);
+    return (size_t)ctl_int32_hash(*a->value);
 }
 
 struct DIGI
@@ -137,7 +128,7 @@ struct DIGI
     }
     size_t hash(const DIGI& a) const
     {
-        return (size_t)int_hash_func(*a.value);
+        return (size_t)ctl_int32_hash(*a.value);
     }
 };
 
@@ -145,7 +136,7 @@ class DIGI_hash {
 public:
     size_t operator()(const DIGI& a) const
     {
-        return (size_t)int_hash_func(*a.value);
+        return (size_t)ctl_int32_hash(*a.value);
     }
 };
 

@@ -1,6 +1,6 @@
 # hashtable - CTL - C Container Template library
  
-Defined in header **<ctl/hashtable.h>**, CTL prefix **htbl**,
+Defined in header **<ctl/hashtable.h>**, CTL prefix **hmap**,
 parent of [unordered_map](unordered_map.md)
 
 No implementation yet.
@@ -13,7 +13,7 @@ No implementation yet.
     } charint;
     
     static inline size_t
-    charint_hash(charint *a) { return FNV1a(a->key); }
+    charint_hash(charint *a) { return ctl_string_hash(a->key); }
 
     static inline int
     charint_equal(charint *a, charint *b) { return strcmp(a->key, b->key) == 0; }
@@ -35,19 +35,19 @@ No implementation yet.
     #define T charint
     #include <ctl/hashtable.h>
 
-    htbl_charint a = htbl_charint_init(1000, charint_hash, charint_equal);
+    hmap_charint a = hmap_charint_init();
     
     char c_char[36];
     for (int i=0; i<1000; i++) {
         snprintf(c_char, 36, "%c%d", 48 + (rand() % 74), rand());
         //str s = (str){.value = c_char};
-        htbl_charint_insert(&a, charint_copy(&(charint){ c_char, i }));
+        hmap_charint_insert(&a, charint_copy(&(charint){ c_char, i }));
     }
-    foreach(htbl_charint, &a, it) { strcpy (c_char, it.ref->key); }
+    foreach(hmap_charint, &a, it) { strcpy (c_char, it.ref->key); }
     printf("last key \"%s\", ", c_char);
-    foreach(htbl_charint, &a, it) { htbl_charint_bucket_size(it.node); }
-    printf("htbl_charint load_factor: %f\n", htbl_charint_load_factor(&a));
-    htbl_charint_free(&a);
+    foreach(hmap_charint, &a, it) { hmap_charint_bucket_size(it.node); }
+    printf("hmap_charint load_factor: %f\n", hmap_charint_load_factor(&a));
+    hmap_charint_free(&a);
 
 ## DESCRIPTION
 
@@ -55,8 +55,8 @@ No implementation yet.
 that contains a set of unique objects of type Key. Search, insertion, and
 removal have average constant-time complexity.
 
-The function names are composed of the prefix **htbl_**, the user-defined type
-**T** and the method name. E.g `htbl_charint` with `#define T charint`. The type
+The function names are composed of the prefix **hmap_**, the user-defined type
+**T** and the method name. E.g `hmap_charint` with `#define T charint`. The type
 must be a custom struct.
 
 Internally, the elements are not sorted in any particular order, but organized
@@ -83,19 +83,19 @@ It has the same API as unordered_map, just no Bucket interface.
 
 ## Member functions
 
-[init](htbl/init.md) `(bucket_count, T_hash(T*), T_equal(T*, T*))`
+[init](hmap/init.md) `(bucket_count, T_hash(T*), T_equal(T*, T*))`
 
 constructs the hash table.
 
-[free](htbl/free.md) `(A* self)`
+[free](hmap/free.md) `(A* self)`
 
 destructs the hash table.
 
-[assign](htbl/assign.md) `(A* self, A* other)`
+[assign](hmap/assign.md) `(A* self, A* other)`
 
 replaces the contents of the container.
 
-[copy](htbl/copy.md) `(A* self)`
+[copy](hmap/copy.md) `(A* self)`
 
 returns a copy of the container.
 
@@ -122,15 +122,15 @@ See [iterators](iterators.md) for more.
 
 ## Capacity
 
-[empty](htbl/empty.md) `(A* self)`
+[empty](hmap/empty.md) `(A* self)`
 
 checks whether the container is empty
 
-[size](htbl/size.md) `(A* self)`
+[size](hmap/size.md) `(A* self)`
 
 returns the number of non-empty and non-deleted elements
 
-[capacity](htbl/size.md) `(A* self)`
+[capacity](hmap/size.md) `(A* self)`
 
 returns the size of the array
 
@@ -140,15 +140,15 @@ returns the maximum possible number of elements
 
 ## Modifiers
 
-[clear](htbl/clear.md) `(A* self)`
+[clear](hmap/clear.md) `(A* self)`
 
 clears the contents
 
-[insert](htbl/insert.md) `(A* self, T value)`
+[insert](hmap/insert.md) `(A* self, T value)`
 
 inserts the element `(C++17)`
 
-[emplace](htbl/emplace.md) `(A* self, T values...)`
+[emplace](hmap/emplace.md) `(A* self, T values...)`
 
 constructs elements in-place. (NYI)
 
@@ -156,89 +156,89 @@ constructs elements in-place. (NYI)
 
 constructs elements in-place at position. (NYI)
 
-[erase](htbl/erase.md) `(A* self, T key)`
+[erase](hmap/erase.md) `(A* self, T key)`
 
 erases the element by key
 
-[erase_it](htbl/erase.md) `(A* self, I* pos)`
+[erase_it](hmap/erase.md) `(A* self, I* pos)`
 
 erases the element at pos
 
-[erase_range](htbl/erase.md) `(A* self, I* first, I* last)`
+[erase_range](hmap/erase.md) `(A* self, I* first, I* last)`
 
 erases elements
 
-[swap](htbl/swap.md) `(A* self, A* other)`
+[swap](hmap/swap.md) `(A* self, A* other)`
 
 swaps the contents
 
-[extract](htbl/extract.md) `(A* self, T key)`
-[extract_it](htbl/extract.md) `(A* self, I* pos)`
+[extract](hmap/extract.md) `(A* self, T key)`
+[extract_it](hmap/extract.md) `(A* self, I* pos)`
 
 extracts a node from the container. NYI
 
-[merge](htbl/merge.md) `(A* self)`
+[merge](hmap/merge.md) `(A* self)`
 
 splices nodes from another container
 
 ## Lookup
 
-[count](htbl/count.md) `(A* self)`
+[count](hmap/count.md) `(A* self)`
 
 returns the number of elements matching specific key
 
-[find](htbl/find.md) `(A* self, T key)`
+[find](hmap/find.md) `(A* self, T key)`
 
 finds element with specific key
 
-[contains](htbl/contains.md) `(A* self, T key)`
+[contains](hmap/contains.md) `(A* self, T key)`
 
 checks if the container contains element with specific key. (C++20)
 
-[equal_range](htbl/equal_range.md) `(A* self)`
+[equal_range](hmap/equal_range.md) `(A* self)`
 
 returns range of elements matching a specific key. (NYI)
 
 ## Hash policy
 
-[load_factor](htbl/load_factor.md) `(A* self)`
+[load_factor](hmap/load_factor.md) `(A* self)`
 
 returns average number of elements per bucket
 
-[max_load_factor](htbl/max_load_factor.md) `()`
-[set_max_load_factor](htbl/max_load_factor.md) `(A* self, float factor)`
+[max_load_factor](hmap/max_load_factor.md) `()`
+[set_max_load_factor](hmap/max_load_factor.md) `(A* self, float factor)`
 	
 manages maximum average number of elements per bucket. defaults to 0.70
 
-[rehash](htbl/rehash.md) `(A* self, size_t bucket_count)`
+[rehash](hmap/rehash.md) `(A* self, size_t bucket_count)`
 
 reserves at least the specified number of buckets.
 This regenerates the hash table.
 
-[reserve](htbl/reserve.md) `(A* self, size_t desired_size)`
+[reserve](hmap/reserve.md) `(A* self, size_t desired_size)`
 
 reserves space for at least the specified number of elements.
 This regenerates the hash table. 
 
 ## Non-member functions
 
-[swap](htbl/swap.md) `(A* self)`
+[swap](hmap/swap.md) `(A* self)`
 
 specializes the swap algorithm
 
-[remove_if](htbl/remove_if.md) `(A* self, int T_match(T*))`
+[remove_if](hmap/remove_if.md) `(A* self, int T_match(T*))`
 
 Removes all elements satisfying specific criteria.
 
-[erase_if](htbl/erase_if.md) `(A* self, int T_match(T*))`
+[erase_if](hmap/erase_if.md) `(A* self, int T_match(T*))`
 
 erases all elements satisfying specific criteria (C++20)
 
-[intersection](htbl/intersection.md) `(A* self, A* other)`
+[intersection](hmap/intersection.md) `(A* self, A* other)`
 
-[union](htbl/union.md) `(A* self, A* other)`
+[union](hmap/union.md) `(A* self, A* other)`
 
-[difference](htbl/difference.md) `(A* self, A* other)`
+[difference](hmap/difference.md) `(A* self, A* other)`
 
-[symmetric_difference](htbl/symmetric_difference.md) `(A* self, A* other)`
+[symmetric_difference](hmap/symmetric_difference.md) `(A* self, A* other)`
 

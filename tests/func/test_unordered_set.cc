@@ -6,8 +6,8 @@ OLD_MAIN
 
 #include "digi.hh"
 
-#define USE_INTERNAL_VERIFY
 #define T digi
+#define USE_INTERNAL_VERIFY
 #define INCLUDE_ALGORITHM
 #include <ctl/unordered_set.h>
 
@@ -152,7 +152,7 @@ static void setup_sets(uset_digi *a, std::unordered_set<DIGI, DIGI_hash> &b)
 {
     size_t size = TEST_RAND(TEST_MAX_SIZE);
     LOG("\nsetup_uset %lu\n", size);
-    *a = uset_digi_init(digi_hash, digi_equal);
+    *a = uset_digi_init();
     uset_digi_rehash(a, size);
     for (size_t inserts = 0; inserts < size; inserts++)
     {
@@ -164,7 +164,7 @@ static void setup_sets(uset_digi *a, std::unordered_set<DIGI, DIGI_hash> &b)
 
 static void test_small_size(void)
 {
-    uset_digi a = uset_digi_init(digi_hash, digi_equal);
+    uset_digi a = uset_digi_init();
     uset_digi_insert(&a, digi_init(1));
     uset_digi_insert(&a, digi_init(2));
     print_uset(&a);
@@ -323,7 +323,7 @@ int main(void)
         }
         case TEST_SWAP: {
             aa = uset_digi_copy(&a);
-            aaa = uset_digi_init(digi_hash, digi_equal);
+            aaa = uset_digi_init();
             bb = b;
             uset_digi_swap(&aaa, &aa);
             std::swap(bb, bbb);
@@ -648,7 +648,6 @@ int main(void)
             break;
         }
         case TEST_MERGE: {
-            aa = uset_digi_init_from(&a);
             setup_sets(&aa, bb);
             print_uset(&a);
             print_uset(&aa);
@@ -672,7 +671,6 @@ int main(void)
             uset_digi_it range_a1, range_a2;
             //std::unordered_set<DIGI>::iterator first_b1, last_b1, first_b2, last_b2;
             //get_random_iters(&a, &range_a1, b, first_b1, last_b1);
-            aa = uset_digi_init_from(&a);
             setup_sets(&aa, bb);
             range_a1 = uset_digi_begin(&a);
             range_a2 = uset_digi_begin(&aa);
