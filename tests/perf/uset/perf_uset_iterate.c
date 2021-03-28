@@ -1,19 +1,19 @@
 #include "../../test.h"
 
+static size_t int_hash(int* a) { return *a; }
+//static int int_equal(int* a, int* b)   { return *a == *b; }
+
 #define POD
 #define T int
 #include <ctl/unordered_set.h>
 
 #include <time.h>
 
-static size_t int_hash(int* a) { return *a; }
-static int int_equal(int* a, int* b)   { return *a == *b; }
-
 int main(void)
 {
     puts(__FILE__);
     srand(0xbeef);
-    uset_int c = uset_int_init(int_hash, int_equal);
+    uset_int c = uset_int_init();
     for(int run = 0; run < TEST_PERF_RUNS; run++)
     {
         unsigned int elems = TEST_PERF_CHUNKS * run;

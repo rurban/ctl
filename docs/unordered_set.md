@@ -5,14 +5,14 @@ parent of [unordered_map](unordered_map.md)
 
 # SYNOPSIS
 
-    size_t int_hash(int* x) { return abs(*x); }
+    size_t int_hash(int* x) { return ctl_int32_hash(*x); }
     int int_eq(int* a, int* b) { return *a == *b; }
 
     #define POD
     #define T int
     #include <ctl/unordered_set.h>
 
-    uset_int a = uset_int_init(int_hash, int_eq);
+    uset_int a = uset_int_init();
     for (int i=0; i < 120; i++)
       uset_int_insert(&a, rand());
 
@@ -58,11 +58,9 @@ element's hash and corrupt the container.
 
 ## Member functions
 
-    A init (T_hash(T*), T_equal(T*, T*))
+    A init ()
 
 constructs the hash table.
-With INTEGRAL types the members may be NULL, and are then set to default
-methods.
 
     free (A* self)
 
@@ -332,3 +330,11 @@ be worse, so it's not yet enabled.  `CTL_USET_CACHED_HASH` is faster with high
 load factors.  Overall the STL `unordered_set` performance is bad, and our is
 also not much better.  That's why we will add better hash tables and a btree,
 with less stability guarantees.
+
+# Changes
+
+* 202104:
+  Starting with CTL_VERSION 202104 there are no dynamic hash and equal fields
+  anymore.
+  They must be defined statically as `T_hash` and `T_equal` methods beforehand.
+

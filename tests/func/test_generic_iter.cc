@@ -38,6 +38,7 @@ OLD_MAIN
 #define T int
 #define INCLUDE_ALGORITHM
 #include <ctl/vector.h>
+static inline size_t int_hash(int* a) { return (size_t)ctl_int32_hash((uint32_t)*a); }
 #define POD
 #define T int
 #define INCLUDE_ALGORITHM

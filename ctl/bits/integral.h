@@ -1,4 +1,5 @@
-/* Type utilities, to apply default equal, compare, hash methods for intergral types.
+/* Type utilities, to apply default equal, compare for integral types.
+   And hash methods.
    See MIT LICENSE.
  */
 
@@ -14,7 +15,47 @@ _define_integral_compare(long)
 #undef _define_integral_compare
 */
 
+#include <string.h>
+
+#ifndef CTL_HASH_DEFAULTS
+#define CTL_HASH_DEFAULTS
+static inline uint32_t ctl_int32_hash(uint32_t key)
+{
+    key = ((key >> 16) ^ key) * 0x45d9f3b;
+    key = ((key >> 16) ^ key) * 0x45d9f3b;
+    key = (key >> 16) ^ key;
+    return key;
+}
+/* FNV1a. Eventually wyhash or o1hash */
+static inline size_t ctl_string_hash(const char* key)
+{
+    size_t h;
+    h = 2166136261u;
+    for (unsigned i = 0; i < strlen((char *)key); i++)
+    {
+        h ^= (unsigned char)key[i];
+        h *= 16777619;
+    }
+    return h;
+}
+
 #if defined(POD) && !defined(NOT_INTEGRAL)
+static inline int JOIN(T, equal)(T *a, T *b)
+{
+    return *a == *b;
+}
+#endif
+
+#endif //CTL_HASH_DEFAULTS
+
+#if defined(POD) && !defined(NOT_INTEGRAL)
+
+#ifdef CTL_USET
+static inline size_t _JOIN(A, _default_integral_hash)(T *a)
+{
+    return ctl_int32_hash((uint32_t)*a);
+}
+#endif //USET
 
 static inline int _JOIN(A, _default_integral_compare3)(T *a, T *b)
 {
@@ -33,30 +74,6 @@ static inline int _JOIN(A, _default_integral_equal)(T *a, T *b)
              _JOIN(A, _default_integral_compare)(b, a) == 0;
     */
 }
-
-static inline size_t _JOIN(A, _default_integral_hash)(T *a)
-{
-    return (size_t)*a;
-}
-
-#include <string.h>
-
-#if defined str || defined u8string || defined charp || defined u8ident || defined ucharp
-
-static inline size_t _JOIN(A, _default_string_hash)(T *key)
-{
-    size_t h;
-    /* FNV1a, not wyhash */
-    h = 2166136261u;
-    for (unsigned i = 0; i < strlen((char *)key); i++)
-    {
-        h ^= (unsigned char)key[i];
-        h *= 16777619;
-    }
-    return h;
-}
-
-#endif
 
 #define CTL_STRINGIFY_HELPER(n) #n
 #define CTL_STRINGIFY(n) CTL_STRINGIFY_HELPER(n)
@@ -83,47 +100,29 @@ static inline bool _JOIN(A, _type_is_integral)(void)
            _strEQcc(CTL_STRINGIFY(T), "llong");
 }
 
-// not C++
-#ifndef __cplusplus
-#define __set_str_hash(self, t)                                                                                        \
-    {                                                                                                                  \
-        typeof(t) tmp = (x);                                                                                           \
-        if (__builtin_types_compatible_p(typeof(t), char *))                                                           \
-            self->hash = _JOIN(A, _default_string_hash);                                                               \
-        else if (__builtin_types_compatible_p(typeof(t), unsigned char *))                                             \
-            self->hash = _JOIN(A, _default_string_hash);                                                               \
-    }
-#else
-#define __set_str_hash(self, t) self->hash = _JOIN(A, _default_string_hash)
-#endif
-
 static inline void _JOIN(A, _set_default_methods)(A *self)
 {
 #if !defined CTL_STR
 #if defined str || defined u8string || defined charp || defined u8ident || defined ucharp
     {
-#ifdef CTL_USET
-        if (!self->hash)
-            __set_str_hash(self, T);
-#else
+#ifndef CTL_USET
         if (!self->compare)
             self->compare = str_key_compare;
-#endif
         if (!self->equal)
             self->equal = str_equal;
+#endif
     }
     else
 #endif
 #endif
-#ifdef CTL_USET
-        if (!self->hash)
-            self->hash = _JOIN(A, _default_integral_hash);
-#else
+#ifndef CTL_USET
     if (!self->compare)
         self->compare = _JOIN(A, _default_integral_compare);
-#endif
     if (!self->equal)
         self->equal = _JOIN(A, _default_integral_equal);
+#else
+    (void)self;
+#endif
 }
 
 #else

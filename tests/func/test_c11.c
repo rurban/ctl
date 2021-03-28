@@ -8,6 +8,11 @@
 #error "POD leftover from ctl/string.h"
 #endif
 
+static inline size_t
+int_hash(int* a)
+{
+    return (size_t)ctl_int32_hash((uint32_t)*a);
+}
 #define POD
 #define T int
 #include <ctl/unordered_set.h>
@@ -15,16 +20,6 @@
 #ifdef POD
 #error "POD leftover"
 #endif
-
-size_t int_hash(int *x)
-{
-    return abs(*x);
-}
-
-int int_equal(int *a, int *b)
-{
-    return *a == *b;
-}
 
 size_t FNV1a(const char *key)
 {

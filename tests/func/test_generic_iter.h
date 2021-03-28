@@ -338,7 +338,7 @@ void print_uset(uset_int *a)
     print_set(&aa)
 
 #define SETUP_USET1                                                                                                    \
-    uset_int a = uset_int_init(NULL, NULL);                                                                            \
+    uset_int a = uset_int_init();                                                                            \
     std::unordered_set<int> b;                                                                                         \
     for (int i = 0; i < 1 + TEST_RAND(TEST_MAX_SIZE - 1); i++)                                                         \
     {                                                                                                                  \
@@ -348,7 +348,7 @@ void print_uset(uset_int *a)
     }                                                                                                                  \
     print_uset(&a)
 #define SETUP_USET2                                                                                                    \
-    uset_int aa = uset_int_init(NULL, NULL);                                                                           \
+    uset_int aa = uset_int_init();                                                                           \
     std::unordered_set<int> bb;                                                                                        \
     for (int i = 0; i < TEST_RAND(25); i++)                                                                            \
     {                                                                                                                  \

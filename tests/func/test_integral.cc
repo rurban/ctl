@@ -84,6 +84,19 @@ typedef unsigned long ulong;
 #define T uint8_t
 #include <ctl/deque.h>
 
+static inline int long_equal(long *a, long *b)
+{
+    return *a == *b;
+}
+static inline size_t long_hash(long *a)
+{
+    long key = *a;
+    key = ((key >> 16) ^ key) * 0x45d9f3bul;
+    key = ((key >> 16) ^ key) * 0x45d9f3bul;
+    key = (key >> 16) ^ key;
+    return key;
+}
+
 #define POD
 #define T long
 #include <ctl/unordered_set.h>
@@ -141,7 +154,7 @@ int main(void)
     }
     TEST_LIST(vec_double, 1.0, 2.0);
     {
-        uset_long a = uset_long_init(NULL, NULL);
+        uset_long a = uset_long_init();
         uset_long_insert(&a, 1L);                    // hash
         uset_long_it found = uset_long_find(&a, 1L); // equal
         assert(!uset_long_it_done(&found));          // equal

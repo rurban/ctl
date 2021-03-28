@@ -832,6 +832,8 @@ List of added, changed. removed features:
   * algorithm: Added shuffle, iter_swap, reverse, reverse_range,
     lexicographical_compare, is_sorted, is_sorted_until.
     Requires now INCLUDE_ALGORITHM
+  * unordered_set and children: removed hash and equal init args, and fields.
+    They must be now declared statically beforehand as `T_hash` and `T_equal`.
   * array: Added difference, intersection, symmetric_difference, assign_range.
   * set: Added includes, includes_range.
   * string: Added find_if, find_if_not, find_if_range, find_if_not_range, includes,

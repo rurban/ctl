@@ -58,6 +58,7 @@
 #endif
 #include <ctl/array.h>
 
+static inline size_t int_hash(int *a) { return (size_t)ctl_int32_hash((uint32_t)*a); }
 #define POD
 #define T int
 #ifdef ALGORITHM
@@ -177,16 +178,6 @@ static int compare_int(int *a, int *b)
     return *a < *b;
 }
 
-static size_t hash_int(int *a)
-{
-    return *a;
-}
-
-static int equal_int(int *a, int *b)
-{
-    return *a == *b;
-}
-
 static int compare_key_short(short *a, short *b)
 {
     return (*a == *b) ? 0 : (*a < *b) ? -1 : 1;
@@ -231,7 +222,7 @@ void A(void)
     str g = str_init("test");
     pqu_int i = pqu_int_init(compare_int);
     arr1024_int j = arr1024_int_init();
-    uset_int k = uset_int_init(hash_int, equal_int);
+    uset_int k = uset_int_init();
 
     for (int el = 0; el < N; el++)
     {
