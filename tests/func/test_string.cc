@@ -506,7 +506,6 @@ int main(void)
                 break;
             }
             case TEST_COMPARE: {
-                // CHECKME!
                 char *ta = a.vector;
                 char *tb = create_test_string(index);
                 aa = str_init(tb);
@@ -723,15 +722,22 @@ int main(void)
                 str_generate(&a, str_generate);
                 str_generate_reset();
                 std::generate(b.begin(), b.end(), STR_generate);
+                LOG("\"%s\" (%zu) vs \"%s\" (%zu)\n", a.vector, a.size, b.c_str(), b.size());
                 CHECK(a, b);
                 break;
             }
             case TEST_GENERATE_N: {
                 size_t count = TEST_RAND(20);
+                // broken, both do not terminate it
                 str_generate_reset();
                 str_generate_n(&a, count, str_generate);
+                size_t min = MIN(count, a.size);
+                a.vector[min] = '\0';
                 str_generate_reset();
                 std::generate_n(b.begin(), count, STR_generate);
+                b[min] = '\0';
+                LOG("count %zu: \"%s\" (%zu) vs \"%s\" (%zu)\n",
+                    count, a.vector, a.size, b.c_str(), b.size());
                 CHECK(a, b);
                 break;
             }
