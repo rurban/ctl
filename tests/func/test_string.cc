@@ -353,8 +353,16 @@ int main(void)
         for (size_t mode = MODE_DIRECT; mode < MODE_TOTAL; mode++)
         {
             char *base = create_test_string(str_size);
-            str a;
-            std::string b;
+            char *temp; /* = create_test_string(TEST_RAND(256)); */
+            str a, aa, aaa;
+            std::string b, bb, bbb;
+            str_it range_a1, range_a2, it;
+            str_it *pos;
+            std::string::iterator first_b1, last_b1, first_b2, last_b2, iter;
+            bool found_a, found_b;
+            size_t num_a, num_b;
+            char value = RAND_ALPHA;
+            size_t index = TEST_RAND(str_size);
 #ifdef NEED_RANDOM_ENGINE
             std::default_random_engine rng {seed};
 #endif
@@ -389,14 +397,12 @@ int main(void)
             RECORD_WHICH;
             switch (which)
             {
-            case TEST_PUSH_BACK: {
-                const char value = TEST_RAND(ALPHA_LETTERS);
+            case TEST_PUSH_BACK:
                 b.push_back(value);
                 str_push_back(&a, value);
                 LOG_CAP(a, b);
                 break;
-            }
-            case TEST_POP_BACK: {
+            case TEST_POP_BACK:
                 if (a.size > 0)
                 {
                     b.pop_back();
@@ -404,98 +410,91 @@ int main(void)
                 }
                 LOG_CAP(a, b);
                 break;
-            }
-            case TEST_APPEND: {
-                char *temp = create_test_string(TEST_RAND(256));
+            case TEST_APPEND:
+                temp = create_test_string(TEST_RAND(256));
                 str_append(&a, temp);
                 b.append(temp);
                 free(temp);
                 break;
-            }
-            case TEST_C_STR: {
+            case TEST_C_STR:
                 assert(strlen(str_c_str(&a))); // strlen(NULL) is valid
                 assert(str_c_str(&a) == str_data(&a));
                 LOG("CTL C_STR %zu %zu\n", a.size, a.capacity);
                 break;
-            }
             case TEST_REPLACE: {
-                char *temp = create_test_string(TEST_RAND(a.size));
-                const size_t index = TEST_RAND(a.size);
-                const size_t size = TEST_RAND(a.size);
-                str_replace(&a, index, size, temp);
-                b.replace(index, size, temp);
+                temp = create_test_string(TEST_RAND(a.size));
+                str_replace(&a, index, index, temp);
+                b.replace(index, index, temp);
                 free(temp);
                 break;
             }
             case TEST_FIND: {
                 const size_t size = TEST_RAND(4);
-                char *temp = create_test_string(size);
+                temp = create_test_string(size);
                 assert(str_find(&a, temp) == b.find(temp));
                 free(temp);
                 break;
             }
             case TEST_RFIND: {
-                char *temp = create_test_string(TEST_RAND(3));
+                temp = create_test_string(TEST_RAND(3));
                 assert(str_rfind(&a, temp) == b.rfind(temp));
                 free(temp);
                 break;
             }
             case TEST_FIND_FIRST_OF: {
                 const size_t size = TEST_RAND(4);
-                char *temp = create_test_string(size);
+                temp = create_test_string(size);
                 LOG("str_find_first_of(\"%s\", \"%s\')\n", a.vector, temp);
-                size_t aa = str_find_first_of(&a, temp);
-                size_t bb = b.find_first_of(temp);
-                LOG("=> %zu vs %zu\n", aa, bb);
-                assert(aa == bb);
+                num_a = str_find_first_of(&a, temp);
+                num_b = b.find_first_of(temp);
+                LOG("=> %zu vs %zu\n", num_a, num_b);
+                assert(num_a == num_b);
                 free(temp);
                 break;
             }
             case TEST_FIND_FIRST_OF_RANGE: {
                 const size_t size = TEST_RAND(4);
-                char *temp = create_test_string(size);
-                str_it first_a, range2;
-                std::string bb = temp;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                str aa = str_init(temp);
-                range2 = str_it_begin(&aa);
-                LOG("str_find_first_of_range(\"%.*s\", [%s])\n", (int)(last_b - first_b), first_a.ref, temp);
+                temp = create_test_string(size);
+                bb = temp;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                aa = str_init(temp);
+                range_a2 = str_it_begin(&aa);
+                LOG("str_find_first_of_range(\"%.*s\", [%s])\n", (int)(last_b1 - first_b1),
+                    range_a1.ref, temp);
                 free(temp);
-                bool found_a = str_find_first_of_range(&first_a, &range2);
-                auto it = std::find_first_of(first_b, last_b, bb.begin(), bb.end());
-                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", it != last_b ? "yes" : "no", first_a.ref - a.vector,
-                    it - first_b);
+                found_a = str_find_first_of_range(&range_a1, &range_a2);
+                iter = std::find_first_of(first_b1, last_b1, bb.begin(), bb.end());
+                LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", iter != last_b1 ? "yes" : "no",
+                    range_a1.ref - a.vector, iter - first_b1);
                 if (found_a)
-                    assert(*it == *first_a.ref);
+                    assert(*iter == *range_a1.ref);
                 else
-                    assert(it == last_b);
+                    assert(iter == last_b1);
                 str_free(&aa);
                 break;
             }
             case TEST_FIND_LAST_OF: {
                 const size_t size = TEST_RAND(3);
-                char *temp = create_test_string(size);
+                temp = create_test_string(size);
                 assert(str_find_last_of(&a, temp) == b.find_last_of(temp));
                 free(temp);
                 break;
             }
             case TEST_FIND_FIRST_NOT_OF: {
                 const size_t size = TEST_RAND(192);
-                char *temp = create_test_string(size);
+                temp = create_test_string(size);
                 assert(str_find_first_not_of(&a, temp) == b.find_first_not_of(temp));
                 free(temp);
                 break;
             }
             case TEST_FIND_LAST_NOT_OF: {
                 const size_t size = TEST_RAND(192);
-                char *temp = create_test_string(size);
+                temp = create_test_string(size);
                 assert(str_find_last_not_of(&a, temp) == b.find_last_not_of(temp));
                 free(temp);
                 break;
             }
             case TEST_SUBSTR: {
-                const size_t index = TEST_RAND(a.size);
                 const size_t size = TEST_RAND(a.size - index);
                 if (size > MIN_STR_SIZE)
                 {
@@ -507,21 +506,18 @@ int main(void)
                 break;
             }
             case TEST_COMPARE: {
-                size_t size = TEST_RAND(512);
-                char *_ta = create_test_string(size);
-                char *_tb = create_test_string(size);
-                str _a = str_init(_ta);
-                str _b = str_init(_tb);
-                std::string _aa = _ta;
-                std::string _bb = _tb;
-                assert(TEST_SIGN(str_compare(&_a, _tb)) == TEST_SIGN(_aa.compare(_tb)));
-                assert(TEST_SIGN(str_compare(&_b, _ta)) == TEST_SIGN(_bb.compare(_ta)));
-                assert(TEST_SIGN(str_compare(&_a, _ta)) == TEST_SIGN(_aa.compare(_ta)));
-                assert(TEST_SIGN(str_compare(&_b, _tb)) == TEST_SIGN(_bb.compare(_tb)));
-                str_free(&_a);
-                str_free(&_b);
-                free(_ta);
-                free(_tb);
+                // CHECKME!
+                char *ta = a.vector;
+                char *tb = create_test_string(index);
+                aa = str_init(tb);
+                b = ta;
+                bb = tb;
+                assert(TEST_SIGN(str_compare(&a, tb))  == TEST_SIGN(b.compare(tb)));
+                assert(TEST_SIGN(str_compare(&aa, ta)) == TEST_SIGN(bb.compare(ta)));
+                assert(TEST_SIGN(str_compare(&a, ta))  == TEST_SIGN(b.compare(ta)));
+                assert(TEST_SIGN(str_compare(&aa, tb)) == TEST_SIGN(bb.compare(tb)));
+                str_free(&aa);
+                free(tb);
                 break;
             }
             case TEST_CLEAR: {
@@ -531,26 +527,26 @@ int main(void)
                 break;
             }
             case TEST_ERASE: {
-                const size_t index = TEST_RAND(a.size - 1);
-                b.erase(b.begin() + index);
-                str_it it = str_it_iter(&a, index);
+                const size_t i = TEST_RAND(a.size - 1);
+                b.erase(b.begin() + i);
+                it = str_it_iter(&a, i);
                 str_erase(&it);
                 break;
             }
             case TEST_ERASE_INDEX: {
-                const size_t index = TEST_RAND(a.size - 1);
-                b.erase(b.begin() + index);
-                str_erase_index(&a, index);
+                const size_t i = TEST_RAND(a.size - 1);
+                b.erase(b.begin() + i);
+                str_erase_index(&a, i);
                 break;
             }
             case TEST_INSERT_INDEX: {
                 size_t letters = TEST_RAND(512);
                 for (size_t count = 0; count < letters; count++)
                 {
-                    const char value = RAND_ALPHA;
-                    const size_t index = TEST_RAND(a.size);
-                    b.insert(b.begin() + index, value);
-                    str_insert_index(&a, index, value);
+                    const size_t i = TEST_RAND(a.size);
+                    value = RAND_ALPHA;
+                    b.insert(b.begin() + i, value);
+                    str_insert_index(&a, i, value);
                 }
                 break;
             }
@@ -558,43 +554,36 @@ int main(void)
                 size_t letters = TEST_RAND(512);
                 for (size_t count = 0; count < letters; count++)
                 {
-                    const char value = RAND_ALPHA;
-                    const size_t index = TEST_RAND(a.size);
-                    b.insert(b.begin() + index, value);
-                    str_it pos = str_it_begin(&a);
-                    str_it_advance(&pos, index);
-                    str_insert(&pos, value);
+                    const size_t i = TEST_RAND(a.size);
+                    value = RAND_ALPHA;
+                    b.insert(b.begin() + i, value);
+                    it = str_it_begin(&a);
+                    str_it_advance(&it, i);
+                    str_insert(&it, value);
                 }
                 break;
             }
             case TEST_INSERT_COUNT: {
                 size_t count = TEST_RAND(24);
-                const char value = RAND_ALPHA;
-                const size_t index = TEST_RAND(a.size);
                 LOG("insert_count %zu x '%c' at %zu\n", count, value, index);
                 // note: different order of args to vector!
                 b.insert(b.begin() + index, count, value);
                 LOG("STL \"%s\" (%zu)\n", b.c_str(), b.size());
-                str_it pos = str_it_begin(&a);
-                str_it_advance(&pos, index);
-                str_insert_count(&pos, count, value);
+                it = str_it_begin(&a);
+                str_it_advance(&it, index);
+                str_insert_count(&it, count, value);
                 LOG("CTL \"%s\" (%zu)\n", str_c_str(&a), a.size);
                 ADJUST_CAP("insert_count", a, b);
                 CHECK(a, b);
                 break;
             }
             case TEST_INSERT_RANGE: {
-                const size_t index = TEST_RAND(a.size);
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
-                get_random_iters(&aa, &first_a, bb, first_b, last_b);
-                b.insert(b.begin() + index, first_b, last_b);
-                str_it pos = str_it_begin(&a);
-                str_it_advance(&pos, index);
-                str_insert_range(&pos, &first_a);
+                get_random_iters(&aa, &range_a1, bb, first_b1, last_b1);
+                b.insert(b.begin() + index, first_b1, last_b1);
+                it = str_it_begin(&a);
+                str_it_advance(&it, index);
+                str_insert_range(&it, &range_a1);
                 ADJUST_CAP("insert_range", a, b);
                 CHECK(a, b);
                 str_free(&aa);
@@ -634,24 +623,22 @@ int main(void)
                 break;
             }
             case TEST_COPY: {
-                str ca = str_copy(&a);
-                std::string cb = b;
+                aa = str_copy(&a);
+                bb = b;
                 LOG("copy  a: \"%s\": %zu\n", str_c_str(&a), a.capacity);
-                LOG("copy ca: \"%s\": %zu\n", str_c_str(&ca), ca.capacity);
-                CHECK(ca, cb);
-                str_free(&ca);
+                LOG("copy aa: \"%s\": %zu\n", str_c_str(&aa), aa.capacity);
+                CHECK(aa, bb);
+                str_free(&aa);
                 break;
             }
             case TEST_ASSIGN: {
-                const char value = RAND_ALPHA;
-                size_t assign_size = TEST_RAND(a.size);
-                str_assign(&a, assign_size, value);
-                b.assign(assign_size, value);
+                str_assign(&a, index, value);
+                b.assign(index, value);
                 break;
             }
             case TEST_EQUAL: {
-                str aa = str_copy(&a);
-                std::string bb = b;
+                aa = str_copy(&a);
+                bb = b;
                 if (TEST_RAND(2) && a.size)
                 {
                     a.vector[0] = 'a';
@@ -666,17 +653,15 @@ int main(void)
                 size_t size1 = MIN(TEST_RAND(a.size), 5);
                 str_resize(&a, size1, '\0');
                 b.resize(size1);
-                str_it r1a;
-                std::string::iterator r1b, last1_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                size_t index = TEST_RAND(a.size - 1);
-                char value = a.size ? a.vector[index] : 'a';
-                LOG("equal_value %c of \"%.*s\"\n", value, (int)(r1a.end - r1a.ref), r1a.ref);
-                bool same_a = str_equal_value(&r1a, value);
-                bool same_b = r1b != last1_b;
-                for (; r1b != last1_b; r1b++)
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                index = TEST_RAND(a.size - 1);
+                value = a.size ? a.vector[index] : 'a';
+                LOG("equal_value %c of \"%.*s\"\n", value, (int)(range_a1.end - range_a1.ref), range_a1.ref);
+                bool same_a = str_equal_value(&range_a1, value);
+                bool same_b = first_b1 != last_b1;
+                for (; first_b1 != last_b1; first_b1++)
                 {
-                    if (value != *r1b)
+                    if (value != *first_b1)
                     {
                         same_b = false;
                         break;
@@ -687,19 +672,17 @@ int main(void)
                 break;
             }
             case TEST_EQUAL_RANGE: {
-                str aa = str_copy(&a);
-                std::string bb = b;
-                str_it r1a, r2a;
-                std::string::iterator r1b, last1_b, r2b, last2_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                get_random_iters(&aa, &r2a, bb, r2b, last2_b);
-                bool same_a = str_equal_range(&r1a, &r2a);
+                aa = str_copy(&a);
+                bb = b;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+                bool same_a = str_equal_range(&range_a1, &range_a2);
 #if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
-                bool same_b = std::equal(r1b, last1_b, r2b, last2_b);
+                bool same_b = std::equal(first_b1, last_b1, first_b2, last_b2);
                 LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
                 assert(same_a == same_b);
 #else
-                bool same_b = std::equal(r1b, last1_b, r2b);
+                bool same_b = std::equal(first_b1, last_b1, first_b2);
                 LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
                 if (same_a != same_b)
                     printf("std::equal requires C++14 with robust_nonmodifying_seq_ops\n");
@@ -708,24 +691,21 @@ int main(void)
                 break;
             }
             case TEST_LEXICOGRAPHICAL_COMPARE: {
-                str aa = str_copy(&a);
-                std::string bb = b;
-                str_it r1a, r2a;
-                std::string::iterator r1b, last1_b, r2b, last2_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                get_random_iters(&aa, &r2a, bb, r2b, last2_b);
-                bool same_a = str_lexicographical_compare(&r1a, &r2a);
-                bool same_b = std::lexicographical_compare(r1b, last1_b, r2b, last2_b);
+                aa = str_copy(&a);
+                bb = b;
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+                bool same_a = str_lexicographical_compare(&range_a1, &range_a2);
+                bool same_b = std::lexicographical_compare(first_b1, last_b1, first_b2, last_b2);
                 LOG("same_a: %d same_b %d\n", (int)same_a, (int)same_b);
                 assert(same_a == same_b);
                 str_free(&aa);
                 break;
             }
             case TEST_SWAP: {
-                str aa = str_copy(&a);
-                str aaa = str_init("");
+                aa = str_copy(&a);
+                aaa = str_init("");
                 std::string cb = b;
-                std::string bbb;
                 str_swap(&aaa, &aa);
                 std::swap(cb, bbb);
                 LOG_CAP(aaa, bbb);
@@ -735,7 +715,6 @@ int main(void)
                 break;
             }
             case TEST_COUNT: {
-                const char value = RAND_ALPHA;
                 assert(count(b.begin(), b.end(), value) == str_count(&a, value));
                 break;
             }
@@ -757,28 +736,24 @@ int main(void)
                 break;
             }
             case TEST_FIND_IF: {
-                str_it first_a = str_find_if(&a, is_upper);
-                auto bb = std::find_if(b.begin(), b.end(), STL_is_upper);
-                CHECK_ITER(first_a, b, bb);
+                it = str_find_if(&a, is_upper);
+                iter = std::find_if(b.begin(), b.end(), STL_is_upper);
+                CHECK_ITER(it, b, iter);
                 break;
             }
             case TEST_FIND_IF_NOT: {
-                str_it first_a = str_find_if_not(&a, is_upper);
-                auto bb = std::find_if_not(b.begin(), b.end(), STL_is_upper);
-                CHECK_ITER(first_a, b, bb);
+                it = str_find_if_not(&a, is_upper);
+                iter = std::find_if_not(b.begin(), b.end(), STL_is_upper);
+                CHECK_ITER(it, b, iter);
                 break;
             }
             case TEST_FIND_END: {
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(4));
-                str_it range_a2 = str_it_begin(&aa);
-                //print_vec(&a);
-                //print_vec(&aa);
-                str_it it = str_find_end(&a, &range_a2);
-                auto iter = find_end(b.begin(), b.end(), bb.begin(), bb.end());
-                bool found_a = !str_it_done(&it);
-                bool found_b = iter != b.end();
+                range_a2 = str_it_begin(&aa);
+                it = str_find_end(&a, &range_a2);
+                iter = find_end(b.begin(), b.end(), bb.begin(), bb.end());
+                found_a = !str_it_done(&it);
+                found_b = iter != b.end();
                 LOG("=> %s/%s, %ld/%ld\n", found_a ? "yes" : "no", found_b ? "yes" : "no", it.ref - a.vector,
                     iter - b.begin());
                 CHECK_ITER(it, b, iter);
@@ -787,16 +762,12 @@ int main(void)
                 break;
             }
             case TEST_FIND_END_RANGE: {
-                str aa;
-                std::string bb;
-                str_it range_a1;
-                std::string::iterator first_b1, last_b1;
                 get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 gen_strings(&aa, bb, TEST_RAND(4));
-                str_it range_a2 = str_it_begin(&aa);
 #if __cpp_lib_erase_if >= 202002L
-                str_it it = str_find_end_range(&range_a1, &range_a2);
-                auto iter = find_end(first_b1, last_b1, bb.begin(), bb.end());
+                range_a2 = str_it_begin(&aa);
+                it = str_find_end_range(&range_a1, &range_a2);
+                iter = find_end(first_b1, last_b1, bb.begin(), bb.end());
                 LOG("%s in %s\n", range_a2.ref, range_a1.ref);
                 LOG("vs %s in %s\n", bb.c_str(), b.c_str());
                 CHECK_ITER(it, b, iter);
@@ -805,123 +776,102 @@ int main(void)
                 break;
             }
             case TEST_FIND_RANGE: {
-                const char c = RAND_CHAR;
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                bool found_a = str_find_range(&first_a, c);
-                auto bb = std::find(first_b, last_b, c);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                found_a = str_find_range(&range_a1, value);
+                iter = std::find(first_b1, last_b1, value);
                 if (found_a)
-                    assert(bb != last_b);
+                    assert(iter != last_b1);
                 else
-                    assert(bb == last_b);
-                CHECK_RANGE(first_a, bb, last_b);
+                    assert(iter == last_b1);
+                CHECK_RANGE(range_a1, iter, last_b1);
                 CHECK(a, b);
                 break;
             }
             case TEST_FIND_IF_RANGE: {
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                first_a = str_find_if_range(&first_a, is_upper);
-                auto bb = std::find_if(first_b, last_b, STL_is_upper);
-                CHECK_ITER(first_a, b, bb);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                it = str_find_if_range(&range_a1, is_upper);
+                iter = std::find_if(first_b1, last_b1, STL_is_upper);
+                CHECK_ITER(it, b, iter);
                 break;
             }
             case TEST_FIND_IF_NOT_RANGE: {
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                first_a = str_find_if_not_range(&first_a, is_upper);
-                auto bb = std::find_if_not(first_b, last_b, STL_is_upper);
-                CHECK_ITER(first_a, b, bb);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                it = str_find_if_not_range(&range_a1, is_upper);
+                iter = std::find_if_not(first_b1, last_b1, STL_is_upper);
+                CHECK_ITER(it, b, iter);
                 break;
             }
             case TEST_ALL_OF_RANGE: {
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                bool aa = str_all_of_range(&first_a, is_upper);
-                bool bb = std::all_of(first_b, last_b, STL_is_upper);
-                assert(aa == bb);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                found_a = str_all_of_range(&range_a1, is_upper);
+                found_b = std::all_of(first_b1, last_b1, STL_is_upper);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_ANY_OF_RANGE: {
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                bool aa = str_any_of_range(&first_a, is_upper);
-                bool bb = std::any_of(first_b, last_b, STL_is_upper);
-                assert(aa == bb);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                found_a = str_any_of_range(&range_a1, is_upper);
+                found_b = std::any_of(first_b1, last_b1, STL_is_upper);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_NONE_OF_RANGE: {
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                bool aa = str_none_of_range(&first_a, is_upper);
-                bool bb = std::none_of(first_b, last_b, STL_is_upper);
-                assert(aa == bb);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                found_a = str_none_of_range(&range_a1, is_upper);
+                found_b = std::none_of(first_b1, last_b1, STL_is_upper);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_COUNT_IF_RANGE: {
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                size_t numa = str_count_if_range(&first_a, is_upper);
-                size_t numb = std::count_if(first_b, last_b, STL_is_upper);
-                assert(numa == numb); // fails. off by one, counts one too much
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                num_a = str_count_if_range(&range_a1, is_upper);
+                num_b = std::count_if(first_b1, last_b1, STL_is_upper);
+                assert(num_a == num_b);
                 break;
             }
             case TEST_COUNT_RANGE: {
-                char c = RAND_CHAR;
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 // used to fail with 0,0 of 0
-                size_t numa = str_count_range(&first_a, c);
-                size_t numb = count(first_b, last_b, c);
-                assert(numa == numb);
+                num_a = str_count_range(&range_a1, value);
+                num_b = count(first_b1, last_b1, value);
+                assert(num_a == num_b);
                 break;
             }
             case TEST_ALL_OF: {
-                bool is_a = str_all_of(&a, is_upper);
-                bool is_b = all_of(b.begin(), b.end(), STL_is_upper);
-                assert(is_a == is_b);
+                found_a = str_all_of(&a, is_upper);
+                found_b = all_of(b.begin(), b.end(), STL_is_upper);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_ANY_OF: {
-                bool is_a = str_any_of(&a, is_upper);
-                bool is_b = any_of(b.begin(), b.end(), STL_is_upper);
-                assert(is_a == is_b);
+                found_a = str_any_of(&a, is_upper);
+                found_b = any_of(b.begin(), b.end(), STL_is_upper);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_NONE_OF: {
-                bool is_a = str_none_of(&a, is_upper);
-                bool is_b = none_of(b.begin(), b.end(), STL_is_upper);
-                assert(is_a == is_b);
+                found_a = str_none_of(&a, is_upper);
+                found_b = none_of(b.begin(), b.end(), STL_is_upper);
+                assert(found_a == found_b);
                 break;
             }
             case TEST_COUNT_IF: {
-                size_t count_a = str_count_if(&a, is_upper);
-                size_t count_b = count_if(b.begin(), b.end(), STL_is_upper);
-                assert(count_a == count_b);
+                num_a = str_count_if(&a, is_upper);
+                num_b = count_if(b.begin(), b.end(), STL_is_upper);
+                assert(num_a == num_b);
                 break;
             }
             case TEST_GENERATE_RANGE: {
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 str_generate_reset();
-                str_generate_range(&first_a, str_generate);
+                str_generate_range(&range_a1, str_generate);
                 str_generate_reset();
-                std::generate(first_b, last_b, STR_generate);
+                std::generate(first_b1, last_b1, STR_generate);
                 CHECK(a, b);
                 break;
             }
             case TEST_TRANSFORM: {
-                str aa = str_transform(&a, str_untrans);
-                std::string bb;
+                aa = str_transform(&a, str_untrans);
                 bb.resize(b.size());
                 std::transform(b.begin(), b.end(), bb.begin(), STR_untrans);
                 CHECK(aa, bb);
@@ -930,12 +880,11 @@ int main(void)
                 break;
             }
             case TEST_TRANSFORM_IT: {
-                str_it pos = str_it_begin(&a);
-                str_it_advance(&pos, 1);
-                str aa = str_transform_it(&a, &pos, str_bintrans);
+                it = str_it_begin(&a);
+                str_it_advance(&it, 1);
+                aa = str_transform_it(&a, &it, str_bintrans);
                 LOG("\"%s\" (%zu)\n", str_c_str(&aa), aa.size);
 #ifndef _MSC_VER
-                std::string bb;
                 bb.reserve(b.size() - 1);
                 std::transform(b.begin(), b.end() - 1, b.begin() + 1, std::back_inserter(bb), STR_bintrans);
                 LOG("\"%s\" (%zu)\n", bb.c_str(), bb.size());
@@ -948,16 +897,13 @@ int main(void)
             }
             case TEST_UNION: // 49
             {
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_sort(&a);
                 str_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                str aaa = str_union(&a, &aa);
+                aaa = str_union(&a, &aa);
 #ifndef _MSC_VER
-                std::string bbb;
                 std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
                 LOG("STL b + bb => bbb\n");
                 LOG("%s\n", b.c_str());
@@ -977,16 +923,13 @@ int main(void)
                 break;
             }
             case TEST_INTERSECTION: {
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_sort(&a);
                 str_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                str aaa = str_intersection(&a, &aa);
+                aaa = str_intersection(&a, &aa);
 #ifndef _MSC_VER
-                std::string bbb;
                 std::set_intersection(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
                 LOG("%s (%zu)\n", str_c_str(&a), a.size);
                 LOG("%s (%zu)\n", str_c_str(&aa), aa.size);
@@ -1001,16 +944,13 @@ int main(void)
                 break;
             }
             case TEST_SYMMETRIC_DIFFERENCE: {
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_sort(&a);
                 str_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                str aaa = str_symmetric_difference(&a, &aa);
+                aaa = str_symmetric_difference(&a, &aa);
 #ifndef _MSC_VER
-                std::string bbb;
                 std::set_symmetric_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
                 ADJUST_CAP("symmetric_difference", aa, bb);
                 CHECK(aa, bb);
@@ -1022,17 +962,14 @@ int main(void)
                 break;
             }
             case TEST_DIFFERENCE: {
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_sort(&a);
                 str_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
                 // LOG(&a);
-                str aaa = str_difference(&a, &aa);
+                aaa = str_difference(&a, &aa);
 #ifndef _MSC_VER
-                std::string bbb;
                 std::set_difference(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
                 ADJUST_CAP("difference", aa, bb);
                 CHECK(aa, bb);
@@ -1044,29 +981,22 @@ int main(void)
                 break;
             }
             case TEST_UNION_RANGE: {
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_sort(&a);
                 str_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                str_it first_a1;
-                std::string::iterator first_b1, last_b1;
-                get_random_iters(&a, &first_a1, b, first_b1, last_b1);
-                str_it first_a2;
-                std::string::iterator first_b2, last_b2;
-                get_random_iters(&aa, &first_a2, bb, first_b2, last_b2);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
-                LOG("CTL a + aa\n");
-                // LOG_range(first_a1);
-                // LOG_range(first_a2);
-                str aaa = str_union_range(&first_a1, &first_a2);
-                LOG("CTL => aaa\n");
+                // LOG("CTL a + aa\n");
+                // LOG_range(range_a1);
+                // LOG_range(range_a2);
+                aaa = str_union_range(&range_a1, &range_a2);
+                // LOG("CTL => aaa\n");
                 // LOG(&aaa);
 
-                std::string bbb;
-                LOG("STL b + bb\n");
+                // LOG("STL b + bb\n");
                 // LOG(b);
                 // LOG(bb);
 #ifndef _MSC_VER
@@ -1082,28 +1012,20 @@ int main(void)
                 break;
             }
             case TEST_INTERSECTION_RANGE: {
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_sort(&a);
                 str_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                str_it first_a1;
-                std::string::iterator first_b1, last_b1;
-                get_random_iters(&a, &first_a1, b, first_b1, last_b1);
-                str_it first_a2;
-                std::string::iterator first_b2, last_b2;
-                get_random_iters(&aa, &first_a2, bb, first_b2, last_b2);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
-                LOG("CTL a - aa\n");
-                // LOG_range(first_a1);
-                // LOG_range(first_a2);
-                str aaa = str_intersection_range(&first_a1, &first_a2);
-                LOG("CTL => aaa (%zu)\n", aaa.size);
-
-                std::string bbb;
-                LOG("STL b - bb\n");
+                // LOG("CTL a - aa\n");
+                // LOG_range(range_a1);
+                // LOG_range(range_a2);
+                aaa = str_intersection_range(&range_a1, &range_a2);
+                // LOG("CTL => aaa (%zu)\n", aaa.size);
+                // LOG("STL b - bb\n");
                 // LOG(b);
                 // LOG(bb);
 #ifndef _MSC_VER
@@ -1119,29 +1041,20 @@ int main(void)
                 break;
             }
             case TEST_DIFFERENCE_RANGE: {
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_sort(&a);
                 str_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                str_it first_a1;
-                std::string::iterator first_b1, last_b1;
-                get_random_iters(&a, &first_a1, b, first_b1, last_b1);
-                str_it first_a2;
-                std::string::iterator first_b2, last_b2;
-                get_random_iters(&aa, &first_a2, bb, first_b2, last_b2);
-
-                LOG("CTL a + aa\n");
-                // LOG_range(first_a1);
-                // LOG_range(first_a2);
-                str aaa = str_difference_range(&first_a1, &first_a2);
-                LOG("CTL => aaa\n");
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+                // LOG("CTL a + aa\n");
+                // LOG_range(range_a1);
+                // LOG_range(range_a2);
+                aaa = str_difference_range(&range_a1, &range_a2);
+                // LOG("CTL => aaa\n");
                 // LOG(&aaa);
-
-                std::string bbb;
-                LOG("STL b + bb\n");
+                // LOG("STL b + bb\n");
                 // LOG(b);
                 // LOG(bb);
 #ifndef _MSC_VER
@@ -1157,29 +1070,22 @@ int main(void)
                 break;
             }
             case TEST_SYMMETRIC_DIFFERENCE_RANGE: {
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_sort(&a);
                 str_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                str_it first_a1;
-                std::string::iterator first_b1, last_b1;
-                get_random_iters(&a, &first_a1, b, first_b1, last_b1);
-                str_it first_a2;
-                std::string::iterator first_b2, last_b2;
-                get_random_iters(&aa, &first_a2, bb, first_b2, last_b2);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
-                LOG("CTL a + aa\n");
-                // LOG_range(first_a1);
-                // LOG_range(first_a2);
-                str aaa = str_symmetric_difference_range(&first_a1, &first_a2);
-                LOG("CTL => aaa\n");
+                // LOG("CTL a + aa\n");
+                // LOG_range(range_a1);
+                // LOG_range(range_a2);
+                aaa = str_symmetric_difference_range(&range_a1, &range_a2);
+                // LOG("CTL => aaa\n");
                 // LOG(&aaa);
 
-                std::string bbb;
-                LOG("STL b + bb\n");
+                // LOG("STL b + bb\n");
                 // LOG(b);
                 // LOG(bb);
 #ifndef _MSC_VER
@@ -1203,8 +1109,6 @@ int main(void)
                 break;
             }
             case TEST_IOTA_RANGE: {
-                str_it range_a1;
-                std::string::iterator first_b1, last_b1;
                 get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 str_iota_range(&range_a1, 'a');
                 LOG("%s\n", str_c_str(&a));
@@ -1230,12 +1134,10 @@ int main(void)
                 break;
             }
             case TEST_SHUFFLE_RANGE: {
-                str_it first_a1;
-                std::string::iterator first_b1, last_b1;
                 LOG("%s\n", str_c_str(&a));
-                get_random_iters(&a, &first_a1, b, first_b1, last_b1);
-                str_shuffle_range(&first_a1);
-                LOG("\"%.*s\"\n", (int)(last_b1 - first_b1), first_a1.ref);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                str_shuffle_range(&range_a1);
+                LOG("\"%.*s\"\n", (int)(last_b1 - first_b1), range_a1.ref);
 #ifndef NEED_RANDOM_ENGINE
                 std::random_shuffle(first_b1, last_b1);
 #else
@@ -1253,17 +1155,14 @@ int main(void)
             case TEST_TRANSFORM_RANGE: {
                 if (a.size < 2)
                     break;
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                str aa = str_init(a.vector);
-                str_it dest = str_it_begin(&aa);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                aa = str_init(a.vector);
+                it = str_it_begin(&aa);
                 /*str_it it = */
-                str_transform_range(&first_a, dest, str_untrans);
-                std::string bb;
-                bb.resize(last_b - first_b);
+                str_transform_range(&range_a1, it, str_untrans);
+                bb.resize(last_b1 - first_b1);
                 /*auto iter = */
-                std::transform(first_b, last_b, b.begin() + 1, bb.begin(), STR_bintrans);
+                std::transform(first_b1, last_b1, b.begin() + 1, bb.begin(), STR_bintrans);
                 ADJUST_CAP("transform_range", aa, bb);
                 // CHECK_ITER(it, bb, iter);
                 CHECK(aa, bb);
@@ -1272,23 +1171,20 @@ int main(void)
                 break;
             }
             case TEST_GENERATE_N_RANGE: {
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &first_a, b, first_b, last_b);
-                size_t off = first_b - b.begin();
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                size_t off = first_b1 - b.begin();
                 size_t count = TEST_RAND(20 - off);
                 str_generate_reset();
-                str_generate_n_range(&first_a, count, str_generate);
+                str_generate_n_range(&range_a1, count, str_generate);
                 str_generate_reset();
-                std::generate_n(first_b, count, STR_generate);
+                std::generate_n(first_b1, count, STR_generate);
                 CHECK(a, b);
                 break;
             }
 #endif // DEBUG
             case TEST_COPY_IF: {
-                str aa = str_copy_if(&a, is_upper);
+                aa = str_copy_if(&a, is_upper);
 #ifndef _MSC_VER // fails to compile
-                std::string bb;
 #if __cplusplus >= 201103L
                 std::copy_if(b.begin(), b.end(), std::back_inserter(bb), STL_is_upper);
 #else
@@ -1305,16 +1201,13 @@ int main(void)
                 break;
             }
             case TEST_COPY_IF_RANGE: {
-                str_it range;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
-                str aa = str_copy_if_range(&range, is_upper);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                aa = str_copy_if_range(&range_a1, is_upper);
 #ifndef _MSC_VER // fails to compile
-                std::string bb;
 #if __cplusplus >= 201103L
-                std::copy_if(first_b, last_b, std::back_inserter(bb), STL_is_upper);
+                std::copy_if(first_b1, last_b1, std::back_inserter(bb), STL_is_upper);
 #else
-                for (auto d = first_b; d != last_b; d++) {
+                for (auto d = first_b1; d != last_b1; d++) {
                     if (STL_is_upper(*d))
                         bb.push_back(*d);
                 }
@@ -1330,30 +1223,26 @@ int main(void)
             {
                 if (a.size < 2)
                     break;
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_it b1, b2;
                 b1 = str_it_begin(&a);
                 b2 = str_it_begin(&aa);
-                str_it r1a, r2a;
-                std::string::iterator r1b, last1_b, r2b, last2_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                get_random_iters(&aa, &r2a, bb, r2b, last2_b);
-                /*bool found_a = */ str_mismatch(&r1a, &r2a);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+                /*bool found_a = */ str_mismatch(&range_a1, &range_a2);
 #if __cpp_lib_robust_nonmodifying_seq_ops >= 201304L
-                auto pair = std::mismatch(r1b, last1_b, r2b, last2_b);
+                auto pair = std::mismatch(first_b1, last_b1, first_b2, last_b2);
 #else
-                if (!bb.size() || !distance(r2b, last2_b))
+                if (!bb.size() || !distance(first_b2, last_b2))
                 {
                     printf("skip std::mismatch with empty 2nd range. use C++14\n");
                     str_free(&aa);
                     break;
                 }
-                auto pair = std::mismatch(r1b, last1_b, r2b);
+                auto pair = std::mismatch(first_b1, last_b1, first_b2);
 #endif
-                int d1a = str_it_distance(&b1, &r1a);
-                int d2a = str_it_distance(&b2, &r2a);
+                int d1a = str_it_distance(&b1, &range_a1);
+                int d2a = str_it_distance(&b2, &range_a2);
                 LOG("iter1 %d, iter2 %d\n", d1a, d2a);
                 // TODO check found_a against iter results
                 assert(d1a == distance(b.begin(), pair.first));
@@ -1362,109 +1251,96 @@ int main(void)
                 break;
             }
             case TEST_SEARCH: // 52, using strstr
-            {
-                str aa = str_copy(&a);
-                std::string bb = b;
-                str_it first_a;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&aa, &first_a, bb, first_b, last_b);
+                aa = str_copy(&a);
+                bb = b;
+                get_random_iters(&aa, &range_a1, bb, first_b1, last_b1);
                 if (aa.size && TEST_RAND(2))
                 { // 50% unsuccessful
-                    size_t i = first_b - bb.begin();
+                    const size_t i = first_b1 - bb.begin();
                     str_set(&aa, i, ' ');
                     bb[i] = ' ';
                 }
-                LOG("search \"%s\" in \"%s\" (%zu)\n", first_a.ref, a.vector, a.size);
-                // print_str_range(first_a);
-                str_it found_a = str_search(&a, &first_a);
-                auto found_b = search(b.begin(), b.end(), first_b, last_b);
-                LOG("found a: %s\n", str_it_done(&found_a) ? "no" : "yes");
-                LOG("found b: %s\n", found_b == b.end() ? "no" : "yes");
-                CHECK_ITER(found_a, b, found_b);
-                str_free(&aa);
-                break;
-            }
-            case TEST_SEARCH_RANGE: {
-                str aa = str_copy(&a);
-                std::string bb = b;
-                str_it needle, range;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&aa, &needle, bb, first_b, last_b);
-                if (aa.size && TEST_RAND(2))
-                { // 50% unsuccessful
-                    size_t i = first_b - bb.begin();
-                    str_set(&aa, i, ' ');
-                    bb[i] = ' ';
-                }
-                LOG("search \"%s\" in \"%s\" (%zu)\n", needle.ref, a.vector, a.size);
-                // print_str_range(needle);
-                range = str_it_begin(&a);
-                bool found = str_search_range(&range, &needle);
-                auto iter = search(b.begin(), b.end(), first_b, last_b);
-                LOG("found a: %s\n", found ? "yes" : "no");
+                LOG("search \"%s\" in \"%s\" (%zu)\n", range_a1.ref, a.vector, a.size);
+                // print_str_range(range_a1);
+                it = str_search(&a, &range_a1);
+                iter = search(b.begin(), b.end(), first_b1, last_b1);
+                LOG("found a: %s\n", str_it_done(&it) ? "no" : "yes");
                 LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
-                assert(found == !str_it_done(&range));
-                CHECK_ITER(range, b, iter);
+                CHECK_ITER(it, b, iter);
                 str_free(&aa);
                 break;
-            }
+            case TEST_SEARCH_RANGE:
+                aa = str_copy(&a);
+                bb = b;
+                get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
+                if (aa.size && TEST_RAND(2))
+                { // 50% unsuccessful
+                    size_t i = first_b2 - bb.begin();
+                    str_set(&aa, i, ' ');
+                    bb[i] = ' ';
+                }
+                LOG("search \"%s\" in \"%s\" (%zu)\n", range_a2.ref, a.vector, a.size);
+                // print_str_range(needle);
+                it = str_it_begin(&a);
+                found_a = str_search_range(&it, &range_a2);
+                iter = search(b.begin(), b.end(), first_b2, last_b2);
+                LOG("found a: %s\n", found_a ? "yes" : "no");
+                LOG("found b: %s\n", iter == b.end() ? "no" : "yes");
+                assert(found_a == !str_it_done(&it));
+                CHECK_ITER(it, b, iter);
+                str_free(&aa);
+                break;
             case TEST_SEARCH_N: {
                 //print_str(&a);
                 size_t count = TEST_RAND(4);
-                char c = RAND_CHAR;
-                LOG("search_n %zu %c\n", count, c);
-                str_it aa = str_search_n(&a, count, c);
-                auto bb = search_n(b.begin(), b.end(), count, c);
-                CHECK_ITER(aa, b, bb);
-                LOG("found %s at %zu\n", str_it_done(&aa) ? "no" : "yes",
-                    str_it_index(&aa));
+                LOG("search_n %zu %c\n", count, value);
+                it = str_search_n(&a, count, value);
+                iter = search_n(b.begin(), b.end(), count, value);
+                CHECK_ITER(it, b, iter);
+                LOG("found %s at %zu\n", str_it_done(&it) ? "no" : "yes",
+                    str_it_index(&it));
                 break;
             }
             case TEST_SEARCH_N_RANGE: {
-                str_it range;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 size_t count = TEST_RAND(4);
-                char c = RAND_CHAR;
-                LOG("search_n_range %zu %c\n", count, c);
-                //print_str_range(&range);
-                str_it *aa = str_search_n_range(&range, count, c);
-                auto bb = search_n(first_b, last_b, count, c);
-                CHECK_RANGE(*aa, bb, last_b);
-                LOG("found %s at %zu\n", str_it_done(aa) ? "no" : "yes",
-                    str_it_index(aa));
+                LOG("search_n_range_a1 %zu %c\n", count, value);
+                //print_str_range(&range_a1);
+                pos = str_search_n_range(&range_a1, count, value);
+                iter = search_n(first_b1, last_b1, count, value);
+                CHECK_RANGE(*pos, iter, last_b1);
+                LOG("found %s at %zu\n", str_it_done(pos) ? "no" : "yes",
+                    str_it_index(pos));
                 break;
             }
             case TEST_ADJACENT_FIND: {
                 LOG("%s\n", str_c_str(&a));
-                str_it aa = str_adjacent_find(&a);
-                auto bb = adjacent_find(b.begin(), b.end());
-                CHECK_ITER(aa, b, bb);
-                LOG("found %s\n", str_it_done(&aa) ? "no" : "yes");
+                it = str_adjacent_find(&a);
+                iter = adjacent_find(b.begin(), b.end());
+                CHECK_ITER(it, b, iter);
+                LOG("found %s\n", str_it_done(&it) ? "no" : "yes");
                 break;
             }
             case TEST_ADJACENT_FIND_RANGE: {
-                str_it range;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 LOG("%s\n", str_c_str(&a));
-                str_it *aa = str_adjacent_find_range(&range);
-                auto bb = adjacent_find(first_b, last_b);
-                CHECK_ITER(*aa, b, bb);
-                LOG("found %s\n", str_it_done(aa) ? "no" : "yes");
+                pos = str_adjacent_find_range(&range_a1);
+                iter = adjacent_find(first_b1, last_b1);
+                CHECK_ITER(*pos, b, iter);
+                LOG("found %s\n", str_it_done(pos) ? "no" : "yes");
                 break;
             }
 #ifdef DEBUG
             case TEST_UNIQUE: {
                 // print_str(&a);
-                str_it aa = str_unique(&a);
-                bool found_a = !str_it_done(&aa);
-                size_t index = str_it_index(&aa);
+                it = str_unique(&a);
+                found_a = !str_it_done(&it);
+                index = str_it_index(&it);
                 // print_str(&a);
                 // C++ is special here with its move hack
-                auto bb = unique(b.begin(), b.end());
-                bool found_b = bb != b.end();
-                long dist = std::distance(b.begin(), bb);
+                iter = unique(b.begin(), b.end());
+                found_b = iter != b.end();
+                long dist = std::distance(b.begin(), iter);
                 b.resize(dist);
                 LOG("found %s at %zu of \"%s\" ", found_a ? "yes" : "no", index, a.vector);
                 LOG("vs found %s at %ld of \"%s\"\n", found_b ? "yes" : "no", dist, b.c_str());
@@ -1474,22 +1350,20 @@ int main(void)
                 break;
             }
             case TEST_UNIQUE_RANGE: {
-                str_it range;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
-                LOG("\"%.*s\" of \"%s\"\n", (int)(range.end - range.ref), range.ref, a.vector);
-                str_it aa = str_unique_range(&range);
-                bool found_a = !str_it_done(&aa);
-                size_t index = str_it_index(&aa);
-                auto bb = unique(first_b, last_b);
-                bool found_b = bb != last_b;
-                long dist = std::distance(b.begin(), bb);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                LOG("\"%.*s\" of \"%s\"\n", (int)(range_a1.end - range_a1.ref), range_a1.ref, a.vector);
+                it = str_unique_range(&range_a1);
+                found_a = !str_it_done(&it);
+                index = str_it_index(&it);
+                iter = unique(first_b1, last_b1);
+                found_b = iter != last_b1;
+                long dist = std::distance(b.begin(), iter);
                 if (found_b)
-                    b.erase(bb, last_b);
-                LOG("found %s at %zu => \"%.*s\" ", found_a ? "yes" : "no", index, (int)(range.end - range.ref),
-                    range.ref);
-                LOG("vs found %s at %ld => \"%.*s\"\n", found_b ? "yes" : "no", dist, (int)(last_b - first_b),
-                    &(*first_b));
+                    b.erase(iter, last_b1);
+                LOG("found %s at %zu => \"%.*s\" ", found_a ? "yes" : "no", index, (int)(range_a1.end - range_a1.ref),
+                    range_a1.ref);
+                LOG("vs found %s at %ld => \"%.*s\"\n", found_b ? "yes" : "no", dist, (int)(last_b1 - first_b1),
+                    &(*first_b1));
                 assert(found_a == found_b);
                 assert((long)index == dist);
                 break;
@@ -1498,97 +1372,77 @@ int main(void)
             case TEST_LOWER_BOUND: {
                 str_sort(&a);
                 std::sort(b.begin(), b.end());
-                const char key = RAND_CHAR;
-                str_it aa = str_lower_bound(&a, key);
-                auto bb = lower_bound(b.begin(), b.end(), key);
-                if (bb != b.end())
+                it = str_lower_bound(&a, value);
+                iter = lower_bound(b.begin(), b.end(), value);
+                if (iter != b.end())
                 {
-                    LOG("%c: %c vs %c\n", key, *aa.ref, *bb);
+                    LOG("%c: %c vs %c\n", value, *it.ref, *iter);
                 }
-                CHECK_ITER(aa, b, bb);
+                CHECK_ITER(it, b, iter);
                 break;
             }
             case TEST_UPPER_BOUND: {
                 str_sort(&a);
                 std::sort(b.begin(), b.end());
-                const char key = RAND_CHAR;
-                str_it aa = str_upper_bound(&a, key);
-                auto bb = upper_bound(b.begin(), b.end(), key);
-                if (bb != b.end())
+                it = str_upper_bound(&a, value);
+                iter = upper_bound(b.begin(), b.end(), value);
+                if (iter != b.end())
                 {
-                    LOG("%c: %c vs %c\n", key, *aa.ref, *bb);
+                    LOG("%c: %c vs %c\n", value, *it.ref, *iter);
                 }
-                CHECK_ITER(aa, b, bb);
+                CHECK_ITER(it, b, iter);
                 break;
             }
-            case TEST_LOWER_BOUND_RANGE: {
+            case TEST_LOWER_BOUND_RANGE:
                 str_sort(&a);
                 std::sort(b.begin(), b.end());
-                const char key = RAND_CHAR;
-                str_it range;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
-                str_it *aa = str_lower_bound_range(&range, key);
-                auto bb = lower_bound(first_b, last_b, key);
-                if (bb != last_b)
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                pos = str_lower_bound_range(&range_a1, value);
+                iter = lower_bound(first_b1, last_b1, value);
+                if (iter != last_b1)
                 {
-                    LOG("%c: %c vs %c\n", key, *aa->ref, *bb);
+                    LOG("%c: %c vs %c\n", value, *pos->ref, *iter);
                 }
-                CHECK_RANGE(*aa, bb, last_b);
+                CHECK_RANGE(*pos, iter, last_b1);
                 break;
-            }
-            case TEST_UPPER_BOUND_RANGE: {
+            case TEST_UPPER_BOUND_RANGE:
                 str_sort(&a);
                 std::sort(b.begin(), b.end());
-                const char key = RAND_CHAR;
-                str_it range;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
-                str_it *aa = str_upper_bound_range(&range, key);
-                auto bb = upper_bound(first_b, last_b, key);
-                if (bb != last_b)
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                pos = str_upper_bound_range(&range_a1, value);
+                iter = upper_bound(first_b1, last_b1, value);
+                if (iter != last_b1)
                 {
-                    LOG("%c: %c vs %c\n", key, *aa->ref, *bb);
+                    LOG("%c: %c vs %c\n", value, *pos->ref, *iter);
                 }
-                CHECK_RANGE(*aa, bb, last_b);
+                CHECK_RANGE(*pos, iter, last_b1);
                 break;
-            }
             case TEST_BINARY_SEARCH: // 73
-            {
                 str_sort(&a);
                 std::sort(b.begin(), b.end());
-                char key = RAND_ALPHA;
-                bool found_a = str_binary_search(&a, key);
-                bool found_b = binary_search(b.begin(), b.end(), key);
-                LOG("%c: %d vs %d\n", key, (int)found_a, (int)found_b);
+                found_a = str_binary_search(&a, value);
+                found_b = binary_search(b.begin(), b.end(), value);
+                LOG("%c: %d vs %d\n", value, (int)found_a, (int)found_b);
                 assert(found_a == found_b);
                 break;
-            }
-            case TEST_BINARY_SEARCH_RANGE: {
+            case TEST_BINARY_SEARCH_RANGE:
                 str_sort(&a);
                 std::sort(b.begin(), b.end());
-                str_it range;
-                std::string::iterator first_b, last_b;
-                get_random_iters(&a, &range, b, first_b, last_b);
-                char key = RAND_ALPHA;
-                bool found_a = str_binary_search_range(&range, key);
-                bool found_b = binary_search(first_b, last_b, key);
-                LOG("%c: %d vs %d\n", key, (int)found_a, (int)found_b);
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                found_a = str_binary_search_range(&range_a1, value);
+                found_b = binary_search(first_b1, last_b1, value);
+                LOG("%c: %d vs %d\n", value, (int)found_a, (int)found_b);
                 assert(found_a == found_b);
                 break;
-            }
-            case TEST_MERGE: {
+            case TEST_MERGE:
                 //str_sort(&a);
                 //std::sort(b.begin(), b.end());
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 //str_sort(&aa);
                 //std::sort(bb.begin(), bb.end());
 
-                str aaa = str_merge(&a, &aa);
+                aaa = str_merge(&a, &aa);
 # ifndef _MSC_VER
-                std::string bbb;
                 std::merge(b.begin(), b.end(), bb.begin(), bb.end(), std::back_inserter(bbb));
                 LOG("merge \"%s\", \"%s\" => \"%s\" (%zu)\n", a.vector, aa.vector, aaa.vector, aaa.size);
                 LOG("vs    \"%s\", \"%s\" => \"%s\" (%zu)\n", b.c_str(), bb.c_str(), bbb.c_str(), bbb.size());
@@ -1598,23 +1452,17 @@ int main(void)
                 str_free(&aa);
                 str_free(&aaa);
                 break;
-            }
-            case TEST_MERGE_RANGE: {
+            case TEST_MERGE_RANGE:
                 str_sort(&a);
                 std::sort(b.begin(), b.end());
-                str aa;
-                std::string bb;
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_sort(&aa);
                 std::sort(bb.begin(), bb.end());
-                str_it range_a1, range_a2;
-                std::string::iterator first_b1, last_b1, first_b2, last_b2;
                 get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
-                str aaa = str_merge_range(&range_a1, &range_a2);
+                aaa = str_merge_range(&range_a1, &range_a2);
 #ifndef _MSC_VER
-                std::string bbb;
                 std::merge(first_b1, last_b1, first_b2, last_b2, std::back_inserter(bbb));
                 LOG("merge_range \"%.*s\", \"%.*s\" => \"%s\" (%zu)\n", (int)(range_a1.end - range_a1.ref),
                     range_a1.ref, (int)(range_a2.end - range_a2.ref), range_a2.ref, aaa.vector, aaa.size);
@@ -1626,98 +1474,75 @@ int main(void)
                 str_free(&aa);
                 str_free(&aaa);
                 break;
-            }
-            case TEST_INCLUDES: {
-                str aa;
-                std::string bb;
+            case TEST_INCLUDES:
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_sort(&a);
                 str_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                bool a_found = str_includes(&a, &aa);
-                bool b_found = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
-                LOG("includes \"%.*s\", \"%.*s\" => %d\n", (int)a.size, a.vector, (int)aa.size, aa.vector, (int)a_found);
+                found_a = str_includes(&a, &aa);
+                found_b = std::includes(b.begin(), b.end(), bb.begin(), bb.end());
+                LOG("includes \"%.*s\", \"%.*s\" => %d\n", (int)a.size, a.vector, (int)aa.size, aa.vector, (int)found_a);
                 LOG("vs       \"%.*s\", \"%.*s\" => %d\n", (int)b.size(), b.c_str(), (int)bb.size(), bb.c_str(),
-                    (int)b_found);
-                assert(a_found == b_found);
+                    (int)found_b);
+                assert(found_a == found_b);
                 CHECK(aa, bb);
                 str_free(&aa);
                 break;
-            }
-            case TEST_INCLUDES_RANGE: {
-                str aa;
-                std::string bb;
+            case TEST_INCLUDES_RANGE:
                 gen_strings(&aa, bb, TEST_RAND(a.size));
                 str_sort(&a);
                 str_sort(&aa);
                 std::sort(b.begin(), b.end());
                 std::sort(bb.begin(), bb.end());
-                str_it range_a1;
-                std::string::iterator first_b1, last_b1;
                 get_random_iters(&a, &range_a1, b, first_b1, last_b1);
-                str_it range_a2;
-                std::string::iterator first_b2, last_b2;
                 get_random_iters(&aa, &range_a2, bb, first_b2, last_b2);
 
-                bool a_found = str_includes_range(&range_a1, &range_a2);
-                std::string bbb;
-                bool b_found = std::includes(first_b1, last_b1, first_b2, last_b2);
+                found_a = str_includes_range(&range_a1, &range_a2);
+                found_b = std::includes(first_b1, last_b1, first_b2, last_b2);
                 LOG("includes_range   \"%.*s\", \"%.*s\" => %d\n", (int)(range_a1.end - range_a1.ref),
-                    range_a1.ref, (int)(range_a2.end - range_a2.ref), range_a2.ref, (int)a_found);
+                    range_a1.ref, (int)(range_a2.end - range_a2.ref), range_a2.ref, (int)found_a);
                 LOG("vs std::includes \"%.*s\", \"%.*s\" => %d\n", (int)(last_b1 - first_b1), &(*first_b1),
-                    (int)(last_b2 - first_b2), &(*first_b2), (int)b_found);
-                assert(a_found == b_found);
+                    (int)(last_b2 - first_b2), &(*first_b2), (int)found_b);
+                assert(found_a == found_b);
                 CHECK(aa, bb);
                 str_free(&aa);
                 break;
-            }
-            case TEST_IS_SORTED: {
-                str_it r1a;
-                std::string::iterator r1b, last1_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                //print_str_range(r1a);
-                bool a_yes = str_is_sorted(&r1a);
-                bool b_yes = std::is_sorted(r1b, last1_b);
-                LOG("a_yes: %d b_yes %d\n", (int)a_yes, (int)b_yes);
-                assert(a_yes == b_yes);
+            case TEST_IS_SORTED:
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                //print_str_range(range_a1);
+                found_a = str_is_sorted(&range_a1);
+                found_b = std::is_sorted(first_b1, last_b1);
+                LOG("a_yes: %d b_yes %d\n", (int)found_a, (int)found_b);
+                assert(found_a == found_b);
                 break;
-            }
-            case TEST_IS_SORTED_UNTIL: {
-                str_it r1a, r2a;
-                str_it *it;
-                std::string::iterator r1b, last1_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
-                //print_str_range(r1a);
-                r2a = r1a;
-                r2a.ref = r1a.end;
-                it = str_is_sorted_until(&r1a, &r2a);
-                r1b = std::is_sorted_until(r1b, last1_b);
-                LOG("=> %s/%s, %ld/%ld: %c/%c\n", !str_it_done(it) ? "yes" : "no", r1b != last1_b ? "yes" : "no",
-                    str_it_index(it), distance(b.begin(), r1b), !str_it_done(it) ? *it->ref : -1,
-                    r1b != last1_b ? *r1b : -1);
-                CHECK_RANGE(*it, r1b, last1_b);
+            case TEST_IS_SORTED_UNTIL:
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
+                //print_str_range(range_a1);
+                range_a2 = range_a1;
+                range_a2.ref = range_a1.end;
+                pos = str_is_sorted_until(&range_a1, &range_a2);
+                first_b1 = std::is_sorted_until(first_b1, last_b1);
+                LOG("=> %s/%s, %ld/%ld: %c/%c\n", !str_it_done(pos) ? "yes" : "no", first_b1 != last_b1 ? "yes" : "no",
+                    str_it_index(pos), distance(b.begin(), first_b1), !str_it_done(pos) ? *pos->ref : -1,
+                    first_b1 != last_b1 ? *first_b1 : -1);
+                CHECK_RANGE(*pos, first_b1, last_b1);
                 break;
-            }
-            case TEST_REVERSE: {
+            case TEST_REVERSE:
                 LOG("%s\n", a.vector);
                 str_reverse(&a);
                 std::reverse(b.begin(), b.end());
                 LOG("%s\n", a.vector);
                 CHECK(a, b);
                 break;
-            }
-            case TEST_REVERSE_RANGE: {
-                str_it r1a;
-                std::string::iterator r1b, last1_b;
-                get_random_iters(&a, &r1a, b, r1b, last1_b);
+            case TEST_REVERSE_RANGE:
+                get_random_iters(&a, &range_a1, b, first_b1, last_b1);
                 LOG("%s\n", a.vector);
-                str_reverse_range(&r1a);
-                std::reverse(r1b, last1_b);
+                str_reverse_range(&range_a1);
+                std::reverse(first_b1, last_b1);
                 LOG("%s\n", a.vector);
                 CHECK(a, b);
                 break;
-            }
 
             default:
 #ifdef DEBUG
