@@ -9,6 +9,7 @@
 #define POD
 #define T int
 #define N 4
+#define INCLUDE_ALGORITHM
 #include "ctl/array.h"
 
 int main()

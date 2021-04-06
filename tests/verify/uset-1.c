@@ -5,6 +5,7 @@
 
 #define POD
 #define T int
+#define INCLUDE_ALGORITHM
 #include "ctl/unordered_set.h"
 
 int main()

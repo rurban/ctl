@@ -8,6 +8,7 @@
 
 #define POD
 #define T int
+#define INCLUDE_ALGORITHM
 #include "ctl/list.h"
 
 int main()

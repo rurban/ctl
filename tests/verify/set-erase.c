@@ -6,6 +6,7 @@
 
 #define POD
 #define T int
+#define INCLUDE_ALGORITHM
 #include "ctl/set.h"
 
 void check(set_int *a)
