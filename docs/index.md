@@ -323,6 +323,7 @@ Many other header-only STL variants in C exist:
 * [Gena](https://github.com/cher-nov/Gena)
 * [OpenCSTL](https://github.com/springkim/OpenCSTL)
 * https://github.com/LeoVen/C-Macro-Collections
+* [STC](https://github.com/tylov/STC) _(Windows preferred)_
 
 In its infancies:
 * [CSTL](https://github.com/brliron/CSTL)
