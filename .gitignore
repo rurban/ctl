@@ -35,6 +35,9 @@ a.out
 /tests/func/test_unordered_set_sleep
 /tests/func/test_vec_capacity
 /tests/func/test_vector
+/tests/func/test_*.dSYM
+/tests/perf/*.dSYM
+/tests/perf/*/*.dSYM
 /tests/perf/*.log
 /examples/6502
 /examples/astar
