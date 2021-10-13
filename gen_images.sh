@@ -1,7 +1,7 @@
 #!/bin/sh
 CC="gcc -std=c11"
 CXX="g++ -std=c++17"
-CFLAGS="-O3 -march=native"
+CFLAGS="-O3 -march=native -I."
 VERSION=$($CXX --version | head -1)
 if test -z "$PNG"; then
   PNG="uset uset_pow2 uset_cached _set pqu vec slist list deq arr compile"

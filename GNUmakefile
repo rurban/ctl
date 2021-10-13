@@ -265,7 +265,7 @@ clean:
 	@rm -f $(EXAMPLES)
 	@rm -f $(PERFS_C) $(PERFS_CC) $(VERIFY)
 	@rm -f *.gcov *.gcda *.gcno
-	@rm -f tests/perf/arr/perf_arr_generate
+	@rm -f tests/perf/arr/perf_arr_generate tests/perf/arr/gen_arr*
 	@rm -f tests/perf/*.log
 	@rm -f docs/man/ctl.h.3 $(MANPAGES)
 	@if test -d docs/man; then rmdir docs/man; fi

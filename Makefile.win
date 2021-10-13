@@ -163,6 +163,7 @@ clean:
 	-@del $(TESTS)
 	-@del $(EXAMPLES)
 	-@del tests/perf/*/*.exe
+        -@del tests/perf/arr/gen_arr*
 
 help:
 	@echo " make targets for the ctl, a header-only library for C"
