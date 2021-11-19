@@ -40,6 +40,12 @@ static inline I JOIN(A, find_if)(A *self, int _match(T *))
 }
 
 // C++11
+/*@
+  requires valid:	\valid_read(self + (0..self->size-1));
+  assigns		\nothing;
+  ensures result:	0 <= \result <= self->size;
+  ensures result:	\result == FindNotEqual(self, self->size, v);
+*/
 static inline I JOIN(A, find_if_not)(A *self, int _match(T *))
 {
     foreach (A, self, i)
