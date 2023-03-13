@@ -351,7 +351,7 @@ And in its grandiosity (esp. not header-only):
 * http://sglib.sourceforge.net/
 * [Smart pointer for GNUC](https://github.com/Snaipe/libcsptr)
 * [STB stretchy buffer](https://github.com/nothings/stb)
-* https://github.com/tylov/C99Containers
+* https://github.com/tylov/STC
 * https://github.com/amadvance/tommyds
 * https://github.com/2cats/cstl-lite
 * https://github.com/ljianhui/libcontainer
