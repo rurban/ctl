@@ -27,17 +27,18 @@ jobs:
           - make -j4 SANITIZE=1 O0=1
           - make -j4 CC='gcc -std=c99'
           - make -j4 CC='gcc -std=c11'
-          - make -j4 CXX='clang++-9 -std=c++2a -stdlib=libc++'
+          - make -j4 CXX='clang++-11 -std=c++2a -stdlib=libc++'
           - make examples SANITIZE=1
           - make perf
     steps:
     # needed for libc++ since the Ubuntu 20.04.2 update (image version 20210315.1)
     # https://askubuntu.com/questions/1211743/clang-doesnt-find-c-stdlib-on-my-ubuntu-18-04-but-it-does-on-a-brand-new-ins
-    # variant 1: downgrade clang++ to matching g++ (= 9)
-    - run: |
-        sudo apt-get install clang++-9 libc++-9-dev libc++abi-9-dev
+    # variant 1: downgrade clang++ to matching g++ (= 11)
+    - if: ${{ contains(matrix.MAKE, 'libc++') }}
+      run: |
+        sudo apt-get install clang++-11 libc++-11-dev libc++abi-11-dev
         clang++ --version
-        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-9 100
+        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-11 100
         clang++ --version
         g++ --version
     - uses: actions/checkout@v2
