@@ -31,10 +31,11 @@ typedef unsigned char unsigned_char;
 #include <ctl/stack.h>
 
 #include "charpint.hh"
+
 typedef char *charp;
 #define TK charp
+#define T int
 #define POD
-#define T float
 #include <ctl/map.h>
 
 #define POD
@@ -107,18 +108,18 @@ void print_deq_int(deq_int *a)
 
 int main(void)
 {
-#define TEST_LIST(type, v1, v2)                                                                                        \
-    {                                                                                                                  \
-        type a = type##_init();                                                                                        \
-        type##_push_back(&a, v1);                                                                                      \
-        type##_it found = type##_find(&a, v1);                                                                         \
-        assert(!type##_it_done(&found)); /* equal */                                                                   \
-        type##_push_back(&a, v2);                                                                                      \
-        type b = type##_copy(&a);                                                                                      \
-        type##_sort(&a); /* compare */                                                                                 \
-        assert(type##_equal(&a, &b));                                                                                  \
-        type##_free(&a);                                                                                               \
-        type##_free(&b);                                                                                               \
+#define TEST_LIST(type, v1, v2)                                                 \
+    {                                                                           \
+        type a = type##_init();                                                 \
+        type##_push_back(&a, v1);                                               \
+        type##_it found = type##_find(&a, v1);                                  \
+        assert(!type##_it_done(&found)); /* equal */                            \
+        type##_push_back(&a, v2);                                               \
+        type b = type##_copy(&a);                                               \
+        type##_sort(&a); /* compare */                                          \
+        assert(type##_equal(&a, &b));                                           \
+        type##_free(&a);                                                        \
+        type##_free(&b);                                                        \
     }
 
     TEST_LIST(deq_int, 1, 2);
@@ -136,11 +137,11 @@ int main(void)
         stack_uint8_t_free(&a);
     }
     {
-        map_charpfloat a = map_charpfloat_init(NULL);
-        map_charpfloat_insert(&a, 1.f); // compare
-        map_charpfloat_it found = map_charpfloat_find(&a, 1.f);
-        assert(!map_charpfloat_it_done(&found)); // equal
-        map_charpfloat_free(&a);
+        map_charpint a = map_charpint_init(NULL);
+        map_charpint_insert(&a, 1.f); // compare
+        map_charpint_it found = map_charpint_find(&a, 1.f);
+        assert(!map_charpint_it_done(&found)); // equal
+        map_charpint_free(&a);
     }
     TEST_LIST(vec_double, 1.0, 2.0);
     {

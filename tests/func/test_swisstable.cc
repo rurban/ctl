@@ -21,44 +21,44 @@ typedef char* charp;
 #include <unordered_set>
 #include <unordered_map>
 
-#define FOREACH_METH(TEST)                                                                                             \
-    TEST(SELF)                                                                                                         \
-    TEST(INSERT)                                                                                                       \
-    TEST(INSERT_FOUND)                                                                                                 \
-    TEST(CONTAINS)                                                                                                     \
-    TEST(CLEAR)                                                                                                        \
-    TEST(SWAP)                                                                                                         \
-    TEST(COUNT)                                                                                                        \
-    TEST(FIND)                                                                                                         \
-    TEST(COPY)                                                                                                         \
-    TEST(EQUAL)                                                                                                        \
-    TEST(REHASH)                                                                                                       \
-    TEST(RESERVE)                                                                                                      \
-    TEST(FIND_IF)                                                                                                      \
+#define FOREACH_METH(TEST)                                                      \
+    TEST(SELF)                                                                  \
+    TEST(INSERT)                                                                \
+    TEST(INSERT_FOUND)                                                          \
+    TEST(CONTAINS)                                                              \
+    TEST(CLEAR)                                                                 \
+    TEST(SWAP)                                                                  \
+    TEST(COUNT)                                                                 \
+    TEST(FIND)                                                                  \
+    TEST(COPY)                                                                  \
+    TEST(EQUAL)                                                                 \
+    TEST(REHASH)                                                                \
+    TEST(RESERVE)                                                               \
+    TEST(FIND_IF)                                                               \
     TEST(FIND_IF_NOT)
 
-#define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(ERASE)                                                                                                        \
-    TEST(ERASE_IF)                                                                                                     \
-    TEST(ALL_OF)                                                                                                       \
-    TEST(ANY_OF)                                                                                                       \
-    TEST(NONE_OF)                                                                                                      \
-    TEST(COUNT_IF)                                                                                                     \
-    TEST(UNION) /* 20 */                                                                                               \
-    TEST(INTERSECTION)                                                                                                 \
-    TEST(DIFFERENCE)                                                                                                   \
-    TEST(SYMMETRIC_DIFFERENCE)                                                                                         \
-    TEST(GENERATE)                                                                                                     \
-    TEST(GENERATE_N)                                                                                                   \
-    TEST(TRANSFORM)                                                                                                    \
-    TEST(COPY_IF)                                                                                                      \
-    TEST(EMPLACE)                                                                                                      \
-    TEST(EMPLACE_FOUND)                                                                                                \
-    TEST(EMPLACE_HINT) /* 30 */                                                                                        \
-    TEST(MERGE)                                                                                                        \
-    TEST(MERGE_RANGE)                                                                                                  \
-    TEST(EXTRACT) /* 33 */                                                                                             \
-    TEST(INSERT_GENERIC)                                                                                               \
+#define FOREACH_DEBUG(TEST)                                                     \
+    TEST(ERASE)                                                                 \
+    TEST(ERASE_IF)                                                              \
+    TEST(ALL_OF)                                                                \
+    TEST(ANY_OF)                                                                \
+    TEST(NONE_OF)                                                               \
+    TEST(COUNT_IF)                                                              \
+    TEST(UNION) /* 20 */                                                        \
+    TEST(INTERSECTION)                                                          \
+    TEST(DIFFERENCE)                                                            \
+    TEST(SYMMETRIC_DIFFERENCE)                                                  \
+    TEST(GENERATE)                                                              \
+    TEST(GENERATE_N)                                                            \
+    TEST(TRANSFORM)                                                             \
+    TEST(COPY_IF)                                                               \
+    TEST(EMPLACE)                                                               \
+    TEST(EMPLACE_FOUND)                                                         \
+    TEST(EMPLACE_HINT) /* 30 */                                                 \
+    TEST(MERGE)                                                                 \
+    TEST(MERGE_RANGE)                                                           \
+    TEST(EXTRACT) /* 33 */                                                      \
+    TEST(INSERT_GENERIC)                                                        \
     TEST(REMOVE_IF)
 
 #define GENERATE_ENUM(x) TEST_##x,
@@ -82,39 +82,39 @@ static const char *test_names[] = {
     ""};
 #endif
 
-#define CHECK(_x, _y)                                                                                                  \
-    {                                                                                                                  \
-        assert(_x.size == _y.size());                                                                                  \
-        if (_x.size > 0)                                                                                               \
-        {                                                                                                              \
-            size_t a_found = 0;                                                                                        \
-            size_t b_found = 0;                                                                                        \
-            foreach (hmap_charp, &_x, _it)                                                                            \
-            {                                                                                                          \
-                str *_key = &_it.ref->key;                                                                             \
-                auto _found = _y.find(str_c_str(_key));                                                                \
-                assert(_found != _y.end());                                                                            \
-                a_found++;                                                                                             \
-            }                                                                                                          \
-            for (auto x : _y)                                                                                          \
-            {                                                                                                          \
-                const char *_key = x.first.c_str();                                                                    \
-                hmap_charp_it _found = hmap_charp_find(&_x, key);                                                    \
-                assert(!hmap_charp_it_done(&_found));                                                                 \
-                strint_free(&d);                                                                                       \
-                b_found++;                                                                                             \
-            }                                                                                                          \
-            assert(a_found == b_found);                                                                                \
-        }                                                                                                              \
+#define CHECK(_x, _y)                                                           \
+    {                                                                           \
+        assert(_x.size == _y.size());                                           \
+        if (_x.size > 0)                                                        \
+        {                                                                       \
+            size_t a_found = 0;                                                 \
+            size_t b_found = 0;                                                 \
+            foreach (hmap_charp, &_x, _it)                                      \
+            {                                                                   \
+                str *_key = &_it.ref->key;                                      \
+                auto _found = _y.find(str_c_str(_key));                         \
+                assert(_found != _y.end());                                     \
+                a_found++;                                                      \
+            }                                                                   \
+            for (auto x : _y)                                                   \
+            {                                                                   \
+                const char *_key = x.first.c_str();                             \
+                hmap_charp_it _found = hmap_charp_find(&_x, key);               \
+                assert(!hmap_charp_it_done(&_found));                           \
+                strint_free(&d);                                                \
+                b_found++;                                                      \
+            }                                                                   \
+            assert(a_found == b_found);                                         \
+        }                                                                       \
     }
 
-#define CHECK_ITER(_it, b, _iter)                                                                                      \
-    if (!hmap_charp_it_done(&_it))                                                                                    \
-    {                                                                                                                  \
-        assert(_iter != b.end());                                                                                      \
-        assert(*_it.ref->value == *(*_iter).value);                                                                    \
-    }                                                                                                                  \
-    else                                                                                                               \
+#define CHECK_ITER(_it, b, _iter)                                               \
+    if (!hmap_charp_it_done(&_it))                                              \
+    {                                                                           \
+        assert(_iter != b.end());                                               \
+        assert(*_it.ref->value == *(*_iter).value);                             \
+    }                                                                           \
+    else                                                                        \
         assert(_iter == b.end())
 
 #ifdef DEBUG
