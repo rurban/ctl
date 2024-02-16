@@ -38,9 +38,9 @@ CFLAGS  = -I.
 CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
 CFLAGS += -g
 # only targetting intel
-CAN_MARCH_NATIVE!=(${CC} ${CFLAGS} -march=native tests/func/test_c11.c) || true
+CAN_MARCH_NATIVE!=(${CC} ${CFLAGS} -march=native -mtune=native tests/func/test_c11.c) || true
 .if ${CAN_MARCH_NATIVE} != ""
-CFLAGS += -march=native
+CFLAGS += -march=native -mtune=native
 .endif
 
 .ifdef LONG

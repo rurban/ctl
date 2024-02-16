@@ -46,9 +46,9 @@ CFLAGS  = -I.
 CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
 CFLAGS += -g
 # only targetting intel
-TRY_MARCH_NATIVE := $(shell $(CC) $(CFLAGS) -march=native tests/verify/vector-1.c -o /dev/null)
+TRY_MARCH_NATIVE := $(shell $(CC) $(CFLAGS) -march=native -mtune=native tests/verify/vector-1.c -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
-CFLAGS += -march=native
+CFLAGS += -march=native -mtune=native
 endif
 
 ifeq (1, $(LONG))
