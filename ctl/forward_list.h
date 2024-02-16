@@ -243,7 +243,7 @@ static inline void JOIN(A, disconnect)(A *self, B *node)
         self->head = self->head->next;
     else
     {
-        B *prev;
+        B *prev = self->head;
         for (B *tail = self->head; tail != node; prev = tail, tail = tail->next)
             ;
         if (prev->next) // == node
