@@ -18,17 +18,29 @@ OLD_MAIN
     TEST(EMPLACE)                                                                                                      \
     TEST(SWAP)
 
+#define FOREACH_DEBUG(TEST)                                                                                            \
+    TEST(EMPTY)
+
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
 
+// clang-format off
 enum
 {
     FOREACH_METH(GENERATE_ENUM)
+#ifdef DEBUG
+    FOREACH_DEBUG(GENERATE_ENUM)
+#endif
     TEST_TOTAL
 };
 static const int number_ok = (int)TEST_TOTAL;
 #ifdef DEBUG
-static const char *test_names[] = {FOREACH_METH(GENERATE_NAME) FOREACH_DEBUG(GENERATE_NAME) ""};
+static const char *test_names[] = {
+    FOREACH_METH(GENERATE_NAME)
+    FOREACH_DEBUG(GENERATE_NAME)
+    ""
+};
+// clang-format on
 
 #define TEST_MAX_VALUE 100
 #else
@@ -122,6 +134,24 @@ int main(void)
             pqu_digi_emplace(&a, &v1);
             break;
         }
+#ifdef DEBUG
+        case TEST_EMPTY: {
+            aa = pqu_digi_copy(&a);
+            while (aa.size > 0)
+            {
+                pqu_digi_pop(&aa);
+            }
+            bb = b;
+            while (bb.size() > 0)
+            {
+                bb.pop();
+            }
+            assert(!pqu_digi_empty(&a));
+            assert(pqu_digi_empty(&aa));
+            assert(b.empty());
+            pqu_digi_free(&aa);
+        }
+#endif
         }
         CHECK(a, b);
         pqu_digi_free(&a);
