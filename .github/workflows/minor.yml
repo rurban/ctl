@@ -31,6 +31,9 @@ jobs:
           - make examples SANITIZE=1
           - make perf
     steps:
+    - if: ${{ contains(matrix.MAKE, 'SANITIZE=1 O0=1') }}
+      name: setup cbmc
+      run: sudo apt install -y --no-install-recommends cbmc
     # needed for libc++ since the Ubuntu 20.04.2 update (image version 20210315.1)
     # https://askubuntu.com/questions/1211743/clang-doesnt-find-c-stdlib-on-my-ubuntu-18-04-but-it-does-on-a-brand-new-ins
     # variant 1: downgrade clang++ to matching g++ (= 11)
@@ -43,6 +46,9 @@ jobs:
         g++ --version
     - uses: actions/checkout@v2
     - run:  ${{ matrix.MAKE }}
+    - if: ${{ contains(matrix.MAKE, 'SANITIZE=1 O0=1') }}
+      name: make verify
+      run:  ${{ matrix.MAKE }} verify
   windows:
     runs-on: windows-latest
     steps:
