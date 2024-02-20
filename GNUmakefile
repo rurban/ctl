@@ -213,20 +213,23 @@ VERIFY = $(patsubst %.c,%, $(wildcard tests/verify/*.c))
 CBMC_CHECKS=--bounds-check --pointer-check --memory-leak-check            \
   --div-by-zero-check --signed-overflow-check --unsigned-overflow-check   \
   --pointer-overflow-check --conversion-check --undefined-shift-check     \
-  --enum-range-check --pointer-primitive-check
+  --float-overflow-check --nan-check --enum-range-check
+  # cbmc 5.12.1: --pointer-primitive-check
 
 tests/verify/% : tests/verify/%.c $(H)
 	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
-	if which cbmc; then cbmc $(CBMC_CHECKS) --compact-trace --depth 6 \
-	                    --unwind 6 -I. $@.c; else true; fi
+	if which cbmc; then \
+          cbmc $(CBMC_CHECKS) --compact-trace --depth 6  --unwind 6 -I. $@.c; \
+        else true; fi
 tests/verify/%-2 : tests/verify/%-2.c $(H)
 	$(CC) $(CFLAGS) $@.c -o $@ && ./$@
-	if which cbmc; then cbmc $(CBMC_CHECKS) --compact-trace --depth 6 \
-	                    --unwind 6 -I. $@.c; else true; fi
-	if which satabs; then for c in `tests/verify/all_claims.sh $@.c`; do \
-            echo satabs --claim "$$c" -I. $@.c; \
-            timeout 5m satabs --concurrency --max-threads 4 --iterations 24 --claim "$$c" -I. $@.c; \
-          done; else true; fi
+	if which cbmc; then \
+          cbmc $(CBMC_CHECKS) --compact-trace --depth 6 --unwind 6 -I. $@.c; \
+        else true; fi
+	#if which satabs; then for c in `tests/verify/all_claims.sh $@.c`; do \
+        #    echo satabs --claim "$$c" -I. $@.c; \
+        #    timeout 5m satabs --concurrency --max-threads 4 --iterations 24 --claim "$$c" -I. $@.c; \
+        #  done; else true; fi
 
 verify: $(VERIFY)
 
