@@ -143,12 +143,12 @@ check: ${TESTS} docs/index.md
 	@${CXX} --version | head -n2
 	@echo ${CXX} ${CXXFLAGS}
 
-all: check perf examples api.lst #verify
+all: check perf examples api.lst compile_commands.json #verify
 
-api.lst: $(H)
+api.lst: $(H) makefile
 	grep '^JOIN(A, ' ctl/*.h | perl -pe 's/JOIN\(A, (\w+?)\)/ $1/' >$@
 .cflags: ALWAYS
-	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
+	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ >/dev/null || mv $@.tmp $@
 images:
 	./gen_images.sh
 
@@ -261,7 +261,7 @@ ${srcc2} : ${srcc2}.c .cflags ${H}
 verify: ${VERIFY}
 
 cppcheck:
-	cppcheck -j4 -I. tests/func/
+	cppcheck -j4 -I. --check-level=exhaustive tests/func/
 
 #tests/func/%: tests/func/%.cc .cflags ${H}
 #	${CXX} ${CXXFLAGS} -o $@ $@.cc
@@ -337,7 +337,8 @@ tests/func/test_int_vector: .cflags ${COMMON_H} tests/test.h ctl/vector.h \
 	${CXX} ${CXXFLAGS} -o $@ $@.cc
 
 compile_commands.json : $(H) makefile
-	make clean; bear make
+	-$(MAKE) clean
+	bear -- $(MAKE)
 
 asan:
 	$(MAKE) SANITIZE=1

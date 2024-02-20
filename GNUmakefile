@@ -162,13 +162,13 @@ check: $(TESTS) docs/index.md
 	@$(CXX) --version | head -n2
 	@echo $(CXX) $(CXXFLAGS)
 
-all: check perf examples api.lst verify
+all: check perf examples api.lst compile_commands.json verify
 
 api.lst: $(H) GNUmakefile
 	perl -lne'/^static.*JOIN\(A, (\w+)\)(.+\))$$/ && print "$$ARGV: $$1 $$2"' ctl/*.h > $@
 
 .cflags: ALWAYS
-	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ || mv $@.tmp $@
+	@echo "$(CC);$(CXX) $(CFLAGS)" >$@.tmp; cmp $@.tmp $@ >/dev/null || mv $@.tmp $@
 images:
 	./gen_images.sh
 
@@ -205,7 +205,8 @@ tests/perf/perf_compile_cc_algorithm: tests/perf/perf_compile_cc.cc
 	$(CXX) $(CXXFLAGS) -DALGORITHM -o $@ tests/perf/perf_compile_cc.cc
 
 compile_commands.json : $(H) GNUmakefile
-	make clean; bear make
+	-make clean
+	bear -- make
 
 examples: $(EXAMPLES)
 
@@ -234,7 +235,7 @@ tests/verify/%-2 : tests/verify/%-2.c $(H)
 verify: $(VERIFY)
 
 cppcheck:
-	cppcheck -j4 -I. tests/func/
+	cppcheck -j4 -I. --check-level=exhaustive tests/func/
 
 MANPAGES = $(patsubst docs/%.md,docs/man/%.h.3, $(wildcard docs/*.md))
 
