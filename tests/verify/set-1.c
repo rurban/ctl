@@ -36,7 +36,9 @@ int main()
     set_int_it pos = set_int_begin(&a);
     set_int_find_range(&pos, a1);
 #ifdef CBMC
-    pos->end = nondet_int();
+    pos->begin = nondet_uint();
+    pos->end = nondet_uint();
+    _CPROVER_assume (pos->begin <= pos->end);
 #endif
     set_int_find_range(&pos, a1);
     set_int_erase_it(&pos);
