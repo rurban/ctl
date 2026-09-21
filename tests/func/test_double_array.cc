@@ -312,7 +312,7 @@ int main(void)
     for (unsigned loop = 0; loop < loops; loop++)
     {
         arr20_double a, aa, aaa;
-        std::array<double, 20> b, bb, bbb;
+        std::array<double, 20> b{}, bb{}, bbb{};
         arr20_double_it range_a1, range_a2, it;
         arr20_double_it *pos;
         std::array<double, 20>::iterator first_b1, last_b1, first_b2, last_b2, iter;
