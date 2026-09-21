@@ -797,7 +797,16 @@ except maybe `max_bucket_count`. hashmap policies are compile-time defined via
 `#define CTL_USET_...` and `#define CTL_HMAP_...`
 
 **u8string** will get proper utf-8/unicode support, exceeding C++ STL.
-compare will check u8strings normalized to NFD.
+`compare`/`equal`/hashing check u8strings by NFD-normalizing a *temporary
+copy*; the stored bytes are never rewritten in place (raised in
+[#23](https://github.com/rurban/ctl/issues/23)). Two distinct code points
+that both normalize to the same NFD sequence (e.g. `Å` U+00C5 vs `Å`
+U+212B) therefore compare equal under the default `compare`/`equal` —
+this is canonical-equivalence, not codepoint identity, and is a
+deliberate policy, not a bug. Callers who need strict codepoint identity
+(e.g. security-sensitive identifier comparisons) must use a raw
+byte-compare method instead of the default NFD-normalizing one, or use
+**u8ident**'s confusable detection below.
 No wstring, u16string and u32string (most likely).
 
 **u8ident**: POSIX std extension for people using utf-8 identifiers, but
