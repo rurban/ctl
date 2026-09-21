@@ -62,6 +62,7 @@ all containers in ISO C99/C11:
 | [ctl/map.h](map.md)                       | std::map             | map      |
 | [ctl/unordered_map.h](unordered_map.md)   | std::unordered_map   | umap     |
 | [ctl/unordered_set.h](unordered_set.md)   | std::unordered_set   | uset     |
+| [ctl/swisstable.h](swisstable.md)         | open-addressing map  | swiss_TK_T        |
 | [ctl/flat_set.h](flat_set.md)             | std::flat_set        | fset (C++23)     |
 | [ctl/flat_multiset.h](flat_multiset.md)   | std::flat_multiset   | fmset (C++23)    |
 | [ctl/flat_map.h](flat_map.md)             | std::flat_map        | fmap (C++23)     |
@@ -76,7 +77,6 @@ In work:
 
 [ctl/pair.h](pair.md),
 [ctl/hashmap.h](hashmap.md),
-[ctl/swisstable.h](swisstable.md),
 [ctl/u8string.h](u8string.md),
 [ctl/u8ident.h](u8ident.md).
 
