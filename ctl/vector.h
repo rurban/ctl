@@ -384,7 +384,7 @@ static inline void JOIN(A, resize)(A *self, size_t size, T value)
             JOIN(A, fit)(self, capacity);
 #endif
         }
-        for (size_t i = 0; self->size < size; i++)
+        while (self->size < size)
             JOIN(A, push_back)(self, self->copy(&value));
     }
     if (self->free)
