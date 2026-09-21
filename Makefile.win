@@ -12,7 +12,7 @@ LONG = 0
 SANITIZE = 0
 SRAND = 1
 
-CFLAGS  = /I. /Ot /DSRAND /Wall /nologo /Zc:__cplusplus
+CFLAGS  = /I. /Ot /F8388608 /DSRAND /Wall /nologo /Zc:__cplusplus
 #CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
 #CFLAGS += -march=native
 #CFLAGS += -g
