@@ -78,7 +78,8 @@ all containers in ISO C99/C11:
 
 [docs/overload.md](overload.md) documents optionally dropping the
 type prefix from `vector.h` and `unordered_set.h` calls, via clang's
-`__attribute__((overloadable))` or a C11 `_Generic` dispatch macro.
+`__attribute__((overloadable))` or the portable `<ctl/generic.h>`
+`_Generic` dispatch helper.
 
 In work:
 
