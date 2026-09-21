@@ -141,6 +141,8 @@ TESTS = \
 	tests/func/test_unordered_set_static_hash \
 	tests/func/test_swisstable \
 	tests/func/test_bvector \
+	tests/func/test_span \
+	tests/func/test_strv \
 	tests/func/test_priority_queue \
 	tests/func/test_queue \
 	tests/func/test_stack \

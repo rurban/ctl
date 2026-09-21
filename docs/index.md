@@ -70,6 +70,8 @@ all containers in ISO C99/C11:
 | [ctl/flat_multimap.h](flat_multimap.md)   | std::flat_multimap   | fmmap (C++23)    |
 | [ctl/inplace_vector.h](inplace_vector.md) | std::inplace_vector  | inplace_vecN (C++26) |
 | [ctl/hive.h](hive.md)                     | std::hive            | hive (C++26)     |
+| [ctl/span.h](span.md)                     | std::span            | span     |
+| [ctl/strv.h](strv.md)                     | std::string_view     | strv     |
 |------------------------------------------------|----------------------|
 | [ctl/algorithm.h](algorithm.md)           | `<algorithm>`        |
 | [ctl/numeric.h](numeric.md)               | `<numeric>`          |
@@ -731,7 +733,6 @@ not just the GNU libstdc++ v3.
 
 Work is ongoing to finish the rest of `algorithm.h`, `numeric.h` and `memory.h`,
 add `pair` for map and `btree_set`, add proper string and identifier support.
-`string_view` and `span` (i.e. vector\_view) not yet planned.
 
 On errors, like `size > max_size` return silently. This avoids DDOS attacks.
 When assert is used, throw them. (when assert.h included, no NDEBUG. This is
@@ -773,7 +774,7 @@ growth policies, but not its mistakes.
 STL multiset and multimap variants will not be implemented because
 similar behaviour can be implemented as an amalgamation of a `set` and `list`.
 
-STL string_view, span and short string optimizations are still missing.
+STL short string optimizations are still missing.
 
 STL methods returning a pair of iterator and bool have a `_found` suffix,
 return the iterator and set a `int *foundp` value. Eg.
