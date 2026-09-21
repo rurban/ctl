@@ -57,6 +57,7 @@ all containers in ISO C99/C11:
 | [ctl/stack.h](stack.md)                   | std::stack           | stack    |
 | [ctl/string.h](string.md)                 | std::string          | str      |
 | [ctl/vector.h](vector.md)                 | std::vector          | vec      |
+| [ctl/bvector.h](bvector.md)               | packed boolean vector | bvec     |
 | [ctl/btree_set.h](btree_set.md)         | B-tree set          | btset             |
 | [ctl/array.h](array.md)                   | std::array           | arrNNNN  |
 | [ctl/map.h](map.md)                       | std::map             | map      |
