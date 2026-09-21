@@ -11,9 +11,13 @@ a.out
 /tests/func/test_container_composing
 /tests/func/test_deque
 /tests/func/test_double_array
+/tests/func/test_flat_map
+/tests/func/test_flat_set
 /tests/func/test_forward_list
 /tests/func/test_generic_iter
 /tests/func/test_generic_iter2
+/tests/func/test_hive
+/tests/func/test_inplace_vector
 /tests/func/test_int_vector
 /tests/func/test_integral
 /tests/func/test_integral_c11

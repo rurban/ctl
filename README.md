@@ -61,6 +61,12 @@ all containers in ISO C99/C11:
 | [ctl/map.h](docs/map.md)                       | std::map             | map      |
 | [ctl/unordered_map.h](docs/unordered_map.md)   | std::unordered_map   | umap     |
 | [ctl/unordered_set.h](docs/unordered_set.md)   | std::unordered_set   | uset     |
+| [ctl/flat_set.h](docs/flat_set.md)             | std::flat_set        | fset (C++23)     |
+| [ctl/flat_multiset.h](docs/flat_multiset.md)   | std::flat_multiset   | fmset (C++23)    |
+| [ctl/flat_map.h](docs/flat_map.md)             | std::flat_map        | fmap (C++23)     |
+| [ctl/flat_multimap.h](docs/flat_multimap.md)   | std::flat_multimap   | fmmap (C++23)    |
+| [ctl/inplace_vector.h](docs/inplace_vector.md) | std::inplace_vector  | inplace_vecN (C++26) |
+| [ctl/hive.h](docs/hive.md)                     | std::hive            | hive (C++26)     |
 |------------------------------------------------|----------------------|
 | [ctl/algorithm.h](docs/algorithm.md)           | `<algorithm>`        |
 | [ctl/numeric.h](docs/numeric.md)               | `<numeric>`          |
