@@ -771,6 +771,32 @@ static inline A *JOIN(A, move_range)(I *range, A *out)
 //#pragma message "vector: no INCLUDE_ALGORITHM"
 //#endif
 
+// Optional: drop the vec_T_ prefix for common self-pointer methods via
+// clang's __attribute__((overloadable)). Opt-in per instantiation with
+// #define CTL_OVERLOADABLE before #include <ctl/vector.h>. `free` is
+// intentionally not wrapped: it would collide with the standard library
+// free(void*). See docs/overload.md.
+#if defined(CTL_OVERLOADABLE) && defined(__clang__)
+static inline __attribute__((overloadable)) size_t size(A *self) { return JOIN(A, size)(self); }
+static inline __attribute__((overloadable)) int empty(A *self) { return JOIN(A, empty)(self); }
+static inline __attribute__((overloadable)) size_t capacity(A *self) { return JOIN(A, capacity)(self); }
+static inline __attribute__((overloadable)) T *at(A *self, size_t index) { return JOIN(A, at)(self, index); }
+static inline __attribute__((overloadable)) T *front(A *self) { return JOIN(A, front)(self); }
+static inline __attribute__((overloadable)) T *back(A *self) { return JOIN(A, back)(self); }
+static inline __attribute__((overloadable)) T *data(A *self) { return JOIN(A, data)(self); }
+static inline __attribute__((overloadable)) I begin(A *self) { return JOIN(A, begin)(self); }
+static inline __attribute__((overloadable)) I end(A *self) { return JOIN(A, end)(self); }
+static inline __attribute__((overloadable)) void push_back(A *self, T value) { JOIN(A, push_back)(self, value); }
+static inline __attribute__((overloadable)) void pop_back(A *self) { JOIN(A, pop_back)(self); }
+static inline __attribute__((overloadable)) void clear(A *self) { JOIN(A, clear)(self); }
+static inline __attribute__((overloadable)) A copy(A *self) { return JOIN(A, copy)(self); }
+static inline __attribute__((overloadable)) void swap(A *self, A *other) { JOIN(A, swap)(self, other); }
+static inline __attribute__((overloadable)) void reserve(A *self, size_t n) { JOIN(A, reserve)(self, n); }
+static inline __attribute__((overloadable)) void shrink_to_fit(A *self) { JOIN(A, shrink_to_fit)(self); }
+static inline __attribute__((overloadable)) void insert_index(A *self, size_t index, T value) { JOIN(A, insert_index)(self, index, value); }
+static inline __attribute__((overloadable)) I erase_index(A *self, size_t index) { return JOIN(A, erase_index)(self, index); }
+#endif
+
 #undef A
 #undef I
 #undef MUST_ALIGN_16

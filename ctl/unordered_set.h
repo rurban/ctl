@@ -1350,6 +1350,30 @@ static inline A JOIN(A, transform)(A *self, T _unop(T *))
 
 // transform_it with binop makes no sense with random ordering.
 
+// Optional: drop the uset_T_ prefix for common self-pointer methods via
+// clang's __attribute__((overloadable)). Opt-in per instantiation with
+// #define CTL_OVERLOADABLE before #include <ctl/unordered_set.h>. `free`
+// is intentionally not wrapped: it would collide with the standard
+// library free(void*). See docs/overload.md.
+#if defined(CTL_OVERLOADABLE) && defined(__clang__)
+static inline __attribute__((overloadable)) size_t size(A *self) { return JOIN(A, size)(self); }
+static inline __attribute__((overloadable)) int empty(A *self) { return JOIN(A, empty)(self); }
+static inline __attribute__((overloadable)) size_t bucket_count(A *self) { return JOIN(A, bucket_count)(self); }
+static inline __attribute__((overloadable)) float load_factor(A *self) { return JOIN(A, load_factor)(self); }
+static inline __attribute__((overloadable)) void max_load_factor(A *self, float f) { JOIN(A, max_load_factor)(self, f); }
+static inline __attribute__((overloadable)) void reserve(A *self, size_t n) { JOIN(A, reserve)(self, n); }
+static inline __attribute__((overloadable)) void rehash(A *self, size_t n) { JOIN(A, rehash)(self, n); }
+static inline __attribute__((overloadable)) I begin(A *self) { return JOIN(A, begin)(self); }
+static inline __attribute__((overloadable)) I end(A *self) { return JOIN(A, end)(self); }
+static inline __attribute__((overloadable)) void insert(A *self, T value) { JOIN(A, insert)(self, value); }
+static inline __attribute__((overloadable)) void erase(A *self, T value) { JOIN(A, erase)(self, value); }
+static inline __attribute__((overloadable)) I find(A *self, T value) { return JOIN(A, find)(self, value); }
+static inline __attribute__((overloadable)) size_t count(A *self, T value) { return JOIN(A, count)(self, value); }
+static inline __attribute__((overloadable)) bool contains(A *self, T value) { return JOIN(A, contains)(self, value); }
+static inline __attribute__((overloadable)) void clear(A *self) { JOIN(A, clear)(self); }
+static inline __attribute__((overloadable)) A copy(A *self) { return JOIN(A, copy)(self); }
+static inline __attribute__((overloadable)) void swap(A *self, A *other) { JOIN(A, swap)(self, other); }
+#endif
 #if defined CTL_UMAP && defined INCLUDE_ALGORITHM
 #include <ctl/algorithm.h>
 #endif

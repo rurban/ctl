@@ -8,6 +8,7 @@ a.out
 /.cflags.tmp
 /tests/func/test_array
 /tests/func/test_btree_set
+/tests/func/test_bvector
 /tests/func/test_c11
 /tests/func/test_container_composing
 /tests/func/test_deque
@@ -16,6 +17,7 @@ a.out
 /tests/func/test_flat_map
 /tests/func/test_flat_set
 /tests/func/test_forward_list
+/tests/func/test_generic_dispatch
 /tests/func/test_generic_iter
 /tests/func/test_generic_iter2
 /tests/func/test_hive
@@ -25,14 +27,17 @@ a.out
 /tests/func/test_integral_c11
 /tests/func/test_list
 /tests/func/test_map
+/tests/func/test_overload
 /tests/func/test_priority_queue
 /tests/func/test_queue
 /tests/func/test_set
 /tests/func/test_set_join_split
 /tests/func/test_slist
+/tests/func/test_span
 /tests/func/test_stack
 /tests/func/test_str_capacity
 /tests/func/test_string
+/tests/func/test_strv
 /tests/func/test_swisstable
 /tests/func/test_u8ident
 /tests/func/test_u8string

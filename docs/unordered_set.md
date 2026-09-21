@@ -35,6 +35,9 @@ constant-time complexity.
 The function names are composed of the prefix **uset_**, the user-defined type
 **T** and the method name. E.g `uset_int` with `#define T int`.
 
+See [overload](overload.md) for optionally dropping the `uset_T_` prefix
+(`insert(&a, 1)` instead of `uset_int_insert(&a, 1)`).
+
 Internally, the elements are not sorted in any particular order, but organized
 into buckets. Which bucket an element is placed into depends entirely on the
 hash of its value. This allows fast access to individual elements, since once a

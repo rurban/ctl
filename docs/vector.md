@@ -32,6 +32,9 @@ any function that expects a pointer to an element of an array.
 The function names are composed of the prefix **vec_**, the user-defined type
 **T** and the method name. E.g `vec_int` with `#define T int`.
 
+See [overload](overload.md) for optionally dropping the `vec_T_` prefix
+(`push_back(&a, 1)` instead of `vec_int_push_back(&a, 1)`).
+
 Reallocations are usually costly operations in terms of performance. The
 `reserve` function can be used to eliminate reallocations if the number of
 elements is known beforehand.

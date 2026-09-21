@@ -76,6 +76,10 @@ all containers in ISO C99/C11:
 | [ctl/algorithm.h](docs/algorithm.md)           | `<algorithm>`        |
 | [ctl/numeric.h](docs/numeric.md)               | `<numeric>`          |
 
+[docs/overload.md](docs/overload.md) documents optionally dropping the
+type prefix from `vector.h` and `unordered_set.h` calls, via clang's
+`__attribute__((overloadable))` or a C11 `_Generic` dispatch macro.
+
 In work:
 
 [ctl/pair.h](docs/pair.md),
