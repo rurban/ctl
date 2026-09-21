@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 # nmake windows makefile just for GitHub Actions
 PREFIX = install
-CC = cl
+CC = cl /std:c11
 # works with c++17 also
 CXX = cl /std:c++latest
 
@@ -72,7 +72,12 @@ TESTS = \
 	tests\func\test_vector.exe \
 	tests\func\test_int_vector.exe \
 	tests\func\test_vec_capacity.exe \
-	tests\func\test_str_capacity.exe
+	tests\func\test_str_capacity.exe \
+	tests\func\test_span.exe \
+	tests\func\test_strv.exe \
+	tests\func\test_bvector.exe \
+	tests\func\test_swisstable.exe \
+	tests\func\test_btree_set.exe
 !ifdef DEBUG
 TESTS +=.exe \
 	tests\func\test_map.exe \
@@ -110,6 +115,11 @@ all: $(TESTS)
 	tests\func\test_str_capacity.exe
 	tests\func\test_generic_iter.exe
 	tests\func\test_generic_iter2.exe
+	tests\func\test_span.exe
+	tests\func\test_strv.exe
+	tests\func\test_bvector.exe
+	tests\func\test_swisstable.exe
+	tests\func\test_btree_set.exe
 	@echo $(CC) $(CFLAGS)
 	@echo $(CXX) $(CXXFLAGS)
 
@@ -265,6 +275,16 @@ tests\func\test_generic_iter.exe: $(H) tests\test.h tests\func\test_generic_iter
 tests\func\test_generic_iter2.exe: $(H) tests\test.h tests\func\test_generic_iter.h \
                            tests\func\test_generic_iter2.cc
 	$(CXX) $(CFLAGS) /Fe:"$@" $(@:.exe=.cc)
+tests\func\test_span.exe: ctl/span.h tests\func\test_span.c
+	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
+tests\func\test_strv.exe: ctl/strv.h tests\func\test_strv.c
+	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
+tests\func\test_bvector.exe: ctl/bvector.h tests\func\test_bvector.c
+	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
+tests\func\test_swisstable.exe: ctl/swisstable.h ctl/ctl.h tests\func\test_swisstable.c
+	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
+tests\func\test_btree_set.exe: ctl/btree_set.h $(COMMON_H) tests\func\test_btree_set.c
+	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
 
 asan:
 	$(MAKE) SANITIZE=1
