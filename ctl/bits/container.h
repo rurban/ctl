@@ -8,7 +8,8 @@
     !defined CTL_USET && \
     !defined CTL_VEC && \
     !defined CTL_ARR && \
-    !defined CTL_DEQ
+    !defined CTL_DEQ && \
+    !defined CTL_BTSET
 #error "No CTL container defined for <ctl/bits/container.h>"
 #endif
 

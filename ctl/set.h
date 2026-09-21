@@ -210,6 +210,7 @@ static inline size_t JOIN(I, index)(I *iter)
 
 static inline A JOIN(A, init_from)(A *copy);
 static inline A JOIN(A, copy)(A *self);
+static inline A JOIN(A, union)(A *a, A *b);
 //static inline A *JOIN(A, copy_range)(GI *range, A *out);
 static inline B *JOIN(A, insert)(A *self, T key);
 //static inline void JOIN(A, inserter)(A *self, T value);
@@ -879,6 +880,44 @@ static inline A JOIN(A, copy)(A *self)
     A copy = JOIN(A, init)(self->compare);
     list_foreach_ref(A, self, it) JOIN(A, insert)(&copy, self->copy(it.ref));
     return copy;
+}
+
+// Returns a new set containing copies of all values in left and right.
+// The inputs are unchanged; duplicate values are retained only once.
+static inline A JOIN(A, join)(A *left, A *right)
+{
+    return JOIN(A, union)(left, right);
+}
+
+// Partitions self around key without modifying self. less and greater must be
+// initialized containers; their existing contents are discarded. Returns true
+// when key is present. Key is a borrowed lookup value.
+static inline bool JOIN(A, split)(A *self, T key, A *less, A *greater)
+{
+    ASSERT(self != less && self != greater && less != greater);
+    CTL_ASSERT_COMPARE
+
+    JOIN(A, clear)(less);
+    JOIN(A, clear)(greater);
+    *less = JOIN(A, init_from)(self);
+    *greater = JOIN(A, init_from)(self);
+
+    bool found = false;
+    B *node = JOIN(A, first)(self);
+    while (node)
+    {
+        B *next = JOIN(B, next)(node);
+        const int forward = self->compare(&node->value, &key);
+        const int reverse = self->compare(&key, &node->value);
+        if (forward == 0 && reverse == 0)
+            found = true;
+        else if (forward < 0 || (forward > 0 && reverse == 0))
+            JOIN(A, insert)(less, less->copy(&node->value));
+        else
+            JOIN(A, insert)(greater, greater->copy(&node->value));
+        node = next;
+    }
+    return found;
 }
 
 static inline void JOIN(A, swap)(A *self, A *other)

@@ -177,6 +177,19 @@ extracts nodes from the container. _(NYI)_
 
 splices nodes from another container _(NYI)_
 
+    A join (A* left, A* right)
+
+returns a new set containing copies of the values from `left` and `right`.
+Neither input is changed; equivalent values appear once in the result.
+
+    bool split (A* self, T key, A* less, A* greater)
+
+partitions copies of `self` into `less` and `greater`: `less` receives values
+strictly below `key`, and `greater` receives values strictly above it. The
+function returns true when `key` is present. `self` is unchanged. Initialize
+both outputs before calling; their existing contents are discarded. `key` is a
+borrowed lookup value and is not freed by `split`.
+
 ## Lookup
 
     size_t count (A* self)

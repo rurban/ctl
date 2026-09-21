@@ -128,12 +128,17 @@ COMMON_H = ctl/ctl.h ctl/algorithm.h ctl/bits/container.h \
            ctl/bits/integral.h ctl/bits/iterators.h ctl/bits/iterator_vtable.h
 TESTS = \
 	tests/func/test_vector \
+	tests/func/test_vector_pointer_types \
 	tests/func/test_string \
 	tests/func/test_array \
 	tests/func/test_deque \
+	tests/func/test_deque_bucket \
 	tests/func/test_list \
 	tests/func/test_set \
+	tests/func/test_set_join_split \
+	tests/func/test_btree_set \
 	tests/func/test_unordered_set \
+	tests/func/test_unordered_set_static_hash \
 	tests/func/test_priority_queue \
 	tests/func/test_queue \
 	tests/func/test_stack \

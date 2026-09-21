@@ -57,6 +57,7 @@ all containers in ISO C99/C11:
 | [ctl/stack.h](docs/stack.md)                   | std::stack           | stack    |
 | [ctl/string.h](docs/string.md)                 | std::string          | str      |
 | [ctl/vector.h](docs/vector.md)                 | std::vector          | vec      |
+| [ctl/btree_set.h](docs/btree_set.md)         | B-tree set          | btset             |
 | [ctl/array.h](docs/array.md)                   | std::array           | arrNNNN  |
 | [ctl/map.h](docs/map.md)                       | std::map             | map      |
 | [ctl/unordered_map.h](docs/unordered_map.md)   | std::unordered_map   | umap     |
@@ -76,7 +77,6 @@ In work:
 [ctl/pair.h](docs/pair.md),
 [ctl/hashmap.h](docs/hashmap.md),
 [ctl/swisstable.h](docs/swisstable.md),
-[ctl/btree.h](docs/btree.md),
 [ctl/u8string.h](docs/u8string.md),
 [ctl/u8ident.h](docs/u8ident.md).
 

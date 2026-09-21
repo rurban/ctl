@@ -36,6 +36,34 @@ Reallocations are usually costly operations in terms of performance. The
 `reserve` function can be used to eliminate reallocations if the number of
 elements is known beforehand.
 
+### Struct and pointer element types
+
+`T` must be a named type because CTL incorporates it into generated identifiers.
+Structs can therefore be instantiated directly. Use a typedef for pointer
+elements; `#define T SweepEvent *` cannot generate a valid container name.
+
+    typedef struct SweepEvent {
+      int id;
+    } SweepEvent;
+    typedef SweepEvent *SweepEventPtr;
+
+    #define POD
+    #define NOT_INTEGRAL
+    #define T SweepEvent
+    #include <ctl/vector.h>
+
+    #define POD
+    #define NOT_INTEGRAL
+    #define T SweepEventPtr
+    #include <ctl/vector.h>
+
+    vec_SweepEvent values = vec_SweepEvent_init();
+    vec_SweepEventPtr pointers = vec_SweepEventPtr_init();
+
+`POD` uses bitwise copies. A pointer container does not own or free its pointees.
+For structs that own resources, omit `POD` and provide `T_copy` and `T_free`.
+Set `compare` or `equal` before invoking operations that compare values.
+
 The complexity (efficiency) of common operations on a `vector` is as follows:
 
 * Random access - constant 𝓞(1)

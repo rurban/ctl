@@ -64,6 +64,27 @@ constructs the hash table.
 With INTEGRAL types the members may be NULL, and are then set to default
 methods.
 
+### Compile-time hash callback
+
+Define `CTL_USET_HASH(value)` before including the header to remove the hash
+function pointer from the container and make every hash call a compile-time
+call site:
+
+    static size_t int_hash(int *value) { return (size_t)*value; }
+    static int int_equal(int *left, int *right) { return *left == *right; }
+
+    #define CTL_USET_HASH(value) int_hash(value)
+    #define POD
+    #define T int
+    #include <ctl/unordered_set.h>
+
+    uset_int values = uset_int_init(int_equal);
+
+In this mode `init` accepts only the equality callback. The hash expression must
+accept a `T*`, remain valid for the entire template instantiation, and be
+consistent with equality. `CTL_USET_HASH` is undefined after inclusion, so
+define it again for another specialization.
+
     free (A* self)
 
 destructs the hash table.

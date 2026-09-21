@@ -46,6 +46,24 @@ deque holding just one element has to allocate its full internal array (e.g. 8
 times the object size on 64-bit libstdc++; 16 times the object size or 4096
 bytes, whichever is larger, on 64-bit libc++).
 
+### Page-size configuration
+
+Deque storage is allocated in fixed-size pages. By default, a page holds 512
+elements, so the first insertion allocates storage for 512 values even when the
+deque contains only one. Define `DEQ_BUCKET_SIZE` before including
+`<ctl/deque.h>` to choose a smaller page for memory-constrained targets:
+
+    #define POD
+    #define DEQ_BUCKET_SIZE 8
+    #define T double
+    #include <ctl/deque.h>
+
+The setting applies to that template instantiation only. The header undefines
+`DEQ_BUCKET_SIZE` after inclusion, so define it again for each subsequent
+instantiation that needs a non-default page size. Smaller pages reduce unused
+capacity but increase allocation frequency and page-table overhead as the deque
+grows.
+
 The complexity (efficiency) of common operations on a `deque` is as follows:
 
 * Random access - constant 𝓞(1)

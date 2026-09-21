@@ -103,8 +103,10 @@ static inline void _JOIN(A, _set_default_methods)(A *self)
 #if defined str || defined u8string || defined charp || defined u8ident || defined ucharp
     {
 #ifdef CTL_USET
+#ifndef CTL_USET_STATIC_HASH
         if (!self->hash)
             __set_str_hash(self, T);
+#endif
 #else
         if (!self->compare)
             self->compare = str_key_compare;
@@ -116,8 +118,10 @@ static inline void _JOIN(A, _set_default_methods)(A *self)
 #endif
 #endif
 #ifdef CTL_USET
+#ifndef CTL_USET_STATIC_HASH
         if (!self->hash)
             self->hash = _JOIN(A, _default_integral_hash);
+#endif
 #else
     if (!self->compare)
         self->compare = _JOIN(A, _default_integral_compare);
