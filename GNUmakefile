@@ -275,14 +275,15 @@ man: docs/man/ctl.h.3 $(MANPAGES)
 	-rm docs/man/numeric.h.3
 
 RONN_ARGS=--manual "CTL Manual $(VERSION)" --organization=rurban/ctl
-# FIXME
+# man pages are best-effort: a broken/missing ronn (e.g. #24) must not
+# block `make install` from installing the headers.
 docs/man/ctl.h.3: docs/index.md
 	@mkdir -p docs/man
-	ronn $(RONN_ARGS) < $< > $@
+	-ronn $(RONN_ARGS) < $< > $@
 
 docs/man/%.h.3 : docs/%.md
 	@mkdir -p docs/man
-	ronn $(RONN_ARGS) < $< > $@
+	-ronn $(RONN_ARGS) < $< > $@
 
 clean:
 	@rm -f .cflags .cflags.tmp
@@ -460,7 +461,7 @@ install: man
 	cp ctl/*.h $(DESTDIR)$(PREFIX)/include/ctl/
 	cp ctl/bits/*.h $(DESTDIR)$(PREFIX)/include/ctl/bits/
 	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man3
-	cp docs/man/* $(DESTDIR)$(PREFIX)/share/man/man3/
+	-cp docs/man/* $(DESTDIR)$(PREFIX)/share/man/man3/ 2>/dev/null
 	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/ctl/images
 	cp docs/*.md $(DESTDIR)$(PREFIX)/share/doc/ctl/
 	cp docs/images/*.log.png $(DESTDIR)$(PREFIX)/share/doc/ctl/images/
