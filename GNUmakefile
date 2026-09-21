@@ -2,12 +2,20 @@ PREFIX = /usr/local
 CC ?= gcc
 CXX ?= g++
 VERSION := $(shell grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
-VERSION ?= 202103
+VERSION ?= 202610
 
 .SUFFIXES: .cc .c .i .ii .o .md .3
 .PHONY: all check man install clean doc images perf examples verify cppcheck asan \
         debug stress stress-long ALWAYS
 
+TRY_CXX26 := $(shell $(CXX) -std=c++26 -I. tests/perf/lst/perf_list_push_back.cc -o /dev/null)
+ifeq ($(.SHELLSTATUS),0)
+CXX += -std=c++26
+else
+TRY_CXX23 := $(shell $(CXX) -std=c++23 -I. tests/perf/lst/perf_list_push_back.cc -o /dev/null)
+ifeq ($(.SHELLSTATUS),0)
+CXX += -std=c++23
+else
 TRY_CXX20 := $(shell $(CXX) -std=c++20 -I. tests/perf/lst/perf_list_push_back.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
 CXX += -std=c++20
@@ -23,6 +31,8 @@ else
 TRY_CXX11 := $(shell $(CXX) -std=c++11 -I. tests/perf/lst/perf_list_push_back.cc -o /dev/null)
 ifeq ($(.SHELLSTATUS),0)
 CXX += -std=c++11
+endif
+endif
 endif
 endif
 endif
@@ -46,7 +56,7 @@ CFLAGS  = -I.
 CFLAGS += -Wall -Wextra -Wpedantic -Wfatal-errors -Wshadow
 CFLAGS += -g
 # only targetting intel
-TRY_MARCH_NATIVE := $(shell $(CC) $(CFLAGS) -march=native -mtune=native tests/verify/vector-1.c -o /dev/null)
+TRY_MARCH_NATIVE := $(shell $(CC) $(CFLAGS) -march=native -mtune=native tests/verify/vector-1.c)
 ifeq ($(.SHELLSTATUS),0)
 CFLAGS += -march=native -mtune=native
 endif
@@ -396,11 +406,11 @@ stress-long:
 # no -std=gnu++NN extensions
 .PHONY: test-c++ test-g++ test-clang++ test-icc test-pgc++
 test-c++:
-	for std in 20 2a 17 14 11 03 98; do $(MAKE) CXX="c++ -std=c++$$std"; done
+	for std in 26 23 20 17 14 11 03 98; do $(MAKE) CXX="c++ -std=c++$$std"; done
 test-g++:
-	for std in 20 2a 17 14 11 03 98; do $(MAKE) CXX="g++ -std=c++$$std"; done
+	for std in 26 23 20 17 14 11 03 98; do $(MAKE) CXX="g++ -std=c++$$std"; done
 test-clang++:
-	for std in 20 2a 17 14 11 03 98; do $(MAKE) CXX="clang++ -std=c++$$std"; done
+	for std in 26 23 20 17 14 11 03 98; do $(MAKE) CXX="clang++ -std=c++$$std"; done
 test-icc:
 	for std in 17 14 11 0x; do $(MAKE) CXX="icc -static-intel -std=c++$$std"; done
 test-pgc++:
