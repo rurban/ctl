@@ -7,9 +7,17 @@ PREFIX ?= /usr/local
 CC ?= gcc
 CXX ?= g++
 VERSION!=(grep 'define CTL_VERSION' ctl/ctl.h | cut -f3 -d' ')
-VERSION ?= 202103
+VERSION ?= 202610
 
-# probe for -std=c++20, 17 or 11
+# probe for -std=c++26, 23, 20, 17 or 11
+TRY_CXX20!=(${CXX} -std=c++26 -I. tests/func/test_deque.cc -o /dev/null && echo -std=c++20) || true
+.if ${TRY_CXX20} != ""
+CXX += -std=c++26
+.else
+TRY_CXX20!=(${CXX} -std=c++23 -I. tests/func/test_deque.cc -o /dev/null && echo -std=c++20) || true
+.if ${TRY_CXX20} != ""
+CXX += -std=c++23
+.else
 TRY_CXX20!=(${CXX} -std=c++20 -I. tests/func/test_deque.cc -o /dev/null && echo -std=c++20) || true
 .if ${TRY_CXX20} != ""
 CXX += -std=c++20
@@ -21,6 +29,8 @@ CXX += -std=c++17
 TRY_CXX11!=(${CXX} -std=c++11 -I. tests/func/test_deque.cc -o /dev/null && echo -std=c++11) || true
 .  if ${TRY_CXX11} != ""
 CXX += -std=c++11
+.  endif
+.  endif
 .  endif
 . endif
 .endif

@@ -269,7 +269,11 @@ verify: $(VERIFY)
 cppcheck:
 	cppcheck -j4 -I. --check-level=exhaustive tests/func/
 
-MANPAGES = $(patsubst docs/%.md,docs/man/%.h.3, $(wildcard docs/*.md))
+# index.md, memory.md and numeric.md are not standalone man pages (index.md
+# also drags in the whole README.md/test-binary chain via docs/index.md's
+# own rule); exclude them instead of generating and immediately discarding.
+MANPAGES = $(filter-out docs/man/index.h.3 docs/man/memory.h.3 docs/man/numeric.h.3, \
+             $(patsubst docs/%.md,docs/man/%.h.3, $(wildcard docs/*.md)))
 
 README.md: ./update-grid.pl tests/func/test_vector tests/func/test_string \
   tests/func/test_array tests/func/test_deque tests/func/test_list tests/func/test_set \
@@ -281,14 +285,11 @@ docs/index.md : README.md ./update-index.pl
 	./update-index.pl
 
 man: docs/man/ctl.h.3 $(MANPAGES)
-	-rm docs/man/index.h.3
-	-rm docs/man/memory.h.3
-	-rm docs/man/numeric.h.3
 
 RONN_ARGS=--manual "CTL Manual $(VERSION)" --organization=rurban/ctl
 # man pages are best-effort: a broken/missing ronn (e.g. #24) must not
 # block `make install` from installing the headers.
-docs/man/ctl.h.3: docs/index.md
+docs/man/ctl.h.3: docs/ctl.md
 	@mkdir -p docs/man
 	-ronn $(RONN_ARGS) < $< > $@
 
@@ -304,7 +305,7 @@ clean:
 	@rm -f *.gcov *.gcda *.gcno
 	@rm -f tests/perf/arr/perf_arr_generate tests/perf/arr/gen_arr*
 	@rm -f tests/perf/*.log
-	@rm -f docs/man/ctl.h.3 $(MANPAGES)
+	@rm -f docs/man/ctl.h.3 docs/man/index.h.3 docs/man/memory.h.3 docs/man/numeric.h.3 $(MANPAGES)
 	@if test -d docs/man; then rmdir docs/man; fi
 
 help:

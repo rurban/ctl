@@ -84,17 +84,14 @@ type prefix from `vector.h` and `unordered_set.h` calls, via clang's
 In work:
 
 [ctl/pair.h](docs/pair.md),
-[ctl/hashmap.h](docs/hashmap.md),
 [ctl/u8string.h](docs/u8string.md),
 [ctl/u8ident.h](docs/u8ident.md).
 
-map (with pairs), and some C++ methods, algorithms are in work still.
+Some C++ methods, algorithms are in work still.
 
 It is based on glouw's ctl, but with proper names, and using the incpath `ctl/` prefix.
 
-multiset and multimap can be composed by set and list. Better open
-flat hashmap's are in work as stanford hash variant for integer keys, and
-swisstable for string keys, both with the `unordered_map` API.
+multiset and multimap can be composed by set and list.
 
 ## Memory Ownership
 
