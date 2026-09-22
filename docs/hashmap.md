@@ -49,11 +49,27 @@ erase.
 
     A init(void)
     A init_with(size_t hash(TK*), int equal(TK*, TK*))
+    bool empty(A* self)
     T* find(A* self, TK key)
     int contains(A* self, TK key)
+    size_t count(A* self, TK key)
+    void equal_range(A* self, TK key, I* lower, I* upper)
     bool insert(A* self, TK key, T value)
     bool erase(A* self, TK key)
+    void clear(A* self)
+    bool rehash(A* self, size_t bucket_count)
+    bool reserve(A* self, size_t count)
+    void swap(A* self, A* other)
     void free(A* self)
 
+    I begin(A* self)
+    I end(A* self)
+    int it_done(I* it)
+    void it_next(I* it)
+    TK* it_key(I* it)
+    T* it_ref(I* it)
+
 `insert` returns true for a new key and false when it replaces an
-existing value. Lookup and erase keys are borrowed.
+existing value. Lookup and erase keys are borrowed. See
+[swisstable](swisstable.md#api) for `equal_range`/`count`/`rehash`/
+`reserve`/`swap`/iteration semantics — identical here.

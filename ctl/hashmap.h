@@ -29,12 +29,14 @@
 #include <ctl/bits/wyhash.h>
 #include <ctl/ctl.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <string.h>
 
 #define CTL_HMAP
 #define C JOIN(hmap, TK)
 #define A JOIN(C, T)
 #define E JOIN(A, entry)
+#define I JOIN(A, it)
 typedef struct E
 {
     TK key;
@@ -48,6 +50,11 @@ typedef struct A
     size_t (*hash)(TK *);
     int (*equal)(TK *, TK *);
 } A;
+typedef struct I
+{
+    A *container;
+    E *entry;
+} I;
 
 static inline size_t JOIN(A, _slot)(A *self, TK *key) { return self->hash(key) & (self->capacity - 1); }
 static inline bool JOIN(A, _resize)(A *self, size_t capacity)
@@ -81,6 +88,32 @@ static inline A JOIN(A, init_with)(size_t (*hash)(TK *), int (*equal)(TK *, TK *
     JOIN(A, _resize)(&self, 8);
     return self;
 }
+static inline bool JOIN(A, empty)(A *self) { return self->size == 0; }
+static inline E *JOIN(A, _first_used)(A *self, E *from)
+{
+    E *end = &self->entries[self->capacity];
+    while (from < end && !from->used)
+        from++;
+    return from;
+}
+static inline I JOIN(A, begin)(A *self)
+{
+    I it;
+    it.container = self;
+    it.entry = JOIN(A, _first_used)(self, self->entries);
+    return it;
+}
+static inline I JOIN(A, end)(A *self)
+{
+    I it;
+    it.container = self;
+    it.entry = &self->entries[self->capacity];
+    return it;
+}
+static inline int JOIN(I, done)(I *it) { return it->entry == &it->container->entries[it->container->capacity]; }
+static inline void JOIN(I, next)(I *it) { it->entry = JOIN(A, _first_used)(it->container, it->entry + 1); }
+static inline TK *JOIN(I, key)(I *it) { return &it->entry->key; }
+static inline T *JOIN(I, ref)(I *it) { return &it->entry->value; }
 
 // Default for integral/POD-scalar keys: the stanford-hash avalanche mix.
 static inline size_t JOIN(A, _stanford_hash)(TK *key) { return stanford_hash((size_t)*key); }
@@ -131,6 +164,24 @@ static inline T *JOIN(A, find)(A *self, TK key)
     return NULL;
 }
 static inline int JOIN(A, contains)(A *self, TK key) { return JOIN(A, find)(self, key) != NULL; }
+static inline size_t JOIN(A, count)(A *self, TK key) { return JOIN(A, contains)(self, key) ? 1 : 0; }
+static inline void JOIN(A, equal_range)(A *self, TK key, I *lower, I *upper)
+{
+    T *val = JOIN(A, find)(self, key);
+    lower->container = self;
+    upper->container = self;
+    if (val)
+    {
+        E *entry = (E *)((char *)val - offsetof(E, value));
+        lower->entry = entry;
+        upper->entry = JOIN(A, _first_used)(self, entry + 1);
+    }
+    else
+    {
+        lower->entry = &self->entries[self->capacity];
+        upper->entry = lower->entry;
+    }
+}
 static inline bool JOIN(A, insert)(A *self, TK key, T value)
 {
     ASSERT(self->hash && self->equal);
@@ -171,6 +222,29 @@ static inline bool JOIN(A, erase)(A *self, TK key)
     }
     return false;
 }
+static inline void JOIN(A, clear)(A *self)
+{
+    for (size_t i = 0; i < self->capacity; i++)
+        self->entries[i].used = false;
+    self->size = 0;
+}
+static inline bool JOIN(A, rehash)(A *self, size_t bucket_count)
+{
+    size_t capacity = 8;
+    while (capacity < bucket_count)
+        capacity <<= 1;
+    while (self->size * 4 >= capacity * 3)
+        capacity <<= 1;
+    return capacity <= self->capacity ? true : JOIN(A, _resize)(self, capacity);
+}
+static inline bool JOIN(A, reserve)(A *self, size_t count)
+{
+    size_t needed = 8;
+    while (needed * 3 < count * 4)
+        needed <<= 1;
+    return JOIN(A, rehash)(self, needed);
+}
+static inline void JOIN(A, swap)(A *self, A *other) { SWAP(A, self, other); }
 static inline void JOIN(A, free)(A *self)
 {
     free(self->entries);
@@ -180,6 +254,7 @@ static inline void JOIN(A, free)(A *self)
 #undef C
 #undef A
 #undef E
+#undef I
 #undef TK
 #undef T
 #undef POD

@@ -15,5 +15,44 @@ int main(void) {
     assert(*swiss_int_int_find(&map, 4) == 99);
     assert(swiss_int_int_erase(&map, 4));
     assert(!swiss_int_int_contains(&map, 4));
+
+    assert(swiss_int_int_count(&map, 4) == 0);
+    assert(swiss_int_int_count(&map, 5) == 1);
+
+    swiss_int_int_it lo, hi;
+    swiss_int_int_equal_range(&map, 5, &lo, &hi);
+    assert(!swiss_int_int_it_done(&lo));
+    assert(*swiss_int_int_it_key(&lo) == 5);
+    assert(*swiss_int_int_it_ref(&lo) == 10);
+    swiss_int_int_it_next(&lo);
+    assert(lo.entry == hi.entry);
+
+    swiss_int_int_equal_range(&map, 4, &lo, &hi);
+    assert(swiss_int_int_it_done(&lo));
+    assert(lo.entry == hi.entry);
+
+    size_t seen = 0;
+    for (swiss_int_int_it it = swiss_int_int_begin(&map); !swiss_int_int_it_done(&it); swiss_int_int_it_next(&it))
+        seen++;
+    assert(seen == map.size);
+
+    swiss_int_int_clear(&map);
+    assert(map.size == 0);
+    assert(swiss_int_int_empty(&map));
+    assert(swiss_int_int_find(&map, 5) == NULL);
+
+    assert(swiss_int_int_reserve(&map, 1000));
+    assert(map.capacity >= 1000);
+    for (int i = 0; i < 500; i++) assert(swiss_int_int_insert(&map, i, i));
+    assert(map.size == 500);
+
+    swiss_int_int other = swiss_int_int_init(int_hash, int_equal);
+    swiss_int_int_insert(&other, 999, 999);
+    swiss_int_int_swap(&map, &other);
+    assert(map.size == 1);
+    assert(*swiss_int_int_find(&map, 999) == 999);
+    assert(other.size == 500);
+    swiss_int_int_free(&other);
+
     swiss_int_int_free(&map);
 }

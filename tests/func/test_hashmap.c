@@ -27,6 +27,45 @@ int main(void)
     assert(*hmap_int_int_find(&map, 4) == 99);
     assert(hmap_int_int_erase(&map, 4));
     assert(!hmap_int_int_contains(&map, 4));
+
+    assert(hmap_int_int_count(&map, 4) == 0);
+    assert(hmap_int_int_count(&map, 5) == 1);
+
+    hmap_int_int_it lo, hi;
+    hmap_int_int_equal_range(&map, 5, &lo, &hi);
+    assert(!hmap_int_int_it_done(&lo));
+    assert(*hmap_int_int_it_key(&lo) == 5);
+    assert(*hmap_int_int_it_ref(&lo) == 10);
+    hmap_int_int_it_next(&lo);
+    assert(lo.entry == hi.entry);
+
+    hmap_int_int_equal_range(&map, 4, &lo, &hi);
+    assert(hmap_int_int_it_done(&lo));
+    assert(lo.entry == hi.entry);
+
+    size_t seen = 0;
+    for (hmap_int_int_it it = hmap_int_int_begin(&map); !hmap_int_int_it_done(&it); hmap_int_int_it_next(&it))
+        seen++;
+    assert(seen == map.size);
+
+    hmap_int_int_clear(&map);
+    assert(map.size == 0);
+    assert(hmap_int_int_empty(&map));
+    assert(hmap_int_int_find(&map, 5) == NULL);
+
+    assert(hmap_int_int_reserve(&map, 1000));
+    assert(map.capacity >= 1000);
+    for (int i = 0; i < 500; i++)
+        assert(hmap_int_int_insert(&map, i, i));
+    assert(map.size == 500);
+
+    hmap_int_int other = hmap_int_int_init();
+    hmap_int_int_insert(&other, 999, 999);
+    hmap_int_int_swap(&map, &other);
+    assert(map.size == 1);
+    assert(*hmap_int_int_find(&map, 999) == 999);
+    assert(other.size == 500);
+    hmap_int_int_free(&other);
     hmap_int_int_free(&map);
 
     // string key: defaults to wyhash + strcmp.
@@ -48,5 +87,13 @@ int main(void)
     char dup[16];
     strcpy(dup, buf[7]);
     assert(*hmap_charp_int_find(&smap, dup) == 7);
+    assert(hmap_charp_int_count(&smap, dup) == 1);
+    assert(hmap_charp_int_count(&smap, buf[4]) == 0);
+    size_t sseen = 0;
+    for (hmap_charp_int_it it = hmap_charp_int_begin(&smap); !hmap_charp_int_it_done(&it); hmap_charp_int_it_next(&it))
+        sseen++;
+    assert(sseen == smap.size);
+    hmap_charp_int_clear(&smap);
+    assert(hmap_charp_int_empty(&smap));
     hmap_charp_int_free(&smap);
 }
