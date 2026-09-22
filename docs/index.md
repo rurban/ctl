@@ -84,17 +84,14 @@ type prefix from `vector.h` and `unordered_set.h` calls, via clang's
 In work:
 
 [ctl/pair.h](pair.md),
-[ctl/hashmap.h](hashmap.md),
 [ctl/u8string.h](u8string.md),
 [ctl/u8ident.h](u8ident.md).
 
-map (with pairs), and some C++ methods, algorithms are in work still.
+Some C++ methods, algorithms are in work still.
 
 It is based on glouw's ctl, but with proper names, and using the incpath `ctl/` prefix.
 
-multiset and multimap can be composed by set and list. Better open
-flat hashmap's are in work as stanford hash variant for integer keys, and
-swisstable for string keys, both with the `unordered_map` API.
+multiset and multimap can be composed by set and list.
 
 ## Memory Ownership
 
@@ -365,6 +362,7 @@ And in its grandiosity (esp. not header-only):
 * http://sglib.sourceforge.net/
 * [Smart pointer for GNUC](https://github.com/Snaipe/libcsptr)
 * [STB stretchy buffer](https://github.com/nothings/stb)
+* https://github.com/tylov/C99Containers
 * https://github.com/amadvance/tommyds
 * https://github.com/2cats/cstl-lite
 * https://github.com/ljianhui/libcontainer
