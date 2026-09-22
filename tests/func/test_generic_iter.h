@@ -174,6 +174,7 @@ void print_uset(uset_int *a)
                 /*assert(*_it1.ref == _d);*/                                                                           \
                 ty1##_int_it_next(&_it1);                                                                              \
             }                                                                                                          \
+            (void)i;                                                                                                   \
             std::cppty::iterator _iter = _y.begin();                                                                   \
             foreach (ty1##_int, &_x, _it2)                                                                             \
             {                                                                                                          \
