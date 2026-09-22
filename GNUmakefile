@@ -144,6 +144,7 @@ TESTS = \
 	tests/func/test_unordered_set \
 	tests/func/test_unordered_set_static_hash \
 	tests/func/test_swisstable \
+	tests/func/test_hashmap \
 	tests/func/test_bvector \
 	tests/func/test_span \
 	tests/func/test_strv \
@@ -330,6 +331,8 @@ ctl/unordered_map.i:
 	$(call expand,$(subst .i,,$@),-DT=strint -DPOD)
 ctl/array.i:
 	$(call expand,$(subst .i,,$@),-DT=int -DN=128 -DPOD)
+ctl/hashmap.i:
+	$(call expand,$(subst .i,,$@),-DTK=int -DT=int -DPOD)
 
 %.i : %.h
 	@$(CC) $(CFLAGS) -DT=int -DPOD $< -E | clang-format -style=webkit

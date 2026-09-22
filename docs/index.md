@@ -64,6 +64,7 @@ all containers in ISO C99/C11:
 | [ctl/unordered_map.h](unordered_map.md)   | std::unordered_map   | umap     |
 | [ctl/unordered_set.h](unordered_set.md)   | std::unordered_set   | uset     |
 | [ctl/swisstable.h](swisstable.md)         | open-addressing map  | swiss_TK_T        |
+| [ctl/hashmap.h](hashmap.md)               | auto-hashed open-addressing map | hmap_TK_T |
 | [ctl/flat_set.h](flat_set.md)             | std::flat_set        | fset (C++23)     |
 | [ctl/flat_multiset.h](flat_multiset.md)   | std::flat_multiset   | fmset (C++23)    |
 | [ctl/flat_map.h](flat_map.md)             | std::flat_map        | fmap (C++23)     |
@@ -385,8 +386,9 @@ And in its grandiosity (esp. not header-only):
     map.h:              set.h
     unordered_set.h:    hashed forward linked lists
     unordered_map.h:    unordered_set.h (pair in work)
-    hashmap.h:          stanford hash for integer keys, intel only.
-    swisstable.h:       abseil flat_hash_map for string keys, with non-intel fallbacks.
+    hashmap.h:          open addressing, auto hash: stanford avalanche hash for
+                         integer/POD keys, wyhash for string keys.
+    swisstable.h:       open addressing, explicit hash/equal function pointers.
 
     ✓  stable and tested
     x  implemented, but broken or untested

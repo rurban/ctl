@@ -26,6 +26,7 @@ a.out
 /tests/func/test_integral
 /tests/func/test_integral_c11
 /tests/func/test_list
+/tests/func/test_hashmap
 /tests/func/test_map
 /tests/func/test_overload
 /tests/func/test_priority_queue

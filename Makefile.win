@@ -77,6 +77,7 @@ TESTS = \
 	tests\func\test_strv.exe \
 	tests\func\test_bvector.exe \
 	tests\func\test_swisstable.exe \
+	tests\func\test_hashmap.exe \
 	tests\func\test_btree_set.exe
 !ifdef DEBUG
 TESTS +=.exe \
@@ -119,6 +120,7 @@ all: $(TESTS)
 	tests\func\test_strv.exe
 	tests\func\test_bvector.exe
 	tests\func\test_swisstable.exe
+	tests\func\test_hashmap.exe
 	tests\func\test_btree_set.exe
 	@echo $(CC) $(CFLAGS)
 	@echo $(CXX) $(CXXFLAGS)
@@ -282,6 +284,8 @@ tests\func\test_strv.exe: ctl/strv.h tests\func\test_strv.c
 tests\func\test_bvector.exe: ctl/bvector.h tests\func\test_bvector.c
 	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
 tests\func\test_swisstable.exe: ctl/swisstable.h ctl/ctl.h tests\func\test_swisstable.c
+	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
+tests\func\test_hashmap.exe: ctl/hashmap.h ctl/bits/stanford_hash.h ctl/bits/wyhash.h ctl/ctl.h tests\func\test_hashmap.c
 	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
 tests\func\test_btree_set.exe: ctl/btree_set.h $(COMMON_H) tests\func\test_btree_set.c
 	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
