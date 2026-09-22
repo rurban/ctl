@@ -4,7 +4,6 @@
 static size_t int_hash(int *value) { return (size_t)*value; }
 static int int_equal(int *left, int *right) { return *left == *right; }
 
-#define CTL_OVERLOADABLE
 #define POD
 #define T int
 #include <ctl/vector.h>

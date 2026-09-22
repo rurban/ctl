@@ -2,17 +2,17 @@
 
 CTL function names are prefixed with the container/type pair (`vec_int_push_back`,
 `uset_int_insert`, ...) so that plain C, with no overloading, never collides
-across instantiations. Two opt-in, compiler-supported ways to drop the prefix
-at call sites are available; both are strictly additive and off by default.
+across instantiations. Two compiler-supported ways to drop the prefix
+at call sites are available; both are strictly additive.
 
-## `CTL_OVERLOADABLE` (clang only)
+## `__attribute__((overloadable))` (clang only, automatic)
 
-Define `CTL_OVERLOADABLE` before including a container header that supports
-it (`vector.h`, `unordered_set.h`) to get `__attribute__((overloadable))`
-wrappers for the common self-pointer methods, named after the method with no
-prefix:
+`vector.h` and `unordered_set.h` automatically declare
+`__attribute__((overloadable))` wrappers for the common self-pointer
+methods, named after the method with no prefix, whenever the compiler
+advertises support (`__has_attribute(overloadable)`, true for clang, false
+for gcc/MSVC). No opt-in macro is needed:
 
-    #define CTL_OVERLOADABLE
     #define POD
     #define T int
     #include <ctl/vector.h>
@@ -42,10 +42,8 @@ Two deliberate exclusions:
 - `free` is never wrapped, to avoid colliding with the standard library's
   `free(void*)`.
 
-`CTL_OVERLOADABLE` is **not** undefined by the container headers (unlike
-`POD`/`NOT_INTEGRAL`): define it once before your first container include to
-enable the wrappers for every subsequent instantiation in the translation
-unit.
+On a compiler without the attribute, the wrappers are simply never declared;
+every instantiation still gets its normal prefixed API.
 
 ## `_Generic` dispatch: `<ctl/generic.h>` (any C11 compiler)
 
@@ -78,9 +76,9 @@ triggers `-Wpedantic`'s "ISO C99 requires at least one argument for the
 compile/link, naming `ctl_generic_unregistered_self_type` instead of
 surfacing a raw `_Generic` diagnostic.
 
-This works with any C11 compiler (gcc, clang, MSVC `/std:c11+`), unlike
-`CTL_OVERLOADABLE`. It shares the same `init`/`init_from` exclusion (no
-`self` to switch on).
+This works with any C11 compiler (gcc, clang, MSVC `/std:c11+`), unlike the
+clang-only `__attribute__((overloadable))` wrappers above. It shares the
+same `init`/`init_from` exclusion (no `self` to switch on).
 
 ### Do not shadow `free`
 

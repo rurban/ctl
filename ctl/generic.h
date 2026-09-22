@@ -1,8 +1,8 @@
 /* Optional C11 _Generic dispatch: reduces the boilerplate of dropping the
    vec_T_/uset_T_/... prefix at call sites to one line per requested method
    name, instead of one line per (type, method) pair. Works with any C11
-   compiler (gcc, clang, MSVC /std:c11+), unlike CTL_OVERLOADABLE
-   (clang-only). See docs/overload.md and #4.
+   compiler (gcc, clang, MSVC /std:c11+), unlike the clang-only
+   `__attribute__((overloadable))` wrappers. See docs/overload.md and #4.
    SPDX-License-Identifier: MIT */
 #ifndef CTL_GENERIC_H
 #define CTL_GENERIC_H
@@ -28,8 +28,8 @@
 
    Adding a type only touches CTL_TYPES, not every method macro. Methods
    with no A* self argument (init, init_from) cannot be dispatched this
-   way, for the same reason CTL_OVERLOADABLE excludes them: there is
-   nothing to switch on. */
+   way, for the same reason the overloadable wrappers exclude them: there
+   is nothing to switch on. */
 
 /* one `<prefix> *: <prefix>_<method>,` case */
 #define CTL_GENERIC_CASE(PREFIX, METHOD) PREFIX *: JOIN(PREFIX, METHOD),

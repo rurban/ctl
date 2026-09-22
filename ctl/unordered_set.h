@@ -1350,12 +1350,11 @@ static inline A JOIN(A, transform)(A *self, T _unop(T *))
 
 // transform_it with binop makes no sense with random ordering.
 
-// Optional: drop the uset_T_ prefix for common self-pointer methods via
-// clang's __attribute__((overloadable)). Opt-in per instantiation with
-// #define CTL_OVERLOADABLE before #include <ctl/unordered_set.h>. `free`
-// is intentionally not wrapped: it would collide with the standard
-// library free(void*). See docs/overload.md.
-#if defined(CTL_OVERLOADABLE) && defined(__clang__)
+// Drop the uset_T_ prefix for common self-pointer methods via clang's
+// __attribute__((overloadable)), automatically when the compiler supports
+// it. `free` is intentionally not wrapped: it would collide with the
+// standard library free(void*). See docs/overload.md.
+#if defined(__has_attribute) && __has_attribute(overloadable)
 static inline __attribute__((overloadable)) size_t size(A *self) { return JOIN(A, size)(self); }
 static inline __attribute__((overloadable)) int empty(A *self) { return JOIN(A, empty)(self); }
 static inline __attribute__((overloadable)) size_t bucket_count(A *self) { return JOIN(A, bucket_count)(self); }

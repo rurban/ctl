@@ -62,7 +62,7 @@ CFLAGS += -march=native -mtune=native
 endif
 
 # clang-only __attribute__((overloadable)); see #5, docs/overload.md.
-TRY_OVERLOADABLE := $(shell $(CC) $(CFLAGS) -o /dev/null tests/overloadable-check.c)
+TRY_OVERLOADABLE := $(shell printf '#if defined(__has_attribute) && __has_attribute(overloadable)\nHAVE\n#endif\n' | $(CC) -E -xc - 2>/dev/null | grep -q HAVE)
 HAVE_OVERLOADABLE := $(.SHELLSTATUS)
 
 ifeq (1, $(LONG))
