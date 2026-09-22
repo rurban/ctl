@@ -238,12 +238,10 @@ int pick_random(list_digi *a)
             assert(*_y.back().value == *list_digi_back(&_x)->value);                                                   \
         }                                                                                                              \
         std::list<DIGI>::iterator _iter = _y.begin();                                                                  \
-        int i = 0;                                                                                                     \
         list_foreach_ref(list_digi, &_x, _it)                                                                          \
         {                                                                                                              \
             LOG("%d ", *_it.ref->value);                                                                       \
             assert(*_it.ref->value == *_iter->value);                                                                  \
-            i++;                                                                                                       \
             _iter++;                                                                                                   \
         }                                                                                                              \
         LOG("\n");                                                                                                     \

@@ -391,7 +391,7 @@ static inline void JOIN(A, push_back)(A *self, T value)
 static inline void JOIN(A, resize)(A *self, size_t size, T value)
 {
     if (LIKELY(size != self->size && size < JOIN(A, max_size)()))
-        for (size_t i = 0; size != self->size; i++)
+        while (size != self->size)
             (size < self->size) ? JOIN(A, pop_back)(self) : JOIN(A, push_back)(self, self->copy(&value));
     if (self->free)
         self->free(&value);
@@ -408,7 +408,6 @@ static inline A JOIN(A, copy)(A *self)
 static inline void JOIN(A, assign)(A *self, size_t size, T value)
 {
     JOIN(A, resize)(self, size, self->copy(&value));
-    size_t i = 0;
     list_foreach_ref(A, self, it)
     {
 #ifndef POD
@@ -416,7 +415,6 @@ static inline void JOIN(A, assign)(A *self, size_t size, T value)
             self->free(it.ref);
 #endif
         *it.ref = self->copy(&value);
-        i++;
     }
     FREE_VALUE(self, value);
 }
