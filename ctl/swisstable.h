@@ -13,12 +13,13 @@
 #include <ctl/ctl.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 #define C JOIN(swiss, TK)
 #define A JOIN(C, T)
 #define E JOIN(A, entry)
 #define I JOIN(A, it)
 typedef struct E { TK key; T value; bool used; } E;
-typedef struct A { E *entries; size_t size, capacity; size_t (*hash)(TK *); int (*equal)(TK *, TK *); } A;
+typedef struct A { E *entries; size_t size, capacity; float max_load_factor; size_t (*hash)(TK *); int (*equal)(TK *, TK *); } A;
 typedef struct I { A *container; E *entry; } I;
 
 static inline size_t JOIN(A, _slot)(A *self, TK *key) { return self->hash(key) & (self->capacity - 1); }
@@ -37,9 +38,12 @@ static inline bool JOIN(A, _resize)(A *self, size_t capacity)
 }
 static inline A JOIN(A, init)(size_t (*hash)(TK *), int (*equal)(TK *, TK *))
 {
-    A self = {0}; self.hash = hash; self.equal = equal; JOIN(A, _resize)(&self, 8); return self;
+    A self = {0}; self.hash = hash; self.equal = equal; self.max_load_factor = 0.75f; JOIN(A, _resize)(&self, 8); return self;
 }
 static inline bool JOIN(A, empty)(A *self) { return self->size == 0; }
+static inline size_t JOIN(A, max_size)(void) { return 4294967296 / sizeof(E); }
+static inline float JOIN(A, load_factor)(A *self) { return self->capacity ? (float)self->size / (float)self->capacity : 0.0f; }
+static inline void JOIN(A, max_load_factor)(A *self, float factor) { self->max_load_factor = factor; }
 static inline E *JOIN(A, _first_used)(A *self, E *from)
 {
     E *end = &self->entries[self->capacity];
@@ -88,7 +92,7 @@ static inline void JOIN(A, equal_range)(A *self, TK key, I *lower, I *upper)
 static inline bool JOIN(A, insert)(A *self, TK key, T value)
 {
     ASSERT(self->hash && self->equal);
-    if ((self->size + 1) * 4 >= self->capacity * 3 && !JOIN(A, _resize)(self, self->capacity * 2)) return false;
+    if ((float)(self->size + 1) >= (float)self->capacity * self->max_load_factor && !JOIN(A, _resize)(self, self->capacity * 2)) return false;
     size_t slot = JOIN(A, _slot)(self, &key);
     while (self->entries[slot].used) {
         if (self->equal(&self->entries[slot].key, &key)) { self->entries[slot].key = key; self->entries[slot].value = value; return false; }
@@ -116,16 +120,28 @@ static inline bool JOIN(A, rehash)(A *self, size_t bucket_count)
 {
     size_t capacity = 8;
     while (capacity < bucket_count) capacity <<= 1;
-    while (self->size * 4 >= capacity * 3) capacity <<= 1;
+    while ((float)self->size >= (float)capacity * self->max_load_factor) capacity <<= 1;
     return capacity <= self->capacity ? true : JOIN(A, _resize)(self, capacity);
 }
 static inline bool JOIN(A, reserve)(A *self, size_t count)
 {
     size_t needed = 8;
-    while (needed * 3 < count * 4) needed <<= 1;
+    while ((float)needed * self->max_load_factor < (float)count) needed <<= 1;
     return JOIN(A, rehash)(self, needed);
 }
 static inline void JOIN(A, swap)(A *self, A *other) { SWAP(A, self, other); }
+static inline A JOIN(A, copy)(A *self)
+{
+    A other = *self;
+    other.entries = malloc(self->capacity * sizeof(E));
+    if (other.entries) memcpy(other.entries, self->entries, self->capacity * sizeof(E));
+    return other;
+}
+static inline void JOIN(A, assign)(A *self, A *other)
+{
+    free(self->entries);
+    *self = JOIN(A, copy)(other);
+}
 static inline void JOIN(A, free)(A *self) { free(self->entries); *self = (A){0}; }
 #undef C
 #undef A

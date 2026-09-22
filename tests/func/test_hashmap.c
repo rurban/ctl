@@ -66,6 +66,34 @@ int main(void)
     assert(*hmap_int_int_find(&map, 999) == 999);
     assert(other.size == 500);
     hmap_int_int_free(&other);
+
+    assert(hmap_int_int_max_size() > 0);
+    float lf = hmap_int_int_load_factor(&map);
+    assert(lf > 0.0f && lf <= 1.0f);
+
+    hmap_int_int cp = hmap_int_int_copy(&map);
+    assert(cp.size == map.size);
+    assert(*hmap_int_int_find(&cp, 999) == 999);
+    assert(cp.entries != map.entries);
+    assert(hmap_int_int_insert(&cp, 12345, 1));
+    assert(cp.size == 2);
+    assert(hmap_int_int_find(&map, 12345) == NULL);
+
+    hmap_int_int_assign(&map, &cp);
+    assert(map.size == 2);
+    assert(hmap_int_int_contains(&map, 12345));
+    assert(map.entries != cp.entries);
+    hmap_int_int_free(&cp);
+
+    hmap_int_int mlf = hmap_int_int_init();
+    hmap_int_int_max_load_factor(&mlf, 0.5f);
+    assert(mlf.max_load_factor == 0.5f);
+    for (int i = 0; i < 4; i++)
+        assert(hmap_int_int_insert(&mlf, i, i));
+    assert(mlf.size == 4);
+    assert(mlf.capacity == 16);
+    hmap_int_int_free(&mlf);
+
     hmap_int_int_free(&map);
 
     // string key: defaults to wyhash + strcmp.

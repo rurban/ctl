@@ -54,5 +54,36 @@ int main(void) {
     assert(other.size == 500);
     swiss_int_int_free(&other);
 
+    assert(swiss_int_int_max_size() > 0);
+    assert(map.max_load_factor > 0.74f && map.max_load_factor < 0.76f);
+    float lf = swiss_int_int_load_factor(&map);
+    assert(lf > 0.0f && lf <= 1.0f);
+
+    // copy: deep copy, independent storage
+    swiss_int_int cp = swiss_int_int_copy(&map);
+    assert(cp.size == map.size);
+    assert(*swiss_int_int_find(&cp, 999) == 999);
+    assert(cp.entries != map.entries);
+    assert(swiss_int_int_insert(&cp, 12345, 1));
+    assert(cp.size == 2);
+    assert(swiss_int_int_find(&map, 12345) == NULL);
+
+    // assign: replace contents with a copy of another table
+    swiss_int_int_assign(&map, &cp);
+    assert(map.size == 2);
+    assert(swiss_int_int_contains(&map, 12345));
+    assert(map.entries != cp.entries);
+    swiss_int_int_free(&cp);
+
+    // custom max_load_factor drives growth
+    swiss_int_int mlf = swiss_int_int_init(int_hash, int_equal);
+    swiss_int_int_max_load_factor(&mlf, 0.5f);
+    assert(mlf.max_load_factor == 0.5f);
+    for (int i = 0; i < 4; i++) assert(swiss_int_int_insert(&mlf, i, i));
+    assert(mlf.size == 4);
+    assert(mlf.capacity == 16); // grew at 50% load instead of the default 75%
+    assert(swiss_int_int_load_factor(&mlf) == 0.25f);
+    swiss_int_int_free(&mlf);
+
     swiss_int_int_free(&map);
 }

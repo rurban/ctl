@@ -18,6 +18,7 @@ The initial implementation supports POD keys and values. It uses power-of-two op
 
     A init(size_t hash(TK*), int equal(TK*, TK*))
     bool empty(A* self)
+    size_t max_size(void)
     T* find(A* self, TK key)
     int contains(A* self, TK key)
     size_t count(A* self, TK key)
@@ -25,8 +26,12 @@ The initial implementation supports POD keys and values. It uses power-of-two op
     bool insert(A* self, TK key, T value)
     bool erase(A* self, TK key)
     void clear(A* self)
+    float load_factor(A* self)
+    void max_load_factor(A* self, float factor)
     bool rehash(A* self, size_t bucket_count)
     bool reserve(A* self, size_t count)
+    A copy(A* self)
+    void assign(A* self, A* other)
     void swap(A* self, A* other)
     void free(A* self)
 
@@ -47,5 +52,10 @@ empty range at `end()` when it is not — keys are unique, so it never spans
 more than one entry. `count` is always 0 or 1 for the same reason.
 `rehash`/`reserve` only grow (never shrink) to the next power-of-two
 bucket count that keeps the existing/requested element count under the
-75% load factor. `swap` exchanges two containers' entire state
+current max load factor (0.75 by default, adjustable with
+`max_load_factor`). `load_factor` reports `size / capacity` as a float.
+`max_size` is a compile-time cap of ~4GB of entries, like the other
+containers. `copy` deep-copies the table into fresh storage (no shared
+entries); `assign` replaces a table's contents with a copy of another,
+freeing the old storage. `swap` exchanges two containers' entire state
 (entries, size, capacity, hash, equal) in O(1).
