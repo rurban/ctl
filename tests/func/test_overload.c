@@ -18,6 +18,7 @@ static int int_equal(int *left, int *right) { return *left == *right; }
 
 int main(void)
 {
+#if defined(__has_attribute) && __has_attribute(overloadable)
     // Overload resolution picks the right vec_T_/uset_T_ function purely
     // from the pointer type of the first argument, across container kinds.
     vec_int ints = vec_int_init();
@@ -57,5 +58,6 @@ int main(void)
     vec_double_free(&doubles);
     vec_int_free(&copied);
     uset_int_free(&set);
+#endif
     return 0;
 }

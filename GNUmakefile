@@ -61,10 +61,6 @@ ifeq ($(.SHELLSTATUS),0)
 CFLAGS += -march=native -mtune=native
 endif
 
-# clang-only __attribute__((overloadable)); see #5, docs/overload.md.
-TRY_OVERLOADABLE := $(shell printf '#if defined(__has_attribute) && __has_attribute(overloadable)\nHAVE\n#endif\n' | $(CC) -E -xc - 2>/dev/null | grep -q HAVE)
-HAVE_OVERLOADABLE := $(.SHELLSTATUS)
-
 ifeq (1, $(LONG))
 CFLAGS += -Werror
 CFLAGS += -DLONG
@@ -169,11 +165,8 @@ TESTS = \
 	tests/func/test_flat_set \
 	tests/func/test_flat_map \
 	tests/func/test_inplace_vector \
-	tests/func/test_hive
-
-ifeq (0, $(HAVE_OVERLOADABLE))
-TESTS += tests/func/test_overload
-endif
+	tests/func/test_hive \
+        tests/func/test_overload
 
 ifneq ($(DEBUG),)
 TESTS += \
