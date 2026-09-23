@@ -9,9 +9,9 @@ while (<$in>) {
   s {docs/images/} {images/};
   s {\(docs/} {\(};
   # grid
-  if ($prev eq "\n" and /^\|  +\|vec/) {
+  if ($prev eq "\n" and /^\|\s+\|(vec|set)\s+\|/) {
     print $out "```\n";
-  } elsif ($prev =~ /^\|  +\|vec/ and $_ eq "\n") {
+  } elsif ($prev =~ /^\|-/ and $_ eq "\n") {
     print $out "```\n";
   }
   print $out $_;
