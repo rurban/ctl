@@ -60,7 +60,7 @@ static inline strint
 strint_copy(strint* self)
 {
     strint copy = strint_init(str_init(""), 0);
-    copy.key = self->key;
+    copy.key = str_copy(&self->key);
     copy.value = self->value;
     return copy;
 }

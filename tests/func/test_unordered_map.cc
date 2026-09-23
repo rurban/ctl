@@ -37,25 +37,12 @@ OLD_MAIN
     TEST(DIFFERENCE)
 
 #define FOREACH_DEBUG(TEST)                                                                                            \
-    /* TEST(EMPLACE) */                                                                                                \
-    /* TEST(EXTRACT) */                                                                                                \
-    /* TEST(MERGE) */                                                                                                  \
-    /* TEST(EQUAL_RANGE) */                                                                                            \
     TEST(SWAP)                                                                                                         \
     TEST(COPY)                                                                                                         \
-    TEST(FIND_IF)                                                                                                      \
-    TEST(FIND_IF_NOT)                                                                                                  \
-    TEST(ALL_OF)                                                                                                       \
-    TEST(ANY_OF)                                                                                                       \
-    TEST(NONE_OF)                                                                                                      \
-    TEST(COUNT_IF)                                                                                                     \
     TEST(EMPLACE)                                                                                                      \
     TEST(EMPLACE_FOUND)                                                                                                \
     TEST(EMPLACE_HINT)                                                                                                 \
-    TEST(MERGE)                                                                                                        \
-    TEST(REMOVE_IF)                                                                                                    \
-    TEST(GENERATE)                                                                                                     \
-    TEST(TRANSFORM)
+    TEST(MERGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
 #define GENERATE_NAME(x) #x,
@@ -163,8 +150,8 @@ int main(void)
             char *key = new_rand_str();
             const int vb = TEST_RAND(TEST_MAX_SIZE);
             umap_strint_insert(&a, strint_init(str_init(key), vb));
-            free(key);
             b.insert(STRINT{key, vb});
+            free(key);
             CHECK(a, b);
             break;
         }
@@ -173,7 +160,6 @@ int main(void)
             const int vb = TEST_RAND(TEST_MAX_SIZE);
             int found;
             umap_strint_it it = umap_strint_insert_found(&a, strint_init(str_init(key), vb), &found);
-            free(key);
 #if __cplusplus >= 201103L
             // C++11
             std::pair<std::unordered_map<std::string, int>::iterator, bool> pair;
@@ -185,6 +171,7 @@ int main(void)
             auto iter = b.insert(STRINT{key, vb});
             CHECK_ITER(it, b, iter);
 #endif
+            free(key);
             CHECK(a, b);
             break;
         }
@@ -192,8 +179,8 @@ int main(void)
             char *key = new_rand_str();
             const int vb = TEST_RAND(TEST_MAX_SIZE);
             umap_strint_insert_or_assign(&a, strint_init(str_init(key), vb));
-            free(key);
             b.insert_or_assign(key, vb);
+            free(key);
             CHECK(a, b);
             break;
         }
@@ -202,7 +189,6 @@ int main(void)
             const int vb = TEST_RAND(TEST_MAX_SIZE);
             int found;
             umap_strint_it it = umap_strint_insert_or_assign_found(&a, strint_init(str_init(key), vb), &found);
-            free(key);
 #if __cplusplus >= 201103L
             // C++11
             std::pair<std::unordered_map<std::string, int>::iterator, bool> pair;
@@ -214,6 +200,7 @@ int main(void)
             auto iter = b.insert_or_assign(key, vb);
             CHECK_ITER(it, b, iter);
 #endif
+            free(key);
             CHECK(a, b);
             break;
         }
@@ -225,9 +212,9 @@ int main(void)
                     char *key = new_rand_str();
                     const int value = TEST_RAND(TEST_MAX_SIZE);
                     strint kd = strint_init(str_init(key), value);
-                    free(key);
                     umap_strint_erase(&a, kd);
                     b.erase(key);
+                    free(key);
                     CHECK(a, b);
                     strint_free(&kd);
                 }
@@ -406,23 +393,61 @@ int main(void)
             break;
         }
 #ifdef DEBUG
-        // case TEST_EMPLACE:
-        // case TEST_EXTRACT:
-        // case TEST_MERGE:
-        // case TEST_EQUAL_RANGE:
-        // case TEST_FIND_IF:
-        // case TEST_FIND_IF_NOT:
-        // case TEST_ALL_OF:
-        // case TEST_ANY_OF:
-        // case TEST_NONE_OF:
-        // case TEST_COUNT_IF:
-        // case TEST_EMPLACE:
-        // case TEST_EMPLACE_FOUND:
-        // case TEST_EMPLACE_HINT:
-        // case TEST_MERGE:
-        // case TEST_REMOVE_IF:
-        // case TEST_GENERATE:
-        // case TEST_TRANSFORM:
+        case TEST_EMPLACE: {
+            char *key = new_rand_str();
+            const int vb = TEST_RAND(TEST_MAX_SIZE);
+            strint d = strint_init(str_init(key), vb);
+            b.emplace(key, vb);
+            free(key);
+            umap_strint_emplace(&a, &d);
+            CHECK(a, b);
+            break;
+        }
+        case TEST_EMPLACE_FOUND: {
+            char *key = new_rand_str();
+            const int vb = TEST_RAND(TEST_MAX_SIZE);
+            int found;
+            strint d = strint_init(str_init(key), vb);
+            std::pair<std::unordered_map<std::string, int>::iterator, bool> pp = b.emplace(key, vb);
+            free(key);
+            umap_strint_it it = umap_strint_emplace_found(&a, &d, &found);
+            // STL returns true if not found, and freshly inserted
+            assert((!found) == (int)pp.second);
+            CHECK(a, b);
+            break;
+        }
+        case TEST_EMPLACE_HINT: {
+            char *key = new_rand_str();
+            const int vb = TEST_RAND(TEST_MAX_SIZE);
+            strint d = strint_init(str_init(key), vb);
+            std::string skey(key);
+            auto hint = b.find(skey);
+            free(key);
+            umap_strint_it hinta = umap_strint_find(&a, d);
+            umap_strint_emplace_hint(&hinta, &d);
+            b.emplace_hint(hint, skey, vb);
+            CHECK(a, b);
+            break;
+        }
+        case TEST_MERGE: {
+            umap_strint aa;
+            std::unordered_map<std::string, int> bb;
+            setup_sets(&aa, bb);
+            umap_strint aaa = umap_strint_merge(&a, &aa);
+#if __cpp_lib_node_extract >= 201606L
+            b.merge(bb); // C++17
+            CHECK(aaa, b);
+            b.clear();
+            umap_strint_clear(&a);
+#else
+            std::unordered_map<std::string, int> bbb;
+            std::set_union(b.begin(), b.end(), bb.begin(), bb.end(), std::inserter(bbb, bbb.begin()));
+            CHECK(aaa, bbb);
+#endif
+            umap_strint_free(&aa);
+            umap_strint_free(&aaa);
+            break;
+        }
 #endif
         default:
 #ifdef DEBUG

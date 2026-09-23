@@ -19,104 +19,104 @@ OLD_MAIN
 #include <random>
 #endif
 
-#define FOREACH_METH(TEST)                                                                                             \
-    TEST(PUSH_BACK)                                                                                                    \
-    TEST(POP_BACK)                                                                                                     \
-    TEST(PUSH_FRONT)                                                                                                   \
-    TEST(POP_FRONT)                                                                                                    \
-    TEST(CLEAR)                                                                                                        \
-    TEST(ERASE)                                                                                                        \
-    TEST(ERASE_INDEX)                                                                                                  \
-    TEST(ERASE_IF)                                                                                                     \
-    TEST(ERASE_RANGE)                                                                                                  \
-    TEST(REMOVE_IF)                                                                                                    \
-    TEST(INSERT)                                                                                                       \
-    TEST(INSERT_INDEX)                                                                                                 \
-    TEST(INSERT_COUNT)                                                                                                 \
-    TEST(INSERT_RANGE)                                                                                                 \
-    TEST(EMPLACE)                                                                                                      \
-    TEST(EMPLACE_FRONT)                                                                                                \
-    TEST(EMPLACE_BACK)                                                                                                 \
-    TEST(RESIZE)                                                                                                       \
-    TEST(SHRINK_TO_FIT)                                                                                                \
-    TEST(SORT)                                                                                                         \
-    TEST(RANGED_SORT)                                                                                                  \
-    TEST(SORT_RANGE)                                                                                                   \
-    TEST(COPY)                                                                                                         \
-    TEST(SWAP)                                                                                                         \
-    TEST(ASSIGN)                                                                                                       \
-    TEST(EQUAL)                                                                                                        \
-    TEST(EQUAL_VALUE)                                                                                                  \
-    TEST(EQUAL_RANGE)                                                                                                  \
-    TEST(FIND)                                                                                                         \
-    TEST(FIND_IF)                                                                                                      \
-    TEST(FIND_IF_NOT)                                                                                                  \
-    TEST(FIND_RANGE)                                                                                                   \
-    TEST(FIND_IF_RANGE)                                                                                                \
-    TEST(FIND_IF_NOT_RANGE)                                                                                            \
-    TEST(ALL_OF)                                                                                                       \
-    TEST(ANY_OF)                                                                                                       \
-    TEST(NONE_OF)                                                                                                      \
-    TEST(ALL_OF_RANGE)                                                                                                 \
-    TEST(ANY_OF_RANGE)                                                                                                 \
-    TEST(NONE_OF_RANGE)                                                                                                \
-    TEST(COUNT)                                                                                                        \
-    TEST(COUNT_IF)                                                                                                     \
-    TEST(COUNT_IF_RANGE)                                                                                               \
-    TEST(COUNT_RANGE)                                                                                                  \
-    TEST(INCLUDES)                                                                                                     \
-    TEST(INCLUDES_RANGE)                                                                                               \
-    TEST(UNION)                                                                                                        \
-    TEST(INTERSECTION)                                                                                                 \
-    TEST(DIFFERENCE)                                                                                                   \
-    TEST(SYMMETRIC_DIFFERENCE)                                                                                         \
-    TEST(UNION_RANGE)                                                                                                  \
-    TEST(INTERSECTION_RANGE)                                                                                           \
-    TEST(DIFFERENCE_RANGE)                                                                                             \
-    TEST(SYMMETRIC_DIFFERENCE_RANGE)                                                                                   \
-    TEST(GENERATE)                                                                                                     \
-    TEST(GENERATE_RANGE)                                                                                               \
-    TEST(GENERATE_N)                                                                                                   \
-    TEST(GENERATE_N_RANGE)                                                                                             \
-    TEST(TRANSFORM)                                                                                                    \
-    TEST(TRANSFORM_IT)                                                                                                 \
-    TEST(TRANSFORM_RANGE)                                                                                              \
-    TEST(TRANSFORM_IT_RANGE)                                                                                           \
-    TEST(IOTA)                                                                                                         \
-    TEST(IOTA_RANGE)                                                                                                   \
-    TEST(SHUFFLE)                                                                                                      \
-    TEST(SHUFFLE_RANGE)                                                                                                \
-    TEST(COPY_IF)                                                                                                      \
-    TEST(COPY_IF_RANGE)                                                                                                \
-    TEST(MISMATCH)                                                                                                     \
-    TEST(SEARCH)                                                                                                       \
-    TEST(SEARCH_RANGE)                                                                                                 \
-    TEST(SEARCH_N)                                                                                                     \
-    TEST(SEARCH_N_RANGE)                                                                                               \
-    TEST(ADJACENT_FIND)                                                                                                \
-    TEST(ADJACENT_FIND_RANGE)                                                                                          \
-    TEST(FIND_FIRST_OF)                                                                                                \
-    TEST(FIND_FIRST_OF_RANGE)                                                                                          \
-    TEST(FIND_END)                                                                                                     \
-    TEST(FIND_END_RANGE)                                                                                               \
-    TEST(LOWER_BOUND)                                                                                                  \
-    TEST(UPPER_BOUND)                                                                                                  \
-    TEST(LOWER_BOUND_RANGE)                                                                                            \
-    TEST(UPPER_BOUND_RANGE)                                                                                            \
-    TEST(BINARY_SEARCH)                                                                                                \
-    TEST(BINARY_SEARCH_RANGE)                                                                                          \
-    TEST(MERGE)                                                                                                        \
-    TEST(MERGE_RANGE)                                                                                                  \
-    TEST(LEXICOGRAPHICAL_COMPARE)                                                                                      \
-    TEST(IS_SORTED)                                                                                                    \
-    TEST(IS_SORTED_UNTIL)                                                                                              \
-    TEST(REVERSE)                                                                                                      \
-    TEST(REVERSE_RANGE)                                                                                                \
+#define FOREACH_METH(TEST)                       \
+    TEST(PUSH_BACK)                              \
+    TEST(POP_BACK)                               \
+    TEST(PUSH_FRONT)                             \
+    TEST(POP_FRONT)                              \
+    TEST(CLEAR)                                  \
+    TEST(ERASE)                                  \
+    TEST(ERASE_INDEX)                            \
+    TEST(ERASE_IF)                               \
+    TEST(ERASE_RANGE)                            \
+    TEST(REMOVE_IF)                              \
+    TEST(INSERT)                                 \
+    TEST(INSERT_INDEX)                           \
+    TEST(INSERT_COUNT)                           \
+    TEST(INSERT_RANGE)                           \
+    TEST(EMPLACE)                                \
+    TEST(EMPLACE_FRONT)                          \
+    TEST(EMPLACE_BACK)                           \
+    TEST(RESIZE)                                 \
+    TEST(SHRINK_TO_FIT)                          \
+    TEST(SORT)                                   \
+    TEST(RANGED_SORT)                            \
+    TEST(SORT_RANGE)                             \
+    TEST(COPY)                                   \
+    TEST(SWAP)                                   \
+    TEST(ASSIGN)                                 \
+    TEST(EQUAL)                                  \
+    TEST(EQUAL_VALUE)                            \
+    TEST(EQUAL_RANGE)                            \
+    TEST(FIND)                                   \
+    TEST(FIND_IF)                                \
+    TEST(FIND_IF_NOT)                            \
+    TEST(FIND_RANGE)                             \
+    TEST(FIND_IF_RANGE)                          \
+    TEST(FIND_IF_NOT_RANGE)                      \
+    TEST(ALL_OF)                                 \
+    TEST(ANY_OF)                                 \
+    TEST(NONE_OF)                                \
+    TEST(ALL_OF_RANGE)                           \
+    TEST(ANY_OF_RANGE)                           \
+    TEST(NONE_OF_RANGE)                          \
+    TEST(COUNT)                                  \
+    TEST(COUNT_IF)                               \
+    TEST(COUNT_IF_RANGE)                         \
+    TEST(COUNT_RANGE)                            \
+    TEST(INCLUDES)                               \
+    TEST(INCLUDES_RANGE)                         \
+    TEST(UNION)                                  \
+    TEST(INTERSECTION)                           \
+    TEST(DIFFERENCE)                             \
+    TEST(SYMMETRIC_DIFFERENCE)                   \
+    TEST(UNION_RANGE)                            \
+    TEST(INTERSECTION_RANGE)                     \
+    TEST(DIFFERENCE_RANGE)                       \
+    TEST(SYMMETRIC_DIFFERENCE_RANGE)             \
+    TEST(GENERATE)                               \
+    TEST(GENERATE_RANGE)                         \
+    TEST(GENERATE_N)                             \
+    TEST(GENERATE_N_RANGE)                       \
+    TEST(TRANSFORM)                              \
+    TEST(TRANSFORM_IT)                           \
+    TEST(TRANSFORM_RANGE)                        \
+    TEST(TRANSFORM_IT_RANGE)                     \
+    TEST(IOTA)                                   \
+    TEST(IOTA_RANGE)                             \
+    TEST(SHUFFLE)                                \
+    TEST(SHUFFLE_RANGE)                          \
+    TEST(COPY_IF)                                \
+    TEST(COPY_IF_RANGE)                          \
+    TEST(MISMATCH)                               \
+    TEST(SEARCH)                                 \
+    TEST(SEARCH_RANGE)                           \
+    TEST(SEARCH_N)                               \
+    TEST(SEARCH_N_RANGE)                         \
+    TEST(ADJACENT_FIND)                          \
+    TEST(ADJACENT_FIND_RANGE)                    \
+    TEST(FIND_FIRST_OF)                          \
+    TEST(FIND_FIRST_OF_RANGE)                    \
+    TEST(FIND_END)                               \
+    TEST(FIND_END_RANGE)                         \
+    TEST(LOWER_BOUND)                            \
+    TEST(UPPER_BOUND)                            \
+    TEST(LOWER_BOUND_RANGE)                      \
+    TEST(UPPER_BOUND_RANGE)                      \
+    TEST(BINARY_SEARCH)                          \
+    TEST(BINARY_SEARCH_RANGE)                    \
+    TEST(MERGE)                                  \
+    TEST(MERGE_RANGE)                            \
+    TEST(LEXICOGRAPHICAL_COMPARE)                \
+    TEST(IS_SORTED)                              \
+    TEST(IS_SORTED_UNTIL)                        \
+    TEST(REVERSE)                                \
+    TEST(REVERSE_RANGE)                          \
     TEST(ASSIGN_GENERIC)
 
-#define FOREACH_DEBUG(TEST)                                                                                            \
-    TEST(UNIQUE)                                                                                                       \
-    TEST(UNIQUE_RANGE)                                                                                                 \
+#define FOREACH_DEBUG(TEST)                      \
+    TEST(UNIQUE)                                 \
+    TEST(UNIQUE_RANGE)                           \
     TEST(INSERT_GENERIC)
 
 #define GENERATE_ENUM(x) TEST_##x,
@@ -197,88 +197,88 @@ void print_deque(std::deque<DIGI> &b)
 #define print_deq_range(x)
 #define print_deque(x)
 
-#define CHECK(_x, _y)                                                                                                  \
-    {                                                                                                                  \
-        assert(_x.size == _y.size());                                                                                  \
-        assert(deq_digi_empty(&_x) == _y.empty());                                                                     \
-        if (_x.size > 0)                                                                                               \
-        {                                                                                                              \
-            if (_y.front().value)                                                                                      \
+#define CHECK(_x, _y)                            \
+    {                                            \
+        assert(_x.size == _y.size());            \
+        assert(deq_digi_empty(&_x) == _y.empty());\
+        if (_x.size > 0)                         \
+        {                                        \
+            if (_y.front().value)                \
                 assert(*_y.front().value == *deq_digi_front(&_x)->value);                                              \
-            if (_y.back().value)                                                                                       \
+            if (_y.back().value)                 \
                 assert(*_y.back().value == *deq_digi_back(&_x)->value);                                                \
-        }                                                                                                              \
+        }                                        \
         std::deque<DIGI>::iterator _iter = _y.begin();                                                                 \
-        foreach (deq_digi, &_x, _it)                                                                                   \
-        {                                                                                                              \
+        foreach (deq_digi, &_x, _it)             \
+        {                                        \
             /* libstdc++ may be corrupt. libc++ not */                                                                 \
-            if (_iter->value)                                                                                          \
+            if (_iter->value)                    \
                 assert(*_it.ref->value == *_iter->value);                                                              \
-            _iter++;                                                                                                   \
-        }                                                                                                              \
-        size_t _i = 0;                                                                                                 \
-        for (auto &_d : _y)                                                                                            \
-        {                                                                                                              \
-            digi *_ref = deq_digi_at(&_x, _i++);                                                                       \
-            if (_d.value)                                                                                              \
-                assert(*_ref->value == *_d.value);                                                                     \
-        }                                                                                                              \
-        for (_i = 0; _i < _y.size(); _i++)                                                                             \
+            _iter++;                             \
+        }                                        \
+        size_t _i = 0;                           \
+        for (auto &_d : _y)                      \
+        {                                        \
+            digi *_ref = deq_digi_at(&_x, _i++); \
+            if (_d.value)                        \
+                assert(*_ref->value == *_d.value);\
+        }                                        \
+        for (_i = 0; _i < _y.size(); _i++)       \
             assert(*_y.at(_i).value == *deq_digi_at(&_x, _i)->value);                                                  \
     }
 #define CHECK_ITER(cit, _y, iter) assert((long)(cit).index == std::distance(_y.begin(), iter))
 
 #else // DEBUG
 
-#define CHECK(_x, _y)                                                                                                  \
-    {                                                                                                                  \
-        assert(_x.size == _y.size());                                                                                  \
-        assert(deq_digi_empty(&_x) == _y.empty());                                                                     \
-        if (_x.size > 0)                                                                                               \
-        {                                                                                                              \
-            if (_y.front().value)                                                                                      \
+#define CHECK(_x, _y)                            \
+    {                                            \
+        assert(_x.size == _y.size());            \
+        assert(deq_digi_empty(&_x) == _y.empty());\
+        if (_x.size > 0)                         \
+        {                                        \
+            if (_y.front().value)                \
                 assert(*_y.front().value == *deq_digi_front(&_x)->value);                                              \
-            else                                                                                                       \
+            else                                 \
                 fprintf(stderr, "STL empty front value\n");                                                            \
-            if (_y.back().value)                                                                                       \
+            if (_y.back().value)                 \
                 assert(*_y.back().value == *deq_digi_back(&_x)->value);                                                \
-            else                                                                                                       \
+            else                                 \
                 fprintf(stderr, "STL empty back value\n");                                                             \
-        }                                                                                                              \
+        }                                        \
         std::deque<DIGI>::iterator _iter = _y.begin();                                                                 \
-        foreach (deq_digi, &_x, _it)                                                                                   \
-        {                                                                                                              \
-            if (*_it.ref->value != *_iter->value)                                                                      \
+        foreach (deq_digi, &_x, _it)             \
+        {                                        \
+            if (*_it.ref->value != *_iter->value)\
                 fprintf(stderr, "CTL %d at %zu vs STL %d\n", *_it.ref->value, _it.index, *_iter->value);               \
             assert(*_it.ref->value == *_iter->value);                                                                  \
-            _iter++;                                                                                                   \
-        }                                                                                                              \
-        size_t _i = 0;                                                                                                 \
-        for (auto &_d : _y)                                                                                            \
-        {                                                                                                              \
-            digi *_ref = deq_digi_at(&_x, _i++);                                                                       \
-            if (_d.value)                                                                                              \
-                assert(*_ref->value == *_d.value);                                                                     \
-        }                                                                                                              \
-        for (_i = 0; _i < _y.size(); _i++)                                                                             \
-            assert(*_y.at(_i).value == *deq_digi_at(&_x, _i)->value);                                                  \
+            _iter++;                             \
+        }                                        \
+        size_t _i = 0;                           \
+        for (auto &_d : _y)                      \
+        {                                        \
+            digi *_ref = deq_digi_at(&_x, _i++); \
+            if (_d.value)                        \
+                assert(*_ref->value == *_d.value);\
+        }                                        \
+        for (_i = 0; _i < _y.size(); _i++)       \
+            assert(*_y.at(_i).value == *deq_digi_at(&_x, _i)->value);\
     }
-#define CHECK_ITER(cit, _y, iter)                                                                                      \
-    {                                                                                                                  \
-        long _dist = std::distance(_y.begin(), iter);                                                                  \
-        if ((long)(cit).index != _dist)                                                                                \
-            fprintf(stderr, "CTL index %zu vs STL %zu\n", (cit).index, _dist);                                         \
-        assert((long)(cit).index == _dist);                                                                            \
+#define CHECK_ITER(cit, _y, iter)                \
+    {                                            \
+        long _dist = std::distance(_y.begin(), iter);\
+        if ((long)(cit).index != _dist)          \
+            fprintf(stderr, "CTL index %zu vs STL %zu\n", (cit).index, _dist);\
+        assert((long)(cit).index == _dist);      \
     }
 #endif
 
-#define CHECK_RANGE(_it, _iter, b_end)                                                                                 \
-    if (!deq_digi_it_done(&(_it)))                                                                                     \
-    {                                                                                                                  \
-        assert(_iter != b_end);                                                                                        \
-        assert(*((_it).ref->value) == *(*_iter).value);                                                                \
-    }                                                                                                                  \
-    else                                                                                                               \
+#define CHECK_RANGE(_it, _iter, b_end)           \
+    if (!deq_digi_it_done(&(_it)))               \
+    {                                            \
+        assert(_iter != b_end);                  \
+        assert(*((_it).ref->value) == *(*_iter).value);\
+    }                                            \
+    else                                         \
         assert(_iter == b_end)
 
 int middle(deq_digi *a)
