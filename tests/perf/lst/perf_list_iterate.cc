@@ -4,7 +4,7 @@
 
 #include <time.h>
 
-int main()
+int main(void)
 {
     puts(__FILE__);
     srand(0xbeef);

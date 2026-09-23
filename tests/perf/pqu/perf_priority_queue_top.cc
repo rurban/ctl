@@ -6,7 +6,7 @@
 
 struct compare { bool operator()(const int& a, const int& b) { return a < b; } };
 
-int main()
+int main(void)
 {
     puts(__FILE__);
     srand(0xbeef);

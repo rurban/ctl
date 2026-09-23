@@ -11,7 +11,7 @@
 #define N 4
 #include "ctl/array.h"
 
-int main()
+int main(void)
 {
     arr4_int a = arr4_int_init();
     assert(arr4_int_size(&a) == 4);

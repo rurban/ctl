@@ -5,7 +5,7 @@
 
 static bool compare(int& a, int& b) { return a < b; }
 
-int main()
+int main(void)
 {
     puts(__FILE__);
     srand(time(NULL));

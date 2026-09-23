@@ -11,7 +11,7 @@
 //#define INCLUDE_ALGORITHM
 #include "ctl/set.h"
 
-int main()
+int main(void)
 {
     set_int a = set_int_init(NULL);
     int found;

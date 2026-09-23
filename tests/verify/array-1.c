@@ -12,7 +12,7 @@
 #define INCLUDE_ALGORITHM
 #include "ctl/array.h"
 
-int main()
+int main(void)
 {
     arr4_int a = arr4_int_init();
 #ifdef CBMC

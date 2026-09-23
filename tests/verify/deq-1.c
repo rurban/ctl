@@ -12,7 +12,7 @@
 #define INCLUDE_ALGORITHM
 #include "ctl/deque.h"
 
-int main()
+int main(void)
 {
     deq_int a = deq_int_init();
 #ifdef CBMC

@@ -34,7 +34,7 @@ void check(set_int *a)
     set_int_free(a);
 }
 
-int main()
+int main(void)
 {
     set_int a = set_int_init(_set_int__default_integral_compare);
     check(&a);

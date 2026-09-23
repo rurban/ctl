@@ -10,7 +10,7 @@
 #define T int
 #include "ctl/priority_queue.h"
 
-int main()
+int main(void)
 {
     pqu_int a = pqu_int_init(NULL);
 #ifdef CBMC

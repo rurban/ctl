@@ -8,7 +8,7 @@
 #define INCLUDE_ALGORITHM
 #include "ctl/unordered_set.h"
 
-int main()
+int main(void)
 {
     uset_int a = uset_int_init(NULL, NULL);
 #ifdef CBMC

@@ -183,7 +183,7 @@ void D()
     i.pop();
 }
 
-int main()
+int main(void)
 {
     A();
     B();

@@ -7,7 +7,7 @@ class int_hash { public:
     std::size_t operator()(const int& a) const { return (size_t)a; }
 };
 
-int main()
+int main(void)
 {
     puts(__FILE__);
     srand(0xbeef);

@@ -11,7 +11,7 @@
 #define INCLUDE_ALGORITHM
 #include "ctl/list.h"
 
-int main()
+int main(void)
 {
     list_int a = list_int_init();
 #ifdef CBMC

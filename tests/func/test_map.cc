@@ -16,42 +16,42 @@ OLD_MAIN
 #include <iterator>
 #include <map>
 
-#define FOREACH_METH(TEST)                                                                                             \
-    TEST(INSERT)                                                                                                       \
-    TEST(INSERT_OR_ASSIGN)                                                                                             \
-    TEST(ERASE)                                                                                                        \
-    TEST(CLEAR)                                                                                                        \
-    TEST(SWAP)                                                                                                         \
-    TEST(COUNT)                                                                                                        \
-    TEST(FIND_NODE)                                                                                                    \
-    TEST(FIND)                                                                                                         \
-    TEST(COPY)                                                                                                         \
-    TEST(EQUAL)                                                                                                        \
-    TEST(UNION)                                                                                                        \
-    TEST(INTERSECTION)                                                                                                 \
-    TEST(SYMMETRIC_DIFFERENCE)                                                                                         \
+#define FOREACH_METH(TEST)                          \
+    TEST(INSERT)                                    \
+    TEST(INSERT_OR_ASSIGN)                          \
+    TEST(ERASE)                                     \
+    TEST(CLEAR)                                     \
+    TEST(SWAP)                                      \
+    TEST(COUNT)                                     \
+    TEST(FIND_NODE)                                 \
+    TEST(FIND)                                      \
+    TEST(COPY)                                      \
+    TEST(EQUAL)                                     \
+    TEST(UNION)                                     \
+    TEST(INTERSECTION)                              \
+    TEST(SYMMETRIC_DIFFERENCE)                      \
     TEST(DIFFERENCE)
 
-#define FOREACH_DEBUG(TEST)                                                                                            \
-    /* TEST(EMPLACE) */                                                                                                \
-    /* TEST(EXTRACT) */                                                                                                \
-    /* TEST(MERGE) */                                                                                                  \
-    TEST(CONTAINS)                                                                                                     \
-    TEST(ERASE_IF)                                                                                                     \
-    TEST(EQUAL_RANGE)                                                                                                  \
-    TEST(FIND_RANGE)                                                                                                   \
-    TEST(FIND_IF)                                                                                                      \
-    TEST(FIND_IF_NOT)                                                                                                  \
-    TEST(FIND_IF_RANGE)                                                                                                \
-    TEST(FIND_IF_NOT_RANGE)                                                                                            \
-    TEST(ALL_OF)                                                                                                       \
-    TEST(ANY_OF)                                                                                                       \
-    TEST(NONE_OF)                                                                                                      \
-    TEST(ALL_OF_RANGE)                                                                                                 \
-    TEST(ANY_OF_RANGE)                                                                                                 \
-    TEST(NONE_OF_RANGE)                                                                                                \
-    TEST(COUNT_IF)                                                                                                     \
-    TEST(COUNT_IF_RANGE)                                                                                               \
+#define FOREACH_DEBUG(TEST)                         \
+    /* TEST(EMPLACE) */                             \
+    /* TEST(EXTRACT) */                             \
+    /* TEST(MERGE) */                               \
+    TEST(CONTAINS)                                  \
+    TEST(ERASE_IF)                                  \
+    TEST(EQUAL_RANGE)                               \
+    TEST(FIND_RANGE)                                \
+    TEST(FIND_IF)                                   \
+    TEST(FIND_IF_NOT)                               \
+    TEST(FIND_IF_RANGE)                             \
+    TEST(FIND_IF_NOT_RANGE)                         \
+    TEST(ALL_OF)                                    \
+    TEST(ANY_OF)                                    \
+    TEST(NONE_OF)                                   \
+    TEST(ALL_OF_RANGE)                              \
+    TEST(ANY_OF_RANGE)                              \
+    TEST(NONE_OF_RANGE)                             \
+    TEST(COUNT_IF)                                  \
+    TEST(COUNT_IF_RANGE)                            \
     TEST(COUNT_RANGE)
 
 #define GENERATE_ENUM(x) TEST_##x,
@@ -79,21 +79,21 @@ static const char *test_names[] = {
 #endif
 // clang-format on
 
-#define CHECK(_x, _y)                                                                                                  \
-    {                                                                                                                  \
-        assert(_x.size == _y.size());                                                                                  \
-        std::map<std::string, int>::iterator _iter = _y.begin();                                                       \
-        foreach (map_strint, &_x, _it)                                                                                 \
-        {                                                                                                              \
-            assert(_it.ref->value == _iter->second);                                                                   \
-            _iter++;                                                                                                   \
-        }                                                                                                              \
-        map_strint_it _it = map_strint_begin(&_x);                                                                     \
-        for (auto &_d : _y)                                                                                            \
-        {                                                                                                              \
-            assert(_it.ref->value == _d.second);                                                                       \
-            map_strint_it_next(&_it);                                                                                  \
-        }                                                                                                              \
+#define CHECK(_x, _y)                               \
+    {                                               \
+        assert(_x.size == _y.size());               \
+        std::map<std::string, int>::iterator _iter = _y.begin(); \
+        foreach (map_strint, &_x, _it)              \
+        {                                           \
+            assert(_it.ref->value == _iter->second);\
+            _iter++;                                \
+        }                                           \
+        map_strint_it _it = map_strint_begin(&_x);  \
+        for (auto &_d : _y)                         \
+        {                                           \
+            assert(_it.ref->value == _d.second);    \
+            map_strint_it_next(&_it);               \
+        }                                           \
     }
 
 static char *new_rand_str()
