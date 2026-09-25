@@ -1,8 +1,10 @@
 #include <assert.h>
 #include <stddef.h>
 
+#if defined(__has_attribute) && __has_attribute(overloadable)
 static size_t int_hash(int *value) { return (size_t)*value; }
 static int int_equal(int *left, int *right) { return *left == *right; }
+#endif
 
 #define POD
 #define T int
