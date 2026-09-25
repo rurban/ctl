@@ -271,21 +271,20 @@ int main(void)
             char *key = new_rand_str();
             int value = TEST_RAND(TEST_MAX_SIZE);
             strint kd = strint_init(str_init(key), value);
-            free(key);
-            int aa = umap_strint_count(&a, kd);
+            int aa = umap_strint_count(&a, kd); // consumes kd
             int bb = b.count(key);
+            free(key);
             assert(aa == bb);
             CHECK(a, b);
-            strint_free(&kd);
             break;
         }
         case TEST_FIND: {
             char *key = new_rand_str();
             const int value = TEST_RAND(TEST_MAX_SIZE);
             strint kd = strint_init(str_init(key), value);
-            free(key);
             umap_strint_it aa = umap_strint_find(&a, kd);
             auto bb = b.find(key);
+            free(key);
             if (bb == b.end())
                 assert(umap_strint_it_done(&aa));
             else
@@ -380,16 +379,15 @@ int main(void)
             char *key = new_rand_str();
             const int value = TEST_RAND(TEST_MAX_SIZE);
             strint kd = strint_init(str_init(key), value);
-            free(key);
-            int aa = umap_strint_contains(&a, kd);
+            int aa = umap_strint_contains(&a, kd); // consumes kd
 #if __cpp_lib_erase_if >= 202002L
             int bb = b.contains(key);
 #else
             int bb = b.count(key) == 1 ? 1 : 0;
 #endif
+            free(key);
             assert(aa == bb);
             CHECK(a, b);
-            strint_free(&kd);
             break;
         }
 #ifdef DEBUG

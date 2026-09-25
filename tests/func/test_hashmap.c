@@ -91,7 +91,8 @@ int main(void)
     for (int i = 0; i < 4; i++)
         assert(hmap_int_int_insert(&mlf, i, i));
     assert(mlf.size == 4);
-    assert(mlf.capacity == 16);
+    assert(mlf.capacity > 8); // grew at 50% load instead of the default 75%
+    assert(hmap_int_int_load_factor(&mlf) <= 0.5f);
     hmap_int_int_free(&mlf);
 
     hmap_int_int_free(&map);

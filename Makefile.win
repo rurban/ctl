@@ -77,7 +77,11 @@ TESTS = \
 	tests\func\test_strv.exe \
 	tests\func\test_bvector.exe \
 	tests\func\test_swisstable.exe \
+	tests\func\test_swisstable_power2.exe \
+	tests\func\test_swisstable_cached.exe \
 	tests\func\test_hashmap.exe \
+	tests\func\test_hashmap_power2.exe \
+	tests\func\test_hashmap_cached.exe \
 	tests\func\test_btree_set.exe
 !ifdef DEBUG
 TESTS +=.exe \
@@ -120,7 +124,11 @@ all: $(TESTS)
 	tests\func\test_strv.exe
 	tests\func\test_bvector.exe
 	tests\func\test_swisstable.exe
+	tests\func\test_swisstable_power2.exe
+	tests\func\test_swisstable_cached.exe
 	tests\func\test_hashmap.exe
+	tests\func\test_hashmap_power2.exe
+	tests\func\test_hashmap_cached.exe
 	tests\func\test_btree_set.exe
 	@echo $(CC) $(CFLAGS)
 	@echo $(CXX) $(CXXFLAGS)
@@ -283,10 +291,18 @@ tests\func\test_strv.exe: ctl/strv.h tests\func\test_strv.c
 	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
 tests\func\test_bvector.exe: ctl/bvector.h tests\func\test_bvector.c
 	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
-tests\func\test_swisstable.exe: ctl/swisstable.h ctl/ctl.h tests\func\test_swisstable.c
+tests\func\test_swisstable.exe: ctl/swisstable.h ctl/bits/prime.h ctl/ctl.h tests\func\test_swisstable.c
 	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
-tests\func\test_hashmap.exe: ctl/hashmap.h ctl/bits/stanford_hash.h ctl/bits/wyhash.h ctl/ctl.h tests\func\test_hashmap.c
+tests\func\test_swisstable_power2.exe: ctl/swisstable.h ctl/bits/prime.h ctl/ctl.h tests\func\test_swisstable.c
+	$(CC) $(CFLAGS) -DCTL_USET_GROWTH_POWER2 tests\func\test_swisstable.c /Fe:"$@"
+tests\func\test_swisstable_cached.exe: ctl/swisstable.h ctl/bits/prime.h ctl/ctl.h tests\func\test_swisstable.c
+	$(CC) $(CFLAGS) -DCTL_USET_CACHED_HASH tests\func\test_swisstable.c /Fe:"$@"
+tests\func\test_hashmap.exe: ctl/hashmap.h ctl/bits/prime.h ctl/bits/stanford_hash.h ctl/bits/wyhash.h ctl/ctl.h tests\func\test_hashmap.c
 	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
+tests\func\test_hashmap_power2.exe: ctl/hashmap.h ctl/bits/prime.h ctl/bits/stanford_hash.h ctl/bits/wyhash.h ctl/ctl.h tests\func\test_hashmap.c
+	$(CC) $(CFLAGS) -DCTL_USET_GROWTH_POWER2 tests\func\test_hashmap.c /Fe:"$@"
+tests\func\test_hashmap_cached.exe: ctl/hashmap.h ctl/bits/prime.h ctl/bits/stanford_hash.h ctl/bits/wyhash.h ctl/ctl.h tests\func\test_hashmap.c
+	$(CC) $(CFLAGS) -DCTL_USET_CACHED_HASH tests\func\test_hashmap.c /Fe:"$@"
 tests\func\test_btree_set.exe: ctl/btree_set.h $(COMMON_H) tests\func\test_btree_set.c
 	$(CC) $(CFLAGS) /Fe:"$@" $(@:.exe=.c)
 

@@ -1,4 +1,22 @@
 /* Open-addressing hashmap with Swiss-table-style probe groups.
+
+   Tunable policies: same growth, cached-hash and DDOS security knobs
+   as <ctl/unordered_set.h> (see there for the full writeup), reusing
+   the identical CTL_USET_* macro names so one `#define` before any
+   hash-container include configures all of them for the translation
+   unit:
+
+     - CTL_USET_GROWTH_PRIMED / CTL_USET_GROWTH_POWER2 (default PRIMED)
+       and CTL_USET_GROWTH_FACTOR, same meaning as unordered_set.h,
+       applied to `capacity` instead of `bucket_count`.
+     - CTL_USET_CACHED_HASH stores the hash next to each entry, to
+       short-circuit `equal()` on probe misses.
+     - CTL_USET_SECURITY_COLLCOUNTING against DDOS-crafted probe runs:
+       0 ignore, 2 sleep (default), 3 abort. Modes 1/4/5 (sorted
+       vector / tree fallback) are chained-hashtable-only concepts
+       (unordered_set/unordered_map); selecting them here is a
+       compile error.
+
    SPDX-License-Identifier: MIT */
 #ifndef TK
 #error "Key type TK undefined for <ctl/swisstable.h>"
@@ -10,6 +28,48 @@
 #error "<ctl/swisstable.h> currently requires POD key and value types"
 #endif
 
+#ifdef CTL_USET_GROWTH_PRIMED // the default
+#undef CTL_USET_GROWTH_POWER2
+#endif
+#ifdef CTL_USET_GROWTH_POWER2
+#undef CTL_USET_GROWTH_PRIMED
+#endif
+#ifndef CTL_USET_GROWTH_FACTOR
+#ifdef CTL_USET_GROWTH_POWER2
+#define CTL_USET_GROWTH_FACTOR 2
+#else
+#define CTL_USET_GROWTH_FACTOR 1.618
+#endif
+#endif
+#ifndef CTL_USET_SECURITY_COLLCOUNTING // defaults to sleep
+#define CTL_USET_SECURITY_COLLCOUNTING 2
+#endif
+#if CTL_USET_SECURITY_COLLCOUNTING == 1 || CTL_USET_SECURITY_COLLCOUNTING == 4 || CTL_USET_SECURITY_COLLCOUNTING == 5
+#error "CTL_USET_SECURITY_COLLCOUNTING 1/4/5 (sorted vector / tree fallback) apply only to the chained <ctl/unordered_set.h>; <ctl/swisstable.h> is open-addressing and supports 0 (ignore), 2 (sleep) and 3 (abort)."
+#endif
+
+#if CTL_USET_SECURITY_COLLCOUNTING == 2 // sleep
+#ifndef _WIN32
+#include <unistd.h>
+#ifndef CTL_USET_SECURITY_ACTION
+#define CTL_USET_SECURITY_ACTION sleep(1)
+#endif
+#else
+#define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
+#include <windows.h>
+#ifndef CTL_USET_SECURITY_ACTION
+#define CTL_USET_SECURITY_ACTION Sleep(500)
+#endif
+#endif
+#elif CTL_USET_SECURITY_COLLCOUNTING == 3 // abort
+#include <stdlib.h>
+#ifndef CTL_USET_SECURITY_ACTION
+#define CTL_USET_SECURITY_ACTION abort()
+#endif
+#endif
+
+#include <ctl/bits/prime.h>
 #include <ctl/ctl.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -18,11 +78,46 @@
 #define A JOIN(C, T)
 #define E JOIN(A, entry)
 #define I JOIN(A, it)
-typedef struct E { TK key; T value; bool used; } E;
+typedef struct E
+{
+    TK key;
+    T value;
+    bool used;
+#ifdef CTL_USET_CACHED_HASH
+    size_t cached_hash;
+#endif
+} E;
 typedef struct A { E *entries; size_t size, capacity; float max_load_factor; size_t (*hash)(TK *); int (*equal)(TK *, TK *); } A;
 typedef struct I { A *container; E *entry; } I;
 
-static inline size_t JOIN(A, _slot)(A *self, TK *key) { return self->hash(key) & (self->capacity - 1); }
+// bucket index of an already computed hash, per growth policy
+static inline size_t JOIN(A, _slot_hash)(A *self, size_t hash)
+{
+#ifdef CTL_USET_GROWTH_POWER2
+    return hash & (self->capacity - 1);
+#else
+    return hash % self->capacity;
+#endif
+}
+static inline size_t JOIN(A, _slot)(A *self, TK *key) { return JOIN(A, _slot_hash)(self, self->hash(key)); }
+// next probe position, per growth policy
+static inline size_t JOIN(A, _probe)(A *self, size_t slot)
+{
+#ifdef CTL_USET_GROWTH_POWER2
+    return (slot + 1) & (self->capacity - 1);
+#else
+    return (slot + 1) % self->capacity;
+#endif
+}
+// smallest valid (power2 or primed) capacity able to hold `want`
+static inline size_t JOIN(A, _valid_capacity)(size_t want)
+{
+#ifdef CTL_USET_GROWTH_POWER2
+    return ctl_next_power2((uint32_t)(want < 8 ? 8 : want));
+#else
+    return ctl_next_prime(want < 8 ? 8 : want);
+#endif
+}
 static inline bool JOIN(A, _resize)(A *self, size_t capacity)
 {
     E *entries = calloc(capacity, sizeof(*entries));
@@ -30,8 +125,12 @@ static inline bool JOIN(A, _resize)(A *self, size_t capacity)
     E *old = self->entries; size_t old_capacity = self->capacity;
     self->entries = entries; self->capacity = capacity; size_t size = self->size; self->size = 0;
     for (size_t i = 0; i < old_capacity; i++) if (old[i].used) {
+#ifdef CTL_USET_CACHED_HASH
+        size_t slot = JOIN(A, _slot_hash)(self, old[i].cached_hash);
+#else
         size_t slot = JOIN(A, _slot)(self, &old[i].key);
-        while (self->entries[slot].used) slot = (slot + 1) & (capacity - 1);
+#endif
+        while (self->entries[slot].used) slot = JOIN(A, _probe)(self, slot);
         self->entries[slot] = old[i]; self->size++;
     }
     free(old); return self->size == size;
@@ -67,12 +166,26 @@ static inline T *JOIN(I, ref)(I *it) { return &it->entry->value; }
 static inline T *JOIN(A, find)(A *self, TK key)
 {
     if (!self->size) return NULL;
+#ifdef CTL_USET_CACHED_HASH
+    size_t hash = self->hash(&key);
+    size_t slot = JOIN(A, _slot_hash)(self, hash);
+#else
     size_t slot = JOIN(A, _slot)(self, &key);
-    for (size_t probes = 0; probes < self->capacity; probes++) {
+#endif
+#if CTL_USET_SECURITY_COLLCOUNTING
+    unsigned int count = 0;
+#endif
+    for (size_t probes = 0; probes < self->capacity; probes++, slot = JOIN(A, _probe)(self, slot)) {
         E *entry = &self->entries[slot];
         if (!entry->used) return NULL;
+#ifdef CTL_USET_CACHED_HASH
+        if (entry->cached_hash != hash) continue;
+#endif
         if (self->equal(&entry->key, &key)) return &entry->value;
-        slot = (slot + 1) & (self->capacity - 1);
+#if CTL_USET_SECURITY_COLLCOUNTING
+        // with max 2^32 keys, 128 collisions is safely considered a DDOS attack.
+        if (++count & 128) CTL_USET_SECURITY_ACTION;
+#endif
     }
     return NULL;
 }
@@ -92,22 +205,58 @@ static inline void JOIN(A, equal_range)(A *self, TK key, I *lower, I *upper)
 static inline bool JOIN(A, insert)(A *self, TK key, T value)
 {
     ASSERT(self->hash && self->equal);
-    if ((float)(self->size + 1) >= (float)self->capacity * self->max_load_factor && !JOIN(A, _resize)(self, self->capacity * 2)) return false;
+    if ((float)(self->size + 1) >= (float)self->capacity * self->max_load_factor &&
+        !JOIN(A, _resize)(self, JOIN(A, _valid_capacity)((size_t)((double)self->capacity * CTL_USET_GROWTH_FACTOR))))
+        return false;
+#ifdef CTL_USET_CACHED_HASH
+    size_t hash = self->hash(&key);
+    size_t slot = JOIN(A, _slot_hash)(self, hash);
+#else
     size_t slot = JOIN(A, _slot)(self, &key);
+#endif
+#if CTL_USET_SECURITY_COLLCOUNTING
+    unsigned int count = 0;
+#endif
     while (self->entries[slot].used) {
-        if (self->equal(&self->entries[slot].key, &key)) { self->entries[slot].key = key; self->entries[slot].value = value; return false; }
-        slot = (slot + 1) & (self->capacity - 1);
+#ifdef CTL_USET_CACHED_HASH
+        if (self->entries[slot].cached_hash == hash && self->equal(&self->entries[slot].key, &key))
+#else
+        if (self->equal(&self->entries[slot].key, &key))
+#endif
+        { self->entries[slot].key = key; self->entries[slot].value = value; return false; }
+#if CTL_USET_SECURITY_COLLCOUNTING
+        if (++count & 128) CTL_USET_SECURITY_ACTION;
+#endif
+        slot = JOIN(A, _probe)(self, slot);
     }
-    self->entries[slot] = (E){key, value, true}; self->size++; return true;
+#ifdef CTL_USET_CACHED_HASH
+    self->entries[slot] = (E){key, value, true, hash};
+#else
+    self->entries[slot] = (E){key, value, true};
+#endif
+    self->size++; return true;
 }
 static inline bool JOIN(A, erase)(A *self, TK key)
 {
     if (!self->size) return false;
+#ifdef CTL_USET_CACHED_HASH
+    size_t hash = self->hash(&key);
+    size_t slot = JOIN(A, _slot_hash)(self, hash);
+#else
     size_t slot = JOIN(A, _slot)(self, &key);
-    for (size_t probes = 0; probes < self->capacity; probes++) {
+#endif
+#if CTL_USET_SECURITY_COLLCOUNTING
+    unsigned int count = 0;
+#endif
+    for (size_t probes = 0; probes < self->capacity; probes++, slot = JOIN(A, _probe)(self, slot)) {
         E *entry = &self->entries[slot]; if (!entry->used) return false;
+#ifdef CTL_USET_CACHED_HASH
+        if (entry->cached_hash != hash) continue;
+#endif
         if (self->equal(&entry->key, &key)) { entry->used = false; self->size--; return JOIN(A, _resize)(self, self->capacity); }
-        slot = (slot + 1) & (self->capacity - 1);
+#if CTL_USET_SECURITY_COLLCOUNTING
+        if (++count & 128) CTL_USET_SECURITY_ACTION;
+#endif
     }
     return false;
 }
@@ -116,11 +265,16 @@ static inline void JOIN(A, clear)(A *self)
     for (size_t i = 0; i < self->capacity; i++) self->entries[i].used = false;
     self->size = 0;
 }
+static inline size_t JOIN(A, _grown_capacity)(A *self, size_t min_count)
+{
+    size_t capacity = JOIN(A, _valid_capacity)(min_count);
+    while ((float)self->size >= (float)capacity * self->max_load_factor)
+        capacity = JOIN(A, _valid_capacity)(capacity + 1);
+    return capacity;
+}
 static inline bool JOIN(A, rehash)(A *self, size_t bucket_count)
 {
-    size_t capacity = 8;
-    while (capacity < bucket_count) capacity <<= 1;
-    while ((float)self->size >= (float)capacity * self->max_load_factor) capacity <<= 1;
+    size_t capacity = JOIN(A, _grown_capacity)(self, bucket_count);
     return capacity <= self->capacity ? true : JOIN(A, _resize)(self, capacity);
 }
 static inline bool JOIN(A, reserve)(A *self, size_t count)

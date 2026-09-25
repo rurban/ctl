@@ -27,6 +27,9 @@ a.out
 /tests/func/test_integral_c11
 /tests/func/test_list
 /tests/func/test_hashmap
+/tests/func/test_hashmap_cached
+/tests/func/test_hashmap_power2
+/tests/func/test_hashmap_sleep
 /tests/func/test_map
 /tests/func/test_overload
 /tests/func/test_priority_queue
@@ -40,6 +43,9 @@ a.out
 /tests/func/test_string
 /tests/func/test_strv
 /tests/func/test_swisstable
+/tests/func/test_swisstable_cached
+/tests/func/test_swisstable_power2
+/tests/func/test_swisstable_sleep
 /tests/func/test_u8ident
 /tests/func/test_u8string
 /tests/func/test_unordered_map
